@@ -53,3 +53,10 @@ No Gradle in this env (per AGENTS.md) — restored files byte-identical to `7244
 - The reveal action slot is now exactly 80dp, matching `CurioBottomBar`'s `NavigationBar` minimum height.
 - Removed the extra navigation-inset padding that made the dock taller than the placeholder.
 - The dock background now uses the category-tinted theme surface instead of the creamy placeholder surface.
+
+---
+
+## CI follow-up (2026-08-07): Restore BoxWithConstraints import — DONE
+
+- CI reported `BoxWithConstraints`, `maxWidth`, and `maxHeight` errors in `TopicRevealScreen.kt`.
+- Restored the missing `androidx.compose.foundation.layout.BoxWithConstraints` import; the cascading composable-context errors should resolve with it.
