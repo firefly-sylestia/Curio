@@ -71,6 +71,8 @@ import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.CurioPetHeroCard
+import com.curio.app.ui.pet.CurioPetSprite
+import kotlinx.coroutines.delay
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -111,6 +113,15 @@ fun QuestsScreen(navController: NavController) {
     // hops once (spec §9). A soft confirmation haptic marks the reward
     // moment (spec §9.3 — light touch, respects device settings).
     var celebrate by remember { mutableStateOf(0) }
+    // v8.6 — level-up celebration (spec §9.1): a claim that crosses a level
+    // shows a brief non-blocking banner (tap to dismiss, auto-dismisses).
+    var levelUpBanner by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(levelUpBanner) {
+        if (levelUpBanner != null) {
+            delay(2500)
+            levelUpBanner = null
+        }
+    }
     // The pet's one-shot bubble for this visit (spec §10.7 — one per screen
     // visit). Fetched in a LaunchedEffect so the bubble's prefs write never
     // happens during composition.
@@ -191,12 +202,16 @@ fun QuestsScreen(navController: NavController) {
                 // celebration hop.
                 item {
                     DailyCard(
-                        quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay()),
+                        quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay(), context),
                         // v8.3 — complete dailies are CLAIMED here (a tap
                         // grants the XP) and in-progress ones can Go straight
-                        // to where the action happens.
+                        // to where the action happens. v8.6 — a claim that
+                        // crosses a level raises the level-up banner.
                         onClaim = { questId ->
+                            val levelBefore = CurioQuests.levelForXp(CurioQuests.xpState)
                             CurioQuests.claimDaily(context, questId)
+                            val levelAfter = CurioQuests.levelForXp(CurioQuests.xpState)
+                            if (levelAfter > levelBefore) levelUpBanner = levelAfter
                             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                             celebrate++
                         },
@@ -223,22 +238,13 @@ fun QuestsScreen(navController: NavController) {
                         }
                     )
                 }
-                // v8.2 — finished chains (every stage earned) are hidden so
-                // the page focuses on what's left; the badge shelf below
-                // still shows the full collection. v8.5 — chains collapse
-                // by default so the page shows one primary next step
-                // instead of every chain expanded (spec §3 + §4.1).
-                val activeChains = CurioQuests.Chains.filter { chain ->
-                    CurioQuests.chainProgress(chain) < chain.stages.size
-                }
-                items(activeChains.size) { index ->
-                    ChainCard(
-                        chain = activeChains[index],
-                        onNavigate = onQuestNavigate
-                    )
-                }
+                // v8.7 — ONE compact "Quest paths" card replaces the wall of
+                // per-chain cards and the always-visible badge grid: every
+                // unfinished path is a tappable row (tap to see its stages),
+                // and the badge shelf lives behind a single tappable row →
+                // dialog. Nothing on the page is a dead display board.
                 item {
-                    BadgeShelf()
+                    PathsCard(onNavigate = onQuestNavigate)
                 }
             }
         }
@@ -249,6 +255,48 @@ fun QuestsScreen(navController: NavController) {
             subtitle = "Grow your curiosity, one chain at a time",
             onBack = { navController.popBackStack() }
         )
+        // v8.6 — non-blocking level-up celebration (spec §9.1): tap to
+        // dismiss; also auto-dismisses after ~2.5s. The pet hops with the
+        // claim and wears its proud mood.
+        levelUpBanner?.let { newLevel ->
+            Surface(
+                onClick = { levelUpBanner = null },
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 14.dp,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(28.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    CurioPetSprite(
+                        stage = CurioPet.currentStage(),
+                        mood = CurioPet.Mood.PROUD,
+                        accent = petAccent,
+                        spriteSize = 52.dp,
+                        celebrateKey = celebrate
+                    )
+                    Column {
+                        Text(
+                            "Level $newLevel reached!",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        )
+                        Text(
+                            "Your Curio pet grew a little — keep going!",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
     }
 
     // ── One-time tour offer (v8.2) — the first time the user taps the
@@ -443,97 +491,197 @@ private fun CurrentQuestCard(
     }
 }
 
-/** One quest chain — its stages trail with the next one highlighted. */
+/**
+ * v8.7 — "Quest paths": ONE compact card replaces the wall of per-chain
+ * cards and the always-visible badge grid. Every unfinished path is a
+ * tappable row — tap to expand its stage trail (the next actionable stage
+ * carries a Go chip). The badge shelf lives behind a single tappable row
+ * that opens a dialog, so no part of the page is a dead display board.
+ */
 @Composable
-private fun ChainCard(
-    chain: QuestChain,
+private fun PathsCard(
     onNavigate: (String) -> Unit = {}
 ) {
-    val chainDone = CurioQuests.chainProgress(chain)
-    // v8.5 — chains collapse by default: the header + progress read at a
-    // glance; tapping expands the stage trail. Keeps the page to one
-    // primary next step instead of every chain's stages at once (spec §3).
-    var expanded by rememberSaveable(chain.id) { mutableStateOf(false) }
+    val activeChains = CurioQuests.Chains.filter { chain ->
+        CurioQuests.chainProgress(chain) < chain.stages.size
+    }
+    val allStages = CurioQuests.allStages()
+    val unlockedCount = allStages.count { CurioQuests.isStageDone(it) }
+    var showBadges by rememberSaveable { mutableStateOf(false) }
     CurioSettingsCard {
+        CurioCardHeader(
+            CurioIcons.Flag,
+            "Quest paths",
+            "${activeChains.size} open · $unlockedCount badges earned"
+        )
+        Spacer(Modifier.height(2.dp))
+        if (activeChains.isEmpty()) {
+            Text(
+                "Every path complete — the whole shelf is yours!",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        activeChains.forEach { chain ->
+            PathRow(chain = chain, onNavigate = onNavigate)
+        }
+        // Badge shelf — one tappable row that opens the grid in a dialog
+        // (v8.7 — no permanent two-column board dominating the page).
+        Spacer(Modifier.height(4.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = !expanded },
+                .clickable { showBadges = true }
+                .padding(vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(13.dp))
-                    .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))),
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(CurioColors.CoralBlush.copy(alpha = 0.14f)),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
-                    name = chain.glyph,
+                    name = CurioIcons.Star,
                     contentDescription = null,
-                    tint = Color.White,
-                    size = 20.dp
+                    tint = CurioColors.CoralBlush,
+                    size = 18.dp
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    chain.title,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    "Badge shelf",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold)
                 )
                 Text(
-                    chain.subtitle,
+                    "$unlockedCount of ${allStages.size} earned",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                "$chainDone/${chain.stages.size}",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (chainDone == chain.stages.size) CurioColors.Sage else CurioColors.CoralBlush
+                "View",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = CurioColors.CoralBlush
             )
-            // Expand/collapse chevron — rotates with the state.
+            CurioForwardArrow(
+                "View badge shelf",
+                tint = CurioColors.CoralBlush,
+                size = 14.dp
+            )
+        }
+    }
+    if (showBadges) {
+        AlertDialog(
+            onDismissRequest = { showBadges = false },
+            title = { Text("Badges · $unlockedCount of ${allStages.size} earned") },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 440.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    allStages.chunked(2).forEach { row ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            row.forEach { stage ->
+                                BadgeTile(
+                                    stage = stage,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (row.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showBadges = false }) { Text("Close") }
+            }
+        )
+    }
+}
+
+/** One quest path row — tap to expand its stage trail. */
+@Composable
+private fun PathRow(
+    chain: QuestChain,
+    onNavigate: (String) -> Unit
+) {
+    val chainDone = CurioQuests.chainProgress(chain)
+    // v8.7 — rows are compact by default; tapping expands the stage trail
+    // (the next actionable stage carries a Go/Start chip).
+    var expanded by rememberSaveable(chain.id) { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))),
+            contentAlignment = Alignment.Center
+        ) {
             CurioIcon(
-                name = if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse ${chain.title}" else "Expand ${chain.title}",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                name = chain.glyph,
+                contentDescription = null,
+                tint = Color.White,
                 size = 18.dp
             )
         }
-        Spacer(Modifier.height(6.dp))
-        LinearProgressIndicator(
-            progress = { (chainDone.toFloat() / chain.stages.size.coerceAtLeast(1)).coerceIn(0f, 1f) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(5.dp)
-                .clip(RoundedCornerShape(50)),
-            color = if (chainDone == chain.stages.size) CurioColors.Sage else CurioColors.CoralBlush,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                chain.title,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                chain.subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Text(
+            "$chainDone/${chain.stages.size}",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+            color = if (chainDone == chain.stages.size) CurioColors.Sage else CurioColors.CoralBlush
         )
-        Spacer(Modifier.height(6.dp))
-        // v8.3 — the chain's NEXT actionable stage carries a Go/Start chip
-        // too, so every chain points at what to do next (not just the
-        // globally current quest). v8.5 — the stage trail is hidden until
-        // the header is tapped.
-        AnimatedVisibility(visible = expanded) {
-            Column {
-                val nextIndex = chain.stages.indexOfFirst { !CurioQuests.isStageDone(it) }
-                chain.stages.forEachIndexed { index, stage ->
-                    val done = CurioQuests.isStageDone(stage)
-                    val isCurrent = !done && stage.id == CurioQuests.currentQuest()?.id
-                    ChainStageRow(
-                        index = index,
-                        stage = stage,
-                        done = done,
-                        isCurrent = isCurrent,
-                        isNext = index == nextIndex,
-                        onNavigate = { stage.navRoute?.let(onNavigate) }
-                    )
-                }
+        CurioIcon(
+            name = if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+            contentDescription = if (expanded) "Collapse ${chain.title}" else "Expand ${chain.title}",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 18.dp
+        )
+    }
+    // v8.3 — the chain's NEXT actionable stage carries a Go/Start chip too.
+    AnimatedVisibility(visible = expanded) {
+        Column {
+            val nextIndex = chain.stages.indexOfFirst { !CurioQuests.isStageDone(it) }
+            chain.stages.forEachIndexed { index, stage ->
+                val done = CurioQuests.isStageDone(stage)
+                val isCurrent = !done && stage.id == CurioQuests.currentQuest()?.id
+                ChainStageRow(
+                    index = index,
+                    stage = stage,
+                    done = done,
+                    isCurrent = isCurrent,
+                    isNext = index == nextIndex,
+                    onNavigate = { stage.navRoute?.let(onNavigate) }
+                )
             }
         }
     }
@@ -648,6 +796,7 @@ private fun DailyCard(
     onClaim: (String) -> Unit,
     onGo: (String) -> Unit
 ) {
+    val context = LocalContext.current
     CurioSettingsCard {
         CurioCardHeader(CurioIcons.EmojiEvents, "Today's quests", "Resets at midnight")
         Spacer(Modifier.height(2.dp))
@@ -655,6 +804,22 @@ private fun DailyCard(
             val progress = CurioQuests.dailyProgressState[quest.kind.name] ?: 0
             val done = quest.id in CurioQuests.dailyAwardedState
             val fraction = (progress.toFloat() / quest.target).coerceIn(0f, 1f)
+            // v8.6 — the discovery daily names the lane the passport wants
+            // the user to try, and its Go chip routes straight into that
+            // lane's Spin deck (spec §6.2/§6.3).
+            val discoveryLane = if (quest.kind == CurioQuests.DailyKind.DISCOVERY) {
+                CurioPassport.leastEngaged(context)
+            } else null
+            val questTitle = when {
+                discoveryLane != null -> "New lane — try ${discoveryLane.displayName}"
+                quest.kind == CurioQuests.DailyKind.DISCOVERY -> "Try a new lane"
+                else -> quest.title
+            }
+            val goRoute = when {
+                discoveryLane != null -> CurioRoutes.spinWithCategory(discoveryLane.id.routeSlug)
+                quest.kind == CurioQuests.DailyKind.DISCOVERY -> null
+                else -> dailyGoRoute(quest.kind)
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -681,7 +846,7 @@ private fun DailyCard(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        quest.title,
+                        questTitle,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = if (done) FontWeight.ExtraBold else FontWeight.SemiBold
                         ),
@@ -724,9 +889,11 @@ private fun DailyCard(
                         color = if (done) CurioColors.Sage else CurioColors.CoralBlush
                     )
                     // v8.3 — Go chip on in-progress dailies: jump to the
-                    // screen where this quest's action happens.
+                    // screen where this quest's action happens. v8.6 — the
+                    // discovery quest's Go chip targets the least-engaged
+                    // lane's Spin deck.
                     if (!done) {
-                        dailyGoRoute(quest.kind)?.let { route ->
+                        goRoute?.let { route ->
                             Spacer(Modifier.width(4.dp))
                             Surface(
                                 onClick = { onGo(route) },

@@ -251,13 +251,28 @@ fun CurioNavHost(
     //    pops up from other screens.
     // ── Quest tour runner — auto-navigate to the current step's screen so
     //    every overlay tap advances the walkthrough to the next place.
+    //    v8.6 — HOLD steps (First Journey's real-action waits) only guide the
+    //    user back when they're PARKED on a bottom-nav tab and not already on
+    //    the step's route — never yank someone away mid-flow (e.g. off the
+    //    reveal while it auto-opens after a spin); the step advances via
+    //    QuestGuide.onWait when the REAL action happens. Also persists the
+    //    exact tour position so it survives process death (spec §7.3).
     LaunchedEffect(QuestGuide.active, QuestGuide.index, routePrefix) {
-        if (!QuestGuide.active) return@LaunchedEffect
-        val step = QuestGuide.current ?: return@LaunchedEffect
-        if (step.route.isEmpty()) return@LaunchedEffect
-        if (routePrefix != step.route) {
-            navController.navigateToQuestRoute(step.route)
+        if (QuestGuide.active) {
+            val step = QuestGuide.current
+            if (step != null && step.route.isNotEmpty()) {
+                val parkedOnTab = routePrefix != null &&
+                    routePrefix in CurioRoutes.bottomNavRoutePrefixes
+                if (step.hold) {
+                    if (parkedOnTab && routePrefix != step.route) {
+                        navController.navigateToQuestRoute(step.route)
+                    }
+                } else if (routePrefix != step.route) {
+                    navController.navigateToQuestRoute(step.route)
+                }
+            }
         }
+        QuestGuide.persist(context)
     }
     // When the tour ends (Finish / the overlay's X), land the user back on a
     // stable tab instead of leaving the pushed tour screens stacked.
@@ -744,6 +759,11 @@ fun CurioNavHost(
         //    page (v8.2), never auto-shown.
         if (QuestGuide.active) {
             QuestGuide.current?.let { step ->
+                // v8.6 — action-wait steps disable the pill's action and
+                // relabel it "Do this to continue": the tour advances the
+                // moment the REAL action happens (spec §7.3), the X always
+                // closes it (Skip tour).
+                val waiting = step.waitFor != null
                 QuestGuideToast(
                     title = step.title,
                     message = step.message,
@@ -754,7 +774,12 @@ fun CurioNavHost(
                         QuestGuide.Position.TOP -> GuidePointer.DOWN
                         QuestGuide.Position.CENTER -> null
                     },
-                    actionLabel = if (QuestGuide.isLast) "Finish" else "Next",
+                    actionLabel = when {
+                        QuestGuide.isLast -> "Finish"
+                        waiting -> "Do this to continue"
+                        else -> "Next"
+                    },
+                    actionEnabled = !waiting,
                     onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
                     onClose = { QuestGuide.stop() },
                     modifier = Modifier

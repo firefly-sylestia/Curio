@@ -329,8 +329,11 @@ object CurioQuests {
         "like-10" to "like-10", "journey-done" to "tour-achievement", "xp-505" to "rank-10"
     )
 
-    // ── Daily quests — three picked per day from a rotating pool ───────
-    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE }
+    // ── Daily quests — three per day, one of each ROLE (spec §5.1) ──────
+    //    Warm-up (easy one-action), discovery (a new lane via the passport),
+    //    creation (save/reflect). DISCOVERY completes when the passport's
+    //    least-engaged lane is explored (spec §6.2).
+    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY }
 
     data class DailyQuest(
         val id: String,
@@ -348,15 +351,41 @@ object CurioQuests {
         DailyQuest("d-quote-1", "Bookmark a quote", 10, DailyKind.QUOTE, 1),
         DailyQuest("d-pin-1", "Pin a topic for later", 10, DailyKind.PIN, 1),
         DailyQuest("d-profile-1", "Visit your profile", 10, DailyKind.PROFILE, 1),
-        DailyQuest("d-like-1", "Like a topic", 10, DailyKind.LIKE, 1)
+        DailyQuest("d-like-1", "Like a topic", 10, DailyKind.LIKE, 1),
+        // Discovery role — "New Lane": explore the passport's least-engaged
+        // lane (its stamp becomes EXPLORED). The UI titles it with the lane
+        // name and routes its CTA to that lane's Spin deck (spec §6.3).
+        DailyQuest("d-lane-1", "Try a new lane", 20, DailyKind.DISCOVERY, 1)
     )
 
-    private const val DAILY_COUNT = 3
-
-    /** The three quests live for [epochDay] — stable all day, new at midnight. */
-    fun dailyQuestsFor(epochDay: Long): List<DailyQuest> {
-        val base = (epochDay % DailyPool.size).toInt().let { if (it < 0) it + DailyPool.size else it }
-        return (0 until DAILY_COUNT).map { i -> DailyPool[(base + i * 2) % DailyPool.size] }
+    /**
+     * The three quests live for [epochDay] — stable all day, new at midnight.
+     * Role diversity (spec §5.1): one warm-up + the discovery quest + one
+     * creation quest. When [context] is given and every lane is already
+     * mastered there is nothing left to discover — the discovery slot is
+     * replaced by a second creation quest instead.
+     */
+    fun dailyQuestsFor(epochDay: Long, context: Context? = null): List<DailyQuest> {
+        val warmups = DailyPool.filter {
+            it.kind == DailyKind.SPIN || it.kind == DailyKind.EXPLORE || it.kind == DailyKind.PROFILE
+        }
+        val creations = DailyPool.filter {
+            it.kind == DailyKind.SAVE || it.kind == DailyKind.QUOTE ||
+                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE
+        }
+        val discovery = DailyPool.firstOrNull { it.kind == DailyKind.DISCOVERY }
+        fun pick(list: List<DailyQuest>): DailyQuest {
+            val base = (epochDay % list.size).toInt()
+            return list[if (base < 0) base + list.size else base]
+        }
+        val hasDiscoveryTarget = context == null || CurioPassport.leastEngaged(context) != null
+        return if (discovery != null && hasDiscoveryTarget) {
+            listOf(pick(warmups), discovery, pick(creations))
+        } else {
+            val c0 = pick(creations)
+            val c1 = creations[(creations.indexOf(c0) + 1) % creations.size]
+            listOf(pick(warmups), c0, c1)
+        }
     }
 
     // ── Seed / persistence ──────────────────────────────────────────────
@@ -515,6 +544,12 @@ object CurioQuests {
         lifetimeState = lifetimeState.copy(explores = lifetimeState.explores + 1)
         categoriesState = categoriesState + categoryId.name
         bumpDaily(context, DailyKind.EXPLORE)
+        // v8.6 — the "New Lane" discovery daily (spec §6.2) completes when the
+        // passport's least-engaged lane is explored.
+        val discoveryTarget = CurioPassport.leastEngaged(context)
+        if (discoveryTarget != null && categoryId == discoveryTarget.id) {
+            bumpDaily(context, DailyKind.DISCOVERY)
+        }
         write(context)
         addXp(context, 5)
         // The pet gets excited the first time a lane is explored (spec §10.5).
@@ -629,7 +664,7 @@ object CurioQuests {
      */
     fun claimDaily(context: Context, questId: String) {
         ensureDaily(context)
-        val quest = dailyQuestsFor(todayEpochDay()).firstOrNull { it.id == questId } ?: return
+        val quest = dailyQuestsFor(todayEpochDay(), context).firstOrNull { it.id == questId } ?: return
         if (quest.id in dailyAwardedState) return
         if ((dailyProgressState[quest.kind.name] ?: 0) < quest.target) return
         dailyAwardedState = dailyAwardedState + quest.id

@@ -1,72 +1,53 @@
-# Prompt — FieldMind/Curio request log
+# Prompt — Curio request log
 
-## Active request: REAL cause of the blank Topic Reveal + CI compile fixes
+## Active request: finish remaining spec phases + declutter the Quests page
 
-### Symptom (user-confirmed)
-Topic Reveal shows ONLY the two dock buttons ("Already watched" / "Start
-exploring") — everything else on the page is invisible. User confirmed it was
-STILL blank after the previous containerColor revert (4d70eba). User also
-reported CI compile failures on the pet commit (5f6e41c).
+User asked to continue the Quest & Pet Redesign spec (docs/app/QUEST_AND_PET_REDESIGN_SPEC.md),
+then interrupted with: "remove the unnecessary quest card boards — many things in quest
+boards feel like placeholders with no real interactions, it feels bland."
 
-### THE REAL ROOT CAUSE (found this pass)
-The containerColor theory from 4d70eba was WRONG (or at least incomplete). The
-actual trigger is a **dock height mismatch**:
+### This pass (committed to `Alpha`, PR #3)
 
-- The reveal dock lives in the Scaffold bottomBar slot — OUTSIDE
-  `SharedTransitionLayout`, which is why the two buttons render while the whole
-  page (inside the layout) is invisible.
-- The NavHost reserves the bottom bar's measured height (80dp — M3 NavigationBar
-  consumes the nav-bar inset inside its 80dp min height) via an invisible
-  placeholder so Scaffold innerPadding stays CONSTANT across the Spin→Reveal
-  shared-element morph.
-- af10023 changed the dock from the working fixed `height(80.dp)` (as in
-  untitled-chat) to `heightIn(min = 80.dp) + windowInsetsPadding(navigationBars)`
-  = 80dp + nav inset (~104dp). When the reveal's dock swapped in for the
-  placeholder MID-transition, innerPadding grew by the inset →
-  `SharedTransitionLayout` re-laid out mid-morph → the shared-element animation
-  froze → the entire reveal page stayed invisible forever.
-- 4d70eba removed the containerColor change but KEPT the height mismatch → still
-  frozen. This pass fixes the height.
+**Phase B — First Journey tutorial (real-action core loop, spec §7):**
+- `data/QuestGuide.kt` rewritten: 9-step tour Home → Quests → Spin → open the landed
+  topic → Start exploring → Capture/Save → Cabinet → Reward & pet growth → done.
+  New `Wait.REVEAL`; action-wait steps (`hold = true`) never yank the user mid-flow,
+  they advance the moment the real action happens (spec §7.3). Persistence:
+  `seed(context)` in MainActivity onCreate, `persist(context)` from the NavHost
+  runner — the tour survives process death.
+- `CurioNavHost.kt` tour runner is now hold-aware (only guides hold-step users back
+  when parked on a bottom-nav tab) and persists every step change.
+- `QuestGuideToast.kt` gains `actionEnabled` — wait steps show "Do this to continue",
+  muted colors, no-op action.
+- `TopicRevealScreen.kt` fires `QuestGuide.onWait(Wait.REVEAL)` when a reveal opens.
 
-### Fix (implemented)
-1. **TopicRevealScreen.RevealActionDock** — `height(80.dp).windowInsetsPadding(
-   navigationBars)`: fixed 80dp TOTAL with the nav-bar inset consumed INSIDE
-   (height first, inset as internal padding — same as M3 NavigationBar), so the
-   dock exactly matches the reserved placeholder/real bar → innerPadding NEVER
-   changes → the morph completes and the page renders. Buttons still clear the
-   gesture bar; compact button padding (vertical 10dp) so they fit the
-   inset-aware content area.
-2. **CurioNavHost.RevealBottomBarPlaceholder** — fallback (unmeasured) branch
-   also `height(80.dp).windowInsetsPadding(...)` so placeholder → dock swap is
-   height-constant in every path (deep-link straight into Reveal included).
-3. Removed now-unused `heightIn` imports from both files.
+**Daily quests (spec §5/§6.2):** `CurioQuests` adds `DailyKind.DISCOVERY`; each day
+now picks warm-up + discovery + creation (discovery names the passport's least-engaged
+lane on the DailyCard and its Go chip routes straight to that lane's Spin deck;
+dropped when no lane target). `onExplore` completes the discovery daily only when the
+explored lane IS the passport's least-engaged lane. `DailyPool.first` → `firstOrNull`
+(robust).
 
-Everything else the user asked for is preserved: transparent buttons with
-category ink, Already/Undo left + Start right, category undo labels,
-wash-backed dock (no cream flash), constant Scaffold containerColor.
+**Phase D — level-up celebration:** a claim that crosses a level raises a skippable
+banner (pet hops, PROUD mood) that auto-dismisses after ~2.5s.
 
-### CI compile fixes (pet commit 5f6e41c — was RED)
-- CurioPassport.allProgress: `associateWith` produced Map<CurioCategory,…>;
-  now `associate { it.id to progress(...) }` → Map<CategoryId,…>.
-- QuestsScreen: added `import com.curio.app.ui.theme.themedAccent` (cleared the
-  unresolved-reference cascade at 126/927 + the bogus Color&Map.Entry errors at
-  948–955 which were compiler recovery from the error type).
-- CurioPetSprite: `-hop.value * 10.dp * (...)` → `10.dp * (-hop.value) * (...)` —
-  this Compose has no Float×Dp operator; Dp×Float is fine.
+**Quests declutter (user request):** page is now hero → daily quests → recommended
+quest → category passport → ONE "Quest paths" card. All per-chain cards merged into
+tappable rows (tap to expand the stage trail; the next actionable stage carries a Go
+chip); the permanent badge grid moved behind a single "Badge shelf" row that opens a
+dialog. Nothing on the page is a dead display board.
 
 ### Validation
-- Brace balance equal on all touched files, `git diff --check` clean, no
-  Float×Dp left, `heightIn` imports removed cleanly, Kotlin 2.3.21 (Stage.entries
-  OK). Code review passed with 2 notes: (a) on 3-button-nav the 80dp total leaves
-  ~32dp content — compacted button padding mitigates; (b) hardcoded 80dp vs the
-  measured placeholder assume the M3 bar is 80dp — consistent with the NavHost's
-  own documented assumption.
-- No Gradle builds in this environment (project rule) — CI validates on push.
+- String-aware brace/paren balance: ALL OK on all touched files (the old
+  `/tmp/check_balance2.py` miscounts strings containing `//` — replaced with
+  `/tmp/check_balance3.py`).
+- `git diff --check` clean. Code review applied: `delay` import + banner autodismiss
+  verified, `onWait(REVEAL)` confirmed inside LaunchedEffect, BadgeTile takes
+  modifier, DISCOVERY bump gated, no orphaned imports, `firstQuestId` still used,
+  stray `result` symlink deleted. CI validates the real build on push.
 
-### Next
-- Commit + push to Alpha (updates PR #3), then USER MUST REBUILD from the latest
-  Alpha (CI was red on 5f6e41c, so any build they tested before this push was
-  either 4d70eba or older). If the blank persists on a FRESH build, the remaining
-  suspects are the hero key(resolved?.id) remount re-registering the shared
-  element mid-morph and device-specific bar heights (thread bottomBarHeightPx
-  into the dock).
+### Still open (later phases)
+- Phase F: pet per-screen reactions (Spin watches the wheel, reveal points at
+  Explore, Cabinet celebrates) — optional.
+- Passport read hoisting (leastEngaged called in DailyCard composition; harmless,
+  SharedPreferences is memory-cached).

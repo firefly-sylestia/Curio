@@ -60,6 +60,10 @@ fun QuestGuideToast(
     stepCount: Int,
     actionLabel: String,
     pointer: GuidePointer? = GuidePointer.UP,
+    /** v8.6 — false for real-action wait steps: the action is muted and taps
+     *  on the pill do nothing (the step advances via the real action; the X
+     *  still closes the tour). */
+    actionEnabled: Boolean = true,
     onClick: () -> Unit,
     onClose: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -82,7 +86,7 @@ fun QuestGuideToast(
     ) {
         if (pointer == GuidePointer.UP) GuidePointerArrow(CurioIcons.ArrowUpward)
         Surface(
-            onClick = onClick,
+            onClick = { if (actionEnabled) onClick() },
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -127,14 +131,17 @@ fun QuestGuideToast(
                 Text(
                     actionLabel,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = CurioColors.CoralBlush
+                    color = if (actionEnabled) CurioColors.CoralBlush
+                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                CurioIcon(
-                    name = CurioIcons.ChevronRight,
-                    contentDescription = actionLabel,
-                    tint = CurioColors.CoralBlush,
-                    size = 18.dp
-                )
+                if (actionEnabled) {
+                    CurioIcon(
+                        name = CurioIcons.ChevronRight,
+                        contentDescription = actionLabel,
+                        tint = CurioColors.CoralBlush,
+                        size = 18.dp
+                    )
+                }
                 if (onClose != null) {
                     Box(
                         modifier = Modifier

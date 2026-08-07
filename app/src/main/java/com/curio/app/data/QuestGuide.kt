@@ -1,35 +1,48 @@
 package com.curio.app.data
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 /**
- * Curio's quest guided tour (v8.1) — a small, tap-along walkthrough that
- * auto-navigates through the app's screens so a new user sees where
- * everything lives. Offered ONCE from the Quests page when the user taps the
- * first quest ("First Spin") and accepts the one-time prompt (v8.2) — it is
- * never auto-shown from other screens.
+ * Curio's quest guided tour (v8.6) — the **First Journey** (spec §7): a
+ * tap-along walkthrough that navigates the REAL screens and WAITS for the
+ * REAL actions — spin → open the landed topic → start exploring → save a
+ * capture → see the Cabinet — so the user finishes the tour having done the
+ * whole core loop, not just looked at it.
+ *
+ * Offered ONCE from the Quests page when the user taps the first quest
+ * ("First Spin") and accepts the one-time prompt (v8.2) — never auto-shown
+ * from other screens.
  *
  * Presentation is an IN-APP OVERLAY (not a system Toast, not a dialog): a
- * compact floating pill that MOVES WITH THE SCREEN (v8.3) — bottom for the
- * tab screens, below the hero on the settings-family screens, centered on
- * the final step — with a pointer arrow toward the content it describes, a
- * progress-dot indicator and a Next button. Every tap advances one step and
- * auto-navigates to that step's screen. Some steps WAIT for the real action
- * (the Spin step advances the moment the user actually spins —
- * [CurioQuests.onSpin] reports it via [onWait]), so the walkthrough hands
- * over to the user mid-flow.
+ * compact floating pill that MOVES WITH THE SCREEN — bottom for the tab
+ * screens, below the hero on the settings-family screens, centered on the
+ * final step — with a pointer arrow toward the content it describes, a
+ * progress-dot indicator and an action label. Steps that WAIT for a real
+ * action ([Wait]) disable the action ("Do this to continue") and advance
+ * automatically the moment the action happens — [CurioQuests.onSpin],
+ * [CurioQuests.onExplore], [CurioQuests.onSave], the reveal screen's open
+ * ([Wait.REVEAL]) and Profile/Settings visits report in via [onWait]. The
+ * X always closes the tour ("Skip tour", spec §7.3).
+ *
+ * v8.6 — the tour SURVIVES PROCESS DEATH (spec §7.3): the active flag + step
+ * index are persisted whenever they change ([persist], called from the
+ * NavHost's tour runner) and restored on launch ([seed], called from
+ * MainActivity), so a killed app resumes exactly where it left off.
  *
  * Routes use the same raw names as [QuestStage.navRoute] ("home", "spin",
  * "cabinet", "profile", "quests", "settings"); the NavHost maps them onto
- * real navigation (tabs via navigateToTab, the rest pushed).
+ * real navigation (tabs via navigateToTab, the rest pushed). Steps marked
+ * [Step.hold] never auto-navigate the user away mid-flow — they wait for
+ * the action on whatever screen it happens (e.g. the reveal's auto-open).
  */
 object QuestGuide {
 
     /** The real-world event a step can wait for before auto-advancing. */
-    enum class Wait { SPIN, EXPLORE, SAVE, PROFILE, SETTINGS }
+    enum class Wait { SPIN, REVEAL, EXPLORE, SAVE, PROFILE, SETTINGS }
 
     /** Where the overlay floats on the current screen (v8.3). */
     enum class Position {
@@ -47,7 +60,15 @@ object QuestGuide {
         val title: String,
         val message: String,
         val waitFor: Wait? = null,
-        val position: Position = Position.BOTTOM
+        val position: Position = Position.BOTTOM,
+        /**
+         * v8.6 — true for action-wait steps: the runner only guides the user
+         * back to [route] when they're PARKED on a bottom-nav tab, and never
+         * yanks them away mid-flow (e.g. off the reveal while it auto-open
+         * after a spin). The step advances via [onWait] when the action
+         * happens, wherever that is.
+         */
+        val hold: Boolean = false
     )
 
     // ── Reactive state (mirrors CurioQuests' pattern) ──
@@ -94,34 +115,78 @@ object QuestGuide {
         if (step.waitFor == wait) next()
     }
 
+    // ── Persistence (v8.6 — spec §7.3: the tour survives process death) ──
+    private const val PREFS_NAME = "curio_guide"
+    private const val KEY_ACTIVE = "active"
+    private const val KEY_INDEX = "index"
+
+    /** Restores an in-flight tour (called once from MainActivity onCreate). */
+    fun seed(context: Context) {
+        val p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (!p.getBoolean(KEY_ACTIVE, false)) return
+        steps = buildTourSteps()
+        index = p.getInt(KEY_INDEX, 0).coerceIn(0, steps.lastIndex.coerceAtLeast(0))
+        active = true
+    }
+
+    /** Persists the exact active state + step (called from the NavHost runner). */
+    fun persist(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_ACTIVE, active)
+            .putInt(KEY_INDEX, index)
+            .apply()
+    }
+
     // v8.3 — one-line messages (the pill shows at most two lines) and a
     // per-step position so the pill never floats over the thing it explains.
+    // v8.6 — the First Journey core loop (spec §7.2): Home → Quests → Spin →
+    // open the landed topic → Start exploring → Capture/Save → Cabinet →
+    // Reward & pet growth. The action-wait steps (SPIN/REVEAL/EXPLORE/SAVE)
+    // advance the moment the user really does the thing.
     private fun buildTourSteps(): List<Step> = listOf(
         Step(
             "home", "Welcome to Curio",
-            "Your daily quest, shuffle, and recent activity live here."
+            "Home is where your day starts — daily quests, the deck, and your latest finds live here."
         ),
         Step(
-            "spin", "Spin the deck",
-            "Tap Spin to shuffle a topic — that's your first quest!",
-            Wait.SPIN
-        ),
-        Step(
-            "cabinet", "The Cabinet",
-            "Every capture you save lands here."
-        ),
-        Step(
-            "profile", "Your profile",
-            "Streak, level, and explored lanes live here."
-        ),
-        Step(
-            "quests", "Quests & levels",
-            "Chains, badges, and fresh daily quests — right here.",
+            "quests", "Daily Quest Hub",
+            "Daily quests are the fastest way to grow — check them anytime.",
             position = Position.TOP
         ),
         Step(
-            "settings", "Make it yours",
-            "Appearance, reminders, and backup all live here.",
+            "spin", "Pick a lane & spin",
+            "Tap Shuffle — the deck picks a fresh topic, then opens it for you.",
+            waitFor = Wait.SPIN
+        ),
+        Step(
+            "spin", "Open the landed topic",
+            "Nice — you landed on a topic. It's already open: read the teaser, then start exploring.",
+            waitFor = Wait.REVEAL,
+            hold = true,
+            position = Position.TOP
+        ),
+        Step(
+            "", "Start exploring",
+            "Time to explore for real — tap Start exploring on the topic.",
+            waitFor = Wait.EXPLORE,
+            hold = true,
+            position = Position.TOP
+        ),
+        Step(
+            "", "Capture what you found",
+            "Back from exploring? Write it down — save a note to make the discovery yours.",
+            waitFor = Wait.SAVE,
+            hold = true
+        ),
+        Step(
+            "cabinet", "The Cabinet",
+            "Saved discoveries live here — every keepsake, one place.",
+            position = Position.TOP
+        ),
+        Step(
+            "quests", "Reward & pet growth",
+            "Every curious act earns XP — and feeds your Curio pet. See it grow!",
             position = Position.TOP
         ),
         Step(

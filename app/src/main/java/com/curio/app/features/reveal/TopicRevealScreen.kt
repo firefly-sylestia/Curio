@@ -87,6 +87,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.QuestGuide
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildExploreSearchUrl
@@ -196,8 +197,13 @@ fun TopicRevealScreen(
     // lane's stamp and refreshes its last-explored date (spec §6.1). Fires
     // once per topic opened; a rotation re-fire is harmless (the stamp
     // derives from counts > 0, never exact values).
+    // v8.6 — the First Journey tour's "Open the landed topic" step advances
+    // the moment the reveal really opens (spec §7.2 step 5).
     LaunchedEffect(cat.id, resolved?.id) {
-        if (resolved != null) CurioPassport.noteReveal(context, cat.id)
+        if (resolved != null) {
+            CurioPassport.noteReveal(context, cat.id)
+            QuestGuide.onWait(QuestGuide.Wait.REVEAL)
+        }
     }
 
     // Explore-session flow — tapping the CTA records the topic as
