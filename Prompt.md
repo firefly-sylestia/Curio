@@ -18,3 +18,15 @@ No Gradle in this env (per AGENTS.md) — restored files byte-identical to `7244
 
 ### Follow-ups
 - The original text-squash glitch on back is expected to return (that is what 72449c9 fixed) — the user chose the full-card morph over the glitch-free version.
+
+---
+
+## Request (2026-08-07, 21st): Move topic reveal actions into the themed bottom area — DONE
+
+### Implementation
+- Approved plan: move Start exploring and Already watched/listened/read/explored out of the scrolling content into a bottom action dock.
+- Updated `features/reveal/TopicRevealScreen.kt` with a full-height parent layout, scrolling content region, responsive stacked/horizontal dock, category-surface tint, and navigation-bar inset handling.
+- Preserved browse-mode, done-state, dialogs, session, and engagement behavior.
+
+### Validation
+- Gradle commands are prohibited in this environment; static validation and git diff review remain to be run before commit/push.
