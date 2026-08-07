@@ -185,7 +185,9 @@ object QuestGuide {
             "Time to explore for real — tap Start exploring on the topic, or explore it later.",
             waitFor = Wait.EXPLORE,
             hold = true,
-            position = Position.TOP,
+            // v8.15 — the Start exploring button lives in the reveal's
+            // bottom action dock, so the pet points at the bottom strip.
+            position = Position.BOTTOM,
             skipLabel = "Explore later"
         ),
         Step(

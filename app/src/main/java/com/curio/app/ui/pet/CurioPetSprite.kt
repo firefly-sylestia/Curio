@@ -83,6 +83,8 @@ fun CurioPetSprite(
     thinking: Boolean = false,
     watching: Boolean = false,
     spinning: Boolean = false,
+    /** v8.15 — the guided-tour pose: a raised paw pointing "here!". */
+    pointing: Boolean = false,
     contentDescription: String? = null
 ) {
     val density = LocalDensity.current
@@ -277,6 +279,9 @@ fun CurioPetSprite(
     val flicking = flickWave > 0.92f && !sleeping && !dragged && !thinking
     val thinkingNow = thinking && !sleeping && !dragged && !moving
     val watchingNow = watching && !sleeping && !dragged && !moving
+    // v8.15 — the tour guide pose: eager wide eyes + a raised pointing paw
+    // on the facing side (mirrored by the flip layer).
+    val pointingNow = pointing && !sleeping && !dragged && !moving
     val idleTilt = (if (thinkingNow) facing * 7f else 0f) +
         (if (watchingNow) facing * 2.5f else 0f)
 
@@ -285,6 +290,7 @@ fun CurioPetSprite(
         dragged -> EyeStyle.WIDE // lifted mid-play: startled wins
         playing -> EyeStyle.STAR
         sleeping -> EyeStyle.CLOSED
+        pointingNow -> EyeStyle.WIDE // "over here!"
         spinningNow -> EyeStyle.STAR // cheering the reel on
         blinkPhase > 0.93f && !excited && !proud && !spinningNow -> EyeStyle.BLINK
         excited -> EyeStyle.STAR
@@ -296,6 +302,7 @@ fun CurioPetSprite(
         dragged -> MouthStyle.O
         playing -> MouthStyle.WIDE
         sleeping -> MouthStyle.NONE
+        pointingNow -> MouthStyle.WIDE // "come on, tap it!"
         spinningNow -> MouthStyle.WIDE
         excited -> MouthStyle.WIDE
         bouncy -> MouthStyle.WIDE
@@ -511,6 +518,20 @@ fun CurioPetSprite(
                                 drawPx(7, 11, ink); drawPx(8, 11, ink)
                             }
                             MouthStyle.NONE -> Unit
+                        }
+
+                        // v8.15 — the raised pointing paw: a little coral
+                        // arm on the facing side that lifts a beat to say
+                        // "here!". The flip layer mirrors it to the other
+                        // side when the pet faces left.
+                        if (pointingNow) {
+                            val pawLift = if (sin(bobPhase * 4f * PI.toFloat()) > 0f) -1 else 0
+                            drawPx(13, 9 + pawLift, accent)
+                            drawPx(14, 9 + pawLift, accent)
+                            drawPx(15, 9 + pawLift, accent)
+                            drawPx(15, 10, accent)
+                            // A tiny ink fingertip so the point reads.
+                            drawPx(15, 9 + pawLift, ink)
                         }
 
                         // Growth accessories (spec §10.4).

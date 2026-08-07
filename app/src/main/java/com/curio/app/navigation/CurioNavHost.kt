@@ -103,9 +103,8 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBottomBar
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.GuidePointer
-import com.curio.app.ui.components.QuestGuideToast
 import com.curio.app.ui.pet.CurioFloatingPet
+import com.curio.app.ui.pet.PetGuideOverlay
 import com.curio.app.ui.theme.CurioMotion
 
 /**
@@ -757,59 +756,37 @@ fun CurioNavHost(
         //    Settings, centered on the final step — with a pointer arrow at
         //    the content it describes and progress dots. Rendered only while
         //    a tour is active; the tour itself is started from the Quests
-        //    page (v8.2), never auto-shown.
+        //    page (v8.2), never auto-shown. v8.15 — the tour overlay is now
+        //    PET-GUIDED: the pet walks to the step's target and points at it
+        //    through a scrim window (see PetGuideOverlay), replacing the
+        //    floating pill.
         if (QuestGuide.active) {
             QuestGuide.current?.let { step ->
-                // v8.6 — action-wait steps disable the pill's action and
-                // relabel it "Do this to continue": the tour advances the
-                // moment the REAL action happens (spec §7.3), the X always
-                // closes it (Skip tour).
+                // v8.6 — action-wait steps disable the action and relabel it
+                // "Do this to continue": the tour advances the moment the
+                // REAL action happens (spec §7.3), the X always closes it.
                 val waiting = step.waitFor != null
-                QuestGuideToast(
+                PetGuideOverlay(
                     title = step.title,
                     message = step.message,
                     stepIndex = QuestGuide.index + 1,
                     stepCount = QuestGuide.steps.size,
-                    pointer = when (step.position) {
-                        QuestGuide.Position.BOTTOM -> GuidePointer.UP
-                        QuestGuide.Position.TOP -> GuidePointer.DOWN
-                        QuestGuide.Position.CENTER -> null
-                        QuestGuide.Position.LOWER -> GuidePointer.DOWN
-                    },
                     actionLabel = when {
                         QuestGuide.isLast -> "Finish"
                         waiting -> "Do this to continue"
                         else -> "Next"
                     },
+                    position = step.position,
                     actionEnabled = !waiting,
                     onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
                     onClose = { QuestGuide.stop() },
                     // v8.12 — wait steps offer "Skip"/"Explore later": the
                     // tour guides but never blocks, so the user can move on
                     // without doing the action.
-                    secondaryLabel = if (waiting) step.skipLabel ?: "Skip" else null,
-                    onSecondary = { QuestGuide.next() },
-                    modifier = Modifier
-                        .align(
-                            when (step.position) {
-                                QuestGuide.Position.BOTTOM -> Alignment.BottomCenter
-                                QuestGuide.Position.TOP -> Alignment.TopCenter
-                                QuestGuide.Position.CENTER -> Alignment.Center
-                                QuestGuide.Position.LOWER -> Alignment.BottomCenter
-                            }
-                        )
-                        // TOP steps (Quests / Settings) sit below the screen
-                        // hero instead of floating over it; LOWER steps float
-                        // ABOVE the bottom action row (the Save bar) so the
-                        // pill never covers the button it points at.
-                        .padding(
-                            start = 16.dp,
-                            top = if (step.position == QuestGuide.Position.TOP)
-                                SettingsHeroTotalHeight + 8.dp else 10.dp,
-                            end = 16.dp,
-                            bottom = if (step.position == QuestGuide.Position.LOWER)
-                                116.dp else 10.dp
-                        )
+                    skipLabel = if (waiting) step.skipLabel ?: "Skip" else null,
+                    onSkip = { QuestGuide.next() },
+                    // TOP steps window the band below the settings hero.
+                    heroTopOffset = SettingsHeroTotalHeight
                 )
             }
         }
@@ -823,7 +800,9 @@ fun CurioNavHost(
     // be dragged anywhere, long-pressed home into its flower bed, and naps
     // back after a long idle. v8.10 — the sprite wears ONE fixed color (the
     // Curio light-theme brand coral), so no accent is computed here anymore.
-    CurioFloatingPet(routePrefix = routePrefix)
+    // v8.15 — while the guided tour runs, the pet IS the guide (in
+    // PetGuideOverlay), so the floating wanderer hides to avoid a duplicate.
+    if (!QuestGuide.active) CurioFloatingPet(routePrefix = routePrefix)
 
     // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"
     // overlay were replaced in v8.2: the tour is offered ONCE on the Quests

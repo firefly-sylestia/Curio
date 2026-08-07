@@ -1,61 +1,52 @@
 # Prompt — Curio request log
 
-## Active request: v8.14 — pet home/sleep + time-of-day + 4 AM rollover (uncommitted)
+## Active request: v8.15 — pet-guided tour + quest-navigation fix (uncommitted)
 
-Working tree (8 files, NOT pushed — user wants to be asked before pushing):
+Working tree (5 files — 1 new overlay + 4 edits; NOT pushed — user wants to
+be asked before pushing):
 
-**User choices (from ask):** cozy bed upgrade (headboard + blanket + lamp),
-nightcap on the sleeping pet, moon/stars + sun backdrop, dream bubbles while
-asleep; curled-up lying pose, pronounced Z's + breathing, sleepy twitches,
-sleep-startle twitch (random dynamic ones); 4 time-of-day phases; pet sleeps
-at night, wakes for morning, time-aware pet lines, morning-energy vs
-night-lazy behavior; **daily quests reset at 4 AM**.
+**A. Quest navigation fix (the Home-tab dead tap)**
+- `CurioRoutes.navigateToTab` now pops back to the HOME root explicitly when
+  the current route is NOT an exact tab route ("home"/"spin"/"cabinet").
+  Scenario: Quests (pushed over Home) → passport stamp or discovery daily
+  "Go" pushes "spin/{slug}" on top → tapping the Home tab ran
+  popUpTo(HOME)+launchSingleTop, and once HOME was the top after the pop,
+  singleTop cancelled the navigate — the tap looked dead (user had to back
+  out to Quests first). The explicit pop guarantees every tab tap from a
+  pushed screen lands. Normal tab switches (exact tab roots) are unchanged.
 
-1. **CI fix** — `CurioPet.var spinning ... private set` emits a JVM
-   `setSpinning(Z)V` setter that clashed with the explicit
-   `fun setSpinning(value)` (Platform declaration clash). Renamed the
-   function to `noteSpinning(value)` and updated both SpinScreen call sites
-   (682, 726). No `setSpinning` references remain.
+**B. Pet-guided tour (replaces the floating pill overlay)**
+- NEW `ui/pet/PetGuideOverlay.kt`: the Curio pet itself guides the First
+  Journey. A dim SCRIM covers the screen and BLOCKS every other button, with
+  a pass-through WINDOW (the hole) over the step's target zone — the real
+  button there stays tappable (pointerInput consumes taps only outside the
+  hole; EvenOdd path + pulsing accent ring draw the window). The pet hops in
+  beside the window (springy appear per step), wears its new `pointing` pose
+  (raised wiggling coral paw + WIDE eyes + open mouth), and aims a pulsing
+  coral arrow into the window. Its speech card reuses QuestGuideToast
+  (pointer = null) with title/message/dots/action/skip/close. Pet + card
+  never overlap the hole. Geometry: BOTTOM/LOWER = bottom strip (Shuffle /
+  reveal dock / Save) with the pet above pointing DOWN; TOP = band below the
+  settings hero with the pet below pointing UP; CENTER (final) = no scrim.
+- `CurioPetSprite` gains `pointing: Boolean` (paw drawn on the facing side,
+  mirrored by the flip layer; gated `!sleeping && !dragged && !moving`).
+- `CurioNavHost`: overlay call replaces the toast block
+  (heroTopOffset = SettingsHeroTotalHeight); floating pet hidden while the
+  tour is active to avoid a duplicate pet.
+- `QuestGuide`: step 5 (Start exploring) position TOP → BOTTOM so the pet
+  points at the reveal's bottom action dock.
 
-2. **TimeOfDay (CurioPet)** — new 4-phase enum (MORNING/AFTERNOON/EVENING/
-   NIGHT) read from `Calendar`; `wakeForMorning()` clears the sleepy flag;
-   `playfulBias(context)` scales energy by the hour (morning high, night
-   low); `lineFor()` gained time-aware copy ("Good morning!", "Night-night
-   soon…", etc.).
-
-3. **4 AM daily rollover** — `CurioQuests.todayEpochDay()` and
-   `StreakTracker.todayEpochDay()` now truncate at 04:00 (not midnight) so a
-   late-night session never wipes the day's quests mid-celebration; Quests
-   daily header now says "Resets at 4 AM". Grep confirmed no other
-   midnight-based "today" math remains.
-
-4. **Sleep animation (CurioPetSprite)** — curled-up lying pose (new grid
-   rows, all 16 chars, every char mapped), periwinkle nightcap with cream
-   trim, pronounced breathing swell, floating Z's, random sleep-STARTLE
-   (tiny jump + eyes flash open, on a random 9–22s beat while asleep) and
-   sleepy twitches; `sleeping = SLEEPY && !moving && !dragged` gate.
-
-5. **Flower bed diorama (CurioFlowerBed rewrite)** — time-of-day sky
-   (warm morning / blue afternoon / amber-evening gradient / moonlit night),
-   sun or crescent moon in the corner, twinkling stars at night (real
-   infinite-transition phase), cozy bed with headboard + coral blanket +
-   lamp glow (stronger at night), grass base, and a dream bubble cycle
-   (symbol pops, rises, fades every ~6s). Fixed a missing
-   `foundation.background` import.
-
-6. **MainActivity** — calls `CurioPet.wakeForMorning()` on launch (import
-   added).
-
-**Validation** — balance + whitespace clean; sprite imports (LinearEasing/
-spring/delay/tween) present; no unmapped sprite chars; 16-char grids; code
-review applied (only concrete fix was the missing background import, which
-is in). CI runs on push.
+**Validation** — balance + whitespace clean; review applied (no concrete
+compile/runtime issues; minor notes: step-3 tab bar sits inside the bottom
+hole but self-heals via the non-hold runner; TOP steps can clip on very
+short screens). CI runs on push.
 
 ## Done previously (pushed)
 
+- **v8.14** (`555b3af`) — pet home/sleep + time-of-day diorama, curled sleep
+  pose + nightcap + startle, 4 AM daily rollover (CurioQuests + StreakTracker),
+  Resets-at-4-AM UI, noteSpinning rename (JVM clash fix).
 - **v8.13** (`04beae0`) — smarter pet (passport-aware leastExploredLane),
-  medal badges (per-stage glyphs, earned-in-full state), silent-explore +5 XP
-  + wildcard passport peek fix.
-- **CI fix** (`d0669a5`) — hoisted LocalContext out of the silent-explore
-  lambda in TopicDatabaseScreen; declared `blushing` after
-  excited/proud/playing in the sprite.
+  medal badges, silent-explore +5 XP + wildcard passport peek fix.
+- **CI fix** (`d0669a5`) — LocalContext hoisted out of a lambda;
+  `blushing` declared after excited/proud/playing.

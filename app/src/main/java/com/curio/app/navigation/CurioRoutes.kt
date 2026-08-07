@@ -220,6 +220,17 @@ object CurioRoutes {
  * always remains after Splash/Onboarding/Crash routes land.
  */
 fun NavController.navigateToTab(route: String) {
+    // From a pushed/parameterized destination (e.g. "spin/artists" opened
+    // from a Quests passport stamp or a discovery daily's Go), pop back to
+    // the HOME root explicitly FIRST: the popUpTo(HOME)+launchSingleTop
+    // navigate can cancel itself there — after the pop, HOME is already the
+    // top entry, so singleTop skips the navigate and the tap appears dead
+    // (the user had to back out to Quests before a tab tap would respond).
+    // Landing on HOME first makes every tab tap from a pushed screen switch.
+    val current = currentBackStackEntry?.destination?.route
+    if (current != null && current !in CurioRoutes.bottomNavRoutes) {
+        popBackStack(CurioRoutes.HOME, inclusive = false)
+    }
     navigate(route) {
         popUpTo(CurioRoutes.HOME) { saveState = true }
         launchSingleTop = true
