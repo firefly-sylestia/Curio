@@ -1,5 +1,6 @@
 package com.curio.app.ui.pet
 
+import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -100,7 +101,10 @@ fun CurioFlowerBed(
 
     // Dream bubble cycle — the phase is a plain Float in both branches (a
     // stable 0f when not sleeping, since the bubble is never composed then).
-    val dreamSpec = remember {
+    // The spec type is annotated (InfiniteRepeatableSpec<Float>) so T binds
+    // — tween/infiniteRepeatable are generic and unannotated vals leave it
+    // unbound ("Cannot infer type for type parameter 'T'").
+    val dreamSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(6000, easing = LinearEasing))
     }
     val dreamPhase: Float = if (sleeping) {
@@ -113,7 +117,7 @@ fun CurioFlowerBed(
         p
     } else 0f
     // Star twinkle phase — a real animated value so the night sky sparkles.
-    val twinkleSpec = remember {
+    val twinkleSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(2200, easing = LinearEasing))
     }
     val twinkle by rememberInfiniteTransition(label = "petTwinkle").animateFloat(
