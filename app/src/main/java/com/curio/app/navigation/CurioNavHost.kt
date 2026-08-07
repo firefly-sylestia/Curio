@@ -107,7 +107,6 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.GuidePointer
 import com.curio.app.ui.components.QuestGuideToast
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.categoryBackgroundWash
 
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
@@ -206,22 +205,16 @@ fun CurioNavHost(
     val reserveBarSpace = routePrefix != null && routePrefix in setOf(
         CurioRoutes.REVEAL.substringBefore("/")
     )
-    // The reveal screen wears a category wash and its action dock is fully
-    // transparent, so the Scaffold's own background (theme surface — cream
-    // in light mode) would otherwise show as a bright strip behind the
-    // dock + navigation bar while the reveal is open (and flash it during
-    // the morph, when the bottom bar is swapped for the placeholder). Paint
-    // the Scaffold container with the reveal page's wash so the bottom
-    // strip is seamless with the page in both themes.
-    // Computed directly (NOT inside a remember block — the wash helper is
-    // @Composable and remember's calculation lambda is @DisallowComposableCalls).
-    // The work is trivial (a color lerp + prefs read) so recomposing it per
-    // frame is fine.
-    val revealWash = if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
-        CurioCategories.byRouteSlug(
-            backStackEntry?.arguments?.getString("categorySlug").orEmpty()
-        )?.categoryBackgroundWash()
-    } else null
+    // The reveal page paints its own category wash over the whole content
+    // area, and its action dock wears the SAME wash (see RevealActionDock),
+    // so the Scaffold's default background never shows as a strip behind
+    // the transparent dock while the reveal is open — and the Scaffold's
+    // containerColor stays CONSTANT across the whole route transition.
+    // (v8.5 regression fix: painting the Scaffold container with a
+    // dynamically-computed revealWash here restarted/disrupted the
+    // shared-element route transition — the morph froze and the entire
+    // reveal page stayed invisible except the dock, which lives outside
+    // the SharedTransitionLayout. The dock now carries the wash itself.)
     // The bottom bar's exact measured height (px) — captured from the real
     // bar so the invisible morph-transition placeholder can reserve IDENTICAL
     // space. M3's NavigationBar consumes the nav-bar inset inside its 80dp
@@ -371,7 +364,6 @@ fun CurioNavHost(
     // window (over other apps), so the Scaffold simply fills the screen.
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            containerColor = revealWash ?: MaterialTheme.colorScheme.background,
             bottomBar = {
                 if (!wide && showBottomBar) {
                     CurioBottomBar(

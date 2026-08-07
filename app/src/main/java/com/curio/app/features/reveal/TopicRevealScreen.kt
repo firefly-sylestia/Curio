@@ -948,12 +948,17 @@ private fun RevealActionDock(
     onExplore: () -> Unit,
     onAlready: () -> Unit
 ) {
-    // Fully transparent dock: the reveal page's category wash (painted on
-    // the Scaffold container by the NavHost) shows straight through, so the
-    // two actions float on the tinted page. The nav-bar inset is consumed
-    // here so the gesture bar never overlaps the buttons.
+    // Wash-backed dock: the dock wears the SAME category wash the reveal
+    // page paints behind it, so the two (fully transparent) actions float
+    // on the page tint exactly like a transparent dock — but unlike true
+    // transparency, the wash also covers the nav-bar strip below the
+    // buttons, so the Scaffold's cream background can never show through as
+    // a band behind the dock. The nav-bar inset is consumed inside so the
+    // gesture bar never overlaps the buttons. (v8.5 — the Scaffold
+    // containerColor must stay constant across the route transition; the
+    // wash lives HERE instead.)
     Surface(
-        color = Color.Transparent,
+        color = cat.categoryBackgroundWash(),
         tonalElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()

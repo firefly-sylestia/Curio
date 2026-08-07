@@ -1,37 +1,52 @@
-# Prompt.md — Current Request Log
+# Prompt — FieldMind/Curio request log
 
-## Request (2026-08-07): Create `Alpha` branch with reveal action-dock work and open a PR to `main`
+## Active request: Fix blank Topic Reveal page (regression from af10023)
 
-**User request:** "create a new branch from this names Alpha and commit and push to the upstream and create a pr to main"
+### Symptom (user-confirmed)
+After commit `af10023` (PR #3, Alpha branch), opening the Topic Reveal screen shows a
+blank page — the hero card, topic name, tags, teaser and action prompt are all gone.
+The ONLY visible elements are the two dock buttons ("Already watched" / "Start
+exploring"), which render in the Scaffold bottomBar slot. User pointed at `af10023`
+as the culprit.
 
-### Analysis
-- `main` had two direct commits (reveal action dock `6c9b8a6` + its Prompt.md log `8643749`) pushed earlier this session.
-- User confirmed (ask_user) they want the **reveal-dock work as the PR content**, carved out of `main` into a dedicated `Alpha` branch, then a PR `Alpha → main`.
+### Diagnosis
+`af10023` changed exactly two layers:
+1. **NavHost** — added `Scaffold(containerColor = revealWash ?: background)` where
+   `revealWash` is recomputed per composition from the back-stack category arg via a
+   `@Composable` wash helper. This is the ONLY page-level delta.
+2. **Dock visuals** — transparent dock/buttons, swapped order, undo labels,
+   `heightIn(80.dp) + windowInsetsPadding(navigationBars)`.
 
-### Plan / steps taken
-1. **Backup:** `backup/main-with-dock` branch created at `8643749` (local safety net; the old main state is fully recoverable).
-2. **`Alpha` branch** created from `6c9b8a6` (reveal action dock commit, parent `7709f70` = pre-dock main).
-3. **`main` rewound** to `7709f70` (pre-dock) and force-pushed with `--force-with-lease`, so the PR diff shows exactly the reveal-dock change (dock work returns to main via the PR merge).
-4. **Push** `Alpha` to `origin`.
-5. **PR opened** `Alpha → main` via GitHub API (the `gh` binary is broken in this env — auth done with the token from `~/.config/gh/hosts.yml`).
+The dock layer is mechanically ruled out (different composition layer, identical
+layout math to the working 6c9b8a6 dock). The symptom (everything inside
+`SharedTransitionLayout` invisible, dock outside it visible) matches a
+frozen/disrupted shared-element route transition: while a shared transition is
+active, Compose pauses ALL animations inside the layout — a stuck morph leaves the
+hero + `RevealContentEntrance` content invisible forever. Painting the Scaffold
+container with a dynamically-computed color exactly at the moment the route
+transition begins is the only plausible trigger.
+
+### Fix (implemented, staged)
+1. **CurioNavHost.kt** — removed the `revealWash` computation, the
+   `categoryBackgroundWash` import, and the `containerColor` param (Scaffold back to
+   its constant default background). Documented the regression in a v8.5 comment.
+2. **TopicRevealScreen.kt** — `RevealActionDock` Surface now paints
+   `cat.categoryBackgroundWash()` (the SAME wash the reveal page paints) instead of
+   `Color.Transparent`. Visually identical to the requested 100%-transparent dock
+   (buttons remain fully transparent), but also covers the nav-bar strip so the
+   cream band behind the dock never shows — without touching the NavHost.
+
+Kept from af10023 (user-requested design): transparent buttons, Already/Undo LEFT +
+Start exploring RIGHT, category undo labels, nav-inset-safe dock.
 
 ### Validation
-No Gradle in this env (per AGENTS.md). Branch topology verified: `Alpha` = `7709f70` + `6c9b8a6` (+ this log commit); `main` = `7709f70` (clean). PR diff = 3 code files from the dock change. CI on the PR is the compile gate.
+- Brace balance equal, `git diff --check` clean, no leftover `revealWash` refs,
+  imports verified (CurioCategories + MaterialTheme still used in NavHost).
+- Code review passed. Notes: containerColor theory is a hypothesis → user must
+  verify on-device; if the blank persists, next suspects are the hero
+  `key(resolved?.id)` remount re-registering the shared element mid-morph and the
+  placeholder→dock innerPadding delta (both pre-existing in 6c9b8a6, which worked).
 
-### Follow-ups
-- After the PR merges, `main` regains the reveal-dock work (as a merge commit). The `backup/main-with-dock` local branch can be deleted once merged.
-- Stray untracked `result` symlink (Nix OpenJDK artifact) still in repo root — not part of any commit.
-
-## Follow-up request (same session): polish the reveal action dock on Alpha
-
-**User request:** fix a light-mode glitch where the navbar flashes cream when the reveal opens; make the Start exploring + Undo button backgrounds and the dock fully transparent; swap them (Undo left, Start exploring right); make Undo say the category mirror (Unwatched/Unread/…) like Already watched.
-
-### Changes (both on `Alpha`, updating PR #3)
-- **`features/reveal/TopicRevealScreen.kt`** — dock + both buttons now `Color.Transparent` (buttons float on the page wash; Start ink = `categoryInk()`, Already ink = categoryInk when done / onSurfaceVariant idle, disabled fades ink); dock uses `heightIn(min = 80.dp)` + `windowInsetsPadding(navigationBars)`; buttons swapped (Already/Undo LEFT, Start RIGHT); new `undoLabel()` mirrors `alreadyDoneLabel` (Unwatched/Unlistened/Unread/Unseen/Unexplored); removed the now-dead `pillBg`/`pillInk` animateColorAsState plumbing.
-- **`navigation/CurioNavHost.kt`** — `Scaffold(containerColor = revealWash ?: background)` where `revealWash` = the reveal route's `categoryBackgroundWash()` (computed directly, NOT in `remember` — the helper is @Composable), so the bottom strip + navbar area is seamless with the page and never flashes cream in light mode.
-
-### Validation
-String-aware brace balance OK both files; `git diff --check` clean; no lingering `pillBg`/`pillInk`/`animateColorAsState` refs; `BorderStroke` import retained (SentimentButton still uses it); review ran (flagged wide-window dock absence as pre-existing, not addressed). CI on push is the compile gate.
-
-### Known (pre-existing, not addressed)
-- On wide/tablet windows the dock doesn't render at all (the `!wide && reserveBarSpace` gate) — the reveal actions vanish on tablets; inherited from the untitled-chat dock design.
+### Next
+- Commit + push to Alpha (updates PR #3).
+- User tests; if blank persists, debug the two secondary suspects.
