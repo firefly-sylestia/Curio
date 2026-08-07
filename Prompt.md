@@ -1,20 +1,23 @@
 # Prompt.md — Current Request Log
 
-## Request (2026-08-07, 20th): Revert the text-out-of-morph restructure (72449c9) — full-card morph is back — DONE (pushed)
+## Request (2026-08-07): Create `Alpha` branch with reveal action-dock work and open a PR to `main`
 
-**User request:** "https://github.com/firefly-sylestia/Curio/commit/72449c98a968720e609ef9bcbf0f4809dfba3067 revert this commit"
+**User request:** "create a new branch from this names Alpha and commit and push to the upstream and create a pr to main"
 
 ### Analysis
-- `72449c9` ("main card text glitch on back") restructured the shared-element morph: instead of the WHOLE card morphing (gradient + glyph + text), the shared element became only the card face gradient, with all text hoisted out and blooming in after the morph. The user's follow-ups ("why did u remove the morph animation of the main card", "i still dont see any morph open animation of main card") made it clear the full-card morph was the desired behavior — the revert restores it.
+- `main` had two direct commits (reveal action dock `6c9b8a6` + its Prompt.md log `8643749`) pushed earlier this session.
+- User confirmed (ask_user) they want the **reveal-dock work as the PR content**, carved out of `main` into a dedicated `Alpha` branch, then a PR `Alpha → main`.
 
-### Fix — revert 72449c9, restore the original whole-card morph
-- **`features/spin/SpinScreen.kt`** — restored from `72449c9^`: `sharedElement` sits back on the OUTER ticket Box (whole card — face gradient, glyph, byline pill, title/tags/teaser all inside it), so the entire card expands out of the deck into the topic page and reverses on back.
-- **`features/reveal/TopicRevealScreen.kt`** — restored from `72449c9^`: `sharedElement` sits back on the hero `Surface` (whole hero — gradient, glyph, action badge, byline, subtype pills all inside it). The `HeroPillEntrance` bloom wrapper is gone (it was added by the reverted commit).
-- **`ui/adaptive/RevealSharedScopes.kt`** — removed `RevealGlyphSharedElementKey` (added by ae28095 on top of the reverted structure): the glyph now lives back inside the whole-card shared element, so the separate glyph element is dead code.
-- Kept from later commits (NOT part of 72449c9): the detail route's bottom-bar reserve removal (ae28095, NavHost) and the reserve fix (db393bd). Changelog top bullets rewritten to describe the full-card morph.
+### Plan / steps taken
+1. **Backup:** `backup/main-with-dock` branch created at `8643749` (local safety net; the old main state is fully recoverable).
+2. **`Alpha` branch** created from `6c9b8a6` (reveal action dock commit, parent `7709f70` = pre-dock main).
+3. **`main` rewound** to `7709f70` (pre-dock) and force-pushed with `--force-with-lease`, so the PR diff shows exactly the reveal-dock change (dock work returns to main via the PR merge).
+4. **Push** `Alpha` to `origin`.
+5. **PR opened** `Alpha → main` via GitHub API (the `gh` binary is broken in this env — auth done with the token from `~/.config/gh/hosts.yml`).
 
 ### Validation
-No Gradle in this env (per AGENTS.md) — restored files byte-identical to `72449c9^` (verified via `git diff 72449c9^` empty), braces balanced (SpinScreen 394/394, TopicReveal 196/196, RevealSharedScopes 2/2), exactly one `sharedElement`/`rememberSharedContentState` per file (whole-card + whole-hero), no `RevealGlyphSharedElementKey` references remain, `git diff --check` clean. Code review ran. CI on the pushed HEAD is the compile gate.
+No Gradle in this env (per AGENTS.md). Branch topology verified: `Alpha` = `7709f70` + `6c9b8a6` (+ this log commit); `main` = `7709f70` (clean). PR diff = 3 code files from the dock change. CI on the PR is the compile gate.
 
 ### Follow-ups
-- The original text-squash glitch on back is expected to return (that is what 72449c9 fixed) — the user chose the full-card morph over the glitch-free version.
+- After the PR merges, `main` regains the reveal-dock work (as a merge commit). The `backup/main-with-dock` local branch can be deleted once merged.
+- Stray untracked `result` symlink (Nix OpenJDK artifact) still in repo root — not part of any commit.
