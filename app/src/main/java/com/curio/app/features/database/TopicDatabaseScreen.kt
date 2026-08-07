@@ -78,6 +78,10 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun TopicDatabaseScreen(navController: NavController) {
+    // Hoisted (v8.13) — the silent Explore chip needs a Context, but
+    // LocalContext.current is @Composable and cannot be called inside the
+    // row's non-composable onExplore lambda.
+    val context = LocalContext.current
     // v7.97 — SAVEABLE state: the search query, the selected category filter
     // and the scroll position survive leaving the screen (Topic Reveal
     // round-trips, tab switches, rotation, process death) instead of
@@ -334,11 +338,14 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 cat = CurioCategories.byId(row.topic.categoryId),
                                 topic = row.topic,
                                 done = row.done,
-                                // v8.12 — a silent Explore chip: opens the
-                                // topic's search page without recording any
-                                // quest/passport/pet progress (browsing the
-                                // database shouldn't inflate stats).
-                                onExplore = { openSilentExplore(LocalContext.current, row.topic) },
+                                // v8.12/8.13 — a silent Explore chip: opens the
+                                // topic's search page without quest chains,
+                                // dailies, recents or done-marks; it still
+                                // feeds the passport + awards the tiny
+                                // exploration XP (browsing shouldn't inflate
+                                // quest progress, but the pet knows you were
+                                // there).
+                                onExplore = { openSilentExplore(context, row.topic) },
                                 onClick = {
                                     // Browse-Topics mode: the reveal opens
                                     // read-only (no explore, no recents

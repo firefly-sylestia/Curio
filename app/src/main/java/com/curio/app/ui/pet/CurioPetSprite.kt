@@ -192,11 +192,6 @@ fun CurioPetSprite(
     val happy = mood == CurioPet.Mood.HAPPY
     val bouncy = mood == CurioPet.Mood.BOUNCY
     val spinningNow = spinning && !sleeping && !dragged && !moving
-    // v8.13 — blush is a CELEBRATION thing, not a permanent feature: only
-    // genuinely happy moments wear it (excited/proud one-shots, bouncy
-    // post-play, mid-play, mid-spin). Plain idle HAPPY is the default state,
-    // so it does NOT blush there — the face stays clean most of the time.
-    val blushing = !sleeping && (excited || proud || bouncy || playing || spinningNow)
     // v8.12 — excited/proud are ONE-SHOT bursts tied to the celebration hop,
     // never sustained ambient moods: the pet reacts for a beat, then idles.
     // (The EXCITED/PROUD mood windows used to keep the wiggle + star eyes
@@ -208,6 +203,13 @@ fun CurioPetSprite(
     // v8.11 — mid-play: the pet is bowing or twirling, so it wears its
     // excited face and wags faster regardless of the ambient mood.
     val playing = playBow.value > 0f || spinAngle.value != 0f
+    // v8.13 — blush is a CELEBRATION thing, not a permanent feature: only
+    // genuinely happy moments wear it (excited/proud one-shots, bouncy
+    // post-play, mid-play, mid-spin). Plain idle HAPPY is the default state,
+    // so it does NOT blush there — the face stays clean most of the time.
+    // (Declared here, after excited/proud/playing — a compile-safety rule:
+    // never reference vals before their declaration point.)
+    val blushing = !sleeping && (excited || proud || bouncy || playing || spinningNow)
     val bowPhase = playBow.value * PI.toFloat()
     // v8.13 — gentler squash so the face never compresses into the scarf
     // (the old amplitudes let the eyes/mouth visually join the bottom rows).
