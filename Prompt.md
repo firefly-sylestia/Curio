@@ -37,3 +37,11 @@ No Gradle in this env (per AGENTS.md) — restored files byte-identical to `7244
 
 - The action buttons are no longer in a separate sticky bottom dock.
 - They now render after the existing bottom spacer inside the scroll content, below the cards, while retaining category tint, responsive layout, and navigation-bar padding.
+
+---
+
+## Follow-up (2026-08-07): Use the commit placeholder for reveal actions — IN PROGRESS
+
+- Commit `db393bdb` fixed the reveal route's bottom-bar placeholder in `CurioNavHost`.
+- The reveal action dock now renders through that exact Scaffold bottom slot, replacing the invisible placeholder with the themed buttons while keeping a measured placeholder fallback for deep links or initial composition.
+- Topic content remains scrollable above the dock; action behavior and theme tint are preserved.

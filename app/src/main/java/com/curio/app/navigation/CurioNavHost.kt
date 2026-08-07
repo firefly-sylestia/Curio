@@ -158,6 +158,24 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * switches crossfade.
  */
 @Composable
+private fun RevealBottomBarPlaceholder(
+    bottomBarHeightPx: Int,
+    density: androidx.compose.ui.unit.Density
+) {
+    val reserve = if (bottomBarHeightPx > 0) {
+        with(density) { bottomBarHeightPx.toDp() }
+    } else null
+    Spacer(
+        modifier = Modifier.fillMaxWidth().then(
+            if (reserve != null) Modifier.height(reserve)
+            else Modifier
+                .heightIn(min = 80.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+        )
+    )
+}
+
+@Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
 ) {
@@ -198,6 +216,7 @@ fun CurioNavHost(
     // (the "morph starts a little down" artifact). Reserving the measured
     // height keeps innerPadding constant across the whole transition.
     var bottomBarHeightPx by rememberSaveable { mutableStateOf(0) }
+    var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -345,26 +364,15 @@ fun CurioNavHost(
                         modifier = Modifier.onSizeChanged { bottomBarHeightPx = it.height }
                     )
                 } else if (!wide && reserveBarSpace) {
-                    // Invisible placeholder sized to the REAL bar's measured
-                    // height so shared-element morph transitions never
-                    // relayout the exiting tab screen. Must match the bar
-                    // pixel-for-pixel (M3's NavigationBar consumes the
-                    // nav-bar inset inside its 80dp min height — an
-                    // "80dp + insets" spacer would be taller by the inset
-                    // and shift the layout the moment the morph starts).
-                    // Falls back to the old estimate if the bar was never
-                    // measured (e.g. a deep link landing straight on Reveal).
-                    val reserve = if (bottomBarHeightPx > 0) {
-                        with(density) { bottomBarHeightPx.toDp() }
-                    } else null
-                    Spacer(
-                        modifier = Modifier.fillMaxWidth().then(
-                            if (reserve != null) Modifier.height(reserve)
-                            else Modifier
-                                .heightIn(min = 80.dp)
-                                .windowInsetsPadding(WindowInsets.navigationBars)
+                    // The reveal actions occupy the same bottom strip that
+                    // used to be only an invisible morph placeholder. This
+                    // keeps the Scaffold height stable while giving the
+                    // reserved area the reveal category tint.
+                    revealBottomBarContent?.invoke()
+                        ?: RevealBottomBarPlaceholder(
+                            bottomBarHeightPx = bottomBarHeightPx,
+                            density = density
                         )
-                    )
                 }
             },
             // Every screen applies its own statusBarsPadding().  This Scaffold
@@ -586,10 +594,12 @@ fun CurioNavHost(
                     TopicRevealScreen(
                         categorySlug = entry.arguments?.getString("categorySlug").orEmpty(),
                         topicName    = safeDecode(entry.arguments?.getString("topicName")),
-                        navController = navController,
-                        // Browse-Topics mode: read-only reveal (see CurioRoutes).
-                        browseMode = entry.arguments?.getString("browse") == "1"
-                    )
+                    navController = navController,
+                    // Browse-Topics mode: read-only reveal (see CurioRoutes).
+                    browseMode = entry.arguments?.getString("browse") == "1",
+                    onBottomBarContentChanged = { revealBottomBarContent = it },
+                    onBottomBarContentCleared = { revealBottomBarContent = null }
+                )
                 }
             }
             composable(

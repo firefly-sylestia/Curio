@@ -54,6 +54,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -152,7 +153,9 @@ fun TopicRevealScreen(
     // Browse-Topics read-only mode (see CurioRoutes.REVEAL): no explore
     // CTA, no like/dislike, no recents recording, and "Already watched"
     // confirms without the write-about-it dialog.
-    browseMode: Boolean = false
+    browseMode: Boolean = false,
+    onBottomBarContentChanged: (@Composable () -> Unit) -> Unit = {},
+    onBottomBarContentCleared: () -> Unit = {}
 ) {
     val cat = remember(categorySlug) {
         CurioCategories.byRouteSlug(categorySlug)
@@ -200,6 +203,53 @@ fun TopicRevealScreen(
     // done (never shows in the shuffle again) and asks whether to write
     // about it now.
     var showAlreadyDoneDialog by rememberSaveable { mutableStateOf(false) }
+
+    val pillBg by animateColorAsState(
+        targetValue = if (isDone) cat.themedAccent()
+                      else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        label = "alreadyDoneBg"
+    )
+    val pillInk by animateColorAsState(
+        targetValue = if (isDone) cat.onAccent()
+                      else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "alreadyDoneInk"
+    )
+    val latestBrowseMode by rememberUpdatedState(browseMode)
+    val latestResolved by rememberUpdatedState(resolved)
+    val latestIsDone by rememberUpdatedState(isDone)
+    val latestPillBg by rememberUpdatedState(pillBg)
+    val latestPillInk by rememberUpdatedState(pillInk)
+    val latestOnExplore by rememberUpdatedState<() -> Unit> { showExploreDialog = true }
+    val latestOnAlready by rememberUpdatedState<() -> Unit> {
+        val currentTopic = latestResolved
+        if (currentTopic != null) {
+            engaged = true
+            if (latestIsDone) {
+                ExploreSessionStore.unmarkDone(context, cat.id, currentTopic.name)
+            } else {
+                ExploreSessionStore.markDone(context, cat.id, currentTopic.name)
+                if (!latestBrowseMode) showAlreadyDoneDialog = true
+            }
+        }
+    }
+    val revealBottomBar = remember(cat) {
+        @Composable {
+            RevealActionDock(
+                cat = cat,
+                browseMode = latestBrowseMode,
+                resolved = latestResolved,
+                isDone = latestIsDone,
+                pillBg = latestPillBg,
+                pillInk = latestPillInk,
+                onExplore = latestOnExplore,
+                onAlready = latestOnAlready
+            )
+        }
+    }
+    DisposableEffect(revealBottomBar) {
+        onBottomBarContentChanged(revealBottomBar)
+        onDispose { onBottomBarContentCleared() }
+    }
 
     // Android 13+ needs POST_NOTIFICATIONS before the persistent explore
     // notification can show — requested when the user starts exploring with
@@ -653,40 +703,10 @@ fun TopicRevealScreen(
                     }
                 }
 
+                // The action dock is rendered by the Scaffold bottom slot so
+                // it occupies the existing reveal placeholder below this
+                // scrolling content.
                 Spacer(Modifier.height(24.dp))
-
-                val pillBg by animateColorAsState(
-                    targetValue = if (isDone) cat.themedAccent()
-                                  else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                    label = "alreadyDoneBg"
-                )
-                val pillInk by animateColorAsState(
-                    targetValue = if (isDone) cat.onAccent()
-                                  else MaterialTheme.colorScheme.onSurfaceVariant,
-                    label = "alreadyDoneInk"
-                )
-
-                RevealActionDock(
-                    cat = cat,
-                    browseMode = browseMode,
-                    resolved = resolved,
-                    isDone = isDone,
-                    pillBg = pillBg,
-                    pillInk = pillInk,
-                    onExplore = { showExploreDialog = true },
-                    onAlready = {
-                        val topic = resolved
-                        if (topic != null) {
-                            engaged = true
-                            if (isDone) {
-                                ExploreSessionStore.unmarkDone(context, cat.id, topic.name)
-                            } else {
-                                ExploreSessionStore.markDone(context, cat.id, topic.name)
-                                if (!browseMode) showAlreadyDoneDialog = true
-                            }
-                        }
-                    }
-                )
             }
 
         }
