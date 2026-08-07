@@ -47,6 +47,8 @@ Start exploring RIGHT, category undo labels, nav-inset-safe dock.
   `key(resolved?.id)` remount re-registering the shared element mid-morph and the
   placeholder→dock innerPadding delta (both pre-existing in 6c9b8a6, which worked).
 
-### Next
-- Commit + push to Alpha (updates PR #3).
-- User tests; if blank persists, debug the two secondary suspects.
+### Completion summary
+- Fix is committed locally as `4d70eba` on branch `work`.
+- Static validation passed: delimiter balance for `CurioNavHost.kt` and `TopicRevealScreen.kt`; `git diff --check` clean.
+- Local Gradle build/test/lint commands were intentionally not run because root `AGENTS.md` forbids Android compile/build/lint/test commands in this environment.
+- User should verify on-device that Topic Reveal now renders the hero/content and that the bottom dock still appears visually transparent over the category wash.
