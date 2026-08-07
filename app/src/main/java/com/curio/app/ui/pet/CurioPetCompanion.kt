@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -58,12 +59,14 @@ fun PetSpeechBubble(
     ) {
         // The tail diamond always sits on the PET's side (the bubble's
         // edge nearest the sprite): before the bubble when tailOnLeft,
-        // after it otherwise. Negative padding lets the diamond straddle
-        // the bubble's edge so it reads as a tail pointing at the pet
-        // (a 45°-rotated square is symmetric, so only the SIDE matters).
+        // after it otherwise. The diamond is shifted with Modifier.offset
+        // (a translation, which may be negative) so it straddles the
+        // bubble's edge and reads as a tail pointing at the pet — padding
+        // cannot be negative, so it is never used for this. A 45°-rotated
+        // square is symmetric, so only the SIDE matters.
         if (tailOnLeft) {
-            Spacer(Modifier.width(6.dp))
-            Box(Modifier.padding(end = -4.dp)) {
+            Spacer(Modifier.width(2.dp))
+            Box(Modifier.offset(x = 4.dp)) {
                 TailDiamond(bubbleColor)
             }
         }
@@ -85,10 +88,10 @@ fun PetSpeechBubble(
             )
         }
         if (!tailOnLeft) {
-            Box(Modifier.padding(start = -4.dp)) {
+            Box(Modifier.offset(x = -4.dp)) {
                 TailDiamond(bubbleColor)
             }
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(2.dp))
         }
     }
 }
