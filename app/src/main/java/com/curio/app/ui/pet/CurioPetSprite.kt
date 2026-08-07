@@ -113,7 +113,8 @@ fun CurioPetSprite(
     val bobWave = sin(bobPhase * 2f * PI.toFloat())
     val bobDp = bobWave * if (sleeping) 1.2f else 2.2f
     val breatheScale = 1f + (if (sleeping) 0.02f else 0f) * sin(breathePhase * 2f * PI.toFloat())
-    val hopJump = if (hop.value > 0f) -hop.value * 10.dp * (1f - hop.value * 0.35f) else 0.dp
+    // Dp * Float only — this Compose version has no Float * Dp operator.
+    val hopJump = if (hop.value > 0f) 10.dp * (-hop.value) * (1f - hop.value * 0.35f) else 0.dp
     val hopSquash = sin(hop.value * PI.toFloat())
     val wiggle = if (excited) sin(bobPhase * 6f * PI.toFloat()) * 3f else 0f
 

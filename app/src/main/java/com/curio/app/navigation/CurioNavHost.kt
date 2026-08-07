@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -165,11 +164,17 @@ private fun RevealBottomBarPlaceholder(
     val reserve = if (bottomBarHeightPx > 0) {
         with(density) { bottomBarHeightPx.toDp() }
     } else null
+    // The fallback (no measured height yet — e.g. a deep link straight into
+    // Reveal) must reserve the SAME 80dp total as the measured bar AND the
+    // reveal dock (which is height(80.dp) with the nav-bar inset consumed
+    // INSIDE), so the placeholder → dock swap never changes Scaffold
+    // innerPadding mid-transition (an innerPadding change re-lays out the
+    // SharedTransitionLayout and freezes the reveal morph — v8.5).
     Spacer(
         modifier = Modifier.fillMaxWidth().then(
             if (reserve != null) Modifier.height(reserve)
             else Modifier
-                .heightIn(min = 80.dp)
+                .height(80.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars)
         )
     )

@@ -1,71 +1,72 @@
 # Prompt — FieldMind/Curio request log
 
-## Active request: Curio pet + Quests redesign (spec v8.5)
+## Active request: REAL cause of the blank Topic Reveal + CI compile fixes
 
-### What was asked
-Create a pixelated cute unique pet for the app with its AI and animations, plus a
-full Quests redesign (past spec: daily-first IA, category passport, First Journey
-tutorial, reward polish). User decisions (ask_user): **whole spec, phased** ·
-pet **toggleable, default ON** · placement **Quests hero + Home corner** ·
-**spark-spirit** design approved · **local rule-based AI** (no server).
+### Symptom (user-confirmed)
+Topic Reveal shows ONLY the two dock buttons ("Already watched" / "Start
+exploring") — everything else on the page is invisible. User confirmed it was
+STILL blank after the previous containerColor revert (4d70eba). User also
+reported CI compile failures on the pet commit (5f6e41c).
 
-### Delivered this pass (Phases E, A, C + Phase D core)
+### THE REAL ROOT CAUSE (found this pass)
+The containerColor theory from 4d70eba was WRONG (or at least incomplete). The
+actual trigger is a **dock height mismatch**:
 
-**Phase E — the pet (headline ask):**
-- `data/CurioPet.kt` — the pet's BRAIN: 6 growth stages (Hatchling Spark → Curio
-  Sage) derived from existing CurioQuests XP/saves/explored-lanes; 5 moods
-  (PROUD/EXCITED/HAPPY/CURIOUS/SLEEPY) from activity timestamps (never shaming);
-  rule-based dialogue engine ("local AI") — one passive sentence per screen visit,
-  one-shot bubble cooldown, tap check-in dialog (mood + next quest + growth hint).
-- `ui/pet/CurioPetSprite.kt` — the pixel sprite, rendered 100% in Compose (16×16
-  pixel-grid Canvas — no bitmaps): round cream spark-spirit, gold star-tipped
-  antenna, category-accent scarf, big eyes/cheeks. Animations: idle bob, periodic
-  blink, sleep breathing + floating Z's, excited wiggle + sparkle eyes, one-shot
-  celebration hop (keyed), stage-gated accessories (sprout leaf / satchel / book /
-  aura / gold halo), theme-aware ink (light twin in dark). Param named
-  `spriteSize` (not `size`) per project compile-safety rule #7.
-- `ui/pet/CurioPetCompanion.kt` — PetSpeechBubble (readable Text, one-liner) +
-  CurioPetHeroCard (pet in an XP ring, level + growth line, XP bar, next-up quest,
-  tap → check-in dialog with "Go to quest").
-- `AppPreferences.petEnabledState` (default ON) + **Appearance settings toggle**
-  "Curio pet" (off = classic layout, pet fully hidden).
-- CurioQuests XP hooks feed the pet's mood timestamps (level-up → PROUD).
+- The reveal dock lives in the Scaffold bottomBar slot — OUTSIDE
+  `SharedTransitionLayout`, which is why the two buttons render while the whole
+  page (inside the layout) is invisible.
+- The NavHost reserves the bottom bar's measured height (80dp — M3 NavigationBar
+  consumes the nav-bar inset inside its 80dp min height) via an invisible
+  placeholder so Scaffold innerPadding stays CONSTANT across the Spin→Reveal
+  shared-element morph.
+- af10023 changed the dock from the working fixed `height(80.dp)` (as in
+  untitled-chat) to `heightIn(min = 80.dp) + windowInsetsPadding(navigationBars)`
+  = 80dp + nav inset (~104dp). When the reveal's dock swapped in for the
+  placeholder MID-transition, innerPadding grew by the inset →
+  `SharedTransitionLayout` re-laid out mid-morph → the shared-element animation
+  froze → the entire reveal page stayed invisible forever.
+- 4d70eba removed the containerColor change but KEPT the height mismatch → still
+  frozen. This pass fixes the height.
 
-**Phase A — Quests IA:**
-- Quests screen now: **pet hero (or classic level card when toggled off) → daily
-  quests FIRST → recommended next quest card (retitled "RECOMMENDED NEXT") →
-  category passport → quest paths (chains COLLAPSED by default, expandable) →
-  badge shelf** (spec §3 + §4.1).
-- Daily claim → pet celebration hop + confirm haptic (Phase D core).
+### Fix (implemented)
+1. **TopicRevealScreen.RevealActionDock** — `height(80.dp).windowInsetsPadding(
+   navigationBars)`: fixed 80dp TOTAL with the nav-bar inset consumed INSIDE
+   (height first, inset as internal padding — same as M3 NavigationBar), so the
+   dock exactly matches the reserved placeholder/real bar → innerPadding NEVER
+   changes → the morph completes and the page renders. Buttons still clear the
+   gesture bar; compact button padding (vertical 10dp) so they fit the
+   inset-aware content area.
+2. **CurioNavHost.RevealBottomBarPlaceholder** — fallback (unmeasured) branch
+   also `height(80.dp).windowInsetsPadding(...)` so placeholder → dock swap is
+   height-constant in every path (deep-link straight into Reveal included).
+3. Removed now-unused `heightIn` imports from both files.
 
-**Phase C — category passport:**
-- `data/CurioPassport.kt` — per-category spins/reveals/explores/saves counters +
-  last-explored; stamps UNSEEN/PEEKED/EXPLORED/MASTERED; `leastEngaged()` for
-  discovery; own SharedPreferences file (needs CurioBackupManager listing).
-- Hooks at the real action sites: SpinScreen settle (noteSpin), TopicRevealScreen
-  open (noteReveal), CurioQuests.onExplore (noteExplore), SaveCaptureScreen new
-  save (noteSave).
-- Passport stamps UI on Quests: 2-row grid, tappable → spins that lane
-  (`CurioRoutes.spinWithCategory`); mastered = sage, unseen = enticing accent.
+Everything else the user asked for is preserved: transparent buttons with
+category ink, Already/Undo left + Start right, category undo labels,
+wash-backed dock (no cream flash), constant Scaffold containerColor.
 
-**Home pet corner:** small pet at the head of the "TODAY'S QUEST" summary
-(QuestShuffleCard `pet` param), same moods, never tappable (spec §10.3).
-
-### Not yet done (later phases)
-- **Phase B** — deep "First Journey" coach-bubble tutorial with real-action waits
-  through reveal→explore→capture→save. The existing QuestGuide already walks real
-  screens and waits on the real spin; the 10-step loop tour is a follow-up.
-- **Phase D extras** — XP-chip flight animation + full level-up celebration overlay
-  (pet hop + proud mood + haptic already in).
-- Passport + pet prefs registered in `CurioBackupManager` (curio_pet +
-  curio_passport) so stamps/pet state ship with the user's backup.
+### CI compile fixes (pet commit 5f6e41c — was RED)
+- CurioPassport.allProgress: `associateWith` produced Map<CurioCategory,…>;
+  now `associate { it.id to progress(...) }` → Map<CategoryId,…>.
+- QuestsScreen: added `import com.curio.app.ui.theme.themedAccent` (cleared the
+  unresolved-reference cascade at 126/927 + the bogus Color&Map.Entry errors at
+  948–955 which were compiler recovery from the error type).
+- CurioPetSprite: `-hop.value * 10.dp * (...)` → `10.dp * (-hop.value) * (...)` —
+  this Compose has no Float×Dp operator; Dp×Float is fine.
 
 ### Validation
-- Brace balance equal on all 12 touched files (script's "UNBALANCED" label is a
-  quirk — pristine files print the same with equal counts), `git diff --check`
-  clean, every added import used, `spriteSize` rename applied at all call sites.
+- Brace balance equal on all touched files, `git diff --check` clean, no
+  Float×Dp left, `heightIn` imports removed cleanly, Kotlin 2.3.21 (Stage.entries
+  OK). Code review passed with 2 notes: (a) on 3-button-nav the 80dp total leaves
+  ~32dp content — compacted button padding mitigates; (b) hardcoded 80dp vs the
+  measured placeholder assume the M3 bar is 80dp — consistent with the NavHost's
+  own documented assumption.
 - No Gradle builds in this environment (project rule) — CI validates on push.
 
 ### Next
-- Code review, commit + push to Alpha (updates PR #3).
-- User builds/tests; then Phase B + Phase D extras as the next pass.
+- Commit + push to Alpha (updates PR #3), then USER MUST REBUILD from the latest
+  Alpha (CI was red on 5f6e41c, so any build they tested before this push was
+  either 4d70eba or older). If the blank persists on a FRESH build, the remaining
+  suspects are the hero key(resolved?.id) remount re-registering the shared
+  element mid-morph and device-specific bar heights (thread bottomBarHeightPx
+  into the dock).

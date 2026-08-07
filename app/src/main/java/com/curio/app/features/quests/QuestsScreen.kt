@@ -75,6 +75,7 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.themedAccent
 
 /**
  * Quests & levels — Curio's gamification home (v8.0).

@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -962,16 +961,26 @@ private fun RevealActionDock(
     // on the page tint exactly like a transparent dock — but unlike true
     // transparency, the wash also covers the nav-bar strip below the
     // buttons, so the Scaffold's cream background can never show through as
-    // a band behind the dock. The nav-bar inset is consumed inside so the
-    // gesture bar never overlaps the buttons. (v8.5 — the Scaffold
-    // containerColor must stay constant across the route transition; the
-    // wash lives HERE instead.)
+    // a band behind the dock. (v8.5 — the Scaffold containerColor must stay
+    // constant across the route transition; the wash lives HERE instead.)
+    // v8.5 regression fix (THE morph freeze): the dock must reserve EXACTLY
+    // the same total height as the bottom bar it replaces (80dp — M3's
+    // NavigationBar consumes the nav-bar inset inside its 80dp min height,
+    // and the NavHost's morph placeholder reserves that measured height). A
+    // taller dock (80dp + inset via heightIn) changed Scaffold innerPadding
+    // the moment this dock swapped in for the placeholder mid-transition,
+    // re-laying out the SharedTransitionLayout and freezing the shared-
+    // element morph — the whole reveal page stayed invisible except this
+    // dock, which lives outside the layout. The nav-bar inset is still
+    // consumed, but INSIDE the fixed 80dp (height first, then the inset as
+    // internal padding), so the buttons clear the gesture bar without
+    // growing the dock past the reserved slot.
     Surface(
         color = cat.categoryBackgroundWash(),
         tonalElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 80.dp)
+            .height(80.dp)
             .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         Row(
@@ -1022,7 +1031,10 @@ private fun RevealStartButton(
             disabledContainerColor = Color.Transparent,
             disabledContentColor = ink.copy(alpha = 0.40f)
         ),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        // Compact vertical padding: the dock is a fixed 80dp with the nav-bar
+        // inset consumed inside, so on inset-heavy devices the content area is
+        // ~50dp — the buttons must fit without clipping the gesture bar.
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
@@ -1062,7 +1074,8 @@ private fun RevealAlreadyButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 15.dp)
+            // Compact vertical padding — see RevealStartButton's comment.
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             CurioIcon(
                 name = if (isDone) CurioIcons.Close else CurioIcons.History,

@@ -124,7 +124,7 @@ object CurioPassport {
 
     /** All visible categories' counters (keyed by category id). */
     fun allProgress(context: Context): Map<CategoryId, CategoryProgress> =
-        CurioCategories.visible.associateWith { progress(context, it.id) }
+        CurioCategories.visible.associate { it.id to progress(context, it.id) }
 
     /** Number of lanes the user has at least explored (drives discovery). */
     fun exploredLaneCount(context: Context): Int =
