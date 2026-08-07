@@ -1,7 +1,6 @@
 package com.curio.app.ui.pet
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 
@@ -127,13 +128,14 @@ fun CurioPetHeroCard(
 ) {
     val context = LocalContext.current
     val lanes = CurioQuests.categoriesState
-    val mood = CurioPet.mood(context, lanes)
     val stage = CurioPet.currentStage()
     val xp = CurioQuests.xpState
     val level = CurioQuests.levelForXp(xp)
     val (progress, _) = CurioQuests.xpProgress(xp)
     val current = CurioQuests.currentQuest()
     var showDialog by remember { mutableStateOf(false) }
+    // v8.8 — bumps the pet's hop when it wakes from the flower bed.
+    var wakeCelebrate by remember { mutableIntStateOf(0) }
 
     Surface(
         shape = RoundedCornerShape(26.dp),
@@ -146,7 +148,10 @@ fun CurioPetHeroCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Pet inside a soft XP ring.
+                // The pet's flower bed inside a soft XP ring (v8.8) — the pet
+                // naps here when the app opens and stays asleep until tapped.
+                // Once awake, the bed sits vacant while the pet floats around
+                // the app.
                 Box(
                     modifier = Modifier.size(96.dp),
                     contentAlignment = Alignment.Center
@@ -163,20 +168,30 @@ fun CurioPetHeroCard(
                             .size(80.dp)
                             .clip(RoundedCornerShape(26.dp))
                             .background(
-                                if (mood == CurioPet.Mood.SLEEPY)
+                                if (!CurioPet.awake)
                                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                 else accent.copy(alpha = 0.14f)
-                            )
-                            .clickable { showDialog = true },
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
-                        CurioPetSprite(
-                            stage = stage,
-                            mood = mood,
+                        CurioFlowerBed(
+                            petInside = !CurioPet.awake || !AppPreferences.floatingPetEnabledState,
+                            sleeping = !CurioPet.awake,
                             accent = accent,
-                            spriteSize = 64.dp,
-                            celebrateKey = celebrateKey,
-                            contentDescription = "${stage.displayName} — tap to check in"
+                            bedSize = 74.dp,
+                            celebrateKey = celebrateKey + wakeCelebrate,
+                            onTap = {
+                                if (!CurioPet.awake) {
+                                    CurioPet.wake()
+                                    wakeCelebrate++
+                                } else {
+                                    showDialog = true
+                                }
+                            },
+                            contentDescription = if (!CurioPet.awake)
+                                "${stage.displayName} asleep in its flower bed — tap to wake"
+                            else
+                                "${stage.displayName}'s flower bed — tap to check in"
                         )
                     }
                 }
@@ -184,7 +199,9 @@ fun CurioPetHeroCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    if (bubbleText != null) {
+                    // The pet only chats when it's awake — a sleeping pet
+                    // stays quiet in its bed.
+                    if (bubbleText != null && CurioPet.awake) {
                         PetSpeechBubble(text = bubbleText, tailOnLeft = true)
                     }
                     Text(

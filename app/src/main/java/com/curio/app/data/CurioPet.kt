@@ -1,6 +1,9 @@
 package com.curio.app.data
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 /**
  * The Curio pet — a tiny pixelated "spark-spirit" companion (spec §10).
@@ -87,6 +90,22 @@ object CurioPet {
         }
     }
 
+    // ── Wakefulness (v8.8) — the pet naps in its flower bed when the app
+    //    opens and stays asleep until tapped. In-memory per process, so a
+    //    fresh launch always finds it snoozing at home (spec §10.3).
+    var awake by mutableStateOf(false)
+        private set
+
+    /** Wake the pet (tap on the bed). The floating companion appears. */
+    fun wake() {
+        awake = true
+    }
+
+    /** Send the pet back to bed after a long idle — the bed shows it asleep. */
+    fun settleToSleep() {
+        awake = false
+    }
+
     // ── Moods (spec §10.5) — derived from recent activity, never shaming ──
     enum class Mood { PROUD, EXCITED, HAPPY, CURIOUS, SLEEPY }
 
@@ -112,17 +131,54 @@ object CurioPet {
     // ── Rule-based dialogue ("local AI", spec §10.6/10.7) ──────────────
     // One sentence for passive bubbles; no nagging; never interrupts input.
 
+    // ── Passive dialogue (v8.8 — a little variety per mood) ────────────
+    // `__LANE__` is swapped for the least-explored lane's name at show time.
+    private val excitedLines = listOf(
+        "Ooh! A fresh lane to wander!",
+        "The deck surprised us both!",
+        "Wheee — new ground!"
+    )
+    private val happyLines = listOf(
+        "Nice one — XP banked. Keep going?",
+        "That was fun. More?",
+        "Curiosity looks good on you."
+    )
+    private val curiousLines = listOf(
+        "We haven't tried __LANE__ yet — want a new stamp?",
+        "I wonder what __LANE__ hides…",
+        "Pssst — __LANE__ is calling."
+    )
+    private val sleepyLines = listOf(
+        "I'll keep your seat warm. Come spin when you're ready.",
+        "Yawn… the deck can wait a moment.",
+        "Soft blanket, warm lamp… I'm ready when you are."
+    )
+
     /** A passive bubble line for the current [mood]. */
     fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String = when (mood) {
-        Mood.PROUD -> "Level ${CurioQuests.levelForXp(CurioQuests.xpState)} — I grew a little!"
-        Mood.EXCITED -> leastExploredLane(lanes)?.let { "A fresh lane to wander!" }
-            ?: "The deck surprised us both!"
-        Mood.HAPPY -> "Nice one — XP banked. Keep going?"
-        Mood.CURIOUS -> leastExploredLane(lanes)?.let {
-            "We haven't tried ${it.displayName} yet — want a new stamp?"
-        } ?: "Spin something new today?"
-        Mood.SLEEPY -> "I'll keep your seat warm. Come spin when you're ready."
+        // Inlined so the level reads live, not baked at first access.
+        Mood.PROUD -> listOf(
+            "Level ${CurioQuests.levelForXp(CurioQuests.xpState)} — I grew a little!",
+            "Shiny! We leveled up together.",
+            "Do you feel that? That's growth!"
+        ).random()
+        Mood.EXCITED -> excitedLines.random()
+        Mood.HAPPY -> happyLines.random()
+        Mood.CURIOUS -> {
+            val lane = leastExploredLane(lanes)
+            if (lane != null) {
+                curiousLines.map { it.replace("__LANE__", lane.displayName) }.random()
+            } else {
+                "Spin something new today?"
+            }
+        }
+        Mood.SLEEPY -> sleepyLines.random()
     }
+
+    /** A short burst when the user touches/pets the floating pet. */
+    fun touchReaction(): String = listOf(
+        "Hehe!", "Boop!", "Wheee!", "Ooh!", "Again, again!", "That tickles!"
+    ).random()
 
     /**
      * One bubble per screen visit: returns a line the first time [screen]

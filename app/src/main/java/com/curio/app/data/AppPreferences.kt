@@ -110,6 +110,7 @@ object AppPreferences {
     // code change (per the experiment rules, the toggle is removed once the
     // companion design is decided).
     private const val KEY_PET_ENABLED = "pet_enabled"
+    private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
     // v8.2 — the quest tour's one-time offer: once the user has taken OR
     // declined it ("No, thanks" / dismissing the prompt), the offer never
     // reappears and the first quest navigates normally.
@@ -311,6 +312,11 @@ object AppPreferences {
      */
     var petEnabledState by mutableStateOf(true)
         private set
+    // v8.8 — whether the pet floats freely on every screen (draggable +
+    // wanders). Independent of [petEnabledState]: the pet layer can be on
+    // while the floating companion is off (the pet then stays in its bed).
+    var floatingPetEnabledState by mutableStateOf(true)
+        private set
 
     // v8.2 — whether the one-time tour offer has been shown (taken or
     // declined). Suppresses the offer on the Quests page so it never nags.
@@ -389,6 +395,7 @@ object AppPreferences {
         guideEnabledState = isGuideEnabled(context)
         guideTourOfferedState = isGuideTourOffered(context)
         petEnabledState = isPetEnabled(context)
+        floatingPetEnabledState = isFloatingPetEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
         savedQuotesState = getSavedQuotes(context)
         topicSentimentsState = getTopicSentiments(context)
@@ -991,6 +998,15 @@ object AppPreferences {
     fun setPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PET_ENABLED, enabled).apply()
         petEnabledState = enabled
+    }
+
+    // v8.8 — floating pet toggle (default ON; see the Appearance settings).
+    fun isFloatingPetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_FLOATING_PET_ENABLED, true)
+
+    fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
+        floatingPetEnabledState = enabled
     }
 
     // ── Daily reminder ───────────────────────────────────────────────

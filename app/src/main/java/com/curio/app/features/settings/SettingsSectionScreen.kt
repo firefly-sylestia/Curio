@@ -195,6 +195,18 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setPetEnabled(context, it)
             }
         }
+        // v8.8 — the floating pet companion: wanders on every screen, can be
+        // dragged anywhere, and naps back into its flower bed. Default ON;
+        // turning it off keeps the pet at home in the bed.
+        SettingsRowPulse(highlightKey == "appearance-floating-pet") {
+            CompactSwitchRow(
+                "Floating pet",
+                "Wanders, follows your finger, naps in its flower bed",
+                AppPreferences.floatingPetEnabledState
+            ) {
+                AppPreferences.setFloatingPetEnabled(context, it)
+            }
+        }
     }
 }
 

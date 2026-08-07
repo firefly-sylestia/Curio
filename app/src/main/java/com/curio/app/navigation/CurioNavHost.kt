@@ -60,6 +60,7 @@ import androidx.navigation.navArgument
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioPassport
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.QuestGuide
@@ -105,7 +106,9 @@ import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.GuidePointer
 import com.curio.app.ui.components.QuestGuideToast
+import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.themedAccent
 
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
@@ -806,6 +809,16 @@ fun CurioNavHost(
         }
     }
     }
+    // v8.8 — the floating Curio pet: a global overlay drawn above the whole
+    // Scaffold (over the bottom bar too). Renders only while the pet layer,
+    // the floating toggle and the pet's awake state are on; it wanders,
+    // can be dragged anywhere, and naps back into its bed after a long idle.
+    // Its scarf wears the recommended lane's accent.
+    val floatingPetAccent = remember {
+        CurioPassport.leastEngaged(context)?.themedAccent()
+            ?: CurioCategories.byId(CategoryId.WILDCARD).themedAccent()
+    }
+    CurioFloatingPet(accent = floatingPetAccent)
 
     // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"
     // overlay were replaced in v8.2: the tour is offered ONCE on the Quests

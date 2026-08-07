@@ -77,7 +77,6 @@ import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
-import com.curio.app.data.CurioQuests
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -100,12 +99,12 @@ import com.curio.app.features.recent.RecentFeedItem
 import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
-import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.pet.CurioFlowerBed
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -197,17 +196,19 @@ fun HomeScreen(navController: NavController) {
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
     val streakDays = StreakTracker.getStreak(context)
     val reminderEnabled = AppPreferences.reminderEnabledState
-    // v8.5 — Home pet corner presence (spec §10.3): a small pet watches the
-    // deck next to the daily quest summary when the pet is enabled. It
-    // shares the Quests hero's moods but stays quiet here (the hero owns
-    // the dialogue) and is never tappable — it just keeps you company.
+    // v8.8 — the pet's flower bed at Home (spec §10.3): the pet naps here
+    // when the app opens and stays asleep until tapped; once awake the bed
+    // sits vacant while the pet floats around the app.
     val homePetSprite: (@Composable () -> Unit)? = if (AppPreferences.petEnabledState) {
         {
-            CurioPetSprite(
-                stage = CurioPet.currentStage(),
-                mood = CurioPet.mood(context, CurioQuests.categoriesState),
+            CurioFlowerBed(
+                petInside = !CurioPet.awake || !AppPreferences.floatingPetEnabledState,
+                sleeping = !CurioPet.awake,
                 accent = homeRoseAccent(),
-                spriteSize = 42.dp
+                bedSize = 52.dp,
+                onTap = { CurioPet.wake() },
+                contentDescription = if (!CurioPet.awake)
+                    "Curio asleep in its flower bed — tap to wake" else "Curio's flower bed"
             )
         }
     } else null
