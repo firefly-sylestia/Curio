@@ -44,6 +44,11 @@ object CurioPassport {
                 saves > 0 -> Stamp.MASTERED
                 explores > 0 -> Stamp.EXPLORED
                 reveals > 0 -> Stamp.PEEKED
+                // v8.13 — a spin counts as a peek. Without this the WILDCARD
+                // lane (whose reveals/explores/saves always resolve to a real
+                // category, so it ONLY ever accumulates spins) would show
+                // "New · spin!" on the passport forever.
+                spins > 0 -> Stamp.PEEKED
                 else -> Stamp.UNSEEN
             }
     }

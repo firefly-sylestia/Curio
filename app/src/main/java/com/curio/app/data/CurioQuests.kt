@@ -607,6 +607,18 @@ object CurioQuests {
         addXp(context, 3)
     }
 
+    /**
+     * v8.13 — awards XP for an action WITHOUT touching quest chains, dailies
+     * or the lifetime counters (used by the silent Explore buttons: browsing
+     * still earns the tiny exploration XP, but never inflates quest
+     * progress, recents or the done-mark). XP feeds levels + the pet's mood
+     * timestamps exactly like every other award.
+     */
+    fun awardXpOnly(context: Context, amount: Int) {
+        if (amount <= 0) return
+        addXp(context, amount)
+    }
+
     /** A topic was liked (AppPreferences.setTopicSentiment). */
     fun onTopicLiked(context: Context) {
         ensureDaily(context)

@@ -1,58 +1,77 @@
 # Prompt — Curio request log
 
-## Active request: v8.11 — smarter, more playful, natural pet
+## Active request: v8.13 — smart pet + real badges + silent-explore smarts (uncommitted)
 
-User asked (after v8.10 polish): increase the reaction texts when interacting,
-increase the animations, make it show a reaction for a second then go idle,
-make it smart and playful — a natural pet that sometimes reacts to touch and
-wants to play — and make its movement smart too. ("Full proper research and
-do it" — grounded in virtual-pet behavior research: escalating touch tiers,
-anticipation signals, playful darts, unprompted play initiation.)
+Two stacked batches, still in the working tree (NOT pushed — user wants to be
+asked before pushing):
 
-### Delivered (commit pending)
-- **`CurioPet` brain**: `touchReaction(tier)` with escalating pools — tier 1
-  soft boops ("Boop!", "You found me!"…), tier 2 playful ("Zoomies!",
-  "Tag — you're it!"…), tier 3+ zoomies ("Wheeee—!", "Spinny!"…); new
-  `playInitiation()` lines for when the pet starts a game itself.
-- **`CurioPetSprite`**: new `playKey` + `spinKey` one-shots — a play-bow
-  (dips down, springs up with a bounce + squeeze) and a full 360° twirl
-  (rotation + scale pulse); mid-play face (STAR eyes, WIDE open smile) and a
-  faster tail wag. Dragged-still-wins the startled face if grabbed mid-play.
-- **`CurioFloatingPet`**: touch escalation — rapid taps (within 1.6s) push
-  boop → play-bow → zoomies spin with matching lines + hearts; after a tap
-  the pet queues a playful dart to a nearby spot that the wander loop answers
-  within ~200ms (fast dash); ~12% of wander cycles the pet initiates play on
-  its own (bow + "Catch me!" + zoom); wander y is downward-biased to stay
-  grounded, with think pauses before/after walks; reaction bubble shows for
-  1.5s then it settles back to idle; drag no longer busy-spins the loop
-  (300ms pause), darts aren't queued while watching the Spin deck, long-press
-  resets the tap streak before going home.
+**A. v8.12 (pending, from the previous request)**
+- Silent "Explore" buttons on Topic Database rows + browse-mode reveal
+  (`openSilentExplore` in ExploreSession.kt) — pure out-of-app search, no
+  quests/XP/recents/done-mark/timer.
+- Tutorial: capture step's pill lifted above the Save button; wait steps
+  (Explore, Capture, Save) become skippable ("Skip for now"); overlay moved
+  to a LOWER position + skip action wired through QuestGuideToast/NavHost.
+- Pet: EXCITED/PROUD are one-shot bursts tied to the hop (no more 60-90s
+  stuck reactions); personality (CUDDLY/BOUNCY/EXPLORER/SPARKY) built from
+  persisted boop/play/explore counts feeding `playfulBias`.
+
+**B. v8.13 (this request)**
+1. **CI fix** — CurioPetSprite.kt had `val auraColor = … else accent` glued
+   to `Box(` (broken merge) — restored the newline; that single glitch caused
+   the whole cascade of unresolved-reference errors.
+2. **Smarter pet** — `CurioPet.leastExploredLane(context, explored)` now also
+   requires the passport stamp to be UNSEEN: a lane the user peeked/explored/
+   saved ANYWHERE (including via the silent buttons) is never called
+   "haven't tried". `openSilentExplore` now feeds `CurioPassport.noteExplore`
+   (engagement awareness only — zero quest progress/XP), which also stops the
+   "New lane" discovery daily from suggesting already-tried lanes.
+3. **Badge shelf upgrade** — BadgeTile is now a round MEDAL: per-chain color
+   gradient + inner ring + gold check when earned; every stage wears its own
+   glyph (`badgeGlyph`, 48 stage ids + QuestKind fallback, all proven in the
+   bundled font); earned badges show the badge IN FULL ("Earned · +XP", no
+   progress bar, no task text); locked badges are silhouettes with progress.
+4. **User follow-up (asked before push)** — silent explores now ALSO award
+   the tiny exploration XP (`CurioQuests.awardXpOnly(context, 5)` — XP +
+   pet mood timestamps only, chains/dailies/recents/done-mark untouched), and
+   the passport stamp now treats a SPIN as a peek (`spins > 0 -> PEEKED`), so
+   the WILDCARD lane (which only ever accumulates spins — its reveals/
+   explores/saves resolve to real categories) finally shows progress on the
+   passport instead of "New · spin!" forever.
+4. **Pet polish** — hearts moved OUT of the pet box into a sibling
+   `HeartsOverlay` above the head (never covers the face; clamped so it can't
+   fly off-screen at the top, lifted clear of the speech bubble); eyes moved
+   up one row + gentler squash (bowDip 4dp, bowSquash 0.045, spinPulse 0.03)
+   so the eyes/mouth never join each other or the scarf; CAT EARS added to
+   the 16×16 grid (rows 1-2); blush is now celebration-only (excited/proud/
+   bouncy/play/spin — NOT plain idle happy); two new moods — FOCUSED (capture
+   screen: quiet, encouraging) and BOUNCY (within 5 min of a play session);
+   `CurioPet.spinning` + `setSpinning()` hooked around the SpinScreen shuffle
+   → the pet cheers the reeling deck ("Go, go, go!") with a star-eyed wide
+   smile + wiggle.
 
 ### Validation
-- String-aware balance ALL OK; `git diff --check` clean; `touchReaction`
-  caller updated (sole caller); sprite params defaulted so the bed/dialog/
-  banner callers are unaffected.
-- Code review applied: face-override order (dragged wins), no dart while
-  watching, streak reset on long-press. No compile risks flagged (local
-  suspend walkTo is valid Kotlin; Dp/Float math type-correct).
-- CI validates the real build on push.
+- Balance ALL OK on all touched files; `git diff --check` clean.
+- Code review applied: blush excluded from idle-HAPPY, hearts overlay clamped
+  + lifted, capture routePrefix verified (`substringBefore("/")` → "capture").
+- User approved the commit + push after being asked.
 
 ---
 
 ## History (committed)
 
+### v8.11 — playful pet: escalating touch, play-bow + spin, self-initiated games (`fb98b49`)
+- `CurioPet.touchReaction(tier)` escalating pools (boop → playful → zoomies);
+  `playInitiation()` lines; sprite playKey/spinKey one-shots (bow + 360°
+  twirl), mid-play face + faster tail wag; floating pet tap-streak escalation,
+  playful darts, ~12% self-started games from `playfulBias`, downward-biased
+  wander with think pauses, 1.5s reaction window.
+
 ### v8.10 — pet polish: one coral theme, happy smile, chubby, send home, no duplicate pet (`eb5820e`)
-- ONE fixed color everywhere — sprite scarf/aura always the Curio light-theme
-  brand coral (no category pastels, no dark-mode twin); accent params removed
-  from Sprite/FlowerBed/FloatingPet/HeroCard + NavHost accent computation.
-- Happy face: the smile mouth was upside down (a frown) — flipped; excited
-  mouth is now a wide open smile. Chubby body rows widened.
-- Removed the round glow disc behind the floating pet + the round XP ring
-  around the hero bed.
-- Long-press the floater fades it out and sits it in its bed (`atHome` +
-  `goHome`/`comeOut`); beds show the pet sitting until tapped to come out.
-- `CurioPet.dialogOpen` hides the floater while the check-in dialog is open —
-  never two pets on screen.
+- ONE fixed color everywhere (no category pastels, no dark-mode twin); smile
+  flipped from frown; chubby body; glow disc + XP ring removed; long-press
+  sends it home to sit in the bed; `dialogOpen` hides the floater during
+  dialogs — never two pets on screen.
 
 ### v8.10 (quest) — discovery daily completes on spinning the target lane (`fe9c336`)
 - `CurioQuests.onSpin(context, categoryId)`; spinning the passport's

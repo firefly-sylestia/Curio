@@ -45,6 +45,9 @@ import kotlin.random.Random
 private val FLOAT_SIZE = 72.dp
 private val EDGE_MARGIN = 14.dp
 private val AUTO_NAP_AFTER_MS = 8 * 60_000L
+// v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
+private val HEARTS_W = 150.dp
+private val HEARTS_H = 96.dp
 
 /**
  * The floating Curio pet (v8.8) — a global overlay that lives on top of
@@ -140,6 +143,10 @@ fun CurioFloatingPet(
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
         val watching = routePrefix?.startsWith("spin") == true
+        // v8.13 — the pet knows when the user is writing on the capture
+        // screen and wears its quiet FOCUSED mood there.
+        val captureScreen = routePrefix?.startsWith("capture") == true
+        val screenHint = if (captureScreen) "capture" else null
         var seenEvents by remember { mutableIntStateOf(CurioPet.eventCount) }
 
         // Entrance hop.
@@ -196,6 +203,7 @@ fun CurioFloatingPet(
                     val target = playDartTarget!!
                     playDartTarget = null
                     // Playful dash to where the tap happened — quick and keen.
+                    CurioPet.notePlay(context)
                     walkTo(target, stepMs = 14, steps = 40)
                     continue
                 }
@@ -206,9 +214,12 @@ fun CurioFloatingPet(
                     continue
                 }
                 // v8.11 — the pet sometimes starts a game on its own: a play
-                // bow + a "catch me!" line, then it zooms off.
-                if (Random.nextFloat() < 0.12f) {
+                // bow + a "catch me!" line, then it zooms off. v8.12 — how
+                // often it does this comes from its GROWING PERSONALITY
+                // (bouncy pets play a lot, sparky ones are shy).
+                if (Random.nextFloat() < CurioPet.playfulBias(context)) {
                     playKey++
+                    CurioPet.notePlay(context)
                     reaction = CurioPet.playInitiation()
                     reactionKey++
                     lastTouch = System.currentTimeMillis()
@@ -261,7 +272,7 @@ fun CurioFloatingPet(
         LaunchedEffect(Unit) {
             while (true) {
                 delay(1200)
-                val m = CurioPet.mood(context, CurioQuests.categoriesState)
+                val m = CurioPet.mood(context, CurioQuests.categoriesState, screenHint)
                 if (lastMood != m) {
                     lastMood = m
                     if (m == CurioPet.Mood.EXCITED || m == CurioPet.Mood.PROUD) {
@@ -273,6 +284,17 @@ fun CurioFloatingPet(
                         reactionKey++
                     }
                 }
+            }
+        }
+
+        // ── Spin cheer (v8.13) — while the deck is reeling, the pet cheers
+        //    it on with a line + a little bounce (once per spin).
+        LaunchedEffect(CurioPet.spinning) {
+            if (CurioPet.spinning && autoWander) {
+                celebrateKey++
+                reaction = CurioPet.spinCheer()
+                reactionKey++
+                lastTouch = System.currentTimeMillis()
             }
         }
 
@@ -351,6 +373,8 @@ fun CurioFloatingPet(
                     detectTapGestures(
                         onTap = {
                             lastTouch = System.currentTimeMillis()
+                            // Every pet feeds the persona (v8.12).
+                            CurioPet.noteTouch(context)
                             // Escalation: quick repeated taps push the pet
                             // from a boop to a play-bow to zoomies (v8.11).
                             val now = System.currentTimeMillis()
@@ -392,7 +416,7 @@ fun CurioFloatingPet(
         ) {
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
-                mood = CurioPet.mood(context, CurioQuests.categoriesState),
+                mood = CurioPet.mood(context, CurioQuests.categoriesState, screenHint),
                 spriteSize = FLOAT_SIZE * 0.92f,
                 celebrateKey = celebrateKey,
                 squishKey = squishKey,
@@ -403,11 +427,29 @@ fun CurioFloatingPet(
                 facing = facing,
                 thinking = thinking,
                 watching = watching,
+                spinning = CurioPet.spinning,
                 contentDescription = "Curio, your companion pet — drag it anywhere, tap to say hi"
             )
-            // Little hearts rising on taps and saves.
-            PetHearts(key = heartsKey, modifier = Modifier.fillMaxSize())
         }
+        // v8.13 — hearts rise ABOVE the pet in their own offset sibling
+        // (like the bubble), so they never cover the face. Bottom of the
+        // hearts box hugs the pet's head; hearts float up and fade.
+        HeartsOverlay(
+            key = heartsKey,
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        (pos.x + petPx / 2f - with(density) { HEARTS_W.toPx() } / 2f).roundToInt(),
+                        // Lifted a touch clear of the speech bubble and
+                        // clamped so it never flies off-screen at the top.
+                        (pos.y - with(density) { (HEARTS_H + 10.dp).toPx() })
+                            .coerceAtLeast(marginPx)
+                            .roundToInt()
+                    )
+                }
+                .size(HEARTS_W, HEARTS_H)
+        )
+
         // Tiny reaction bubble floating just above the pet. Drawn as a
         // separate offset sibling (never inside the pet's touch box) so it
         // can wrap freely and never eats the pet's taps. The offset box is
@@ -435,9 +477,14 @@ fun CurioFloatingPet(
     }
 }
 
-/** Tiny pink hearts that rise and fade above the pet on taps and saves. */
+/**
+ * Pink hearts that float UP from just above the pet's head and fade
+ * (v8.13). Drawn in a sibling box offset above the pet, so they never
+ * cover the sprite's face. Starts near the bottom of this box (the pet's
+ * head) and rises to the top, shrinking as it fades.
+ */
 @Composable
-private fun PetHearts(key: Int, modifier: Modifier = Modifier) {
+private fun HeartsOverlay(key: Int, modifier: Modifier = Modifier) {
     val rise = remember { Animatable(0f) }
     LaunchedEffect(key) {
         if (key > 0) {
@@ -450,9 +497,9 @@ private fun PetHearts(key: Int, modifier: Modifier = Modifier) {
         repeat(3) { i ->
             val t = ((rise.value * 3f + i * 0.33f) % 1f)
             val alpha = (1f - t).coerceIn(0f, 1f)
-            val s = size.minDimension * (0.11f + t * 0.05f)
-            val x = centerX + (i - 1) * size.width * 0.18f
-            val y = size.height * 0.5f - t * size.height * 0.85f
+            val s = size.minDimension * (0.09f + t * 0.04f)
+            val x = centerX + (i - 1) * size.width * 0.22f
+            val y = size.height * 0.95f - t * size.height * 0.95f
             drawHeart(x, y, s, Color(0xFFF7AFAF).copy(alpha = alpha * 0.95f))
         }
     }

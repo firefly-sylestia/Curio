@@ -774,6 +774,7 @@ fun CurioNavHost(
                         QuestGuide.Position.BOTTOM -> GuidePointer.UP
                         QuestGuide.Position.TOP -> GuidePointer.DOWN
                         QuestGuide.Position.CENTER -> null
+                        QuestGuide.Position.LOWER -> GuidePointer.DOWN
                     },
                     actionLabel = when {
                         QuestGuide.isLast -> "Finish"
@@ -783,22 +784,31 @@ fun CurioNavHost(
                     actionEnabled = !waiting,
                     onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
                     onClose = { QuestGuide.stop() },
+                    // v8.12 — wait steps offer "Skip"/"Explore later": the
+                    // tour guides but never blocks, so the user can move on
+                    // without doing the action.
+                    secondaryLabel = if (waiting) step.skipLabel ?: "Skip" else null,
+                    onSecondary = { QuestGuide.next() },
                     modifier = Modifier
                         .align(
                             when (step.position) {
                                 QuestGuide.Position.BOTTOM -> Alignment.BottomCenter
                                 QuestGuide.Position.TOP -> Alignment.TopCenter
                                 QuestGuide.Position.CENTER -> Alignment.Center
+                                QuestGuide.Position.LOWER -> Alignment.BottomCenter
                             }
                         )
                         // TOP steps (Quests / Settings) sit below the screen
-                        // hero instead of floating over it.
+                        // hero instead of floating over it; LOWER steps float
+                        // ABOVE the bottom action row (the Save bar) so the
+                        // pill never covers the button it points at.
                         .padding(
                             start = 16.dp,
                             top = if (step.position == QuestGuide.Position.TOP)
                                 SettingsHeroTotalHeight + 8.dp else 10.dp,
                             end = 16.dp,
-                            bottom = 10.dp
+                            bottom = if (step.position == QuestGuide.Position.LOWER)
+                                116.dp else 10.dp
                         )
                 )
             }

@@ -51,7 +51,13 @@ object QuestGuide {
         /** Just below the settings-family hero, pointer down. */
         TOP,
         /** Mid-screen with no pointer — the final step. */
-        CENTER
+        CENTER,
+        /**
+         * v8.12 — bottom but LIFTED above the bottom action row (the
+         * capture screen's Save bar): the pill must never cover the button
+         * it is pointing at.
+         */
+        LOWER
     }
 
     data class Step(
@@ -68,7 +74,13 @@ object QuestGuide {
          * after a spin). The step advances via [onWait] when the action
          * happens, wherever that is.
          */
-        val hold: Boolean = false
+        val hold: Boolean = false,
+        /**
+         * v8.12 — optional "skip this step" label on wait steps ("Explore
+         * later" / "Skip"): the user can move on WITHOUT doing the action
+         * (spec §7.3 — the tour guides, it never blocks). Null = no skip.
+         */
+        val skipLabel: String? = null
     )
 
     // ── Reactive state (mirrors CurioQuests' pattern) ──
@@ -157,27 +169,34 @@ object QuestGuide {
         Step(
             "spin", "Pick a lane & spin",
             "Tap Shuffle — the deck picks a fresh topic, then opens it for you.",
-            waitFor = Wait.SPIN
+            waitFor = Wait.SPIN,
+            skipLabel = "Skip"
         ),
         Step(
             "spin", "Open the landed topic",
             "Nice — you landed on a topic. It's already open: read the teaser, then start exploring.",
             waitFor = Wait.REVEAL,
             hold = true,
-            position = Position.TOP
+            position = Position.TOP,
+            skipLabel = "Skip"
         ),
         Step(
             "", "Start exploring",
-            "Time to explore for real — tap Start exploring on the topic.",
+            "Time to explore for real — tap Start exploring on the topic, or explore it later.",
             waitFor = Wait.EXPLORE,
             hold = true,
-            position = Position.TOP
+            position = Position.TOP,
+            skipLabel = "Explore later"
         ),
         Step(
             "", "Capture what you found",
             "Back from exploring? Write it down — save a note to make the discovery yours.",
             waitFor = Wait.SAVE,
-            hold = true
+            hold = true,
+            // v8.12 — the pill floats ABOVE the Save bar so it never covers
+            // the button it's pointing at.
+            position = Position.LOWER,
+            skipLabel = "Skip"
         ),
         Step(
             "cabinet", "The Cabinet",

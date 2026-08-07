@@ -93,6 +93,7 @@ import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildExploreSearchUrl
 import com.curio.app.data.categoryOpensYouTube
+import com.curio.app.data.openSilentExplore
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -225,6 +226,12 @@ fun TopicRevealScreen(
     val latestResolved by rememberUpdatedState(resolved)
     val latestIsDone by rememberUpdatedState(isDone)
     val latestOnExplore by rememberUpdatedState<() -> Unit> { showExploreDialog = true }
+    // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
+    // explore: opens the topic's search page without recording quests,
+    // passport, pet events, recents or a timer — browsing must not count.
+    val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
+        latestResolved?.let { topic -> openSilentExplore(context, topic) }
+    }
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
         val currentTopic = latestResolved
         if (currentTopic != null) {
@@ -245,7 +252,8 @@ fun TopicRevealScreen(
                 resolved = latestResolved,
                 isDone = latestIsDone,
                 onExplore = latestOnExplore,
-                onAlready = latestOnAlready
+                onAlready = latestOnAlready,
+                onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null
             )
         }
     }
@@ -963,7 +971,9 @@ private fun RevealActionDock(
     resolved: CurioTopic?,
     isDone: Boolean,
     onExplore: () -> Unit,
-    onAlready: () -> Unit
+    onAlready: () -> Unit,
+    // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
+    onSilentExplore: (() -> Unit)? = null
 ) {
     // Wash-backed dock: the dock wears the SAME category wash the reveal
     // page paints behind it, so the two (fully transparent) actions float
@@ -1014,6 +1024,15 @@ private fun RevealActionDock(
                     modifier = Modifier.weight(1f),
                     onClick = onExplore
                 )
+            } else if (onSilentExplore != null) {
+                // Browse mode: Explore opens the search page silently.
+                RevealStartButton(
+                    enabled = resolved != null,
+                    cat = cat,
+                    label = "Explore",
+                    modifier = Modifier.weight(1f),
+                    onClick = onSilentExplore
+                )
             }
         }
     }
@@ -1024,6 +1043,7 @@ private fun RevealStartButton(
     enabled: Boolean,
     cat: com.curio.app.data.CurioCategory,
     modifier: Modifier = Modifier,
+    label: String = "Start exploring",
     onClick: () -> Unit
 ) {
     // Fully transparent: the accent text + icon float directly on the page
@@ -1052,7 +1072,7 @@ private fun RevealStartButton(
         ) {
             CurioIcon(CurioIcons.AutoAwesome, null, tint = ink, size = 20.dp)
             Text(
-                text = "Start exploring",
+                text = label,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
             )
         }

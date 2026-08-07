@@ -281,6 +281,11 @@ fun CurioPetHeroCard(
                         )
                     }
                     Text(
+                        "Personality: ${info.persona.displayName} — ${info.persona.tagline}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
                         "Next growth: ${info.nextStageLabel}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant

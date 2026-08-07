@@ -66,6 +66,9 @@ fun QuestGuideToast(
     actionEnabled: Boolean = true,
     onClick: () -> Unit,
     onClose: (() -> Unit)? = null,
+    /** v8.12 — an optional "skip this step" text link ("Explore later"). */
+    secondaryLabel: String? = null,
+    onSecondary: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Gentle pop-in (fade + slight scale) so the pill doesn't slam in.
@@ -140,6 +143,20 @@ fun QuestGuideToast(
                         contentDescription = actionLabel,
                         tint = CurioColors.CoralBlush,
                         size = 18.dp
+                    )
+                }
+                // v8.12 — "Skip" / "Explore later": the tour guides but
+                // never blocks — wait steps can be moved past without doing
+                // the action.
+                if (secondaryLabel != null && onSecondary != null) {
+                    Text(
+                        text = secondaryLabel,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onSecondary)
+                            .padding(horizontal = 6.dp, vertical = 4.dp)
                     )
                 }
                 if (onClose != null) {

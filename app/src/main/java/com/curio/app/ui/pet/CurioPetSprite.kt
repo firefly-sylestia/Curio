@@ -80,6 +80,7 @@ fun CurioPetSprite(
     facing: Float = 1f,
     thinking: Boolean = false,
     watching: Boolean = false,
+    spinning: Boolean = false,
     contentDescription: String? = null
 ) {
     val density = LocalDensity.current
@@ -187,16 +188,32 @@ fun CurioPetSprite(
     }
 
     val sleeping = mood == CurioPet.Mood.SLEEPY && !moving && !dragged
-    val excited = mood == CurioPet.Mood.EXCITED
-    val proud = mood == CurioPet.Mood.PROUD
+    // v8.13 — mood faces for the new status moods + the spin cheer.
+    val happy = mood == CurioPet.Mood.HAPPY
+    val bouncy = mood == CurioPet.Mood.BOUNCY
+    val spinningNow = spinning && !sleeping && !dragged && !moving
+    // v8.13 — blush is a CELEBRATION thing, not a permanent feature: only
+    // genuinely happy moments wear it (excited/proud one-shots, bouncy
+    // post-play, mid-play, mid-spin). Plain idle HAPPY is the default state,
+    // so it does NOT blush there — the face stays clean most of the time.
+    val blushing = !sleeping && (excited || proud || bouncy || playing || spinningNow)
+    // v8.12 — excited/proud are ONE-SHOT bursts tied to the celebration hop,
+    // never sustained ambient moods: the pet reacts for a beat, then idles.
+    // (The EXCITED/PROUD mood windows used to keep the wiggle + star eyes
+    // for 60-90s, so the pet looked stuck reacting until the next level-up.)
+    val celebrating = hop.value > 0f
+    val excited = celebrating
+    val proud = celebrating
     val curious = mood == CurioPet.Mood.CURIOUS
     // v8.11 — mid-play: the pet is bowing or twirling, so it wears its
     // excited face and wags faster regardless of the ambient mood.
     val playing = playBow.value > 0f || spinAngle.value != 0f
     val bowPhase = playBow.value * PI.toFloat()
-    val bowDip = 6.dp * sin(bowPhase)          // dips down, then springs up
-    val bowSquash = sin(bowPhase * 2f) * 0.06f // a little squeeze mid-dip
-    val spinPulse = sin(spinAngle.value / 360f * PI.toFloat() * 6f) * 0.04f
+    // v8.13 — gentler squash so the face never compresses into the scarf
+    // (the old amplitudes let the eyes/mouth visually join the bottom rows).
+    val bowDip = 4.dp * sin(bowPhase)          // dips down, then springs up
+    val bowSquash = sin(bowPhase * 2f) * 0.045f // a little squeeze mid-dip
+    val spinPulse = sin(spinAngle.value / 360f * PI.toFloat() * 6f) * 0.03f
 
     // Body motion: idle/walk bob, celebration hop, excited wiggle, walk lean
     // and curious tilt. Sleep adds a slow breathing scale.
@@ -212,7 +229,7 @@ fun CurioPetSprite(
     // Dp * Float only — this Compose version has no Float * Dp operator.
     val hopJump = if (hop.value > 0f) 10.dp * (-hop.value) * (1f - hop.value * 0.35f) else 0.dp
     val hopSquash = sin(hop.value * PI.toFloat())
-    val wiggle = if (excited) sin(bobPhase * 6f * PI.toFloat()) * 3f else 0f
+    val wiggle = if (excited || spinningNow) sin(bobPhase * 6f * PI.toFloat()) * 3f else 0f
     // Lean into the walk direction, alternating with each step.
     val walkLean = if (moving) facing * 4f * sin(bobPhase * 2f * PI.toFloat()) else 0f
     val tilt = if (curious && !moving && !dragged && !thinking) facing * 5f else 0f
@@ -241,16 +258,20 @@ fun CurioPetSprite(
         dragged -> EyeStyle.WIDE // lifted mid-play: startled wins
         playing -> EyeStyle.STAR
         sleeping -> EyeStyle.CLOSED
-        blinkPhase > 0.93f && !excited && !proud -> EyeStyle.BLINK
+        spinningNow -> EyeStyle.STAR // cheering the reel on
+        blinkPhase > 0.93f && !excited && !proud && !spinningNow -> EyeStyle.BLINK
         excited -> EyeStyle.STAR
         proud -> EyeStyle.HAPPY
+        bouncy -> EyeStyle.HAPPY
         else -> EyeStyle.OPEN
     }
     val mouth = when {
         dragged -> MouthStyle.O
         playing -> MouthStyle.WIDE
         sleeping -> MouthStyle.NONE
+        spinningNow -> MouthStyle.WIDE
         excited -> MouthStyle.WIDE
+        bouncy -> MouthStyle.WIDE
         else -> MouthStyle.SMILE
     }
 
@@ -264,7 +285,8 @@ fun CurioPetSprite(
         // One motion layer carries the aura, the bob/hop/wiggle/lean and the
         // breathing + squish scales so the glow always moves with the sprite.
         val auraOn = stage == CurioPet.Stage.LANE_GUARDIAN || stage == CurioPet.Stage.SAGE
-        val auraColor = if (stage == CurioPet.Stage.SAGE) gold else accent            Box(
+        val auraColor = if (stage == CurioPet.Stage.SAGE) gold else accent
+        Box(
             modifier = Modifier
                 .size(spriteSize * 0.92f)
                 .graphicsLayer {
@@ -354,61 +376,66 @@ fun CurioPetSprite(
 
                     // Face overlays — the eyes drift with the glance and lift
                     // while watching the Spin deck; cheeks and mouth stay put.
+                    // v8.13 — the eyes sit one row HIGHER (rows 6-8 instead
+                    // of 7-9) so there is a clear gap between them and the
+                    // mouth — they never look joined, even mid-squish.
                     translate(
                         left = glanceShift * px,
                         top = if (watchingNow) -px else 0f
                     ) {
                         when (eyes) {
                         EyeStyle.OPEN -> {
+                            drawPx(4, 7, ink); drawPx(5, 7, ink)
                             drawPx(4, 8, ink); drawPx(5, 8, ink)
-                            drawPx(4, 9, ink); drawPx(5, 9, ink)
+                            drawPx(10, 7, ink); drawPx(11, 7, ink)
                             drawPx(10, 8, ink); drawPx(11, 8, ink)
-                            drawPx(10, 9, ink); drawPx(11, 9, ink)
-                            drawPx(4, 8, white); drawPx(10, 8, white)
+                            drawPx(4, 7, white); drawPx(10, 7, white)
                         }
                         EyeStyle.BLINK -> {
-                            drawPx(4, 8, ink); drawPx(5, 8, ink)
-                            drawPx(10, 8, ink); drawPx(11, 8, ink)
+                            drawPx(4, 7, ink); drawPx(5, 7, ink)
+                            drawPx(10, 7, ink); drawPx(11, 7, ink)
                         }
                         EyeStyle.CLOSED -> {
-                            drawPx(4, 9, ink); drawPx(5, 9, ink)
-                            drawPx(10, 9, ink); drawPx(11, 9, ink)
+                            drawPx(4, 8, ink); drawPx(5, 8, ink)
+                            drawPx(10, 8, ink); drawPx(11, 8, ink)
                         }
                         EyeStyle.WIDE -> {
                             // Big startled eyes while lifted.
+                            drawPx(4, 6, ink); drawPx(5, 6, ink)
                             drawPx(4, 7, ink); drawPx(5, 7, ink)
                             drawPx(4, 8, ink); drawPx(5, 8, ink)
-                            drawPx(4, 9, ink); drawPx(5, 9, ink)
+                            drawPx(10, 6, ink); drawPx(11, 6, ink)
                             drawPx(10, 7, ink); drawPx(11, 7, ink)
                             drawPx(10, 8, ink); drawPx(11, 8, ink)
-                            drawPx(10, 9, ink); drawPx(11, 9, ink)
-                            drawPx(4, 8, white); drawPx(10, 8, white)
+                            drawPx(4, 7, white); drawPx(10, 7, white)
                         }
                         EyeStyle.STAR -> {
                             // Gold sparkle eyes with cross arms.
-                            drawPx(4, 8, gold); drawPx(5, 8, gold)
-                            drawPx(4, 9, gold); drawPx(5, 9, gold)
-                            drawPx(10, 8, gold); drawPx(11, 8, gold)
-                            drawPx(10, 9, gold); drawPx(11, 9, gold)
-                            drawPx(3, 8, gold); drawPx(6, 8, gold)
                             drawPx(4, 7, gold); drawPx(5, 7, gold)
-                            drawPx(9, 8, gold); drawPx(12, 8, gold)
+                            drawPx(4, 8, gold); drawPx(5, 8, gold)
                             drawPx(10, 7, gold); drawPx(11, 7, gold)
+                            drawPx(10, 8, gold); drawPx(11, 8, gold)
+                            drawPx(3, 7, gold); drawPx(6, 7, gold)
+                            drawPx(4, 6, gold); drawPx(5, 6, gold)
+                            drawPx(9, 7, gold); drawPx(12, 7, gold)
+                            drawPx(10, 6, gold); drawPx(11, 6, gold)
                         }
                         EyeStyle.HAPPY -> {
-                            drawPx(4, 9, ink); drawPx(5, 8, ink); drawPx(5, 9, ink)
-                            drawPx(10, 9, ink); drawPx(10, 8, ink); drawPx(11, 9, ink)
+                            drawPx(4, 8, ink); drawPx(5, 7, ink); drawPx(5, 8, ink)
+                            drawPx(10, 8, ink); drawPx(10, 7, ink); drawPx(11, 8, ink)
                         }
                         }
                     }
 
-                    // Cheeks.
-                    drawPx(2, 9, blush, 0.55f)
-                    drawPx(3, 9, blush, 0.55f)
-                    drawPx(12, 9, blush, 0.55f)
-                    drawPx(13, 9, blush, 0.55f)
-                    drawPx(2, 10, blush, 0.4f)
-                    drawPx(13, 10, blush, 0.4f)
+                    // Cheeks — only when the pet is happy/excited/proud/
+                    // bouncy or mid-play/spin (v8.13: not a permanent feature,
+                    // and the row-10 pair that crowded the scarf is gone).
+                    if (blushing) {
+                        drawPx(2, 9, blush, 0.5f)
+                        drawPx(3, 9, blush, 0.5f)
+                        drawPx(12, 9, blush, 0.5f)
+                        drawPx(13, 9, blush, 0.5f)
+                    }
 
                     // Mouth. v8.10 — the smile was drawn upside down (corners
                     // lower than the middle = a frown, which is why the pet
@@ -505,9 +532,11 @@ private const val GRID = 16
  * 'G' gold, 'g' gold deep.
  */
 private val BODY_ROWS: List<String> = listOf(
+    // v8.13 — cat ears: a tiny pointed ear on each side of the head (the
+    // antenna star stays center). Rows 1-2; 'o' outline, 'b' body fill.
     ".......GG.......",
-    ".......GG.......",
-    "..o...........o.",
+    "...o...GG...o...",
+    "..ob........bo..",
     "..ob....o....bo.",
     "...oooooooooo...",
     ".obbbbbbbbbbbbo.",

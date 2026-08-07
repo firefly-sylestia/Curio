@@ -32,6 +32,7 @@ object CurioPet {
     private const val KEY_LAST_NEW_LANE_AT = "last_new_lane_at"
     private const val KEY_LAST_BUBBLE_SCREEN = "last_bubble_screen"
     private const val KEY_LAST_BUBBLE_AT = "last_bubble_at"
+    private const val KEY_LAST_PLAY_AT = "last_play_at"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -165,27 +166,102 @@ object CurioPet {
         atHome = false
     }
 
-    // ── Moods (spec §10.5) — derived from recent activity, never shaming ──
-    enum class Mood { PROUD, EXCITED, HAPPY, CURIOUS, SLEEPY }
+    // ── Personality (v8.12) — a persona that BUILDS from the user's actual
+    //    interaction history and PERSISTS across sessions: boops make it
+    //    cuddly, play sessions make it bouncy, exploring makes it curious.
+    //    Slightly biases how often it starts games on its own.
+    enum class Persona(val displayName: String, val tagline: String) {
+        CUDDLY("Cuddly", "loves boops and scritches"),
+        BOUNCY("Bouncy", "always up for a game"),
+        EXPLORER("Explorer", "can't pass up a new lane"),
+        SPARKY("Sparky", "still finding its spark")
+    }
 
-    fun mood(context: Context, lanes: Set<String>): Mood {
+    private const val KEY_PET_BOOPS = "pet_boops"
+    private const val KEY_PET_PLAYS = "pet_plays"
+
+    /** The user petted the floating pet (persisted — feeds the persona). */
+    fun noteTouch(context: Context) {
+        val p = prefs(context)
+        p.edit().putInt(KEY_PET_BOOPS, p.getInt(KEY_PET_BOOPS, 0) + 1).apply()
+    }
+
+    /** The pet played (a dart / self-started game — persisted). */
+    fun notePlay(context: Context) {
+        val p = prefs(context)
+        p.edit()
+            .putInt(KEY_PET_PLAYS, p.getInt(KEY_PET_PLAYS, 0) + 1)
+            .putLong(KEY_LAST_PLAY_AT, System.currentTimeMillis())
+            .apply()
+    }
+
+    private fun touchCount(context: Context): Int = prefs(context).getInt(KEY_PET_BOOPS, 0)
+    private fun playCount(context: Context): Int = prefs(context).getInt(KEY_PET_PLAYS, 0)
+
+    /**
+     * The pet's growing personality — the dominant of cuddles / play /
+     * exploration, learned from real history (not a random pick).
+     */
+    fun persona(context: Context): Persona {
+        val boops = touchCount(context)
+        val plays = playCount(context)
+        val explores = CurioQuests.lifetimeState.explores
+        return when {
+            boops >= 3 && boops >= plays && boops >= explores -> Persona.CUDDLY
+            plays >= 3 && plays >= boops -> Persona.BOUNCY
+            explores >= 3 -> Persona.EXPLORER
+            else -> Persona.SPARKY
+        }
+    }
+
+    /** How often the pet starts a game on its own — bouncy pets play more. */
+    fun playfulBias(context: Context): Float = when (persona(context)) {
+        Persona.BOUNCY -> 0.22f
+        Persona.EXPLORER -> 0.14f
+        Persona.CUDDLY -> 0.10f
+        Persona.SPARKY -> 0.08f
+    }
+
+    // ── Moods (spec §10.5) — derived from recent activity, never shaming ──
+    // v8.13 — two more status moods: FOCUSED (the user is writing/saving on
+    // the capture screen) and BOUNCY (a play session just ended — the pet is
+    // still full of beans). All moods are state-derived, so the pet reads
+    // the user's behavior instead of wearing a fixed face.
+    enum class Mood { PROUD, EXCITED, HAPPY, CURIOUS, SLEEPY, FOCUSED, BOUNCY }
+
+    fun mood(context: Context, lanes: Set<String>, screen: String? = null): Mood {
         val now = System.currentTimeMillis()
         return when {
             now - lastLevelUpAt(context) < 90_000L -> Mood.PROUD
             now - lastNewLaneAt(context) < 60_000L -> Mood.EXCITED
+            // The user is mid-capture — the pet stays quiet and attentive.
+            screen == "capture" -> Mood.FOCUSED
+            // A play session just ended (a dart, a self-started game).
+            now - lastPlayAt(context) < 5 * 60_000L -> Mood.BOUNCY
             now - lastXpAt(context) < 120_000L -> Mood.HAPPY
-            leastExploredLane(lanes) != null -> Mood.CURIOUS
+            leastExploredLane(context, lanes) != null -> Mood.CURIOUS
             now - lastXpAt(context) > 12 * 3_600_000L -> Mood.SLEEPY
             else -> Mood.HAPPY
         }
     }
 
     /**
-     * The first visible category the user has never explored — the
+     * The first visible category the user has never really TRIED — the
      * passport/discovery gap the pet nudges toward (null = every lane seen).
+     *
+     * v8.13 — smarter: a lane counts as tried when the quests' explored set
+     * knows it OR the passport has ANY engagement (a reveal counts — opening
+     * a topic is "trying" it, even when the explore was a silent browse that
+     * never touched quest progress). This stops the pet from nagging
+     * "We haven't tried X" for lanes the user already peeked or explored
+     * through the non-tracking Explore buttons, and stops the discovery
+     * daily from pointing at lanes the user has actually been in.
      */
-    fun leastExploredLane(explored: Set<String>): CurioCategory? =
-        CurioCategories.visible.firstOrNull { it.id.name !in explored }
+    fun leastExploredLane(context: Context, explored: Set<String>): CurioCategory? =
+        CurioCategories.visible.firstOrNull { cat ->
+            cat.id.name !in explored &&
+                CurioPassport.progress(context, cat.id).stamp == CurioPassport.Stamp.UNSEEN
+        }
 
     // ── Rule-based dialogue ("local AI", spec §10.6/10.7) ──────────────
     // One sentence for passive bubbles; no nagging; never interrupts input.
@@ -212,6 +288,18 @@ object CurioPet {
         "Yawn… the deck can wait a moment.",
         "Soft blanket, warm lamp… I'm ready when you are."
     )
+    // v8.13 — the new moods' lines: focused keeps out of the way while the
+    // user writes; bouncy rides the post-play high.
+    private val focusedLines = listOf(
+        "Write it down — I'll guard your thoughts.",
+        "Quiet paws, I promise.",
+        "Take your time — this one's a keeper."
+    )
+    private val bouncyLines = listOf(
+        "Phew — that was fun. Again soon?",
+        "I'm still bouncing from that game!",
+        "Best play date ever. …Round two?"
+    )
 
     /** A passive bubble line for the current [mood]. */
     fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String = when (mood) {
@@ -224,15 +312,23 @@ object CurioPet {
         Mood.EXCITED -> excitedLines.random()
         Mood.HAPPY -> happyLines.random()
         Mood.CURIOUS -> {
-            val lane = leastExploredLane(lanes)
+            val lane = leastExploredLane(context, lanes)
             if (lane != null) {
                 curiousLines.map { it.replace("__LANE__", lane.displayName) }.random()
             } else {
                 "Spin something new today?"
             }
         }
+        Mood.FOCUSED -> focusedLines.random()
+        Mood.BOUNCY -> bouncyLines.random()
         Mood.SLEEPY -> sleepyLines.random()
     }
+
+    /** A short cheer while the Spin deck is reeling (v8.13). */
+    fun spinCheer(): String = listOf(
+        "Go, go, go!", "Spinny spin!", "Ooh — where will it land?",
+        "Come on, good one!", "Round and round!", "I can't watch — okay, I'm watching."
+    ).random()
 
     /**
      * A short burst when the user touches/pets the floating pet (v8.11).
@@ -280,13 +376,14 @@ object CurioPet {
         }
         p.edit().putString(KEY_LAST_BUBBLE_SCREEN, screen)
             .putLong(KEY_LAST_BUBBLE_AT, now).apply()
-        return lineFor(context, mood(context, lanes), lanes)
+        return lineFor(context, mood(context, lanes, screen), lanes)
     }
 
-    /** What tapping the pet reveals: mood, next quest, growth status. */
+    /** What tapping the pet reveals: mood, personality, growth status. */
     data class TapInfo(
         val mood: Mood,
         val stage: Stage,
+        val persona: Persona,
         val nextStageLabel: String,
         val nextQuestTitle: String?
     )
@@ -296,9 +393,21 @@ object CurioPet {
         return TapInfo(
             mood = mood(context, lanes),
             stage = stage,
+            persona = persona(context),
             nextStageLabel = nextStageHint(stage),
             nextQuestTitle = CurioQuests.currentQuest()?.title
         )
+    }
+
+    // ── Wakefulness / spin watching (v8.13) ───────────────────────────
+    // [spinning] flips true the moment the Spin deck starts reeling and
+    // false when it settles — the floating pet cheers it on while it turns.
+    var spinning by mutableStateOf(false)
+        private set
+
+    /** The Spin screen sets this around its shuffle animation. */
+    fun setSpinning(value: Boolean) {
+        spinning = value
     }
 
     // ── Activity hooks (called from CurioQuests) ───────────────────────
@@ -317,4 +426,5 @@ object CurioPet {
     fun lastXpAt(context: Context): Long = prefs(context).getLong(KEY_LAST_XP_AT, 0L)
     fun lastLevelUpAt(context: Context): Long = prefs(context).getLong(KEY_LAST_LEVEL_AT, 0L)
     fun lastNewLaneAt(context: Context): Long = prefs(context).getLong(KEY_LAST_NEW_LANE_AT, 0L)
+    fun lastPlayAt(context: Context): Long = prefs(context).getLong(KEY_LAST_PLAY_AT, 0L)
 }
