@@ -2,6 +2,7 @@ package com.curio.app.ui.pet
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -89,13 +90,13 @@ fun CurioPetSprite(
     // Specs are hoisted with remember so InfiniteTransition does NOT restart
     // the loop on every recomposition (a fresh spec instance would). Walk
     // bob is quick and deep; idle bob is slow and shallow.
-    val bobSpec = remember(moving) {
+    val bobSpec: InfiniteRepeatableSpec<Float> = remember(moving) {
         infiniteRepeatable(tween(if (moving) 380 else 2400, easing = LinearEasing))
     }
-    val blinkSpec = remember {
+    val blinkSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(3800), RepeatMode.Restart)
     }
-    val breatheSpec = remember {
+    val breatheSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(2200, easing = LinearEasing))
     }
     val idle = rememberInfiniteTransition(label = "petIdle")

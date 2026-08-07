@@ -813,11 +813,12 @@ fun CurioNavHost(
     // Scaffold (over the bottom bar too). Renders only while the pet layer,
     // the floating toggle and the pet's awake state are on; it wanders,
     // can be dragged anywhere, and naps back into its bed after a long idle.
-    // Its scarf wears the recommended lane's accent.
-    val floatingPetAccent = remember {
-        CurioPassport.leastEngaged(context)?.themedAccent()
-            ?: CurioCategories.byId(CategoryId.WILDCARD).themedAccent()
-    }
+    // Its scarf wears the recommended lane's accent. themedAccent() is
+    // @Composable, so the lane lookup is remembered but the accent calls
+    // stay at composable scope (never inside the remember lambda).
+    val petAccentCat = remember { CurioPassport.leastEngaged(context) }
+    val floatingPetAccent = petAccentCat?.themedAccent()
+        ?: CurioCategories.byId(CategoryId.WILDCARD).themedAccent()
     CurioFloatingPet(accent = floatingPetAccent)
 
     // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"

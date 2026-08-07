@@ -8,8 +8,10 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -89,7 +91,7 @@ fun CurioFloatingPet(
         val marginPx = with(density) { EDGE_MARGIN.toPx() }
         // Start just above the bottom bar / nav inset so it never covers the
         // action dock or the bottom nav out of the box.
-        val navBottom = with(density) { androidx.compose.foundation.layout.WindowInsets.navigationBars.getBottom(density) }
+        val navBottom = with(density) { WindowInsets.navigationBars.getBottom(density) }
         val defaultPos = remember(maxW, maxH, petPx, marginPx, navBottom) {
             Offset(
                 x = maxW - petPx - marginPx,
