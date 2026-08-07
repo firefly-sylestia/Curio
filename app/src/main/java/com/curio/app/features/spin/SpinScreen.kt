@@ -643,8 +643,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     LaunchedEffect(pageWash) {
         CurioNavTint.publishSpinWash(pageWash)
     }
-    // Hygiene: clear the handoff when Spin leaves composition so a stale wash
-    // never lingers for a future route that might share the tint.
+    // Keep the last published wash while the shared-element transition leaves
+    // Spin. Clearing it here would make the Scaffold nav bar fall back to the
+    // cream theme surface for one frame before the reveal placeholder takes
+    // over, creating a visible color flash. Non-Spin routes ignore this handoff
+    // and a new Spin composition republishes the current wash immediately.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -656,10 +659,6 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { CurioNavTint.publishSpinWash(null) }
     }
 
     // Category switch resets transient animation state. The landed card is
