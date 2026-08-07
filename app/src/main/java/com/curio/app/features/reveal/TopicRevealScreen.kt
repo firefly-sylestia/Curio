@@ -11,7 +11,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -25,10 +24,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -201,21 +204,9 @@ fun TopicRevealScreen(
     // about it now.
     var showAlreadyDoneDialog by rememberSaveable { mutableStateOf(false) }
 
-    val pillBg by animateColorAsState(
-        targetValue = if (isDone) cat.themedAccent()
-                      else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-        label = "alreadyDoneBg"
-    )
-    val pillInk by animateColorAsState(
-        targetValue = if (isDone) cat.onAccent()
-                      else MaterialTheme.colorScheme.onSurfaceVariant,
-        label = "alreadyDoneInk"
-    )
     val latestBrowseMode by rememberUpdatedState(browseMode)
     val latestResolved by rememberUpdatedState(resolved)
     val latestIsDone by rememberUpdatedState(isDone)
-    val latestPillBg by rememberUpdatedState(pillBg)
-    val latestPillInk by rememberUpdatedState(pillInk)
     val latestOnExplore by rememberUpdatedState<() -> Unit> { showExploreDialog = true }
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
         val currentTopic = latestResolved
@@ -236,8 +227,6 @@ fun TopicRevealScreen(
                 browseMode = latestBrowseMode,
                 resolved = latestResolved,
                 isDone = latestIsDone,
-                pillBg = latestPillBg,
-                pillInk = latestPillInk,
                 onExplore = latestOnExplore,
                 onAlready = latestOnAlready
             )
@@ -956,17 +945,20 @@ private fun RevealActionDock(
     browseMode: Boolean,
     resolved: CurioTopic?,
     isDone: Boolean,
-    pillBg: Color,
-    pillInk: Color,
     onExplore: () -> Unit,
     onAlready: () -> Unit
 ) {
+    // Fully transparent dock: the reveal page's category wash (painted on
+    // the Scaffold container by the NavHost) shows straight through, so the
+    // two actions float on the tinted page. The nav-bar inset is consumed
+    // here so the gesture bar never overlaps the buttons.
     Surface(
-        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        color = Color.Transparent,
         tonalElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .heightIn(min = 80.dp)
+            .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         Row(
             modifier = Modifier
@@ -975,6 +967,14 @@ private fun RevealActionDock(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Already/Undo on the LEFT, Start exploring on the RIGHT.
+            RevealAlreadyButton(
+                enabled = resolved != null,
+                cat = cat,
+                isDone = isDone,
+                modifier = Modifier.weight(1f),
+                onClick = onAlready
+            )
             if (!browseMode) {
                 RevealStartButton(
                     enabled = resolved != null,
@@ -983,15 +983,6 @@ private fun RevealActionDock(
                     onClick = onExplore
                 )
             }
-            RevealAlreadyButton(
-                enabled = resolved != null,
-                cat = cat,
-                isDone = isDone,
-                pillBg = pillBg,
-                pillInk = pillInk,
-                modifier = Modifier.weight(1f),
-                onClick = onAlready
-            )
         }
     }
 }
@@ -1003,15 +994,19 @@ private fun RevealStartButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    // Fully transparent: the accent text + icon float directly on the page
+    // wash (categoryInk is theme-aware — deep accent in light, light twin
+    // in dark). Disabled fades the ink instead of showing a tinted fill.
+    val ink = cat.categoryInk()
     Button(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(
-            containerColor = cat.themedAccent(),
-            contentColor = cat.onAccent(),
-            disabledContainerColor = cat.themedAccent().copy(alpha = 0.35f),
-            disabledContentColor = cat.onAccent().copy(alpha = 0.45f)
+            containerColor = Color.Transparent,
+            contentColor = ink,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = ink.copy(alpha = 0.40f)
         ),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         modifier = modifier.fillMaxWidth()
@@ -1020,7 +1015,7 @@ private fun RevealStartButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CurioIcon(CurioIcons.AutoAwesome, null, tint = cat.onAccent(), size = 20.dp)
+            CurioIcon(CurioIcons.AutoAwesome, null, tint = ink, size = 20.dp)
             Text(
                 text = "Start exploring",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
@@ -1034,18 +1029,20 @@ private fun RevealAlreadyButton(
     enabled: Boolean,
     cat: com.curio.app.data.CurioCategory,
     isDone: Boolean,
-    pillBg: Color,
-    pillInk: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    // Fully transparent: the label + icon float on the page wash. Done
+    // state reads in the category ink (mirrors the Start button); idle
+    // state in the muted onSurfaceVariant. Disabled fades the ink to match
+    // the Start button's disabled treatment while the topic loads.
+    val baseInk = if (isDone) cat.categoryInk() else MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(18.dp),
-        color = pillBg,
-        border = if (isDone) BorderStroke(1.dp, cat.onAccent().copy(alpha = 0.25f))
-                 else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        color = Color.Transparent,
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
@@ -1056,14 +1053,14 @@ private fun RevealAlreadyButton(
             CurioIcon(
                 name = if (isDone) CurioIcons.Close else CurioIcons.History,
                 contentDescription = null,
-                tint = pillInk,
+                tint = ink,
                 size = 18.dp
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = if (isDone) "Undo" else alreadyDoneLabel(cat),
+                text = if (isDone) undoLabel(cat) else alreadyDoneLabel(cat),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = pillInk
+                color = ink
             )
         }
     }
@@ -1449,6 +1446,18 @@ private fun alreadyDoneLabel(cat: com.curio.app.data.CurioCategory): String = wh
     CategoryId.ARTWORKS -> "Already seen"
     CategoryId.PAINTERS -> "Already explored"
     else -> "Already explored"
+}
+
+/** The undo label — mirrors [alreadyDoneLabel] per category (Films →
+ *  "Unwatched" ↔ "Already watched", Books → "Unread" ↔ "Already read",
+ *  etc.). Shown on the already-pill's done state; tapping unmarks it. */
+private fun undoLabel(cat: com.curio.app.data.CurioCategory): String = when (cat.id) {
+    CategoryId.FILMS, CategoryId.DIRECTORS -> "Unwatched"
+    CategoryId.ALBUMS, CategoryId.ARTISTS -> "Unlistened"
+    CategoryId.BOOKS, CategoryId.AUTHORS -> "Unread"
+    CategoryId.ARTWORKS -> "Unseen"
+    CategoryId.PAINTERS -> "Unexplored"
+    else -> "Unexplored"
 }
 
 /** Circular like/dislike toggle — active state fills with the category accent. */

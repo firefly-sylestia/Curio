@@ -21,3 +21,17 @@ No Gradle in this env (per AGENTS.md). Branch topology verified: `Alpha` = `7709
 ### Follow-ups
 - After the PR merges, `main` regains the reveal-dock work (as a merge commit). The `backup/main-with-dock` local branch can be deleted once merged.
 - Stray untracked `result` symlink (Nix OpenJDK artifact) still in repo root — not part of any commit.
+
+## Follow-up request (same session): polish the reveal action dock on Alpha
+
+**User request:** fix a light-mode glitch where the navbar flashes cream when the reveal opens; make the Start exploring + Undo button backgrounds and the dock fully transparent; swap them (Undo left, Start exploring right); make Undo say the category mirror (Unwatched/Unread/…) like Already watched.
+
+### Changes (both on `Alpha`, updating PR #3)
+- **`features/reveal/TopicRevealScreen.kt`** — dock + both buttons now `Color.Transparent` (buttons float on the page wash; Start ink = `categoryInk()`, Already ink = categoryInk when done / onSurfaceVariant idle, disabled fades ink); dock uses `heightIn(min = 80.dp)` + `windowInsetsPadding(navigationBars)`; buttons swapped (Already/Undo LEFT, Start RIGHT); new `undoLabel()` mirrors `alreadyDoneLabel` (Unwatched/Unlistened/Unread/Unseen/Unexplored); removed the now-dead `pillBg`/`pillInk` animateColorAsState plumbing.
+- **`navigation/CurioNavHost.kt`** — `Scaffold(containerColor = revealWash ?: background)` where `revealWash` = the reveal route's `categoryBackgroundWash()` (computed directly, NOT in `remember` — the helper is @Composable), so the bottom strip + navbar area is seamless with the page and never flashes cream in light mode.
+
+### Validation
+String-aware brace balance OK both files; `git diff --check` clean; no lingering `pillBg`/`pillInk`/`animateColorAsState` refs; `BorderStroke` import retained (SentimentButton still uses it); review ran (flagged wide-window dock absence as pre-existing, not addressed). CI on push is the compile gate.
+
+### Known (pre-existing, not addressed)
+- On wide/tablet windows the dock doesn't render at all (the `!wide && reserveBarSpace` gate) — the reveal actions vanish on tablets; inherited from the untitled-chat dock design.
