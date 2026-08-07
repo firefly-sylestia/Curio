@@ -20,17 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -965,59 +961,36 @@ private fun RevealActionDock(
     onAlready: () -> Unit
 ) {
     Surface(
-        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainer),
-        tonalElevation = 2.dp,
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        tonalElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp)
-            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .height(80.dp)
     ) {
-        BoxWithConstraints(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val compact = maxWidth < 520.dp
-            if (compact) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (!browseMode) {
-                        RevealStartButton(
-                            enabled = resolved != null,
-                            cat = cat,
-                            onClick = onExplore
-                        )
-                    }
-                    RevealAlreadyButton(
-                        enabled = resolved != null,
-                        cat = cat,
-                        isDone = isDone,
-                        pillBg = pillBg,
-                        pillInk = pillInk,
-                        onClick = onAlready
-                    )
-                }
-            } else {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (!browseMode) {
-                        RevealStartButton(
-                            enabled = resolved != null,
-                            cat = cat,
-                            modifier = Modifier.weight(1f),
-                            onClick = onExplore
-                        )
-                    }
-                    RevealAlreadyButton(
-                        enabled = resolved != null,
-                        cat = cat,
-                        isDone = isDone,
-                        pillBg = pillBg,
-                        pillInk = pillInk,
-                        modifier = Modifier.weight(1f),
-                        onClick = onAlready
-                    )
-                }
+            if (!browseMode) {
+                RevealStartButton(
+                    enabled = resolved != null,
+                    cat = cat,
+                    modifier = Modifier.weight(1f),
+                    onClick = onExplore
+                )
             }
+            RevealAlreadyButton(
+                enabled = resolved != null,
+                cat = cat,
+                isDone = isDone,
+                pillBg = pillBg,
+                pillInk = pillInk,
+                modifier = Modifier.weight(1f),
+                onClick = onAlready
+            )
         }
     }
 }

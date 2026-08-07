@@ -45,3 +45,11 @@ No Gradle in this env (per AGENTS.md) — restored files byte-identical to `7244
 - Commit `db393bdb` fixed the reveal route's bottom-bar placeholder in `CurioNavHost`.
 - The reveal action dock now renders through that exact Scaffold bottom slot, replacing the invisible placeholder with the themed buttons while keeping a measured placeholder fallback for deep links or initial composition.
 - Topic content remains scrollable above the dock; action behavior and theme tint are preserved.
+
+---
+
+## Follow-up (2026-08-07): Match the real navigation-bar height — DONE
+
+- The reveal action slot is now exactly 80dp, matching `CurioBottomBar`'s `NavigationBar` minimum height.
+- Removed the extra navigation-inset padding that made the dock taller than the placeholder.
+- The dock background now uses the category-tinted theme surface instead of the creamy placeholder surface.
