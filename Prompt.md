@@ -1,52 +1,71 @@
 # Prompt — FieldMind/Curio request log
 
-## Active request: Fix blank Topic Reveal page (regression from af10023)
+## Active request: Curio pet + Quests redesign (spec v8.5)
 
-### Symptom (user-confirmed)
-After commit `af10023` (PR #3, Alpha branch), opening the Topic Reveal screen shows a
-blank page — the hero card, topic name, tags, teaser and action prompt are all gone.
-The ONLY visible elements are the two dock buttons ("Already watched" / "Start
-exploring"), which render in the Scaffold bottomBar slot. User pointed at `af10023`
-as the culprit.
+### What was asked
+Create a pixelated cute unique pet for the app with its AI and animations, plus a
+full Quests redesign (past spec: daily-first IA, category passport, First Journey
+tutorial, reward polish). User decisions (ask_user): **whole spec, phased** ·
+pet **toggleable, default ON** · placement **Quests hero + Home corner** ·
+**spark-spirit** design approved · **local rule-based AI** (no server).
 
-### Diagnosis
-`af10023` changed exactly two layers:
-1. **NavHost** — added `Scaffold(containerColor = revealWash ?: background)` where
-   `revealWash` is recomputed per composition from the back-stack category arg via a
-   `@Composable` wash helper. This is the ONLY page-level delta.
-2. **Dock visuals** — transparent dock/buttons, swapped order, undo labels,
-   `heightIn(80.dp) + windowInsetsPadding(navigationBars)`.
+### Delivered this pass (Phases E, A, C + Phase D core)
 
-The dock layer is mechanically ruled out (different composition layer, identical
-layout math to the working 6c9b8a6 dock). The symptom (everything inside
-`SharedTransitionLayout` invisible, dock outside it visible) matches a
-frozen/disrupted shared-element route transition: while a shared transition is
-active, Compose pauses ALL animations inside the layout — a stuck morph leaves the
-hero + `RevealContentEntrance` content invisible forever. Painting the Scaffold
-container with a dynamically-computed color exactly at the moment the route
-transition begins is the only plausible trigger.
+**Phase E — the pet (headline ask):**
+- `data/CurioPet.kt` — the pet's BRAIN: 6 growth stages (Hatchling Spark → Curio
+  Sage) derived from existing CurioQuests XP/saves/explored-lanes; 5 moods
+  (PROUD/EXCITED/HAPPY/CURIOUS/SLEEPY) from activity timestamps (never shaming);
+  rule-based dialogue engine ("local AI") — one passive sentence per screen visit,
+  one-shot bubble cooldown, tap check-in dialog (mood + next quest + growth hint).
+- `ui/pet/CurioPetSprite.kt` — the pixel sprite, rendered 100% in Compose (16×16
+  pixel-grid Canvas — no bitmaps): round cream spark-spirit, gold star-tipped
+  antenna, category-accent scarf, big eyes/cheeks. Animations: idle bob, periodic
+  blink, sleep breathing + floating Z's, excited wiggle + sparkle eyes, one-shot
+  celebration hop (keyed), stage-gated accessories (sprout leaf / satchel / book /
+  aura / gold halo), theme-aware ink (light twin in dark). Param named
+  `spriteSize` (not `size`) per project compile-safety rule #7.
+- `ui/pet/CurioPetCompanion.kt` — PetSpeechBubble (readable Text, one-liner) +
+  CurioPetHeroCard (pet in an XP ring, level + growth line, XP bar, next-up quest,
+  tap → check-in dialog with "Go to quest").
+- `AppPreferences.petEnabledState` (default ON) + **Appearance settings toggle**
+  "Curio pet" (off = classic layout, pet fully hidden).
+- CurioQuests XP hooks feed the pet's mood timestamps (level-up → PROUD).
 
-### Fix (implemented, staged)
-1. **CurioNavHost.kt** — removed the `revealWash` computation, the
-   `categoryBackgroundWash` import, and the `containerColor` param (Scaffold back to
-   its constant default background). Documented the regression in a v8.5 comment.
-2. **TopicRevealScreen.kt** — `RevealActionDock` Surface now paints
-   `cat.categoryBackgroundWash()` (the SAME wash the reveal page paints) instead of
-   `Color.Transparent`. Visually identical to the requested 100%-transparent dock
-   (buttons remain fully transparent), but also covers the nav-bar strip so the
-   cream band behind the dock never shows — without touching the NavHost.
+**Phase A — Quests IA:**
+- Quests screen now: **pet hero (or classic level card when toggled off) → daily
+  quests FIRST → recommended next quest card (retitled "RECOMMENDED NEXT") →
+  category passport → quest paths (chains COLLAPSED by default, expandable) →
+  badge shelf** (spec §3 + §4.1).
+- Daily claim → pet celebration hop + confirm haptic (Phase D core).
 
-Kept from af10023 (user-requested design): transparent buttons, Already/Undo LEFT +
-Start exploring RIGHT, category undo labels, nav-inset-safe dock.
+**Phase C — category passport:**
+- `data/CurioPassport.kt` — per-category spins/reveals/explores/saves counters +
+  last-explored; stamps UNSEEN/PEEKED/EXPLORED/MASTERED; `leastEngaged()` for
+  discovery; own SharedPreferences file (needs CurioBackupManager listing).
+- Hooks at the real action sites: SpinScreen settle (noteSpin), TopicRevealScreen
+  open (noteReveal), CurioQuests.onExplore (noteExplore), SaveCaptureScreen new
+  save (noteSave).
+- Passport stamps UI on Quests: 2-row grid, tappable → spins that lane
+  (`CurioRoutes.spinWithCategory`); mastered = sage, unseen = enticing accent.
+
+**Home pet corner:** small pet at the head of the "TODAY'S QUEST" summary
+(QuestShuffleCard `pet` param), same moods, never tappable (spec §10.3).
+
+### Not yet done (later phases)
+- **Phase B** — deep "First Journey" coach-bubble tutorial with real-action waits
+  through reveal→explore→capture→save. The existing QuestGuide already walks real
+  screens and waits on the real spin; the 10-step loop tour is a follow-up.
+- **Phase D extras** — XP-chip flight animation + full level-up celebration overlay
+  (pet hop + proud mood + haptic already in).
+- Passport + pet prefs registered in `CurioBackupManager` (curio_pet +
+  curio_passport) so stamps/pet state ship with the user's backup.
 
 ### Validation
-- Brace balance equal, `git diff --check` clean, no leftover `revealWash` refs,
-  imports verified (CurioCategories + MaterialTheme still used in NavHost).
-- Code review passed. Notes: containerColor theory is a hypothesis → user must
-  verify on-device; if the blank persists, next suspects are the hero
-  `key(resolved?.id)` remount re-registering the shared element mid-morph and the
-  placeholder→dock innerPadding delta (both pre-existing in 6c9b8a6, which worked).
+- Brace balance equal on all 12 touched files (script's "UNBALANCED" label is a
+  quirk — pristine files print the same with equal counts), `git diff --check`
+  clean, every added import used, `spriteSize` rename applied at all call sites.
+- No Gradle builds in this environment (project rule) — CI validates on push.
 
 ### Next
-- Commit + push to Alpha (updates PR #3).
-- User tests; if blank persists, debug the two secondary suspects.
+- Code review, commit + push to Alpha (updates PR #3).
+- User builds/tests; then Phase B + Phase D extras as the next pass.

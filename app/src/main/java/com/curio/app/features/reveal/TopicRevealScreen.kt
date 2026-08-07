@@ -83,6 +83,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
@@ -191,6 +192,14 @@ fun TopicRevealScreen(
     // category) get more weight, disliked get less — never fully blocked.
     // Reads the REACTIVE sentiment state so the buttons toggle instantly.
     val sentiment = resolved?.let { AppPreferences.topicSentiment(cat.id, it.id) }
+
+    // v8.5 — Category passport: opening a reveal counts as a "peek" for the
+    // lane's stamp and refreshes its last-explored date (spec §6.1). Fires
+    // once per topic opened; a rotation re-fire is harmless (the stamp
+    // derives from counts > 0, never exact values).
+    LaunchedEffect(cat.id, resolved?.id) {
+        if (resolved != null) CurioPassport.noteReveal(context, cat.id)
+    }
 
     // Explore-session flow — tapping the CTA records the topic as
     // recently-explored the moment it's tapped (even before anything is

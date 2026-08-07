@@ -76,6 +76,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CurioPet
+import com.curio.app.data.CurioQuests
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -98,6 +100,7 @@ import com.curio.app.features.recent.RecentFeedItem
 import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
+import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -194,6 +197,20 @@ fun HomeScreen(navController: NavController) {
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
     val streakDays = StreakTracker.getStreak(context)
     val reminderEnabled = AppPreferences.reminderEnabledState
+    // v8.5 — Home pet corner presence (spec §10.3): a small pet watches the
+    // deck next to the daily quest summary when the pet is enabled. It
+    // shares the Quests hero's moods but stays quiet here (the hero owns
+    // the dialogue) and is never tappable — it just keeps you company.
+    val homePetSprite: (@Composable () -> Unit)? = if (AppPreferences.petEnabledState) {
+        {
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.mood(context, CurioQuests.categoriesState),
+                accent = homeRoseAccent(),
+                spriteSize = 42.dp
+            )
+        }
+    } else null
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val recentEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
@@ -516,6 +533,7 @@ fun HomeScreen(navController: NavController) {
                 ) {
                 QuestShuffleCard(
                     accent = homeRoseAccent(),
+                    pet = homePetSprite,
                     onShuffle = {
                         // v7.94 — shuffle only VISIBLE lanes: hidden
                         // categories (Manage Categories) never get dealt.
@@ -1053,6 +1071,7 @@ private fun TopBarPill(
 @Composable
 private fun QuestShuffleCard(
     accent: Color,
+    pet: (@Composable () -> Unit)? = null,
     onShuffle: () -> Unit
 ) {
     // Deep ink twin for the eyebrow — the airy pastel accent reads too
@@ -1076,6 +1095,17 @@ private fun QuestShuffleCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            // v8.5 — the pet sits at the head of the daily quest summary
+            // (spec §10.3). Never intercepts taps: the row's shuffle click
+            // still fires.
+            pet?.let {
+                Box(
+                    modifier = Modifier.size(46.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    it()
+                }
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "TODAY'S QUEST",

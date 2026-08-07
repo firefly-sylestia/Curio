@@ -1,7 +1,9 @@
 package com.curio.app.features.quests
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,14 +26,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +48,9 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioCategory
+import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioQuests.DailyQuest
 import com.curio.app.data.CurioQuests.QuestChain
@@ -61,6 +70,7 @@ import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.pet.CurioPetHeroCard
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -95,6 +105,25 @@ fun QuestsScreen(navController: NavController) {
     val (progress, nextThreshold) = CurioQuests.xpProgress(xp)
     val current = CurioQuests.currentQuest()
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    // v8.5 — pet celebration: a daily claim bumps this key and the pet hero
+    // hops once (spec §9). A soft confirmation haptic marks the reward
+    // moment (spec §9.3 — light touch, respects device settings).
+    var celebrate by remember { mutableStateOf(0) }
+    // The pet's one-shot bubble for this visit (spec §10.7 — one per screen
+    // visit). Fetched in a LaunchedEffect so the bubble's prefs write never
+    // happens during composition.
+    var petBubble by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        if (AppPreferences.petEnabledState) {
+            petBubble = CurioPet.bubbleFor(context, "quests", CurioQuests.categoriesState)
+        }
+    }
+    // The pet's accent — the least-engaged lane's tint, or the page coral
+    // when every lane is already explored. (themedAccent is @Composable, so
+    // only the prefs read is remembered.)
+    val leastEngagedCat = remember { CurioPassport.leastEngaged(context) }
+    val petAccent = leastEngagedCat?.themedAccent() ?: CurioColors.CoralBlush
     // v8.2 — the tour is offered ONCE and only from a tap on this page: the
     // first quest shows a prompt with a "No, thanks" option; a taken or
     // declined offer is never shown again, and the "Guided tour" Settings
@@ -133,13 +162,44 @@ fun QuestsScreen(navController: NavController) {
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 10.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // v8.5 — Pet hero: the level card is replaced by the pet
+                // companion (level + XP ring + growth line + speech bubble)
+                // when the pet is enabled; the classic level card returns
+                // when the toggle is off.
                 item {
-                    LevelCard(
-                        level = level,
-                        xp = xp,
-                        nextThreshold = nextThreshold,
-                        progress = progress,
-                        isMaxLevel = level >= CurioQuests.maxLevel
+                    if (AppPreferences.petEnabledState) {
+                        CurioPetHeroCard(
+                            accent = petAccent,
+                            bubbleText = petBubble,
+                            onGo = onQuestNavigate,
+                            celebrateKey = celebrate
+                        )
+                    } else {
+                        LevelCard(
+                            level = level,
+                            xp = xp,
+                            nextThreshold = nextThreshold,
+                            progress = progress,
+                            isMaxLevel = level >= CurioQuests.maxLevel
+                        )
+                    }
+                }
+                // v8.5 — Daily quests are FIRST under the hero: the page
+                // answers "what can I do today" before anything else
+                // (spec §3 + §4.1). Completing one fires the pet's
+                // celebration hop.
+                item {
+                    DailyCard(
+                        quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay()),
+                        // v8.3 — complete dailies are CLAIMED here (a tap
+                        // grants the XP) and in-progress ones can Go straight
+                        // to where the action happens.
+                        onClaim = { questId ->
+                            CurioQuests.claimDaily(context, questId)
+                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                            celebrate++
+                        },
+                        onGo = onQuestNavigate
                     )
                 }
                 if (current != null) {
@@ -151,9 +211,22 @@ fun QuestsScreen(navController: NavController) {
                         )
                     }
                 }
+                // v8.5 — Category passport: every lane's stamp, tappable to
+                // spin that lane (spec §6).
+                item {
+                    PassportCard(
+                        onSpin = { slug ->
+                            navController.navigate(CurioRoutes.spinWithCategory(slug)) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
                 // v8.2 — finished chains (every stage earned) are hidden so
                 // the page focuses on what's left; the badge shelf below
-                // still shows the full collection.
+                // still shows the full collection. v8.5 — chains collapse
+                // by default so the page shows one primary next step
+                // instead of every chain expanded (spec §3 + §4.1).
                 val activeChains = CurioQuests.Chains.filter { chain ->
                     CurioQuests.chainProgress(chain) < chain.stages.size
                 }
@@ -161,16 +234,6 @@ fun QuestsScreen(navController: NavController) {
                     ChainCard(
                         chain = activeChains[index],
                         onNavigate = onQuestNavigate
-                    )
-                }
-                item {
-                    DailyCard(
-                        quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay()),
-                        // v8.3 — complete dailies are CLAIMED here (a tap
-                        // grants the XP) and in-progress ones can Go straight
-                        // to where the action happens.
-                        onClaim = { questId -> CurioQuests.claimDaily(context, questId) },
-                        onGo = onQuestNavigate
                     )
                 }
                 item {
@@ -318,7 +381,9 @@ private fun CurrentQuestCard(
                 )
             }
             Text(
-                "CURRENT QUEST",
+                // v8.5 — this is the single recommended next step (spec §3:
+                // "One primary next step"), so the label says what it is.
+                "RECOMMENDED NEXT",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.2.sp
@@ -384,8 +449,15 @@ private fun ChainCard(
     onNavigate: (String) -> Unit = {}
 ) {
     val chainDone = CurioQuests.chainProgress(chain)
+    // v8.5 — chains collapse by default: the header + progress read at a
+    // glance; tapping expands the stage trail. Keeps the page to one
+    // primary next step instead of every chain's stages at once (spec §3).
+    var expanded by rememberSaveable(chain.id) { mutableStateOf(false) }
     CurioSettingsCard {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -423,6 +495,13 @@ private fun ChainCard(
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
                 color = if (chainDone == chain.stages.size) CurioColors.Sage else CurioColors.CoralBlush
             )
+            // Expand/collapse chevron — rotates with the state.
+            CurioIcon(
+                name = if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                contentDescription = if (expanded) "Collapse ${chain.title}" else "Expand ${chain.title}",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 18.dp
+            )
         }
         Spacer(Modifier.height(6.dp))
         LinearProgressIndicator(
@@ -437,19 +516,24 @@ private fun ChainCard(
         Spacer(Modifier.height(6.dp))
         // v8.3 — the chain's NEXT actionable stage carries a Go/Start chip
         // too, so every chain points at what to do next (not just the
-        // globally current quest).
-        val nextIndex = chain.stages.indexOfFirst { !CurioQuests.isStageDone(it) }
-        chain.stages.forEachIndexed { index, stage ->
-            val done = CurioQuests.isStageDone(stage)
-            val isCurrent = !done && stage.id == CurioQuests.currentQuest()?.id
-            ChainStageRow(
-                index = index,
-                stage = stage,
-                done = done,
-                isCurrent = isCurrent,
-                isNext = index == nextIndex,
-                onNavigate = { stage.navRoute?.let(onNavigate) }
-            )
+        // globally current quest). v8.5 — the stage trail is hidden until
+        // the header is tapped.
+        AnimatedVisibility(visible = expanded) {
+            Column {
+                val nextIndex = chain.stages.indexOfFirst { !CurioQuests.isStageDone(it) }
+                chain.stages.forEachIndexed { index, stage ->
+                    val done = CurioQuests.isStageDone(stage)
+                    val isCurrent = !done && stage.id == CurioQuests.currentQuest()?.id
+                    ChainStageRow(
+                        index = index,
+                        stage = stage,
+                        done = done,
+                        isCurrent = isCurrent,
+                        isNext = index == nextIndex,
+                        onNavigate = { stage.navRoute?.let(onNavigate) }
+                    )
+                }
+            }
         }
     }
 }
@@ -785,6 +869,119 @@ private fun BadgeTile(
                 if (unlocked) "Badge earned" else "$progress / ${stage.target}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * v8.5 — the category passport (spec §6): every lane as a tappable stamp.
+ * Explored/mastered lanes show their stamp; unseen lanes look enticing and
+ * route straight into that lane's Spin deck (spec §6.3).
+ */
+@Composable
+private fun PassportCard(
+    onSpin: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val cats = CurioCategories.visible
+    val mastered = cats.count {
+        CurioPassport.progress(context, it.id).stamp == CurioPassport.Stamp.MASTERED
+    }
+    CurioSettingsCard {
+        CurioCardHeader(
+            CurioIcons.Star,
+            "Category passport",
+            "$mastered of ${cats.size} lanes mastered"
+        )
+        Spacer(Modifier.height(4.dp))
+        cats.chunked(3).forEach { row ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                row.forEach { cat ->
+                    PassportStamp(
+                        cat = cat,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onSpin(cat.id.routeSlug) }
+                    )
+                }
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+/** One passport stamp — the lane's glyph, name and state. */
+@Composable
+private fun PassportStamp(
+    cat: CurioCategory,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val stamp = CurioPassport.progress(context, cat.id).stamp
+    val accent = cat.themedAccent()
+    val label: String
+    val glyph: String
+    val tint: Color
+    when (stamp) {
+        CurioPassport.Stamp.MASTERED -> {
+            label = "Mastered"; glyph = CurioIcons.TaskAlt; tint = CurioColors.Sage
+        }
+        CurioPassport.Stamp.EXPLORED -> {
+            label = "Explored"; glyph = CurioIcons.Check; tint = CurioColors.Sage
+        }
+        CurioPassport.Stamp.PEEKED -> {
+            label = "Peeked"; glyph = CurioIcons.Star; tint = accent
+        }
+        CurioPassport.Stamp.UNSEEN -> {
+            label = "New · spin!"; glyph = CurioIcons.StarOutline; tint = accent
+        }
+    }
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = when (stamp) {
+            CurioPassport.Stamp.MASTERED -> CurioColors.Sage.copy(alpha = 0.12f)
+            CurioPassport.Stamp.UNSEEN -> accent.copy(alpha = 0.10f)
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        },
+        border = BorderStroke(
+            1.dp,
+            if (stamp == CurioPassport.Stamp.UNSEEN) accent.copy(alpha = 0.35f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        ),
+        modifier = modifier
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+        ) {
+            CurioIcon(
+                name = cat.iconGlyph,
+                contentDescription = cat.displayName,
+                tint = accent,
+                size = 20.dp
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                cat.displayName,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = tint,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

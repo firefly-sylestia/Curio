@@ -481,9 +481,18 @@ object CurioQuests {
 
     // ── XP ───────────────────────────────────────────────────────────────
     private fun addXp(context: Context, amount: Int) {
+        val levelBefore = levelForXp(xpState)
         xpState += amount
+        val levelAfter = levelForXp(xpState)
         write(context)
         checkAll(context)
+        // Feed the Curio pet's mood timestamps (spec §10.5): a level-up is
+        // the proud moment; any positive XP is a happy one. (The pet only
+        // reacts to REAL XP — the 0-XP refresh calls stay quiet.)
+        if (amount > 0) {
+            if (levelAfter > levelBefore) CurioPet.noteLevelUp(context)
+            else CurioPet.noteXpEarned(context)
+        }
     }
 
     // ── Event hooks — the app calls these where real actions happen ────
@@ -502,11 +511,17 @@ object CurioQuests {
     /** The user started exploring a topic (ExploreSessionStore.recordExplored). */
     fun onExplore(context: Context, categoryId: CategoryId) {
         ensureDaily(context)
+        val isNewLane = categoryId.name !in categoriesState
         lifetimeState = lifetimeState.copy(explores = lifetimeState.explores + 1)
         categoriesState = categoriesState + categoryId.name
         bumpDaily(context, DailyKind.EXPLORE)
         write(context)
         addXp(context, 5)
+        // The pet gets excited the first time a lane is explored (spec §10.5).
+        if (isNewLane) CurioPet.noteLaneExplored(context)
+        // Feed the category passport — an explore advances the lane's stamp
+        // toward EXPLORED and refreshes its last-explored date (spec §6.1).
+        CurioPassport.noteExplore(context, categoryId)
         // The tour's Explore step advances when a topic is explored.
         QuestGuide.onWait(QuestGuide.Wait.EXPLORE)
     }

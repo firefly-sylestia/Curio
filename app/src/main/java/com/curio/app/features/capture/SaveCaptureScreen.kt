@@ -67,6 +67,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
+import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
@@ -310,6 +311,9 @@ fun SaveCaptureScreen(
                             // existing keepsake, not a new discovery.
                             if (editEntryId == null) {
                                 CurioQuests.onSave(context, entry.format)
+                                // Feed the category passport — a saved capture
+                                // masters the lane's stamp (spec §6.1).
+                                CurioPassport.noteSave(context, entry.topic.categoryId)
                             }
                             // Saved — the autosaved draft is now redundant. Null the
                             // snapshot too, so a debounced write that re-fires when

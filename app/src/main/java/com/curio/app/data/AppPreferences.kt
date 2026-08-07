@@ -103,6 +103,13 @@ object AppPreferences {
     // transcription never appears or starts until the user opts in.
     private const val KEY_VOICE_TO_TEXT_ENABLED = "voice_to_text_enabled"
     private const val KEY_GUIDE_ENABLED = "guide_enabled"
+    // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
+    // rule-based dialogue + the category passport/discovery features on
+    // Quests and Home. Default ON; a user-facing Appearance toggle gates
+    // the whole companion layer so it can be A/B'd and reverted without a
+    // code change (per the experiment rules, the toggle is removed once the
+    // companion design is decided).
+    private const val KEY_PET_ENABLED = "pet_enabled"
     // v8.2 — the quest tour's one-time offer: once the user has taken OR
     // declined it ("No, thanks" / dismissing the prompt), the offer never
     // reappears and the first quest navigates normally.
@@ -295,6 +302,16 @@ object AppPreferences {
     var guideEnabledState by mutableStateOf(true)
         private set
 
+    /**
+     * Curio pet companion state (v8.5) — gates the pixel pet sprite, its
+     * rule-based dialogue, and the passport/discovery companion layer on
+     * Quests and Home (spec §10). Default ON. Seeded from prefs in
+     * [initThemeMode]; off hides the pet entirely and restores the plain
+     * quests layout.
+     */
+    var petEnabledState by mutableStateOf(true)
+        private set
+
     // v8.2 — whether the one-time tour offer has been shown (taken or
     // declined). Suppresses the offer on the Quests page so it never nags.
     var guideTourOfferedState by mutableStateOf(false)
@@ -371,6 +388,7 @@ object AppPreferences {
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         guideEnabledState = isGuideEnabled(context)
         guideTourOfferedState = isGuideTourOffered(context)
+        petEnabledState = isPetEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
         savedQuotesState = getSavedQuotes(context)
         topicSentimentsState = getTopicSentiments(context)
@@ -963,6 +981,16 @@ object AppPreferences {
     fun setGuideTourOffered(context: Context, offered: Boolean) {
         guideTourOfferedState = offered
         prefs(context).edit().putBoolean(KEY_GUIDE_TOUR_OFFERED, offered).apply()
+    }
+
+    // ── Curio pet companion (v8.5) ───────────────────────────────────
+    /** Whether the Curio pet companion layer is on (default ON). */
+    fun isPetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_ENABLED, true)
+
+    fun setPetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_ENABLED, enabled).apply()
+        petEnabledState = enabled
     }
 
     // ── Daily reminder ───────────────────────────────────────────────
