@@ -526,11 +526,25 @@ object CurioQuests {
 
     // ── Event hooks — the app calls these where real actions happen ────
 
-    /** A spin landed (SpinScreen). */
-    fun onSpin(context: Context) {
+    /**
+     * A spin landed in [categoryId] (SpinScreen). [categoryId] is the lane
+     * the user actually spun — WILDCARD when they used the surprise deck.
+     */
+    fun onSpin(context: Context, categoryId: CategoryId) {
         ensureDaily(context)
         lifetimeState = lifetimeState.copy(spins = lifetimeState.spins + 1)
         bumpDaily(context, DailyKind.SPIN)
+        // v8.10 — spinning the discovery daily's target lane completes it at
+        // the spin itself (its "Go" chip routes into that lane's deck). This
+        // is the ONLY path a Wildcard-targeted discovery can ever complete:
+        // Wildcard is a merge, so every wildcard spin lands on a real
+        // category and no reveal/explore reports WILDCARD back — there is no
+        // proper wildcard topic page to open. Real lanes keep the explore
+        // path in [onExplore] too, so opening the topic still counts.
+        val discoveryTarget = CurioPassport.leastEngaged(context)
+        if (discoveryTarget != null && categoryId == discoveryTarget.id) {
+            bumpDaily(context, DailyKind.DISCOVERY)
+        }
         write(context)
         addXp(context, 2)
         // The tour's Spin step advances the moment the user actually spins.

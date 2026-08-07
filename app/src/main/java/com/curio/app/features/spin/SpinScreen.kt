@@ -753,7 +753,10 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             recentTopicIds = (recentTopicIds + primary.id).toList().takeLast(20).toSet()
             StreakTracker.recordActivity(context)
             // Feed the quests system — spins drive journey + daily + badges.
-            CurioQuests.onSpin(context)
+            // The spun lane is passed so a "New lane" discovery daily aimed
+            // at this category (or Wildcard's surprise deck) completes at the
+            // spin, no topic-open required (spec §6.3).
+            CurioQuests.onSpin(context, activeCategory.id)
             // Feed the category passport — the spin counts toward the lane's
             // stamp and drives discovery quests (spec §6).
             CurioPassport.noteSpin(context, activeCategory.id)
