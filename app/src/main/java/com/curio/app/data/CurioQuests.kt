@@ -552,8 +552,10 @@ object CurioQuests {
         }
         write(context)
         addXp(context, 5)
-        // The pet gets excited the first time a lane is explored (spec §10.5).
+        // The pet gets excited the first time a lane is explored (spec §10.5),
+        // and always hops when the user starts exploring (spec §10.6 event hook).
         if (isNewLane) CurioPet.noteLaneExplored(context)
+        CurioPet.reactTo(CurioPet.Event.EXPLORE)
         // Feed the category passport — an explore advances the lane's stamp
         // toward EXPLORED and refreshes its last-explored date (spec §6.1).
         CurioPassport.noteExplore(context, categoryId)

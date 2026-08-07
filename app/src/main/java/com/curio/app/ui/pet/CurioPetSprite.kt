@@ -71,6 +71,8 @@ fun CurioPetSprite(
     moving: Boolean = false,
     dragged: Boolean = false,
     facing: Float = 1f,
+    thinking: Boolean = false,
+    watching: Boolean = false,
     contentDescription: String? = null
 ) {
     val density = LocalDensity.current
@@ -99,6 +101,12 @@ fun CurioPetSprite(
     val breatheSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(2200, easing = LinearEasing))
     }
+    val glanceSpec: InfiniteRepeatableSpec<Float> = remember {
+        infiniteRepeatable(tween(7000), RepeatMode.Restart)
+    }
+    val flickSpec: InfiniteRepeatableSpec<Float> = remember {
+        infiniteRepeatable(tween(5200), RepeatMode.Restart)
+    }
     val idle = rememberInfiniteTransition(label = "petIdle")
     val bobPhase by idle.animateFloat(
         initialValue = 0f, targetValue = 1f,
@@ -114,6 +122,18 @@ fun CurioPetSprite(
         initialValue = 0f, targetValue = 1f,
         animationSpec = breatheSpec,
         label = "petBreathe"
+    )
+    // Slow glance — the eyes drift to one side for a moment every ~7s.
+    val glancePhase by idle.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = glanceSpec,
+        label = "petGlance"
+    )
+    // Ear flick — a quick ear perk every ~5s.
+    val flickPhase by idle.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = flickSpec,
+        label = "petFlick"
     )
     // One-shot celebration hop — keyed so the Quests/Home screens can fire
     // it on quest claims and level-ups.
@@ -157,10 +177,26 @@ fun CurioPetSprite(
     val wiggle = if (excited) sin(bobPhase * 6f * PI.toFloat()) * 3f else 0f
     // Lean into the walk direction, alternating with each step.
     val walkLean = if (moving) facing * 4f * sin(bobPhase * 2f * PI.toFloat()) else 0f
-    val tilt = if (curious && !moving && !dragged) facing * 5f else 0f
+    val tilt = if (curious && !moving && !dragged && !thinking) facing * 5f else 0f
     // Dragged: lifted + stretched like it's being picked up.
     val dragStretchX = if (dragged) 0.92f else 1f
     val dragLiftY = if (dragged) 1.08f else 1f
+    // Extra idle flourishes (v8.9): a slow glance, a periodic ear flick, a
+    // "thinking" tilt with a little ?, and a "watching" tilt (Spin deck).
+    val glanceWave = sin(glancePhase * 2f * PI.toFloat())
+    val glanceShift = if (!sleeping && !dragged && !moving && !thinking) {
+        when {
+            glanceWave > 0.72f -> 1
+            glanceWave < -0.72f -> -1
+            else -> 0
+        }
+    } else 0
+    val flickWave = sin(flickPhase * 2f * PI.toFloat())
+    val flicking = flickWave > 0.92f && !sleeping && !dragged && !thinking
+    val thinkingNow = thinking && !sleeping && !dragged && !moving
+    val watchingNow = watching && !sleeping && !dragged && !moving
+    val idleTilt = (if (thinkingNow) facing * 7f else 0f) +
+        (if (watchingNow) facing * 2.5f else 0f)
 
     // ── Face state ─────────────────────────────────────────────────────
     val eyes = when {
@@ -198,7 +234,7 @@ fun CurioPetSprite(
                     val squishScale = squish.value
                     scaleX = ((breatheScale + squash) * dragStretchX * squishScale).coerceAtLeast(0.4f)
                     scaleY = ((breatheScale - squash) * dragLiftY * squishScale).coerceAtLeast(0.4f)
-                    rotationZ = wiggle + walkLean + tilt
+                    rotationZ = wiggle + walkLean + tilt + idleTilt
                 }
                 .then(
                     if (auraOn) {
@@ -264,8 +300,19 @@ fun CurioPetSprite(
                         if (wag > 0.4f) drawPx(15, 10, bodyShade)
                     }
 
-                    // Face overlays.
-                    when (eyes) {
+                    // Ear flick — a tiny perk of the left ear.
+                    if (flicking) {
+                        drawPx(2, 1, ink)
+                        drawPx(2, 0, ink)
+                    }
+
+                    // Face overlays — the eyes drift with the glance and lift
+                    // while watching the Spin deck; cheeks and mouth stay put.
+                    translate(
+                        left = glanceShift * px,
+                        top = if (watchingNow) -px else 0f
+                    ) {
+                        when (eyes) {
                         EyeStyle.OPEN -> {
                             drawPx(4, 8, ink); drawPx(5, 8, ink)
                             drawPx(4, 9, ink); drawPx(5, 9, ink)
@@ -305,6 +352,7 @@ fun CurioPetSprite(
                         EyeStyle.HAPPY -> {
                             drawPx(4, 9, ink); drawPx(5, 8, ink); drawPx(5, 9, ink)
                             drawPx(10, 9, ink); drawPx(10, 8, ink); drawPx(11, 9, ink)
+                        }
                         }
                     }
 
@@ -373,6 +421,18 @@ fun CurioPetSprite(
                         drawPx(2, 13, gold, twinkle * 0.8f)
                         drawPx(13, 2, gold, (1f - twinkle) * 0.8f)
                     }
+
+                    // A white glint twinkles on the antenna star.
+                    if (sin(bobPhase * 2f * PI.toFloat()) > 0.78f) {
+                        drawPx(7, 0, white, 0.9f)
+                    }
+
+                    // A tiny "?" hovers above the antenna while thinking.
+                    if (thinkingNow) {
+                        drawPx(9, 0, ink)
+                        drawPx(8, 1, ink); drawPx(9, 1, ink)
+                        drawPx(9, 2, ink)
+                    }
                 }
             }
         }
@@ -403,10 +463,10 @@ private val BODY_ROWS: List<String> = listOf(
     "..obbbbbbbbbbo..",
     ".obbbbbbbbbbbbo.",
     "obbbbbbbbbbbbbbo",
-    "obbbbbbbbbbbbbbo",
-    "obbbbbbbbbbbbbbo",
-    "obbbbbbbbbbbbbbo",
-    ".obbbbbbbbbbbbo.",
+    "obbbbbbbbbbbBBbo",
+    "obbbbbbbbbbbBBbo",
+    "obbbbbbbbbbbBBbo",
+    ".obbbbbbbbbbBBo.",
     "..osssssssssso..",
     "...oSSssssSSo...",
     "..oo........oo..",

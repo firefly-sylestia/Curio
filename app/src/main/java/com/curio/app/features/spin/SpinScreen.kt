@@ -105,6 +105,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
@@ -756,6 +757,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             // Feed the category passport — the spin counts toward the lane's
             // stamp and drives discovery quests (spec §6).
             CurioPassport.noteSpin(context, activeCategory.id)
+            // The pet cheers when the wheel lands (spec §10.6 event hook).
+            CurioPet.reactTo(CurioPet.Event.SPIN_LANDED)
             // Final reel clunk — strong confirmation the wheel locked in.
             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
         }

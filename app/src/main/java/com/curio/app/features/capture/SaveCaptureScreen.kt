@@ -68,6 +68,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
@@ -314,6 +315,8 @@ fun SaveCaptureScreen(
                                 // Feed the category passport — a saved capture
                                 // masters the lane's stamp (spec §6.1).
                                 CurioPassport.noteSave(context, entry.topic.categoryId)
+                                // The pet celebrates a new keepsake (spec §10.6).
+                                CurioPet.reactTo(CurioPet.Event.SAVE)
                             }
                             // Saved — the autosaved draft is now redundant. Null the
                             // snapshot too, so a debounced write that re-fires when

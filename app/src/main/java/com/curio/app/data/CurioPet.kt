@@ -2,6 +2,7 @@ package com.curio.app.data
 
 import android.content.Context
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
@@ -99,6 +100,37 @@ object CurioPet {
     /** Wake the pet (tap on the bed). The floating companion appears. */
     fun wake() {
         awake = true
+    }
+
+    // ── One-shot events (v8.9) — screens bump these on real actions and the
+    //    floating pet watches [eventCount] to react (hop + line).
+    enum class Event { SPIN_LANDED, REVEAL_OPEN, EXPLORE, SAVE }
+
+    var eventCount by mutableIntStateOf(0)
+        private set
+    var lastEvent by mutableStateOf<Event?>(null)
+        private set
+
+    /** Called by the screens where the action really happens. */
+    fun reactTo(event: Event) {
+        lastEvent = event
+        eventCount++
+    }
+
+    /** A short, cute line for the pet's reaction to [event]. */
+    fun eventLine(event: Event): String = when (event) {
+        Event.SPIN_LANDED -> listOf(
+            "It landed!", "Ooh — the deck chose well!", "A new topic, a new tale!"
+        ).random()
+        Event.REVEAL_OPEN -> listOf(
+            "Open it, open it!", "A mystery awaits!", "Peek inside!"
+        ).random()
+        Event.EXPLORE -> listOf(
+            "Go explore!", "Adventure time!", "I'll wait right here — go see!"
+        ).random()
+        Event.SAVE -> listOf(
+            "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!"
+        ).random()
     }
 
     /** Send the pet back to bed after a long idle — the bed shows it asleep. */

@@ -819,7 +819,7 @@ fun CurioNavHost(
     val petAccentCat = remember { CurioPassport.leastEngaged(context) }
     val floatingPetAccent = petAccentCat?.themedAccent()
         ?: CurioCategories.byId(CategoryId.WILDCARD).themedAccent()
-    CurioFloatingPet(accent = floatingPetAccent)
+    CurioFloatingPet(accent = floatingPetAccent, routePrefix = routePrefix)
 
     // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"
     // overlay were replaced in v8.2: the tour is offered ONCE on the Quests

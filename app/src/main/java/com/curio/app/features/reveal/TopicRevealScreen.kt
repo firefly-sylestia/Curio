@@ -83,6 +83,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
@@ -202,6 +203,8 @@ fun TopicRevealScreen(
     LaunchedEffect(cat.id, resolved?.id) {
         if (resolved != null) {
             CurioPassport.noteReveal(context, cat.id)
+            // The pet leans in when the topic reveal opens (spec §10.6).
+            CurioPet.reactTo(CurioPet.Event.REVEAL_OPEN)
             QuestGuide.onWait(QuestGuide.Wait.REVEAL)
         }
     }
