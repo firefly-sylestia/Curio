@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import java.util.Calendar
 
 /**
  * The Curio pet — a tiny pixelated "spark-spirit" companion (spec §10).
@@ -214,13 +215,61 @@ object CurioPet {
         }
     }
 
-    /** How often the pet starts a game on its own — bouncy pets play more. */
-    fun playfulBias(context: Context): Float = when (persona(context)) {
-        Persona.BOUNCY -> 0.22f
-        Persona.EXPLORER -> 0.14f
-        Persona.CUDDLY -> 0.10f
-        Persona.SPARKY -> 0.08f
+    /**
+     * How often the pet starts a game on its own — bouncy pets play more,
+     * and the clock sets the energy level (v8.14): sprightly in the
+     * morning, winding down after dark.
+     */
+    fun playfulBias(context: Context): Float {
+        val base = when (persona(context)) {
+            Persona.BOUNCY -> 0.22f
+            Persona.EXPLORER -> 0.14f
+            Persona.CUDDLY -> 0.10f
+            Persona.SPARKY -> 0.08f
+        }
+        val energy = when (timeOfDay()) {
+            TimeOfDay.MORNING -> 1.5f
+            TimeOfDay.AFTERNOON -> 1.15f
+            TimeOfDay.EVENING -> 0.9f
+            TimeOfDay.NIGHT -> 0.45f
+        }
+        return (base * energy).coerceIn(0f, 0.3f)
     }
+
+    // ── Time of day (v8.14) — 4 phases from the device clock ──────────
+    enum class TimeOfDay(val displayName: String) {
+        MORNING("Morning"), AFTERNOON("Afternoon"), EVENING("Evening"), NIGHT("Night")
+    }
+
+    /** The current time-of-day phase from the device clock (v8.14). */
+    fun timeOfDay(): TimeOfDay {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 6..11 -> TimeOfDay.MORNING
+            in 12..17 -> TimeOfDay.AFTERNOON
+            in 18..21 -> TimeOfDay.EVENING
+            else -> TimeOfDay.NIGHT
+        }
+    }
+
+    /**
+     * v8.14 — at app launch the pet wakes on its own in the MORNING (and
+     * greets), while at night it stays tucked in bed. Afternoon/evening
+     * launches keep the old asleep-until-tapped behavior. Called from
+     * MainActivity after the state seeds.
+     */
+    fun wakeForMorning() {
+        if (timeOfDay() == TimeOfDay.MORNING && !awake) {
+            awake = true
+            atHome = false
+        }
+    }
+
+    /** A short morning greeting (v8.14) — shown when the pet appears in the morning. */
+    fun morningGreeting(): String = listOf(
+        "Good morning!", "Morning! Ready for a spin?", "Rise and shine!",
+        "Fresh day, fresh topics!"
+    ).random()
 
     // ── Moods (spec §10.5) — derived from recent activity, never shaming ──
     // v8.13 — two more status moods: FOCUSED (the user is writing/saving on
@@ -240,6 +289,9 @@ object CurioPet {
             now - lastPlayAt(context) < 5 * 60_000L -> Mood.BOUNCY
             now - lastXpAt(context) < 120_000L -> Mood.HAPPY
             leastExploredLane(context, lanes) != null -> Mood.CURIOUS
+            // v8.14 — natural bed time: after dark the pet gets drowsy once
+            // the day's excitement cools (30 min without XP) and dozes off.
+            timeOfDay() == TimeOfDay.NIGHT && now - lastXpAt(context) > 30 * 60_000L -> Mood.SLEEPY
             now - lastXpAt(context) > 12 * 3_600_000L -> Mood.SLEEPY
             else -> Mood.HAPPY
         }
@@ -278,6 +330,29 @@ object CurioPet {
         "That was fun. More?",
         "Curiosity looks good on you."
     )
+    // v8.14 — the HAPPY mood wears the hour's voice: morning energy, cozy
+    // evening, hushed night.
+    private val morningLines = listOf(
+        "Morning! The deck smells fresh.",
+        "Rise and shine — something new is waiting.",
+        "Fresh eyes, fresh topics — let's go!",
+        "Good morning! I saved your spot."
+    )
+    private val afternoonLines = listOf(
+        "Afternoon wander? Let's go.",
+        "Bright and busy — a good time to peek.",
+        "Midday! Perfect for a quick spin."
+    )
+    private val eveningLines = listOf(
+        "Evening! Cozy hour, warm lamp.",
+        "The day's winding down — one more spin?",
+        "Evening glow. Nice time for a discovery."
+    )
+    private val nightLines = listOf(
+        "Past my bedtime… but for you, I'll stay.",
+        "Shh — night mode. One quiet spin?",
+        "The stars are out. The deck still shines."
+    )
     private val curiousLines = listOf(
         "We haven't tried __LANE__ yet — want a new stamp?",
         "I wonder what __LANE__ hides…",
@@ -310,7 +385,12 @@ object CurioPet {
             "Do you feel that? That's growth!"
         ).random()
         Mood.EXCITED -> excitedLines.random()
-        Mood.HAPPY -> happyLines.random()
+        Mood.HAPPY -> when (timeOfDay()) {
+            TimeOfDay.MORNING -> morningLines.random()
+            TimeOfDay.AFTERNOON -> afternoonLines.random()
+            TimeOfDay.EVENING -> eveningLines.random()
+            TimeOfDay.NIGHT -> nightLines.random()
+        }
         Mood.CURIOUS -> {
             val lane = leastExploredLane(context, lanes)
             if (lane != null) {
@@ -406,7 +486,7 @@ object CurioPet {
         private set
 
     /** The Spin screen sets this around its shuffle animation. */
-    fun setSpinning(value: Boolean) {
+    fun noteSpinning(value: Boolean) {
         spinning = value
     }
 

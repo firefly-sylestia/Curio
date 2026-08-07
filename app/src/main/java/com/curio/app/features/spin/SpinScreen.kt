@@ -679,7 +679,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         if (shuffleCount == 0 || filteredPool.isEmpty()) return@LaunchedEffect
         shuffling = true
         // v8.13 — the pet cheers while the deck reels (cleared at the settle).
-        CurioPet.setSpinning(true)
+        CurioPet.noteSpinning(true)
         landedTopicName = null
         landingAlreadyOpened = false
         isOpening = false
@@ -723,7 +723,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
         shuffling = false
         // v8.13 — the reel stopped; the pet settles back to watching.
-        CurioPet.setSpinning(false)
+        CurioPet.noteSpinning(false)
 
         // Pick a single topic — tier-biased, sentiment-weighted (liked /
         // disliked topics + category affinity), and never an already-

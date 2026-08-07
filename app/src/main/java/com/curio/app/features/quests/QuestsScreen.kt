@@ -799,7 +799,7 @@ private fun DailyCard(
 ) {
     val context = LocalContext.current
     CurioSettingsCard {
-        CurioCardHeader(CurioIcons.EmojiEvents, "Today's quests", "Resets at midnight")
+        CurioCardHeader(CurioIcons.EmojiEvents, "Today's quests", "Resets at 4 AM")
         Spacer(Modifier.height(2.dp))
         quests.forEach { quest ->
             val progress = CurioQuests.dailyProgressState[quest.kind.name] ?: 0

@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureRepository
 import com.curio.app.data.CurioDatabase
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.QuestGuide
@@ -71,6 +72,9 @@ class MainActivity : ComponentActivity() {
         // v8.6 — restore an in-flight First Journey tour so it survives
         // process death (spec §7.3); no-op when no tour was running.
         QuestGuide.seed(this)
+        // v8.14 — the pet wakes on its own in the morning (and stays tucked
+        // in at night); afternoon/evening launches keep asleep-until-tapped.
+        CurioPet.wakeForMorning()
         if (AppPreferences.isReminderEnabled(this)) {
             com.curio.app.data.DailyReminderScheduler.schedule(
                 this,

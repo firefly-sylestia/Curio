@@ -498,10 +498,14 @@ object CurioQuests {
         write(context)
     }
 
-    /** Today's epoch day (midnight-normalized) — the daily reset key. */
+    /**
+     * Today's epoch day — the daily reset key. v8.14 — the day rolls over
+     * at 4 AM (not midnight), so a late-night session never quietly wipes
+     * the day's quests mid-celebration; a "day" now runs 4 AM → 4 AM.
+     */
     fun todayEpochDay(): Long {
         val cal = Calendar.getInstance()
-        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.HOUR_OF_DAY, 4)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
