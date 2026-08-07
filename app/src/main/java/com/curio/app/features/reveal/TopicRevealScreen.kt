@@ -446,12 +446,11 @@ fun TopicRevealScreen(
             CurioWatermarkBackdrop(activeCat = cat)
         }
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
         // ── 1. Top bar (pin bookmark + close ✕) ────────────────────────
         Row(
             modifier = Modifier
@@ -655,44 +654,41 @@ fun TopicRevealScreen(
                 }
 
                 Spacer(Modifier.height(24.dp))
-            }
 
-            }
+                val pillBg by animateColorAsState(
+                    targetValue = if (isDone) cat.themedAccent()
+                                  else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                    label = "alreadyDoneBg"
+                )
+                val pillInk by animateColorAsState(
+                    targetValue = if (isDone) cat.onAccent()
+                                  else MaterialTheme.colorScheme.onSurfaceVariant,
+                    label = "alreadyDoneInk"
+                )
 
-            val pillBg by animateColorAsState(
-                targetValue = if (isDone) cat.themedAccent()
-                              else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                label = "alreadyDoneBg"
-            )
-            val pillInk by animateColorAsState(
-                targetValue = if (isDone) cat.onAccent()
-                              else MaterialTheme.colorScheme.onSurfaceVariant,
-                label = "alreadyDoneInk"
-            )
-
-            RevealActionDock(
-                cat = cat,
-                browseMode = browseMode,
-                resolved = resolved,
-                isDone = isDone,
-                pillBg = pillBg,
-                pillInk = pillInk,
-                onExplore = { showExploreDialog = true },
-                onAlready = {
-                    val topic = resolved
-                    if (topic != null) {
-                        // Marking OR unmarking is engaging — backing out must not
-                        // record the topic as unexplored afterwards.
-                        engaged = true
-                        if (isDone) {
-                            ExploreSessionStore.unmarkDone(context, cat.id, topic.name)
-                        } else {
-                            ExploreSessionStore.markDone(context, cat.id, topic.name)
-                            if (!browseMode) showAlreadyDoneDialog = true
+                RevealActionDock(
+                    cat = cat,
+                    browseMode = browseMode,
+                    resolved = resolved,
+                    isDone = isDone,
+                    pillBg = pillBg,
+                    pillInk = pillInk,
+                    onExplore = { showExploreDialog = true },
+                    onAlready = {
+                        val topic = resolved
+                        if (topic != null) {
+                            engaged = true
+                            if (isDone) {
+                                ExploreSessionStore.unmarkDone(context, cat.id, topic.name)
+                            } else {
+                                ExploreSessionStore.markDone(context, cat.id, topic.name)
+                                if (!browseMode) showAlreadyDoneDialog = true
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
+
         }
     }
 

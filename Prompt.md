@@ -30,3 +30,10 @@ No Gradle in this env (per AGENTS.md) — restored files byte-identical to `7244
 
 ### Validation
 - Gradle commands are prohibited in this environment; static validation and git diff review remain to be run before commit/push.
+
+---
+
+## Follow-up (2026-08-07): Keep actions below the content — DONE
+
+- The action buttons are no longer in a separate sticky bottom dock.
+- They now render after the existing bottom spacer inside the scroll content, below the cards, while retaining category tint, responsive layout, and navigation-bar padding.
