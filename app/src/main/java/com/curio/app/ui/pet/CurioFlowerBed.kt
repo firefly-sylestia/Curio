@@ -32,12 +32,15 @@ import com.curio.app.data.CurioQuests
  * [petInside] draws the pet on the mattress (asleep when [sleeping], with
  * drifting Z's; sitting up otherwise). [celebrateKey] forwards the one-shot
  * celebration hop to the pet in the bed.
+ *
+ * v8.10 — no accent param: the pet's scarf wears the fixed Curio brand
+ * coral (one theme, one color), so the bed stops tinting with category
+ * pastels or dark mode.
  */
 @Composable
 fun CurioFlowerBed(
     petInside: Boolean,
     sleeping: Boolean,
-    accent: Color,
     modifier: Modifier = Modifier,
     bedSize: Dp = 76.dp,
     onTap: (() -> Unit)? = null,
@@ -104,7 +107,6 @@ fun CurioFlowerBed(
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
                 mood = mood,
-                accent = accent,
                 spriteSize = bedSize * 0.52f,
                 celebrateKey = celebrateKey,
                 contentDescription = if (sleeping) "Curio asleep in its flower bed — tap to wake" else null,

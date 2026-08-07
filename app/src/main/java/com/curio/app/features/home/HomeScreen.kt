@@ -202,13 +202,22 @@ fun HomeScreen(navController: NavController) {
     val homePetSprite: (@Composable () -> Unit)? = if (AppPreferences.petEnabledState) {
         {
             CurioFlowerBed(
-                petInside = !CurioPet.awake || !AppPreferences.floatingPetEnabledState,
+                petInside = !CurioPet.awake || CurioPet.atHome ||
+                    !AppPreferences.floatingPetEnabledState,
                 sleeping = !CurioPet.awake,
-                accent = homeRoseAccent(),
                 bedSize = 52.dp,
-                onTap = { CurioPet.wake() },
-                contentDescription = if (!CurioPet.awake)
-                    "Curio asleep in its flower bed — tap to wake" else "Curio's flower bed"
+                onTap = {
+                    when {
+                        !CurioPet.awake -> CurioPet.wake()
+                        CurioPet.atHome -> CurioPet.comeOut()
+                        else -> Unit // already floating — the bed is vacant
+                    }
+                },
+                contentDescription = when {
+                    !CurioPet.awake -> "Curio asleep in its flower bed — tap to wake"
+                    CurioPet.atHome -> "Curio sitting in its flower bed — tap to come out"
+                    else -> "Curio's flower bed"
+                }
             )
         }
     } else null

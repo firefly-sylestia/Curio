@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.ui.theme.CurioColors
 
 /**
  * A cozy one-line speech bubble with a tail pointing at the pet (spec §10.7:
@@ -109,24 +109,31 @@ private fun TailDiamond(color: Color) {
 }
 
 /**
- * The Quests hero — the pet companion with its speech bubble, a soft XP
- * ring, level + growth line, and the XP bar (spec §10.3 + §4.1). The pet is
- * tappable: tapping opens a check-in dialog with its mood, next quest and
- * growth status.
+ * The Quests hero — the pet companion with its speech bubble, level +
+ * growth line, and the XP bar (spec §10.3 + §4.1). The pet is tappable:
+ * tapping opens a check-in dialog with its mood, next quest and growth
+ * status.
  *
- * [accent] is the scarf/ring accent (usually the recommended lane's tint).
+ * v8.10 — one fixed color scheme (the Curio light-theme brand coral): the
+ * round XP ring around the bed was removed, and the bar/tints no longer
+ * react to category pastels or dark mode. Tapping the bed while the pet is
+ * sitting at home ([CurioPet.atHome]) brings it back out; opening the
+ * check-in hides the floating pet ([CurioPet.dialogOpen]) so there is never
+ * a duplicate pet on screen.
+ *
  * [bubbleText] is the one-shot dialogue line (null = stay quiet).
  * [celebrateKey] increments to trigger a celebration hop.
  */
 @Composable
 fun CurioPetHeroCard(
-    accent: Color,
     bubbleText: String?,
     onGo: (String) -> Unit = {},
     celebrateKey: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    // One fixed accent for the whole pet area — the Curio brand coral.
+    val accent = CurioColors.CategoryCoral
     val lanes = CurioQuests.categoriesState
     val stage = CurioPet.currentStage()
     val xp = CurioQuests.xpState
@@ -148,52 +155,52 @@ fun CurioPetHeroCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // The pet's flower bed inside a soft XP ring (v8.8) — the pet
-                // naps here when the app opens and stays asleep until tapped.
-                // Once awake, the bed sits vacant while the pet floats around
-                // the app.
+                // The pet's flower bed (v8.8) — the pet naps here when the
+                // app opens and stays asleep until tapped. Once awake the bed
+                // sits vacant while the pet floats around the app (or shows
+                // the pet sitting at home when [CurioPet.atHome]). v8.10 — the
+                // round XP ring was removed (the bar below already shows
+                // progress).
                 Box(
-                    modifier = Modifier.size(96.dp),
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(
+                            if (!CurioPet.awake)
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            else accent.copy(alpha = 0.14f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        progress = { progress.coerceIn(0f, 1f) },
-                        modifier = Modifier.size(96.dp),
-                        strokeWidth = 3.dp,
-                        color = accent,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(RoundedCornerShape(26.dp))
-                            .background(
-                                if (!CurioPet.awake)
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                else accent.copy(alpha = 0.14f)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CurioFlowerBed(
-                            petInside = !CurioPet.awake || !AppPreferences.floatingPetEnabledState,
-                            sleeping = !CurioPet.awake,
-                            accent = accent,
-                            bedSize = 74.dp,
-                            celebrateKey = celebrateKey + wakeCelebrate,
-                            onTap = {
-                                if (!CurioPet.awake) {
+                    CurioFlowerBed(
+                        petInside = !CurioPet.awake ||
+                            CurioPet.atHome ||
+                            !AppPreferences.floatingPetEnabledState,
+                        sleeping = !CurioPet.awake,
+                        bedSize = 74.dp,
+                        celebrateKey = celebrateKey + wakeCelebrate,
+                        onTap = {
+                            when {
+                                !CurioPet.awake -> {
                                     CurioPet.wake()
                                     wakeCelebrate++
-                                } else {
-                                    showDialog = true
                                 }
-                            },
-                            contentDescription = if (!CurioPet.awake)
-                                "${stage.displayName} asleep in its flower bed — tap to wake"
-                            else
-                                "${stage.displayName}'s flower bed — tap to check in"
-                        )
-                    }
+                                CurioPet.atHome -> {
+                                    CurioPet.comeOut()
+                                    wakeCelebrate++
+                                }
+                                else -> {
+                                    showDialog = true
+                                    CurioPet.dialogOpen = true
+                                }
+                            }
+                        },
+                        contentDescription = when {
+                            !CurioPet.awake -> "${stage.displayName} asleep in its flower bed — tap to wake"
+                            CurioPet.atHome -> "${stage.displayName} sitting in its flower bed — tap to come out"
+                            else -> "${stage.displayName}'s flower bed — tap to check in"
+                        }
+                    )
                 }
                 Column(
                     modifier = Modifier.weight(1f),
@@ -245,11 +252,16 @@ fun CurioPetHeroCard(
     }
 
     // ── Pet check-in dialog — tap the pet to see its mood + next steps ──
+    // The floating pet hides while this is up ([CurioPet.dialogOpen]) so the
+    // dialog's pet is the ONLY one on screen (v8.10).
     if (showDialog) {
         val info = CurioPet.tapInfo(context, lanes)
         val questRoute = CurioQuests.currentQuest()?.navRoute
         AlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = {
+                showDialog = false
+                CurioPet.dialogOpen = false
+            },
             title = { Text(info.stage.displayName) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -260,7 +272,6 @@ fun CurioPetHeroCard(
                         CurioPetSprite(
                             stage = info.stage,
                             mood = info.mood,
-                            accent = accent,
                             spriteSize = 48.dp,
                             contentDescription = null
                         )
@@ -284,13 +295,17 @@ fun CurioPetHeroCard(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Okay") }
+                TextButton(onClick = {
+                    showDialog = false
+                    CurioPet.dialogOpen = false
+                }) { Text("Okay") }
             },
             dismissButton = {
                 if (questRoute != null) {
                     TextButton(
                         onClick = {
                             showDialog = false
+                            CurioPet.dialogOpen = false
                             questRoute.let(onGo)
                         }
                     ) { Text("Go to quest") }

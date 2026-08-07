@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioPet
+import com.curio.app.ui.theme.CurioColors
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -56,12 +57,15 @@ import kotlin.math.sin
  * dragged, sleep breathing with floating Z's, an excited wiggle with
  * sparkle eyes, and a curious head tilt. [facing] mirrors the sprite (1 =
  * facing right, -1 = facing left).
+ *
+ * v8.10 — ONE fixed color on every theme: the scarf and aura always wear
+ * the Curio light-theme brand coral ([CurioColors.CategoryCoral]); they no
+ * longer react to the category pastel accents or to dark mode.
  */
 @Composable
 fun CurioPetSprite(
     stage: CurioPet.Stage,
     mood: CurioPet.Mood,
-    accent: Color,
     modifier: Modifier = Modifier,
     // NOTE: named spriteSize (not `size`) — this function draws the sprite
     // on a Canvas, and a parameter named `size` would shadow DrawScope.size
@@ -78,6 +82,10 @@ fun CurioPetSprite(
 ) {
     val density = LocalDensity.current
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
+    // v8.10 — the scarf/aura accent is hardcoded to the Curio light-theme
+    // brand coral: one theme, one color, on every device (never the
+    // category pastel, never a dark-mode twin).
+    val accent = CurioColors.CategoryCoral
     val ink = Color(0xFF4A3426)
     val body = Color(0xFFFFF3DC)
     val bodyShade = Color(0xFFF0DDBB)
@@ -365,16 +373,20 @@ fun CurioPetSprite(
                     drawPx(2, 10, blush, 0.4f)
                     drawPx(13, 10, blush, 0.4f)
 
-                    // Mouth.
+                    // Mouth. v8.10 — the smile was drawn upside down (corners
+                    // lower than the middle = a frown, which is why the pet
+                    // always looked sad). Flipped: corners UP (row 10), middle
+                    // DOWN (row 11) = a proper happy smile.
                     when (mouth) {
                         MouthStyle.SMILE -> {
-                            drawPx(6, 11, ink); drawPx(9, 11, ink)
-                            drawPx(7, 10, ink); drawPx(8, 10, ink)
+                            drawPx(6, 10, ink); drawPx(9, 10, ink)
+                            drawPx(7, 11, ink); drawPx(8, 11, ink)
                         }
                         MouthStyle.WIDE -> {
+                            // Excited open smile — corners up, wide open bottom.
+                            drawPx(6, 10, ink); drawPx(9, 10, ink)
                             drawPx(6, 11, ink); drawPx(7, 11, ink)
                             drawPx(8, 11, ink); drawPx(9, 11, ink)
-                            drawPx(7, 10, ink); drawPx(8, 10, ink)
                         }
                         MouthStyle.O -> {
                             drawPx(7, 10, ink); drawPx(8, 10, ink)
@@ -461,15 +473,15 @@ private val BODY_ROWS: List<String> = listOf(
     "..o...........o.",
     "..ob....o....bo.",
     "...oooooooooo...",
-    "..obbbbbbbbbbo..",
     ".obbbbbbbbbbbbo.",
+    "obbbbbbbbbbbbbbo",
     "obbbbbbbbbbbbbbo",
     "obbbbbbbbbbbBBbo",
     "obbbbbbbbbbbBBbo",
     "obbbbbbbbbbbBBbo",
-    ".obbbbbbbbbbBBo.",
-    "..osssssssssso..",
-    "...oSSssssSSo...",
+    "obbbbbbbbbbbbBBo",
+    ".osssssssssssso.",
+    "..oSSssssssSSo..",
     "..oo........oo..",
     "..oo........oo.."
 )

@@ -65,14 +65,20 @@ private val AUTO_NAP_AFTER_MS = 8 * 60_000L
  *
  * Gated by the Appearance toggles: the whole pet layer
  * ([AppPreferences.petEnabledState]) and the floating companion itself
- * ([AppPreferences.floatingPetEnabledState]).
+ * ([AppPreferences.floatingPetEnabledState]). Hides while a pet dialog is
+ * open ([CurioPet.dialogOpen]) so there is never a duplicate pet on screen,
+ * and while the pet is sitting at home in its bed ([CurioPet.atHome]).
+ *
+ * v8.10 — the sprite wears ONE fixed color (the Curio brand coral), so the
+ * overlay no longer takes an accent; the soft cream glow disc behind the
+ * pet was removed. A LONG-PRESS fades the pet out and sends it home to sit
+ * in its flower bed.
  *
  * Touch plumbing lives ONLY on the pet element, so the transparent overlay
  * never blocks taps or scrolls on the screen beneath.
  */
 @Composable
 fun CurioFloatingPet(
-    accent: Color,
     routePrefix: String? = null,
     modifier: Modifier = Modifier
 ) {
@@ -80,7 +86,9 @@ fun CurioFloatingPet(
     val density = LocalDensity.current
     if (!AppPreferences.petEnabledState ||
         !AppPreferences.floatingPetEnabledState ||
-        !CurioPet.awake
+        !CurioPet.awake ||
+        CurioPet.atHome ||
+        CurioPet.dialogOpen
     ) return
 
     // Reduced motion: no autonomous wandering — the pet still follows touch.
@@ -117,6 +125,7 @@ fun CurioFloatingPet(
         var reactionKey by remember { mutableIntStateOf(0) }
         var lastMood by remember { mutableStateOf<CurioPet.Mood?>(null) }
         var lastTouch by remember { mutableStateOf(System.currentTimeMillis()) }
+        var leavingHome by remember { mutableStateOf(false) }
         val appear = remember { Animatable(0f) }
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
@@ -228,6 +237,16 @@ fun CurioFloatingPet(
             }
         }
 
+        // Long-press: fade out, then hop back into the flower bed (the bed
+        // shows the pet sitting there until tapped to come out again).
+        LaunchedEffect(leavingHome) {
+            if (leavingHome) {
+                appear.animateTo(0f, tween(260, easing = FastOutSlowInEasing))
+                CurioPet.goHome()
+                leavingHome = false
+            }
+        }
+
         Box(
             modifier = Modifier
                 .offset { IntOffset(pos.x.roundToInt(), pos.y.roundToInt()) }
@@ -268,27 +287,29 @@ fun CurioFloatingPet(
                     )
                 }
                 .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        lastTouch = System.currentTimeMillis()
-                        reaction = CurioPet.touchReaction()
-                        reactionKey++
-                        squishKey++
-                        heartsKey++
-                    })
+                    detectTapGestures(
+                        onTap = {
+                            lastTouch = System.currentTimeMillis()
+                            reaction = CurioPet.touchReaction()
+                            reactionKey++
+                            squishKey++
+                            heartsKey++
+                        },
+                        onLongPress = {
+                            lastTouch = System.currentTimeMillis()
+                            squishKey++
+                            heartsKey++
+                            reaction = "Home sweet home!"
+                            reactionKey++
+                            leavingHome = true
+                        }
+                    )
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Soft cream glow so the fixed one-look sprite reads on any theme.
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                drawCircle(
-                    color = Color(0xFFFFF3DC).copy(alpha = 0.30f),
-                    radius = size.minDimension * 0.54f
-                )
-            }
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
                 mood = CurioPet.mood(context, CurioQuests.categoriesState),
-                accent = accent,
                 spriteSize = FLOAT_SIZE * 0.92f,
                 celebrateKey = celebrateKey,
                 squishKey = squishKey,

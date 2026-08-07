@@ -97,9 +97,35 @@ object CurioPet {
     var awake by mutableStateOf(false)
         private set
 
+    /**
+     * v8.10 — the pet is SITTING in its flower bed (awake but home): the
+     * floating overlay hides and the bed shows it up instead of asleep.
+     * The user sends it home with a long-press; tapping the bed brings it
+     * back out.
+     */
+    var atHome by mutableStateOf(false)
+        private set
+
+    /**
+     * v8.10 — a pet dialog is on screen (the hero check-in). The floating
+     * overlay hides so there is never a duplicate pet on screen.
+     */
+    var dialogOpen by mutableStateOf(false)
+
     /** Wake the pet (tap on the bed). The floating companion appears. */
     fun wake() {
         awake = true
+        atHome = false
+    }
+
+    /** Send the pet back to sit in its flower bed (long-press the floater). */
+    fun goHome() {
+        atHome = true
+    }
+
+    /** Bring the pet back out of the bed (tap the bed while it sits there). */
+    fun comeOut() {
+        atHome = false
     }
 
     // ── One-shot events (v8.9) — screens bump these on real actions and the
@@ -136,6 +162,7 @@ object CurioPet {
     /** Send the pet back to bed after a long idle — the bed shows it asleep. */
     fun settleToSleep() {
         awake = false
+        atHome = false
     }
 
     // ── Moods (spec §10.5) — derived from recent activity, never shaming ──

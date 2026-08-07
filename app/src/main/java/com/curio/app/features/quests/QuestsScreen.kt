@@ -137,8 +137,6 @@ fun QuestsScreen(navController: NavController) {
     // The pet's accent — the least-engaged lane's tint, or the page coral
     // when every lane is already explored. (themedAccent is @Composable, so
     // only the prefs read is remembered.)
-    val leastEngagedCat = remember { CurioPassport.leastEngaged(context) }
-    val petAccent = leastEngagedCat?.themedAccent() ?: CurioColors.CoralBlush
     // v8.2 — the tour is offered ONCE and only from a tap on this page: the
     // first quest shows a prompt with a "No, thanks" option; a taken or
     // declined offer is never shown again, and the "Guided tour" Settings
@@ -184,7 +182,6 @@ fun QuestsScreen(navController: NavController) {
                 item {
                     if (AppPreferences.petEnabledState) {
                         CurioPetHeroCard(
-                            accent = petAccent,
                             bubbleText = petBubble,
                             onGo = onQuestNavigate,
                             celebrateKey = celebrate
@@ -280,7 +277,6 @@ fun QuestsScreen(navController: NavController) {
                     CurioPetSprite(
                         stage = CurioPet.currentStage(),
                         mood = CurioPet.Mood.PROUD,
-                        accent = petAccent,
                         spriteSize = 52.dp,
                         celebrateKey = celebrate
                     )
