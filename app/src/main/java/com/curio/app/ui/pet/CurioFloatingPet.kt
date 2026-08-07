@@ -56,8 +56,10 @@ private val AUTO_NAP_AFTER_MS = 8 * 60_000L
  *    the system's animator scale is 0 — reduced motion).
  *  - CAN BE DRAGGED ANYWHERE: grab it and it stretches like it's being
  *    lifted; release and it settles where you put it (clamped to the edges).
- *  - REACTS TO TOUCH: a tap squishes it, pops a tiny reaction bubble
- *    ("Boop!", "Hehe!") and refreshes its nap timer.
+ *  - REACTS TO TOUCH (v8.11): quick repeated taps escalate the reaction
+ *    (soft boop -> playful play-bow -> zoomies spin) with a matching line,
+ *    hearts, and then a playful dart to a nearby spot — like a pet that
+ *    wants to keep playing. Sometimes it even starts the game itself.
  *  - CELEBRATES: when its mood flips to EXCITED/PROUD (a new lane, a
  *    level-up, a claim), it hops with a short excited line.
  *  - NAPS: after a long idle it fades back into its flower bed
@@ -119,6 +121,8 @@ fun CurioFloatingPet(
         var dragged by remember { mutableStateOf(false) }
         var thinking by remember { mutableStateOf(false) }
         var squishKey by remember { mutableIntStateOf(0) }
+        var playKey by remember { mutableIntStateOf(0) }
+        var spinKey by remember { mutableIntStateOf(0) }
         var celebrateKey by remember { mutableIntStateOf(0) }
         var heartsKey by remember { mutableIntStateOf(0) }
         var reaction by remember { mutableStateOf<String?>(null) }
@@ -126,6 +130,12 @@ fun CurioFloatingPet(
         var lastMood by remember { mutableStateOf<CurioPet.Mood?>(null) }
         var lastTouch by remember { mutableStateOf(System.currentTimeMillis()) }
         var leavingHome by remember { mutableStateOf(false) }
+        // v8.11 — touch escalation: rapid repeated taps (within 1.6s) push
+        // the reaction tier up (boop -> play -> zoomies). A tap also queues
+        // a playful dart that the wander loop dashes to promptly.
+        var tapStreak by remember { mutableIntStateOf(0) }
+        var lastTapAt by remember { mutableStateOf(0L) }
+        var playDartTarget by remember { mutableStateOf<Offset?>(null) }
         val appear = remember { Animatable(0f) }
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
@@ -145,7 +155,7 @@ fun CurioFloatingPet(
             )
         }
 
-        // ── Autonomy: wander to random spots ────────────────────────────
+        // ── Autonomy: wander, think, and PLAY (v8.11) ───────────────────
         // Keyed on awake too: the loop dies when the pet naps and restarts
         // fresh when it wakes again. On the Spin screen the pet prefers to
         // WATCH the deck, so it stays put there. `watching` is a plain val
@@ -153,33 +163,82 @@ fun CurioFloatingPet(
         // would keep a stale value after navigating between screens.
         LaunchedEffect(maxW, maxH, autoWander, CurioPet.awake, watching) {
             if (!autoWander) return@LaunchedEffect
+            // A shared walker for gentle wanders and fast playful darts.
+            // [stepMs] small = fast dash; [steps] = path length.
+            suspend fun walkTo(target: Offset, stepMs: Long = 24, steps: Int = 56) {
+                facing = if (target.x >= pos.x) 1f else -1f
+                moving = true
+                val start = pos
+                for (i in 1..steps) {
+                    if (dragged || !CurioPet.awake) break
+                    val t = i.toFloat() / steps
+                    pos = Offset(
+                        start.x + (target.x - start.x) * t,
+                        start.y + (target.y - start.y) * t
+                    )
+                    delay(stepMs)
+                }
+                moving = false
+            }
             while (CurioPet.awake) {
-                delay(Random.nextLong(2800, 7000))
-                if (dragged || watching) continue
+                // Wait for the next wander beat, but answer a pending tap
+                // dart within ~200ms instead of the full 3-7s pause.
+                val waitMs = Random.nextLong(2800, 7000)
+                var waited = 0L
+                while (waited < waitMs && playDartTarget == null &&
+                    !dragged && !watching && CurioPet.awake
+                ) {
+                    delay(200)
+                    waited += 200
+                }
+                if (!CurioPet.awake) break
+                if (playDartTarget != null && !dragged) {
+                    val target = playDartTarget!!
+                    playDartTarget = null
+                    // Playful dash to where the tap happened — quick and keen.
+                    walkTo(target, stepMs = 14, steps = 40)
+                    continue
+                }
+                if (dragged || watching) {
+                    // Held in a drag (or glued to the Spin deck): pause a
+                    // beat so the loop never busy-spins while grabbed.
+                    delay(300)
+                    continue
+                }
+                // v8.11 — the pet sometimes starts a game on its own: a play
+                // bow + a "catch me!" line, then it zooms off.
+                if (Random.nextFloat() < 0.12f) {
+                    playKey++
+                    reaction = CurioPet.playInitiation()
+                    reactionKey++
+                    lastTouch = System.currentTimeMillis()
+                    val tx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    val ty = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    walkTo(Offset(tx, ty), stepMs = 16, steps = 44)
+                    continue
+                }
+                // Normal wander — a downward bias keeps it grounded instead
+                // of floating over the top bars.
                 val tx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
-                val ty = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
-                facing = if (tx >= pos.x) 1f else -1f
-                // v8.9 — sometimes the pet 'thinks' (tilts + "?") first.
+                val tyBand = (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                val ty = if (Random.nextFloat() < 0.25f)
+                    marginPx + Random.nextFloat() * tyBand * 0.35f
+                else
+                    marginPx + tyBand * (0.35f + Random.nextFloat() * 0.65f)
+                // v8.9 — sometimes the pet 'thinks' (tilts + "?") before
+                // walking; v8.11 also sometimes looks around after arriving.
                 if (Random.nextFloat() < 0.45f) {
                     thinking = true
                     delay(620)
                     thinking = false
                 }
-                moving = true
-                val start = pos
-                val steps = 56
-                val stepMs = Random.nextLong(18, 34)
-                for (i in 1..steps) {
-                    if (dragged || !CurioPet.awake) break
-                    val t = i.toFloat() / steps
-                    pos = Offset(
-                        start.x + (tx - start.x) * t,
-                        start.y + (ty - start.y) * t
-                    )
-                    delay(stepMs)
-                }
-                moving = false
+                walkTo(Offset(tx, ty), stepMs = Random.nextLong(18, 34))
                 thinking = false
+                if (Random.nextFloat() < 0.2f) {
+                    thinking = true
+                    delay(450)
+                    thinking = false
+                }
                 delay(Random.nextLong(1200, 3200))
             }
         }
@@ -229,10 +288,12 @@ fun CurioFloatingPet(
             }
         }
 
-        // Bubble auto-dismiss.
+        // Bubble auto-dismiss — the reaction shows for a beat, then the pet
+        // settles back to its idle wander (v8.11: a touch shorter so it
+        // feels snappy, not chatty).
         LaunchedEffect(reactionKey) {
             if (reaction != null) {
-                delay(2000)
+                delay(1500)
                 reaction = null
             }
         }
@@ -290,13 +351,35 @@ fun CurioFloatingPet(
                     detectTapGestures(
                         onTap = {
                             lastTouch = System.currentTimeMillis()
-                            reaction = CurioPet.touchReaction()
+                            // Escalation: quick repeated taps push the pet
+                            // from a boop to a play-bow to zoomies (v8.11).
+                            val now = System.currentTimeMillis()
+                            tapStreak = if (now - lastTapAt < 1600L) tapStreak + 1 else 1
+                            lastTapAt = now
+                            val tier = tapStreak.coerceAtMost(3)
+                            reaction = CurioPet.touchReaction(tier)
                             reactionKey++
-                            squishKey++
                             heartsKey++
+                            when (tier) {
+                                1 -> squishKey++
+                                2 -> playKey++
+                                else -> spinKey++
+                            }
+                            // The pet dashes to a nearby spot after the
+                            // reaction — it wants to play (not in reduced
+                            // motion, and not while watching the Spin deck;
+                            // the wander loop is what moves it).
+                            if (autoWander && !watching) {
+                                val tx = (pos.x + Random.nextFloat() * 140f - 70f)
+                                    .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
+                                val ty = (pos.y + Random.nextFloat() * 120f - 60f)
+                                    .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                                playDartTarget = Offset(tx, ty)
+                            }
                         },
                         onLongPress = {
                             lastTouch = System.currentTimeMillis()
+                            tapStreak = 0 // a fresh start when it comes home
                             squishKey++
                             heartsKey++
                             reaction = "Home sweet home!"
@@ -313,6 +396,8 @@ fun CurioFloatingPet(
                 spriteSize = FLOAT_SIZE * 0.92f,
                 celebrateKey = celebrateKey,
                 squishKey = squishKey,
+                playKey = playKey,
+                spinKey = spinKey,
                 moving = moving,
                 dragged = dragged,
                 facing = facing,

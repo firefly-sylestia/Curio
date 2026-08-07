@@ -234,9 +234,36 @@ object CurioPet {
         Mood.SLEEPY -> sleepyLines.random()
     }
 
-    /** A short burst when the user touches/pets the floating pet. */
-    fun touchReaction(): String = listOf(
-        "Hehe!", "Boop!", "Wheee!", "Ooh!", "Again, again!", "That tickles!"
+    /**
+     * A short burst when the user touches/pets the floating pet (v8.11).
+     * [tier] grows with rapid repeated taps (computed by the overlay from
+     * the tap streak): 1 = a soft boop, 2 = playful, 3+ = zoomies. Natural
+     * pet escalation — a poke, a giggle, then it wants to run around.
+     */
+    fun touchReaction(tier: Int): String = when {
+        tier >= 3 -> listOf(
+            "Wheeee—!", "Too fast!", "Spinny!", "Okay, okay!", "I'm dizzy!",
+            "Again? Again!", "Zoom zoom!"
+        ).random()
+        tier >= 2 -> listOf(
+            "Hehehe!", "More, more!", "Zoomies!", "This is fun!", "Tag — you're it!",
+            "Catch me!", "Bouncy bouncy!"
+        ).random()
+        else -> listOf(
+            "Boop!", "Hehe!", "Wheee!", "Ooh!", "That tickles!", "Hihi!",
+            "Boop boop!", "Again!", "You found me!", "Poke!", "Hi hi hi!",
+            "Soft paws!"
+        ).random()
+    }
+
+    /**
+     * The pet sometimes starts a game on its own (v8.11) — it play-bows,
+     * calls out, then zooms off. Kept short: one sentence max.
+     */
+    fun playInitiation(): String = listOf(
+        "Wanna play? Catch me!", "Boop! You're it!", "I'm feeling bouncy!",
+        "Zoom zoom — chase me!", "Play with me!", "Tag! Your turn!",
+        "I'm bored — come chase me!"
     ).random()
 
     /**

@@ -73,6 +73,8 @@ fun CurioPetSprite(
     spriteSize: Dp = 96.dp,
     celebrateKey: Int = 0,
     squishKey: Int = 0,
+    playKey: Int = 0,
+    spinKey: Int = 0,
     moving: Boolean = false,
     dragged: Boolean = false,
     facing: Float = 1f,
@@ -163,11 +165,38 @@ fun CurioPetSprite(
             squish.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 500f))
         }
     }
+    // One-shot play bow (playKey, v8.11) — dips down, then pops up with a
+    // little bounce: the "let's play!" invitation pose.
+    val playBow = remember { Animatable(0f) }
+    LaunchedEffect(playKey) {
+        if (playKey > 0) {
+            playBow.snapTo(0f)
+            playBow.animateTo(1f, tween(210, easing = FastOutSlowInEasing))
+            playBow.animateTo(0f, spring(dampingRatio = 0.45f, stiffness = 430f))
+        }
+    }
+    // One-shot playful spin (spinKey, v8.11) — a full 360° twirl, like a
+    // happy dog chasing its tail when the taps escalate to zoomies.
+    val spinAngle = remember { Animatable(0f) }
+    LaunchedEffect(spinKey) {
+        if (spinKey > 0) {
+            spinAngle.snapTo(0f)
+            spinAngle.animateTo(360f, tween(540, easing = FastOutSlowInEasing))
+            spinAngle.snapTo(0f)
+        }
+    }
 
     val sleeping = mood == CurioPet.Mood.SLEEPY && !moving && !dragged
     val excited = mood == CurioPet.Mood.EXCITED
     val proud = mood == CurioPet.Mood.PROUD
     val curious = mood == CurioPet.Mood.CURIOUS
+    // v8.11 — mid-play: the pet is bowing or twirling, so it wears its
+    // excited face and wags faster regardless of the ambient mood.
+    val playing = playBow.value > 0f || spinAngle.value != 0f
+    val bowPhase = playBow.value * PI.toFloat()
+    val bowDip = 6.dp * sin(bowPhase)          // dips down, then springs up
+    val bowSquash = sin(bowPhase * 2f) * 0.06f // a little squeeze mid-dip
+    val spinPulse = sin(spinAngle.value / 360f * PI.toFloat() * 6f) * 0.04f
 
     // Body motion: idle/walk bob, celebration hop, excited wiggle, walk lean
     // and curious tilt. Sleep adds a slow breathing scale.
@@ -209,7 +238,8 @@ fun CurioPetSprite(
 
     // ── Face state ─────────────────────────────────────────────────────
     val eyes = when {
-        dragged -> EyeStyle.WIDE
+        dragged -> EyeStyle.WIDE // lifted mid-play: startled wins
+        playing -> EyeStyle.STAR
         sleeping -> EyeStyle.CLOSED
         blinkPhase > 0.93f && !excited && !proud -> EyeStyle.BLINK
         excited -> EyeStyle.STAR
@@ -218,6 +248,7 @@ fun CurioPetSprite(
     }
     val mouth = when {
         dragged -> MouthStyle.O
+        playing -> MouthStyle.WIDE
         sleeping -> MouthStyle.NONE
         excited -> MouthStyle.WIDE
         else -> MouthStyle.SMILE
@@ -233,17 +264,20 @@ fun CurioPetSprite(
         // One motion layer carries the aura, the bob/hop/wiggle/lean and the
         // breathing + squish scales so the glow always moves with the sprite.
         val auraOn = stage == CurioPet.Stage.LANE_GUARDIAN || stage == CurioPet.Stage.SAGE
-        val auraColor = if (stage == CurioPet.Stage.SAGE) gold else accent
-        Box(
+        val auraColor = if (stage == CurioPet.Stage.SAGE) gold else accent            Box(
             modifier = Modifier
                 .size(spriteSize * 0.92f)
                 .graphicsLayer {
-                    translationY = with(density) { bobDp.dp.toPx() } + with(density) { hopJump.toPx() }
-                    val squash = hopSquash * 0.06f * (if (hop.value > 0f) 1f else 0f)
+                    translationY = with(density) { bobDp.dp.toPx() } +
+                        with(density) { hopJump.toPx() } +
+                        with(density) { bowDip.toPx() }
+                    val squash = hopSquash * 0.06f * (if (hop.value > 0f) 1f else 0f) + bowSquash
                     val squishScale = squish.value
-                    scaleX = ((breatheScale + squash) * dragStretchX * squishScale).coerceAtLeast(0.4f)
-                    scaleY = ((breatheScale - squash) * dragLiftY * squishScale).coerceAtLeast(0.4f)
-                    rotationZ = wiggle + walkLean + tilt + idleTilt
+                    scaleX = ((breatheScale + squash) * dragStretchX * squishScale * (1f + spinPulse))
+                        .coerceAtLeast(0.4f)
+                    scaleY = ((breatheScale - squash) * dragLiftY * squishScale * (1f - spinPulse))
+                        .coerceAtLeast(0.4f)
+                    rotationZ = wiggle + walkLean + tilt + idleTilt + spinAngle.value
                 }
                 .then(
                     if (auraOn) {
@@ -300,9 +334,12 @@ fun CurioPetSprite(
                     )
 
                     // Little tail on the sprite's right side — wags when
-                    // walking or excited.
+                    // walking, excited, or mid-play (faster while playing).
                     if (!dragged) {
-                        val wag = if (moving || excited) sin(bobPhase * 10f * PI.toFloat()) else 0f
+                        val wagFreq = if (playing) 18f else 10f
+                        val wag = if (moving || excited || playing) {
+                            sin(bobPhase * wagFreq * PI.toFloat())
+                        } else 0f
                         drawPx(14, 11, bodyShade)
                         drawPx(15, 11, bodyShade)
                         drawPx(15, 12, bodyShade)
