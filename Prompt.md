@@ -178,6 +178,33 @@
     morph stay untouched) whenever the user leaves: close ✕, system back,
     Explore-now → Home, and both Write-about-it dialogs.
 
+## Part 10 — Pet Designer Universal Editor, Phase 1: editor shell (DONE)
+
+- User approved the full redesign plan (docs/plans/PET_DESIGNER_UNIVERSAL_EDITOR_PLAN.md):
+  always-on (replaces the old tab designer), executed phase by phase with a
+  commit per phase.
+- Phase 1 — Universal Editor Shell (`PetDesignerModels.kt` NEW + `PetDesignerScreen.kt`):
+  - `PetDesignerPage` (ANIMATIONS/ACTIONS/SETTINGS) + `PetEditorTarget` sealed
+    interface (Body, CurledPose, DetailLayer, Face, Reaction, Colors).
+  - Local `PetDesignerNavbar` (segmented Animations/Actions/Settings) replaces
+    the old EditorTab row; switching pages resets the target.
+  - `TargetPicker` per page: Animations → Body & pose / Detail layers / Faces /
+    Colors chips; Actions → Reaction chips; Settings → none (its own content).
+  - Old editor surfaces routed into the universal editor by target guard:
+    Body/Curled pixel grid, Detail layer, Colors, Face (per mood), Reaction
+    (per event, incl. dialogue + anim + face grid). One-tap personality
+    presets moved to the Actions page landing. Shapes/randomize + import/
+    export moved to the Settings page.
+  - `SaveArea` PINNED below the editor (always visible): Save custom design /
+    Use default look + Reset changes + toast. SaveButton removed from the
+    buried TOOLS tab.
+  - Legacy EditorTab + EditorTabRow deleted (compile-safe: no stale refs).
+- Also this session: fixed CurioPetBrain.kt:243 smart-cast CI error (laneLabel
+  captured up front — smart casts don't flow between function-call arguments)
+  and split the CI workflows: ABI splits now gated on `-PcurioAbiSplits` in
+  app/build.gradle.kts; android.yml (PR/push) passes `-PcurioAbiSplits=false`
+  → ONE universal release APK; release.yml (tags) keeps universal + per-ABI.
+
 ## Part 6 — Spin deck swipe direction fix (DONE)
 
 - `SpinScreen.kt` `Carousel` — the deck-swipe mapping fired the OPPOSITE cycle on

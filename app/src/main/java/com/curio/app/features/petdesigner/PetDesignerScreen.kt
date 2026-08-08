@@ -35,7 +35,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -114,8 +113,8 @@ private val PALETTE_SLOTS = listOf(
 /** The paint tools (v8.35): brush, fill bucket, eraser, eyedropper. */
 private enum class PaintTool { BRUSH, FILL, ERASER, EYEDROPPER }
 
-/** Focused designer tabs keep the canvas and its less-used options from becoming one long scroll. */
-private enum class EditorTab { PREVIEW, BODY, DETAILS, FACES, COLORS, TOOLS }
+// v8.45 — the old editor tabs are replaced by the universal-editor model in
+// PetDesignerModels.kt (PetDesignerPage + PetEditorTarget).
 
 /** A curated palette of pleasant hex colors for the quick-pick swatches. */
 private val QUICK_HEX = listOf(
@@ -203,7 +202,12 @@ fun PetDesignerScreen(navController: NavController) {
     var paintTool by rememberSaveable { mutableStateOf(PaintTool.BRUSH) }
     // Explicitly armed drawing mode: off means the canvas is safe to scroll.
     var drawMode by rememberSaveable { mutableStateOf(false) }
-    var editorTab by rememberSaveable { mutableStateOf(EditorTab.PREVIEW) }
+    // v8.45 — universal editor: the local page (Animations/Actions/Settings)
+    // + the selected edit target. One editor renders whichever target is
+    // chosen; Colors is an Animations-page target, reactions are
+    // Actions-page targets.
+    var page by rememberSaveable { mutableStateOf(PetDesignerPage.ANIMATIONS) }
+    var target by rememberSaveable { mutableStateOf<PetEditorTarget?>(null) }
     // Detail layers share the same protected canvas and palette as body art.
     var detailLayer by rememberSaveable { mutableStateOf("tail") }
     // The Details tab starts with the effective current part (including
@@ -300,6 +304,24 @@ fun PetDesignerScreen(navController: NavController) {
         }
     }
 
+    // v8.45 — picking a target in the universal editor also syncs the legacy
+    // editor states (grid, detail layer, face mood, reaction event) so the
+    // existing editor bodies keep working unchanged.
+    fun selectTarget(newTarget: PetEditorTarget) {
+        target = newTarget
+        when (newTarget) {
+            is PetEditorTarget.DetailLayer -> detailLayer = newTarget.key
+            is PetEditorTarget.Face -> faceMood = newTarget.mood
+            is PetEditorTarget.Reaction -> {
+                reactEvent = newTarget.event
+                reactionLineDraft = design.reactionFor(newTarget.event).lines.joinToString("\n")
+            }
+            PetEditorTarget.CurledPose -> editingGrid = "curled"
+            PetEditorTarget.Body -> editingGrid = "body"
+            PetEditorTarget.Colors -> Unit
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -312,8 +334,11 @@ fun PetDesignerScreen(navController: NavController) {
             )
         }
         val wide = windowWidthSizeClass().isWide
+        Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
@@ -324,12 +349,53 @@ fun PetDesignerScreen(navController: NavController) {
         ) {
             item { CurioSectionLabel("Pet designer") }
             item {
-                EditorTabRow(selected = editorTab, onSelect = { editorTab = it })
+                // v8.45 — the local Pet Designer navbar (separate from the
+                // app-wide nav). Switching pages resets the editor target so
+                // every page lands on its picker first.
+                PetDesignerNavbar(page = page, onSelect = { newPage ->
+                    page = newPage
+                    target = null
+                })
+            }
+            // ── Choose what to edit (the universal editor target) ────
+            item {
+                TargetPicker(
+                    page = page,
+                    selected = target,
+                    onSelect = ::selectTarget
+                )
+            }
+            // ── One-tap personality presets (Actions page landing) ────
+            item {
+                if (page == PetDesignerPage.ACTIONS && target == null) SectionCard(
+                    "One-tap presets",
+                    "Set every mood face and every reaction with one tap"
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PetFacePresets.ALL.forEach { preset ->
+                            PresetCard(
+                                name = preset.name,
+                                tagline = preset.tagline,
+                                preview = preset.applyTo(design),
+                                onClick = {
+                                    val nextDesign = preset.applyTo(design)
+                                    resetDetailEditor()
+                                    design = nextDesign
+                                    reactionLineDraft = nextDesign.reactionFor(reactEvent).lines.joinToString("\n")
+                                    toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
+                                }
+                            )
+                        }
+                    }
+                }
             }
 
-            // ── Live preview ─────────────────────────────────────────
+            // ── Live preview (Animations page landing) ───────────────
             item {
-                if (editorTab == EditorTab.PREVIEW) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
+                if (page == PetDesignerPage.ANIMATIONS && target == null) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
                     CurioPetSprite(
                         stage = CurioPet.currentStage(),
                         mood = previewMood,
@@ -358,9 +424,9 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Pixel grid editor ─────────────────────────────────────
+            // ── Body / curled pose pixel editor (Animations targets) ──
             item {
-                if (editorTab == EditorTab.BODY) SectionCard(
+                if (target == PetEditorTarget.Body || target == PetEditorTarget.CurledPose) SectionCard(
                     "Pixel grid",
                     "Paint with a brush stroke, fill, erase, or pick colors from the canvas"
                 ) {
@@ -466,9 +532,9 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Drawable details editor ───────────────────────────────
+            // ── Drawable details editor (Animations target) ──────────
             item {
-                if (editorTab == EditorTab.DETAILS) SectionCard(
+                if (target is PetEditorTarget.DetailLayer) SectionCard(
                     "Draw every detail",
                     "Paint Curie's tail, accessories, effects, or antenna on separate layers"
                 ) {
@@ -612,9 +678,9 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Palette editor ────────────────────────────────────────
+            // ── Palette editor (Animations target) ───────────────────
             item {
-                if (editorTab == EditorTab.COLORS) SectionCard(
+                if (target == PetEditorTarget.Colors) SectionCard(
                     "Colors",
                     "Pick the paint color, or tap a swatch's pencil for the advanced editor (hex + HSL sliders)"
                 ) {
@@ -634,48 +700,12 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Face & reactions editor ───────────────────────────────
+            // ── Face editor (Animations page target) ──────────────────
             item {
-                if (editorTab == EditorTab.FACES) SectionCard(
-                    "Face & reactions",
-                    "Customize Curie's face per mood, and how it reacts to each moment"
+                if (target is PetEditorTarget.Face) SectionCard(
+                    "Face per mood",
+                    "Customize Curie's face for this mood"
                 ) {
-                    // v8.38 — one-tap personality presets: paint every mood
-                    // face and every reaction rule in a single tap.
-                    Text(
-                        "One-tap presets",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "Set every mood face and every reaction with one tap",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        PetFacePresets.ALL.forEach { preset ->
-                            PresetCard(
-                                name = preset.name,
-                                tagline = preset.tagline,
-                                preview = preset.applyTo(design),
-                                onClick = {
-                                    val nextDesign = preset.applyTo(design)
-                                    resetDetailEditor()
-                                    design = nextDesign
-                                    reactionLineDraft = nextDesign.reactionFor(reactEvent).lines.joinToString("\n")
-                                    toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
-                                }
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(Modifier.height(16.dp))
-
                     Text(
                         "Face per mood",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
@@ -689,7 +719,10 @@ fun PetDesignerScreen(navController: NavController) {
                             ChoiceChip(
                                 label = PetFaceMoods.label(mood),
                                 selected = faceMood == mood,
-                                onClick = { faceMood = mood }
+                                onClick = {
+                                    faceMood = mood
+                                    target = PetEditorTarget.Face(mood)
+                                }
                             )
                         }
                     }
@@ -758,10 +791,15 @@ fun PetDesignerScreen(navController: NavController) {
                     )
 
 
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(Modifier.height(16.dp))
+                }
+            }
 
+            // ── Reaction editor (Actions page target) ────────────────
+            item {
+                if (target is PetEditorTarget.Reaction) SectionCard(
+                    "Reaction",
+                    "What Curie does for this moment — and the face it wears while reacting"
+                ) {
                     Text(
                         "Reactions",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
@@ -783,6 +821,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 selected = reactEvent == event,
                                 onClick = {
                                     reactEvent = event
+                                    target = PetEditorTarget.Reaction(event)
                                     reactionLineDraft = design.reactionFor(event).lines.joinToString("\n")
                                 }
                             )
@@ -888,9 +927,9 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Shapes & randomize ────────────────────────────────────
+            // ── Shapes & randomize (Settings page) ───────────────────
             item {
-                if (editorTab == EditorTab.TOOLS) SectionCard(
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
                     "Shapes & inspiration",
                     "Jump-start the body grid with a preset, or roll a fresh palette"
                 ) {
@@ -929,9 +968,9 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Import / export / save ────────────────────────────────
+            // ── Import / export (Settings page) ──────────────────────
             item {
-                if (editorTab == EditorTab.TOOLS) SectionCard(
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
                     "Import & export",
                     "Share Curie as a PNG image (pixel-perfect), or use the text format for fine control"
                 ) {
@@ -1021,29 +1060,28 @@ fun PetDesignerScreen(navController: NavController) {
                             importDraft = clipboard.getText()?.text ?: ""
                         }
                     }
-                    Spacer(Modifier.height(14.dp))
-                    SaveButton(
-                        label = if (design.isCustom) "Save custom design" else "Use default look",
-                        onClick = {
-                            if (design.isCustom) {
-                                AppPreferences.setPetDesign(context, design.toText())
-                                toast = "Saved — Curie wears it everywhere"
-                            } else {
-                                AppPreferences.clearPetDesign(context)
-                                toast = "Default look restored"
-                            }
-                        }
-                    )
-                    if (toast != null) {
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            toast.orEmpty(),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
             }
+        }
+            // ── Save area — always visible below the editor ──────────
+            SaveArea(
+                design = design,
+                toast = toast,
+                onSave = {
+                    if (design.isCustom) {
+                        AppPreferences.setPetDesign(context, design.toText())
+                        toast = "Saved — Curie wears it everywhere"
+                    } else {
+                        AppPreferences.clearPetDesign(context)
+                        toast = "Default look restored"
+                    }
+                },
+                onReset = {
+                    resetDetailEditor()
+                    design = PetDesign.DEFAULT
+                    reactionLineDraft = PetDesign.DEFAULT.reactionFor(reactEvent).lines.joinToString("\n")
+                }
+            )
         }
 
         SettingsHeroHeader(
@@ -1124,6 +1162,191 @@ fun PetDesignerScreen(navController: NavController) {
                     },
                     onCancel = { importReview = null }
                 )
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v8.45 — Universal editor shell: local navbar + target picker + save area
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** The local Pet Designer navbar (Animations / Actions / Settings). */
+@Composable
+private fun PetDesignerNavbar(
+    page: PetDesignerPage,
+    onSelect: (PetDesignerPage) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        PetDesignerPage.entries.forEach { p ->
+            val selected = p == page
+            Surface(
+                onClick = { onSelect(p) },
+                shape = RoundedCornerShape(50),
+                color = if (selected) MaterialTheme.colorScheme.surface else Color.Transparent,
+                shadowElevation = if (selected) 2.dp else 0.dp,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = when (p) {
+                        PetDesignerPage.ANIMATIONS -> "Animations"
+                        PetDesignerPage.ACTIONS -> "Actions"
+                        PetDesignerPage.SETTINGS -> "Settings"
+                    },
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
+                    ),
+                    color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 10.dp)
+                )
+            }
+        }
+    }
+}
+
+/** The per-page "choose what to edit" picker (renders nothing on Settings). */
+@Composable
+private fun TargetPicker(
+    page: PetDesignerPage,
+    selected: PetEditorTarget?,
+    onSelect: (PetEditorTarget) -> Unit
+) {
+    if (page == PetDesignerPage.SETTINGS) return
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        CurioSectionLabel(
+            if (page == PetDesignerPage.ANIMATIONS) "Choose what to edit" else "Choose a reaction to edit"
+        )
+        if (page == PetDesignerPage.ANIMATIONS) {
+            TargetChipRow(
+                label = "Body & pose",
+                targets = listOf(PetEditorTarget.Body, PetEditorTarget.CurledPose, PetEditorTarget.Colors),
+                selected = selected,
+                onSelect = onSelect
+            )
+            TargetChipRow(
+                label = "Detail layers",
+                targets = PetDesign.DETAIL_KEYS.map { PetEditorTarget.DetailLayer(it) },
+                selected = selected,
+                onSelect = onSelect
+            )
+            TargetChipRow(
+                label = "Faces",
+                targets = PetFaceMoods.ALL.map { PetEditorTarget.Face(it) },
+                selected = selected,
+                onSelect = onSelect
+            )
+        } else {
+            TargetChipRow(
+                label = "Reactions",
+                targets = PetReactionEvents.ALL.map { PetEditorTarget.Reaction(it) },
+                selected = selected,
+                onSelect = onSelect
+            )
+        }
+    }
+}
+
+/** One labelled row of target chips in the picker. */
+@Composable
+private fun TargetChipRow(
+    label: String,
+    targets: List<PetEditorTarget>,
+    selected: PetEditorTarget?,
+    onSelect: (PetEditorTarget) -> Unit
+) {
+    Column {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            targets.forEach { t ->
+                TargetChip(
+                    target = t,
+                    selected = t.id == selected?.id,
+                    onClick = { onSelect(t) }
+                )
+            }
+        }
+    }
+}
+
+/** One tappable target chip (selected state in the container color). */
+@Composable
+private fun TargetChip(
+    target: PetEditorTarget,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+        shadowElevation = if (selected) 1.dp else 0.dp
+    ) {
+        Text(
+            text = target.title,
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+            ),
+            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+        )
+    }
+}
+
+/**
+ * The always-visible save area pinned below the editor (Phase 1): the
+ * primary Save button plus Reset changes and the transient toast.
+ */
+@Composable
+private fun SaveArea(
+    design: PetDesign,
+    toast: String?,
+    onSave: () -> Unit,
+    onReset: () -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SaveButton(
+                label = if (design.isCustom) "Save custom design" else "Use default look",
+                onClick = onSave
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SmallAction("Reset changes", design.isCustom) { onReset() }
+                if (toast != null) {
+                    Text(
+                        toast,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
@@ -2152,29 +2375,6 @@ private fun PaletteRow(
                     modifier = Modifier.padding(6.dp)
                 )
             }
-        }
-    }
-}
-
-/** Compact tabs keep body, faces, colors, and tools in focused editing spaces. */
-@Composable
-private fun EditorTabRow(selected: EditorTab, onSelect: (EditorTab) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        EditorTab.entries.forEach { tab ->
-            val label = when (tab) {
-                EditorTab.PREVIEW -> "Preview"
-                EditorTab.BODY -> "Body"
-                EditorTab.DETAILS -> "Details"
-                EditorTab.FACES -> "Faces"
-                EditorTab.COLORS -> "Colors"
-                EditorTab.TOOLS -> "Tools"
-            }
-            ChoiceChip(label, selected == tab) { onSelect(tab) }
         }
     }
 }
