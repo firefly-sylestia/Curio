@@ -90,6 +90,7 @@ import com.curio.app.data.PetAnimation
 import com.curio.app.data.PetAnimationFrame
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
@@ -375,7 +376,10 @@ fun PetDesignerScreen(navController: NavController) {
             PetEditorTarget.CurledPose -> editingGrid = "curled"
             PetEditorTarget.Body -> editingGrid = "body"
             PetEditorTarget.Colors -> Unit
-            PetEditorTarget.Animation -> Unit
+            // Animation is a data class (carries animationId), so it must be
+            // matched with `is` — a bare `PetEditorTarget.Animation` reference
+            // would be an unresolved companion-object expression (CI fix).
+            is PetEditorTarget.Animation -> Unit
         }
     }
 
@@ -2141,8 +2145,14 @@ private fun ColorEditorCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ColorPreviewColumn("Original", initialHex, accent = false)
-            ColorPreviewColumn("New", hexDraft, accent = !hexError && hexDraft != initialHex)
+            // weight(1f) lives at the CALL SITE (inside this Row scope) —
+            // ColorPreviewColumn itself is a plain Column, so weight would be
+            // unresolved inside its own definition (CI fix).
+            ColorPreviewColumn("Original", initialHex, accent = false, modifier = Modifier.weight(1f))
+            ColorPreviewColumn(
+                "New", hexDraft, accent = !hexError && hexDraft != initialHex,
+                modifier = Modifier.weight(1f)
+            )
         }
         Spacer(Modifier.height(12.dp))
         Surface(
@@ -2315,9 +2325,9 @@ private fun ColorEditorCard(
 
 /** v8.47 — big before/after preview column for the color editor. */
 @Composable
-private fun ColorPreviewColumn(label: String, hex: String, accent: Boolean) {
+private fun ColorPreviewColumn(label: String, hex: String, accent: Boolean, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.weight(1f),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -2595,7 +2605,7 @@ private fun AnimationTimelineEditor(
         Spacer(Modifier.height(12.dp))
         val fps = (1000f / shown.durationMs).coerceIn(1f, 20f)
         Text(
-            "Frame ${selectedFrame + 1} of ${frames.size} · ${kotlin.math.roundToInt(fps)} fps · ${shown.durationMs} ms",
+            "Frame ${selectedFrame + 1} of ${frames.size} · ${fps.roundToInt()} fps · ${shown.durationMs} ms",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
         )
         Slider(
@@ -3340,11 +3350,10 @@ private fun PaletteRow(
     }
 }
 
-/** A clear armed/off state prevents accidental drawing while the page scrolls. */
-@Composable
 /** v8.46 — tells the user whether editing is armed. Picking a tool in the
  *  tray below arms editing; with no tool the canvas scrolls safely (the old
- *  draw toggle is gone — the tool tray is the edit-mode switch). */
+ *  draw toggle is gone — the tool tray is the edit-mode switch). A clear
+ *  armed/off state prevents accidental drawing while the page scrolls. */
 @Composable
 private fun CanvasStatus(activeTool: PaintTool?) {
     val editing = activeTool != null

@@ -1,3 +1,21 @@
+# Request — Pet Designer CI compile fixes (DONE)
+
+## PetDesignerScreen.kt — 5 CI errors fixed (pushed)
+
+- selectTarget `when` over PetEditorTarget: bare `PetEditorTarget.Animation ->`
+  was invalid (Animation is a data class, no companion) AND made the when
+  non-exhaustive → `is PetEditorTarget.Animation -> Unit`.
+- ColorPreviewColumn used `Modifier.weight(1f)` on its own top-level Column
+  (no RowScope there) → now takes `modifier: Modifier = Modifier`; the
+  weight moved to the two call sites inside the caller's Row.
+- `kotlin.math.roundToInt(fps)` (roundToInt is an extension, not a top-level
+  fn) → `fps.roundToInt()` + `import kotlin.math.roundToInt`.
+- Duplicate `@Composable` + duplicate KDoc before CanvasStatus (annotation
+  not repeatable) → collapsed to one of each.
+- Verified: all other target refs are `is`-checks/constructors, only one
+  target-typed when (now exhaustive), all other weight sites in valid scope
+  (compiler error list was exhaustive). Braces + whitespace clean, reviewed.
+
 # Request — Topic Reveal action dock: buttons floating above the scaffold (DONE)
 
 ## Reveal dock — buttons float above the 80dp wash (DONE)
