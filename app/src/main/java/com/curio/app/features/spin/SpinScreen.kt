@@ -1240,6 +1240,7 @@ private fun ColumnScope.SpinDeckSection(
     buttonPulse: Float,
     fitScale: Float = 1f,
     onCardTap: () -> Unit,
+    onCycle: (Int) -> Unit,
     onSpinClick: () -> Unit
 ) {
     // ── Breathing room before the deck (tighter when the screen is short;
@@ -1279,6 +1280,7 @@ private fun ColumnScope.SpinDeckSection(
             roomy = roomy,
             fitScale = fitScale,
             onCardTap = onCardTap,
+            onCycle = onCycle,
             modifier = m.fillMaxWidth()
         )
     }
