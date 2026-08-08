@@ -328,7 +328,7 @@ private fun GuidePet(
             spriteSize = 66.dp,
             pointing = pointing,
             watching = pointing,
-            contentDescription = if (actionEnabled) "Curio the guide. Tap to continue" else null
+            contentDescription = if (actionEnabled) "Curie the guide. Tap to continue" else null
         )
     }
 }

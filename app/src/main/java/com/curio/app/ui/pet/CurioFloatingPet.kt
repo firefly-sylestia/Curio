@@ -3,6 +3,7 @@ package com.curio.app.ui.pet
 import android.provider.Settings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -25,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,6 +46,10 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.PetDesign
+import com.curio.app.data.PetFace
+import com.curio.app.data.PetReactionEvents
+import com.curio.app.data.ReactionAnim
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,6 +76,9 @@ private const val CLOUD_GRID_W = 20
 private const val CLOUD_GRID_H = 8
 // v8.20 — how close a drop must be to the flower bed to count as "home".
 private val DROP_FORGIVENESS = 12.dp
+// v8.35 — the tiny pixel keyboard Curie types on while the user types.
+private val TYPING_W = 150.dp
+private val TYPING_H = 34.dp
 
 /**
  * The floating Curio pet (v8.8) — a global overlay that lives on top of
@@ -193,6 +203,45 @@ fun CurioFloatingPet(
         val captureScreen = routePrefix?.startsWith("capture") == true
         val screenHint = if (captureScreen) "capture" else null
         var seenEvents by remember { mutableIntStateOf(CurioPet.eventCount) }
+        // v8.35 — the saved custom design's reaction rules drive what Curie
+        // does for each event (reactive — re-read when a design is saved).
+        val savedText = AppPreferences.petDesignState
+        val activeDesign = remember(savedText) {
+            savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
+        } ?: PetDesign.DEFAULT
+        val accentColor = designColor(activeDesign.colorOf('s'))
+        // v8.35 — the reaction rule's face while a reaction plays (cleared a
+        // beat later); hide-and-peek crouch; typing-along state.
+        var reactionFace by remember { mutableStateOf<PetFace?>(null) }
+        var reactionFaceKey by remember { mutableIntStateOf(0) }
+        var peeking by remember { mutableStateOf(false) }
+        var lastPeekAt by remember { mutableStateOf(0L) }
+        var typingReaction by remember { mutableStateOf(false) }
+        var lastTypingAt by remember { mutableStateOf(0L) }
+        var lastTypingScreen by remember { mutableStateOf<String?>(null) }
+
+        /**
+         * v8.35 — fires a configured reaction: the animation + face from the
+         * design's reaction rule for [event], plus an optional [line].
+         */
+        fun fireReaction(event: String, line: String?) {
+            val rule = activeDesign.reactionFor(event)
+            if (!rule.enabled) return
+            when (rule.anim) {
+                ReactionAnim.HOP -> celebrateKey++
+                ReactionAnim.SPIN -> spinKey++
+                ReactionAnim.SQUISH -> squishKey++
+                ReactionAnim.BOUNCE -> playKey++
+                ReactionAnim.NONE -> Unit
+            }
+            reactionFace = rule.face
+            reactionFaceKey++
+            lastTouch = System.currentTimeMillis()
+            if (line != null) {
+                reaction = line
+                reactionKey++
+            }
+        }
 
         // Entrance hop.
         LaunchedEffect(Unit) {
@@ -243,7 +292,7 @@ fun CurioFloatingPet(
                 val waitMs = Random.nextLong(2800, 7000)
                 var waited = 0L
                 while (waited < waitMs && playDartTarget == null &&
-                    !dragged && !watching && !gliding && CurioPet.awake
+                    !dragged && !watching && !gliding && !typingReaction && CurioPet.awake
                 ) {
                     delay(200)
                     waited += 200
@@ -335,6 +384,51 @@ fun CurioFloatingPet(
                     lastPokeAt = System.currentTimeMillis()
                     continue
                 }
+                // v8.35 — hide-and-peek: every so often Curie crouches beside
+                // a button or gadget and peeks out — play without words.
+                // Not while glued to the Spin deck or mid-spin.
+                if (!watching && !CurioPet.spinning && landmarks.isNotEmpty() &&
+                    System.currentTimeMillis() - lastPeekAt > 22_000L &&
+                    Random.nextFloat() < 0.4f
+                ) {
+                    lastPeekAt = System.currentTimeMillis()
+                    val target = landmarks.random()
+                    val c = target.bounds.center
+                    val side = if (Random.nextFloat() < 0.5f) -1 else 1
+                    val tx = (c.x + side * petPx * 1.25f)
+                        .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
+                    val ty = (c.y + side * petPx * 0.55f)
+                        .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                    walkTo(Offset(tx, ty), stepMs = 24, steps = 46)
+                    peeking = true
+                    squishKey++
+                    delay(720)
+                    peeking = false
+                    squishKey++
+                    reaction = "Peekaboo!"
+                    reactionKey++
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
+                // v8.35 — sometimes Curie hides at the very bottom edge, only
+                // its head peeking up over the lip (never mid-watch/spin).
+                if (!watching && !CurioPet.spinning &&
+                    System.currentTimeMillis() - lastPeekAt > 22_000L &&
+                    Random.nextFloat() < 0.12f
+                ) {
+                    lastPeekAt = System.currentTimeMillis()
+                    val edgeY = (maxH - petPx * 0.30f).coerceAtLeast(marginPx)
+                    val tx = (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
+                    walkTo(Offset(tx, edgeY), stepMs = 24, steps = 40)
+                    peeking = true
+                    delay(900)
+                    peeking = false
+                    squishKey++
+                    reaction = "Peekaboo!"
+                    reactionKey++
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
                 if (watching) {
                     // Glued to the Spin deck between pokes: stay and watch.
                     delay(300)
@@ -374,24 +468,33 @@ fun CurioFloatingPet(
                 // often it does this comes from its GROWING PERSONALITY
                 // (bouncy pets play a lot, sparky ones are shy).
                 if (Random.nextFloat() < CurioPet.playfulBias(context)) {
-                    playKey++
                     CurioPet.notePlay(context)
-                    reaction = CurioPet.playInitiation()
-                    reactionKey++
-                    lastTouch = System.currentTimeMillis()
+                    fireReaction(PetReactionEvents.PLAY, CurioPet.playInitiation())
                     val tx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
                     val ty = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
                     walkTo(Offset(tx, ty), stepMs = 16, steps = 44)
                     continue
                 }
                 // Normal wander — a downward bias keeps it grounded instead
-                // of floating over the top bars.
-                val tx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                // of floating over the top bars. v8.35 — pick a spot that
+                // does NOT cover a landmark (button/text), so wandering stays
+                // out of the way; fall back to the last candidate.
+                val avoid = PetLandmarks.forScreen(routePrefix)
+                var tx = marginPx
+                var ty = marginPx
                 val tyBand = (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
-                val ty = if (Random.nextFloat() < 0.25f)
-                    marginPx + Random.nextFloat() * tyBand * 0.35f
-                else
-                    marginPx + tyBand * (0.35f + Random.nextFloat() * 0.65f)
+                for (attempt in 0 until 6) {
+                    val candX = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    val candY = if (Random.nextFloat() < 0.25f)
+                        marginPx + Random.nextFloat() * tyBand * 0.35f
+                    else
+                        marginPx + tyBand * (0.35f + Random.nextFloat() * 0.65f)
+                    tx = candX
+                    ty = candY
+                    val spot = Rect(Offset(candX, candY), Size(petPx, petPx))
+                        .inflate(with(density) { 6.dp.toPx() })
+                    if (avoid.none { it.bounds.overlaps(spot) }) break
+                }
                 // v8.9 — sometimes the pet 'thinks' (tilts + "?") before
                 // walking; v8.11 also sometimes looks around after arriving.
                 if (Random.nextFloat() < 0.45f) {
@@ -411,20 +514,26 @@ fun CurioFloatingPet(
         }
 
         // ── Event reactions (v8.9) — real actions bump CurioPet events; the
-        //    pet hops, cheers and (on saves) pops hearts.
+        //    pet hops, cheers and (on saves) pops hearts. v8.35 — the
+        //    animation + face come from the design's reaction rules.
         LaunchedEffect(CurioPet.eventCount) {
             val latest = CurioPet.lastEvent
             if (CurioPet.eventCount > seenEvents && latest != null) {
                 seenEvents = CurioPet.eventCount
-                celebrateKey++
-                lastTouch = System.currentTimeMillis()
-                reaction = CurioPet.eventLine(latest)
-                reactionKey++
+                val event = when (latest) {
+                    CurioPet.Event.SPIN_LANDED -> PetReactionEvents.SPIN_LANDED
+                    CurioPet.Event.REVEAL_TAPPED,
+                    CurioPet.Event.REVEAL_AUTO -> PetReactionEvents.REVEAL
+                    CurioPet.Event.EXPLORE -> PetReactionEvents.EXPLORE
+                    CurioPet.Event.SAVE -> PetReactionEvents.SAVE
+                }
+                fireReaction(event, CurioPet.eventLine(latest))
                 if (latest == CurioPet.Event.SAVE) heartsKey++
             }
         }
 
         // ── Mood reactions: hop + excited line on EXCITED/PROUD ─────────
+        // v8.35 — the LEVEL_UP reaction rule drives the animation + face.
         LaunchedEffect(Unit) {
             while (true) {
                 delay(1200)
@@ -432,12 +541,12 @@ fun CurioFloatingPet(
                 if (lastMood != m) {
                     lastMood = m
                     if (m == CurioPet.Mood.EXCITED || m == CurioPet.Mood.PROUD) {
-                        celebrateKey++
                         // App activity counts as interaction — the pet won't
                         // nap away mid-celebration.
-                        lastTouch = System.currentTimeMillis()
-                        reaction = CurioPet.lineFor(context, m, CurioQuests.categoriesState)
-                        reactionKey++
+                        fireReaction(
+                            PetReactionEvents.LEVEL_UP,
+                            CurioPet.lineFor(context, m, CurioQuests.categoriesState)
+                        )
                     }
                 }
             }
@@ -489,6 +598,46 @@ fun CurioFloatingPet(
             }
         }
 
+        // v8.35 — a reaction face (from the reaction editor) lingers a beat
+        // so the animation reads, then clears back to the mood face.
+        LaunchedEffect(reactionFaceKey) {
+            if (reactionFace != null) {
+                delay(1400)
+                reactionFace = null
+            }
+        }
+
+        // ── Typing reaction (v8.35) — when the on-screen keyboard opens,
+        //    Curie hurries up above it and types along on a tiny keyboard.
+        //    Once per screen visit (60s cooldown), so it never spams.
+        LaunchedEffect(routePrefix, maxW, maxH) {
+            snapshotFlow { WindowInsets.ime.getBottom(density) > 0 }
+                .collect { imeOpen ->
+                    if (imeOpen && autoWander && CurioPet.awake && !dragged && !CurioPet.atHome) {
+                        val now = System.currentTimeMillis()
+                        if (now - lastTypingAt > 60_000L || lastTypingScreen != routePrefix) {
+                            lastTypingAt = now
+                            lastTypingScreen = routePrefix
+                            typingReaction = true
+                            lastTouch = System.currentTimeMillis()
+                            val kbTop = with(density) { WindowInsets.ime.getBottom(density) }
+                            val targetY = (maxH - kbTop - petPx - with(density) { 10.dp.toPx() })
+                                .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                            pos = Offset(
+                                (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                                targetY
+                            )
+                            facing = 1f
+                            squishKey++
+                            reaction = "Tap tap tap! I can type too!"
+                            reactionKey++
+                        }
+                    } else {
+                        typingReaction = false
+                    }
+                }
+        }
+
         // Long-press: fade out, then hop back into the flower bed (the bed
         // shows the pet sitting there until tapped to come out again).
         LaunchedEffect(leavingHome) {
@@ -535,6 +684,8 @@ fun CurioFloatingPet(
                     dizzy = false
                     recovering = false
                     gliding = false
+                    peeking = false
+                    typingReaction = false
                     PetLandmarks.setHovered("bed", false)
                     // v8.26 — throw momentum: the drag tracks its own
                     // velocity; on release the pet keeps a little of the
@@ -561,6 +712,8 @@ fun CurioFloatingPet(
                             dragged = true
                             // v8.21 — flinging it around makes it dizzy.
                             dizzy = true
+                            peeking = false
+                            typingReaction = false
                             dragStartAt = System.currentTimeMillis()
                             lastTouch = System.currentTimeMillis()
                             // v8.20 — a fresh drag starts clear of the bed.
@@ -718,15 +871,28 @@ fun CurioFloatingPet(
                             tapStreak = if (now - lastTapAt < 1600L) tapStreak + 1 else 1
                             lastTapAt = now
                             val tier = tapStreak.coerceAtMost(3)
-                            reaction = CurioPet.touchReaction(tier)
-                            reactionKey++
+                            // v8.35 — the TOUCH reaction rule's face, and
+                            // fewer words: only ~40% of taps show a line so
+                            // the reaction is mostly motion.
+                            val rule = activeDesign.reactionFor(PetReactionEvents.TOUCH)
+                            reactionFace = rule.face
+                            reactionFaceKey++
+                            if (Random.nextFloat() < 0.4f) {
+                                reaction = CurioPet.touchReaction(tier)
+                                reactionKey++
+                            }
                             when (tier) {
                                 // v8.21 — tapping never spins it dizzy anymore
                                 // (that's for dragging): boop → play-bow → a
                                 // big happy celebration hop.
                                 1 -> squishKey++
                                 2 -> playKey++
-                                else -> celebrateKey++
+                                else -> {
+                                    // v8.35 — the biggest taps add a
+                                    // celebratory twirl.
+                                    celebrateKey++
+                                    spinKey++
+                                }
                             }
                             // v8.21 — hearts for the playful/celebrate taps
                             // only, so a plain boop stays clean.
@@ -772,7 +938,10 @@ fun CurioFloatingPet(
                 spinning = CurioPet.spinning,
                 // v8.21 — swirls + wobble while flung, and while recovering.
                 dizzy = dizzy || recovering,
-                contentDescription = "Curio, your companion pet. Drag it anywhere, tap to say hi"
+                // v8.35 — the reaction editor's face + the hide-and-peek pose.
+                faceOverride = reactionFace,
+                peeking = peeking,
+                contentDescription = "Curie, your companion pet. Drag it anywhere, tap to say hi"
             )
         }
         // v8.13 — hearts rise ABOVE the pet in their own offset sibling
@@ -792,6 +961,21 @@ fun CurioFloatingPet(
                     )
                 }
                 .size(HEARTS_W, HEARTS_H)
+        )
+
+        // v8.35 — while the user's keyboard is open, Curie types along on a
+        // tiny pixel keyboard (beside the bubble, above the pet).
+        TypingKeyboard(
+            visible = typingReaction,
+            accent = accentColor,
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        (pos.x + petPx / 2f - with(density) { TYPING_W.toPx() } / 2f).roundToInt(),
+                        (pos.y - with(density) { 34.dp.toPx() }).roundToInt()
+                    )
+                }
+                .size(TYPING_W, TYPING_H)
         )
 
         // Tiny reaction bubble floating just above the pet. Drawn as a
@@ -826,6 +1010,49 @@ fun CurioFloatingPet(
         }
     }
 }
+
+/**
+ * v8.35 — the tiny pixel keyboard Curie "types" on while the user's own
+ * keyboard is open: a row of keys with one pulsing in turn (a paw tapping
+ * its way across).
+ */
+@Composable
+private fun TypingKeyboard(visible: Boolean, accent: Color, modifier: Modifier = Modifier) {
+    val density = LocalDensity.current
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 0.92f else 0f,
+        animationSpec = tween(200),
+        label = "typingAlpha"
+    )
+    val flash = remember { Animatable(0f) }
+    LaunchedEffect(visible) {
+        if (visible) {
+            flash.snapTo(0f)
+            while (true) {
+                flash.animateTo(1f, tween(110, easing = LinearEasing))
+                flash.snapTo(0f)
+            }
+        }
+    }
+    Canvas(modifier = modifier.graphicsLayer { this.alpha = alpha }) {
+        val keyW = size.width / 7f
+        val active = (flash.value * 7f).toInt().coerceIn(0, 6)
+        for (i in 0 until 7) {
+            val x = i * keyW + with(density) { 1.dp.toPx() }
+            val w = keyW - with(density) { 2.dp.toPx() }
+            drawRoundRect(
+                color = if (i == active) accent else Color(0xFFFFFFFF),
+                topLeft = Offset(x, 0f),
+                size = Size(w, size.height),
+                cornerRadius = CornerRadius(with(density) { 5.dp.toPx() })
+            )
+        }
+    }
+}
+
+/** v8.35 — parses a design hex into a Compose color (safe fallback). */
+private fun designColor(hex: String): Color =
+    runCatching { Color(android.graphics.Color.parseColor("#$hex")) }.getOrDefault(Color(0xFFFF6F61))
 
 /**
  * Pink hearts that float UP from just above the pet's head and fade

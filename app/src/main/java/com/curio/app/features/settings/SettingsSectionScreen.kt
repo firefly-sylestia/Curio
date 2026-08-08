@@ -191,7 +191,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // v8.5 — the Curio pet companion (spec §10): pixel pet + rule-based
         // dialogue + passport/discovery on Quests and Home. Default ON.
         SettingsRowPulse(highlightKey == "appearance-pet") {
-            CompactSwitchRow("Curio pet", "Pixel companion that grows with your XP", AppPreferences.petEnabledState) {
+            CompactSwitchRow("Curie", "Pixel companion that grows with your XP", AppPreferences.petEnabledState) {
                 AppPreferences.setPetEnabled(context, it)
             }
         }

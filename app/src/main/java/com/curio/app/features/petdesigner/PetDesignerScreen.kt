@@ -1,13 +1,23 @@
 package com.curio.app.features.petdesigner
 
+import android.content.ClipData
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,11 +29,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,8 +48,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -43,12 +59,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioPet
+import com.curio.app.data.EyeStyle
+import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
+import com.curio.app.data.PetFaceMoods
+import com.curio.app.data.PetReactionEvents
+import com.curio.app.data.ReactionAnim
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
@@ -60,6 +82,7 @@ import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import java.io.File
 
 /** One editable color in the palette — its grid key, name and hex. */
 private data class PaletteSlot(val key: Char, val name: String)
@@ -71,8 +94,17 @@ private val PALETTE_SLOTS = listOf(
     PaletteSlot('s', "Scarf"),
     PaletteSlot('S', "Scarf dark"),
     PaletteSlot('G', "Gold"),
-    PaletteSlot('g', "Gold deep")
+    PaletteSlot('g', "Gold deep"),
+    PaletteSlot('c', "Custom 1"),
+    PaletteSlot('C', "Custom 2"),
+    PaletteSlot('d', "Custom 3"),
+    PaletteSlot('D', "Custom 4"),
+    PaletteSlot('r', "Blush"),
+    PaletteSlot('y', "Eyes")
 )
+
+/** The paint tools (v8.35): brush, fill bucket, eraser, eyedropper. */
+private enum class PaintTool { BRUSH, FILL, ERASER, EYEDROPPER }
 
 /** A curated palette of pleasant hex colors for the quick-pick swatches. */
 private val QUICK_HEX = listOf(
@@ -93,13 +125,53 @@ private fun parseHex(text: String): String? {
 private fun hexColor(hex: String): Color = runCatching { Color(0xFF000000L or (hex.toLong(16) shl 8)) }
     .getOrDefault(Color(0xFF4A3426))
 
+/** Hex → HSL (h in 0..360, s/l in 0..1) — for the advanced color editor. */
+private fun hexToHsl(hex: String): Triple<Float, Float, Float> {
+    val r = hex.substring(0, 2).toInt(16) / 255f
+    val g = hex.substring(2, 4).toInt(16) / 255f
+    val b = hex.substring(4, 6).toInt(16) / 255f
+    val max = maxOf(r, g, b)
+    val min = minOf(r, g, b)
+    val l = (max + min) / 2f
+    val d = max - min
+    if (d == 0f) return Triple(0f, 0f, l)
+    val s = d / (1f - kotlin.math.abs(2f * l - 1f))
+    val h = when (max) {
+        r -> ((g - b) / d) % 6f
+        g -> (b - r) / d + 2f
+        else -> (r - g) / d + 4f
+    } * 60f
+    return Triple((h + 360f) % 360f, s.coerceIn(0f, 1f), l.coerceIn(0f, 1f))
+}
+
+/** HSL → hex (RRGGBB). */
+private fun hslToHex(h: Float, s: Float, l: Float): String {
+    val c = (1f - kotlin.math.abs(2f * l - 1f)) * s
+    val hp = (h % 360f + 360f) % 360f / 60f
+    val x = c * (1f - kotlin.math.abs(hp % 2f - 1f))
+    val (r1, g1, b1) = when {
+        hp < 1f -> Triple(c, x, 0f)
+        hp < 2f -> Triple(x, c, 0f)
+        hp < 3f -> Triple(0f, c, x)
+        hp < 4f -> Triple(0f, x, c)
+        hp < 5f -> Triple(x, 0f, c)
+        else -> Triple(c, 0f, x)
+    }
+    val m = l - c / 2f
+    fun toByte(v: Float): Int = ((v + m) * 255f).toInt().coerceIn(0, 255)
+    return "%02X%02X%02X".format(toByte(r1), toByte(g1), toByte(b1))
+}
+
 /**
- * v8.34 — the Pet designer playground (Settings → Pet designer): a working
- * copy of the pet's look you can reshape live — 16×16 pixel grid editor
- * (body + asleep poses), palette recoloring with quick-pick swatches,
- * preset shapes, a randomizer, and plain-text import/export of the design
- * format (see [PetDesign]). Saving applies the design EVERYWHERE (always-on
- * — [AppPreferences.setPetDesign]); the pet sprite reads it reactively.
+ * v8.35 — the Pet designer playground (Settings → Pet designer): a working
+ * copy of the pet's look you can reshape live. Two canvases (24×24 and
+ * 32×32, convertible), paint tools (brush / fill bucket / eraser /
+ * eyedropper) with drag painting, palette recoloring with hex + HSL
+ * sliders, preset shapes, a randomizer, a Face & reactions editor (per-mood
+ * eyes/mouth/blush/sparkles + per-event reaction rules), and import/export
+ * as PNG images or plain text. Saving applies the design EVERYWHERE
+ * (always-on — [AppPreferences.setPetDesign]); the pet sprite reads it
+ * reactively.
  */
 @Composable
 fun PetDesignerScreen(navController: NavController) {
@@ -107,9 +179,6 @@ fun PetDesignerScreen(navController: NavController) {
     val clipboard = LocalClipboardManager.current
     val savedText = AppPreferences.petDesignState
     // Working copy — starts from the saved design (or default), edited live.
-    // remember (not rememberSaveable): PetDesign isn't Bundle-saveable, and
-    // re-keying on savedText refreshes the start point when a design is
-    // saved or cleared elsewhere.
     var design by remember(savedText) {
         mutableStateOf(
             savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) } ?: PetDesign.DEFAULT
@@ -119,14 +188,61 @@ fun PetDesignerScreen(navController: NavController) {
     var editingGrid by rememberSaveable { mutableStateOf("body") }
     // The currently selected palette paint key.
     var paintKey by rememberSaveable { mutableStateOf('b') }
+    // v8.35 — the active paint tool.
+    var paintTool by rememberSaveable { mutableStateOf(PaintTool.BRUSH) }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
-    // When non-null, the import/export dialog is open with this draft text.
+    // When non-null, the import/export text dialog is open with this draft.
     var importDraft by rememberSaveable { mutableStateOf<String?>(null) }
     // A transient confirmation ("Saved!" / "Copied!") shown under the actions.
     var toast by remember { mutableStateOf<String?>(null) }
     // Preview mood so the user can see the design in different poses.
     var previewMood by rememberSaveable { mutableStateOf(CurioPet.Mood.HAPPY) }
+    // v8.35 — the face editor's selected mood + the reaction editor's event.
+    var faceMood by rememberSaveable { mutableStateOf(PetFaceMoods.HAPPY) }
+    var reactEvent by rememberSaveable { mutableStateOf(PetReactionEvents.TOUCH) }
+    // v8.35 — preview the hide-and-peek crouch.
+    var previewPeek by rememberSaveable { mutableStateOf(false) }
+    // v8.35 — which grid a picked PNG should land on (1 = body, 2 = curled).
+    var importPngTarget by remember { mutableStateOf<Int?>(null) }
+
+    // v8.35 — PNG import: pick an image, resample to the canvas, snap every
+    // pixel to the nearest palette key.
+    val pngPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        val target = importPngTarget ?: return@rememberLauncherForActivityResult
+        val bitmap = runCatching {
+            context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
+        }.getOrNull() ?: return@rememberLauncherForActivityResult
+        val imported = petBitmapToGrid(bitmap, design.gridSize, design)
+        if (imported != null) {
+            design = design.withGrid(if (target == 1) "body" else "curled", imported)
+            toast = "Imported PNG — snapped to ${design.gridSize}×${design.gridSize} pixels"
+        } else {
+            toast = "Couldn't read that image"
+        }
+    }
+
+    // v8.35 — applies the active tool at a grid cell.
+    fun applyTool(row: Int, col: Int) {
+        when (paintTool) {
+            PaintTool.BRUSH -> design = design.withPixel(editingGrid, row, col, paintKey)
+            PaintTool.FILL -> design = design.withFloodFill(editingGrid, row, col, paintKey)
+            PaintTool.ERASER -> design = design.withPixel(editingGrid, row, col, '.')
+            PaintTool.EYEDROPPER -> {
+                val rows = if (editingGrid == "curled") design.curledRows else design.bodyRows
+                val ch = rows.getOrNull(row)?.getOrNull(col) ?: '.'
+                if (ch != '.') {
+                    paintKey = ch
+                    paintTool = PaintTool.BRUSH
+                } else {
+                    paintTool = PaintTool.ERASER
+                }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -154,106 +270,122 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Live preview ─────────────────────────────────────────
             item {
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 3.dp,
-                    shadowElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
+                    CurioPetSprite(
+                        stage = CurioPet.currentStage(),
+                        mood = previewMood,
+                        spriteSize = 110.dp,
+                        design = design,
+                        peeking = previewPeek
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            "Live preview",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            if (design.isCustom) "Your custom look" else "The default look — make it yours!",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(14.dp))
-                        CurioPetSprite(
-                            stage = CurioPet.currentStage(),
-                            mood = previewMood,
-                            spriteSize = 110.dp,
-                            design = design
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(
-                                CurioPet.Mood.HAPPY to "Happy",
-                                CurioPet.Mood.EXCITED to "Excited",
-                                CurioPet.Mood.SLEEPY to "Asleep"
-                            ).forEach { (mood, label) ->
-                                MoodChip(
-                                    label = label,
-                                    selected = previewMood == mood,
-                                    onClick = { previewMood = mood }
-                                )
-                            }
+                        CurioPet.Mood.entries.forEach { mood ->
+                            MoodChip(
+                                label = mood.name.lowercase().replaceFirstChar { it.uppercase() },
+                                selected = previewMood == mood && !previewPeek,
+                                onClick = { previewMood = mood; previewPeek = false }
+                            )
                         }
+                        MoodChip(
+                            label = "Peeking",
+                            selected = previewPeek,
+                            onClick = { previewPeek = !previewPeek }
+                        )
                     }
                 }
             }
 
             // ── Pixel grid editor ─────────────────────────────────────
             item {
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 3.dp,
-                    shadowElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
+                SectionCard(
+                    "Pixel grid",
+                    "Paint with a brush stroke, fill, erase, or pick colors from the canvas"
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Canvas",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                            )
+                            Text(
+                                "Convert between sizes — pixels keep their palette",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(3.dp),
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    "Pixel grid",
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                                )
-                                Text(
-                                    "Tap a cell to paint with the selected color",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            GridTab("24×24", design.gridSize == 24) {
+                                design = design.withSize(24)
                             }
-                            Row(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(3.dp),
-                                horizontalArrangement = Arrangement.spacedBy(3.dp)
-                            ) {
-                                GridTab("Body", editingGrid == "body") { editingGrid = "body" }
-                                GridTab("Asleep", editingGrid == "curled") { editingGrid = "curled" }
+                            GridTab("32×32", design.gridSize == 32) {
+                                design = design.withSize(32)
                             }
                         }
-                        Spacer(Modifier.height(14.dp))
-                        PixelGrid(
-                            design = design,
-                            grid = editingGrid,
-                            paintKey = paintKey,
-                            onPaint = { row, col ->
-                                design = design.withPixel(editingGrid, row, col, paintKey)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(3.dp),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        GridTab("Body", editingGrid == "body") { editingGrid = "body" }
+                        GridTab("Asleep", editingGrid == "curled") { editingGrid = "curled" }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    PixelGrid(
+                        design = design,
+                        grid = editingGrid,
+                        paintKey = paintKey,
+                        tool = paintTool,
+                        onTool = { row, col, continuous ->
+                            // Fill + eyedropper act once per gesture; brush
+                            // and eraser paint continuously while dragging.
+                            if (paintTool == PaintTool.FILL || paintTool == PaintTool.EYEDROPPER) {
+                                if (!continuous) applyTool(row, col)
+                            } else {
+                                applyTool(row, col)
                             }
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            SmallAction("Copy body → asleep", enabled = editingGrid == "body") {
-                                design = design.copy(curledRows = PetDesign.bodyAsCurled(design.bodyRows))
-                            }
-                            SmallAction("Clear grid", enabled = true) {
-                                val blank = List(16) { ".".repeat(16) }
-                                design = design.withGrid(editingGrid, blank)
-                            }
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        PaintTool.entries.forEach { tool ->
+                            ToolChip(
+                                tool = tool,
+                                selected = paintTool == tool,
+                                onClick = { paintTool = tool }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallAction("Copy body → asleep", enabled = editingGrid == "body") {
+                            design = design.copy(curledRows = PetDesign.bodyAsCurled(design.bodyRows))
+                        }
+                        SmallAction("Clear grid", enabled = true) {
+                            val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
+                            design = design.withGrid(editingGrid, blank)
                         }
                     }
                 }
@@ -261,79 +393,196 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Palette editor ────────────────────────────────────────
             item {
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 3.dp,
-                    shadowElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
+                SectionCard(
+                    "Colors",
+                    "Pick the paint color, or tap a swatch's pencil for the advanced editor (hex + HSL sliders)"
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Colors",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                    PALETTE_SLOTS.forEach { slot ->
+                        PaletteRow(
+                            slot = slot,
+                            hex = design.colorOf(slot.key),
+                            selected = paintKey == slot.key && paintTool != PaintTool.ERASER,
+                            onSelect = {
+                                paintKey = slot.key
+                                paintTool = PaintTool.BRUSH
+                            },
+                            onEdit = { editingColorKey = slot.key }
                         )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "Pick the paint color, or tap a swatch's pencil to edit its hex",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        PALETTE_SLOTS.forEach { slot ->
-                            PaletteRow(
-                                slot = slot,
-                                hex = design.colorOf(slot.key),
-                                selected = paintKey == slot.key,
-                                onSelect = { paintKey = slot.key },
-                                onEdit = { editingColorKey = slot.key }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+            }
+
+            // ── Face & reactions editor ───────────────────────────────
+            item {
+                SectionCard(
+                    "Face & reactions",
+                    "Customize Curie's face per mood, and how it reacts to each moment"
+                ) {
+                    Text(
+                        "Face per mood",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        PetFaceMoods.ALL.forEach { mood ->
+                            ChoiceChip(
+                                label = PetFaceMoods.label(mood),
+                                selected = faceMood == mood,
+                                onClick = { faceMood = mood }
                             )
-                            Spacer(Modifier.height(8.dp))
                         }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    val face = design.faceFor(faceMood)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        CurioPetSprite(
+                            stage = CurioPet.currentStage(),
+                            mood = moodFromName(faceMood),
+                            spriteSize = 64.dp,
+                            design = design
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "${PetFaceMoods.label(faceMood)} face",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                "Eyes: ${face.eyes.name} · Mouth: ${face.mouth.name}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    LabeledChips(
+                        label = "Eyes",
+                        options = EyeStyle.entries.map { it.name },
+                        selected = face.eyes.name,
+                        onSelect = { design = design.withFace(faceMood, face.copy(eyes = EyeStyle.valueOf(it))) }
+                    )
+                    LabeledChips(
+                        label = "Mouth",
+                        options = MouthStyle.entries.map { it.name },
+                        selected = face.mouth.name,
+                        onSelect = { design = design.withFace(faceMood, face.copy(mouth = MouthStyle.valueOf(it))) }
+                    )
+                    ToggleRow("Blush (cheeks)", face.blush) {
+                        design = design.withFace(faceMood, face.copy(blush = it))
+                    }
+                    ToggleRow("Sparkles around Curie", face.sparkles) {
+                        design = design.withFace(faceMood, face.copy(sparkles = it))
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(Modifier.height(16.dp))
+
+                    Text(
+                        "Reactions",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Choose what Curie does for each moment — and the face it wears while reacting",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        PetReactionEvents.ALL.forEach { event ->
+                            ChoiceChip(
+                                label = PetReactionEvents.label(event),
+                                selected = reactEvent == event,
+                                onClick = { reactEvent = event }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    val reaction = design.reactionFor(reactEvent)
+                    ToggleRow(
+                        "React to “${PetReactionEvents.label(reactEvent)}”",
+                        reaction.enabled
+                    ) {
+                        design = design.withReaction(reactEvent, reaction.copy(enabled = it))
+                    }
+                    LabeledChips(
+                        label = "Animation",
+                        options = ReactionAnim.entries.map { it.name },
+                        selected = reaction.anim.name,
+                        onSelect = { design = design.withReaction(reactEvent, reaction.copy(anim = ReactionAnim.valueOf(it))) }
+                    )
+                    LabeledChips(
+                        label = "Reaction eyes",
+                        options = EyeStyle.entries.map { it.name },
+                        selected = reaction.face.eyes.name,
+                        onSelect = {
+                            design = design.withReaction(
+                                reactEvent,
+                                reaction.copy(face = reaction.face.copy(eyes = EyeStyle.valueOf(it)))
+                            )
+                        }
+                    )
+                    LabeledChips(
+                        label = "Reaction mouth",
+                        options = MouthStyle.entries.map { it.name },
+                        selected = reaction.face.mouth.name,
+                        onSelect = {
+                            design = design.withReaction(
+                                reactEvent,
+                                reaction.copy(face = reaction.face.copy(mouth = MouthStyle.valueOf(it)))
+                            )
+                        }
+                    )
+                    ToggleRow("Blush while reacting", reaction.face.blush) {
+                        design = design.withReaction(
+                            reactEvent,
+                            reaction.copy(face = reaction.face.copy(blush = it))
+                        )
+                    }
+                    ToggleRow("Sparkles while reacting", reaction.face.sparkles) {
+                        design = design.withReaction(
+                            reactEvent,
+                            reaction.copy(face = reaction.face.copy(sparkles = it))
+                        )
                     }
                 }
             }
 
             // ── Shapes & randomize ────────────────────────────────────
             item {
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 3.dp,
-                    shadowElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
+                SectionCard(
+                    "Shapes & inspiration",
+                    "Jump-start the body grid with a preset, or roll a fresh palette"
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Shapes & inspiration",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "Jump-start the body grid with a preset, or roll a fresh palette",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            SmallAction("Default", enabled = true) {
-                                design = design.withGrid("body", PetDesign.DEFAULT_BODY)
-                            }
-                            SmallAction("Robot", enabled = true) {
-                                design = design.withGrid("body", ROBOT_BODY)
-                            }
-                            SmallAction("Ghost", enabled = true) {
-                                design = design.withGrid("body", GHOST_BODY)
-                            }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallAction("Default", enabled = true) {
+                            design = design.withGrid("body", upscalePreset(PetDesign.DEFAULT_BODY_16, design.gridSize))
                         }
-                        Spacer(Modifier.height(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            SmallAction("Random palette", enabled = true) {
-                                design = design.randomize()
-                            }
-                            SmallAction("Reset all", enabled = design.isCustom) {
-                                design = PetDesign.DEFAULT
-                            }
+                        SmallAction("Robot", enabled = true) {
+                            design = design.withGrid("body", upscalePreset(ROBOT_BODY, design.gridSize))
+                        }
+                        SmallAction("Ghost", enabled = true) {
+                            design = design.withGrid("body", upscalePreset(GHOST_BODY, design.gridSize))
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallAction("Random palette", enabled = true) {
+                            design = design.randomize()
+                        }
+                        SmallAction("Reset all", enabled = design.isCustom) {
+                            design = PetDesign.DEFAULT
                         }
                     }
                 }
@@ -341,66 +590,114 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Import / export / save ────────────────────────────────
             item {
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 3.dp,
-                    shadowElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
+                SectionCard(
+                    "Import & export",
+                    "Share Curie as a PNG image (pixel-perfect), or use the text format for fine control"
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(
-                            "Import & export",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "The design is plain text — paste it in, edit colors by hand, or share it",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            SmallAction("Copy design text") {
-                                clipboard.setText(AnnotatedString(design.toText()))
-                                toast = "Copied to clipboard"
-                            }
-                            SmallAction("Paste design text") {
-                                importDraft = clipboard.getText()?.text ?: ""
-                            }
-                        }
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            "Tip: the palette is key=HEX lines — change a hex to recolor that part.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(Modifier.height(14.dp))
-                        SaveButton(
-                            label = if (design.isCustom) "Save custom design" else "Use default look",
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                             onClick = {
-                                if (design.isCustom) {
-                                    AppPreferences.setPetDesign(context, design.toText())
-                                    toast = "Saved — your pet wears it everywhere"
-                                } else {
-                                    AppPreferences.clearPetDesign(context)
-                                    toast = "Default look restored"
-                                }
+                                val uri = exportPngUri(context, design, editingGrid)
+                                if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Wallpaper,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    size = 22.dp
+                                )
+                                Text(
+                                    "Export PNG",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    "Current pose · ${design.gridSize}×${design.gridSize}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
                             }
-                        )
-                        if (toast != null) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                toast.orEmpty(),
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary
-                            )
                         }
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                            onClick = {
+                                importPngTarget = if (editingGrid == "curled") 2 else 1
+                                pngPicker.launch("image/*")
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Image,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    size = 22.dp
+                                )
+                                Text(
+                                    "Import PNG",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Text(
+                                    "Snaps to nearest palette color",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Text format (advanced): copy the design as text, paste it in, edit colors by hand, or share it",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallAction("Copy design text") {
+                            clipboard.setText(AnnotatedString(design.toText()))
+                            toast = "Copied to clipboard"
+                        }
+                        SmallAction("Paste design text") {
+                            importDraft = clipboard.getText()?.text ?: ""
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+                    SaveButton(
+                        label = if (design.isCustom) "Save custom design" else "Use default look",
+                        onClick = {
+                            if (design.isCustom) {
+                                AppPreferences.setPetDesign(context, design.toText())
+                                toast = "Saved — Curie wears it everywhere"
+                            } else {
+                                AppPreferences.clearPetDesign(context)
+                                toast = "Default look restored"
+                            }
+                        }
+                    )
+                    if (toast != null) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            toast.orEmpty(),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
@@ -408,7 +705,7 @@ fun PetDesignerScreen(navController: NavController) {
 
         SettingsHeroHeader(
             title = "Pet designer",
-            subtitle = "Draw your own Curio",
+            subtitle = "Draw your own Curie",
             onBack = { navController.popBackStack() },
             compact = wide
         )
@@ -428,21 +725,22 @@ fun PetDesignerScreen(navController: NavController) {
             }
         }
 
-        // ── Import/export overlay ────────────────────────────────────
+        // ── Import/export text overlay ───────────────────────────────
         importDraft?.let { draft ->
             DialogScrim(onDismiss = { importDraft = null }) {
                 ImportCard(
                     draft = draft,
+                    gridSize = design.gridSize,
                     onCancel = { importDraft = null },
                     onImport = { text ->
                         val parsed = PetDesign.DEFAULT.toParsedOr(text, PetDesign.DEFAULT)
-                        // Tolerant parse always yields 32 rows; treat text
-                        // that produced no palette keys AND the default body
-                        // as unreadable so a garbage paste can't wipe a design.
+                        // Tolerant parse; treat text that produced no palette
+                        // keys AND the default body as unreadable so garbage
+                        // can't wipe a design.
                         val looksLikeDesign =
                             parsed != PetDesign.DEFAULT ||
                                 text.contains("=") ||
-                                text.lines().any { it.length >= 16 }
+                                text.lines().any { it.length >= design.gridSize }
                         if (looksLikeDesign) {
                             design = parsed
                             importDraft = null
@@ -455,6 +753,109 @@ fun PetDesignerScreen(navController: NavController) {
             }
         }
     }
+}
+
+/** Maps a face-editor mood name to the sprite's Mood enum. */
+private fun moodFromName(name: String): CurioPet.Mood =
+    runCatching { CurioPet.Mood.valueOf(name) }.getOrDefault(CurioPet.Mood.HAPPY)
+
+/** Upscales a 16×16 preset grid to the current canvas size. */
+private fun upscalePreset(rows: List<String>, gridSize: Int): List<String> =
+    if (gridSize == 16) rows else PetDesign.resizeGrid(rows, 16, gridSize)
+
+/**
+ * Renders a design grid to a pixel-perfect PNG bitmap and returns its
+ * shareable FileProvider URI (cache/share, which file_paths.xml exposes).
+ */
+private fun exportPngUri(context: android.content.Context, design: PetDesign, grid: String): android.net.Uri? {
+    val rows = if (grid == "curled") design.curledRows else design.bodyRows
+    val n = design.gridSize
+    val scale = 12
+    val bitmap = Bitmap.createBitmap(n * scale, n * scale, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    rows.forEachIndexed { r, line ->
+        line.forEachIndexed { c, ch ->
+            val hex = design.colorFor(ch) ?: return@forEachIndexed
+            val color = runCatching { android.graphics.Color.parseColor("#$hex") }.getOrDefault(0xFF4A3426.toInt())
+            paint.color = color
+            canvas.drawRect(
+                c * scale.toFloat(), r * scale.toFloat(),
+                (c + 1) * scale.toFloat(), (r + 1) * scale.toFloat(),
+                paint
+            )
+        }
+    }
+    val dir = File(context.cacheDir, "share")
+    if (!dir.exists()) dir.mkdirs()
+    val file = File(dir, "curie_${grid}_${n}x$n.png")
+    return runCatching {
+        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    }.getOrNull()
+}
+
+/** Shares a PNG via the Android share sheet. */
+private fun sharePng(context: android.content.Context, uri: android.net.Uri) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = ClipData.newUri(context.contentResolver, "Curie", uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    runCatching {
+        context.startActivity(Intent.createChooser(intent, "Share Curie as PNG"))
+    }
+}
+
+/**
+ * Decodes a bitmap into a [gridSize]×[gridSize] grid of palette keys: every
+ * pixel is snapped to the nearest palette color by RGB distance (fully
+ * transparent pixels become empty cells). Null when the bitmap is invalid.
+ */
+private fun petBitmapToGrid(bitmap: Bitmap, gridSize: Int, design: PetDesign): List<String>? {
+    val scaled = runCatching {
+        Bitmap.createScaledBitmap(bitmap, gridSize, gridSize, true)
+    }.getOrNull() ?: return null
+    val pixels = IntArray(gridSize * gridSize)
+    scaled.getPixels(pixels, 0, gridSize, 0, 0, gridSize, gridSize)
+    val keys = PetDesign.KEYS
+    val paletteRgb = keys.map { key ->
+        val hex = design.colorOf(key)
+        Triple(
+            hex.substring(0, 2).toInt(16),
+            hex.substring(2, 4).toInt(16),
+            hex.substring(4, 6).toInt(16)
+        )
+    }
+    val rows = MutableList(gridSize) { StringBuilder() }
+    for (r in 0 until gridSize) {
+        for (c in 0 until gridSize) {
+            val argb = pixels[r * gridSize + c]
+            val alpha = (argb ushr 24) and 0xFF
+            if (alpha < 128) {
+                rows[r].append('.')
+                continue
+            }
+            val red = (argb shr 16) and 0xFF
+            val green = (argb shr 8) and 0xFF
+            val blue = argb and 0xFF
+            var best = 0
+            var bestDist = Int.MAX_VALUE
+            paletteRgb.forEachIndexed { i, (kr, kg, kb) ->
+                val dr = red - kr
+                val dg = green - kg
+                val db = blue - kb
+                val d = dr * dr + dg * dg + db * db
+                if (d < bestDist) {
+                    bestDist = d
+                    best = i
+                }
+            }
+            rows[r].append(keys[best])
+        }
+    }
+    return rows.map { it.toString() }
 }
 
 /** A dim full-screen scrim with a centered dialog surface. */
@@ -485,7 +886,7 @@ private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) 
     }
 }
 
-/** The hex color editor card. */
+/** The hex + HSL color editor card. */
 @Composable
 private fun ColorEditorCard(
     key: Char,
@@ -494,6 +895,7 @@ private fun ColorEditorCard(
     onApply: (String) -> Unit
 ) {
     var hexDraft by rememberSaveable(key) { mutableStateOf(initialHex) }
+    var hsl by rememberSaveable(key) { mutableStateOf(hexToHsl(initialHex)) }
     val hexError = hexDraft.length != 6
     Column(modifier = Modifier.padding(18.dp)) {
         Text(
@@ -527,6 +929,9 @@ private fun ColorEditorCard(
                         onValueChange = { input ->
                             hexDraft = input.filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
                                 .uppercase().take(6)
+                            if (hexDraft.length == 6) {
+                                hsl = hexToHsl(hexDraft)
+                            }
                         },
                         singleLine = true,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -542,6 +947,24 @@ private fun ColorEditorCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+        Spacer(Modifier.height(14.dp))
+        Text(
+            "Advanced — HSL sliders",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        SliderRow("Hue", hsl.first, 360f) {
+            hsl = hsl.copy(first = it)
+            hexDraft = hslToHex(hsl.first, hsl.second, hsl.third)
+        }
+        SliderRow("Saturation", hsl.second, 1f) {
+            hsl = hsl.copy(second = it)
+            hexDraft = hslToHex(hsl.first, hsl.second, hsl.third)
+        }
+        SliderRow("Lightness", hsl.third, 1f) {
+            hsl = hsl.copy(third = it)
+            hexDraft = hslToHex(hsl.first, hsl.second, hsl.third)
         }
         Spacer(Modifier.height(12.dp))
         Text(
@@ -566,7 +989,7 @@ private fun ColorEditorCard(
                                         .padding(2.dp)
                                 } else Modifier
                             )
-                            .clickable { hexDraft = hex },
+                            .clickable { hexDraft = hex; hsl = hexToHsl(hex) },
                         contentAlignment = Alignment.Center
                     ) {
                         if (selected) {
@@ -603,10 +1026,32 @@ private fun ColorEditorCard(
     }
 }
 
+/** One HSL slider with its label. */
+@Composable
+private fun SliderRow(label: String, value: Float, max: Float, onChange: (Float) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(88.dp)
+        )
+        Slider(
+            value = value.coerceIn(0f, max),
+            onValueChange = onChange,
+            valueRange = 0f..max
+        )
+    }
+}
+
 /** The import text card. */
 @Composable
 private fun ImportCard(
     draft: String,
+    gridSize: Int,
     onCancel: () -> Unit,
     onImport: (String) -> Boolean
 ) {
@@ -619,7 +1064,7 @@ private fun ImportCard(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            "key=HEX palette lines, then 16 body rows and 16 asleep rows",
+            "key=HEX palette lines, then $gridSize body rows and $gridSize asleep rows",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -672,6 +1117,37 @@ private fun ImportCard(
     }
 }
 
+/** A rounded section card with a title + subtitle. */
+@Composable
+private fun SectionCard(
+    title: String,
+    subtitle: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        tonalElevation = 3.dp,
+        shadowElevation = 0.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(12.dp))
+            content()
+        }
+    }
+}
+
 /** A small rounded chip for preview moods. */
 @Composable
 private fun MoodChip(label: String, selected: Boolean, onClick: () -> Unit) {
@@ -691,7 +1167,7 @@ private fun MoodChip(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** The Body / Asleep tab in the grid card. */
+/** The Body / Asleep / size tabs. */
 @Composable
 private fun GridTab(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
@@ -707,6 +1183,48 @@ private fun GridTab(label: String, selected: Boolean, onClick: () -> Unit) {
             color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
+    }
+}
+
+/** A paint-tool chip with icon + label. */
+@Composable
+private fun ToolChip(tool: PaintTool, selected: Boolean, onClick: () -> Unit) {
+    val icon = when (tool) {
+        PaintTool.BRUSH -> CurioIcons.Brush
+        PaintTool.FILL -> CurioIcons.Fill
+        PaintTool.ERASER -> CurioIcons.Eraser
+        PaintTool.EYEDROPPER -> CurioIcons.Colorize
+    }
+    val label = when (tool) {
+        PaintTool.BRUSH -> "Brush"
+        PaintTool.FILL -> "Fill"
+        PaintTool.ERASER -> "Erase"
+        PaintTool.EYEDROPPER -> "Pick"
+    }
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+                ),
+                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -778,35 +1296,142 @@ private fun PaletteRow(
     }
 }
 
-/** The 16×16 pixel editor — tap a cell to paint it with the active key. */
+/**
+ * The pixel editor — tap or drag to paint with the active tool. Brush and
+ * eraser paint continuously; fill and eyedropper act once per gesture.
+ */
 @Composable
 private fun PixelGrid(
     design: PetDesign,
     grid: String,
     paintKey: Char,
-    onPaint: (Int, Int) -> Unit
+    tool: PaintTool,
+    onTool: (Int, Int, Boolean) -> Unit
 ) {
+    val gridSize = design.gridSize
     val rows = if (grid == "curled") design.curledRows else design.bodyRows
-    Column(modifier = Modifier.fillMaxWidth()) {
-        rows.forEachIndexed { rowIndex, line ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                line.forEachIndexed { colIndex, ch ->
-                    val filled = ch != '.'
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .padding(1.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(
-                                if (filled) hexColor(design.colorOf(ch))
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                            )
-                            .clickable { onPaint(rowIndex, colIndex) }
-                    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(gridSize, tool) {
+                detectTapGestures(onTap = { offset ->
+                    val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
+                    onTool(r, c, false)
+                })
+            }
+            .pointerInput(gridSize, tool) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
+                        onTool(r, c, false)
+                    },
+                    onDrag = { change, _ ->
+                        change.consume()
+                        val (r, c) = cellAtPosition(change.position, size.width, size.height, gridSize)
+                        onTool(r, c, true)
+                    }
+                )
+            }
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            rows.forEachIndexed { rowIndex, line ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    line.forEachIndexed { colIndex, ch ->
+                        val filled = ch != '.'
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .padding(0.5.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(
+                                    if (filled) hexColor(design.colorOf(ch))
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                )
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+/** Maps a pointer position to a (row, col) cell inside the grid. */
+private fun cellAtPosition(offset: Offset, w: Int, h: Int, grid: Int): Pair<Int, Int> {
+    val cellW = w.toFloat() / grid
+    val cellH = h.toFloat() / grid
+    val col = (offset.x / cellW).toInt().coerceIn(0, grid - 1)
+    val row = (offset.y / cellH).toInt().coerceIn(0, grid - 1)
+    return row to col
+}
+
+/** A horizontally scrollable row of choice chips. */
+@Composable
+private fun LabeledChips(
+    label: String,
+    options: List<String>,
+    selected: String,
+    onSelect: (String) -> Unit
+) {
+    Spacer(Modifier.height(8.dp))
+    Text(
+        label,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(Modifier.height(6.dp))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        options.forEach { option ->
+            ChoiceChip(
+                label = option,
+                selected = selected == option,
+                onClick = { onSelect(option) }
+            )
+        }
+    }
+}
+
+/** A compact choice chip. */
+@Composable
+private fun ChoiceChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        onClick = onClick
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+            ),
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp)
+        )
+    }
+}
+
+/** A labeled switch row (face/reaction toggles). */
+@Composable
+private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Spacer(Modifier.height(4.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }
 

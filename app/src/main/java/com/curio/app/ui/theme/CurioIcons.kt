@@ -150,6 +150,12 @@ object CurioIcons {
     const val WorkspacePremium = "workspace_premium"    // badge — level milestones
     // v8.34 — paw glyph for the Pet designer Settings entry (Material Symbols "pets").
     const val Pets = "pets"
+    // v8.35 — pet designer tool glyphs (verified present in the bundled font subset).
+    const val Brush = "brush"                 // paint brush — paint tool
+    const val Fill = "format_paint"           // paint roller — fill bucket tool
+    const val Eraser = "ink_eraser"           // eraser — erase tool
+    const val Keyboard = "keyboard"           // typing reaction
+    const val Wallpaper = "wallpaper"         // PNG export
     const val TaskAlt         = "task_alt"              // current quest
     const val Database        = "database"              // v7.89 — Browse Topics drawer entry (verified in font subset)
     const val SupportAgent    = "support_agent"          // v7.89 — Support & diagnostics drawer entry (verified in font subset)

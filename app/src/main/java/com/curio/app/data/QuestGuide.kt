@@ -167,8 +167,8 @@ object QuestGuide {
         // v8.29 — the pet INTRODUCES ITSELF first (centered, no scrim): the
         // tour never assumes the pet is already a familiar friend.
         Step(
-            "", "Meet Curio",
-            "Hi! I'm Curio, your spark companion. Follow me and I'll show you the loop: spin, explore, save.",
+            "", "Meet Curie",
+            "Hi! I'm Curie, your spark companion. Follow me and I'll show you the loop: spin, explore, save.",
             position = Position.CENTER
         ),
         Step(

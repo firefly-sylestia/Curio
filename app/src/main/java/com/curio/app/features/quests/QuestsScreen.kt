@@ -350,7 +350,7 @@ fun QuestsScreen(navController: NavController) {
                             )
                         )
                         Text(
-                            "Your Curio pet grew a little. Keep going!",
+                            "Curie grew a little. Keep going!",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

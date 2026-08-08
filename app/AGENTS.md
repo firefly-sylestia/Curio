@@ -116,6 +116,18 @@ app/src/main/java/com/curio/app/
 - New icons must be declared in the `CurioIcons` object (snake_case ligature names) — do NOT inline glyph names in screens.
 - **All design-system primitives (the `CurioIcon` composable + `CurioIcons` glyph constants object) live under `ui/theme/`.** Components in `ui/components/` consume them via import — they do not re-export them. Wrong-package imports (e.g. `import com.curio.app.ui.components.CurioIcon`) compile silently against an empty package and only fail in CI's `compileDebugKotlin`. Always import from `ui.theme.*`.
 
+### Curie pet layer (v8.35)
+- `data/PetDesign.kt` owns the pet look contract: 16/24/32 canvases
+  (convertible via dominant-key resample), a 13-key palette (incl. `r` blush
+  + `y` eye colors), per-mood faces (`PetFace`) and per-event reaction rules
+  (`PetReaction`). The text format (palette lines + grids + `face=` /
+  `react=` / `size=` lines) is documented in that file's KDoc — the source
+  of truth. `CurioPetSprite` renders any grid size; the procedural face art
+  is authored in a 16-grid space and scaled to the canvas.
+- `PetDesignerScreen` (Settings → Pet designer) is the editor. PNG
+  export/import shares via FileProvider `${applicationId}.fileprovider`
+  (`res/xml/file_paths.xml` cache/share).
+
 ### Experimental features (A/B testing)
 - Per root `AGENTS.md`, any experimental/test behavior MUST be gated behind a **user-facing Settings toggle** so it can be A/B-compared against the current behavior and reverted without a code change — never hardcoded as the only path.
 - Remove the toggle once the experiment is decided, keeping the winning behavior hardcoded.

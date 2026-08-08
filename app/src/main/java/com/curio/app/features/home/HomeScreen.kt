@@ -225,9 +225,9 @@ fun HomeScreen(navController: NavController) {
                         }
                     },
                     contentDescription = when {
-                        !CurioPet.awake -> "Curio asleep in its flower bed. Tap to wake"
-                        CurioPet.atHome -> "Curio sitting in its flower bed. Tap to come out"
-                        else -> "Curio's flower bed"
+                        !CurioPet.awake -> "Curie asleep in its flower bed. Tap to wake"
+                        CurioPet.atHome -> "Curie sitting in its flower bed. Tap to come out"
+                        else -> "Curie's flower bed"
                     },
                     modifier = m
                 )

@@ -34,8 +34,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
+import com.curio.app.data.EyeStyle
+import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
-import com.curio.app.ui.theme.CurioColors
+import com.curio.app.data.PetFace
+import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.random.Random
@@ -98,6 +101,16 @@ fun CurioPetSprite(
     dizzy: Boolean = false,
     contentDescription: String? = null,
     /**
+     * v8.35 — a one-shot face override (a reaction rule's face, from the
+     * reaction editor). Wins over the mood's face while set.
+     */
+    faceOverride: PetFace? = null,
+    /**
+     * v8.35 — the hide-and-peek pose: crouched with wide eyes peeking out
+     * from behind a button or the screen edge.
+     */
+    peeking: Boolean = false,
+    /**
      * v8.34 — a custom look from the Pet designer playground. When null
      * (the normal case) the sprite reads the SAVED design (if any) from
      * [AppPreferences.petDesignState]; the designer passes its working
@@ -122,16 +135,17 @@ fun CurioPetSprite(
     // falls back to the default look when the design doesn't recolor it).
     val accent = petDesignColor(activeDesign.colorOf('s'))
     val ink = petDesignColor(activeDesign.colorOf('o'))
-    val body = petDesignColor(activeDesign.colorOf('b'))
     val bodyShade = petDesignColor(activeDesign.colorOf('B'))
     val bellyLight = Color(0xFFFFFBF0)
-    val blush = Color(0xFFF7AFAF)
+    // v8.35 — blush ('r') and eye ('y') colors come from the design palette,
+    // so the Face editor and palette can recolor them.
+    val blush = petDesignColor(activeDesign.colorOf('r'))
     val gold = petDesignColor(activeDesign.colorOf('G'))
     val goldDeep = petDesignColor(activeDesign.colorOf('g'))
     // v8.26 — excited eyes wear a NATURAL warm brown (the ink family, one
     // step lighter) instead of gold: the gold stars read orangish against
     // the cream body. Sparkles and the antenna keep the gold.
-    val starEye = Color(0xFF7A4E2E)
+    val starEye = petDesignColor(activeDesign.colorOf('y'))
     val leaf = Color(0xFF9CCB8B)
     val bookCover = Color(0xFFD98BA0)
     val white = Color.White
@@ -229,8 +243,6 @@ fun CurioPetSprite(
 
     val sleeping = mood == CurioPet.Mood.SLEEPY && !moving && !dragged
     // v8.13 — mood faces for the new status moods + the spin cheer.
-    val happy = mood == CurioPet.Mood.HAPPY
-    val bouncy = mood == CurioPet.Mood.BOUNCY
     val spinningNow = spinning && !sleeping && !dragged && !moving
     // v8.12 — excited/proud are ONE-SHOT bursts tied to the celebration hop,
     // never sustained ambient moods: the pet reacts for a beat, then idles.
@@ -243,13 +255,6 @@ fun CurioPetSprite(
     // v8.11 — mid-play: the pet is bowing or twirling, so it wears its
     // excited face and wags faster regardless of the ambient mood.
     val playing = playBow.value > 0f || spinAngle.value != 0f
-    // v8.13 — blush is a CELEBRATION thing, not a permanent feature: only
-    // genuinely happy moments wear it (excited/proud one-shots, bouncy
-    // post-play, mid-play, mid-spin). Plain idle HAPPY is the default state,
-    // so it does NOT blush there — the face stays clean most of the time.
-    // (Declared here, after excited/proud/playing — a compile-safety rule:
-    // never reference vals before their declaration point.)
-    val blushing = !sleeping && (excited || proud || bouncy || playing || spinningNow)
     // v8.14 — the rare sleep-STARTLE: a tiny jump with eyes flashing open,
     // then it settles right back (the "almost woke up" moment). Runs only
     // while asleep, on a random 9-22s beat.
@@ -321,30 +326,48 @@ fun CurioPetSprite(
         (if (watchingNow) facing * 2.5f else 0f)
 
     // ── Face state ─────────────────────────────────────────────────────
+    // v8.35 — faces are configurable: the base face for the ambient mood
+    // comes from the design's face editor (or the built-in default), and
+    // the one-shot states (celebration hop, spin cheer, mid-play) wear the
+    // design's EXCITED face so a happy hop reads excited. A [faceOverride]
+    // (a reaction rule's face, e.g. from petting) wins while set.
+    val moodFace = faceOverride ?: activeDesign.faceFor(mood.name)
+    val oneShotFace = activeDesign.faceFor(PetFaceMoods.EXCITED)
     val eyes = when {
         // v8.21 — being flung around spins the eyes first.
         dizzy -> EyeStyle.DIZZY
         dragged -> EyeStyle.WIDE // lifted mid-play: startled wins
-        playing -> EyeStyle.STAR
+        playing -> oneShotFace.eyes
         sleeping -> EyeStyle.CLOSED
+        peeking -> EyeStyle.WIDE // peeking out from behind a button
         pointingNow -> EyeStyle.WIDE // "over here!"
-        spinningNow -> EyeStyle.STAR // cheering the reel on
+        spinningNow -> oneShotFace.eyes // cheering the reel on
         blinkPhase > 0.93f && !excited && !proud && !spinningNow -> EyeStyle.BLINK
-        excited -> EyeStyle.STAR
-        proud -> EyeStyle.HAPPY
-        bouncy -> EyeStyle.HAPPY
-        else -> EyeStyle.OPEN
+        excited -> oneShotFace.eyes
+        proud -> activeDesign.faceFor(PetFaceMoods.PROUD).eyes
+        else -> moodFace.eyes
     }
     val mouth = when {
         dizzy -> MouthStyle.O // "whoa…"
         dragged -> MouthStyle.O
-        playing -> MouthStyle.WIDE
+        playing -> oneShotFace.mouth
         sleeping -> MouthStyle.NONE
+        peeking -> MouthStyle.NONE // a quiet peek
         pointingNow -> MouthStyle.WIDE // "come on, tap it!"
-        spinningNow -> MouthStyle.WIDE
-        excited -> MouthStyle.WIDE
-        bouncy -> MouthStyle.WIDE
-        else -> MouthStyle.SMILE
+        spinningNow -> oneShotFace.mouth
+        excited -> oneShotFace.mouth
+        proud -> activeDesign.faceFor(PetFaceMoods.PROUD).mouth
+        else -> moodFace.mouth
+    }
+    // Blush + sparkles follow the same story: the ambient mood's face, with
+    // the one-shots borrowing the EXCITED face's settings.
+    val blushing = !sleeping && !dizzy && !dragged && when {
+        excited || proud || playing || spinningNow -> oneShotFace.blush
+        else -> moodFace.blush
+    }
+    val sparklesOn = when {
+        excited || spinningNow -> oneShotFace.sparkles
+        else -> moodFace.sparkles
     }
 
     val desc = contentDescription
@@ -366,7 +389,8 @@ fun CurioPetSprite(
                         with(density) { hopJump.toPx() } +
                         with(density) { bowDip.toPx() } +
                         with(density) { startleJump.toPx() }
-                    val squash = hopSquash * 0.06f * (if (hop.value > 0f) 1f else 0f) + bowSquash
+                    val squash = hopSquash * 0.06f * (if (hop.value > 0f) 1f else 0f) + bowSquash +
+                        (if (peeking) -0.10f else 0f) // v8.35 — a crouched hide-and-peek
                     val squishScale = squish.value
                     scaleX = ((breatheScale + squash) * dragStretchX * squishScale *
                         (1f + spinPulse) * (1f + startleSquash))
@@ -397,9 +421,16 @@ fun CurioPetSprite(
                     .graphicsLayer { scaleX = facing }
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    val px = size.width / GRID
-                    fun drawPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
-                        if (col !in 0 until GRID || row !in 0 until GRID) return
+                    // v8.35 — the canvas adapts to the design's grid size.
+                    // Design cells (drawGridPx) use one cell = px; the
+                    // procedural face art (drawPx) is authored in a 16-grid
+                    // space and scaled to the canvas (opx), so the face
+                    // keeps its proportions on any grid.
+                    val grid = activeDesign.gridSize
+                    val px = size.width / grid
+                    val opx = size.width / 16f
+                    fun drawGridPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
+                        if (col !in 0 until grid || row !in 0 until grid) return
                         // v8.21 — softer pixels: each cell is a slightly-
                         // ROUNDED, slightly-overlapping square so the sprite
                         // reads soft and plush instead of crunchy. The 6%
@@ -411,27 +442,29 @@ fun CurioPetSprite(
                             cornerRadius = CornerRadius(px * 0.16f)
                         )
                     }
+                    // Procedural overlay cell — the 16-grid authoring space.
+                    // NOTE: Int params — Kotlin has no implicit Int→Float
+                    // conversion, and the face art passes integer coords.
+                    // (Int * opx yields Float, so scaling works.)
+                    fun drawPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
+                        drawRoundRect(
+                            color = color.copy(alpha = alpha),
+                            topLeft = Offset(col * opx, row * opx),
+                            size = Size(opx * 1.06f, opx * 1.06f),
+                            cornerRadius = CornerRadius(opx * 0.16f)
+                        )
+                    }
 
                     // Body — static pattern with the accent scarf. v8.14 —
                     // asleep pets CURL UP into a cozy ball instead of
                     // standing with closed eyes. v8.34 — the active design's
-                    // grids replace the default ones.
+                    // grids replace the default ones. v8.35 — every palette
+                    // key renders (custom paint slots included).
                     val bodyRows = if (sleeping) activeDesign.curledRows else activeDesign.bodyRows
                     bodyRows.forEachIndexed { row, line ->
                         line.forEachIndexed { col, ch ->
-                            when (ch) {
-                                'b' -> drawPx(col, row, body)
-                                'B' -> drawPx(col, row, bodyShade)
-                                'o' -> drawPx(col, row, ink)
-                                's' -> drawPx(col, row, accent)
-                                'S' -> drawPx(
-                                    col,
-                                    row,
-                                    petDesignColor(activeDesign.colorOf('S'))
-                                )
-                                'G' -> drawPx(col, row, gold)
-                                'g' -> drawPx(col, row, goldDeep)
-                            }
+                            val hex = activeDesign.colorFor(ch)
+                            if (hex != null) drawGridPx(col, row, petDesignColor(hex))
                         }
                     }
 
@@ -460,9 +493,9 @@ fun CurioPetSprite(
                         // Soft belly patch — a lighter tummy inside the blob.
                         drawRoundRect(
                             color = bellyLight.copy(alpha = 0.85f),
-                            topLeft = Offset(5 * px, 9 * px),
-                            size = Size(6 * px, 3 * px),
-                            cornerRadius = CornerRadius(3 * px)
+                            topLeft = Offset(5 * opx, 9 * opx),
+                            size = Size(6 * opx, 3 * opx),
+                            cornerRadius = CornerRadius(3 * opx)
                         )
 
                         // Little tail on the sprite's right side — wags when
@@ -490,8 +523,8 @@ fun CurioPetSprite(
                         // (rows 6-8 instead of 7-9) so there is a clear gap
                         // between them and the mouth — never joined.
                         translate(
-                            left = glanceShift * px,
-                            top = if (watchingNow) -px else 0f
+                            left = glanceShift * opx,
+                            top = if (watchingNow) -opx else 0f
                         ) {
                             when (eyes) {
                             EyeStyle.OPEN -> {
@@ -637,8 +670,9 @@ fun CurioPetSprite(
                         drawPx(14, 7 - drift, ink, 0.4f); drawPx(15, 8 - drift, ink, 0.4f); drawPx(14, 8 - drift, ink, 0.4f)
                     }
 
-                    // Excited sparkles around the pet.
-                    if (excited) {
+                    // Excited sparkles around the pet (v8.35 — toggleable in
+                    // the Face/Excitement editor via the design's face).
+                    if (sparklesOn) {
                         val twinkle = sin(bobPhase * 8f * PI.toFloat()) * 0.5f + 0.5f
                         drawPx(1, 2, gold, twinkle * 0.9f)
                         drawPx(14, 3, gold, (1f - twinkle) * 0.9f)
@@ -671,12 +705,3 @@ fun CurioPetSprite(
         }
     }
 }
-
-/** Darkens a scarf accent for shading — one fixed shade on every theme. */
-private fun shade(color: Color): Color =
-    androidx.compose.ui.graphics.lerp(color, Color.Black, 0.25f)
-
-private enum class EyeStyle { OPEN, BLINK, CLOSED, WIDE, STAR, DIZZY, HAPPY }
-private enum class MouthStyle { SMILE, WIDE, O, NONE }
-
-private const val GRID = 16
