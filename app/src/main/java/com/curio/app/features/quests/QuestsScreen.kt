@@ -912,8 +912,10 @@ private fun dailyGoRoute(kind: CurioQuests.DailyKind): String? = when (kind) {
 /**
  * Today's quests — three CORE quests with mini progress bars (v8.3 —
  * claimable rewards), then TWO BONUS quests that unlock once the core trio
- * is claimed (v8.27). Completed quests animate away, the bonus row pops in
- * with a gold sparkle, and claiming pops a "+N XP" chip and hops the pet.
+ * is claimed (v8.27). Before they unlock, the bonus pair peeks through as
+ * locked "??" silhouettes so players can see more is coming (v8.28).
+ * Completed quests animate away, the bonus group pops in with a gold
+ * sparkle, and claiming pops a "+N XP" chip and hops the pet.
  */
 @Composable
 private fun DailyCard(
@@ -970,39 +972,53 @@ private fun DailyCard(
                 )
             }
         }
-        if (coreDone) {
-            // v8.27 — the bonus pair pops in as one group (fade + grow) the
-            // moment the core trio is claimed; claimed core rows animate out
-            // individually while the core list is showing.
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(240)) + scaleIn(initialScale = 0.92f)
-            ) {
-                Column {
-                    bonus.forEach { quest ->
-                        DailyQuestRow(
-                            quest = quest,
-                            done = quest.id in awarded,
-                            onClaim = { id ->
-                                onClaim(id)
-                                xpPop = quest.xpReward to ((xpPop?.second ?: 0) + 1)
-                            },
-                            onGo = onGo
-                        )
-                    }
+        // Both groups stay composed and CROSS-FADE when the trio completes:
+        // the core list (+ locked bonus silhouettes) fades out while the real
+        // bonus pair pops in (fade + grow).
+        AnimatedVisibility(
+            visible = !coreDone,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(180))
+        ) {
+            Column {
+                core.forEach { quest ->
+                    DailyQuestRow(
+                        quest = quest,
+                        done = quest.id in awarded,
+                        onClaim = { id ->
+                            onClaim(id)
+                            xpPop = quest.xpReward to ((xpPop?.second ?: 0) + 1)
+                        },
+                        onGo = onGo
+                    )
+                }
+                // v8.28 — the two bonus quests peek through as locked "??"
+                // silhouettes (dimmed, mystery reward) so there's a visible
+                // reason to finish the trio; they swap for the gold rows on
+                // unlock. (coreRemaining >= 1 here: the group only shows
+                // while the trio is still open.)
+                val coreRemaining = core.count { it.id !in awarded }
+                bonus.forEach {
+                    BonusLockedRow(coreRemaining = coreRemaining)
                 }
             }
-        } else {
-            core.forEach { quest ->
-                DailyQuestRow(
-                    quest = quest,
-                    done = quest.id in awarded,
-                    onClaim = { id ->
-                        onClaim(id)
-                        xpPop = quest.xpReward to ((xpPop?.second ?: 0) + 1)
-                    },
-                    onGo = onGo
-                )
+        }
+        AnimatedVisibility(
+            visible = coreDone,
+            enter = fadeIn(tween(240)) + scaleIn(initialScale = 0.92f)
+        ) {
+            Column {
+                bonus.forEach { quest ->
+                    DailyQuestRow(
+                        quest = quest,
+                        done = quest.id in awarded,
+                        onClaim = { id ->
+                            onClaim(id)
+                            xpPop = quest.xpReward to ((xpPop?.second ?: 0) + 1)
+                        },
+                        onGo = onGo
+                    )
+                }
             }
         }
         if (doneCount == quests.size) {
@@ -1037,6 +1053,62 @@ private fun DailyCard(
                 }
             }
         }
+    }
+}
+
+/**
+ * v8.28 — a locked BONUS silhouette: the same row rhythm as a real bonus
+ * quest, but dimmed with a mystery "?? XP" reward and a hint counting how
+ * many core quests are left. Swaps for the real gold row on unlock.
+ */
+@Composable
+private fun BonusLockedRow(coreRemaining: Int) {
+    val dim = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+    val dimSoft = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(11.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(11.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                name = CurioIcons.AutoAwesome,
+                contentDescription = null,
+                tint = dimSoft,
+                size = 18.dp
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                "Bonus quest",
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = dim,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                if (coreRemaining == 1) "Complete the last core quest to unlock"
+                else "Complete $coreRemaining more core quests to unlock",
+                style = MaterialTheme.typography.bodySmall,
+                color = dimSoft,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Text(
+            "?? XP",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = dimSoft
+        )
     }
 }
 
