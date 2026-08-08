@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.delayBy
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -2122,7 +2121,7 @@ private fun HeroTicketCard(
         // v8.32 — the bounce lands when the hero's turn arrives in the
         // cascade (mid-wave, after the top peeks) so the pulse reads as
         // part of the ripple instead of firing ahead of the deck.
-        delay(2 * PeekWaveStaggerMs)
+        delay((2 * PeekWaveStaggerMs).toLong())
         tickDir = -tickDir
         // v6.6 — calm breath instead of a kick: the card lifts barely
         // (1.02) and glides back on a heavily damped, low-stiffness
@@ -2423,13 +2422,13 @@ private fun HeroTicketCard(
                                     // still lands under the tick floor.
                                     val heroDelay = 2 * PeekWaveStaggerMs
                                     (slideInVertically(
-                                        animationSpec = tween(180, easing = FastOutSlowInEasing).delayBy(heroDelay)
+                                        animationSpec = tween(180, delayMillis = heroDelay, easing = FastOutSlowInEasing)
                                     ) { height -> height / 2 } +
-                                        fadeIn(animationSpec = tween(180, easing = FastOutSlowInEasing).delayBy(heroDelay))) togetherWith
+                                        fadeIn(animationSpec = tween(180, delayMillis = heroDelay, easing = FastOutSlowInEasing))) togetherWith
                                     (slideOutVertically(
-                                        animationSpec = tween(160, easing = FastOutSlowInEasing).delayBy(heroDelay)
+                                        animationSpec = tween(160, delayMillis = heroDelay, easing = FastOutSlowInEasing)
                                     ) { height -> -height / 2 } +
-                                        fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing).delayBy(heroDelay))) using SizeTransform(clip = false)
+                                        fadeOut(animationSpec = tween(160, delayMillis = heroDelay, easing = FastOutSlowInEasing))) using SizeTransform(clip = false)
                                 } else {
                                     (slideInVertically(
                                         animationSpec = tween(300, easing = FastOutSlowInEasing)
@@ -2774,13 +2773,13 @@ private fun PeekCard(
                     }
                     val waveDelay = waveTurn * PeekWaveStaggerMs
                     slideInVertically(
-                        animationSpec = tween(PeekWaveInMs, easing = FastOutSlowInEasing).delayBy(waveDelay)
+                        animationSpec = tween(PeekWaveInMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)
                     ) { height -> (height * dir * PeekWipeTravel).toInt() } +
-                    fadeIn(animationSpec = tween(PeekWaveInMs, easing = FastOutSlowInEasing).delayBy(waveDelay)) togetherWith
+                    fadeIn(animationSpec = tween(PeekWaveInMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)) togetherWith
                     slideOutVertically(
-                        animationSpec = tween(PeekWaveOutMs, easing = FastOutSlowInEasing).delayBy(waveDelay)
+                        animationSpec = tween(PeekWaveOutMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekWaveOutMs, easing = FastOutSlowInEasing).delayBy(waveDelay)) using SizeTransform(clip = false)
+                    fadeOut(animationSpec = tween(PeekWaveOutMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
                 } else {
                     // Idle re-fan (landing re-deal / category switch) — a
                     // slower, softer pass in the same per-side direction.

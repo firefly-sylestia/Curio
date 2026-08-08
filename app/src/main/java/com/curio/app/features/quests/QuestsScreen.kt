@@ -963,13 +963,13 @@ private fun DailyCard(
                 CurioIcon(
                     name = CurioIcons.AutoAwesome,
                     contentDescription = null,
-                    tint = CurioColors.ButterYellow,
+                    tint = bonusGold(),
                     size = 16.dp
                 )
                 Text(
                     "Bonus quests unlocked!",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = CurioColors.ButterYellow
+                    color = bonusGold()
                 )
             }
         }
@@ -1113,6 +1113,16 @@ private fun BonusLockedRow(coreRemaining: Int) {
     }
 }
 
+/**
+ * v8.33 — the bonus quest gold, theme-aware: dark gold ink on light cream
+ * surfaces (ButterYellow is a pale pastel that vanishes on the light
+ * background), bright butter in dark mode where it pops. @Composable so it
+ * can read the live theme state.
+ */
+@Composable
+private fun bonusGold(): Color =
+    if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
+
 /** One daily quest row — title, animated progress, and Claim / Go chip. */
 @Composable
 private fun DailyQuestRow(
@@ -1148,7 +1158,10 @@ private fun DailyQuestRow(
     // v8.27 — bonus quests wear gold + a sparkle glyph; the Claim pill
     // softly pulses ONLY while it's ready to claim (spec §5.3: "card glows
     // softly"), so an idle page never drives a permanent animation loop.
-    val accent = if (quest.bonus) CurioColors.ButterYellow else CurioColors.CoralBlush
+    // v8.33 — bonus gold reads on LIGHT cream surfaces: dark gold ink in
+    // light mode (ButterYellow vanishes on the pale background), bright
+    // butter in dark mode where it pops.
+    val accent = if (quest.bonus) bonusGold() else CurioColors.CoralBlush
     val pulseAlpha = if (claimable) {
         val pulse = rememberInfiniteTransition(label = "claimPulse")
         pulse.animateFloat(
@@ -1214,7 +1227,7 @@ private fun DailyQuestRow(
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 0.8.sp
                             ),
-                            color = CurioColors.ButterYellow
+                            color = bonusGold()
                         )
                     }
                 }

@@ -1,51 +1,58 @@
-# Request — v8.32: peek cards animate one after another (cascade wave)
+# Request — v8.33: CI fix (delayBy unresolved) + bonus quest gold readable in light mode
 
 ## What the user asked
 
-Modify the peek cards animation during shuffling: "the top card goes first
-then the buttom card then like that not together but one after another
-animates and each time they animate the main cards does its animation too
-and without making the animation feel janky it will feel faster when
-shuffling." So — stagger the peeks top→bottom instead of wiping all at
-once, keep the hero card animating every tick too, and make the whole thing
-feel faster/snappier without jank.
+"fix this first then push and continue and ask me later for the plan also
+change the yellow golden color of bonus quest as its not visible in light
+mode" — with the CI compile errors pasted. So: (1) fix the SpinScreen
+compile failure, (2) make the bonus quest gold readable on light
+backgrounds, (3) push, then continue the pet-designer plan later (asked
+the user about it separately — NOT implemented yet).
 
-## How it worked before
+## CI failure (SpinScreen.kt)
 
-On every shuffle tick, `cycleIndex = ++tick` changed all five fan slots'
-topics simultaneously, so all four peeks wiped in unison (PeekWipeInMs 320 /
-OutMs 300) and the hero glided (300ms) + pulsed (tickPulse) at the same
-moment. Felt like one block flipping.
+`androidx.compose.animation.core.delayBy` was unresolved in this Compose
+version (broke import + type inference on every chained tween), and
+`delay(2 * PeekWaveStaggerMs)` passed an Int where Long was expected.
 
-## Fix (this request)
+### Fix (pushed)
 
-- **Constants** — `PeekWipeInMs/OutMs` (320/300) replaced with
-  `PeekWaveInMs = 120`, `PeekWaveOutMs = 110`, `PeekWaveStaggerMs = 45`.
-  Idle re-fan constants (PeekIdle 300/280) unchanged.
-- **PeekCard transitionSpec (shuffling)** — each peek's enter AND exit
-  specs are `delayBy(waveTurn * PeekWaveStaggerMs)` where waveTurn is
-  slot -2→0, -1→1, 1→2, else→3 (top-to-bottom waterfall). The card holds
-  its old topic until its turn, then swaps fast (delayBy on both sides
-  keeps the old content visible during the wait — no blank flash).
-- **HeroTicketCard content reel (shuffling)** — joined the wave at its
-  center slot: `heroDelay = 2 * PeekWaveStaggerMs` (90ms) applied via
-  delayBy, wipe shortened 300→180ms / 260→160ms so it lands under the floor.
-- **Hero tickPulse** — `delay(2 * PeekWaveStaggerMs)` before the bounce so
-  the pulse lands mid-ripple, synced with the reel swap.
-- **Import** — `androidx.compose.animation.core.delayBy` added
-  (alphabetically placed).
+- Replaced all 8 `.delayBy(x)` chained specs with `tween(duration,
+  delayMillis = x, easing = ...)` — the built-in `TweenSpec.delayMillis`
+  parameter, version-safe, no new import. Same 180/160 hero + 120/110 peek
+  timings, same stagger values, zero behavior change.
+- `delay((2 * PeekWaveStaggerMs).toLong())` for the hero bounce.
+- Removed the `delayBy` import.
 
-## Timing math (no jank)
+## Bonus quest gold (light mode)
 
-Tick floor ≈ 340ms (interval 340–520ms). Last peek starts at 3×45=135ms
-and finishes ~255ms; hero finishes ~270ms. Whole wave < 340ms, so no
-overlap on the fastest ticks — reads faster than the old 320ms unified
-wipe.
+`CurioColors.ButterYellow` (0xFFFFD97D) is a pale pastel that vanished on
+the cream background — the "Bonus quests unlocked!" banner, the BONUS
+label, the bonus icon/progress/Claim pill all washed out in light mode.
+
+### Fix (pushed)
+
+- **CurioColors.kt** — new `GoldInk = Color(0xFFB8860B)` (dark goldenrod,
+  readable on light).
+- **QuestsScreen.kt** — new `@Composable private fun bonusGold()`:
+  ButterYellow in dark mode (pops there), GoldInk in light. Applied to the
+  bonus accent (drives icon box, progress bar, Claim pill, Go chip), the
+  unlock banner icon + text, and the BONUS label. The Claim pill was
+  white-on-pale-butter before — dark gold is a strict contrast win.
+- Rank trophy / rank badge / medal check intentionally left ButterYellow
+  (user asked about bonus quests specifically; can extend later if needed).
 
 ## Validation
 
-No stale PeekWipe refs; brace balance + `git diff --check` pass; code
-review done (import-order nit fixed). CI on push is the compile gate.
+No `delayBy` refs remain; brace balance + `git diff --check` pass on all 3
+files; code review done. CI on push is the compile gate.
+
+## Parked: pet designer playground (user's next feature)
+
+User asked for an easy design import + the design in the import format +
+a designer playground screen in the app. Waiting on the user's plan
+answers (toggleable vs always-on, screen placement, format preferences)
+before implementing — see the ask_user questions sent after this fix.
 
 ## Parked v8.28 hooks spec (user picks, build later)
 
