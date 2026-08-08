@@ -542,3 +542,101 @@ object PetFaceMoods {
         else -> mood
     }
 }
+
+/**
+ * v8.38 — one-tap personality presets for the Face & reactions editor.
+ * Each preset paints ALL mood faces AND ALL reaction rules at once, so a
+ * single tap restyles Curie's whole personality (Shy, Party, Sleepyhead).
+ */
+object PetFacePresets {
+
+    /** A ready-made personality: a face per mood + a rule per event. */
+    data class Preset(
+        val name: String,
+        val tagline: String,
+        val faces: Map<String, PetFace>,
+        val reactions: Map<String, PetReaction>
+    ) {
+        /** Paints every mood face and every reaction rule onto [design]. */
+        fun applyTo(design: PetDesign): PetDesign {
+            var out = design
+            faces.forEach { (mood, face) -> out = out.withFace(mood, face) }
+            reactions.forEach { (event, reaction) -> out = out.withReaction(event, reaction) }
+            return out
+        }
+    }
+
+    /** Shy — bashful, wide-eyed, blushes at everything. */
+    val SHY = Preset(
+        name = "Shy",
+        tagline = "Bashful — blushes at everything",
+        faces = mapOf(
+            "HAPPY" to PetFace(eyes = EyeStyle.WIDE, mouth = MouthStyle.SMILE, blush = true),
+            "EXCITED" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true),
+            "SLEEPY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.NONE, blush = false),
+            "CURIOUS" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.O, blush = true),
+            "PROUD" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true),
+            "BOUNCY" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true),
+            "FOCUSED" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.NONE, blush = true)
+        ),
+        reactions = mapOf(
+            "TOUCH" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.WIDE, mouth = MouthStyle.O, blush = true)),
+            "SPIN_LANDED" to PetReaction(anim = ReactionAnim.SQUISH, face = PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true)),
+            "REVEAL" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.WIDE, mouth = MouthStyle.O, blush = true)),
+            "EXPLORE" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = true)),
+            "SAVE" to PetReaction(anim = ReactionAnim.SQUISH, face = PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true)),
+            "PLAY" to PetReaction(anim = ReactionAnim.BOUNCE, face = PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true)),
+            "LEVEL_UP" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true))
+        )
+    )
+
+    /** Party — starry eyes and sparkles everywhere. */
+    val PARTY = Preset(
+        name = "Party",
+        tagline = "Sparkly & bursting with excitement",
+        faces = mapOf(
+            "HAPPY" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true),
+            "EXCITED" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true),
+            "SLEEPY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.NONE, blush = false, sparkles = false),
+            "CURIOUS" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.SMILE, blush = true, sparkles = true),
+            "PROUD" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true),
+            "BOUNCY" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true),
+            "FOCUSED" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = false, sparkles = false)
+        ),
+        reactions = mapOf(
+            "TOUCH" to PetReaction(anim = ReactionAnim.BOUNCE, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
+            "SPIN_LANDED" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
+            "REVEAL" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
+            "EXPLORE" to PetReaction(anim = ReactionAnim.BOUNCE, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, sparkles = true)),
+            "SAVE" to PetReaction(anim = ReactionAnim.BOUNCE, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
+            "PLAY" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
+            "LEVEL_UP" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true))
+        )
+    )
+
+    /** Sleepyhead — dozy, calm, barely reacts. */
+    val SLEEPYHEAD = Preset(
+        name = "Sleepyhead",
+        tagline = "Dozy & calm — big yawns, tiny reactions",
+        faces = mapOf(
+            "HAPPY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE, blush = false),
+            "EXCITED" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE, blush = false),
+            "SLEEPY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.NONE, blush = false),
+            "CURIOUS" to PetFace(eyes = EyeStyle.BLINK, mouth = MouthStyle.SMILE, blush = false),
+            "PROUD" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = false),
+            "BOUNCY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE, blush = false),
+            "FOCUSED" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE, blush = false)
+        ),
+        reactions = mapOf(
+            "TOUCH" to PetReaction(anim = ReactionAnim.SQUISH, face = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE)),
+            "SPIN_LANDED" to PetReaction(anim = ReactionAnim.NONE, face = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.NONE)),
+            "REVEAL" to PetReaction(anim = ReactionAnim.NONE, face = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE)),
+            "EXPLORE" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE)),
+            "SAVE" to PetReaction(anim = ReactionAnim.SQUISH, face = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE)),
+            "PLAY" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE)),
+            "LEVEL_UP" to PetReaction(anim = ReactionAnim.NONE, face = PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE))
+        )
+    )
+
+    val ALL = listOf(SHY, PARTY, SLEEPYHEAD)
+}

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,6 +63,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
@@ -73,6 +75,7 @@ import com.curio.app.data.EyeStyle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFaceMoods
+import com.curio.app.data.PetFacePresets
 import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.ReactionAnim
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -427,6 +430,39 @@ fun PetDesignerScreen(navController: NavController) {
                     "Face & reactions",
                     "Customize Curie's face per mood, and how it reacts to each moment"
                 ) {
+                    // v8.38 — one-tap personality presets: paint every mood
+                    // face and every reaction rule in a single tap.
+                    Text(
+                        "One-tap presets",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Set every mood face and every reaction with one tap",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PetFacePresets.ALL.forEach { preset ->
+                            PresetCard(
+                                name = preset.name,
+                                tagline = preset.tagline,
+                                preview = preset.applyTo(design),
+                                onClick = {
+                                    design = preset.applyTo(design)
+                                    toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
+                                }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(Modifier.height(16.dp))
+
                     Text(
                         "Face per mood",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
@@ -1762,6 +1798,49 @@ private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean
             checked = checked,
             onCheckedChange = onCheckedChange
         )
+    }
+}
+
+/** v8.38 — a one-tap personality preset card (Shy / Party / Sleepyhead). */
+@Composable
+private fun RowScope.PresetCard(
+    name: String,
+    tagline: String,
+    preview: PetDesign,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+        onClick = onClick,
+        modifier = Modifier.weight(1f)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.Mood.HAPPY,
+                spriteSize = 44.dp,
+                design = preview
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                name,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                tagline,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
