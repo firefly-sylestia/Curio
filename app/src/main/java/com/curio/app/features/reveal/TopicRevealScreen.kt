@@ -991,45 +991,59 @@ private fun RevealActionDock(
             .height(80.dp)
             .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Already/Undo on the LEFT, Start exploring on the RIGHT.
-            RevealAlreadyButton(
-                enabled = resolved != null,
-                cat = cat,
-                isDone = isDone,
-                modifier = Modifier.weight(1f),
-                onClick = onAlready
-            )
-            if (!browseMode) {
-                // v8.22 — the Start exploring button is a tour landmark: the
-                // pet-guide highlights its REAL bounds on the tour step.
-                PetLandmark(
-                    id = "start-exploring",
-                    kind = PetLandmarks.Kind.FUN,
-                    screen = "reveal"
-                ) { m ->
+        // v8.4x — small-screen fix WITHOUT touching the fixed 80dp dock height
+        // (which the reveal morph's reserved slot depends on). The dock's
+        // real content area is 80dp minus the nav-bar inset, and on phones
+        // that is often only ~30-50dp tall and ~320-400dp wide — the two
+        // full labels + icons used to wrap/overflow and the buttons were cut
+        // off below the visible area. When the window is small we tighten the
+        // paddings and typography so the actions always fit INSIDE the fixed
+        // dock; tablets/wide windows keep the original generous metrics.
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val compact = maxWidth < 440.dp || maxHeight < 44.dp
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = if (compact) 2.dp else 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Already/Undo on the LEFT, Start exploring on the RIGHT.
+                RevealAlreadyButton(
+                    enabled = resolved != null,
+                    cat = cat,
+                    isDone = isDone,
+                    compact = compact,
+                    modifier = Modifier.weight(1f),
+                    onClick = onAlready
+                )
+                if (!browseMode) {
+                    // v8.22 — the Start exploring button is a tour landmark: the
+                    // pet-guide highlights its REAL bounds on the tour step.
+                    PetLandmark(
+                        id = "start-exploring",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "reveal"
+                    ) { m ->
+                        RevealStartButton(
+                            enabled = resolved != null,
+                            cat = cat,
+                            compact = compact,
+                            modifier = m.weight(1f),
+                            onClick = onExplore
+                        )
+                    }
+                } else if (onSilentExplore != null) {
+                    // Browse mode: Explore opens the search page silently.
                     RevealStartButton(
                         enabled = resolved != null,
                         cat = cat,
-                        modifier = m.weight(1f),
-                        onClick = onExplore
+                        label = "Explore",
+                        compact = compact,
+                        modifier = Modifier.weight(1f),
+                        onClick = onSilentExplore
                     )
                 }
-            } else if (onSilentExplore != null) {
-                // Browse mode: Explore opens the search page silently.
-                RevealStartButton(
-                    enabled = resolved != null,
-                    cat = cat,
-                    label = "Explore",
-                    modifier = Modifier.weight(1f),
-                    onClick = onSilentExplore
-                )
             }
         }
     }
@@ -1041,6 +1055,7 @@ private fun RevealStartButton(
     cat: com.curio.app.data.CurioCategory,
     modifier: Modifier = Modifier,
     label: String = "Start exploring",
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
     // Fully transparent: the accent text + icon float directly on the page
@@ -1059,18 +1074,33 @@ private fun RevealStartButton(
         ),
         // Compact vertical padding: the dock is a fixed 80dp with the nav-bar
         // inset consumed inside, so on inset-heavy devices the content area is
-        // ~50dp — the buttons must fit without clipping the gesture bar.
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
+        // ~30-50dp — the buttons must fit without clipping the gesture bar.
+        // Small windows tighten this further (see RevealActionDock).
+        contentPadding = if (compact) {
+            PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+        } else {
+            PaddingValues(horizontal = 20.dp, vertical = 10.dp)
+        },
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 8.dp)
         ) {
-            CurioIcon(CurioIcons.AutoAwesome, null, tint = ink, size = 20.dp)
+            CurioIcon(CurioIcons.AutoAwesome, null, tint = ink, size = if (compact) 16.dp else 20.dp)
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                style = if (compact) {
+                    MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                } else {
+                    MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                },
+                // Never wrap to a second line — a wrapped label overflows the
+                // fixed-height dock and the button gets cut off at the bottom
+                // on small screens. Ellipsis is the graceful last resort on
+                // extremely narrow windows.
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -1082,6 +1112,7 @@ private fun RevealAlreadyButton(
     cat: com.curio.app.data.CurioCategory,
     isDone: Boolean,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
     // Fully transparent: the label + icon float on the page wash. Done
@@ -1095,25 +1126,35 @@ private fun RevealAlreadyButton(
         enabled = enabled,
         shape = RoundedCornerShape(18.dp),
         color = Color.Transparent,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                // Compact vertical padding — see RevealStartButton's comment.
+                // Small windows tighten this further (see RevealActionDock).
+                if (compact) Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                else Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            // Compact vertical padding — see RevealStartButton's comment.
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
             CurioIcon(
                 name = if (isDone) CurioIcons.Close else CurioIcons.History,
                 contentDescription = null,
                 tint = ink,
-                size = 18.dp
+                size = if (compact) 16.dp else 18.dp
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(if (compact) 6.dp else 8.dp))
             Text(
                 text = if (isDone) undoLabel(cat) else alreadyDoneLabel(cat),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = ink
+                color = ink,
+                // Never wrap to a second line — a wrapped label overflows the
+                // fixed-height dock and the button gets cut off at the bottom
+                // on small screens (same fix as RevealStartButton).
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
