@@ -100,6 +100,7 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
 
 /**
@@ -1608,7 +1609,13 @@ private fun PassportStamp(
 ) {
     val context = LocalContext.current
     val stamp = CurioPassport.progress(context, cat.id).stamp
+    // v8.28 — stamp text/glyphs use the READABLE accent ink (deep accent in
+    // light, deep hue twin for pale accents + in pastel mode, light twin in
+    // dark) instead of the pastel fill accent, which washed the labels and
+    // glyphs out. The fills below keep the pastel accent for the soft
+    // tinted surfaces.
     val accent = cat.themedAccent()
+    val ink = cat.readableAccentInk()
     val label: String
     val glyph: String
     val tint: Color
@@ -1620,10 +1627,10 @@ private fun PassportStamp(
             label = "Explored"; glyph = CurioIcons.Check; tint = CurioColors.Sage
         }
         CurioPassport.Stamp.PEEKED -> {
-            label = "Peeked"; glyph = CurioIcons.Star; tint = accent
+            label = "Peeked"; glyph = CurioIcons.Star; tint = ink
         }
         CurioPassport.Stamp.UNSEEN -> {
-            label = "New · spin!"; glyph = CurioIcons.StarOutline; tint = accent
+            label = "New · spin!"; glyph = CurioIcons.StarOutline; tint = ink
         }
     }
     Surface(
@@ -1636,7 +1643,7 @@ private fun PassportStamp(
         },
         border = BorderStroke(
             1.dp,
-            if (stamp == CurioPassport.Stamp.UNSEEN) accent.copy(alpha = 0.35f)
+            if (stamp == CurioPassport.Stamp.UNSEEN) ink.copy(alpha = 0.45f)
             else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         ),
         modifier = modifier
@@ -1648,7 +1655,7 @@ private fun PassportStamp(
             CurioIcon(
                 name = cat.iconGlyph,
                 contentDescription = cat.displayName,
-                tint = accent,
+                tint = ink,
                 size = 20.dp
             )
             Spacer(Modifier.height(4.dp))

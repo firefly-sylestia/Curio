@@ -1,47 +1,50 @@
-# Request — v8.28: locked bonus-quest silhouettes (done) + parked hooks spec
+# Request — v8.28: fix washed-out colors in light & pastel mode (done)
 
 ## What the user asked
 
-Show the two bonus quests as hidden locked silhouettes with "??" before the
-core trio is done, so players can see there's more coming.
+Colors on the Quests category passport texts were not visible properly in
+pastel mode, and the saved-bookmark ("pin") icon was unreadable too. Make
+the text/icons a little darker in light and pastel mode.
 
-## Implementation (pushed)
+## Root cause
 
-`features/quests/QuestsScreen.kt` — `DailyCard` restructure:
+`PassportStamp` (Quests page) tinted its lane glyph and status labels
+("Peeked" / "New · spin!") with `cat.themedAccent()` — in pastel mode that
+is an airy pastel (lightness 0.80), so the text washed out. The
+saved-quote bookmark in `EntryDetailScreen` did the same
+(`category.themedAccent()` as the icon tint). `categoryInk()` fixed the
+pastel case but only darkens PALE accents when pastel mode is ON — the
+wildcard coral accent (pale by nature) still washed out in plain light mode.
 
-- The core list and bonus pair now stay composed as a CROSS-FADING pair of
-  `AnimatedVisibility` nodes: while the trio is open
-  (`visible = !coreDone`) the core rows render, followed by the two bonus
-  quests as locked silhouettes; when `coreDone` flips, the core group fades
-  out while the real gold bonus rows pop in (fade + scale). No abrupt swap.
-- New `BonusLockedRow(quest, coreRemaining)` composable: same row rhythm as
-  a real bonus quest but dimmed — silhouette icon box (surfaceVariant +
-  border, dimmed `AutoAwesome` glyph), "Bonus quest" title, a hint counting
-  down ("Complete N more core quests to unlock" / "Complete the last core
-  quest to unlock"), and a mystery "?? XP" reward tag.
-- KDoc updated; store changelog `20260816.txt`.
+## Fix (pushed)
 
-Validation: brace balance + `git diff --check` pass. CI on push is the
+- NEW public helper `CurioCategory.readableAccentInk()` in
+  `ui/theme/CategoryInk.kt`: deep accent in light mode, deep hue twin for
+  pale accents (wildcard) in EVERY light theme (not just pastel), light
+  twin in dark mode.
+- `PassportStamp` (QuestsScreen): glyph + PEEKED/UNSEEN label tints →
+  `readableAccentInk()`; UNSEEN stamp border bumped to the ink at 0.45 so
+  the "New · spin!" outline reads. Fills keep the pastel accent.
+- `EntryDetailScreen` saved-quote bookmark icon tint →
+  `readableAccentInk()`.
+- Store changelog `20260817.txt`.
+
+## Validation
+
+Brace balance + `git diff --check` pass on all 3 files. CI on push is the
 compile gate.
 
-## Parked v8.28 hooks spec (user picks, build later — from earlier rounds)
+## Parked v8.28 hooks spec (user picks, build later)
 
-1. **Topic of the day (Home)** — gold "must-see" card; deterministic
-   rotation through the whole catalog, no repeats until cycle done.
-2. **Come-back teaser (Home)** — short rotating mix: pet missed you +
-   what's waiting (ready quests/gift) + streak warning.
-3. **Spin streak combo (Spin)** — consecutive spins stack an XP multiplier
-   up to 2x AND fill a "Spin Storm" meter that pays when full.
-4. **Rare card moments (Spin)** — ~1 in 20 spins, rare topic with sparkle +
-   bonus XP; the pet occasionally sniffs out / telegraphs one.
-5. **Mystery card slot + viewed-cards stack (Spin/Reveal)** — third
-   face-down card that flips on landing; PLUS a smooth scrollable stack of
-   previously viewed cards behind the landed topic to explore instead
-   (UX-first polish).
-6. **Streak freeze & revival** — freezes earned at 7-day milestones;
-   revival costs XP scaled by streak length.
-7. **Weekly rotating special chain (Quests)** — one themed chain per week
-   (e.g. "Explorer Week") with its own reward and badge.
-8. **Pet / Cabinet / Profile hooks** — user has own ideas, to share later.
+1. Topic of the day (Home) — gold must-see card, deterministic rotation.
+2. Come-back teaser (Home) — rotating mix: pet missed you + what's waiting
+   + streak warning.
+3. Spin streak combo — XP multiplier up to 2x + "Spin Storm" meter.
+4. Rare card moments — ~1 in 20, pet sniffs out / telegraphs.
+5. Mystery card slot + smooth scrollable viewed-cards stack behind the
+   landed topic (UX-first).
+6. Streak freeze (7-day milestones) + revival (XP scaled by streak).
+7. Weekly rotating themed chain (e.g. "Explorer Week").
+8. User's own Pet/Cabinet/Profile ideas, to share later.
 
 Always-on unless the user asks for a toggle.

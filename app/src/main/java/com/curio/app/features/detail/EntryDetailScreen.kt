@@ -162,6 +162,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
 import com.curio.app.ui.theme.lightAccentTint
@@ -2463,7 +2464,11 @@ private fun RenderQuoteCards(
                         CurioIcon(
                             name = if (saved) CurioIcons.Bookmark else CurioIcons.BookmarkBorder,
                             contentDescription = if (saved) "Remove bookmark" else "Bookmark quote",
-                            tint = if (saved) category.themedAccent()
+                            // v8.28 — saved bookmark wears the readable ink
+                            // (deep in light + pastel, deep twin for pale
+                            // accents, light twin in dark) so it never
+                            // washes out on the pastel wash.
+                            tint = if (saved) category.readableAccentInk()
                                    else notePaperInk(quoteSheet).copy(alpha = 0.45f),
                             size = 18.dp,
                             modifier = Modifier.padding(4.dp)
