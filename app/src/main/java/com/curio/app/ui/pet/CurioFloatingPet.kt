@@ -531,6 +531,10 @@ fun CurioFloatingPet(
                     // v8.26 — throw momentum: the drag tracks its own
                     // velocity; on release the pet keeps a little of the
                     // fling and slides on with friction before settling.
+                    // The pointerInput scope IS a CoroutineScope — captured
+                    // here so the drag callbacks (plain lambdas with no
+                    // scope receiver) can launch the glide coroutine.
+                    val inputScope = this
                     var lastDragPos: Offset? = null
                     var lastDragAt = 0L
                     var dragVelX = 0f
@@ -643,7 +647,7 @@ fun CurioFloatingPet(
                                 val dirX = dragVelX / speed
                                 val dirY = dragVelY / speed
                                 gliding = true
-                                glideJob = launch {
+                                glideJob = inputScope.launch {
                                     try {
                                         var v = v0
                                         var px = pos.x
