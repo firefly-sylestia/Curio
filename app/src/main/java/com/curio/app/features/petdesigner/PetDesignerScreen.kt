@@ -1118,62 +1118,6 @@ private fun exportPngUri(
 
     paintRows(rows)
     val face = design.faceFor(moodName)
-    if (face.gridRows.isNotEmpty()) {
-        // The export follows the selected Preview mood, including its
-        // hand-drawn face overlay.
-        paintRows(face.gridRows)
-    } else {
-        // Match the sprite's procedural face when the mood has no drawn
-        // overlay, so a PNG is not unexpectedly faceless.
-        val ink = design.colorOf('o')
-        val blush = design.colorOf('r')
-        val white = "FFFFFF"
-        when (face.eyes) {
-            EyeStyle.OPEN, EyeStyle.WIDE -> {
-                val rows = if (face.eyes == EyeStyle.WIDE) listOf(6, 7, 8) else listOf(7, 8)
-                rows.forEach { row ->
-                    paintProceduralCell(4, row, ink)
-                    paintProceduralCell(5, row, ink)
-                    paintProceduralCell(10, row, ink)
-                    paintProceduralCell(11, row, ink)
-                }
-                paintProceduralCell(4, 7, white)
-                paintProceduralCell(10, 7, white)
-            }
-            EyeStyle.BLINK -> {
-                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
-                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
-            }
-            EyeStyle.CLOSED -> {
-                paintProceduralCell(4, 8, ink); paintProceduralCell(5, 8, ink)
-                paintProceduralCell(10, 8, ink); paintProceduralCell(11, 8, ink)
-            }
-            EyeStyle.STAR, EyeStyle.DIZZY, EyeStyle.HAPPY -> {
-                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
-                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
-                paintProceduralCell(4, 7, white); paintProceduralCell(10, 7, white)
-            }
-        }
-        if (face.blush) {
-            paintProceduralCell(2, 9, blush, 0.5f); paintProceduralCell(3, 9, blush, 0.5f)
-            paintProceduralCell(12, 9, blush, 0.5f); paintProceduralCell(13, 9, blush, 0.5f)
-        }
-        when (face.mouth) {
-            MouthStyle.SMILE -> {
-                paintProceduralCell(6, 10, ink); paintProceduralCell(9, 10, ink)
-                paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
-            }
-            MouthStyle.WIDE -> {
-                paintProceduralCell(6, 10, ink); paintProceduralCell(9, 10, ink)
-                (6..9).forEach { col -> paintProceduralCell(col, 11, ink) }
-            }
-            MouthStyle.O -> {
-                paintProceduralCell(7, 10, ink); paintProceduralCell(8, 10, ink)
-                paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
-            }
-            MouthStyle.NONE -> Unit
-        }
-    }
     // Match the static parts of the live sprite that have a meaningful
     // single-frame representation. Motion-only pieces (wag phase, bob,
     // twinkle phase) intentionally use a calm deterministic frame.
@@ -1225,6 +1169,57 @@ private fun exportPngUri(
         if (face.sparkles) {
             paintProceduralCell(1, 2, goldHex, 0.9f); paintProceduralCell(14, 3, goldHex, 0.9f)
             paintProceduralCell(2, 13, goldHex, 0.8f); paintProceduralCell(13, 2, goldHex, 0.8f)
+        }
+    }
+    // Render the selected mood face after the body and generated static art,
+    // matching the runtime sprite's visual hierarchy.
+    if (face.gridRows.isNotEmpty()) {
+        paintRows(face.gridRows)
+    } else {
+        val ink = design.colorOf('o')
+        val blush = design.colorOf('r')
+        val white = "FFFFFF"
+        when (face.eyes) {
+            EyeStyle.OPEN, EyeStyle.WIDE -> {
+                val eyeRows = if (face.eyes == EyeStyle.WIDE) listOf(6, 7, 8) else listOf(7, 8)
+                eyeRows.forEach { row ->
+                    paintProceduralCell(4, row, ink); paintProceduralCell(5, row, ink)
+                    paintProceduralCell(10, row, ink); paintProceduralCell(11, row, ink)
+                }
+                paintProceduralCell(4, 7, white); paintProceduralCell(10, 7, white)
+            }
+            EyeStyle.BLINK -> {
+                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
+                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
+            }
+            EyeStyle.CLOSED -> {
+                paintProceduralCell(4, 8, ink); paintProceduralCell(5, 8, ink)
+                paintProceduralCell(10, 8, ink); paintProceduralCell(11, 8, ink)
+            }
+            EyeStyle.STAR, EyeStyle.DIZZY, EyeStyle.HAPPY -> {
+                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
+                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
+                paintProceduralCell(4, 7, white); paintProceduralCell(10, 7, white)
+            }
+        }
+        if (face.blush) {
+            paintProceduralCell(2, 9, blush, 0.5f); paintProceduralCell(3, 9, blush, 0.5f)
+            paintProceduralCell(12, 9, blush, 0.5f); paintProceduralCell(13, 9, blush, 0.5f)
+        }
+        when (face.mouth) {
+            MouthStyle.SMILE -> {
+                paintProceduralCell(6, 10, ink); paintProceduralCell(9, 10, ink)
+                paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
+            }
+            MouthStyle.WIDE -> {
+                paintProceduralCell(6, 10, ink); paintProceduralCell(9, 10, ink)
+                (6..9).forEach { col -> paintProceduralCell(col, 11, ink) }
+            }
+            MouthStyle.O -> {
+                paintProceduralCell(7, 10, ink); paintProceduralCell(8, 10, ink)
+                paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
+            }
+            MouthStyle.NONE -> Unit
         }
     }
     // Include every user-authored detail layer last, matching the live sprite
