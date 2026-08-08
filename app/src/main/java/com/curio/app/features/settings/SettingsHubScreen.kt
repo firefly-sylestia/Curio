@@ -501,6 +501,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
     SettingsDeepRow(CurioIcons.Schedule, "Entry date & mood", "Date, mood, and attachments on saved entries", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-entry"),
     SettingsDeepRow(CurioIcons.Flag, "Guided tour", "Small quest dialogs that walk you through Curio", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-guide"),
+    SettingsDeepRow(CurioIcons.Edit, "Custom reaction lines", "Let Curie speak your saved lines for each event", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-reaction-lines"),
     // ── Notifications ────────────────────────────────────────────────
     SettingsDeepRow(CurioIcons.Notifications, "Daily shuffle reminder", "A daily nudge to spin the deck", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-reminder"),
     SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-sessions"),

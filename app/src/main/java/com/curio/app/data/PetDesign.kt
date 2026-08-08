@@ -251,11 +251,28 @@ data class PetDesign(
                 line.startsWith("size=") && eq > 0 -> {
                     declaredSize = line.substring(5).trim().toIntOrNull()
                 }
-                line.startsWith("face=") && eq > 0 -> {
-                    PetFace.parse(line.substring(eq + 1))?.let { faces[line.substring(5, eq).trim()] = it }
+                line.startsWith("face=") && eq == 4 -> {
+                    // The mood name is between `face=` and the first `;`.
+                    // Do not use [eq] as the end index: it points to the
+                    // equals sign at index 4 and caused substring(5, 4)
+                    // crashes when a saved custom design was read.
+                    val separator = line.indexOf(';', startIndex = 5)
+                    val moodEnd = if (separator >= 0) separator else line.length
+                    val mood = line.substring(5, moodEnd).trim()
+                    val config = if (separator >= 0) line.substring(separator + 1) else ""
+                    if (mood.isNotEmpty()) {
+                        PetFace.parse(config)?.let { faces[mood] = it }
+                    }
                 }
-                line.startsWith("react=") && eq > 0 -> {
-                    PetReaction.parse(line.substring(eq + 1))?.let { reactions[line.substring(6, eq).trim()] = it }
+                line.startsWith("react=") && eq == 5 -> {
+                    // Same delimiter rule for `react=EVENT;...` lines.
+                    val separator = line.indexOf(';', startIndex = 6)
+                    val eventEnd = if (separator >= 0) separator else line.length
+                    val event = line.substring(6, eventEnd).trim()
+                    val config = if (separator >= 0) line.substring(separator + 1) else ""
+                    if (event.isNotEmpty()) {
+                        PetReaction.parse(config)?.let { reactions[event] = it }
+                    }
                 }
                 eq == 1 && line.length > eq + 1 -> {
                     val key = line[0]
@@ -456,17 +473,46 @@ data class PetFace(
 data class PetReaction(
     val enabled: Boolean = true,
     val anim: ReactionAnim = ReactionAnim.HOP,
-    val face: PetFace = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)
+    val face: PetFace = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true),
+    /** Custom speech lines for this event; one is chosen at random when enabled. */
+    val lines: List<String> = emptyList()
 ) {
-    fun toConfig(): String =
-        "enabled=${if (enabled) 1 else 0};anim=${anim.name};${face.toConfig()}"
+    fun toConfig(): String {
+        val cleanLines = lines.map { it.trim().take(MAX_LINE_LENGTH) }
+            .filter { it.isNotBlank() }
+            .take(MAX_LINES)
+        val encodedLines = runCatching {
+            java.net.URLEncoder.encode(cleanLines.joinToString("\n"), "UTF-8")
+        }.getOrDefault("")
+        return "enabled=${if (enabled) 1 else 0};anim=${anim.name};lines=$encodedLines;${face.toConfig()}"
+    }
 
     companion object {
-        /** Tolerant parse of "enabled=1;anim=HOP;eyes=STAR;...". */
+        private const val MAX_LINES = 8
+        private const val MAX_LINE_LENGTH = 120
+
+        /** Limits the live editor draft without moving the cursor for ordinary typing. */
+        fun limitDraft(text: String): String = text
+            .replace("\r\n", "\n")
+            .replace('\r', '\n')
+            .split('\n', limit = MAX_LINES + 1)
+            .take(MAX_LINES)
+            .joinToString("\n") { it.take(MAX_LINE_LENGTH) }
+
+        /** Keeps user-entered lines bounded and removes blank lines for storage. */
+        fun normalizeLines(text: String): List<String> = limitDraft(text)
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .take(MAX_LINES)
+            .toList()
+
+        /** Tolerant parse of "enabled=1;anim=HOP;lines=...;eyes=STAR;...". */
         fun parse(config: String): PetReaction? {
             var enabled = true
             var anim = ReactionAnim.HOP
             var face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)
+            var lines = emptyList<String>()
             config.split(';').forEach { part ->
                 val eq = part.indexOf('=')
                 if (eq <= 0) return@forEach
@@ -475,13 +521,23 @@ data class PetReaction(
                 when (key) {
                     "enabled" -> enabled = value == "1" || value.equals("true", ignoreCase = true)
                     "anim" -> ReactionAnim.entries.firstOrNull { it.name.equals(value, ignoreCase = true) }?.let { anim = it }
+                    "lines" -> {
+                        lines = runCatching {
+                            normalizeLines(java.net.URLDecoder.decode(value, "UTF-8"))
+                        }.getOrDefault(emptyList())
+                    }
+                    // Accept the singular field for forward/backward-tolerant imports.
+                    "line" -> {
+                        val decoded = runCatching { java.net.URLDecoder.decode(value, "UTF-8") }.getOrNull()
+                        lines = decoded?.let(::normalizeLines).orEmpty()
+                    }
                     "eyes" -> EyeStyle.entries.firstOrNull { it.name.equals(value, ignoreCase = true) }?.let { face = face.copy(eyes = it) }
                     "mouth" -> MouthStyle.entries.firstOrNull { it.name.equals(value, ignoreCase = true) }?.let { face = face.copy(mouth = it) }
                     "blush" -> face = face.copy(blush = value == "1" || value.equals("true", ignoreCase = true))
                     "sparkles" -> face = face.copy(sparkles = value == "1" || value.equals("true", ignoreCase = true))
                 }
             }
-            return PetReaction(enabled, anim, face)
+            return PetReaction(enabled, anim, face, lines)
         }
     }
 }

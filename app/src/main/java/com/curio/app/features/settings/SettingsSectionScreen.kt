@@ -220,6 +220,16 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setAutoOpenReveal(context, it)
             }
         }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "appearance-reaction-lines") {
+            CompactSwitchRow(
+                "Custom reaction lines",
+                "Let Curie speak your saved lines for each event",
+                AppPreferences.customReactionLinesState
+            ) {
+                AppPreferences.setCustomReactionLinesEnabled(context, it)
+            }
+        }
     }
 }
 

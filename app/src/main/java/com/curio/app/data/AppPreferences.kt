@@ -133,6 +133,9 @@ object AppPreferences {
     // saved — the pet sprite renders this instead of the default until the
     // user resets it. Null = default design.
     private const val KEY_PET_DESIGN = "pet_design"
+    // v8.39 — custom reaction speech is saved with the pet design but stays
+    // opt-in so the built-in Curie dialogue remains the default experience.
+    private const val KEY_CUSTOM_REACTION_LINES = "custom_reaction_lines"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -331,6 +334,11 @@ object AppPreferences {
     var autoOpenRevealState by mutableStateOf(true)
         private set
 
+    // v8.39 — custom reaction lines are an explicit opt-in. The editor can
+    // always be used, but Curie only speaks saved custom lines when enabled.
+    var customReactionLinesState by mutableStateOf(false)
+        private set
+
     // v8.2 — whether the one-time tour offer has been shown (taken or
     // declined). Suppresses the offer on the Quests page so it never nags.
     var guideTourOfferedState by mutableStateOf(false)
@@ -419,6 +427,7 @@ object AppPreferences {
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
         autoOpenRevealState = isAutoOpenReveal(context)
+        customReactionLinesState = isCustomReactionLinesEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
         savedQuotesState = getSavedQuotes(context)
         topicSentimentsState = getTopicSentiments(context)
@@ -1041,6 +1050,15 @@ object AppPreferences {
     fun setAutoOpenReveal(context: Context, enabled: Boolean) {
         autoOpenRevealState = enabled
         prefs(context).edit().putBoolean(KEY_AUTO_OPEN_REVEAL, enabled).apply()
+    }
+
+    /** Whether Curie may speak the custom reaction lines saved in the Pet designer. */
+    fun isCustomReactionLinesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CUSTOM_REACTION_LINES, false)
+
+    fun setCustomReactionLinesEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CUSTOM_REACTION_LINES, enabled).apply()
+        customReactionLinesState = enabled
     }
 
     // ── Daily reminder ───────────────────────────────────────────────

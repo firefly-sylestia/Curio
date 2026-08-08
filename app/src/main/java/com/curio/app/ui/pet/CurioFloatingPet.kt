@@ -237,7 +237,14 @@ fun CurioFloatingPet(
             reactionFaceKey++
             lastTouch = System.currentTimeMillis()
             if (line != null) {
-                reaction = line
+                // Custom lines are deliberately opt-in. When enabled, an
+                // event with saved lines speaks one of them; an event with
+                // no saved lines keeps Curie's built-in dialogue.
+                reaction = if (AppPreferences.customReactionLinesState) {
+                    rule.lines.randomOrNull() ?: line
+                } else {
+                    line
+                }
                 reactionKey++
             }
         }
@@ -876,28 +883,35 @@ fun CurioFloatingPet(
                             // fewer words: only ~40% of taps show a line so
                             // the reaction is mostly motion.
                             val rule = activeDesign.reactionFor(PetReactionEvents.TOUCH)
-                            reactionFace = rule.face
-                            reactionFaceKey++
-                            if (Random.nextFloat() < 0.4f) {
-                                reaction = CurioPet.touchReaction(tier)
-                                reactionKey++
-                            }
-                            when (tier) {
-                                // v8.21 — tapping never spins it dizzy anymore
-                                // (that's for dragging): boop → play-bow → a
-                                // big happy celebration hop.
-                                1 -> squishKey++
-                                2 -> playKey++
-                                else -> {
-                                    // v8.35 — the biggest taps add a
-                                    // celebratory twirl.
-                                    celebrateKey++
-                                    spinKey++
+                            if (rule.enabled) {
+                                reactionFace = rule.face
+                                reactionFaceKey++
+                                if (Random.nextFloat() < 0.4f) {
+                                    val builtInLine = CurioPet.touchReaction(tier)
+                                    reaction = if (AppPreferences.customReactionLinesState) {
+                                        rule.lines.randomOrNull() ?: builtInLine
+                                    } else {
+                                        builtInLine
+                                    }
+                                    reactionKey++
                                 }
+                                when (tier) {
+                                    // v8.21 — tapping never spins it dizzy anymore
+                                    // (that's for dragging): boop → play-bow → a
+                                    // big happy celebration hop.
+                                    1 -> squishKey++
+                                    2 -> playKey++
+                                    else -> {
+                                        // v8.35 — the biggest taps add a
+                                        // celebratory twirl.
+                                        celebrateKey++
+                                        spinKey++
+                                    }
+                                }
+                                // v8.21 — hearts for the playful/celebrate taps
+                                // only, so a plain boop stays clean.
+                                if (tier >= 2) heartsKey++
                             }
-                            // v8.21 — hearts for the playful/celebrate taps
-                            // only, so a plain boop stays clean.
-                            if (tier >= 2) heartsKey++
                             // The pet dashes to a nearby spot after the
                             // reaction — it wants to play (not in reduced
                             // motion, and not while watching the Spin deck;

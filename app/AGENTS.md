@@ -118,12 +118,15 @@ app/src/main/java/com/curio/app/
 
 ### Curie pet layer (v8.35)
 - `data/PetDesign.kt` owns the pet look contract: 16/24/32 canvases
-  (convertible via dominant-key resample), a 13-key palette (incl. `r` blush
+  (convertible via dominant-key resample), a 13-key palette  (incl. `r` blush
   + `y` eye colors), per-mood faces (`PetFace`) and per-event reaction rules
-  (`PetReaction`). The text format (palette lines + grids + `face=` /
-  `react=` / `size=` lines) is documented in that file's KDoc — the source
-  of truth. `CurioPetSprite` renders any grid size; the procedural face art
-  is authored in a 16-grid space and scaled to the canvas.
+  (`PetReaction`), including optional user-authored reaction lines. The
+  reaction-lines editor is separate from the design data and is spoken only
+  when the opt-in Custom reaction lines setting is enabled. The text format
+  (palette lines + grids + `face=` / `react=` / `size=` lines) is documented
+  in that file's KDoc — the source of truth. `CurioPetSprite` renders any
+  grid size; the procedural face art is authored in a 16-grid space and
+  scaled to the canvas.
 - `PetDesignerScreen` (Settings → Pet designer) is the editor. PNG
   export/import shares via FileProvider `${applicationId}.fileprovider`
   (`res/xml/file_paths.xml` cache/share).

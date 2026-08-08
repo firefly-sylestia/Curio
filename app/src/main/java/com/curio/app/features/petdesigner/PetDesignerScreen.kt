@@ -76,6 +76,7 @@ import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFaceMoods
 import com.curio.app.data.PetFacePresets
+import com.curio.app.data.PetReaction
 import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.ReactionAnim
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -208,6 +209,13 @@ fun PetDesignerScreen(navController: NavController) {
     // v8.35 — the face editor's selected mood + the reaction editor's event.
     var faceMood by rememberSaveable { mutableStateOf(PetFaceMoods.HAPPY) }
     var reactEvent by rememberSaveable { mutableStateOf(PetReactionEvents.TOUCH) }
+    // Keep raw editor text separate from the normalized persisted lines so
+    // typing does not trim the field or jump the cursor on every keystroke.
+    var reactionLineDraft by remember(savedText) {
+        mutableStateOf(
+            design.reactionFor(PetReactionEvents.TOUCH).lines.joinToString("\n")
+        )
+    }
     // v8.35 — preview the hide-and-peek crouch.
     var previewPeek by rememberSaveable { mutableStateOf(false) }
     // v8.35 — which grid a picked PNG should land on (1 = body, 2 = curled).
@@ -453,7 +461,9 @@ fun PetDesignerScreen(navController: NavController) {
                                 tagline = preset.tagline,
                                 preview = preset.applyTo(design),
                                 onClick = {
-                                    design = preset.applyTo(design)
+                                    val nextDesign = preset.applyTo(design)
+                                    design = nextDesign
+                                    reactionLineDraft = nextDesign.reactionFor(reactEvent).lines.joinToString("\n")
                                     toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
                                 }
                             )
@@ -548,12 +558,67 @@ fun PetDesignerScreen(navController: NavController) {
                             ChoiceChip(
                                 label = PetReactionEvents.label(event),
                                 selected = reactEvent == event,
-                                onClick = { reactEvent = event }
+                                onClick = {
+                                    reactEvent = event
+                                    reactionLineDraft = design.reactionFor(event).lines.joinToString("\n")
+                                }
                             )
                         }
                     }
                     Spacer(Modifier.height(10.dp))
                     val reaction = design.reactionFor(reactEvent)
+                    Text(
+                        "Reaction lines (optional)",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Write one line per row. When Custom reaction lines is enabled in Settings, Curie picks one of these for this event.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(118.dp)
+                    ) {
+                        Box(modifier = Modifier.padding(12.dp)) {
+                            if (reaction.lines.isEmpty()) {
+                                Text(
+                                    "Boop!\nYou found me!\nWrite up to 8 custom lines…",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                                )
+                            }
+                            BasicTextField(
+                                value = reactionLineDraft,
+                                onValueChange = { text ->
+                                    val limitedText = PetReaction.limitDraft(text)
+                                    reactionLineDraft = limitedText
+                                    design = design.withReaction(
+                                        reactEvent,
+                                        design.reactionFor(reactEvent).copy(
+                                            lines = PetReaction.normalizeLines(limitedText)
+                                        )
+                                    )
+                                },
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "${reaction.lines.size}/8 lines · 120 characters per line",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
                     ToggleRow(
                         "React to “${PetReactionEvents.label(reactEvent)}”",
                         reaction.enabled
@@ -627,6 +692,7 @@ fun PetDesignerScreen(navController: NavController) {
                         }
                         SmallAction("Reset all", enabled = design.isCustom) {
                             design = PetDesign.DEFAULT
+                            reactionLineDraft = PetDesign.DEFAULT.reactionFor(reactEvent).lines.joinToString("\n")
                         }
                     }
                 }
@@ -787,6 +853,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 text.lines().any { it.length >= design.gridSize }
                         if (looksLikeDesign) {
                             design = parsed
+                            reactionLineDraft = parsed.reactionFor(reactEvent).lines.joinToString("\n")
                             importDraft = null
                             true
                         } else {

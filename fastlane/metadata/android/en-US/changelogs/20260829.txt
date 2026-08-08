@@ -1,0 +1,1 @@
+• Write custom reaction lines for every Curie event in the Pet designer, then opt in from Settings to let Curie speak them. Also fixed a crash when saving an imported and reshaped custom pet design.
