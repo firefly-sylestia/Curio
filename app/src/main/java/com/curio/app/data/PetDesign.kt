@@ -779,6 +779,33 @@ object PetReactionEvents {
         LEVEL_UP -> "Level up"
         else -> event
     }
+
+    /** v8.50 — short "when does this fire" summary shown on the Actions
+     *  landing cards in the Pet Designer (Phase 5). */
+    fun trigger(event: String): String = when (event) {
+        TOUCH -> "When you tap or boop Curie"
+        SPIN_LANDED -> "When the spin lands a topic"
+        REVEAL -> "When a topic opens"
+        EXPLORE -> "When you start exploring"
+        SAVE -> "When you save a keepsake"
+        PLAY -> "During playtime"
+        LEVEL_UP -> "When you level up"
+        else -> event
+    }
+
+    /** v8.50 — preview-only speech line for the action preview. Shown in
+     *  the Pet Designer's live bubble when the event has no custom lines;
+     *  NEVER saved into the design (defaults live only in this object). */
+    fun defaultLine(event: String): String = when (event) {
+        TOUCH -> "Boop!"
+        SPIN_LANDED -> "Ooh, what did we get?"
+        REVEAL -> "Let's look inside!"
+        EXPLORE -> "Adventure time!"
+        SAVE -> "Kept safe forever!"
+        PLAY -> "Wheee!"
+        LEVEL_UP -> "We leveled up!"
+        else -> "Yay!"
+    }
 }
 
 /** The moods the Face editor exposes (a face per mood). */

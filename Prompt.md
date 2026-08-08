@@ -1,3 +1,29 @@
+# Request — Pet Designer Phase 5: Actions & dialogue page (DONE)
+
+## Phase 5 — Actions landing cards + live action preview (pushed)
+
+- **Actions landing**: the ACTIONS page now leads with an "Actions" SectionCard
+  (One-tap presets kept below): 7 `ActionCard`s in 2-col rows, each with a
+  looping `ReactionSpritePreview` (pet plays its move wearing the reaction
+  face), name, trigger summary (`PetReactionEvents.trigger`), "ANIM · On/Off",
+  italic dialogue snippet (`lines.firstOrNull() ?: defaultLine`), and a tiny
+  primary edited dot when the reaction differs from built-in defaults.
+- **Reaction editor**: new `ActionPreview` stage — "Live preview" card with a
+  speech bubble showing the current dialogue line, an 84dp looping
+  `ReactionSpritePreview`, and a Replay button that re-triggers the move and
+  cycles to the next line (`replayKey++` + `lineIndex % lines.size`). New
+  "Reset action" SmallAction (undoable, enabled when custom) restores
+  `DEFAULT_REACTIONS[event]`.
+- **`ReactionSpritePreview`**: maps `ReactionAnim` → `CurioPetSprite` one-shot
+  keys (HOP→celebrate, BOUNCE→play, SPIN→spin, SQUISH→squish, NONE→still) and
+  loops them on a per-anim period (SPIN 1000ms / HOP 700 / BOUNCE 760 /
+  SQUISH 600). Review fixes: keys gated on `reaction.enabled` (a disabled
+  reaction no longer hops when Replay is pressed) + per-anim loop period.
+- Data: `PetReactionEvents.trigger(event)` + `defaultLine(event)` preview-only
+  helpers in PetDesign.kt (never serialized).
+- Verified: braces + whitespace clean, no name collisions, comment scan clean,
+  code-reviewed. CI is the compile gate.
+
 # Request — Pet Designer CI compile fixes (DONE)
 
 ## PetDesignerScreen.kt — 5 CI errors fixed (pushed)

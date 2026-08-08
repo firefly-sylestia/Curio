@@ -92,6 +92,8 @@ import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.font.FontStyle
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
@@ -435,6 +437,36 @@ fun PetDesignerScreen(navController: NavController) {
                     )
                 }
             }
+            // ── Action cards (Actions page landing, Phase 5) ─────────
+            item {
+                if (page == PetDesignerPage.ACTIONS && target == null) SectionCard(
+                    "Actions",
+                    "What Curie does for each moment — pick one to edit its move, face and lines"
+                ) {
+                    PetReactionEvents.ALL.chunked(2).forEach { rowEvents ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowEvents.forEach { event ->
+                                ActionCard(
+                                    event = event,
+                                    design = design,
+                                    onClick = {
+                                        reactEvent = event
+                                        target = PetEditorTarget.Reaction(event)
+                                        reactionLineDraft = design.reactionFor(event).lines.joinToString("\n")
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (rowEvents.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+            }
+
             // ── One-tap personality presets (Actions page landing) ────
             item {
                 if (page == PetDesignerPage.ACTIONS && target == null) SectionCard(
@@ -935,6 +967,15 @@ fun PetDesignerScreen(navController: NavController) {
                     }
                     Spacer(Modifier.height(10.dp))
                     val reaction = design.reactionFor(reactEvent)
+                    // v8.50 — live action preview: the pet plays the chosen
+                    // animation wearing the reaction face, over a speech bubble.
+                    ActionPreview(
+                        event = reactEvent,
+                        design = design,
+                        reaction = reaction,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(12.dp))
                     Text(
                         "Reaction lines (optional)",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
@@ -1003,6 +1044,19 @@ fun PetDesignerScreen(navController: NavController) {
                             design = design.withReaction(reactEvent, reaction.copy(anim = ReactionAnim.valueOf(it)))
                         }
                     )
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallAction(
+                            "Reset action",
+                            enabled = reaction != (PetDesign.DEFAULT_REACTIONS[reactEvent] ?: PetReaction())
+                        ) {
+                            pushUndo()
+                            val def = PetDesign.DEFAULT_REACTIONS[reactEvent] ?: PetReaction()
+                            design = design.withReaction(reactEvent, def)
+                            reactionLineDraft = def.lines.joinToString("\n")
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         "Draw the reaction face yourself. It overrides the procedural face while this event plays.",
                         style = MaterialTheme.typography.bodySmall,
@@ -3941,3 +3995,204 @@ private val GHOST_CURLED: List<String> = listOf(
     "................",
     "................"
 ).map { it.padEnd(16, '.') }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Actions page (Phase 5) — action cards, live preview, speech bubble
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** v8.50 — looping reaction preview. Maps the reaction's animation onto the
+ *  sprite's one-shot keys and re-triggers them on a timer, so both the
+ *  landing card and the editor stage play the move live. A disabled reaction
+ *  renders still (and the caller dims it). */
+@Composable
+private fun ReactionSpritePreview(
+    design: PetDesign,
+    reaction: PetReaction,
+    spriteSize: Dp,
+    replayKey: Int = 0,
+    modifier: Modifier = Modifier
+) {
+    var loop by remember(reaction.anim) { mutableStateOf(0) }
+    // Loop period tuned to each move's one-shot duration so the preview
+    // re-triggers smoothly (a fixed 800ms would chop the 360° spin or leave
+    // a dead gap after the short squish).
+    val loopPeriod = when (reaction.anim) {
+        ReactionAnim.SPIN -> 1000L
+        ReactionAnim.HOP -> 700L
+        ReactionAnim.BOUNCE -> 760L
+        ReactionAnim.SQUISH -> 600L
+        ReactionAnim.NONE -> 0L
+    }
+    LaunchedEffect(reaction.anim, reaction.enabled, replayKey) {
+        if (!reaction.enabled || loopPeriod <= 0L) return@LaunchedEffect
+        while (true) {
+            delay(loopPeriod)
+            loop++
+        }
+    }
+    // Gate the keys on enabled too: a disabled reaction must not play a
+    // one-shot even when the editor's Replay bumps replayKey (the sprite's
+    // internal LaunchedEffect fires on any key > 0).
+    val key = if (reaction.enabled) loop + replayKey else 0
+    val anim = reaction.anim
+    CurioPetSprite(
+        stage = CurioPet.currentStage(),
+        mood = CurioPet.Mood.HAPPY,
+        spriteSize = spriteSize,
+        design = design,
+        faceOverride = reaction.face,
+        celebrateKey = if (anim == ReactionAnim.HOP) key else 0,
+        playKey = if (anim == ReactionAnim.BOUNCE) key else 0,
+        spinKey = if (anim == ReactionAnim.SPIN) key else 0,
+        squishKey = if (anim == ReactionAnim.SQUISH) key else 0,
+        contentDescription = "Reaction preview",
+        modifier = modifier
+    )
+}
+
+/** v8.50 — one Actions-landing card: looping preview, name, trigger summary,
+ *  animation + enabled state, dialogue snippet, and an edited marker. */
+@Composable
+private fun ActionCard(
+    event: String,
+    design: PetDesign,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val reaction = design.reactionFor(event)
+    val edited = reaction != (PetDesign.DEFAULT_REACTIONS[event] ?: PetReaction())
+    val line = reaction.lines.firstOrNull() ?: PetReactionEvents.defaultLine(event)
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            1.dp,
+            if (edited) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box {
+                ReactionSpritePreview(
+                    design = design,
+                    reaction = reaction,
+                    spriteSize = 44.dp,
+                    modifier = Modifier.alpha(if (reaction.enabled) 1f else 0.45f)
+                )
+                if (edited) {
+                    // Tiny primary dot — an action customized away from its
+                    // built-in defaults.
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(8.dp)
+                    ) {}
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                PetReactionEvents.label(event),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                PetReactionEvents.trigger(event),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "${reaction.anim.name} · ${if (reaction.enabled) "On" else "Off"}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
+            )
+            Text(
+                "\u201c$line\u201d",
+                style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/** v8.50 — live action preview inside the reaction editor: the pet plays the
+ *  reaction's animation wearing its face, over a speech bubble. Replay
+ *  re-triggers the move and cycles to the next dialogue line. */
+@Composable
+private fun ActionPreview(
+    event: String,
+    design: PetDesign,
+    reaction: PetReaction,
+    modifier: Modifier = Modifier
+) {
+    var replayKey by rememberSaveable(event) { mutableStateOf(0) }
+    var lineIndex by rememberSaveable(event) { mutableStateOf(0) }
+    val lines = reaction.lines.ifEmpty { listOf(PetReactionEvents.defaultLine(event)) }
+    val shown = lines[lineIndex % lines.size]
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Live preview",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Text(
+                    "\u201c$shown\u201d",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            ReactionSpritePreview(
+                design = design,
+                reaction = reaction,
+                spriteSize = 84.dp,
+                replayKey = replayKey,
+                modifier = Modifier.alpha(if (reaction.enabled) 1f else 0.5f)
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                SmallAction("Replay", enabled = true) {
+                    replayKey++
+                    lineIndex = (lineIndex + 1) % lines.size
+                }
+                Text(
+                    "${reaction.anim.name} · ${if (reaction.enabled) "enabled" else "disabled"}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
