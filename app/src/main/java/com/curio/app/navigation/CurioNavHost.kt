@@ -42,6 +42,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -67,6 +68,7 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryBackgroundWash
 import kotlinx.coroutines.delay
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
@@ -159,7 +161,11 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
 @Composable
 private fun RevealBottomBarPlaceholder(
     bottomBarHeightPx: Int,
-    density: androidx.compose.ui.unit.Density
+    density: androidx.compose.ui.unit.Density,
+    // v8.25 — the reserved strip wears the reveal page's category wash (not
+    // the Scaffold's plain cream surface), so no cream band ever flashes
+    // between the Spin wash and the reveal dock registering.
+    background: Color
 ) {
     val reserve = if (bottomBarHeightPx > 0) {
         with(density) { bottomBarHeightPx.toDp() }
@@ -171,12 +177,15 @@ private fun RevealBottomBarPlaceholder(
     // innerPadding mid-transition (an innerPadding change re-lays out the
     // SharedTransitionLayout and freezes the reveal morph — v8.5).
     Spacer(
-        modifier = Modifier.fillMaxWidth().then(
-            if (reserve != null) Modifier.height(reserve)
-            else Modifier
-                .height(80.dp)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-        )
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(background)
+            .then(
+                if (reserve != null) Modifier.height(reserve)
+                else Modifier
+                    .height(80.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+            )
     )
 }
 
@@ -210,6 +219,21 @@ fun CurioNavHost(
     val reserveBarSpace = routePrefix != null && routePrefix in setOf(
         CurioRoutes.REVEAL.substringBefore("/")
     )
+    // v8.25 — the reveal page's category, resolved from the reveal route's
+    // categorySlug so the reserved bottom strip below can wear the SAME wash
+    // as the page from the very first frame. The reveal dock (which carries
+    // the wash itself) registers a frame or two after the route switches —
+    // without this the transparent morph placeholder showed the Scaffold's
+    // plain cream surface in that gap (the "bottom nav flashes cream on
+    // open" bug). Keyed on the back-stack entry so a second reveal for a
+    // different category republishes the right wash.
+    val revealCat = remember(backStackEntry) {
+        if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+            CurioCategories.byRouteSlug(
+                backStackEntry?.arguments?.getString("categorySlug").orEmpty()
+            ) ?: CurioCategories.byId(CategoryId.WILDCARD)
+        } else null
+    }
     // The reveal page paints its own category wash over the whole content
     // area, and its action dock wears the SAME wash (see RevealActionDock),
     // so the Scaffold's default background never shows as a strip behind
@@ -397,11 +421,16 @@ fun CurioNavHost(
                     // The reveal actions occupy the same bottom strip that
                     // used to be only an invisible morph placeholder. This
                     // keeps the Scaffold height stable while giving the
-                    // reserved area the reveal category tint.
+                    // reserved area the reveal category tint — the
+                    // placeholder paints the wash itself so the strip never
+                    // shows the Scaffold's plain cream between the Spin wash
+                    // and the reveal dock (v8.25).
                     revealBottomBarContent?.invoke()
                         ?: RevealBottomBarPlaceholder(
                             bottomBarHeightPx = bottomBarHeightPx,
-                            density = density
+                            density = density,
+                            background = revealCat?.categoryBackgroundWash()
+                                ?: MaterialTheme.colorScheme.surface
                         )
                 }
             },

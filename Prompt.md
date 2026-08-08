@@ -1,45 +1,51 @@
-# Request — v8.22: first-launch tutorial + boot-gate pet + tour redesign
-
-v8.21 (`9fb7360`, pushed) shipped the dizzy-on-drag / hearts / de-AI /
-auto-open-ON batch. This request is the guided-tour + boot-flow overhaul.
+# Request — v8.25: reveal title inside the hero card + bottom-strip cream flash fix
 
 ## What the user asked
 
-1. The pet should stay at its house during startup (no floating pet on the
-   splash), come out of its bed on its own during the intro, and then ASK
-   about the tutorial the first time the app opens.
-2. Redesign the tutorial: the dialog must come FROM the pet's bubble, the
-   highlight must cover the REAL buttons (some were wrong), the highlighted
-   button must stay tappable, and the instructions were getting cut off.
+1. On the topic reveal page, put the title inside the hero card so it looks
+   like the title stayed in its place (it should morph with the card instead
+   of popping in below as a separate headline).
+2. When the topic reveal page opens, the bottom nav area changes back to the
+   plain cream color for a moment — fix that flash.
 
-## Changes (6 files + 1 deleted)
+## Analysis
+
+- The reveal hero card is the shared-element morph target for the Spin front
+  ticket. The topic name was rendered BELOW the hero as a standalone 40sp
+  centered headline (v7.16 removed the title from the shared element because
+  a separate shared title stretched text). Moving the title INSIDE the hero
+  card makes it card content, so the whole card (gradient, watermark, pills,
+  name) morphs as one unit — the title reads as staying put.
+- The bottom-strip flash: on the reveal route, the NavHost swaps the bottom
+  bar for `revealBottomBarContent` (the action dock) or an invisible
+  `RevealBottomBarPlaceholder` until the dock registers a frame or two later.
+  The placeholder was a bare transparent Spacer → the Scaffold's plain cream
+  surface showed through in the strip for that gap.
+
+## Changes (3 files)
 
 | File | Change |
 | --- | --- |
-| `data/QuestGuide.kt` | `Step` gains `targetLandmark: String?` — 6 steps now name the exact landmark they highlight (`daily`, `spin`, `deck`, `start-exploring`, `save`, `grid`). |
-| `ui/pet/PetGuideOverlay.kt` | REWRITE. The pass-through window is now the step's landmark's REAL bounds (via `PetLandmarks.forScreen(routePrefix)` — snapshot state, so it snaps into place the moment the screen registers; falls back to the old position zones). The pet + bubble sit BESIDE the window — below it when the target is high on the screen, above when low — never covering the button. The dialog is now `GuideSpeechBubble`: a real speech bubble with a tail aimed at the pet, title, message (maxLines 4 — instructions no longer cut at 2), progress dots, action, skip, close. |
-| `navigation/CurioNavHost.kt` | Passes `screen = routePrefix` + `targetLandmark = step.targetLandmark` to the overlay; the floating pet is suppressed on the splash + crash routes (pet stays at its house during startup). |
-| `features/reveal/TopicRevealScreen.kt` | The Start exploring button is wrapped in `PetLandmark("start-exploring", FUN, "reveal")` so the tour highlights its real bounds. |
-| `features/onboarding/OnboardingScreen.kt` | The pet comes OUT of its bed automatically when the intro composes (`CurioPet.wake()` + `comeOut()`); finishing the intro asks "Take a quick tour?" the very first time (pet sprite in the dialog; accept → land on Home then `QuestGuide.start()`; decline/dismiss → marks offered). |
-| `ui/components/QuestGuideToast.kt` | DELETED — fully orphaned after the speech-bubble redesign (its only caller was PetGuideOverlay; verified no other refs). |
-
-## Review fixes applied
-
-1. **Dead code** — `QuestGuideToast.kt` (pill + `GuidePointer`) had no
-   remaining callers; removed.
-2. **Race** — the tour-ask confirm used to `QuestGuide.start()` then
-   navigate Home; reordered to navigate Home FIRST, then start the tour, so
-   the NavHost runner picks up step 1 from a clean stack.
+| `features/reveal/TopicRevealScreen.kt` | The topic name moved INSIDE the hero card: a `Column` (20dp padding, SpaceBetween) now holds the verb+duration badge (top), the name (middle — 34sp/38sp geom ExtraBold, same style as the Spin ticket title, card ink, max 3 lines), and the byline + subtype pills (bottom row, one per corner, blank spacers keep a lone pill pinned to its corner). The standalone headline below the hero is gone; the tags row follows the hero directly (top padding 20dp). `TextAlign` import removed. |
+| `navigation/CurioNavHost.kt` | `RevealBottomBarPlaceholder` now paints the reveal page's category wash (`background` param) instead of showing the Scaffold's cream surface. The wash is resolved from the reveal route's `categorySlug` (`revealCat`, keyed on the back-stack entry) so the strip matches the page from the very first frame — including deep links and the fallback 80dp branch. |
+| `fastlane/metadata/android/en-US/changelogs/20260811.txt` | NEW — release notes for the two fixes. |
 
 ## Validation
 
-- Brace balance ALL OK (5 edited files), `git diff --check` clean.
-- Reviewer (code-reviewer-deepseek-flash) passed after the two fixes.
+- Brace balance ALL OK (all edited files), `git diff --check` clean.
+- No compile/build commands run (environment has no Android SDK — CI gates
+  compilation on push per root AGENTS.md).
+- Reviewer (code-reviewer-deepseek-flash) passed after two fixes: the
+  hero's content column now uses explicit weighted spacers (title stays
+  centred even while the topic loads and the badge is absent), the byline
+  pill is bounded with `weight(1f, fill = false)` so a long byline
+  ellipsizes instead of overflowing the bottom row on narrow screens, and
+  SpinScreen's stale "title is not a shared element" comment was updated.
 
 ## Completion summary
 
-v8.22 shipped: the pet stays at its house through the splash, comes out on
-its own during onboarding and asks for the guided tour on first launch; the
-tour itself now highlights the real buttons (window = landmark bounds, so
-the highlighted control stays tappable), talks through a speech bubble that
-points at the pet, and no longer cuts off instructions. Pushed to Alpha.
+v8.25 shipped: the reveal topic title now lives inside the morphing hero
+card (same 34sp geom style as the Spin ticket, so the shared-element morph
+grows it in place), and the reserved bottom strip wears the reveal page's
+category wash from the first frame — no more cream flash when the topic page
+opens. Pushed to Alpha.

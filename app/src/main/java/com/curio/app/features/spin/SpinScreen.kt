@@ -2376,14 +2376,15 @@ private fun HeroTicketCard(
                                 color = ink,
                                 maxLines = 3,
                                 overflow = TextOverflow.Ellipsis,
-                                // The title is NOT a shared element anymore:
-                                // text can't morph cleanly in
-                                // SharedTransitionScope (it scales the stable
-                                // layout — the 34sp card title stretched to
-                                // the full-width headline and long names
-                                // warped). The reveal headline fades in on
-                                // its own; the hero card is the only shared
-                                // piece.
+                                // v8.25 — the reveal's topic name now lives
+                                // INSIDE the shared hero card, styled exactly
+                                // like this ticket title (34sp/38sp geom), so
+                                // the whole card — gradient, glyph, pills and
+                                // name — morphs as one unit and the title
+                                // reads as staying put. This text stays plain
+                                // card content (never its own shared
+                                // element), so it never cross-scales against
+                                // a different headline.
                                 modifier = Modifier
                             )
                             if (currentTopic != null && currentTopic.tags.isNotEmpty()) {

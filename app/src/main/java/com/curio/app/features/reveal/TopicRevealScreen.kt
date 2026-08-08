@@ -70,7 +70,6 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -137,10 +136,10 @@ import com.curio.app.ui.theme.themedAccent
  *   24-44 dp   statusBarsPadding()
  *   40 dp      Top bar (close ✕ → Pop back to the Spin deck)
  *    8 dp      gap
- *   ~260 dp    Hero card (gradient ticket: watermark glyph + badges)
- *   24 dp      gap
- *   ~84 dp     Topic name (geom displaySmall, multi-line)
- *    8 dp      gap
+ *   ~260 dp    Hero card (gradient ticket: watermark glyph + badges +
+ *              the topic NAME — the title lives on the card so the
+ *              shared-element morph grows it in place, v8.25)
+ *   20 dp      gap
  *   ~42 dp     Tags chip row
  *   20 dp      gap
  *   ~auto     "One quirky fact to get you curious" card
@@ -594,39 +593,20 @@ fun TopicRevealScreen(
                 }
 
                 // ── 3. Topic name ───────────────────────────────────────────
-                // The headline blooms in with a soft fade + rise right after
-                // the hero morph. The hero is now the ONLY shared element:
-                // the old shared-element title morph stretched the text (a
-                // 34sp card title scaled up to a full-width 40sp headline)
-                // and could land at the wrong spot on back — text can't be
-                // re-wrapped smoothly in SharedTransitionScope, so the name
-                // gets a clean entrance instead. Secondary entry points
-                // (Home/Recents/Browse) get the same treatment.
-                RevealContentEntrance(delayMillis = 80) {
-                    Text(
-                        text = resolved?.name ?: cat.displayName,
-                        style = MaterialTheme.typography.displaySmall.copy(
-                            lineHeight = 40.sp,
-                            letterSpacing = (-0.5).sp
-                        ),
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 20.dp)
-                    )
-                }
+                // v8.25 — the topic name now lives INSIDE the hero card
+                // (see HeroCard above), so it morphs with the card instead
+                // of popping in below as a separate headline: opening a
+                // landed topic grows the title in place with the rest of
+                // the card. The tags row below simply follows the hero
+                // directly.
 
                 // ── 4. Tags chip row (genre / era context) ─────────────────
-                RevealContentEntrance(delayMillis = 110) {
+                RevealContentEntrance(delayMillis = 80) {
                     if (!resolved?.tags.isNullOrEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 10.dp),
+                                .padding(top = 20.dp),
                             horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -1252,94 +1232,134 @@ private fun HeroCard(
                     .align(Alignment.CenterEnd)
                     .padding(end = 6.dp)
             )
-            // ── Action badge (verb + duration) — white pill on gradient ───
-            if (action != null) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.18f),
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // ── Content column — the topic NAME lives INSIDE the hero so
+            //    the shared-element morph grows it with the card (v8.25):
+            //    opening a landed topic no longer pops a separate headline
+            //    in below the card — the title expands in place with the
+            //    gradient, watermark and pills, so it reads as staying put
+            //    through the whole morph. Same 34sp/38sp geom style and
+            //    left alignment as the Spin ticket's title for a 1:1
+            //    handoff; the card's ink keeps it legible on the gradient.
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+            ) {
+                // ── Top — action badge (verb + duration) ────────────────
+                if (action != null) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = ink.copy(alpha = 0.18f),
+                        shadowElevation = 0.dp
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(ink)
-                        )
-                        Text(
-                            text = "${action.verb} for ~${action.durationMinutes} min",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ink
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(ink)
+                            )
+                            Text(
+                                text = "${action.verb} for ~${action.durationMinutes} min",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = ink
+                            )
+                        }
                     }
                 }
-            }
-            // ── Byline pill (artist / author / director / painter /
-            //    discoverer) — "Artist · The Beatles" — mirrors the subtype
-            //    pill on the opposite corner so the work's creator reads at
-            //    a glance.
-            val byline = resolved?.byline?.takeIf { it.isNotBlank() }
-            val bylineLabel = when (cat.id) {
-                CategoryId.ALBUMS -> "Artist"
-                CategoryId.BOOKS -> "Author"
-                CategoryId.FILMS -> "Director"
-                CategoryId.ARTWORKS -> "Painter"
-                CategoryId.DISCOVERIES -> "Discovered by"
-                else -> null
-            }
-            if (byline != null && bylineLabel != null) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.18f),
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.Person,
-                            contentDescription = null,
-                            tint = ink,
-                            size = 14.dp
-                        )
-                        Text(
-                            text = "$bylineLabel · $byline",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ink,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+
+                // ── Middle — the topic name (card content, max 3 lines) ─
+                // Weighted spacers (not SpaceBetween) keep the title centred
+                // between the badge row and the bottom pills whether or not
+                // the badge is present (e.g. while the topic loads).
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = resolved?.name ?: cat.displayName,
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontSize = 34.sp,
+                        lineHeight = 38.sp,
+                        letterSpacing = (-0.5).sp
+                    ),
+                    fontWeight = FontWeight.ExtraBold,
+                    color = ink,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.weight(1f))
+
+                // ── Bottom — byline + subtype pills, one per corner ─────
+                val byline = resolved?.byline?.takeIf { it.isNotBlank() }
+                val bylineLabel = when (cat.id) {
+                    CategoryId.ALBUMS -> "Artist"
+                    CategoryId.BOOKS -> "Author"
+                    CategoryId.FILMS -> "Director"
+                    CategoryId.ARTWORKS -> "Painter"
+                    CategoryId.DISCOVERIES -> "Discovered by"
+                    else -> null
                 }
-            }
-            // ── Subtype pill ────────────────────
-            if (resolved?.subtype?.isNotBlank() == true) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.18f),
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
+                val subtype = resolved?.subtype?.takeIf { it.isNotBlank() }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = resolved.subtype,
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = ink,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                    )
+                    // Left slot — byline pill (or a blank spacer so a lone
+                    // subtype still pins to the right corner). weight(1f,
+                    // fill = false) bounds the pill to the space left after
+                    // the subtype, so a long byline ellipsizes instead of
+                    // overflowing the row on narrow screens.
+                    if (byline != null && bylineLabel != null) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = ink.copy(alpha = 0.18f),
+                            shadowElevation = 0.dp,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Person,
+                                    contentDescription = null,
+                                    tint = ink,
+                                    size = 14.dp
+                                )
+                                Text(
+                                    text = "$bylineLabel · $byline",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ink,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(Modifier)
+                    }
+                    // Right slot — subtype pill (blank spacer keeps the
+                    // byline on its left corner when there's no subtype).
+                    if (subtype != null) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = ink.copy(alpha = 0.18f),
+                            shadowElevation = 0.dp
+                        ) {
+                            Text(
+                                text = subtype,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = ink,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            )
+                        }
+                    } else {
+                        Spacer(Modifier)
+                    }
                 }
             }
             } // inner background Box
