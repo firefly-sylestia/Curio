@@ -202,11 +202,24 @@ data class PetDesign(
     val isCustom: Boolean get() = this != DEFAULT
 
     /** The face to wear for [mood] — user override or the built-in face. */
-    fun faceFor(moodName: String): PetFace = faces[moodName] ?: DEFAULT_FACES[moodName] ?: PetFace()
+    /** The face for [mood], including its optional hand-drawn overlay grid. */
+    fun faceFor(moodName: String): PetFace = normalizeFace(
+        faces[moodName] ?: DEFAULT_FACES[moodName] ?: PetFace()
+    )
 
     /** The reaction rule for [event] — user override or the built-in rule. */
-    fun reactionFor(eventName: String): PetReaction =
-        reactions[eventName] ?: DEFAULT_REACTIONS[eventName] ?: PetReaction()
+    fun reactionFor(eventName: String): PetReaction {
+        val reaction = reactions[eventName] ?: DEFAULT_REACTIONS[eventName] ?: PetReaction()
+        return reaction.copy(face = normalizeFace(reaction.face))
+    }
+
+    private fun normalizeFace(face: PetFace): PetFace = if (face.gridRows.isEmpty()) face else face.copy(
+        gridRows = face.gridRows.map { (it + ".".repeat(gridSize)).take(gridSize) }
+            .take(gridSize)
+            .let { rows ->
+                if (rows.size == gridSize) rows else rows + List(gridSize - rows.size) { ".".repeat(gridSize) }
+            }
+    )
 
     /** The full design as importable text (the format shown in the header). */
     fun toText(): String = buildString {
@@ -296,13 +309,23 @@ data class PetDesign(
         if (rows.size < size * 2) return fallback
         val body = rows.take(size).map { (it + ".".repeat(size)).take(size) }
         val curled = rows.drop(size).take(size).map { (it + ".".repeat(size)).take(size) }
+        val faceMap = if (faces.isEmpty()) fallback.faces else faces
+        val reactionMap = if (reactions.isEmpty()) fallback.reactions else reactions
+        fun normalize(face: PetFace): PetFace = if (face.gridRows.isEmpty()) face else face.copy(
+            gridRows = face.gridRows.map { (it + ".".repeat(size)).take(size) }
+                .take(size)
+                .let { parsedRows ->
+                    if (parsedRows.size == size) parsedRows
+                    else parsedRows + List(size - parsedRows.size) { ".".repeat(size) }
+                }
+        )
         return PetDesign(
             palette = if (palette.isEmpty()) fallback.palette else palette,
             bodyRows = body,
             curledRows = curled,
             gridSize = size,
-            faces = if (faces.isEmpty()) fallback.faces else faces,
-            reactions = if (reactions.isEmpty()) fallback.reactions else reactions
+            faces = faceMap.mapValues { (_, face) -> normalize(face) },
+            reactions = reactionMap.mapValues { (_, reaction) -> reaction.copy(face = normalize(reaction.face)) }
         )
     }
 
@@ -412,16 +435,31 @@ data class PetDesign(
      */
     fun withSize(newSize: Int): PetDesign {
         if (newSize == gridSize) return this
+        fun resizeFace(face: PetFace): PetFace = face.copy(
+            gridRows = if (face.gridRows.isEmpty()) emptyList() else resizeGrid(face.gridRows, gridSize, newSize)
+        )
         return copy(
             gridSize = newSize,
             bodyRows = resizeGrid(bodyRows, gridSize, newSize),
-            curledRows = resizeGrid(curledRows, gridSize, newSize)
+            curledRows = resizeGrid(curledRows, gridSize, newSize),
+            faces = faces.mapValues { (_, face) -> resizeFace(face) },
+            reactions = reactions.mapValues { (_, reaction) -> reaction.copy(face = resizeFace(reaction.face)) }
         )
     }
 
     /** Overrides one mood's face. */
     fun withFace(moodName: String, face: PetFace): PetDesign =
         copy(faces = faces + (moodName to face))
+
+    /** Paints one cell in a mood's hand-drawn face overlay. */
+    fun withFacePixel(moodName: String, row: Int, col: Int, key: Char): PetDesign =
+        withFace(moodName, faceFor(moodName).withPixel(row, col, key, gridSize))
+
+    /** Paints one cell in an event reaction's hand-drawn face overlay. */
+    fun withReactionFacePixel(eventName: String, row: Int, col: Int, key: Char): PetDesign =
+        withReaction(eventName, reactionFor(eventName).copy(
+            face = reactionFor(eventName).face.withPixel(row, col, key, gridSize)
+        ))
 
     /** Overrides one event's reaction rule. */
     fun withReaction(eventName: String, reaction: PetReaction): PetDesign =
@@ -437,10 +475,48 @@ data class PetFace(
     val eyes: EyeStyle = EyeStyle.OPEN,
     val mouth: MouthStyle = MouthStyle.SMILE,
     val blush: Boolean = true,
-    val sparkles: Boolean = false
+    val sparkles: Boolean = false,
+    /** Transparent pixel overlay; empty means use the procedural fallback. */
+    val gridRows: List<String> = emptyList()
 ) {
-    fun toConfig(): String =
-        "eyes=${eyes.name};mouth=${mouth.name};blush=${if (blush) 1 else 0};sparkles=${if (sparkles) 1 else 0}"
+    fun toConfig(): String {
+        val grid = if (gridRows.isEmpty()) "" else runCatching {
+            java.net.URLEncoder.encode(gridRows.joinToString("\n"), "UTF-8")
+        }.getOrDefault("")
+        return "eyes=${eyes.name};mouth=${mouth.name};blush=${if (blush) 1 else 0};sparkles=${if (sparkles) 1 else 0};grid=$grid"
+    }
+
+    /** Paints one cell in the transparent overlay, creating a blank grid when needed. */
+    fun withPixel(row: Int, col: Int, key: Char, gridSize: Int): PetFace {
+        val rows = if (gridRows.size == gridSize) gridRows
+        else List(gridSize) { ".".repeat(gridSize) }
+        if (row !in rows.indices || col !in 0 until gridSize) return this
+        val chars = rows[row].toCharArray()
+        chars[col] = key
+        return copy(gridRows = rows.toMutableList().also { it[row] = String(chars) })
+    }
+
+    /** Flood-fills one connected transparent face region. */
+    fun withFloodFill(row: Int, col: Int, key: Char, gridSize: Int): PetFace {
+        val rows = if (gridRows.size == gridSize) gridRows
+        else List(gridSize) { ".".repeat(gridSize) }
+        if (row !in 0 until gridSize || col !in 0 until gridSize) return this
+        val work = rows.map { it.toCharArray() }
+        val target = work[row][col]
+        if (target == key) return this
+        val stack = ArrayDeque<Pair<Int, Int>>()
+        stack.add(row to col)
+        while (stack.isNotEmpty()) {
+            val (r, c) = stack.removeLast()
+            if (r !in 0 until gridSize || c !in 0 until gridSize || work[r][c] != target) continue
+            work[r][c] = key
+            stack.add(r - 1 to c)
+            stack.add(r + 1 to c)
+            stack.add(r to c - 1)
+            stack.add(r to c + 1)
+        }
+        return copy(gridRows = work.map { String(it) })
+    }
 
     companion object {
         /** Tolerant parse of "eyes=STAR;mouth=WIDE;blush=1;sparkles=1". */
@@ -449,6 +525,7 @@ data class PetFace(
             var mouth = MouthStyle.SMILE
             var blush = true
             var sparkles = false
+            var gridRows = emptyList<String>()
             config.split(';').forEach { part ->
                 val eq = part.indexOf('=')
                 if (eq <= 0) return@forEach
@@ -459,9 +536,14 @@ data class PetFace(
                     "mouth" -> MouthStyle.entries.firstOrNull { it.name.equals(value, ignoreCase = true) }?.let { mouth = it }
                     "blush" -> blush = value == "1" || value.equals("true", ignoreCase = true)
                     "sparkles" -> sparkles = value == "1" || value.equals("true", ignoreCase = true)
+                    "grid" -> if (value.isNotBlank()) {
+                        gridRows = runCatching {
+                            java.net.URLDecoder.decode(value, "UTF-8").split("\n")
+                        }.getOrDefault(emptyList())
+                    }
                 }
             }
-            return PetFace(eyes, mouth, blush, sparkles)
+            return PetFace(eyes, mouth, blush, sparkles, gridRows)
         }
     }
 }
@@ -535,6 +617,11 @@ data class PetReaction(
                     "mouth" -> MouthStyle.entries.firstOrNull { it.name.equals(value, ignoreCase = true) }?.let { face = face.copy(mouth = it) }
                     "blush" -> face = face.copy(blush = value == "1" || value.equals("true", ignoreCase = true))
                     "sparkles" -> face = face.copy(sparkles = value == "1" || value.equals("true", ignoreCase = true))
+                    "grid" -> if (value.isNotBlank()) {
+                        face = face.copy(gridRows = runCatching {
+                            java.net.URLDecoder.decode(value, "UTF-8").split("\n")
+                        }.getOrDefault(emptyList()))
+                    }
                 }
             }
             return PetReaction(enabled, anim, face, lines)

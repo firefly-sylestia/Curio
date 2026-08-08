@@ -332,7 +332,14 @@ fun CurioPetSprite(
     // design's EXCITED face so a happy hop reads excited. A [faceOverride]
     // (a reaction rule's face, e.g. from petting) wins while set.
     val moodFace = faceOverride ?: activeDesign.faceFor(mood.name)
+    val customMoodGrid = moodFace.gridRows.takeIf { it.isNotEmpty() }
     val oneShotFace = activeDesign.faceFor(PetFaceMoods.EXCITED)
+    val customOneShotGrid = oneShotFace.gridRows.takeIf { it.isNotEmpty() }
+    val activeCustomGrid = when {
+        faceOverride != null -> customMoodGrid
+        excited || spinningNow || playing -> customOneShotGrid
+        else -> customMoodGrid
+    }
     val eyes = when {
         // v8.21 — being flung around spins the eyes first.
         dizzy -> EyeStyle.DIZZY
@@ -471,10 +478,12 @@ fun CurioPetSprite(
                     if (sleeping) {
                         // ── Curled sleep pose (v8.14) ──────────────────────
                         // Happy closed-eye arcs on the ball.
-                        drawPx(5, 4, ink); drawPx(6, 4, ink)
-                        drawPx(9, 4, ink); drawPx(10, 4, ink)
+                        if (activeCustomGrid == null) {
+                            drawPx(5, 4, ink); drawPx(6, 4, ink)
+                            drawPx(9, 4, ink); drawPx(10, 4, ink)
+                        }
                         // The rare startle flashes the eyes open for a beat.
-                        if (startling) {
+                        if (startling && activeCustomGrid == null) {
                             drawPx(5, 3, white); drawPx(6, 3, white)
                             drawPx(9, 3, white); drawPx(10, 3, white)
                         }
@@ -489,6 +498,15 @@ fun CurioPetSprite(
                         drawPx(6, 1, cap); drawPx(7, 1, cap); drawPx(8, 1, cap); drawPx(9, 1, cap)
                         drawPx(6, 2, cap); drawPx(7, 2, cap); drawPx(8, 2, cap); drawPx(9, 2, cap)
                         drawPx(6, 3, capTrim); drawPx(7, 3, capTrim); drawPx(8, 3, capTrim); drawPx(9, 3, capTrim)
+                        if (activeCustomGrid != null) {
+                            activeCustomGrid.forEachIndexed { row, line ->
+                                line.forEachIndexed { col, ch ->
+                                    activeDesign.colorFor(ch)?.let { hex ->
+                                        drawGridPx(col, row, petDesignColor(hex))
+                                    }
+                                }
+                            }
+                        }
                     } else {
                         // Soft belly patch — a lighter tummy inside the blob.
                         drawRoundRect(
@@ -522,7 +540,7 @@ fun CurioPetSprite(
                         // stay put. v8.13 — the eyes sit one row HIGHER
                         // (rows 6-8 instead of 7-9) so there is a clear gap
                         // between them and the mouth — never joined.
-                        translate(
+                        if (activeCustomGrid == null) translate(
                             left = glanceShift * opx,
                             top = if (watchingNow) -opx else 0f
                         ) {
@@ -594,7 +612,7 @@ fun CurioPetSprite(
                         // Cheeks — only when the pet is happy/excited/proud/
                         // bouncy or mid-play/spin (v8.13: not a permanent
                         // feature, and the row-10 pair is gone).
-                        if (blushing) {
+                        if (activeCustomGrid == null && blushing) {
                             drawPx(2, 9, blush, 0.5f)
                             drawPx(3, 9, blush, 0.5f)
                             drawPx(12, 9, blush, 0.5f)
@@ -604,7 +622,7 @@ fun CurioPetSprite(
                         // Mouth. v8.10 — the smile was drawn upside down (a
                         // frown); flipped: corners UP (row 10), middle DOWN
                         // (row 11) = a proper happy smile.
-                        when (mouth) {
+                        if (activeCustomGrid == null) when (mouth) {
                             MouthStyle.SMILE -> {
                                 drawPx(6, 10, ink); drawPx(9, 10, ink)
                                 drawPx(7, 11, ink); drawPx(8, 11, ink)
@@ -658,6 +676,17 @@ fun CurioPetSprite(
                                 drawPx(6, 1, goldDeep)
                             }
                             else -> Unit
+                        }
+                        if (activeCustomGrid != null) {
+                            // Hand-drawn mood/reaction faces are transparent overlays;
+                            // the body, tail, accessories, and other motion art remain intact.
+                            activeCustomGrid.forEachIndexed { row, line ->
+                                line.forEachIndexed { col, ch ->
+                                    activeDesign.colorFor(ch)?.let { hex ->
+                                        drawGridPx(col, row, petDesignColor(hex))
+                                    }
+                                }
+                            }
                         }
                     }
 

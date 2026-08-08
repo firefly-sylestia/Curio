@@ -114,6 +114,9 @@ private val PALETTE_SLOTS = listOf(
 /** The paint tools (v8.35): brush, fill bucket, eraser, eyedropper. */
 private enum class PaintTool { BRUSH, FILL, ERASER, EYEDROPPER }
 
+/** Focused designer tabs keep the canvas and its less-used options from becoming one long scroll. */
+private enum class EditorTab { PREVIEW, BODY, FACES, COLORS, TOOLS }
+
 /** A curated palette of pleasant hex colors for the quick-pick swatches. */
 private val QUICK_HEX = listOf(
     "FFF3DC", "FFE0C2", "FFC9A3", "FFB1A0", "FF8FA3", "FF6F61",
@@ -198,6 +201,9 @@ fun PetDesignerScreen(navController: NavController) {
     var paintKey by rememberSaveable { mutableStateOf('b') }
     // v8.35 — the active paint tool.
     var paintTool by rememberSaveable { mutableStateOf(PaintTool.BRUSH) }
+    // Explicitly armed drawing mode: off means the canvas is safe to scroll.
+    var drawMode by rememberSaveable { mutableStateOf(false) }
+    var editorTab by rememberSaveable { mutableStateOf(EditorTab.PREVIEW) }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
     // When non-null, the import/export text dialog is open with this draft.
@@ -286,10 +292,13 @@ fun PetDesignerScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item { CurioSectionLabel("Pet designer") }
+            item {
+                EditorTabRow(selected = editorTab, onSelect = { editorTab = it })
+            }
 
             // ── Live preview ─────────────────────────────────────────
             item {
-                SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
+                if (editorTab == EditorTab.PREVIEW) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
                     CurioPetSprite(
                         stage = CurioPet.currentStage(),
                         mood = previewMood,
@@ -320,7 +329,7 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Pixel grid editor ─────────────────────────────────────
             item {
-                SectionCard(
+                if (editorTab == EditorTab.BODY) SectionCard(
                     "Pixel grid",
                     "Paint with a brush stroke, fill, erase, or pick colors from the canvas"
                 ) {
@@ -366,11 +375,23 @@ fun PetDesignerScreen(navController: NavController) {
                         GridTab("Asleep", editingGrid == "curled") { editingGrid = "curled" }
                     }
                     Spacer(Modifier.height(12.dp))
+                    DrawModeRow(enabled = drawMode, onToggle = { drawMode = it })
+                    Spacer(Modifier.height(10.dp))
+                    QuickPaletteRow(
+                        selectedKey = paintKey,
+                        design = design,
+                        onSelect = {
+                            paintKey = it
+                            paintTool = PaintTool.BRUSH
+                        },
+                        onEdit = { editingColorKey = it }
+                    )
+                    Spacer(Modifier.height(12.dp))
                     PixelGrid(
                         design = design,
                         grid = editingGrid,
-                        paintKey = paintKey,
                         tool = paintTool,
+                        drawMode = drawMode,
                         onTool = { row, col, continuous ->
                             // Fill + eyedropper act once per gesture; brush
                             // and eraser paint continuously while dragging.
@@ -412,7 +433,7 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Palette editor ────────────────────────────────────────
             item {
-                SectionCard(
+                if (editorTab == EditorTab.COLORS) SectionCard(
                     "Colors",
                     "Pick the paint color, or tap a swatch's pencil for the advanced editor (hex + HSL sliders)"
                 ) {
@@ -434,7 +455,7 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Face & reactions editor ───────────────────────────────
             item {
-                SectionCard(
+                if (editorTab == EditorTab.FACES) SectionCard(
                     "Face & reactions",
                     "Customize Curie's face per mood, and how it reacts to each moment"
                 ) {
@@ -516,24 +537,44 @@ fun PetDesignerScreen(navController: NavController) {
                         }
                     }
                     Spacer(Modifier.height(12.dp))
-                    LabeledChips(
-                        label = "Eyes",
-                        options = EyeStyle.entries.map { it.name },
-                        selected = face.eyes.name,
-                        onSelect = { design = design.withFace(faceMood, face.copy(eyes = EyeStyle.valueOf(it))) }
+                    Text(
+                        "Draw this face directly — transparent cells leave Curie's normal body visible.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    LabeledChips(
-                        label = "Mouth",
-                        options = MouthStyle.entries.map { it.name },
-                        selected = face.mouth.name,
-                        onSelect = { design = design.withFace(faceMood, face.copy(mouth = MouthStyle.valueOf(it))) }
+                    Spacer(Modifier.height(8.dp))
+                    FaceGridEditor(
+                        design = design,
+                        face = face,
+                        tool = paintTool,
+                        drawMode = drawMode,
+                        onDrawMode = { drawMode = it },
+                        onPaint = { row, col, continuous ->
+                            if (!(paintTool == PaintTool.FILL && continuous)) {
+                                val nextFace = when (paintTool) {
+                                    PaintTool.BRUSH -> face.withPixel(row, col, paintKey, design.gridSize)
+                                    PaintTool.ERASER -> face.withPixel(row, col, '.', design.gridSize)
+                                    PaintTool.FILL -> face.withFloodFill(row, col, paintKey, design.gridSize)
+                                    PaintTool.EYEDROPPER -> {
+                                        val picked = face.gridRows.getOrNull(row)?.getOrNull(col) ?: '.'
+                                    if (picked != '.') {
+                                        paintKey = picked
+                                        paintTool = PaintTool.BRUSH
+                                    }
+                                    face
+                                    }
+                                }
+                                design = design.withFace(faceMood, nextFace)
+                            }
+                        }
                     )
-                    ToggleRow("Blush (cheeks)", face.blush) {
-                        design = design.withFace(faceMood, face.copy(blush = it))
-                    }
-                    ToggleRow("Sparkles around Curie", face.sparkles) {
-                        design = design.withFace(faceMood, face.copy(sparkles = it))
-                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Procedural fallback: ${face.eyes.name} eyes · ${face.mouth.name} mouth · blush ${if (face.blush) "on" else "off"}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
 
                     Spacer(Modifier.height(16.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -631,46 +672,43 @@ fun PetDesignerScreen(navController: NavController) {
                         selected = reaction.anim.name,
                         onSelect = { design = design.withReaction(reactEvent, reaction.copy(anim = ReactionAnim.valueOf(it))) }
                     )
-                    LabeledChips(
-                        label = "Reaction eyes",
-                        options = EyeStyle.entries.map { it.name },
-                        selected = reaction.face.eyes.name,
-                        onSelect = {
-                            design = design.withReaction(
-                                reactEvent,
-                                reaction.copy(face = reaction.face.copy(eyes = EyeStyle.valueOf(it)))
-                            )
+                    Text(
+                        "Draw the reaction face yourself. It overrides the procedural face while this event plays.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FaceGridEditor(
+                        design = design,
+                        face = reaction.face,
+                        tool = paintTool,
+                        drawMode = drawMode,
+                        onDrawMode = { drawMode = it },
+                        onPaint = { row, col, continuous ->
+                            if (!(paintTool == PaintTool.FILL && continuous)) {
+                                val nextFace = when (paintTool) {
+                                    PaintTool.BRUSH -> reaction.face.withPixel(row, col, paintKey, design.gridSize)
+                                    PaintTool.ERASER -> reaction.face.withPixel(row, col, '.', design.gridSize)
+                                    PaintTool.FILL -> reaction.face.withFloodFill(row, col, paintKey, design.gridSize)
+                                    PaintTool.EYEDROPPER -> {
+                                    val picked = reaction.face.gridRows.getOrNull(row)?.getOrNull(col) ?: '.'
+                                    if (picked != '.') {
+                                        paintKey = picked
+                                        paintTool = PaintTool.BRUSH
+                                    }
+                                    reaction.face
+                                }
+                                }
+                                design = design.withReaction(reactEvent, reaction.copy(face = nextFace))
+                            }
                         }
                     )
-                    LabeledChips(
-                        label = "Reaction mouth",
-                        options = MouthStyle.entries.map { it.name },
-                        selected = reaction.face.mouth.name,
-                        onSelect = {
-                            design = design.withReaction(
-                                reactEvent,
-                                reaction.copy(face = reaction.face.copy(mouth = MouthStyle.valueOf(it)))
-                            )
-                        }
-                    )
-                    ToggleRow("Blush while reacting", reaction.face.blush) {
-                        design = design.withReaction(
-                            reactEvent,
-                            reaction.copy(face = reaction.face.copy(blush = it))
-                        )
-                    }
-                    ToggleRow("Sparkles while reacting", reaction.face.sparkles) {
-                        design = design.withReaction(
-                            reactEvent,
-                            reaction.copy(face = reaction.face.copy(sparkles = it))
-                        )
-                    }
                 }
             }
 
             // ── Shapes & randomize ────────────────────────────────────
             item {
-                SectionCard(
+                if (editorTab == EditorTab.TOOLS) SectionCard(
                     "Shapes & inspiration",
                     "Jump-start the body grid with a preset, or roll a fresh palette"
                 ) {
@@ -700,7 +738,7 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Import / export / save ────────────────────────────────
             item {
-                SectionCard(
+                if (editorTab == EditorTab.TOOLS) SectionCard(
                     "Import & export",
                     "Share Curie as a PNG image (pixel-perfect), or use the text format for fine control"
                 ) {
@@ -1729,6 +1767,169 @@ private fun PaletteRow(
     }
 }
 
+/** Compact tabs keep body, faces, colors, and tools in focused editing spaces. */
+@Composable
+private fun EditorTabRow(selected: EditorTab, onSelect: (EditorTab) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        EditorTab.entries.forEach { tab ->
+            val label = when (tab) {
+                EditorTab.PREVIEW -> "Preview"
+                EditorTab.BODY -> "Body"
+                EditorTab.FACES -> "Faces"
+                EditorTab.COLORS -> "Colors"
+                EditorTab.TOOLS -> "Tools"
+            }
+            ChoiceChip(label, selected == tab) { onSelect(tab) }
+        }
+    }
+}
+
+/** A clear armed/off state prevents accidental drawing while the page scrolls. */
+@Composable
+private fun DrawModeRow(enabled: Boolean, onToggle: (Boolean) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CurioIcon(
+                name = CurioIcons.Brush,
+                contentDescription = null,
+                tint = if (enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 20.dp
+            )
+            Spacer(Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    if (enabled) "Draw mode is on" else "Draw mode is off",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    if (enabled) "Drag across the canvas to paint"
+                    else "Turn on to paint; scrolling stays safe",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(checked = enabled, onCheckedChange = onToggle)
+        }
+    }
+}
+
+/** Quick body-color access docked beside the canvas; the full palette stays in Colors. */
+@Composable
+private fun QuickPaletteRow(
+    selectedKey: Char,
+    design: PetDesign,
+    onSelect: (Char) -> Unit,
+    onEdit: (Char) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PALETTE_SLOTS.forEach { slot ->
+            Surface(
+                shape = CircleShape,
+                color = hexColor(design.colorOf(slot.key)),
+                border = BorderStroke(
+                    if (selectedKey == slot.key) 3.dp else 1.dp,
+                    if (selectedKey == slot.key) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.outlineVariant
+                ),
+                onClick = { onSelect(slot.key) },
+                modifier = Modifier.size(if (selectedKey == slot.key) 38.dp else 32.dp)
+            ) {}
+        }
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            onClick = { onEdit(selectedKey) }
+        ) {
+            Text(
+                "Edit ${selectedKey} color",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+            )
+        }
+    }
+}
+
+/** A face overlay canvas uses the same protected draw mode and palette as the body editor. */
+@Composable
+private fun FaceGridEditor(
+    design: PetDesign,
+    face: com.curio.app.data.PetFace,
+    tool: PaintTool,
+    drawMode: Boolean,
+    onDrawMode: (Boolean) -> Unit,
+    onPaint: (Int, Int, Boolean) -> Unit
+) {
+    val gridSize = design.gridSize
+    val rows = if (face.gridRows.size == gridSize) face.gridRows
+    else List(gridSize) { ".".repeat(gridSize) }
+    var gestures = Modifier
+    if (drawMode) {
+        gestures = gestures
+            .pointerInput(gridSize, tool, face.gridRows) {
+                detectTapGestures { offset ->
+                    val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
+                    onPaint(row, col, false)
+                }
+            }
+            .pointerInput(gridSize, tool, face.gridRows) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
+                        onPaint(row, col, false)
+                    },
+                    onDrag = { change, _ ->
+                        change.consume()
+                        val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
+                        onPaint(row, col, true)
+                    }
+                )
+            }
+    }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        DrawModeRow(enabled = drawMode, onToggle = onDrawMode)
+        Spacer(Modifier.height(8.dp))
+        Box(modifier = Modifier.fillMaxWidth().then(gestures)) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                rows.forEach { line ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        line.forEach { ch ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .padding(0.5.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(
+                                        if (ch == '.') MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
+                                        else hexColor(design.colorOf(ch))
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 /**
  * The pixel editor — tap or drag to paint with the active tool. Brush and
  * eraser paint continuously; fill and eyedropper act once per gesture.
@@ -1737,15 +1938,15 @@ private fun PaletteRow(
 private fun PixelGrid(
     design: PetDesign,
     grid: String,
-    paintKey: Char,
     tool: PaintTool,
+    drawMode: Boolean,
     onTool: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
     val rows = if (grid == "curled") design.curledRows else design.bodyRows
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
+    var gestures = Modifier
+    if (drawMode) {
+        gestures = gestures
             .pointerInput(gridSize, tool) {
                 detectTapGestures(onTap = { offset ->
                     val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
@@ -1765,7 +1966,8 @@ private fun PixelGrid(
                     }
                 )
             }
-    ) {
+    }
+    Box(modifier = Modifier.fillMaxWidth().then(gestures)) {
         Column(modifier = Modifier.fillMaxWidth()) {
             rows.forEachIndexed { rowIndex, line ->
                 Row(modifier = Modifier.fillMaxWidth()) {

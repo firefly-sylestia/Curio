@@ -1,47 +1,37 @@
-# Request — Addictive shuffle choreography + correct swipe sequence (v8.40)
+# Request — Curie Pet Designer drawn faces, focused editing, and easier colors (v8.41)
 
 ## Completed
 
-Focused only on `SpinScreen.kt` animation and deck interaction. No z-index,
-layout, card ordering, colors, shapes, or visual card design were changed.
-
-### Shuffle choreography
-
-- The hero now has one clean heartbeat per reel tick: a tiny press-down,
-  lift/anticipation, then a controlled settle. The prior two pulse springs
-  restarted 110ms apart and overlapped with the hero content reel, producing
-  simultaneous, strange motion.
-- The hero topic content handoff starts 90ms after the heartbeat begins, so
-  the card motion leads and the new topic arrives as a readable release.
-- Peek cards now animate strictly one at a time in this order:
-  **top outer (`-2`) → top inner (`-1`) → bottom inner (`+1`) → bottom outer
-  (`+2`)**. Each card has its own delay; no two peek cards share a wave.
-- The per-card timings remain below the 340ms fastest shuffle tick so the
-  cascade completes before the next reel tick.
-
-### Swipe sequence
-
-- The existing user-selected direction is preserved: **left swipe → nearest
-  visible bottom peek (`+1`)**, right swipe → nearest visible top peek (`-1`).
-- The shuffle loop no longer resets `cycleIndex` from a separate tick counter
-  starting at hand index 1. It now advances the current hand position, so
-  manual swipes and subsequent shuffle ticks stay on the same visible topic
-  sequence instead of jumping to a top topic.
+- Added backward-compatible transparent pixel face overlays to `PetFace`.
+  Existing saved designs without `grid=` continue using procedural eyes,
+  mouth, blush, and sparkles as before.
+- Added mood and reaction face overlay editing in the Pet designer. Drawn
+  overlays are serialized URL-encoded in existing `face=` / `react=` config
+  lines and resized with the body canvas.
+- Updated `CurioPetSprite` to render custom face overlays while preserving
+  the body, motion, tail, accessories, sparkles, and sleep pose. Procedural
+  face art is suppressed only when a custom overlay exists.
+- Refactored Pet designer navigation into focused Preview, Body, Faces,
+  Colors, and Tools tabs so editing options no longer form one long scroll.
+- Added explicit Draw mode. When off, body and face canvases do not consume
+  scroll gestures; when on, brush/fill/erase/eyedropper gestures are active.
+- Docked a quick body palette beside the canvas and retained the full palette
+  in Colors. Existing hex + HSL picker remains available via palette editing.
+- Face eyedroppers return to Brush mode after selecting a color.
+- Empty custom grid values no longer suppress legacy procedural faces.
 
 ## Files changed
 
-- `app/src/main/java/com/curio/app/features/spin/SpinScreen.kt`
-- `app/build.gradle.kts` → versionCode 20260830
-- `fastlane/metadata/android/en-US/changelogs/20260830.txt`
-- `app/AGENTS.md` motion contract note retained; no new ownership boundary
+- `app/src/main/java/com/curio/app/data/PetDesign.kt`
+- `app/src/main/java/com/curio/app/features/petdesigner/PetDesignerScreen.kt`
+- `app/src/main/java/com/curio/app/ui/pet/CurioPetSprite.kt`
 - `Prompt.md`
 
 ## Validation
 
-- SpinScreen delimiter balance: BALANCED.
-- `git diff --check`: clean.
-- Only SpinScreen was changed before release metadata.
-- Protected-scope diff check found no z-index/layout/design changes.
-- Final code review found no concrete animation, sequencing, or compile blocker.
-- No Gradle build was run because repository DOX rules forbid local Android
-  builds; CI on push is the compile gate.
+- Kotlin delimiter balance passed for all three changed Kotlin files.
+- `git diff --check` passed.
+- Static review checked serialization fallback, custom rendering, draw-mode
+  gesture protection, tab helper signatures, and reaction eyedropper state.
+- No Gradle command was run because repository DOX rules forbid local Android
+  builds; CI on push remains the compile gate.
