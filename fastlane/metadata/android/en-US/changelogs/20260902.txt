@@ -1,0 +1,1 @@
+Fixed a Spin screen compile issue and made PNG color importing easier to understand. The image import flow now uses clear names like Main accent, Soft accent, Highlight, and Extra color instead of technical slot codes.

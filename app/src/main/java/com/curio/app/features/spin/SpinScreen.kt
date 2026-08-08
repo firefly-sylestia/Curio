@@ -693,7 +693,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             CurioMotion.Durations.SpinMin.toLong(),
             CurioMotion.Durations.SpinMax.toLong() + 1
         )
-        val start = System.currentTimeMillis()        while (true) {
+        val start = System.currentTimeMillis()
+        while (true) {
             val elapsed = System.currentTimeMillis() - start
             if (elapsed >= durationMs) break
             val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 1f)

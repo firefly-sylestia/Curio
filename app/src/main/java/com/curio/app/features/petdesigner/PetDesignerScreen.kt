@@ -228,9 +228,8 @@ fun PetDesignerScreen(navController: NavController) {
     var previewPeek by rememberSaveable { mutableStateOf(false) }
     // v8.35 — which grid a picked PNG should land on (1 = body, 2 = curled).
     var importPngTarget by remember { mutableStateOf<Int?>(null) }
-    // v8.37 — PNG import review: the picked image previews with an
-    // eyedropper-style "add custom color" step (tap the image or a swatch to
-    // fill the four custom palette slots c C d D), then Apply snaps + imports.
+    // PNG import review: the picked image opens a guided color step. Users
+    // can sample colors from the image, name them by purpose, then apply.
     var importReview by remember { mutableStateOf<ImportReview?>(null) }
 
     // v8.35/v8.37 — PNG import: pick an image, resample to the canvas, then
@@ -926,7 +925,7 @@ fun PetDesignerScreen(navController: NavController) {
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                                 Text(
-                                    "Eyedropper: add image colors, then import",
+                                    "Sample image colors before importing",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                                 )
@@ -1448,14 +1447,10 @@ private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) 
 }
 
 /**
- * v8.37 — the PNG import review step: shows the raw imported pixels and lets
- * the user "eyedropper" colors into the four custom palette slots (c C d D)
- * before the image is snapped to the palette and applied. Tapping the image
- * picks the tapped pixel's color; tapping a slot chip arms it as the
- * eyedropper target (or just keep tapping the image — untouched slots fill
- * in order); the quick-pick row offers the image's dominant colors. Apply
- * runs the palette-aware snap, so the picked custom colors are preserved
- * instead of being flattened away by the 13 default keys.
+ * PNG import review: shows the raw image and guides the user through
+ * sampling colors into four named saved-color destinations before the image
+ * is applied. Tapping the image samples a color; the suggested-color row
+ * offers dominant image colors; Apply snaps the image using the saved colors.
  */
 @Composable
 private fun ImportPngDialog(
@@ -1479,16 +1474,16 @@ private fun ImportPngDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Import PNG — add custom colors",
+                "Choose colors from your image",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 if (review.armed != null) {
-                    "Eyedropper armed → slot '${review.armed}': tap a pixel in the image to fill it"
+                    "Color target selected: tap a pixel in the image to save that color"
                 } else {
-                    "Tap the image (or a quick-pick swatch) to fill custom color slots — " +
-                        "Apply then imports with those colors."
+                    "Tap a pixel or a suggested color, then choose where to save it. " +
+                        "You can use these colors throughout Curie's design."
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1532,50 +1527,83 @@ private fun ImportPngDialog(
             }
             Spacer(Modifier.height(14.dp))
 
-            // ── The four custom palette slots — tap to arm ────────────
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CUSTOM_SLOTS.forEach { key ->
-                    val colorHex = review.custom[key] ?: "FFFFFF"
-                    val armed = review.armed == key
-                    val filled = key in review.touched
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = hexColor(colorHex),
-                        border = BorderStroke(
-                            width = if (armed) 3.dp else 1.dp,
-                            color = if (armed) MaterialTheme.colorScheme.primary
-                                    else if (filled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f)
-                        ),
-                        onClick = { onArmSlot(key) },
-                        modifier = Modifier.size(44.dp)
+            // ── Named saved-color targets — tap to choose a destination ─
+            Text(
+                "Save sampled color as…",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                CUSTOM_SLOTS.chunked(2).forEachIndexed { rowIndex, rowSlots ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = key.toString(),
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                color = contrastingInk(hexColor(colorHex))
-                            )
+                        rowSlots.forEachIndexed { slotIndex, key ->
+                            val colorHex = review.custom[key] ?: "FFFFFF"
+                            val armed = review.armed == key
+                            val filled = key in review.touched
+                            val label = when (rowIndex * 2 + slotIndex) {
+                                0 -> "Main accent"
+                                1 -> "Soft accent"
+                                2 -> "Highlight"
+                                else -> "Extra color"
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                                border = BorderStroke(
+                                    width = if (armed) 2.dp else 1.dp,
+                                    color = if (armed) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                                ),
+                                onClick = { onArmSlot(key) },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(hexColor(colorHex))
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            label,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            if (filled) "Color saved" else "Choose target",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
-                "Tap a slot to arm it, then tap the image — or just keep tapping the image (slots fill in order).",
+                "Select a destination above, then tap the image to sample a color. If you do not choose one, Curie fills destinations in order.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(12.dp))
 
-            // ── Quick picks — the image's dominant colors ─────────────
+            // ── Suggested colors — the image's dominant colors ────────
             if (review.unique.isNotEmpty()) {
                 Text(
-                    "Quick picks from your image",
+                    "Suggested colors from your image",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
