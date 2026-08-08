@@ -206,6 +206,19 @@ fun PetDesignerScreen(navController: NavController) {
     var editorTab by rememberSaveable { mutableStateOf(EditorTab.PREVIEW) }
     // Detail layers share the same protected canvas and palette as body art.
     var detailLayer by rememberSaveable { mutableStateOf("tail") }
+    // The Details tab starts with the effective current part (including
+    // procedural art) so users can redraw what Curie already wears.
+    var detailEditorDrafts by remember(savedText) {
+        mutableStateOf<Map<String, List<String>>>(emptyMap())
+    }
+    // Compare edits against the part as it looked when this designer opened.
+    var showBlueprint by rememberSaveable { mutableStateOf(false) }
+    var detailEditorRevision by remember { mutableStateOf(0) }
+    fun resetDetailEditor() {
+        detailEditorDrafts = emptyMap()
+        showBlueprint = false
+        detailEditorRevision++
+    }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
     // When non-null, the import/export text dialog is open with this draft.
@@ -374,9 +387,11 @@ fun PetDesignerScreen(navController: NavController) {
                             horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
                             GridTab("24×24", design.gridSize == 24) {
+                                resetDetailEditor()
                                 design = design.withSize(24)
                             }
                             GridTab("32×32", design.gridSize == 32) {
+                                resetDetailEditor()
                                 design = design.withSize(32)
                             }
                         }
@@ -439,9 +454,11 @@ fun PetDesignerScreen(navController: NavController) {
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Copy body → asleep", enabled = editingGrid == "body") {
+                            resetDetailEditor()
                             design = design.copy(curledRows = PetDesign.bodyAsCurled(design.bodyRows))
                         }
                         SmallAction("Clear grid", enabled = true) {
+                            resetDetailEditor()
                             val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
                             design = design.withGrid(editingGrid, blank)
                         }
@@ -474,7 +491,33 @@ fun PetDesignerScreen(navController: NavController) {
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Draw mode protects scrolling. Empty cells are transparent; your layer is placed over Curie's existing motion art.",
+                        "Draw mode protects scrolling. The grid starts with the current part in its real placement, so you can redraw it instead of starting from blank pixels.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    CurioPetSprite(
+                        stage = CurioPet.currentStage(),
+                        mood = previewMood,
+                        spriteSize = 150.dp,
+                        design = design,
+                        contentDescription = "Live placement preview for the $detailLayer layer"
+                    )
+                    Text(
+                        "Live placement — this shows where the selected ${detailLayer.replaceFirstChar { it.uppercase() }} appears on Curie. Edit the matching pixels below; blank cells stay transparent.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    ToggleRow(
+                        label = "Show before-edit blueprint",
+                        checked = showBlueprint,
+                        onCheckedChange = { showBlueprint = it }
+                    )
+                    Text(
+                        "The blueprint marks the original current pixels underneath your redraw.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -491,16 +534,37 @@ fun PetDesignerScreen(navController: NavController) {
                         onEdit = { editingColorKey = it }
                     )
                     Spacer(Modifier.height(12.dp))
+                    val blueprintRows = remember(detailLayer, design.gridSize, savedText, detailEditorRevision) {
+                        effectiveDetailRows(design, detailLayer)
+                    }
+                    val editorRows = detailEditorDrafts[detailLayer] ?: blueprintRows
                     PixelGrid(
                         design = design,
                         grid = "detail:$detailLayer",
+                        rowsOverride = editorRows,
+                        blueprintRows = blueprintRows,
+                        showBlueprint = showBlueprint,
                         tool = paintTool,
                         drawMode = drawMode,
                         onTool = { row, col, continuous ->
                             if (paintTool == PaintTool.FILL || paintTool == PaintTool.EYEDROPPER) {
-                                if (!continuous) applyTool(row, col, "detail:$detailLayer")
+                                if (!continuous) {
+                                    val rows = detailEditorDrafts[detailLayer] ?: blueprintRows
+                                    detailEditorDrafts = detailEditorDrafts + (detailLayer to rows)
+                                    design = design
+                                        .withDetailGrid(detailLayer, rows)
+                                        .withProceduralEnabled(detailLayer, false)
+                                    applyTool(row, col, "detail:$detailLayer")
+                                    detailEditorDrafts = detailEditorDrafts + (detailLayer to design.detailFor(detailLayer))
+                                }
                             } else {
+                                val rows = detailEditorDrafts[detailLayer] ?: blueprintRows
+                                detailEditorDrafts = detailEditorDrafts + (detailLayer to rows)
+                                design = design
+                                    .withDetailGrid(detailLayer, rows)
+                                    .withProceduralEnabled(detailLayer, false)
                                 applyTool(row, col, "detail:$detailLayer")
+                                detailEditorDrafts = detailEditorDrafts + (detailLayer to design.detailFor(detailLayer))
                             }
                         }
                     )
@@ -532,16 +596,18 @@ fun PetDesignerScreen(navController: NavController) {
                             label = if (element == "antenna") "Generated antenna extras" else "Generated ${element.replaceFirstChar { it.uppercase() }}",
                             checked = design.isProceduralEnabled(element),
                             onCheckedChange = { enabled ->
+                                resetDetailEditor()
                                 design = design.withProceduralEnabled(element, enabled)
                             }
                         )
                     }
                     Spacer(Modifier.height(6.dp))
                     SmallAction("Clear ${detailLayer} layer", enabled = true) {
-                        design = design.withDetailGrid(
-                            detailLayer,
-                            List(design.gridSize) { ".".repeat(design.gridSize) }
-                        )
+                        val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
+                        detailEditorDrafts = detailEditorDrafts + (detailLayer to blank)
+                        design = design
+                            .withDetailGrid(detailLayer, blank)
+                            .withProceduralEnabled(detailLayer, false)
                     }
                 }
             }
@@ -598,6 +664,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 preview = preset.applyTo(design),
                                 onClick = {
                                     val nextDesign = preset.applyTo(design)
+                                    resetDetailEditor()
                                     design = nextDesign
                                     reactionLineDraft = nextDesign.reactionFor(reactEvent).lines.joinToString("\n")
                                     toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
@@ -829,15 +896,18 @@ fun PetDesignerScreen(navController: NavController) {
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Default", enabled = true) {
+                            resetDetailEditor()
                             design = design.withGrid("body", upscalePreset(PetDesign.DEFAULT_BODY_16, design.gridSize))
                         }
                         SmallAction("Robot", enabled = true) {
+                            resetDetailEditor()
                             design = design.copy(
                                 bodyRows = upscalePreset(ROBOT_BODY, design.gridSize),
                                 curledRows = upscalePreset(ROBOT_CURLED, design.gridSize)
                             )
                         }
                         SmallAction("Ghost", enabled = true) {
+                            resetDetailEditor()
                             design = design.copy(
                                 bodyRows = upscalePreset(GHOST_BODY, design.gridSize),
                                 curledRows = upscalePreset(GHOST_CURLED, design.gridSize)
@@ -847,9 +917,11 @@ fun PetDesignerScreen(navController: NavController) {
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Random palette", enabled = true) {
+                            resetDetailEditor()
                             design = design.randomize()
                         }
                         SmallAction("Reset all", enabled = design.isCustom) {
+                            resetDetailEditor()
                             design = PetDesign.DEFAULT
                             reactionLineDraft = PetDesign.DEFAULT.reactionFor(reactEvent).lines.joinToString("\n")
                         }
@@ -1013,6 +1085,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 text.contains("=") ||
                                 text.lines().any { it.length >= design.gridSize }
                         if (looksLikeDesign) {
+                            resetDetailEditor()
                             design = parsed
                             reactionLineDraft = parsed.reactionFor(reactEvent).lines.joinToString("\n")
                             importDraft = null
@@ -1040,6 +1113,7 @@ fun PetDesignerScreen(navController: NavController) {
                         )
                     },
                     onApply = {
+                        resetDetailEditor()
                         design = applyImport(review, design)
                         toast = if (review.touched.isNotEmpty()) {
                             "Imported — ${review.touched.size} custom color(s) added"
@@ -2248,6 +2322,54 @@ private fun FaceGridEditor(
 }
 
 /**
+ * Projects the visible procedural part into the editor's design grid. An
+ * existing authored layer wins; otherwise the user sees the part Curie is
+ * currently wearing instead of a misleading blank canvas.
+ */
+private fun effectiveDetailRows(design: PetDesign, layer: String): List<String> {
+    val authored = design.detailFor(layer)
+    if (authored.any { row -> row.any { it != '.' } }) return authored
+    if (!design.isProceduralEnabled(layer)) return authored
+
+    val pixels = when (layer) {
+        "tail" -> listOf(
+            Triple(14, 11, 'B'), Triple(15, 11, 'B'),
+            Triple(15, 12, 'B'), Triple(15, 10, 'B')
+        )
+        "accessories" -> listOf(
+            Triple(2, 1, 'o'), Triple(2, 0, 'o'),
+            Triple(4, 2, 's'), Triple(5, 1, 's'), Triple(5, 2, 's'), Triple(5, 3, 's'),
+            Triple(13, 10, 'o'), Triple(14, 10, 's'), Triple(15, 10, 's'),
+            Triple(13, 11, 'o'), Triple(14, 11, 's'), Triple(15, 11, 's'),
+            Triple(14, 13, 'o'), Triple(15, 13, 'o'), Triple(14, 14, 'o'), Triple(15, 14, 'o'),
+            Triple(4, 0, 'G'), Triple(8, 0, 'G'), Triple(6, 1, 'g')
+        )
+        "effects" -> listOf(
+            Triple(1, 2, 'G'), Triple(14, 3, 'G'),
+            Triple(2, 13, 'G'), Triple(13, 2, 'G'),
+            Triple(1, 6, 'o'), Triple(0, 7, 'o'), Triple(1, 8, 'o'),
+            Triple(14, 6, 'o'), Triple(15, 7, 'o'), Triple(14, 8, 'o')
+        )
+        "antenna" -> listOf(
+            Triple(7, 0, 'G'), Triple(8, 0, 'G'),
+            Triple(6, 1, 's'), Triple(7, 1, 's'), Triple(8, 1, 's'), Triple(9, 1, 's'),
+            Triple(6, 2, 's'), Triple(7, 2, 's'), Triple(8, 2, 's'), Triple(9, 2, 's'),
+            Triple(6, 3, 'S'), Triple(7, 3, 'S'), Triple(8, 3, 'S'), Triple(9, 3, 'S')
+        )
+        else -> emptyList()
+    }
+    val rows = MutableList(design.gridSize) { CharArray(design.gridSize) { '.' } }
+    pixels.forEach { (col16, row16, key) ->
+        val col = ((col16 + 0.5f) * design.gridSize / 16f).toInt()
+            .coerceIn(0, design.gridSize - 1)
+        val row = ((row16 + 0.5f) * design.gridSize / 16f).toInt()
+            .coerceIn(0, design.gridSize - 1)
+        rows[row][col] = key
+    }
+    return rows.map { String(it) }
+}
+
+/**
  * The pixel editor — tap or drag to paint with the active tool. Brush and
  * eraser paint continuously; fill and eyedropper act once per gesture.
  */
@@ -2257,15 +2379,19 @@ private fun PixelGrid(
     grid: String,
     tool: PaintTool,
     drawMode: Boolean,
+    rowsOverride: List<String>? = null,
+    blueprintRows: List<String>? = null,
+    showBlueprint: Boolean = false,
     onTool: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
     val latestOnTool by rememberUpdatedState(onTool)
-    val rows = when {
+    val rows = rowsOverride ?: when {
         grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
         grid == "curled" -> design.curledRows
         else -> design.bodyRows
     }
+    val blueprint = if (showBlueprint) blueprintRows else null
     var gestures: Modifier = Modifier
     if (drawMode) {
         gestures = gestures
@@ -2295,6 +2421,8 @@ private fun PixelGrid(
                 Row(modifier = Modifier.fillMaxWidth()) {
                     line.forEachIndexed { colIndex, ch ->
                         val filled = ch != '.'
+                        val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
+                        val blueprintOnly = !filled && blueprintKey != null && blueprintKey != '.'
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -2302,8 +2430,11 @@ private fun PixelGrid(
                                 .padding(0.5.dp)
                                 .clip(RoundedCornerShape(3.dp))
                                 .background(
-                                    if (filled) hexColor(design.colorOf(ch))
-                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                    when {
+                                        filled -> hexColor(design.colorOf(ch))
+                                        blueprintOnly -> hexColor(design.colorOf(blueprintKey)).copy(alpha = 0.28f)
+                                        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                    }
                                 )
                         )
                     }

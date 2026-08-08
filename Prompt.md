@@ -1,21 +1,18 @@
-# Request — monitor CI and fix the current/previous failure
+# Request — show current detail parts with live placement and blueprint
 
 ## Completed
 
-- Inspected the previous failed Android CI run `31251340426` for commit `833f463`.
-- Found the concrete failure in both debug and release compilation:
-  `PetDesignerScreen.kt:2202` and `PetDesignerScreen.kt:2271` reported an
-  assignment type mismatch because `var gestures = Modifier` inferred the
-  `Modifier.Companion` object instead of the `Modifier` interface.
-- Updated both declarations to `var gestures: Modifier = Modifier`.
-- The newer run `31251448986` for `eb3a34d` was still compiling when inspected;
-  it did not contain this correction. This fix starts a new CI cycle.
+- The Details editor now opens with the selected part's effective current pixels visible instead of a blank transparent grid.
+- Existing authored detail layers are shown unchanged; empty procedural layers are projected into the editable design grid using their current static placement.
+- The first edit materializes the visible current part into the selected custom layer and disables only that layer's generated art, so the live preview matches the editable grid.
+- Added a live full-Curie preview and clear placement copy for the selected Tail, Accessories, Effects, or Antenna layer.
+- Added a “Show before-edit blueprint” toggle that displays the original current pixels beneath edits.
+- External design replacements (resize, presets, randomize, imports, reset, and procedural toggles) clear temporary editor snapshots so stale current/blueprint art cannot persist.
 
 ## Validation
 
 - PetDesignerScreen delimiter balance passed.
-- Both gesture declarations were verified as explicitly typed `Modifier`.
 - `git diff --check` passed.
-- Static review found no remaining blocker in the targeted fix.
-- Gradle builds are forbidden locally by the Curio DOX rules; GitHub Actions is
-  the compile gate.
+- Static review found no remaining concrete Kotlin/Compose blocker.
+- Procedural projection is intentionally a static editor placement; runtime animation remains owned by CurioPetSprite.
+- Gradle builds are forbidden locally by the Curio DOX rules; CI remains the compile gate.
