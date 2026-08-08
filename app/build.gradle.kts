@@ -115,7 +115,9 @@ android {
     // splits via this DSL are still supported.
     splits {
         abi {
-            isEnabled = true
+            // AGP 9 renamed the Split toggle from isEnabled to isEnable
+            // (verified against gradle-api 9.2.1 sources: `Split.isEnable`).
+            isEnable = true
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
