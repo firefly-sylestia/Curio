@@ -224,6 +224,7 @@ object CurioPetBrain {
         val nightShare = (hist[CurioPet.TimeOfDay.NIGHT.name] ?: 0).toFloat() / total
         val morningShare = (hist[CurioPet.TimeOfDay.MORNING.name] ?: 0).toFloat() / total
         val lane = favoriteLane(context)
+        val laneLabel = lane?.displayName
         val saves = CurioQuests.lifetimeState.saves
         val streak = CurioQuests.bestStreakState
 
@@ -240,7 +241,11 @@ object CurioPetBrain {
         // passive bubbles).
         if (tryCoin(traits[Trait.NIGHT_OWL]!! > 0.55f && nightShare > 0.4f, "The night deck is OUR thing now.")) return
         if (tryCoin(morningShare > 0.4f, "Morning spins — that's our little ritual.")) return
-        if (tryCoin(lane != null && laneEngagementShare(context, lane) > 0.6f, "I'll always cheer for ${lane.displayName}.")) return
+        // laneLabel is captured up front: the smart-cast from `lane != null`
+        // in the condition argument does NOT flow into the phrase argument
+        // (arguments are independent expressions), so `${lane.displayName}`
+        // here was a compile error (CI v8.44).
+        if (tryCoin(lane != null && laneEngagementShare(context, lane) > 0.6f, "I'll always cheer for ${laneLabel}.")) return
         if (tryCoin(streak >= 7, "A full week together, and I'm keeping count.")) return
         if (tryCoin(saves >= 10, "Every saved spark is a little memory we share.")) return
         if (tryCoin(traits[Trait.PLAYFULNESS]!! > 0.55f, "Boops are my love language — just so you know.")) return

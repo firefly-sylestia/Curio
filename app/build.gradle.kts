@@ -117,7 +117,13 @@ android {
         abi {
             // AGP 9 renamed the Split toggle from isEnabled to isEnable
             // (verified against gradle-api 9.2.1 sources: `Split.isEnable`).
-            isEnable = true
+            // The per-ABI splits are gated on `-PcurioAbiSplits=true` (the
+            // default). PR CI passes `-PcurioAbiSplits=false` so it builds
+            // ONLY the single universal APK — no per-ABI split packaging
+            // (faster PR checks); the tag release workflow keeps the full
+            // universal + per-ABI set for sideloading.
+            isEnable = project.providers.gradleProperty("curioAbiSplits")
+                .orNull?.toBoolean() ?: true
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true

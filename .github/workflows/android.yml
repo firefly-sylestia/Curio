@@ -59,19 +59,23 @@ jobs:
           echo "Release keystore decoded (${size} bytes)."
           echo "decoded=true" >> "$GITHUB_OUTPUT"
 
-      - name: Run Android checks and build release APKs
+      # PR/push CI builds ONE universal release APK (curioAbiSplits=false
+      # disables the per-ABI split packaging in app/build.gradle.kts). The
+      # tag release workflow builds the full universal + per-ABI set.
+      - name: Run Android checks and build the universal release APK
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew lintDebug validateTopics assembleRelease --stacktrace
+        run: ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
 
       - name: Verify release APKs and signatures
         if: steps.keystore.outputs.decoded == 'true'
         run: |
           set -euo pipefail
-          # ABI splits + universal APK all live here (see app/build.gradle.kts).
+          # PR/push CI: exactly one universal release APK (splits disabled
+          # via -PcurioAbiSplits=false — see app/build.gradle.kts).
           shopt -s nullglob
           apks=(app/build/outputs/apk/release/*.apk)
           if [ "${#apks[@]}" -eq 0 ]; then
