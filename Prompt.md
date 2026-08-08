@@ -1,77 +1,58 @@
-# Request — v8.27: richer daily quests, pinned badges, fun reward moments + CI fix
+# Request — v8.28 (PLANNED): addictive hooks, per user's picks. CI fix done.
 
 ## What the user asked
 
-1. Daily quests had only 3 quests and not much XP — make them more.
-2. Improve the quest system further: pinned badges, and make it actually
-   fun with animations for things.
-3. (Later message) Fix a CI compile error (CurioPet JVM signature clash),
-   then continue the quest work.
+1. Brainstorm addictive features screen by screen; they answered a picker.
+2. Fix a CI compile error, commit + push.
+3. Ask follow-up clarifications on their picks (done below).
 
-## Decisions (asked via ask_user)
+## CI fix (done, pushed `3013ac0`)
 
-- **5 dailies/day**: three CORE quests shown first; claimed core quests hide
-  (animate out); once all three are claimed, the two BONUS quests take over
-  with a gold "Bonus quests unlocked!" reveal. User chose: "5 per day and
-  show it as bonus after the 3 completes hide the completed and show that."
-- **Pinned badges**: earned medal badges on the Profile achievements card AND
-  an earned-badge strip on the Quests page (locked ones shown as
-  silhouettes, per spec §4.1). Badge shelf dialog kept behind the strip.
-- **Always-on** (no Settings toggle).
+`QuestsScreen.kt:368` — `ConfettiBurst(trigger = levelUpBanner)` failed:
+"Smart cast to 'Any' is impossible, because 'levelUpBanner' is a delegated
+property." Fixed by passing the value: `trigger = levelUpBanner ?: 0`.
 
-## Implementation
+## Picks (round 1) + clarifications (round 2) — FEATURES ARE PARKED, build later
 
-### CI fix (pushed separately as `7efcbcc`, then `e617bc9` prior)
-- `CurioFloatingPet.kt` — the throw-glide `launch` ran on a plain lambda; the
-  previous `inputScope = this` fix was wrong for Compose 2026.05
-  (PointerInputScope is no longer a CoroutineScope). Now uses
-  `rememberCoroutineScope()`.
-- This turn: `CurioPet.kt` — `var floatingSuppressed by mutableStateOf(false)
-  private set` already generates a JVM `setFloatingSuppressed(Boolean)`, so
-  the manual `fun setFloatingSuppressed(...)` clashed. Renamed the manual
-  function to `suppressFloating(...)`; updated `OnboardingScreen.kt` (2
-  callers) and the KDoc reference.
+### 1. Topic of the day (Home)
+- Gold "Today's must-see" card on Home.
+- Selection: **deterministic rotation through the whole catalog**, no repeats
+  until the cycle is done.
 
-### Data layer (`data/CurioQuests.kt`)
-- `DailyQuest` gains `bonus: Boolean` (v8.27).
-- DailyPool: 8 core quests (one per role; warm-up/discovery/creation picked
-  deterministically, never same-kind on one day) + 7 bonus quests
-  (25-40 XP). Core rewards raised ~50%: warm-up 15-20, discovery 30,
-  creation 15-25. A full day now pays ~120-140 XP (was ~45).
-- `dailyQuestsFor` returns core trio + two bonus (picked, never repeated).
+### 2. Come-back teaser (Home)
+- When returning after a gap, show a **short rotating mix** of all three:
+  pet missed you (emotional greeting animation), what's waiting (ready bonus
+  quests / gift / today's quests), and a streak warning ("one more day and
+  your streak breaks!").
 
-### Shared badge components (`ui/components/CurioBadges.kt`, NEW)
-- `badgeGlyph(stage)` — every stage wears its own glyph (fallback by kind).
-- `chainBadgeColor(chainId)` — per-chain medal color.
-- `CurioBadgeMedal(stage, medalSize)` — round medal, gradient + gold check +
-  white glyph when earned; silhouette when locked.
-- `CurioBadgeStrip(earnedLimit, lockedPreview, onViewAll, emptyText)` —
-  earned medals first, "+N" tile when more, locked silhouettes after.
+### 3. Spin streak combo (Spin)
+- Consecutive spins in one session stack an **XP multiplier up to 2x**.
+- Simultaneously fill a **"Spin Storm" meter** that pays out a bonus when
+  full (meter climbs as the multiplier climbs).
 
-### Quests screen (`features/quests/QuestsScreen.kt`)
-- DailyCard: header "N of 5 done · Resets at 4 AM"; claimed core rows animate
-  out; bonus rows take over when coreDone with gold sparkle line; per-claim
-  "+N XP" chip floats up; "All done today!" when all 5 claimed.
-- DailyQuestRow: animated mini progress bar, gold accent + BONUS tag +
-  sparkle glyph for bonus quests, pulsing Claim pill when ready.
-- Live badge-unlock toast (medal + pet hop) when a chain badge earns while
-  the page is open; level-up now also rains ConfettiBurst.
-- PathsCard gains an on-page CurioBadgeStrip (earned first, +N → shelf
-  dialog).
+### 4. Rare card moments (Spin)
+- ~**1 in 20** spins the deck lands a rare topic (sparkle + bonus XP).
+- The **pet occasionally sniffs out / telegraphs** a rare card before you
+  spin.
 
-### Profile (`features/profile/ProfileScreen.kt`)
-- ProgressAndAchievementsCard's inline chip FlowRow replaced with the shared
-  CurioBadgeStrip (earned medals pinned, locked silhouettes, tap → Quests).
-  Removed the now-unused `FlowRow` import.
+### 5. Mystery card slot + viewed-cards stack (Spin / Reveal)
+- A **third face-down deck slot** that flips on landing with suspense.
+- PLUS: a **stack of previously viewed cards behind the landed topic** the
+  user can smoothly scroll / peek through and choose to explore instead.
+  UX must be smooth and polished (this is the priority detail).
 
-### Docs
-- `docs/app/QUEST_AND_PET_REDESIGN_SPEC.md` §5.1 — v8.27 amendment (5 quests,
-  bonus unlocks, reward raise).
-- QuestsScreen header KDoc: "three daily quests" → five (3 core + 2 bonus).
-- New store changelog `20260815.txt`.
+### 6. Streak freeze & revival
+- Freezes earned at **7-day milestones**.
+- Revival costs **XP scaled by streak length**.
 
-## Validation
-- Brace balance + `git diff --check` pass on all 6 touched Kotlin files.
-- No stale `setFloatingSuppressed` references; `FlowRow` gone from Profile.
-- No em dashes in the new user-facing strings.
-- CI on push is the compile gate (no Android SDK in this workspace).
+### 7. Weekly rotating special chain (Quests)
+- One **special themed chain per week that rotates** (e.g. "Explorer Week")
+  with its own rewards and badge.
+
+### 8. Parked separately
+- User has their own Pet / Cabinet / Profile ideas to share later.
+
+## Build order suggestion (when user says go)
+Topic of the day → Come-back teaser → Spin combo + Storm meter → Rare cards
++ pet sniff → Mystery slot + viewed-cards stack → freeze/revival → weekly
+chain. Always-on (no toggles) unless the user asks otherwise.
