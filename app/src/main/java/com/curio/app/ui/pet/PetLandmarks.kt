@@ -35,7 +35,13 @@ object PetLandmarks {
         /** A button/gadget — the pet dashes in eagerly and boops it. */
         FUN,
         /** A text/reading thing — the pet tiptoes over and reads it. */
-        CURIOUS
+        CURIOUS,
+        /**
+         * v8.17 — a special spot (e.g. the pet's own flower bed): the pet
+         * dashes over, pokes it, and does a little happy jig — a squish
+         * bounce, a play-bow and a twirl.
+         */
+        PLAY
     }
 
     data class Landmark(

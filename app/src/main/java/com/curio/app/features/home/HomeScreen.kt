@@ -203,24 +203,35 @@ fun HomeScreen(navController: NavController) {
     // sits vacant while the pet floats around the app.
     val homePetSprite: (@Composable () -> Unit)? = if (AppPreferences.petEnabledState) {
         {
-            CurioFlowerBed(
-                petInside = !CurioPet.awake || CurioPet.atHome ||
-                    !AppPreferences.floatingPetEnabledState,
-                sleeping = !CurioPet.awake,
-                bedSize = 52.dp,
-                onTap = {
-                    when {
-                        !CurioPet.awake -> CurioPet.wake()
-                        CurioPet.atHome -> CurioPet.comeOut()
-                        else -> Unit // already floating — the bed is vacant
-                    }
-                },
-                contentDescription = when {
-                    !CurioPet.awake -> "Curio asleep in its flower bed — tap to wake"
-                    CurioPet.atHome -> "Curio sitting in its flower bed — tap to come out"
-                    else -> "Curio's flower bed"
-                }
-            )
+            // v8.17 — the flower bed is the pet's PLAY landmark: while it
+            // floats, the pet sometimes dashes back home and does a little
+            // jig at its own (vacant) bed. Bounds-only, like every landmark
+            // — the bed's layout never changes, it just springs a beat.
+            PetLandmark(
+                id = "bed",
+                kind = PetLandmarks.Kind.PLAY,
+                screen = "home"
+            ) { m ->
+                CurioFlowerBed(
+                    petInside = !CurioPet.awake || CurioPet.atHome ||
+                        !AppPreferences.floatingPetEnabledState,
+                    sleeping = !CurioPet.awake,
+                    bedSize = 52.dp,
+                    onTap = {
+                        when {
+                            !CurioPet.awake -> CurioPet.wake()
+                            CurioPet.atHome -> CurioPet.comeOut()
+                            else -> Unit // already floating — the bed is vacant
+                        }
+                    },
+                    contentDescription = when {
+                        !CurioPet.awake -> "Curio asleep in its flower bed — tap to wake"
+                        CurioPet.atHome -> "Curio sitting in its flower bed — tap to come out"
+                        else -> "Curio's flower bed"
+                    },
+                    modifier = m
+                )
+            }
         }
     } else null
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)

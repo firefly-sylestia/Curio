@@ -468,6 +468,16 @@ object CurioPet {
         )).random()
 
     /**
+     * v8.17 — the pet's line when it does a little jig at a special spot
+     * (a PLAY landmark). One sentence max, matching the passive-bubble rule.
+     */
+    fun jigLine(): String = listOf(
+        "Tippy tap tap!", "Happy feet!", "Wiggle wiggle!",
+        "Da-da-daaaa!", "Jiggle jiggle!", "Party paws!",
+        "Dance break!", "Shake it off!", "Tap dance time!"
+    ).random()
+
+    /**
      * One bubble per screen visit: returns a line the first time [screen]
      * is composed, then stays quiet for a cooldown (or until tapped).
      */

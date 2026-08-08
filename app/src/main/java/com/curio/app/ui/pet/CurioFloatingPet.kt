@@ -270,6 +270,26 @@ fun CurioFloatingPet(
                             reactionKey++
                             lastTouch = System.currentTimeMillis()
                         }
+                        PetLandmarks.Kind.PLAY -> {
+                            // v8.17 — a SPECIAL spot (the pet's flower bed):
+                            // an eager dash over, a poke (the spot springs a
+                            // beat), then a little happy jig — a squish
+                            // bounce, a play-bow and a twirl.
+                            walkTo(Offset(tx, ty), stepMs = 15, steps = 44)
+                            PetLandmarks.poke(target.id)
+                            squishKey++
+                            delay(180)
+                            playKey++
+                            delay(320)
+                            // The hop fires with the twirl so the moment
+                            // reads as a real dance, not a generic spin.
+                            celebrateKey++
+                            spinKey++
+                            heartsKey++
+                            reaction = CurioPet.jigLine()
+                            reactionKey++
+                            lastTouch = System.currentTimeMillis()
+                        }
                     }
                     lastPokeAt = System.currentTimeMillis()
                     continue
