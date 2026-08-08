@@ -1,3 +1,27 @@
+# Request — Topic Reveal action dock: buttons floating above the scaffold (DONE)
+
+## Reveal dock — buttons float above the 80dp wash (DONE)
+
+- User: "keep that background or that bottom scaffold like that but make the
+  buttons even higher i mean floating above that scaffolding so it stays
+  visible properly and doesnt affect anything".
+- `RevealActionDock` keeps the FIXED 80dp wash Surface + internal
+  `windowInsetsPadding(navigationBars)` — the shared-element morph reserve is
+  byte-for-byte untouched (the v8.5 freeze rule).
+- The two actions now live in an ELEVATED OPAQUE PILL (surface color, tonal
+  elevation 3, shadow 8–12dp) inside `BoxWithConstraints`, `align(BottomCenter)`
+  + 8dp vertical padding → floats ABOVE the nav-bar inset with a small gap.
+  The pill is ~52–56dp tall vs the ~32dp cramped strip content area on phones,
+  so it overflows upward into the page's reserved bottom padding — free
+  overlay, nothing clipped, no re-layout, morph untouched.
+- Buttons upgraded: `RevealStartButton` = real filled primary `Button` (icon +
+  label, labelLarge 14sp ExtraBold, maxLines 1, ellipsis; 10dp vertical
+  padding on phones); `RevealAlreadyButton` = text-style `Surface` with
+  10–12dp vertical padding; `PetLandmark("start-exploring")` wrapper intact
+  for the tour. Old 2dp-tight tiers + heightIn metrics deleted (comments only).
+- Review: no blockers. Morph reserve + inset consumption untouched; nothing
+  clips; the two "tight tier" grep hits are comments.
+
 # Request — Pet Designer v8.49 studio upgrade (DONE — committed & pushed 27f4e01 for phases 2-4, then 33a5cxx for the upgrade)
 
 ## v8.49 — studio UI upgrade (DONE)

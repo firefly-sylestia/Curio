@@ -991,12 +991,12 @@ private fun RevealActionDock(
     onSilentExplore: (() -> Unit)? = null
 ) {
     // Wash-backed dock: the dock wears the SAME category wash the reveal
-    // page paints behind it, so the two (fully transparent) actions float
-    // on the page tint exactly like a transparent dock — but unlike true
-    // transparency, the wash also covers the nav-bar strip below the
-    // buttons, so the Scaffold's cream background can never show through as
-    // a band behind the dock. (v8.5 — the Scaffold containerColor must stay
-    // constant across the route transition; the wash lives HERE instead.)
+    // page paints behind it, so the actions sit on the page tint like a
+    // transparent dock — but unlike true transparency, the wash also covers
+    // the nav-bar strip below the buttons, so the Scaffold's cream background
+    // can never show through as a band behind the dock. (v8.5 — the Scaffold
+    // containerColor must stay constant across the route transition; the
+    // wash lives HERE instead.)
     // v8.5 regression fix (THE morph freeze): the dock must reserve EXACTLY
     // the same total height as the bottom bar it replaces (80dp — M3's
     // NavigationBar consumes the nav-bar inset inside its 80dp min height,
@@ -1007,8 +1007,15 @@ private fun RevealActionDock(
     // element morph — the whole reveal page stayed invisible except this
     // dock, which lives outside the layout. The nav-bar inset is still
     // consumed, but INSIDE the fixed 80dp (height first, then the inset as
-    // internal padding), so the buttons clear the gesture bar without
-    // growing the dock past the reserved slot.
+    // internal padding).
+    // v8.49 — the actions now FLOAT above the wash as an elevated pill
+    // instead of being squeezed into the strip's cramped content area (80dp
+    // minus the nav-bar inset, ~32-56dp on phones). The pill is anchored
+    // above the nav-bar inset with a small gap, so its buttons keep
+    // comfortable heights even on three-button-nav phones; if the pill is
+    // taller than the visible strip its top simply floats over the reveal's
+    // reserved bottom padding — a free overlay, nothing is clipped or
+    // re-laid out, and the 80dp morph reserve is untouched.
     Surface(
         color = cat.categoryBackgroundWash(),
         tonalElevation = 0.dp,
@@ -1017,76 +1024,60 @@ private fun RevealActionDock(
             .height(80.dp)
             .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
-        // v8.4x — small-screen fix WITHOUT touching the fixed 80dp dock height
-        // (which the reveal morph's reserved slot depends on). The dock's
-        // real content area is 80dp minus the nav-bar inset, and on phones
-        // that is often only ~30-50dp tall and ~320-400dp wide — the two
-        // full labels + icons used to wrap/overflow and the buttons were cut
-        // off below the visible area. When the window is small we tighten the
-        // paddings and typography so the actions always fit INSIDE the fixed
-        // dock; tablets/wide windows keep the original generous metrics.
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            // v8.44 — two INDEPENDENT squeezes instead of one blanket
-            // "compact": NARROW windows (every phone) tighten only the
-            // horizontal padding, while TIGHT height (the dock content area
-            // is 80dp minus the nav-bar inset — ~32dp on three-button-nav,
-            // ~48-56dp on gesture phones) gets the absolute-minimum metrics.
-            // Before, ALL phones got the minimum, so normal gesture phones
-            // showed tiny, squished buttons even though they had room.
             val compact = maxWidth < 440.dp
-            val tight = maxHeight < 48.dp
-            Row(
+            Surface(
+                shape = RoundedCornerShape(if (compact) 22.dp else 26.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp,
+                shadowElevation = if (compact) 8.dp else 12.dp,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        horizontal = 12.dp,
-                        vertical = when {
-                            tight -> 2.dp
-                            compact -> 4.dp
-                            else -> 8.dp
-                        }
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(if (tight) 6.dp else 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .fillMaxWidth()
             ) {
-                // Already/Undo on the LEFT, Start exploring on the RIGHT.
-                RevealAlreadyButton(
-                    enabled = resolved != null,
-                    cat = cat,
-                    isDone = isDone,
-                    compact = compact,
-                    tight = tight,
-                    modifier = Modifier.weight(1f),
-                    onClick = onAlready
-                )
-                if (!browseMode) {
-                    // v8.22 — the Start exploring button is a tour landmark: the
-                    // pet-guide highlights its REAL bounds on the tour step.
-                    PetLandmark(
-                        id = "start-exploring",
-                        kind = PetLandmarks.Kind.FUN,
-                        screen = "reveal"
-                    ) { m ->
-                        RevealStartButton(
-                            enabled = resolved != null,
-                            cat = cat,
-                            compact = compact,
-                            tight = tight,
-                            modifier = m.weight(1f),
-                            onClick = onExplore
-                        )
-                    }
-                } else if (onSilentExplore != null) {
-                    // Browse mode: Explore opens the search page silently.
-                    RevealStartButton(
+                Row(
+                    modifier = Modifier.padding(
+                        horizontal = if (compact) 6.dp else 10.dp,
+                        vertical = 6.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Already/Undo on the LEFT, Start exploring on the RIGHT.
+                    RevealAlreadyButton(
                         enabled = resolved != null,
                         cat = cat,
-                        label = "Explore",
+                        isDone = isDone,
                         compact = compact,
-                        tight = tight,
                         modifier = Modifier.weight(1f),
-                        onClick = onSilentExplore
+                        onClick = onAlready
                     )
+                    if (!browseMode) {
+                        // v8.22 — the Start exploring button is a tour landmark:
+                        // the pet-guide highlights its REAL bounds on the tour step.
+                        PetLandmark(
+                            id = "start-exploring",
+                            kind = PetLandmarks.Kind.FUN,
+                            screen = "reveal"
+                        ) { m ->
+                            RevealStartButton(
+                                enabled = resolved != null,
+                                compact = compact,
+                                modifier = m.weight(1f),
+                                onClick = onExplore
+                            )
+                        }
+                    } else if (onSilentExplore != null) {
+                        // Browse mode: Explore opens the search page silently.
+                        RevealStartButton(
+                            enabled = resolved != null,
+                            label = "Explore",
+                            compact = compact,
+                            modifier = Modifier.weight(1f),
+                            onClick = onSilentExplore
+                        )
+                    }
                 }
             }
         }
@@ -1096,73 +1087,53 @@ private fun RevealActionDock(
 @Composable
 private fun RevealStartButton(
     enabled: Boolean,
-    cat: com.curio.app.data.CurioCategory,
     modifier: Modifier = Modifier,
     label: String = "Start exploring",
     compact: Boolean = false,
-    // v8.44 — maxHeight < 48dp content area (three-button-nav phones): the
-    // absolute minimum that still fits; see RevealActionDock.
-    tight: Boolean = false,
     onClick: () -> Unit
 ) {
-    // Fully transparent: the accent text + icon float directly on the page
-    // wash (categoryInk is theme-aware — deep accent in light, light twin
-    // in dark). Disabled fades the ink instead of showing a tinted fill.
-    val ink = cat.categoryInk()
+    // v8.49 — filled CTA: the actions now live on an OPAQUE floating pill
+    // (see RevealActionDock), so this is a proper primary button instead of
+    // transparent-on-wash. The pill carries the vertical room, so phones keep
+    // a comfortable 10dp vertical padding — the old 2dp tight tier is gone.
     Button(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = ink,
-            disabledContainerColor = Color.Transparent,
-            disabledContentColor = ink.copy(alpha = 0.40f)
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         ),
-        // Vertical padding: the dock is a fixed 80dp with the nav-bar inset
-        // consumed inside, so on inset-heavy devices the content area is
-        // ~32-56dp — the buttons must fit without clipping the gesture bar.
-        // v8.44 — three tiers: TIGHT (three-button-nav, ~32dp) keeps the
-        // absolute minimum; COMPACT (every phone) uses the roomier phone
-        // metrics (proper 8dp vertical padding, 18dp icon — the old blanket
-        // "compact" gave ALL phones the minimum, squishing gesture phones
-        // that actually had ~48-56dp); tablets keep the original generous
-        // metrics.
-        contentPadding = if (tight) {
-            PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-        } else if (compact) {
-            PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+        contentPadding = if (compact) {
+            PaddingValues(horizontal = 10.dp, vertical = 10.dp)
         } else {
-            PaddingValues(horizontal = 20.dp, vertical = 10.dp)
+            PaddingValues(horizontal = 20.dp, vertical = 12.dp)
         },
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(if (tight) 6.dp else 8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CurioIcon(
                 CurioIcons.AutoAwesome,
                 null,
-                tint = ink,
-                size = if (tight) 16.dp else if (compact) 18.dp else 20.dp
+                tint = MaterialTheme.colorScheme.onPrimary,
+                size = if (compact) 18.dp else 20.dp
             )
             Text(
                 text = label,
                 // Phones keep labelLarge (14sp): 16sp titleMedium would push
                 // "Start exploring" past the half-width button on ~360dp
-                // screens and ellipsize — the "squished" look is fixed by the
-                // roomier vertical padding + bigger icon instead. Tablets keep
-                // the original titleMedium (v8.44 review).
-                style = if (tight || compact) {
+                // screens and ellipsize (v8.44 review). Tablets keep
+                // titleMedium.
+                style = if (compact) {
                     MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                 } else {
                     MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
                 },
-                // Never wrap to a second line — a wrapped label overflows the
-                // fixed-height dock and the button gets cut off at the bottom
-                // on small screens. Ellipsis is the graceful last resort on
-                // extremely narrow windows.
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1177,14 +1148,11 @@ private fun RevealAlreadyButton(
     isDone: Boolean,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
-    // v8.44 — three-button-nav phones, see RevealStartButton.
-    tight: Boolean = false,
     onClick: () -> Unit
 ) {
-    // Fully transparent: the label + icon float on the page wash. Done
-    // state reads in the category ink (mirrors the Start button); idle
-    // state in the muted onSurfaceVariant. Disabled fades the ink to match
-    // the Start button's disabled treatment while the topic loads.
+    // v8.49 — text-style action on the opaque floating pill (was
+    // transparent-on-wash). Done state reads in the category ink; idle in
+    // the muted onSurfaceVariant. Disabled fades it like the Start button.
     val baseInk = if (isDone) cat.categoryInk() else MaterialTheme.colorScheme.onSurfaceVariant
     val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
     Surface(
@@ -1195,10 +1163,10 @@ private fun RevealAlreadyButton(
         modifier = modifier
             .fillMaxWidth()
             .then(
-                // Vertical padding tiers — see RevealStartButton's comment.
-                if (tight) Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                else if (compact) Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                else Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                // Comfortable vertical padding on the floating pill — the old
+                // 2dp tight tier is gone (see RevealActionDock).
+                if (compact) Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+                else Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
     ) {
         Row(
@@ -1209,16 +1177,13 @@ private fun RevealAlreadyButton(
                 name = if (isDone) CurioIcons.Close else CurioIcons.History,
                 contentDescription = null,
                 tint = ink,
-                size = if (tight) 16.dp else 18.dp
+                size = if (compact) 18.dp else 20.dp
             )
             Spacer(Modifier.width(if (compact) 6.dp else 8.dp))
             Text(
                 text = if (isDone) undoLabel(cat) else alreadyDoneLabel(cat),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = ink,
-                // Never wrap to a second line — a wrapped label overflows the
-                // fixed-height dock and the button gets cut off at the bottom
-                // on small screens (same fix as RevealStartButton).
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
