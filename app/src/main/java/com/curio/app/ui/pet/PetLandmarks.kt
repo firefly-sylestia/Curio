@@ -1,12 +1,15 @@
 package com.curio.app.ui.pet
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -53,6 +56,9 @@ object PetLandmarks {
 
     private val byScreenMap = mutableStateMapOf<String, List<Landmark>>()
     private val reactCounters = mutableStateMapOf<String, Int>()
+    // v8.20 — a landmark being drag-hovered as a drop target (the flower
+    // bed) glows so the drop is legible.
+    private val hoveredIds = mutableStateMapOf<String, Boolean>()
 
     /** Landmarks for every screen (route prefix → list). Reactive. */
     val byScreen: Map<String, List<Landmark>> get() = byScreenMap
@@ -76,6 +82,22 @@ object PetLandmarks {
      */
     fun resetReactCount(id: String) {
         reactCounters.remove(id)
+    }
+
+    /** Whether [id] is currently drag-hovered as a drop target (the bed). */
+    fun isHovered(id: String): Boolean = hoveredIds[id] == true
+
+    /**
+     * v8.20 — the user is dragging the pet over [id] (or released it): the
+     * landmark glows while true and stops when false. No-op when unchanged
+     * (the drag loop reports every frame).
+     */
+    fun setHovered(id: String, hovered: Boolean) {
+        if (hovered) {
+            if (hoveredIds[id] != true) hoveredIds[id] = true
+        } else {
+            hoveredIds.remove(id)
+        }
     }
 
     /**
@@ -132,8 +154,17 @@ fun PetLandmark(
             // v8.19 — also drop the poke counter: navigating back to this
             // screen composes at count 0, so no one-off pulse on arrival.
             PetLandmarks.resetReactCount(id)
+            // v8.20 — clear any stale drag-hover highlight.
+            PetLandmarks.setHovered(id, false)
         }
     }
+    // v8.20 — the bed glows (sustained scale) while the pet is dragged
+    // over it — the drop target reads before the drop.
+    val hoverScale by animateFloatAsState(
+        targetValue = if (PetLandmarks.isHovered(id)) 1.10f else 1f,
+        animationSpec = spring(dampingRatio = 0.55f, stiffness = 350f),
+        label = "landmarkHover"
+    )
     val landmarkModifier = Modifier
         .onGloballyPositioned { coords ->
             PetLandmarks.upsert(
@@ -152,8 +183,8 @@ fun PetLandmark(
             )
         }
         .graphicsLayer {
-            scaleX = poke.value
-            scaleY = poke.value
+            scaleX = poke.value * hoverScale
+            scaleY = poke.value * hoverScale
         }
     content(landmarkModifier)
 }

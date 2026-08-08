@@ -3,6 +3,7 @@ package com.curio.app.ui.pet
 import android.provider.Settings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -25,7 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -48,6 +52,11 @@ private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 // v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
 private val HEARTS_W = 150.dp
 private val HEARTS_H = 96.dp
+// v8.20 — the little cloud the pet rides while it walks (under the sprite).
+private val CLOUD_W = 96.dp
+private val CLOUD_H = 42.dp
+// v8.20 — how close a drop must be to the flower bed to count as "home".
+private val DROP_FORGIVENESS = 12.dp
 
 /**
  * The floating Curio pet (v8.8) — a global overlay that lives on top of
@@ -416,6 +425,20 @@ fun CurioFloatingPet(
             }
         }
 
+        // v8.20 — the pet rides a cute cloud while it walks: drawn UNDER
+        // the sprite (a sibling before it), fading in/out with movement.
+        CloudRide(
+            visible = moving,
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        (pos.x + petPx / 2f - with(density) { CLOUD_W.toPx() } / 2f).roundToInt(),
+                        (pos.y + petPx * 0.66f).roundToInt()
+                    )
+                }
+                .size(CLOUD_W, CLOUD_H)
+        )
+
         Box(
             modifier = Modifier
                 .offset { IntOffset(pos.x.roundToInt(), pos.y.roundToInt()) }
@@ -425,11 +448,21 @@ fun CurioFloatingPet(
                     scaleX = 0.5f + 0.5f * appear.value
                     scaleY = 0.5f + 0.5f * appear.value
                 }
-                .pointerInput(maxW, maxH, petPx, marginPx) {
+                .pointerInput(maxW, maxH, petPx, marginPx, routePrefix) {
+                    // v8.20 — self-heal a drag interrupted by navigation:
+                    // keying this on routePrefix cancels the coroutine on a
+                    // tab switch WITHOUT firing onDragCancel, which would
+                    // leave `dragged` stuck true (wander pause + no auto-nap
+                    // forever). The new coroutine starts immediately, so
+                    // clearing the flags here resets any stale state.
+                    dragged = false
+                    PetLandmarks.setHovered("bed", false)
                     detectDragGestures(
                         onDragStart = {
                             dragged = true
                             lastTouch = System.currentTimeMillis()
+                            // v8.20 — a fresh drag starts clear of the bed.
+                            PetLandmarks.setHovered("bed", false)
                         },
                         onDrag = { change, amount ->
                             change.consume()
@@ -444,18 +477,56 @@ fun CurioFloatingPet(
                                 )
                             )
                             if (amount.x != 0f) facing = if (amount.x > 0f) 1f else -1f
+                            // v8.20 — glow the flower bed while the pet is
+                            // dragged over it (the drop target reads before
+                            // the drop). No-op on screens without a bed.
+                            val bed = PetLandmarks.forScreen(routePrefix)
+                                .firstOrNull { it.id == "bed" }
+                            if (bed != null) {
+                                val dropRect = bed.bounds.inflate(
+                                    with(density) { DROP_FORGIVENESS.toPx() }
+                                )
+                                PetLandmarks.setHovered(
+                                    "bed",
+                                    Rect(Offset(pos.x, pos.y), Size(petPx, petPx))
+                                        .overlaps(dropRect)
+                                )
+                            }
                         },
                         onDragEnd = {
                             dragged = false
                             lastTouch = System.currentTimeMillis()
+                            // v8.20 — drop the pet onto its flower bed to
+                            // send it home (hover glow off either way).
+                            val bed = PetLandmarks.forScreen(routePrefix)
+                                .firstOrNull { it.id == "bed" }
+                            if (bed != null) {
+                                val dropRect = bed.bounds.inflate(
+                                    with(density) { DROP_FORGIVENESS.toPx() }
+                                )
+                                val dropped = Rect(Offset(pos.x, pos.y), Size(petPx, petPx))
+                                    .overlaps(dropRect)
+                                PetLandmarks.setHovered("bed", false)
+                                if (dropped) {
+                                    squishKey++
+                                    heartsKey++
+                                    reaction = "Home sweet home!"
+                                    reactionKey++
+                                    leavingHome = true
+                                }
+                            }
                         },
                         onDragCancel = {
                             dragged = false
                             lastTouch = System.currentTimeMillis()
+                            PetLandmarks.setHovered("bed", false)
                         }
                     )
                 }
-                .pointerInput(Unit) {
+                // v8.20 — keyed on routePrefix too: the tap handler reads
+                // `watching` (from routePrefix), so navigating must restart
+                // it or a stale Spin-screen value lingers after a tab switch.
+                .pointerInput(routePrefix) {
                     detectTapGestures(
                         onTap = {
                             lastTouch = System.currentTimeMillis()
@@ -588,6 +659,66 @@ private fun HeartsOverlay(key: Int, modifier: Modifier = Modifier) {
             val y = size.height * 0.95f - t * size.height * 0.95f
             drawHeart(x, y, s, Color(0xFFF7AFAF).copy(alpha = alpha * 0.95f))
         }
+    }
+}
+
+/**
+ * v8.20 — the puff of cloud the pet rides while it walks. Drawn in its own
+ * offset sibling under the sprite (never inside its touch box); three soft
+ * overlapping puffs + a flat base, bobbing gently, fading in with movement
+ * so it only shows on the go.
+ */
+@Composable
+private fun CloudRide(visible: Boolean, modifier: Modifier = Modifier) {
+    val cloudAlpha by animateFloatAsState(
+        targetValue = if (visible) 0.92f else 0f,
+        animationSpec = tween(240),
+        label = "petCloudAlpha"
+    )
+    // v8.20 — the bob only runs while the cloud is shown: an idle pet never
+    // ticks this animation, so an invisible cloud doesn't burn frames. When
+    // [visible] flips, the effect restarts and the loop picks up cleanly.
+    val bob = remember { Animatable(0f) }
+    LaunchedEffect(visible) {
+        if (visible) {
+            bob.snapTo(0f)
+            while (true) {
+                bob.animateTo(1f, tween(640, easing = FastOutSlowInEasing))
+                bob.animateTo(0f, tween(640, easing = FastOutSlowInEasing))
+            }
+        }
+    }
+    Canvas(
+        modifier = modifier.graphicsLayer {
+            this.alpha = cloudAlpha
+            // A gentle ride: bob up/down and a soft swell.
+            translationY = (bob.value * 3f - 1.5f).dp.toPx()
+            scaleX = 1f + bob.value * 0.04f
+            scaleY = 1f + bob.value * 0.04f
+        }
+    ) {
+        val w = size.width
+        val h = size.height
+        val puff = Color.White
+        val shadow = Color(0xFFDCD5C8)
+        val cY = h * 0.55f
+        // Three overlapping puffs + a flat base make the cloud read soft.
+        drawCircle(puff, radius = w * 0.22f, center = Offset(w * 0.30f, cY))
+        drawCircle(puff, radius = w * 0.27f, center = Offset(w * 0.48f, cY - h * 0.16f))
+        drawCircle(puff, radius = w * 0.21f, center = Offset(w * 0.68f, cY))
+        drawRoundRect(
+            color = puff,
+            topLeft = Offset(w * 0.12f, cY),
+            size = Size(w * 0.76f, h * 0.34f),
+            cornerRadius = CornerRadius(w * 0.12f)
+        )
+        // A whisper of shade under the puffs for definition.
+        drawRoundRect(
+            color = shadow.copy(alpha = 0.85f),
+            topLeft = Offset(w * 0.16f, h * 0.82f),
+            size = Size(w * 0.68f, h * 0.12f),
+            cornerRadius = CornerRadius(w * 0.06f)
+        )
     }
 }
 
