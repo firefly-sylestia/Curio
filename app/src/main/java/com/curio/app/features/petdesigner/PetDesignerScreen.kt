@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,14 +44,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -205,9 +209,13 @@ fun PetDesignerScreen(navController: NavController) {
     var previewPeek by rememberSaveable { mutableStateOf(false) }
     // v8.35 — which grid a picked PNG should land on (1 = body, 2 = curled).
     var importPngTarget by remember { mutableStateOf<Int?>(null) }
+    // v8.37 — PNG import review: the picked image previews with an
+    // eyedropper-style "add custom color" step (tap the image or a swatch to
+    // fill the four custom palette slots c C d D), then Apply snaps + imports.
+    var importReview by remember { mutableStateOf<ImportReview?>(null) }
 
-    // v8.35 — PNG import: pick an image, resample to the canvas, snap every
-    // pixel to the nearest palette key.
+    // v8.35/v8.37 — PNG import: pick an image, resample to the canvas, then
+    // open the review step instead of snapping immediately.
     val pngPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -216,13 +224,13 @@ fun PetDesignerScreen(navController: NavController) {
         val bitmap = runCatching {
             context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
         }.getOrNull() ?: return@rememberLauncherForActivityResult
-        val imported = petBitmapToGrid(bitmap, design.gridSize, design)
-        if (imported != null) {
-            design = design.withGrid(if (target == 1) "body" else "curled", imported)
-            toast = "Imported PNG — snapped to ${design.gridSize}×${design.gridSize} pixels"
-        } else {
-            toast = "Couldn't read that image"
-        }
+        val grid = design.gridSize
+        val scaled = runCatching { Bitmap.createScaledBitmap(bitmap, grid, grid, true) }
+            .getOrNull() ?: return@rememberLauncherForActivityResult
+        val pixels = IntArray(grid * grid)
+        scaled.getPixels(pixels, 0, grid, 0, 0, grid, grid)
+        importPngTarget = null
+        importReview = buildImportReview(pixels, grid, design, target)
     }
 
     // v8.35 — applies the active tool at a grid cell.
@@ -654,7 +662,7 @@ fun PetDesignerScreen(navController: NavController) {
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                                 Text(
-                                    "Snaps to nearest palette color",
+                                    "Eyedropper: add image colors, then import",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                                 )
@@ -752,6 +760,34 @@ fun PetDesignerScreen(navController: NavController) {
                 )
             }
         }
+
+        // ── PNG import review (v8.37) — eyedropper custom colors ─────
+        importReview?.let { review ->
+            DialogScrim(onDismiss = { importReview = null }) {
+                ImportPngDialog(
+                    review = review,
+                    onPickCell = { row, col ->
+                        importReview = pickColorFromCell(row, col, review) ?: review
+                    },
+                    onPickColor = { rgb -> importReview = addCustomColor(rgb, review) },
+                    onArmSlot = { key ->
+                        importReview = review.copy(
+                            armed = if (review.armed == key) null else key
+                        )
+                    },
+                    onApply = {
+                        design = applyImport(review, design)
+                        toast = if (review.touched.isNotEmpty()) {
+                            "Imported — ${review.touched.size} custom color(s) added"
+                        } else {
+                            "Imported PNG — snapped to nearest palette colors"
+                        }
+                        importReview = null
+                    },
+                    onCancel = { importReview = null }
+                )
+            }
+        }
     }
 }
 
@@ -808,17 +844,101 @@ private fun sharePng(context: android.content.Context, uri: android.net.Uri) {
     }
 }
 
+/** The four custom paint slots an imported image can fill (c C d D). */
+private val CUSTOM_SLOTS = listOf('c', 'C', 'd', 'D')
+
+/** A color found in an imported image (rgb 0xRRGGBB) plus its pixel count. */
+private data class ImportedColor(val rgb: Int, val count: Int)
+
 /**
- * Decodes a bitmap into a [gridSize]×[gridSize] grid of palette keys: every
- * pixel is snapped to the nearest palette color by RGB distance (fully
- * transparent pixels become empty cells). Null when the bitmap is invalid.
+ * The in-progress PNG import (v8.37): the raw scaled pixels plus the
+ * eyedropper/quick-pick state. The image is NOT applied until the user
+ * confirms with Apply, so they can add custom colors first.
  */
-private fun petBitmapToGrid(bitmap: Bitmap, gridSize: Int, design: PetDesign): List<String>? {
-    val scaled = runCatching {
-        Bitmap.createScaledBitmap(bitmap, gridSize, gridSize, true)
-    }.getOrNull() ?: return null
-    val pixels = IntArray(gridSize * gridSize)
-    scaled.getPixels(pixels, 0, gridSize, 0, 0, gridSize, gridSize)
+private data class ImportReview(
+    val pixels: IntArray,
+    val gridSize: Int,
+    /** The image's dominant colors (quantized), for the quick-pick row. */
+    val unique: List<ImportedColor>,
+    /** The current colors of the four custom slots (hex). */
+    val custom: Map<Char, String>,
+    /** Slots the user filled during this import session. */
+    val touched: Set<Char> = emptySet(),
+    /** The slot the eyedropper fills next, or null for auto-next. */
+    val armed: Char? = null,
+    /** Which grid the import lands on (1 = body, 2 = curled). */
+    val target: Int
+)
+
+/**
+ * Scans the imported pixels into the review state: the design's current
+ * custom-slot colors plus the dominant quantized colors for quick picks
+ * (4-bit-per-channel quantization merges near-identical shades so the row
+ * reads as distinct swatches instead of JPEG-ish noise).
+ */
+private fun buildImportReview(pixels: IntArray, gridSize: Int, design: PetDesign, target: Int): ImportReview {
+    val counts = HashMap<Int, Int>()
+    for (i in pixels.indices) {
+        val argb = pixels[i]
+        if (((argb ushr 24) and 0xFF) < 128) continue
+        val r = ((argb shr 16) and 0xFF) and 0xF0
+        val g = ((argb shr 8) and 0xFF) and 0xF0
+        val b = (argb and 0xFF) and 0xF0
+        val q = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+        counts[q] = (counts[q] ?: 0) + 1
+    }
+    return ImportReview(
+        pixels = pixels,
+        gridSize = gridSize,
+        unique = counts.entries
+            .sortedByDescending { it.value }
+            .take(8)
+            .map { ImportedColor(it.key and 0xFFFFFF, it.value) },
+        custom = CUSTOM_SLOTS.associateWith { design.colorOf(it) },
+        target = target
+    )
+}
+
+/**
+ * Adds [rgb] to the review's custom slots: the armed slot, else the next
+ * untouched one, else the first slot (so a last slot can be overwritten).
+ * Disarms after a pick so repeated taps walk through the slots in order.
+ */
+private fun addCustomColor(rgb: Int, review: ImportReview): ImportReview {
+    val slot = review.armed
+        ?: CUSTOM_SLOTS.firstOrNull { it !in review.touched }
+        ?: CUSTOM_SLOTS.first()
+    return review.copy(
+        custom = review.custom + (slot to rgbToHex(rgb)),
+        touched = review.touched + slot,
+        armed = null
+    )
+}
+
+/** Eyedropper tap on the preview: picks the tapped pixel's color. */
+private fun pickColorFromCell(row: Int, col: Int, review: ImportReview): ImportReview? {
+    val argb = review.pixels.getOrNull(row * review.gridSize + col) ?: return null
+    if (((argb ushr 24) and 0xFF) < 128) return null
+    return addCustomColor(argb and 0xFFFFFF, review)
+}
+
+/** Formats an 0xRRGGBB int as an uppercase "RRGGBB" hex string. */
+private fun rgbToHex(rgb: Int): String {
+    val r = (rgb shr 16) and 0xFF
+    val g = (rgb shr 8) and 0xFF
+    val b = rgb and 0xFF
+    return "${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}"
+        .uppercase()
+}
+
+/**
+ * Snaps a pixel array to a [gridSize]×[gridSize] grid of palette keys:
+ * every opaque pixel is matched to the nearest palette color by RGB
+ * distance (fully transparent pixels become empty cells). The palette is
+ * read from [design] — so the custom slots' picked colors win for matching
+ * pixels on apply.
+ */
+private fun snapPixelGrid(pixels: IntArray, gridSize: Int, design: PetDesign): List<String> {
     val keys = PetDesign.KEYS
     val paletteRgb = keys.map { key ->
         val hex = design.colorOf(key)
@@ -858,6 +978,19 @@ private fun petBitmapToGrid(bitmap: Bitmap, gridSize: Int, design: PetDesign): L
     return rows.map { it.toString() }
 }
 
+/**
+ * Folds the review's custom-slot colors into the design's palette, snaps
+ * the pixels with that extended palette, and applies the grid to the body
+ * or curled pose (per the review's target).
+ */
+private fun applyImport(review: ImportReview, design: PetDesign): PetDesign {
+    val design2 = CUSTOM_SLOTS.fold(design) { d, key ->
+        d.withPaletteColor(key, review.custom[key] ?: d.colorOf(key))
+    }
+    val rows = snapPixelGrid(review.pixels, review.gridSize, design2)
+    return design2.withGrid(if (review.target == 1) "body" else "curled", rows)
+}
+
 /** A dim full-screen scrim with a centered dialog surface. */
 @Composable
 private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) {
@@ -885,6 +1018,203 @@ private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) 
         }
     }
 }
+
+/**
+ * v8.37 — the PNG import review step: shows the raw imported pixels and lets
+ * the user "eyedropper" colors into the four custom palette slots (c C d D)
+ * before the image is snapped to the palette and applied. Tapping the image
+ * picks the tapped pixel's color; tapping a slot chip arms it as the
+ * eyedropper target (or just keep tapping the image — untouched slots fill
+ * in order); the quick-pick row offers the image's dominant colors. Apply
+ * runs the palette-aware snap, so the picked custom colors are preserved
+ * instead of being flattened away by the 13 default keys.
+ */
+@Composable
+private fun ImportPngDialog(
+    review: ImportReview,
+    onPickCell: (Int, Int) -> Unit,
+    onPickColor: (Int) -> Unit,
+    onArmSlot: (Char) -> Unit,
+    onApply: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Import PNG — add custom colors",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                if (review.armed != null) {
+                    "Eyedropper armed → slot '${review.armed}': tap a pixel in the image to fill it"
+                } else {
+                    "Tap the image (or a quick-pick swatch) to fill custom color slots — " +
+                        "Apply then imports with those colors."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(14.dp))
+
+            // ── The imported image — tap to eyedropper a color ────────
+            // The gesture coroutine only restarts when its key changes, so
+            // it must call the LATEST callback via rememberUpdatedState — a
+            // captured stale onPickCell/review would recompute every pick
+            // from the pristine first review and silently drop earlier picks.
+            val latestOnPickCell by rememberUpdatedState(onPickCell)
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .pointerInput(review.gridSize) {
+                        detectTapGestures { offset ->
+                            val cell = size.width / review.gridSize
+                            val col = (offset.x / cell).toInt().coerceIn(0, review.gridSize - 1)
+                            val row = (offset.y / cell).toInt().coerceIn(0, review.gridSize - 1)
+                            latestOnPickCell(row, col)
+                        }
+                    }
+            ) {
+                val cell = size.width / review.gridSize
+                for (r in 0 until review.gridSize) {
+                    for (c in 0 until review.gridSize) {
+                        val argb = review.pixels[r * review.gridSize + c]
+                        if (((argb ushr 24) and 0xFF) < 128) continue
+                        drawRect(
+                            color = Color(argb),
+                            topLeft = Offset(c * cell, r * cell),
+                            size = Size(cell, cell)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+
+            // ── The four custom palette slots — tap to arm ────────────
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CUSTOM_SLOTS.forEach { key ->
+                    val colorHex = review.custom[key] ?: "FFFFFF"
+                    val armed = review.armed == key
+                    val filled = key in review.touched
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = hexColor(colorHex),
+                        border = BorderStroke(
+                            width = if (armed) 3.dp else 1.dp,
+                            color = if (armed) MaterialTheme.colorScheme.primary
+                                    else if (filled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f)
+                        ),
+                        onClick = { onArmSlot(key) },
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = key.toString(),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                color = contrastingInk(hexColor(colorHex))
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Tap a slot to arm it, then tap the image — or just keep tapping the image (slots fill in order).",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(12.dp))
+
+            // ── Quick picks — the image's dominant colors ─────────────
+            if (review.unique.isNotEmpty()) {
+                Text(
+                    "Quick picks from your image",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    review.unique.take(8).forEach { imported ->
+                        val rgbColor = Color(0xFF000000L or imported.rgb.toLong())
+                        val hex = rgbToHex(imported.rgb)
+                        val used = review.custom.values.any { it.equals(hex, ignoreCase = true) }
+                        Surface(
+                            shape = RoundedCornerShape(9.dp),
+                            color = rgbColor,
+                            border = BorderStroke(
+                                2.dp,
+                                if (used) MaterialTheme.colorScheme.primary
+                                else Color.White.copy(alpha = 0.7f)
+                            ),
+                            onClick = { onPickColor(imported.rgb) },
+                            modifier = Modifier.size(36.dp)
+                        ) {}
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+            }
+            Spacer(Modifier.height(14.dp))
+
+            // ── Actions ───────────────────────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        "Cancel",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    onClick = onApply,
+                    modifier = Modifier.weight(1.4f)
+                ) {
+                    Text(
+                        "Apply import",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Dark or light ink so a letter on a swatch stays readable. */
+private fun contrastingInk(bg: Color): Color =
+    if (bg.luminance() > 0.5f) Color(0xFF2A2015) else Color.White
 
 /** The hex + HSL color editor card. */
 @Composable
