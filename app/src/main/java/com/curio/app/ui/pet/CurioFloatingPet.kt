@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,6 +111,12 @@ fun CurioFloatingPet(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    // v8.26b — the throw-glide coroutine scope. NOTE: in this Compose BOM
+    // (2026.05) PointerInputScope no longer extends CoroutineScope, so the
+    // drag callbacks cannot launch on `this` — this composition-scoped
+    // scope is the safe host for the glide (cancelled when the pet leaves
+    // composition).
+    val glideScope = rememberCoroutineScope()
     if (!AppPreferences.petEnabledState ||
         !AppPreferences.floatingPetEnabledState ||
         !CurioPet.awake ||
@@ -527,14 +534,14 @@ fun CurioFloatingPet(
                     dragged = false
                     dizzy = false
                     recovering = false
+                    gliding = false
                     PetLandmarks.setHovered("bed", false)
                     // v8.26 — throw momentum: the drag tracks its own
                     // velocity; on release the pet keeps a little of the
                     // fling and slides on with friction before settling.
-                    // The pointerInput scope IS a CoroutineScope — captured
-                    // here so the drag callbacks (plain lambdas with no
-                    // scope receiver) can launch the glide coroutine.
-                    val inputScope = this
+                    // The glide runs on the composition-level [glideScope]
+                    // (the drag callbacks are plain lambdas with no scope
+                    // receiver).
                     var lastDragPos: Offset? = null
                     var lastDragAt = 0L
                     var dragVelX = 0f
@@ -647,7 +654,7 @@ fun CurioFloatingPet(
                                 val dirX = dragVelX / speed
                                 val dirY = dragVelY / speed
                                 gliding = true
-                                glideJob = inputScope.launch {
+                                glideJob = glideScope.launch {
                                     try {
                                         var v = v0
                                         var px = pos.x
