@@ -27,10 +27,21 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 `android.yml` runs on pushes and pull requests targeting `main`, plus manual dispatch. It:
 
 - Validates all topic catalogs with `python3 scripts/validate_topics.py`.
-- Runs the Gradle `lintDebug`, `validateTopics`, `assembleDebug`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain.
-- Uploads lint reports plus both the debug APK and the release-variant APK for 14 days. Lint-report upload is best-effort and silently skips the artifact when Gradle fails before producing reports; the Gradle check remains authoritative.
-- Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies the APK signature is not the debug key. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes.
+- Runs the Gradle `lintDebug`, `validateTopics`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain — **release build only**, no debug APK is produced (debug remains available for local development via the app's debug build type).
+- Uploads lint reports plus the release-variant APKs (universal + per-ABI splits) for 14 days. Lint-report upload is best-effort and silently skips the artifact when Gradle fails before producing reports; the Gradle check remains authoritative.
+- Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies **every** release APK's signature is not the debug key. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes.
 - Cancels an older in-progress run for the same ref when a newer run starts.
+
+### Release workflow
+
+`release.yml` runs only for `v*` tags. It:
+
+- Requires `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`.
+- Decodes the repository keystore, runs `validateTopics assembleRelease`, and verifies the signature of **every** produced APK is not the Android debug key using the available Android build-tools.
+- Produces a **universal APK plus per-ABI APKs** (armeabi-v7a, arm64-v8a, x86, x86_64) via the ABI splits in `app/build.gradle.kts`, so each device can install the smallest file that matches its CPU.
+- Renames every APK to a device-friendly name — `Curio-{versionName}-{versionCode}-{abi}-Android{min}+.apk` (Android 8.0+ = `minSdk 26`) — using version numbers read from the `printReleaseVersion` Gradle task (single source of truth: `defaultConfig`), and publishes a release body that explains which APK fits which device.
+- Publishes the release APKs through a GitHub Release, marking `alpha`, `beta`, and `rc` tags as prereleases.
+- Never falls back to debug signing for a published release.
 
 ### Release workflow
 

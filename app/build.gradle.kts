@@ -102,6 +102,26 @@ android {
         }
     }
 
+    // ── Per-ABI release APK splits ──────────────────────────────────────────
+    //
+    // GitHub Releases are the sideload distribution path, so instead of one
+    // fat universal APK we emit a universal APK plus one small APK per CPU
+    // architecture. Every device can install the matching ABI; the universal
+    // APK is the safe fallback. The release workflow renames each output to a
+    // device-friendly name (e.g. Curio-1.0.0-20260906-arm64-v8a-Android8.0+.apk)
+    // and publishes an install guide, so there is no per-device guesswork.
+    //
+    // Note: AGP 9 removed DENSITY splits (use app bundles there), but ABI
+    // splits via this DSL are still supported.
+    splits {
+        abi {
+            isEnabled = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -156,6 +176,25 @@ dependencies {
     testImplementation(libs.junit)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// ── CI release APK naming helper ──────────────────────────────────────────
+//
+// Prints "versionName:versionCode" (single line) so the release workflow can
+// name the split APKs without duplicating version numbers. The source of truth
+// stays `defaultConfig` above — bump the version there and CI follows.
+//
+// Consumed by .github/workflows/release.yml, which greps the line matching
+// ^[0-9][0-9.]*:[0-9]+$ (Gradle may also print warnings to stdout).
+// The string is captured at configuration time (cleaner for the configuration
+// cache than reading the extension inside doLast).
+val ciReleaseVersion = "${android.defaultConfig.versionName}:${android.defaultConfig.versionCode}"
+tasks.register("printReleaseVersion") {
+    group = "help"
+    description = "Prints the app version as NAME:CODE for CI release APK naming."
+    doLast {
+        println(ciReleaseVersion)
+    }
 }
 
 // ── Kotlin stdlib alignment ───────────────────────────────────────────────

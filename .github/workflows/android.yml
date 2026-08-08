@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Validate, lint, and build debug and release APKs
+    name: Validate, lint, and build release APKs
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -59,35 +59,40 @@ jobs:
           echo "Release keystore decoded (${size} bytes)."
           echo "decoded=true" >> "$GITHUB_OUTPUT"
 
-      - name: Run Android checks and build debug and release APKs
+      - name: Run Android checks and build release APKs
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew lintDebug validateTopics assembleDebug assembleRelease --stacktrace
+        run: ./gradlew lintDebug validateTopics assembleRelease --stacktrace
 
-      - name: Verify release APK and signature
+      - name: Verify release APKs and signatures
         if: steps.keystore.outputs.decoded == 'true'
         run: |
           set -euo pipefail
-          apk=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' ! -name '*-unsigned.apk' | head -n 1)
-          if [ -z "$apk" ]; then
+          # ABI splits + universal APK all live here (see app/build.gradle.kts).
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/release/*.apk)
+          if [ "${#apks[@]}" -eq 0 ]; then
             echo "::error::No signed release APK was produced."
             exit 1
           fi
-          echo "Release APK: $apk"
           sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
           apksigner=$(find "$sdk_root/build-tools" -type f -name apksigner | sort -V | tail -n 1)
           if [ -z "$apksigner" ]; then
             echo "::error::Android build-tools apksigner was not found."
             exit 1
           fi
-          "$apksigner" verify --print-certs "$apk"
-          if "$apksigner" verify --print-certs "$apk" 2>&1 | grep -q 'CN=Android Debug'; then
-            echo "::error::Release APK is signed with the Android debug key."
-            exit 1
-          fi
+          for apk in "${apks[@]}"; do
+            echo "Release APK: $apk"
+            "$apksigner" verify --print-certs "$apk"
+            if "$apksigner" verify --print-certs "$apk" 2>&1 | grep -q 'CN=Android Debug'; then
+              echo "::error::Release APK $apk is signed with the Android debug key."
+              exit 1
+            fi
+          done
+          echo "Verified ${#apks[@]} release APK(s) — none signed with the debug key."
 
       - name: Upload lint reports
         if: always()
@@ -103,13 +108,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Upload debug and release APKs
+      - name: Upload release APKs
         if: success()
         uses: actions/upload-artifact@v6
         with:
-          name: curio-pr-apks-${{ github.run_number }}
-          path: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
+          name: curio-pr-release-apks-${{ github.run_number }}
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
