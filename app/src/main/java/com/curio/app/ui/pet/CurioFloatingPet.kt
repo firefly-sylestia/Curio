@@ -50,8 +50,9 @@ private val FLOAT_SIZE = 72.dp
 private val EDGE_MARGIN = 14.dp
 private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 // v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
-private val HEARTS_W = 150.dp
-private val HEARTS_H = 96.dp
+// v8.21 — a smaller box so the hearts read as tiny, and they fade out fully.
+private val HEARTS_W = 132.dp
+private val HEARTS_H = 84.dp
 // v8.20 — the little cloud the pet rides while it walks (under the sprite).
 private val CLOUD_W = 96.dp
 private val CLOUD_H = 42.dp
@@ -69,9 +70,10 @@ private val DROP_FORGIVENESS = 12.dp
  *  - CAN BE DRAGGED ANYWHERE: grab it and it stretches like it's being
  *    lifted; release and it settles where you put it (clamped to the edges).
  *  - REACTS TO TOUCH (v8.11): quick repeated taps escalate the reaction
- *    (soft boop -> playful play-bow -> zoomies spin) with a matching line,
- *    hearts, and then a playful dart to a nearby spot — like a pet that
- *    wants to keep playing. Sometimes it even starts the game itself.
+ *    (soft boop -> playful play-bow -> happy celebration) with a matching
+ *    line and hearts, then a playful dart to a nearby spot. v8.21 — being
+ *    DRAGGED is what makes it dizzy now: swirl eyes + a wobbly sway while
+ *    it's flung around, then a short groggy recovery with a line.
  *  - CELEBRATES: when its mood flips to EXCITED/PROUD (a new lane, a
  *    level-up, a claim), it hops with a short excited line.
  *  - NAPS: after a long idle it fades back into its flower bed
@@ -79,9 +81,9 @@ private val DROP_FORGIVENESS = 12.dp
  *
  * Gated by the Appearance toggles: the whole pet layer
  * ([AppPreferences.petEnabledState]) and the floating companion itself
- * ([AppPreferences.floatingPetEnabledState]). Hides while a pet dialog is
- * open ([CurioPet.dialogOpen]) so there is never a duplicate pet on screen,
- * and while the pet is sitting at home in its bed ([CurioPet.atHome]).
+ * ([AppPreferences.floatingPetEnabledState]). v8.21 — the pet STAYS visible
+ * while a dialog is open (dimmed behind the scrim) and only hides while it
+ * is sitting at home in its bed ([CurioPet.atHome]).
  *
  * v8.10 — the sprite wears ONE fixed color (the Curio brand coral), so the
  * overlay no longer takes an accent; the soft cream glow disc behind the
@@ -101,8 +103,7 @@ fun CurioFloatingPet(
     if (!AppPreferences.petEnabledState ||
         !AppPreferences.floatingPetEnabledState ||
         !CurioPet.awake ||
-        CurioPet.atHome ||
-        CurioPet.dialogOpen
+        CurioPet.atHome
     ) return
 
     // Reduced motion: no autonomous wandering — the pet still follows touch.
@@ -142,8 +143,14 @@ fun CurioFloatingPet(
         var lastMood by remember { mutableStateOf<CurioPet.Mood?>(null) }
         var lastTouch by remember { mutableStateOf(System.currentTimeMillis()) }
         var leavingHome by remember { mutableStateOf(false) }
+        // v8.21 — dragging flings the pet dizzy: swirl eyes + a wobbly sway
+        // while it's held, then a short recovery after release.
+        var dizzy by remember { mutableStateOf(false) }
+        var recovering by remember { mutableStateOf(false) }
+        var dragStartAt by remember { mutableStateOf(0L) }
         // v8.11 — touch escalation: rapid repeated taps (within 1.6s) push
-        // the reaction tier up (boop -> play -> zoomies). A tap also queues
+        // the reaction tier up (boop -> play-bow -> celebration; v8.21 —
+        // the dizzy zoomies tier moved to dragging). A tap also queues
         // a playful dart that the wander loop dashes to promptly.
         var tapStreak by remember { mutableIntStateOf(0) }
         var lastTapAt by remember { mutableStateOf(0L) }
@@ -308,6 +315,35 @@ fun CurioFloatingPet(
                     delay(300)
                     continue
                 }
+                // v8.21 — a bottom drawer (filter / category) is open: the
+                // pet hurries over to the screen's bottom edge and hops up
+                // and down, trying to peek over the drawer's lip.
+                if (PetLandmarks.isSheetOpen(routePrefix) &&
+                    System.currentTimeMillis() - lastPokeAt > 4_000L
+                ) {
+                    val edgeX = (maxW / 2f).coerceIn(
+                        marginPx,
+                        (maxW - petPx - marginPx).coerceAtLeast(marginPx)
+                    )
+                    val edgeY = (maxH - petPx - marginPx).coerceAtLeast(marginPx)
+                    walkTo(Offset(edgeX, edgeY), stepMs = 15, steps = 40)
+                    // Peek-hop: bob up and down at the edge a few times,
+                    // like it's trying to see over the lip.
+                    val baseY = pos.y
+                    repeat(3) {
+                        pos = pos.copy(y = (baseY - 26f).coerceAtLeast(marginPx))
+                        delay(130)
+                        pos = pos.copy(y = baseY)
+                        delay(150)
+                    }
+                    squishKey++
+                    heartsKey++
+                    reaction = CurioPet.drawerLine()
+                    reactionKey++
+                    lastPokeAt = System.currentTimeMillis()
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
                 // v8.11 — the pet sometimes starts a game on its own: a play
                 // bow + a "catch me!" line, then it zooms off. v8.12 — how
                 // often it does this comes from its GROWING PERSONALITY
@@ -415,6 +451,14 @@ fun CurioFloatingPet(
             }
         }
 
+        // v8.21 — the dizzy spell wears off a beat after the drag ends.
+        LaunchedEffect(recovering) {
+            if (recovering) {
+                delay(1600)
+                recovering = false
+            }
+        }
+
         // Long-press: fade out, then hop back into the flower bed (the bed
         // shows the pet sitting there until tapped to come out again).
         LaunchedEffect(leavingHome) {
@@ -456,10 +500,15 @@ fun CurioFloatingPet(
                     // forever). The new coroutine starts immediately, so
                     // clearing the flags here resets any stale state.
                     dragged = false
+                    dizzy = false
+                    recovering = false
                     PetLandmarks.setHovered("bed", false)
                     detectDragGestures(
                         onDragStart = {
                             dragged = true
+                            // v8.21 — flinging it around makes it dizzy.
+                            dizzy = true
+                            dragStartAt = System.currentTimeMillis()
                             lastTouch = System.currentTimeMillis()
                             // v8.20 — a fresh drag starts clear of the bed.
                             PetLandmarks.setHovered("bed", false)
@@ -495,7 +544,12 @@ fun CurioFloatingPet(
                         },
                         onDragEnd = {
                             dragged = false
+                            dizzy = false
                             lastTouch = System.currentTimeMillis()
+                            // v8.21 — the release leaves it dizzy for a beat
+                            // (swirl eyes + wobble) with a groggy line — but
+                            // only when the drag actually flung it around.
+                            val flung = System.currentTimeMillis() - dragStartAt > 900L
                             // v8.20 — drop the pet onto its flower bed to
                             // send it home (hover glow off either way).
                             val bed = PetLandmarks.forScreen(routePrefix)
@@ -515,9 +569,16 @@ fun CurioFloatingPet(
                                     leavingHome = true
                                 }
                             }
+                            if (flung && !leavingHome) {
+                                recovering = true
+                                reaction = CurioPet.dizzyLine()
+                                reactionKey++
+                            }
                         },
                         onDragCancel = {
                             dragged = false
+                            dizzy = false
+                            recovering = false
                             lastTouch = System.currentTimeMillis()
                             PetLandmarks.setHovered("bed", false)
                         }
@@ -533,19 +594,25 @@ fun CurioFloatingPet(
                             // Every pet feeds the persona (v8.12).
                             CurioPet.noteTouch(context)
                             // Escalation: quick repeated taps push the pet
-                            // from a boop to a play-bow to zoomies (v8.11).
+                            // from a boop to a play-bow to a happy
+                            // celebration (v8.21 — no more tap-dizzy).
                             val now = System.currentTimeMillis()
                             tapStreak = if (now - lastTapAt < 1600L) tapStreak + 1 else 1
                             lastTapAt = now
                             val tier = tapStreak.coerceAtMost(3)
                             reaction = CurioPet.touchReaction(tier)
                             reactionKey++
-                            heartsKey++
                             when (tier) {
+                                // v8.21 — tapping never spins it dizzy anymore
+                                // (that's for dragging): boop → play-bow → a
+                                // big happy celebration hop.
                                 1 -> squishKey++
                                 2 -> playKey++
-                                else -> spinKey++
+                                else -> celebrateKey++
                             }
+                            // v8.21 — hearts for the playful/celebrate taps
+                            // only, so a plain boop stays clean.
+                            if (tier >= 2) heartsKey++
                             // The pet dashes to a nearby spot after the
                             // reaction — it wants to play (not in reduced
                             // motion, and not while watching the Spin deck;
@@ -585,6 +652,8 @@ fun CurioFloatingPet(
                 thinking = thinking,
                 watching = watching,
                 spinning = CurioPet.spinning,
+                // v8.21 — swirls + wobble while flung, and while recovering.
+                dizzy = dizzy || recovering,
                 contentDescription = "Curio, your companion pet — drag it anywhere, tap to say hi"
             )
         }
@@ -643,19 +712,26 @@ fun CurioFloatingPet(
 @Composable
 private fun HeartsOverlay(key: Int, modifier: Modifier = Modifier) {
     val rise = remember { Animatable(0f) }
+    val fade = remember { Animatable(0f) }
     LaunchedEffect(key) {
         if (key > 0) {
             rise.snapTo(0f)
-            rise.animateTo(1f, tween(1200, easing = FastOutSlowInEasing))
+            fade.snapTo(1f)
+            rise.animateTo(1f, tween(950, easing = FastOutSlowInEasing))
+            // v8.21 — fade the whole burst OUT at the end so no heart ever
+            // lingers over the pet's head (the old modulo math left one
+            // fully-visible forever).
+            fade.animateTo(0f, tween(280))
         }
     }
     Canvas(modifier = modifier) {
         val centerX = size.width / 2f
         repeat(3) { i ->
-            val t = ((rise.value * 3f + i * 0.33f) % 1f)
-            val alpha = (1f - t).coerceIn(0f, 1f)
-            val s = size.minDimension * (0.09f + t * 0.04f)
-            val x = centerX + (i - 1) * size.width * 0.22f
+            val t = (rise.value + i * 0.22f).coerceIn(0f, 1f)
+            val alpha = (1f - t) * fade.value
+            // v8.21 — smaller hearts.
+            val s = size.minDimension * (0.065f + t * 0.03f)
+            val x = centerX + (i - 1) * size.width * 0.2f
             val y = size.height * 0.95f - t * size.height * 0.95f
             drawHeart(x, y, s, Color(0xFFF7AFAF).copy(alpha = alpha * 0.95f))
         }

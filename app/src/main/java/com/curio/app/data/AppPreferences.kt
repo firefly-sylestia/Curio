@@ -319,10 +319,11 @@ object AppPreferences {
     var floatingPetEnabledState by mutableStateOf(true)
         private set
     // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
-    // moment the wheel settles. Default OFF: the deck lands, the front card
-    // stays tappable, and no reveal page or open-it prompt appears until the
-    // user taps the card.
-    var autoOpenRevealState by mutableStateOf(false)
+    // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
+    // itself when the deck lands (the tour and pet lines adapt). Turn it
+    // OFF to make the deck land quietly with the front card staying
+    // tappable until the user opens it manually.
+    var autoOpenRevealState by mutableStateOf(true)
         private set
 
     // v8.2 — whether the one-time tour offer has been shown (taken or
@@ -1017,9 +1018,10 @@ object AppPreferences {
         floatingPetEnabledState = enabled
     }
 
-    // v8.16 — auto-open the landed topic's reveal after a spin (default OFF).
+    // v8.16 — auto-open the landed topic's reveal after a spin. v8.21 —
+    // default ON (the reveal opens as soon as the deck settles).
     fun isAutoOpenReveal(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_AUTO_OPEN_REVEAL, false)
+        prefs(context).getBoolean(KEY_AUTO_OPEN_REVEAL, true)
 
     fun setAutoOpenReveal(context: Context, enabled: Boolean) {
         autoOpenRevealState = enabled

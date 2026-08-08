@@ -59,6 +59,11 @@ object PetLandmarks {
     // v8.20 — a landmark being drag-hovered as a drop target (the flower
     // bed) glows so the drop is legible.
     private val hoveredIds = mutableStateMapOf<String, Boolean>()
+    // v8.21 — a bottom drawer (the Spin filter / category sheets) is open on
+    // a screen. The sheets live in a SEPARATE window layer, so their content
+    // can't be tracked as landmarks — instead they report open/close here
+    // and the pet hurries over to peek at the drawer from the screen edge.
+    private val sheetOpenScreens = mutableStateMapOf<String, Boolean>()
 
     /** Landmarks for every screen (route prefix → list). Reactive. */
     val byScreen: Map<String, List<Landmark>> get() = byScreenMap
@@ -99,6 +104,19 @@ object PetLandmarks {
             hoveredIds.remove(id)
         }
     }
+
+    /**
+     * v8.21 — the sheets report when a bottom drawer opens/closes on their
+     * screen ("spin", "picker"). The pet reads [isSheetOpen] in its wander
+     * loop and comes over to peek.
+     */
+    fun noteSheet(screen: String, open: Boolean) {
+        if (open) sheetOpenScreens[screen] = true else sheetOpenScreens.remove(screen)
+    }
+
+    /** Whether a bottom drawer is currently open on [screen]. */
+    fun isSheetOpen(screen: String?): Boolean =
+        screen?.let { sheetOpenScreens[it] == true } ?: false
 
     /**
      * Add/refresh one landmark — replaces any previous one with the same id.

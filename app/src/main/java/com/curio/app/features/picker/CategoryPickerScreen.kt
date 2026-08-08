@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +47,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -89,6 +92,11 @@ fun CategoryPickerScreen(navController: NavController) {
     // Same full-screen + swipe-down-dismiss pattern as the filter page — a
     // ModalBottomSheet expanded to full height with a drag handle.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // v8.21 — tell the pet a drawer is up so it comes over to peek.
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("picker", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("picker", false) }
+    }
 
     ModalBottomSheet(
         onDismissRequest = { navController.popBackStack() },
@@ -132,9 +140,9 @@ fun CategoryPickerScreen(navController: NavController) {
 
         Text(
             text = if (multiSelectMode) {
-                "Tap to toggle decks · Done to spin them together"
+                "Tap to pick decks — then Mix to spin them together"
             } else {
-                "Tap a deck to spin it · hold to pick several"
+                "Tap a deck to spin it — hold one to mix a few"
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

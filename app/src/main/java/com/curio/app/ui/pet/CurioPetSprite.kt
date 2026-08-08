@@ -85,6 +85,11 @@ fun CurioPetSprite(
     spinning: Boolean = false,
     /** v8.15 — the guided-tour pose: a raised paw pointing "here!". */
     pointing: Boolean = false,
+    /**
+     * v8.21 — the pet is dizzy (being dragged around, or recovering right
+     * after a drag): swirly eyes, a wobbly sway, and little whoosh marks.
+     */
+    dizzy: Boolean = false,
     contentDescription: String? = null
 ) {
     val density = LocalDensity.current
@@ -265,6 +270,9 @@ fun CurioPetSprite(
     // Dragged: lifted + stretched like it's being picked up.
     val dragStretchX = if (dragged) 0.92f else 1f
     val dragLiftY = if (dragged) 1.08f else 1f
+    // v8.21 — the dizzy sway: a fast, wobbly rock while the pet is flung
+    // around or recovering, so it visibly reels.
+    val dizzyWobble = if (dizzy) sin(bobPhase * 14f * PI.toFloat()) * 5f else 0f
     // Extra idle flourishes (v8.9): a slow glance, a periodic ear flick, a
     // "thinking" tilt with a little ?, and a "watching" tilt (Spin deck).
     val glanceWave = sin(glancePhase * 2f * PI.toFloat())
@@ -287,6 +295,8 @@ fun CurioPetSprite(
 
     // ── Face state ─────────────────────────────────────────────────────
     val eyes = when {
+        // v8.21 — being flung around spins the eyes first.
+        dizzy -> EyeStyle.DIZZY
         dragged -> EyeStyle.WIDE // lifted mid-play: startled wins
         playing -> EyeStyle.STAR
         sleeping -> EyeStyle.CLOSED
@@ -299,6 +309,7 @@ fun CurioPetSprite(
         else -> EyeStyle.OPEN
     }
     val mouth = when {
+        dizzy -> MouthStyle.O // "whoa…"
         dragged -> MouthStyle.O
         playing -> MouthStyle.WIDE
         sleeping -> MouthStyle.NONE
@@ -336,7 +347,7 @@ fun CurioPetSprite(
                     scaleY = ((breatheScale - squash) * dragLiftY * squishScale *
                         (1f - spinPulse) * (1f - startleSquash))
                         .coerceAtLeast(0.4f)
-                    rotationZ = wiggle + walkLean + tilt + idleTilt + spinAngle.value
+                    rotationZ = wiggle + walkLean + tilt + idleTilt + spinAngle.value + dizzyWobble
                 }
                 .then(
                     if (auraOn) {
@@ -362,10 +373,15 @@ fun CurioPetSprite(
                     val px = size.width / GRID
                     fun drawPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
                         if (col !in 0 until GRID || row !in 0 until GRID) return
-                        drawRect(
+                        // v8.21 — softer pixels: each cell is a slightly-
+                        // ROUNDED, slightly-overlapping square so the sprite
+                        // reads soft and plush instead of crunchy. The 6%
+                        // overlap hides the seams between rounded corners.
+                        drawRoundRect(
                             color = color.copy(alpha = alpha),
                             topLeft = Offset(col * px, row * px),
-                            size = Size(px + 0.02f, px + 0.02f)
+                            size = Size(px * 1.06f, px * 1.06f),
+                            cornerRadius = CornerRadius(px * 0.16f)
                         )
                     }
 
@@ -472,15 +488,35 @@ fun CurioPetSprite(
                                 drawPx(4, 7, white); drawPx(10, 7, white)
                             }
                             EyeStyle.STAR -> {
-                                // Gold sparkle eyes with cross arms.
-                                drawPx(4, 7, gold); drawPx(5, 7, gold)
-                                drawPx(4, 8, gold); drawPx(5, 8, gold)
-                                drawPx(10, 7, gold); drawPx(11, 7, gold)
-                                drawPx(10, 8, gold); drawPx(11, 8, gold)
-                                drawPx(3, 7, gold); drawPx(6, 7, gold)
+                                // v8.21 — big shiny gold stars with a white
+                                // glint: genuinely excited, not a sparse
+                                // cross. Each eye is a 4×3 star with a
+                                // highlight where the light catches.
                                 drawPx(4, 6, gold); drawPx(5, 6, gold)
-                                drawPx(9, 7, gold); drawPx(12, 7, gold)
+                                drawPx(3, 7, gold); drawPx(4, 7, gold); drawPx(5, 7, gold); drawPx(6, 7, gold)
+                                drawPx(4, 8, gold); drawPx(5, 8, gold)
+                                drawPx(4, 7, white)
                                 drawPx(10, 6, gold); drawPx(11, 6, gold)
+                                drawPx(9, 7, gold); drawPx(10, 7, gold); drawPx(11, 7, gold); drawPx(12, 7, gold)
+                                drawPx(10, 8, gold); drawPx(11, 8, gold)
+                                drawPx(10, 7, white)
+                            }
+                            EyeStyle.DIZZY -> {
+                                // v8.21 — dizzy pinwheel swirls: a tall
+                                // core with side arms, and glints that
+                                // alternate diagonally so it reads as
+                                // spinning. Drawn while the pet is flung
+                                // around (dragged) or recovering.
+                                drawPx(4, 6, ink); drawPx(5, 6, ink)
+                                drawPx(4, 7, ink); drawPx(5, 7, ink)
+                                drawPx(4, 8, ink); drawPx(5, 8, ink)
+                                drawPx(3, 7, ink); drawPx(6, 7, ink)
+                                drawPx(4, 7, white); drawPx(5, 6, white)
+                                drawPx(10, 6, ink); drawPx(11, 6, ink)
+                                drawPx(10, 7, ink); drawPx(11, 7, ink)
+                                drawPx(10, 8, ink); drawPx(11, 8, ink)
+                                drawPx(9, 7, ink); drawPx(12, 7, ink)
+                                drawPx(10, 7, white); drawPx(11, 6, white)
                             }
                             EyeStyle.HAPPY -> {
                                 drawPx(4, 8, ink); drawPx(5, 7, ink); drawPx(5, 8, ink)
@@ -577,6 +613,15 @@ fun CurioPetSprite(
                         drawPx(13, 2, gold, (1f - twinkle) * 0.8f)
                     }
 
+                    // v8.21 — while dizzy, little whoosh marks trail beside
+                    // the pet so the spin feels like it's actually moving.
+                    if (dizzy) {
+                        val whoosh = sin(bobPhase * 10f * PI.toFloat())
+                        val a = 0.45f + whoosh * 0.25f
+                        drawPx(1, 6, ink, a); drawPx(0, 7, ink, a * 0.8f); drawPx(1, 8, ink, a)
+                        drawPx(14, 6, ink, a); drawPx(15, 7, ink, a * 0.8f); drawPx(14, 8, ink, a)
+                    }
+
                     // A white glint twinkles on the antenna star.
                     if (sin(bobPhase * 2f * PI.toFloat()) > 0.78f) {
                         drawPx(7, 0, white, 0.9f)
@@ -598,7 +643,7 @@ fun CurioPetSprite(
 private fun shade(color: Color): Color =
     androidx.compose.ui.graphics.lerp(color, Color.Black, 0.25f)
 
-private enum class EyeStyle { OPEN, BLINK, CLOSED, WIDE, STAR, HAPPY }
+private enum class EyeStyle { OPEN, BLINK, CLOSED, WIDE, STAR, DIZZY, HAPPY }
 private enum class MouthStyle { SMILE, WIDE, O, NONE }
 
 private const val GRID = 16

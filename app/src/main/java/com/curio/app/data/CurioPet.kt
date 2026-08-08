@@ -108,12 +108,6 @@ object CurioPet {
     var atHome by mutableStateOf(false)
         private set
 
-    /**
-     * v8.10 — a pet dialog is on screen (the hero check-in). The floating
-     * overlay hides so there is never a duplicate pet on screen.
-     */
-    var dialogOpen by mutableStateOf(false)
-
     /** Wake the pet (tap on the bed). The floating companion appears. */
     fun wake() {
         awake = true
@@ -157,12 +151,12 @@ object CurioPet {
         // the eager "Open it!" cheer stays.
         Event.REVEAL_OPEN -> if (AppPreferences.autoOpenRevealState)
             listOf(
-                "There it is!", "It opened itself — how curious!", "Ta-da! A new tale!",
-                "Ooh, look what landed!"
+                "There it is!", "It opened itself — sneaky!", "Ta-da! A new tale!",
+                "Ooh, look what landed!", "Surprise!"
             ).random()
         else
             listOf(
-                "Open it, open it!", "A mystery awaits!", "Peek inside!"
+                "Open it, open it!", "Come see what's inside!", "I'm dying of curiosity!"
             ).random()
         Event.EXPLORE -> listOf(
             "Go explore!", "Adventure time!", "I'll wait right here — go see!"
@@ -332,14 +326,17 @@ object CurioPet {
     // ── Passive dialogue (v8.8 — a little variety per mood) ────────────
     // `__LANE__` is swapped for the least-explored lane's name at show time.
     private val excitedLines = listOf(
-        "Ooh! A fresh lane to wander!",
-        "The deck surprised us both!",
-        "Wheee — new ground!"
+        "Ooh! Somewhere new!",
+        "Wheee — new ground!",
+        "The deck has taste!",
+        "Fresh paths ahead!"
     )
     private val happyLines = listOf(
-        "Nice one — XP banked. Keep going?",
-        "That was fun. More?",
-        "Curiosity looks good on you."
+        "Nice! XP banked — keep going?",
+        "That was fun — more?",
+        "Curiosity looks good on you.",
+        "Ooh, we're on a roll!",
+        "Doing that again? Please?"
     )
     // v8.14 — the HAPPY mood wears the hour's voice: morning energy, cozy
     // evening, hushed night.
@@ -424,22 +421,24 @@ object CurioPet {
     /**
      * A short burst when the user touches/pets the floating pet (v8.11).
      * [tier] grows with rapid repeated taps (computed by the overlay from
-     * the tap streak): 1 = a soft boop, 2 = playful, 3+ = zoomies. Natural
-     * pet escalation — a poke, a giggle, then it wants to run around.
+     * the tap streak): 1 = a soft boop, 2 = playful, 3+ = a happy
+     * celebration. v8.21 — the DIZZY tier moved to DRAGGING (the pet gets
+     * flung around), so tapping never spins it anymore — rapid taps just
+     * escalate from boop to play-bow to a big happy bounce.
      */
     fun touchReaction(tier: Int): String = when {
         tier >= 3 -> listOf(
-            "Wheeee—!", "Too fast!", "Spinny!", "Okay, okay!", "I'm dizzy!",
-            "Again? Again!", "Zoom zoom!"
+            "Yay!", "I love boops!", "Best friends!", "Squee!",
+            "More, more, more!", "You're my favorite!", "Party time!"
         ).random()
         tier >= 2 -> listOf(
-            "Hehehe!", "More, more!", "Zoomies!", "This is fun!", "Tag — you're it!",
-            "Catch me!", "Bouncy bouncy!"
+            "Hehehe!", "More, more!", "This is fun!", "Tag — you're it!",
+            "Catch me!", "Bouncy bouncy!", "Again, again!"
         ).random()
         else -> listOf(
             "Boop!", "Hehe!", "Wheee!", "Ooh!", "That tickles!", "Hihi!",
             "Boop boop!", "Again!", "You found me!", "Poke!", "Hi hi hi!",
-            "Soft paws!"
+            "Soft paws!", "Mrow!", "Pfft!"
         ).random()
     }
 
@@ -475,6 +474,26 @@ object CurioPet {
         "Tippy tap tap!", "Happy feet!", "Wiggle wiggle!",
         "Da-da-daaaa!", "Jiggle jiggle!", "Party paws!",
         "Dance break!", "Shake it off!", "Tap dance time!"
+    ).random()
+
+    /**
+     * v8.21 — the pet got flung around (dragged) and is dizzy: swirl eyes,
+     * a wobble, and a groggy line while it recovers.
+     */
+    fun dizzyLine(): String = listOf(
+        "Whoa… the room is spinning!", "Wheee— dizzy!", "Spin spin… okay, stop!",
+        "Whoa whoa whoa!", "I think I need a sit-down…", "So dizzy!",
+        "We-e-ee! …Whew!", "The floor is wobbly!"
+    ).random()
+
+    /**
+     * v8.21 — a bottom drawer (filter / category sheet) just opened and the
+     * pet hurried over to peek at it from the bottom edge.
+     */
+    fun drawerLine(): String = listOf(
+        "Ooh, a drawer!", "Peek peek — what's in there?", "Can I come too?",
+        "Hmm, so many choices!", "Ooh — filters!", "What are we picking?",
+        "I'll wait right here!", "Ooh, shiny options!"
     ).random()
 
     /**

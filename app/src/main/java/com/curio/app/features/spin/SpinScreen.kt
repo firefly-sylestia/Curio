@@ -1226,26 +1226,30 @@ private fun ColumnScope.SpinDeckSection(
 
     // ── Carousel (interactive cards) — fitScale compresses the fan to the
     //    space actually available (see SpinScreen's fit-scale computation).
-    Carousel(
-        cat = cat,
-        deckAccent = deckAccent,
-        deckGradient = deckGradient,
-        isMixed = isMixed,
-        mixSeed = mixSeed,
-        displayPool = displayPool,
-        cycleIndex = cycleIndex,
-        shuffling = shuffling,
-        landedTopic = landedTopic,
-        opening = opening,
-        enabled = enabled,
-        compact = compact,
-        extraCompact = extraCompact,
-        densityExtraCompact = densityExtraCompact,
-        roomy = roomy,
-        fitScale = fitScale,
-        onCardTap = onCardTap,
-        modifier = Modifier.fillMaxWidth()
-    )
+    // v8.21 — the deck is a FUN landmark: the pet sometimes dashes over and
+    // boops the whole fan of cards (bounds-only, zero layout impact).
+    PetLandmark(id = "deck", kind = PetLandmarks.Kind.FUN, screen = "spin") { m ->
+        Carousel(
+            cat = cat,
+            deckAccent = deckAccent,
+            deckGradient = deckGradient,
+            isMixed = isMixed,
+            mixSeed = mixSeed,
+            displayPool = displayPool,
+            cycleIndex = cycleIndex,
+            shuffling = shuffling,
+            landedTopic = landedTopic,
+            opening = opening,
+            enabled = enabled,
+            compact = compact,
+            extraCompact = extraCompact,
+            densityExtraCompact = densityExtraCompact,
+            roomy = roomy,
+            fitScale = fitScale,
+            onCardTap = onCardTap,
+            modifier = m.fillMaxWidth()
+        )
+    }
 
     // ── Center spin button — the ONLY shuffle CTA (v6) ──────────────
     // v8.16 — the spin button is a FUN pet landmark: the pet sometimes
@@ -1392,6 +1396,11 @@ private fun FilterSheet(
     var draftFilters by remember(initialFilters) { mutableStateOf(initialFilters) }
     var draftSubtypes by remember(initialSubtypes) { mutableStateOf(initialSubtypes) }
     val activeCount = draftFilters.size + draftSubtypes.size
+    // v8.21 — tell the pet a drawer is up so it comes over to peek.
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("spin", false) }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -1436,6 +1445,15 @@ private fun FilterSheet(
                     }
                 }
             }
+
+            // v8.21 — a warm subtitle so the sheet reads friendly, not like
+            // a settings form.
+            Text(
+                text = "Pick what you're in the mood for",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, bottom = 10.dp)
+            )
 
             // ── Active filter summary chips — this is what was missing ─
             if (activeCount > 0) {
@@ -3264,10 +3282,13 @@ private fun CategoryPickerSheet(
     var multiSelectMode by remember { mutableStateOf(false) }
     var selectedSlugs by remember { mutableStateOf(setOf<String>()) }
 
-    // Same full-screen + swipe-down-dismiss pattern as the filter page — a
-    // ModalBottomSheet expanded to full height with a drag handle.
+    // Same full-screen + swipe-down-dismiss pattern as the filter page — a    // ModalBottomSheet expanded to full height with a drag handle.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
+    // v8.21 — tell the pet a drawer is up so it comes over to peek.
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("spin", false) }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

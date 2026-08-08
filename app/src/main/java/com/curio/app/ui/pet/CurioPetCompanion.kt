@@ -117,9 +117,9 @@ private fun TailDiamond(color: Color) {
  * v8.10 — one fixed color scheme (the Curio light-theme brand coral): the
  * round XP ring around the bed was removed, and the bar/tints no longer
  * react to category pastels or dark mode. Tapping the bed while the pet is
- * sitting at home ([CurioPet.atHome]) brings it back out; opening the
- * check-in hides the floating pet ([CurioPet.dialogOpen]) so there is never
- * a duplicate pet on screen.
+ * sitting at home ([CurioPet.atHome]) brings it back out. v8.21 — opening
+ * the check-in no longer hides the floating pet: it stays visible, dimmed
+ * behind the dialog scrim.
  *
  * [bubbleText] is the one-shot dialogue line (null = stay quiet).
  * [celebrateKey] increments to trigger a celebration hop.
@@ -191,7 +191,6 @@ fun CurioPetHeroCard(
                                 }
                                 else -> {
                                     showDialog = true
-                                    CurioPet.dialogOpen = true
                                 }
                             }
                         },
@@ -252,15 +251,14 @@ fun CurioPetHeroCard(
     }
 
     // ── Pet check-in dialog — tap the pet to see its mood + next steps ──
-    // The floating pet hides while this is up ([CurioPet.dialogOpen]) so the
-    // dialog's pet is the ONLY one on screen (v8.10).
+    // v8.21 — the floating pet stays visible behind the scrim (dimmed),
+    // never fully hidden.
     if (showDialog) {
         val info = CurioPet.tapInfo(context, lanes)
         val questRoute = CurioQuests.currentQuest()?.navRoute
         AlertDialog(
             onDismissRequest = {
                 showDialog = false
-                CurioPet.dialogOpen = false
             },
             title = { Text(info.stage.displayName) },
             text = {
@@ -302,7 +300,6 @@ fun CurioPetHeroCard(
             confirmButton = {
                 TextButton(onClick = {
                     showDialog = false
-                    CurioPet.dialogOpen = false
                 }) { Text("Okay") }
             },
             dismissButton = {
@@ -310,7 +307,6 @@ fun CurioPetHeroCard(
                     TextButton(
                         onClick = {
                             showDialog = false
-                            CurioPet.dialogOpen = false
                             questRoute.let(onGo)
                         }
                     ) { Text("Go to quest") }
