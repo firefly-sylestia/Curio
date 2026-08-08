@@ -346,9 +346,31 @@ private fun GuideSpeechBubble(
     modifier: Modifier = Modifier
 ) {
     val bubbleColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    // v8.24 — a happy confirmation bounce whenever the step advances. Wait
+    // steps advance the moment the REAL action is done, so the bubble pops
+    // and hops exactly on the "yay, done!" beat. The overshoot spring lands
+    // past full size, then settles back.
+    val pop = remember { Animatable(0f) }
+    LaunchedEffect(stepIndex) {
+        if (stepIndex > 0) {
+            pop.snapTo(0f)
+            pop.animateTo(1f, spring(dampingRatio = 0.42f, stiffness = 520f))
+        }
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.widthIn(max = 430.dp)
+        modifier = modifier
+            .widthIn(max = 430.dp)
+            .graphicsLayer {
+                val t = pop.value
+                alpha = t.coerceIn(0f, 1f)
+                // Pops from small to full — the spring overshoots past 1,
+                // so it lands with a little bounce.
+                scaleX = 0.55f + 0.45f * t
+                scaleY = 0.55f + 0.45f * t
+                // Rises in from below, dipping back as it settles.
+                translationY = (1f - t) * 12.dp.toPx()
+            }
     ) {
         if (!tailDown) {
             BubbleTail(color = bubbleColor, pullUp = false)
