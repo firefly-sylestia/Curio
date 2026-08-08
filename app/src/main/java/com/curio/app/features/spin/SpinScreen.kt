@@ -1895,8 +1895,11 @@ private fun Carousel(
                             onDragCancel = { totalDrag = 0f },
                             onDragEnd = {
                                 when {
-                                    totalDrag <= -swipeThreshold -> onCycle(1)
-                                    totalDrag >= swipeThreshold -> onCycle(-1)
+                                    // Swipe follows the gesture: right → next
+                                    // (+1), left → previous (−1) (v8.41 fix —
+                                    // this was inverted on release).
+                                    totalDrag <= -swipeThreshold -> onCycle(-1)
+                                    totalDrag >= swipeThreshold -> onCycle(1)
                                 }
                                 totalDrag = 0f
                             },

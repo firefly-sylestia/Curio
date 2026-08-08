@@ -86,7 +86,17 @@
 - Unrelated working-tree changes (`docs/app/QUEST_AND_PET_REDESIGN_SPEC.md` deletion,
   untracked `docs/plans/`) remain untouched and out of commits.
 
+## Part 6 — Spin deck swipe direction fix (DONE)
+
+- `SpinScreen.kt` `Carousel` — the deck-swipe mapping fired the OPPOSITE cycle on
+  release: swipe LEFT → `onCycle(1)` (advance), swipe RIGHT → `onCycle(-1)`
+  (back). The fan is a vertical reel (peeks above/below the hero), so a
+  horizontal swipe controlling it read inverted to users. Flipped to follow the
+  gesture: right → +1 (next card from the bottom peek), left → −1 (previous from
+  the top peek), with an inline comment documenting the mapping.
+
 ## Completion
 
 Parts 1-3 committed and pushed (`0db21b7`, `468869a`, `6f6609f`); Part 4 pushed
-(`6389d60`); Part 5 (clip import + KDoc `*/` fix) pushed as a new commit.
+(`6389d60`); Part 5 (clip import + KDoc `*/` fix) pushed (`2f7bbaf`); Part 6
+(swipe direction flip) pushed as a new commit.
