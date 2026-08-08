@@ -137,6 +137,37 @@ private fun isRevealRoute(entry: NavBackStackEntry): Boolean =
 private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route?.substringBefore("/") == CurioRoutes.ENTRY_DETAIL.substringBefore("/")
 
+/**
+ * Push destinations that use the detail page's center pop-up (scale + fade)
+ * instead of the generic horizontal slide — v8.4x: Save/Capture (+ its edit
+ * routes), Profile, Quests, Settings (hub + every section), Pet Designer,
+ * Topic History, Manage Categories, Recents, Support/Bug Report, and the
+ * Topic Database. Lightbox, Category Picker, Reveal, and the boot gates keep
+ * their own treatments. Values are route PREFIXES (substringBefore("/")) so
+ * parameterised routes like capture/{...}, edit-*/{...}, and settings/*
+ * match their whole family.
+ */
+private val popScreenRoutePrefixes: Set<String> = setOf(
+    CurioRoutes.CAPTURE.substringBefore("/"),
+    CurioRoutes.EDIT_MOODBOARD.substringBefore("/"),
+    CurioRoutes.EDIT_ENTRY.substringBefore("/"),
+    CurioRoutes.PROFILE,
+    CurioRoutes.QUESTS,
+    CurioRoutes.SETTINGS,
+    CurioRoutes.EXPERIMENTS,
+    CurioRoutes.PET_DESIGNER,
+    CurioRoutes.TOPIC_HISTORY,
+    CurioRoutes.MANAGE_CATEGORIES,
+    CurioRoutes.RECENTS_ALL,
+    CurioRoutes.SUPPORT,
+    CurioRoutes.BUG_REPORT,
+    CurioRoutes.DATABASE
+)
+
+/** True when the destination is one of the center-pop push screens. */
+private fun isPopScreenRoute(entry: NavBackStackEntry): Boolean =
+    entry.destination.route?.substringBefore("/") in popScreenRoutePrefixes
+
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     initialState: NavBackStackEntry,
     targetState: NavBackStackEntry
@@ -161,7 +192,10 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * Upgraded navigation transitions:
  *  - Forward navigations: slide left + fade (matched tweens)
  *  - Back navigations: slide right + fade (matched tweens)
- *  - Tab switches (bottom nav): simple crossfade (no directional slide)
+ *  - Modal push screens (detail + Capture/Profile/Quests/Settings/Pet
+ *    Designer/Topic History/Manage Categories/Recents/Support/Bug Report/
+ *    Database): center pop — scale up + fade in, shrink + fade out (v8.4x)
+ *  - Tab switches (bottom nav): subtle scale-fade (no directional slide)
  *  - Splash → Home / Onboarding: fade-only reveal
  * v7.17 — the old exit/pop-enter slides used underdamped springs that
  * overshot and bounced (and never matched their paired fade) — the
@@ -535,10 +569,11 @@ fun CurioNavHost(
                     // the hero (its staggered entrance) reads cleanly.
                     isRevealRoute(targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // Entry Detail pops up from the screen center (scale +
-                    // fade) like a modal — it never slides in from the side
-                    // (v8.38).
-                    isDetailRoute(targetState) ->
+                    // Entry Detail and the modal-style push screens pop up
+                    // from the screen center (scale + fade) like a modal — they
+                    // never slide in from the side (v8.38 detail; v8.4x the
+                    // same pop for the screens in popScreenRoutePrefixes).
+                    isDetailRoute(targetState) || isPopScreenRoute(targetState) ->
                         scaleIn(
                             initialScale = 0.88f,
                             animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
@@ -551,9 +586,13 @@ fun CurioNavHost(
                                 delayMillis = 0
                             )
                         )
-                    // Tab switches: simple crossfade (no directional slide)
+                    // Tab switches: subtle scale-fade (no directional slide) —
+                    // the incoming tab grows gently while it fades in.
                     isTabSwitch(initialState, targetState) ->
-                        fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
+                        scaleIn(
+                            initialScale = 0.97f,
+                            animationSpec = tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other forward navigations: slide left + fade
                     else -> slideInHorizontally(
                         initialOffsetX = { fullWidth -> fullWidth / 4 },
@@ -570,15 +609,23 @@ fun CurioNavHost(
                     // vanish under the ~450ms morph).
                     isRevealRoute(targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // The screen under the detail pop-up (the Cabinet grid)
-                    // dims out over the SAME 450ms as the pop — no slide, and
-                    // the longer fade masks the bottom-bar space release as a
-                    // gentle dim instead of a snap (v8.38).
-                    isDetailRoute(targetState) ->
+                    // The screen under the detail pop-up / modal push dims out
+                    // over the SAME 450ms as the pop — no slide, and the longer
+                    // fade masks the bottom-bar space release as a gentle dim
+                    // instead of a snap (v8.38 detail; v8.4x pop screens).
+                    isDetailRoute(targetState) || isPopScreenRoute(targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Navigating away from splash: no exit needed
                     initialState.destination.route == CurioRoutes.SPLASH ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
+                    // A pop screen that opens a NON-pop push (e.g. Settings →
+                    // Lightbox) shrinks away the same way it popped in, so the
+                    // modal language stays consistent (v8.4x).
+                    isPopScreenRoute(initialState) ->
+                        scaleOut(
+                            targetScale = 0.88f,
+                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     isTabSwitch(initialState, targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other exits: slide out slightly + fade
@@ -595,13 +642,18 @@ fun CurioNavHost(
                     // directional slide would fight it.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // Popping back from Entry Detail: the page below fades
-                    // back in while the detail shrinks away (v8.38).
-                    isDetailRoute(initialState) ->
+                    // Popping back from Entry Detail / a pop screen: the page
+                    // below fades back in while the modal shrinks away (v8.38
+                    // detail; v8.4x pop screens).
+                    isDetailRoute(initialState) || isPopScreenRoute(initialState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // Tab switch back: crossfade too (no directional slide).
+                    // Tab switch back: subtle scale-fade too (no directional
+                    // slide).
                     isTabSwitch(initialState, targetState) ->
-                        fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
+                        scaleIn(
+                            initialScale = 0.97f,
+                            animationSpec = tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
                         // Back navigation: slide right + fade
                         slideInHorizontally(
@@ -617,10 +669,11 @@ fun CurioNavHost(
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // The detail page shrinks back down as it pops away — the
-                    // matched fade keeps the shrink smooth over the same
-                    // duration as the page beneath fading back in (v8.38).
-                    isDetailRoute(initialState) ->
+                    // The detail page / pop screen shrinks back down as it
+                    // pops away — the matched fade keeps the shrink smooth over
+                    // the same duration as the page beneath fading back in
+                    // (v8.38 detail; v8.4x pop screens).
+                    isDetailRoute(initialState) || isPopScreenRoute(initialState) ->
                         scaleOut(
                             targetScale = 0.88f,
                             animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
