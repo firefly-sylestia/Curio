@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.delayBy
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -703,8 +704,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             // the wheel starts at a readable cadence and glides gently to a
             // stop — a graceful slow-down instead of a snappy whip. The
             // ~340ms floor keeps the fastest early ticks readable and sits
-            // ABOVE the ~320ms peek wipe, so every transition completes
-            // before the next tick lands. Intervals ~340ms -> ~520ms.
+            // ABOVE the ~310ms staggered peek wave, so every transition
+            // completes before the next tick lands. Intervals ~340ms -> ~520ms.
             val eased = sin(progress * Math.PI.toFloat() / 2f)
             val interval = (340L + (180L * eased).toLong()).coerceAtMost(520L)
             cycleIndex = ++tick
@@ -1772,8 +1773,16 @@ private const val LandedRestScale = 1.02f
 // v7.1 — peek wipe timings. Soft partial-height glides + fades (no hard
 // slot cut), all under the ~340ms tick floor so each step completes before
 // the next tick lands.
-private const val PeekWipeInMs = 320
-private const val PeekWipeOutMs = 300
+// v8.32 — CASCADE wave: during a shuffle the five fan cards no longer wipe
+// together — the TOP of the deck animates first and the wave rolls down one
+// card after another (top far → top near → hero → bottom near → bottom far),
+// each delayed PeekWaveStaggerMs behind the one above it. Wipes are much
+// shorter (120ms vs the old 320ms) so the whole cascade (last card starts at
+// 3×45=135ms and finishes ~255ms) still lands under the ~340ms tick floor —
+// the reel reads snappier and faster, never janky.
+private const val PeekWaveInMs = 120
+private const val PeekWaveOutMs = 110
+private const val PeekWaveStaggerMs = 45
 private const val PeekIdleInMs = 300
 private const val PeekIdleOutMs = 280
 
@@ -2108,6 +2117,10 @@ private fun HeroTicketCard(
     var tickDir by remember { mutableStateOf(1f) }
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
+        // v8.32 — the bounce lands when the hero's turn arrives in the
+        // cascade (mid-wave, after the top peeks) so the pulse reads as
+        // part of the ripple instead of firing ahead of the deck.
+        delay(2 * PeekWaveStaggerMs)
         tickDir = -tickDir
         // v6.6 — calm breath instead of a kick: the card lifts barely
         // (1.02) and glides back on a heavily damped, low-stiffness
@@ -2398,20 +2411,23 @@ private fun HeroTicketCard(
                             targetState = topic,
                             transitionSpec = {
                                 if (shuffling) {
-                                    // v6.10 — same rhythm as the peek wipes
-                                    // (under the 200ms tick floor) with a
-                                    // stronger height/2 rise so the front
-                                    // content visibly glides up as the deck
-                                    // streams. clip=false keeps the title
-                                    // reel from being sliced mid-slide.
+                                    // v8.32 — the hero joins the cascade at
+                                    // its center slot (after the top peeks,
+                                    // before the bottom ones): its swap waits
+                                    // one stagger step past the top near peek
+                                    // and wipes a touch faster (180ms vs the
+                                    // old 300ms v6.10 rhythm) so the whole
+                                    // deck ripples top→bottom in one wave that
+                                    // still lands under the tick floor.
+                                    val heroDelay = 2 * PeekWaveStaggerMs
                                     (slideInVertically(
-                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                        animationSpec = tween(180, easing = FastOutSlowInEasing).delayBy(heroDelay)
                                     ) { height -> height / 2 } +
-                                        fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing))) togetherWith
+                                        fadeIn(animationSpec = tween(180, easing = FastOutSlowInEasing).delayBy(heroDelay))) togetherWith
                                     (slideOutVertically(
-                                        animationSpec = tween(260, easing = FastOutSlowInEasing)
+                                        animationSpec = tween(160, easing = FastOutSlowInEasing).delayBy(heroDelay)
                                     ) { height -> -height / 2 } +
-                                        fadeOut(animationSpec = tween(260, easing = FastOutSlowInEasing))) using SizeTransform(clip = false)
+                                        fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing).delayBy(heroDelay))) using SizeTransform(clip = false)
                                 } else {
                                     (slideInVertically(
                                         animationSpec = tween(300, easing = FastOutSlowInEasing)
@@ -2743,14 +2759,26 @@ private fun PeekCard(
                 // before the next tick lands.
                 val dir = if (isTop) -1f else 1f
                 if (shuffling) {
+                    // v8.32 — cascade turn: the top of the deck wipes first
+                    // and the wave rolls down (slot -2 → -1 → hero → 1 → 2),
+                    // each card holding its topic until its stagger moment
+                    // then swapping fast. Enter AND exit share the delay so
+                    // the card visibly waits its turn instead of tearing.
+                    val waveTurn = when (slot) {
+                        -2 -> 0
+                        -1 -> 1
+                        1 -> 2
+                        else -> 3
+                    }
+                    val waveDelay = waveTurn * PeekWaveStaggerMs
                     slideInVertically(
-                        animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)
+                        animationSpec = tween(PeekWaveInMs, easing = FastOutSlowInEasing).delayBy(waveDelay)
                     ) { height -> (height * dir * PeekWipeTravel).toInt() } +
-                    fadeIn(animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)) togetherWith
+                    fadeIn(animationSpec = tween(PeekWaveInMs, easing = FastOutSlowInEasing).delayBy(waveDelay)) togetherWith
                     slideOutVertically(
-                        animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
+                        animationSpec = tween(PeekWaveOutMs, easing = FastOutSlowInEasing).delayBy(waveDelay)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
+                    fadeOut(animationSpec = tween(PeekWaveOutMs, easing = FastOutSlowInEasing).delayBy(waveDelay)) using SizeTransform(clip = false)
                 } else {
                     // Idle re-fan (landing re-deal / category switch) — a
                     // slower, softer pass in the same per-side direction.
