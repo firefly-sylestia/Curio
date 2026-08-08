@@ -156,6 +156,8 @@ object CurioRoutes {
     const val PROMO = "promo"
     const val DATABASE = "database"
     const val FIELDMIND_OBSERVATION = "fieldmind-observation"
+    // v8.34 — the Pet designer playground (custom pet look, Settings entry).
+    const val PET_DESIGNER = "pet-designer"
 
     // ── Route builders ──────────────────────────────────────────────────────
     fun spinWithCategory(slug: String) = "spin/$slug"

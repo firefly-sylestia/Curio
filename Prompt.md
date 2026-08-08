@@ -49,10 +49,13 @@ files; code review done. CI on push is the compile gate.
 
 ## Parked: pet designer playground (user's next feature)
 
-User asked for an easy design import + the design in the import format +
-a designer playground screen in the app. Waiting on the user's plan
-answers (toggleable vs always-on, screen placement, format preferences)
-before implementing — see the ask_user questions sent after this fix.
+DONE — v8.34 shipped: PetDesign model + hex text import/export format,
+PetDesignerScreen (Settings → Pet designer) with live preview, 16×16 pixel
+grid editor (body/asleep), palette recoloring + quick picks, preset shapes,
+randomizer, clipboard import/export, save/reset (always-on when saved).
+Sprite reads saved design reactively via AppPreferences.petDesignState.
+Follow-ups if wanted: eye/mouth position presets for custom bodies, more
+preset shapes, undo history.
 
 ## Parked v8.28 hooks spec (user picks, build later)
 

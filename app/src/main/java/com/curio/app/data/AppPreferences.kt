@@ -128,6 +128,11 @@ object AppPreferences {
     // restart and nothing else in the app honored them.
     private const val KEY_HIDDEN_CATEGORIES = "hidden_categories"
     private const val KEY_CATEGORY_ORDER = "category_order"
+    // v8.34 — custom pet design (Pet designer playground): the imported
+    // design's full text (palette + body/curled grids). Always-on when
+    // saved — the pet sprite renders this instead of the default until the
+    // user resets it. Null = default design.
+    private const val KEY_PET_DESIGN = "pet_design"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -375,6 +380,15 @@ object AppPreferences {
     var categoryOrderState by mutableStateOf<List<CategoryId>>(emptyList())
         private set
 
+    /**
+     * Reactive custom-pet-design state (v8.34) — the design's import text,
+     * or null when the pet wears its default look. Updated by
+     * [setPetDesign] / [clearPetDesign] so the pet sprite recomposes
+     * instantly when a design is saved in the designer playground.
+     */
+    var petDesignState by mutableStateOf<String?>(null)
+        private set
+
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
         themeStyleState = getThemeStyle(context)
@@ -410,6 +424,7 @@ object AppPreferences {
         topicSentimentsState = getTopicSentiments(context)
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
+        petDesignState = getPetDesign(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -1090,6 +1105,24 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_LAST_SPIN_CATEGORIES, names.joinToString(",")).apply()
         setLastSpinCategory(context, ids.first())
     }
+
+    // ── Custom pet design (v8.34 — Pet designer playground) ──────────
+    /** The saved custom pet-design text, or null for the default look. */
+    fun getPetDesign(context: Context): String? =
+        prefs(context).getString(KEY_PET_DESIGN, null)
+
+    /** Saves a custom pet design (always-on: the pet wears it everywhere). */
+    fun setPetDesign(context: Context, text: String) {
+        prefs(context).edit().putString(KEY_PET_DESIGN, text).apply()
+        petDesignState = text
+    }
+
+    /** Removes the custom design, returning the pet to its default look. */
+    fun clearPetDesign(context: Context) {
+        prefs(context).edit().remove(KEY_PET_DESIGN).apply()
+        petDesignState = null
+    }
+
 
     // ── Landed Spin topic (per category) — persisted so the landed card ──
     //    survives ANY navigation. rememberSaveable alone dies when the

@@ -32,7 +32,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
+import com.curio.app.data.PetDesign
 import com.curio.app.ui.theme.CurioColors
 import kotlin.math.PI
 import kotlin.math.sin
@@ -90,21 +92,38 @@ fun CurioPetSprite(
      * after a drag): swirly eyes, a wobbly sway, and little whoosh marks.
      */
     dizzy: Boolean = false,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    /**
+     * v8.34 — a custom look from the Pet designer playground. When null
+     * (the normal case) the sprite reads the SAVED design (if any) from
+     * [AppPreferences.petDesignState]; the designer passes its working
+     * copy here for a live preview. Null + no saved design = default look.
+     */
+    design: PetDesign? = null
 ) {
     val density = LocalDensity.current
+    // v8.34 — resolve the active design: the explicit working copy wins;
+    // otherwise the saved one (reactive — recomposes when a design is
+    // saved in the playground). Parsing is cheap (16+16 rows) and cached
+    // per text via remember.
+    val savedText = AppPreferences.petDesignState
+    val activeDesign = remember(savedText, design) {
+        design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
+    } ?: PetDesign.DEFAULT
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
     // v8.10 — the scarf/aura accent is hardcoded to the Curio light-theme
     // brand coral: one theme, one color, on every device (never the
     // category pastel, never a dark-mode twin).
-    val accent = CurioColors.CategoryCoral
-    val ink = Color(0xFF4A3426)
-    val body = Color(0xFFFFF3DC)
-    val bodyShade = Color(0xFFF0DDBB)
+    // v8.34 — the active design's palette drives every body color (each key
+    // falls back to the default look when the design doesn't recolor it).
+    val accent = Color(0xFF${activeDesign.colorOf('s')})
+    val ink = Color(0xFF${activeDesign.colorOf('o')})
+    val body = Color(0xFF${activeDesign.colorOf('b')})
+    val bodyShade = Color(0xFF${activeDesign.colorOf('B')})
     val bellyLight = Color(0xFFFFFBF0)
     val blush = Color(0xFFF7AFAF)
-    val gold = Color(0xFFFFD97D)
-    val goldDeep = Color(0xFFE0B050)
+    val gold = Color(0xFF${activeDesign.colorOf('G')})
+    val goldDeep = Color(0xFF${activeDesign.colorOf('g')})
     // v8.26 — excited eyes wear a NATURAL warm brown (the ink family, one
     // step lighter) instead of gold: the gold stars read orangish against
     // the cream body. Sparkles and the antenna keep the gold.
@@ -390,9 +409,10 @@ fun CurioPetSprite(
                     }
 
                     // Body — static pattern with the accent scarf. v8.14 —
-                    // asleep pets CURL UP into a cozy ball (CURLED_ROWS)
-                    // instead of standing with closed eyes.
-                    val bodyRows = if (sleeping) CURLED_ROWS else BODY_ROWS
+                    // asleep pets CURL UP into a cozy ball instead of
+                    // standing with closed eyes. v8.34 — the active design's
+                    // grids replace the default ones.
+                    val bodyRows = if (sleeping) activeDesign.curledRows else activeDesign.bodyRows
                     bodyRows.forEachIndexed { row, line ->
                         line.forEachIndexed { col, ch ->
                             when (ch) {
@@ -400,7 +420,7 @@ fun CurioPetSprite(
                                 'B' -> drawPx(col, row, bodyShade)
                                 'o' -> drawPx(col, row, ink)
                                 's' -> drawPx(col, row, accent)
-                                'S' -> drawPx(col, row, shade(accent))
+                                'S' -> drawPx(col, row, Color(0xFF${activeDesign.colorOf('S')}))
                                 'G' -> drawPx(col, row, gold)
                                 'g' -> drawPx(col, row, goldDeep)
                             }
@@ -652,55 +672,3 @@ private enum class EyeStyle { OPEN, BLINK, CLOSED, WIDE, STAR, DIZZY, HAPPY }
 private enum class MouthStyle { SMILE, WIDE, O, NONE }
 
 private const val GRID = 16
-
-/**
- * The pet's body — a round cream blob with ear nubs, a gold star-tipped
- * antenna, feet, and a category-accent scarf. Keys: '.' empty, 'b' body,
- * 'B' body shade, 'o' ink outline, 's' scarf accent, 'S' scarf shade,
- * 'G' gold, 'g' gold deep.
- */
-private val BODY_ROWS: List<String> = listOf(
-    // v8.13 — cat ears: a tiny pointed ear on each side of the head (the
-    // antenna star stays center). Rows 1-2; 'o' outline, 'b' body fill.
-    ".......GG.......",
-    "...o...GG...o...",
-    "..ob........bo..",
-    "..ob....o....bo.",
-    "...oooooooooo...",
-    ".obbbbbbbbbbbbo.",
-    "obbbbbbbbbbbbbbo",
-    "obbbbbbbbbbbbbbo",
-    "obbbbbbbbbbbBBbo",
-    "obbbbbbbbbbbBBbo",
-    "obbbbbbbbbbbBBbo",
-    "obbbbbbbbbbbbBBo",
-    ".osssssssssssso.",
-    "..oSSssssssSSo..",
-    "..oo........oo..",
-    "..oo........oo.."
-)
-
-/**
- * The pet CURLED UP asleep (v8.14) — a round ball with ears, the coral
- * scarf draped over it, and the tail wrapped around the front. The nightcap
- * (drawn as an overlay) covers the top center; the closed eyes + twitches
- * are overlays too. Same keys as [BODY_ROWS].
- */
-private val CURLED_ROWS: List<String> = listOf(
-    ".......GG.......",
-    "...o...GG...o...",
-    "..ob........bo..",
-    "..obbbbbbbbbbbo..",
-    "...obbbbbbbbbbo...",
-    "..obbbbbbbbbbbbo..",
-    ".obbbbbbbbbbbbbbo.",
-    "obbbbbbbbbbbbbbo",
-    "obssssssssssssbo",
-    ".obbbbbbbbbbbbbbo.",
-    "..obbbbbbbbbbbbo..",
-    "...obbbbbbbbbbo...",
-    ".....oBBbbbbBBo.",
-    "......oooooo....",
-    "................",
-    "................"
-)

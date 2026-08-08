@@ -94,6 +94,7 @@ import com.curio.app.features.recent.RecentScreen
 import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
+import com.curio.app.features.petdesigner.PetDesignerScreen
 import com.curio.app.features.picker.CategoryPickerScreen
 import com.curio.app.features.reveal.TopicRevealScreen
 import com.curio.app.features.spin.SpinScreen
@@ -773,6 +774,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.FIELDMIND_OBSERVATION) {
                 FieldMindObservationScreen(navController = navController)
+            }
+            composable(CurioRoutes.PET_DESIGNER) {
+                PetDesignerScreen(navController = navController)
             }
             composable(route = CurioRoutes.LIGHTBOX) {
                 // The image URI is handed off out-of-band via LightboxTarget

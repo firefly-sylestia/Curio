@@ -148,6 +148,8 @@ object CurioIcons {
     const val EmojiEvents     = "workspace_premium"     // trophy — achievements shelf (v7.89: glyph verified in font subset; "emoji_events" was tofu)
     const val Flag            = "flag"                  // journey marker
     const val WorkspacePremium = "workspace_premium"    // badge — level milestones
+    // v8.34 — paw glyph for the Pet designer Settings entry (Material Symbols "pets").
+    const val Pets = "pets"
     const val TaskAlt         = "task_alt"              // current quest
     const val Database        = "database"              // v7.89 — Browse Topics drawer entry (verified in font subset)
     const val SupportAgent    = "support_agent"          // v7.89 — Support & diagnostics drawer entry (verified in font subset)

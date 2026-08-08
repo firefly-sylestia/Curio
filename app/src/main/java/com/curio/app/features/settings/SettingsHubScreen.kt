@@ -428,7 +428,8 @@ private val SettingsSections = listOf(
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint, and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
                     SettingsRowEntry(CurioIcons.Notifications, "Notifications", "Reminders and explore controls", CurioRoutes.SETTINGS_NOTIFICATIONS),
-                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING)
+                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING),
+                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own companion look", CurioRoutes.PET_DESIGNER)
                 )
             )
         )
