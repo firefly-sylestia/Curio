@@ -116,14 +116,14 @@ fun CurioPetSprite(
     // category pastel, never a dark-mode twin).
     // v8.34 — the active design's palette drives every body color (each key
     // falls back to the default look when the design doesn't recolor it).
-    val accent = Color(0xFF${activeDesign.colorOf('s')})
-    val ink = Color(0xFF${activeDesign.colorOf('o')})
-    val body = Color(0xFF${activeDesign.colorOf('b')})
-    val bodyShade = Color(0xFF${activeDesign.colorOf('B')})
+    val accent = Color(("FF" + activeDesign.colorOf('s')).toLong(16).toULong())
+    val ink = Color(("FF" + activeDesign.colorOf('o')).toLong(16).toULong())
+    val body = Color(("FF" + activeDesign.colorOf('b')).toLong(16).toULong())
+    val bodyShade = Color(("FF" + activeDesign.colorOf('B')).toLong(16).toULong())
     val bellyLight = Color(0xFFFFFBF0)
     val blush = Color(0xFFF7AFAF)
-    val gold = Color(0xFF${activeDesign.colorOf('G')})
-    val goldDeep = Color(0xFF${activeDesign.colorOf('g')})
+    val gold = Color(("FF" + activeDesign.colorOf('G')).toLong(16).toULong())
+    val goldDeep = Color(("FF" + activeDesign.colorOf('g')).toLong(16).toULong())
     // v8.26 — excited eyes wear a NATURAL warm brown (the ink family, one
     // step lighter) instead of gold: the gold stars read orangish against
     // the cream body. Sparkles and the antenna keep the gold.
@@ -420,7 +420,11 @@ fun CurioPetSprite(
                                 'B' -> drawPx(col, row, bodyShade)
                                 'o' -> drawPx(col, row, ink)
                                 's' -> drawPx(col, row, accent)
-                                'S' -> drawPx(col, row, Color(0xFF${activeDesign.colorOf('S')}))
+                                'S' -> drawPx(
+                                    col,
+                                    row,
+                                    Color(("FF" + activeDesign.colorOf('S')).toLong(16).toULong())
+                                )
                                 'G' -> drawPx(col, row, gold)
                                 'g' -> drawPx(col, row, goldDeep)
                             }
