@@ -82,7 +82,7 @@ object CurioPet {
 
     /** A short human line about what's missing to reach the next stage. */
     fun nextStageHint(stage: Stage): String {
-        val next = nextStage(stage) ?: return "Fully grown — every lane is yours."
+        val next = nextStage(stage) ?: return "Fully grown. Every lane is yours."
         return when (next) {
             Stage.SPROUT -> "Reach Level 3 to grow."
             Stage.TRAIL_BUDDY -> "Explore ${(3 - CurioQuests.categoriesState.size).coerceAtLeast(0)} more lane(s) to grow."
@@ -157,7 +157,7 @@ object CurioPet {
     /** A short, cute line for the pet's reaction to [event]. */
     fun eventLine(event: Event): String = when (event) {
         Event.SPIN_LANDED -> listOf(
-            "It landed!", "Ooh — the deck chose well!", "A new topic, a new tale!"
+            "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!"
         ).random()
         // v8.16 — the line adapts to the auto-open preference: when the
         // reveal opens BY ITSELF (auto-open ON) the pet cheers the surprise
@@ -166,7 +166,7 @@ object CurioPet {
         // the eager "Open it!" cheer stays.
         Event.REVEAL_OPEN -> if (AppPreferences.autoOpenRevealState)
             listOf(
-                "There it is!", "It opened itself — sneaky!", "Ta-da! A new tale!",
+                "There it is!", "It opened itself, sneaky!", "Ta-da! A new tale!",
                 "Ooh, look what landed!", "Surprise!"
             ).random()
         else
@@ -174,7 +174,7 @@ object CurioPet {
                 "Open it, open it!", "Come see what's inside!", "I'm dying of curiosity!"
             ).random()
         Event.EXPLORE -> listOf(
-            "Go explore!", "Adventure time!", "I'll wait right here — go see!"
+            "Go explore!", "Adventure time!", "I'll wait right here. Go see!"
         ).random()
         Event.SAVE -> listOf(
             "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!"
@@ -342,13 +342,13 @@ object CurioPet {
     // `__LANE__` is swapped for the least-explored lane's name at show time.
     private val excitedLines = listOf(
         "Ooh! Somewhere new!",
-        "Wheee — new ground!",
+        "Wheee, new ground!",
         "The deck has taste!",
         "Fresh paths ahead!"
     )
     private val happyLines = listOf(
-        "Nice! XP banked — keep going?",
-        "That was fun — more?",
+        "Nice! XP banked. Keep going?",
+        "That was fun. More?",
         "Curiosity looks good on you.",
         "Ooh, we're on a roll!",
         "Doing that again? Please?"
@@ -357,29 +357,29 @@ object CurioPet {
     // evening, hushed night.
     private val morningLines = listOf(
         "Morning! The deck smells fresh.",
-        "Rise and shine — something new is waiting.",
-        "Fresh eyes, fresh topics — let's go!",
+        "Rise and shine. Something new is waiting.",
+        "Fresh eyes, fresh topics. Let's go!",
         "Good morning! I saved your spot."
     )
     private val afternoonLines = listOf(
         "Afternoon wander? Let's go.",
-        "Bright and busy — a good time to peek.",
+        "Bright and busy. A good time to peek.",
         "Midday! Perfect for a quick spin."
     )
     private val eveningLines = listOf(
         "Evening! Cozy hour, warm lamp.",
-        "The day's winding down — one more spin?",
+        "The day's winding down. One more spin?",
         "Evening glow. Nice time for a discovery."
     )
     private val nightLines = listOf(
         "Past my bedtime… but for you, I'll stay.",
-        "Shh — night mode. One quiet spin?",
+        "Shh, night mode. One quiet spin?",
         "The stars are out. The deck still shines."
     )
     private val curiousLines = listOf(
-        "We haven't tried __LANE__ yet — want a new stamp?",
+        "We haven't tried __LANE__ yet. Want a new stamp?",
         "I wonder what __LANE__ hides…",
-        "Pssst — __LANE__ is calling."
+        "Pssst, __LANE__ is calling."
     )
     private val sleepyLines = listOf(
         "I'll keep your seat warm. Come spin when you're ready.",
@@ -389,12 +389,12 @@ object CurioPet {
     // v8.13 — the new moods' lines: focused keeps out of the way while the
     // user writes; bouncy rides the post-play high.
     private val focusedLines = listOf(
-        "Write it down — I'll guard your thoughts.",
+        "Write it down. I'll guard your thoughts.",
         "Quiet paws, I promise.",
-        "Take your time — this one's a keeper."
+        "Take your time. This one's a keeper."
     )
     private val bouncyLines = listOf(
-        "Phew — that was fun. Again soon?",
+        "Phew, that was fun. Again soon?",
         "I'm still bouncing from that game!",
         "Best play date ever. …Round two?"
     )
@@ -403,7 +403,7 @@ object CurioPet {
     fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String = when (mood) {
         // Inlined so the level reads live, not baked at first access.
         Mood.PROUD -> listOf(
-            "Level ${CurioQuests.levelForXp(CurioQuests.xpState)} — I grew a little!",
+            "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. I grew a little!",
             "Shiny! We leveled up together.",
             "Do you feel that? That's growth!"
         ).random()
@@ -429,8 +429,8 @@ object CurioPet {
 
     /** A short cheer while the Spin deck is reeling (v8.13). */
     fun spinCheer(): String = listOf(
-        "Go, go, go!", "Spinny spin!", "Ooh — where will it land?",
-        "Come on, good one!", "Round and round!", "I can't watch — okay, I'm watching."
+        "Go, go, go!", "Spinny spin!", "Ooh, where will it land?",
+        "Come on, good one!", "Round and round!", "I can't watch. Okay, I'm watching."
     ).random()
 
     /**
@@ -447,7 +447,7 @@ object CurioPet {
             "More, more, more!", "You're my favorite!", "Party time!"
         ).random()
         tier >= 2 -> listOf(
-            "Hehehe!", "More, more!", "This is fun!", "Tag — you're it!",
+            "Hehehe!", "More, more!", "This is fun!", "Tag, you're it!",
             "Catch me!", "Bouncy bouncy!", "Again, again!"
         ).random()
         else -> listOf(
@@ -463,8 +463,8 @@ object CurioPet {
      */
     fun playInitiation(): String = listOf(
         "Wanna play? Catch me!", "Boop! You're it!", "I'm feeling bouncy!",
-        "Zoom zoom — chase me!", "Play with me!", "Tag! Your turn!",
-        "I'm bored — come chase me!"
+        "Zoom zoom, chase me!", "Play with me!", "Tag! Your turn!",
+        "I'm bored, come chase me!"
     ).random()
 
     /**
@@ -474,7 +474,7 @@ object CurioPet {
      */
     fun landmarkLine(funThing: Boolean): String =
         (if (funThing) listOf(
-            "Boop!", "Ooh — shiny!", "Hehe, hi!", "Tag! You're it!",
+            "Boop!", "Ooh, shiny!", "Hehe, hi!", "Tag! You're it!",
             "I like this one!", "Spinny spinny!", "Wheee!", "Boop boop boop!"
         ) else listOf(
             "What's this?", "Hmm, interesting…", "*peeks*", "Read read read!",
@@ -496,7 +496,7 @@ object CurioPet {
      * a wobble, and a groggy line while it recovers.
      */
     fun dizzyLine(): String = listOf(
-        "Whoa… the room is spinning!", "Wheee— dizzy!", "Spin spin… okay, stop!",
+        "Whoa… the room is spinning!", "Wheee, dizzy!", "Spin spin… okay, stop!",
         "Whoa whoa whoa!", "I think I need a sit-down…", "So dizzy!",
         "We-e-ee! …Whew!", "The floor is wobbly!"
     ).random()
@@ -506,8 +506,8 @@ object CurioPet {
      * pet hurried over to peek at it from the bottom edge.
      */
     fun drawerLine(): String = listOf(
-        "Ooh, a drawer!", "Peek peek — what's in there?", "Can I come too?",
-        "Hmm, so many choices!", "Ooh — filters!", "What are we picking?",
+        "Ooh, a drawer!", "Peek peek, what's in there?", "Can I come too?",
+        "Hmm, so many choices!", "Ooh, filters!", "What are we picking?",
         "I'll wait right here!", "Ooh, shiny options!"
     ).random()
 

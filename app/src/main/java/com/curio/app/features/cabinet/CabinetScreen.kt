@@ -343,7 +343,7 @@ fun CabinetScreen(navController: NavController) {
                     CurioEmptyState(
                         glyph = CurioIcons.Inventory2,
                         headline = "Your Cabinet is empty",
-                        subtext = "Every capture you save will live here — shuffle to find your first one.",
+                        subtext = "Every capture you save will live here. Shuffle to find your first one.",
                         tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                         ctaLabel = "Discover something",
                         onCtaClick = {
@@ -535,7 +535,7 @@ fun CabinetScreen(navController: NavController) {
                     CabinetHeroActionPill(
                         onClick = { sortNewestFirst = !sortNewestFirst },
                         glyph = if (sortNewestFirst) CurioIcons.ArrowDownward else CurioIcons.ArrowUpward,
-                        contentDescription = if (sortNewestFirst) "Newest first — tap for oldest" else "Oldest first — tap for newest",
+                        contentDescription = if (sortNewestFirst) "Newest first. Tap for oldest" else "Oldest first. Tap for newest",
                         ink = ink,
                         emphasized = sortNewestFirst
                     )

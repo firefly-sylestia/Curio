@@ -765,7 +765,7 @@ fun CurioFloatingPet(
                 spinning = CurioPet.spinning,
                 // v8.21 — swirls + wobble while flung, and while recovering.
                 dizzy = dizzy || recovering,
-                contentDescription = "Curio, your companion pet — drag it anywhere, tap to say hi"
+                contentDescription = "Curio, your companion pet. Drag it anywhere, tap to say hi"
             )
         }
         // v8.13 — hearts rise ABOVE the pet in their own offset sibling

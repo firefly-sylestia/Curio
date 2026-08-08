@@ -43,7 +43,7 @@ fun CurioUpdateCheckRow(modifier: Modifier = Modifier) {
                 "Version ${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
             UpdateCheckState.Checking -> "Checking for updates…"
             UpdateCheckState.UpToDate -> "You're up to date · v${BuildConfig.VERSION_NAME}"
-            UpdateCheckState.UpdateAvailable -> "Update available — ${updateInfo?.tagName ?: ""}"
+            UpdateCheckState.UpdateAvailable -> "Update available: ${updateInfo?.tagName ?: ""}"
             UpdateCheckState.Failed -> "Couldn't check · tap to retry"
         },
         onClick = {

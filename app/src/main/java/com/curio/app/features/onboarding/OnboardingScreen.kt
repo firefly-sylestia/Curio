@@ -677,7 +677,7 @@ private fun SetupSlide(
             Spacer(Modifier.height(6.dp))
 
             Text(
-                text = "Grant what you like — you can change it anytime in Settings.",
+                text = "Grant what you like. You can change it anytime in Settings.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center
@@ -908,12 +908,12 @@ private val OnboardingSlides = listOf(
     OnboardingSlideData(
         kicker = "EXPLORE",
         headline = "Explore it your way",
-        subtext = "Listen, read, watch, or scroll. Your time is timed, never rushed — wander wherever curiosity leads."
+        subtext = "Listen, read, watch, or scroll. Your time is timed, never rushed. Wander wherever curiosity leads."
     ),
     OnboardingSlideData(
         kicker = "KEEP",
         headline = "Keep what moves you",
-        subtext = "Voice notes, reviews, moodboards, journal pages — save what stays with you, in the format that fits how you think."
+        subtext = "Voice notes, reviews, moodboards, journal pages: save what stays with you, in the format that fits how you think."
     )
 )
 
@@ -966,7 +966,7 @@ private fun ThemeSlide() {
             Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
 
             Text(
-                text = "Light, dark, or follow your phone — and keep Curio's soft pastel colors?",
+                text = "Light, dark, or follow your phone, and keep Curio's soft pastel colors?",
                 style = MaterialTheme.typography.bodyLarge,
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center

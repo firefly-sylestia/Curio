@@ -1,62 +1,59 @@
-# Request — v8.26: pet polish (cloud, eyes, throw momentum, bubble, dialog)
+# Request — v8.26b: CI compile fix + app-wide em-dash sweep
 
 ## What the user asked
 
-1. Make the ride cloud even smaller.
-2. Change "I'm reading this." to something else.
-3. Change the orangish excited eyes to a more natural, different look.
-4. Make throwing the pet dynamic: it should keep a little momentum after a
-   fling (not too much).
-5. The dialog/bubble change isn't smooth (pops) — make it smooth.
-6. Reactions (dizzy, etc.) should last ~2-3 seconds.
-7. Export the pet's dialog as a txt so the user can improve the copy later —
-   keep a note of what each line is FOR so it's easy to edit.
+1. Fix the CI compile failures from the last push (they pasted the Gradle
+   error log).
+2. Remove em dashes from the rest of the user-facing copy app-wide
+   (onboarding slides, quest descriptions, badges, etc.).
 
-## Analysis
+## Part 1 — CI compile fix (root causes)
 
-- **Cloud:** `CLOUD_W/H` were 96×42dp with a 16-col pixel grid whose 20-char
-  rows got clipped on the right (lopsided). Shrunk to 80×32dp, grid widened
-  to 20 so the full art renders, and it's tucked under the feet (y offset
-  0.66 → 0.72 of pet height).
-- **Eyes:** the EXCITED `EyeStyle.STAR` used `gold` (0xFFFFD97D) which reads
-  orangish on the cream body. Swapped to a natural warm brown `starEye`
-  (0xFF7A4E2E — the ink family, one step lighter); sparkles/antenna keep gold.
-- **Throw momentum:** `detectDragGestures` gives no velocity, so the
-  pointerInput now tracks a rolling blended px/s velocity; on release, if
-  the speed clears 350dp/s it launches a short friction glide (capped at
-  620dp/s, decay 8/s, stops at 26dp/s ≈ max ~75dp slide) — "a little, not
-  too much". Glide job is cancelled on drag start/cancel.
-- **Smooth bubble:** new `bubbleAnim` Animatable — bubble fades + rises in
-  (180ms), holds ~2.3s, fades out (180ms), then clears. The bubble Box got a
-  graphicsLayer alpha + 8dp rise.
-- **Reaction timing:** bubble hold 1500 → 2300ms; dizzy recovery 1600 →
-  2500ms (2-3s reactions).
-- **Line swap:** curious-poke list: "I'm reading this." → "Let me read this!".
-- **Dialog txt:** new `docs/PET_DIALOGUE.txt` — every pet + tour line grouped
-  by purpose (mood bubbles, event reactions, spin cheer, touch tiers,
-  landmark pokes, jig, dizzy, drawer, morning greeting, home drop, check-in
-  dialog, tour steps, onboarding ask) with code locations and editing notes.
+- `CurioNavHost.kt` — `Modifier.background(background)` in the reveal
+  bottom-strip placeholder (v8.25) was missing the
+  `androidx.compose.foundation.background` import. The unresolved extension
+  cascaded into the confusing `Comparator.then` / "unresolved background" /
+  "cannot infer T" errors. Fixed by adding the import.
+- `CurioFloatingPet.kt` — the throw-momentum glide (v8.26) called `launch`
+  inside `onDragEnd`, a plain lambda with no CoroutineScope receiver, so it
+  resolved to the deprecated top-level `launch`. Fixed by capturing the
+  pointerInput scope (`val inputScope = this`) and launching via
+  `inputScope.launch { ... }`.
 
-## Changes
+Pushed as `e617bc9` before starting the copy sweep.
 
-| File | Change |
-| --- | --- |
-| `ui/pet/CurioFloatingPet.kt` | Smaller cloud (80×32, 20-col grid, tucked under feet); animated bubble in/out; throw-momentum glide with velocity tracking; bubble hold 2.3s; dizzy recovery 2.5s. |
-| `ui/pet/CurioPetSprite.kt` | STAR (excited) eyes now natural warm brown instead of gold. |
-| `data/CurioPet.kt` | "I'm reading this." → "Let me read this!". |
-| `docs/PET_DIALOGUE.txt` | NEW — full dialog reference with purpose labels + code locations. |
-| `fastlane/metadata/android/en-US/changelogs/20260813.txt` | NEW — release notes. |
+## Part 2 — em-dash sweep (user asked; scope = UI copy ONLY)
+
+Asked via ask_user: ~10,000 em dashes in the topic content JSONs are
+editorial data — user chose UI copy only, so `assets/topics/*.json` is
+untouched.
+
+Swapped every em dash in user-facing Kotlin/XML strings for commas, colons,
+or periods (context-appropriate). 35 files, 130 changes:
+
+- Pet dialogue (`data/CurioPet.kt`, `ui/pet/*`, home pet contentDescriptions)
+- Quest descriptions + badges (`data/CurioQuests.kt`, `features/quests`)
+- Onboarding slides + permission copy (`features/onboarding`)
+- Reveal/spin/cabinet/profile/recent/capture/crash/settings/support/promo/
+  bugreport screens, nav host session dialogs, notifications
+  (`ExploreReminderReceiver`, `ExploreSessionService`), update-check rows,
+  `strings.xml`, share-text builders (`data/CaptureData.kt`), fallback quote
+  (`data/TopicCatalog.kt`)
+- `docs/PET_DIALOGUE.txt` synced to the new pet lines.
+
+LEFT AS-IS (not user-facing): code comments, Log.w lines, exception
+messages, icon-name comments (`CurioIcons.kt`), the topic JSON content.
 
 ## Validation
 
-- Brace balance ALL OK (3 edited files), `git diff --check` clean, diffs
-  visually reviewed.
-- No compile/build commands run (environment has no Android SDK — CI gates
-  compilation on push per root AGENTS.md).
+- `git diff --check` clean; brace balance OK (flagged files are pre-existing
+  false positives of the naive checker — identical at HEAD).
+- Re-scan confirms 0 em dashes left in user-facing Kotlin/XML string
+  literals (remaining 43 are comments/logs only).
+- No compile/build commands run (no Android SDK here — CI gates on push).
 
 ## Completion summary
 
-v8.26 shipped: smaller tucked cloud, natural brown excited eyes, a little
-throw momentum after flings, smooth fade/rise speech bubbles, 2.3s bubble
-hold + 2.5s dizzy recovery, "Let me read this!" line, and a full
-docs/PET_DIALOGUE.txt reference for future copy edits.
+CI compile fixed (background import + scoped glide launch, pushed e617bc9);
+then the app-wide UI-copy em-dash sweep (35 files, all user-facing strings)
+pushed as the follow-up. Topic content JSONs untouched per scope choice.

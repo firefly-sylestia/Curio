@@ -944,7 +944,7 @@ private fun ProgressAndAchievementsCard(
             trackColor = CurioColors.CoralBlush.copy(alpha = 0.14f)
         )
         Text(
-            text = if (isMaxLevel) "Maximum level reached — keep exploring for more XP."
+            text = if (isMaxLevel) "Maximum level reached. Keep exploring for more XP."
             else "${(nextThreshold - xp).coerceAtLeast(0)} XP to the next level",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -980,7 +980,7 @@ private fun ProgressAndAchievementsCard(
                     )
                     Text(
                         currentQuest?.let { "Next: ${it.title}" }
-                            ?: "Journey complete — every badge is open",
+                            ?: "Journey complete. Every badge is open",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

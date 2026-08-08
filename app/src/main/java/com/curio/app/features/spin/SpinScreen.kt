@@ -1928,7 +1928,7 @@ private fun EmptyPoolHint(cat: CurioCategory) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "This lane is still forming — new topics will appear here as you explore.",
+                    text = "This lane is still forming. New topics will appear here as you explore.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center

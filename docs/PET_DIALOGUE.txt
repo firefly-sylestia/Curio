@@ -17,48 +17,48 @@ Legend
              bouncyLines)
 
   PROUD (leveled up in last 90s) [picks one at random]:
-    • "Level {N} — I grew a little!"     (N = your level)
+    • "Level {N}. I grew a little!"     (N = your level)
     • "Shiny! We leveled up together."
     • "Do you feel that? That's growth!"
 
   EXCITED (explored a new lane in last 60s):
     • "Ooh! Somewhere new!"
-    • "Wheee — new ground!"
+    • "Wheee, new ground!"
     • "The deck has taste!"
     • "Fresh paths ahead!"
 
   HAPPY — morning (6-11h):
     • "Morning! The deck smells fresh."
-    • "Rise and shine — something new is waiting."
-    • "Fresh eyes, fresh topics — let's go!"
+    • "Rise and shine. Something new is waiting."
+    • "Fresh eyes, fresh topics. Let's go!"
     • "Good morning! I saved your spot."
   HAPPY — afternoon (12-17h):
     • "Afternoon wander? Let's go."
-    • "Bright and busy — a good time to peek."
+    • "Bright and busy. A good time to peek."
     • "Midday! Perfect for a quick spin."
   HAPPY — evening (18-21h):
     • "Evening! Cozy hour, warm lamp."
-    • "The day's winding down — one more spin?"
+    • "The day's winding down. One more spin?"
     • "Evening glow. Nice time for a discovery."
   HAPPY — night (22h-5h):
     • "Past my bedtime… but for you, I'll stay."
-    • "Shh — night mode. One quiet spin?"
+    • "Shh, night mode. One quiet spin?"
     • "The stars are out. The deck still shines."
 
   CURIOUS (there is a lane you never tried) [__LANE__ is the lane name]:
-    • "We haven't tried __LANE__ yet — want a new stamp?"
+    • "We haven't tried __LANE__ yet. Want a new stamp?"
     • "I wonder what __LANE__ hides…"
-    • "Pssst — __LANE__ is calling."
+    • "Pssst, __LANE__ is calling."
     (fallback when every lane is tried)
     • "Spin something new today?"
 
   FOCUSED (you're writing/saving on the capture screen):
-    • "Write it down — I'll guard your thoughts."
+    • "Write it down. I'll guard your thoughts."
     • "Quiet paws, I promise."
-    • "Take your time — this one's a keeper."
+    • "Take your time. This one's a keeper."
 
   BOUNCY (right after a play session):
-    • "Phew — that was fun. Again soon?"
+    • "Phew, that was fun. Again soon?"
     • "I'm still bouncing from that game!"
     • "Best play date ever. …Round two?"
 
@@ -73,11 +73,11 @@ Legend
 
   SPIN LANDED:
     • "It landed!"
-    • "Ooh — the deck chose well!"
+    • "Ooh, the deck chose well!"
     • "A new topic, a new tale!"
   REVEAL OPENED — auto-open ON (reveal opens by itself):
     • "There it is!"
-    • "It opened itself — sneaky!"
+    • "It opened itself, sneaky!"
     • "Ta-da! A new tale!"
     • "Ooh, look what landed!"
     • "Surprise!"
@@ -88,7 +88,7 @@ Legend
   EXPLORED A TOPIC:
     • "Go explore!"
     • "Adventure time!"
-    • "I'll wait right here — go see!"
+    • "I'll wait right here. Go see!"
   SAVED A CAPTURE:
     • "Keepsake saved!"
     • "Mine now… I mean, ours!"
@@ -100,10 +100,10 @@ Legend
 
     • "Go, go, go!"
     • "Spinny spin!"
-    • "Ooh — where will it land?"
+    • "Ooh, where will it land?"
     • "Come on, good one!"
     • "Round and round!"
-    • "I can't watch — okay, I'm watching."
+    • "I can't watch. Okay, I'm watching."
 
 --------------------------------------------------------------------------------
 4. TOUCH REACTIONS — tap the floating pet (escalates with rapid taps)
@@ -121,7 +121,7 @@ Legend
     • "Hehehe!"
     • "More, more!"
     • "This is fun!"
-    • "Tag — you're it!"
+    • "Tag, you're it!"
     • "Catch me!"
     • "Bouncy bouncy!"
     • "Again, again!"
@@ -148,10 +148,10 @@ Legend
     • "Wanna play? Catch me!"
     • "Boop! You're it!"
     • "I'm feeling bouncy!"
-    • "Zoom zoom — chase me!"
+    • "Zoom zoom, chase me!"
     • "Play with me!"
     • "Tag! Your turn!"
-    • "I'm bored — come chase me!"
+    • "I'm bored, come chase me!"
 
 --------------------------------------------------------------------------------
 6. LANDMARK POKES — the pet wanders to a screen element and boops it
@@ -159,7 +159,7 @@ Legend
 
   FUN things (buttons/gadgets — boop + hearts):
     • "Boop!"
-    • "Ooh — shiny!"
+    • "Ooh, shiny!"
     • "Hehe, hi!"
     • "Tag! You're it!"
     • "I like this one!"
@@ -194,7 +194,7 @@ Legend
    Location: CurioPet.kt (dizzyLine)
 
     • "Whoa… the room is spinning!"
-    • "Wheee— dizzy!"
+    • "Wheee, dizzy!"
     • "Spin spin… okay, stop!"
     • "Whoa whoa whoa!"
     • "I think I need a sit-down…"
@@ -207,10 +207,10 @@ Legend
    Location: CurioPet.kt (drawerLine)
 
     • "Ooh, a drawer!"
-    • "Peek peek — what's in there?"
+    • "Peek peek, what's in there?"
     • "Can I come too?"
     • "Hmm, so many choices!"
-    • "Ooh — filters!"
+    • "Ooh, filters!"
     • "What are we picking?"
     • "I'll wait right here!"
     • "Ooh, shiny options!"

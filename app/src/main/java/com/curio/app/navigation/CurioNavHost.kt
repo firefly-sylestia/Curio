@@ -888,7 +888,7 @@ fun CurioNavHost(
                         // The double-confirmation step — make the cost of
                         // cancelling explicit before the session is dropped.
                         Text(
-                            "This ends the session now — the ${formatElapsed(elapsedMillis)} isn't saved and you won't be asked to write about ${activeSession.topicName}. You can explore it again anytime.",
+                            "This ends the session now. The ${formatElapsed(elapsedMillis)} isn't saved and you won't be asked to write about ${activeSession.topicName}. You can explore it again anytime.",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     } else {
@@ -904,14 +904,14 @@ fun CurioNavHost(
                             )
                             Text(
                                 if (activeSession.paused)
-                                    "Paused at ${formatElapsed(elapsedMillis)} — tap Resume on the bubble or notification to continue"
+                                    "Paused at ${formatElapsed(elapsedMillis)}. Tap Resume on the bubble or notification to continue"
                                 else
                                     "You've been exploring for ${formatElapsed(elapsedMillis)}",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                             )
                         }
                         Text(
-                            "You started ${activeSession.verb.lowercase()} ${activeSession.targetName} — if you're done, write it down while it's fresh. Or keep exploring, no rush.",
+                            "You started ${activeSession.verb.lowercase()} ${activeSession.targetName}. If you're done, write it down while it's fresh. Or keep exploring, no rush.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -951,7 +951,7 @@ fun CurioNavHost(
                         navController.navigate(
                             CurioRoutes.captureFor(activeSession.categoryId.routeSlug, activeSession.topicName)
                         ) { launchSingleTop = true }
-                    }) { Text("Done — write about it") }
+                    }) { Text("Done and write about it") }
                 }
             },
             dismissButton = {

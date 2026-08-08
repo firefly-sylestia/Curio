@@ -331,11 +331,11 @@ fun SaveCaptureScreen(
                         }
                         .onFailure { error ->
                             Log.e("SaveCaptureScreen", "Failed to save capture ${entry.id}", error)
-                            saveError = "Couldn't save this entry. Your recording is still here — try again."
+                            saveError = "Couldn't save this entry. Your recording is still here. Try again."
                         }
                 } catch (error: Exception) {
                     Log.e("SaveCaptureScreen", "Failed to prepare capture", error)
-                    saveError = "Couldn't save this entry. Your recording is still here — try again."
+                    saveError = "Couldn't save this entry. Your recording is still here. Try again."
                 } finally {
                     saveInProgress = false
                 }

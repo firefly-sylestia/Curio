@@ -310,7 +310,7 @@ fun QuestsScreen(navController: NavController) {
                             )
                         )
                         Text(
-                            "Your Curio pet grew a little — keep going!",
+                            "Your Curio pet grew a little. Keep going!",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -384,7 +384,7 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    if (isMaxLevel) "Curio Sovereign — the whole shelf is yours."
+                    if (isMaxLevel) "Curio Sovereign, the whole shelf is yours."
                     else "Rank $level of ${CurioQuests.maxLevel} · ${CurioQuests.maxLevel - level} to go",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -411,7 +411,7 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = if (isMaxLevel) "Curio Sovereign — the whole shelf is yours."
+            text = if (isMaxLevel) "Curio Sovereign, the whole shelf is yours."
             else "$xp / $nextThreshold XP · ${(nextThreshold - xp).coerceAtLeast(0)} XP to Level ${level + 1}",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -503,7 +503,7 @@ private fun CurrentQuestCard(
         if (chain != null) {
             Spacer(Modifier.height(8.dp))
             Text(
-                "From the ${chain.title} chain — ${CurioQuests.chainProgress(chain)} of ${chain.stages.size} stages done",
+                "From the ${chain.title} chain, ${CurioQuests.chainProgress(chain)} of ${chain.stages.size} stages done",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -539,7 +539,7 @@ private fun PathsCard(
         Spacer(Modifier.height(2.dp))
         if (activeChains.isEmpty()) {
             Text(
-                "Every path complete — the whole shelf is yours!",
+                "Every path complete. The whole shelf is yours!",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -834,7 +834,7 @@ private fun DailyCard(
                 CurioPassport.leastEngaged(context)
             } else null
             val questTitle = when {
-                discoveryLane != null -> "New lane — try ${discoveryLane.displayName}"
+                discoveryLane != null -> "New lane, try ${discoveryLane.displayName}"
                 quest.kind == CurioQuests.DailyKind.DISCOVERY -> "Try a new lane"
                 else -> quest.title
             }

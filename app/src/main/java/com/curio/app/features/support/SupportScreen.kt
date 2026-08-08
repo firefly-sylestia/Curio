@@ -124,7 +124,7 @@ fun SupportScreen(navController: NavController) {
         UpdateCheckUi.Idle -> "Tap to check for the latest release"
         UpdateCheckUi.Checking -> "Checking for updates…"
         UpdateCheckUi.UpToDate -> "You're up to date · v${BuildConfig.VERSION_NAME}"
-        UpdateCheckUi.UpdateAvailable -> "Update available — ${updateInfo?.tagName ?: ""}"
+        UpdateCheckUi.UpdateAvailable -> "Update available: ${updateInfo?.tagName ?: ""}"
         UpdateCheckUi.Failed -> "Couldn't check · tap to retry"
     }
 
@@ -302,7 +302,7 @@ private fun UpdateResultCard(
         UpdateCheckUi.UpToDate ->
             CurioColors.Sage to "You're on the latest version"
         UpdateCheckUi.UpdateAvailable ->
-            CurioColors.CoralBlush to "Update available — ${info?.tagName ?: ""}"
+            CurioColors.CoralBlush to "Update available: ${info?.tagName ?: ""}"
         else ->
             MaterialTheme.colorScheme.error to "Couldn't check for updates"
     }

@@ -71,7 +71,7 @@ fun BackupToolsScreen(navController: NavController) {
                     lastBackupAt = CurioBackupManager.lastBackupAtMillis(context)
                     backupStatus = true to (
                         "Backed up ${result.captureCount} capture(s), your settings and sound recordings.\n" +
-                            "Keep the file somewhere safe — it brings everything back on a new device."
+                            "Keep the file somewhere safe. It brings everything back on a new device."
                         )
                 } catch (e: Exception) {
                     backupStatus = false to "Backup failed: ${e.message ?: "unknown error"}"
@@ -134,7 +134,7 @@ fun BackupToolsScreen(navController: NavController) {
                         ". ${preview.species} species " +
                         (if (preview.species == 1) "entry" else "entries") +
                         " go to the saved catalog.\n\n" +
-                        "They'll be added to your Cabinet as legacy entries — nothing currently in Curio is touched."
+                        "They'll be added to your Cabinet as legacy entries. Nothing currently in Curio is touched."
                 )
             },
             confirmButton = {

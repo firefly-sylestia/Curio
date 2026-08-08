@@ -225,8 +225,8 @@ fun HomeScreen(navController: NavController) {
                         }
                     },
                     contentDescription = when {
-                        !CurioPet.awake -> "Curio asleep in its flower bed — tap to wake"
-                        CurioPet.atHome -> "Curio sitting in its flower bed — tap to come out"
+                        !CurioPet.awake -> "Curio asleep in its flower bed. Tap to wake"
+                        CurioPet.atHome -> "Curio sitting in its flower bed. Tap to come out"
                         else -> "Curio's flower bed"
                     },
                     modifier = m
@@ -974,7 +974,7 @@ fun HomeScreen(navController: NavController) {
         AlertDialog(
             onDismissRequest = { pendingUnpin = null },
             title = { Text("Unpin ${pinned.topicName}?") },
-            text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck — you can pin it again anytime.") },
+            text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck. You can pin it again anytime.") },
             confirmButton = {
                 TextButton(onClick = {
                     AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
@@ -2041,9 +2041,9 @@ private fun CurrentlyExploringCard(
                 Text(
                     when {
                         session.paused ->
-                            "Paused at ${formatElapsed(elapsedMillis)} — ${session.verb.lowercase()} ${session.targetName}"
+                            "Paused at ${formatElapsed(elapsedMillis)}: ${session.verb.lowercase()} ${session.targetName}"
                         overRecommended ->
-                            "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far — past the ~${session.durationMinutes} min mark"
+                            "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far, past the ~${session.durationMinutes} min mark"
                         else ->
                             "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far · ~${session.durationMinutes} min recommended"
                     },
@@ -2066,7 +2066,7 @@ private fun CurrentlyExploringCard(
                         ),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Done — write about it", style = MaterialTheme.typography.labelLarge)
+                        Text("Done and write about it", style = MaterialTheme.typography.labelLarge)
                     }
                     OutlinedButton(
                         onClick = onKeepExploring,

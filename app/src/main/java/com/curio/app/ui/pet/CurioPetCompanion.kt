@@ -195,9 +195,9 @@ fun CurioPetHeroCard(
                             }
                         },
                         contentDescription = when {
-                            !CurioPet.awake -> "${stage.displayName} asleep in its flower bed — tap to wake"
-                            CurioPet.atHome -> "${stage.displayName} sitting in its flower bed — tap to come out"
-                            else -> "${stage.displayName}'s flower bed — tap to check in"
+                            !CurioPet.awake -> "${stage.displayName} asleep in its flower bed. Tap to wake"
+                            CurioPet.atHome -> "${stage.displayName} sitting in its flower bed. Tap to come out"
+                            else -> "${stage.displayName}'s flower bed. Tap to check in"
                         }
                     )
                 }
@@ -279,7 +279,7 @@ fun CurioPetHeroCard(
                         )
                     }
                     Text(
-                        "Personality: ${info.persona.displayName} — ${info.persona.tagline}",
+                        "Personality: ${info.persona.displayName}, ${info.persona.tagline}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -184,9 +184,9 @@ object CurioQuests {
             id = "deck", glyph = "casino", title = "The Deck", subtitle = "Spin your way up the ranks",
             stages = listOf(
                 QuestStage("deck-1", "First Spin", "Spin the deck once", "Tap the Shuffle button on the Spin tab.", 10, QuestKind.SPIN, 1, navRoute = "spin"),
-                QuestStage("deck-3", "Warming Up", "Spin 3 times", "Three shuffles — the deck is getting to know you.", 5, QuestKind.SPIN, 3),
-                QuestStage("deck-5", "Deck Regular", "Spin 5 times", "Keep shuffling — the deck resets each spin.", 15, QuestKind.SPIN, 5),
-                QuestStage("deck-10", "Deck Habit", "Spin 10 times", "Double digits — a proper habit forming.", 10, QuestKind.SPIN, 10),
+                QuestStage("deck-3", "Warming Up", "Spin 3 times", "Three shuffles. The deck is getting to know you.", 5, QuestKind.SPIN, 3),
+                QuestStage("deck-5", "Deck Regular", "Spin 5 times", "Keep shuffling. The deck resets each spin.", 15, QuestKind.SPIN, 5),
+                QuestStage("deck-10", "Deck Habit", "Spin 10 times", "Double digits. A proper habit forming.", 10, QuestKind.SPIN, 10),
                 QuestStage("deck-25", "Deck Master", "Spin 25 times", "A quarter of a century of spins.", 25, QuestKind.SPIN, 25),
                 QuestStage("deck-50", "Deck Virtuoso", "Spin 50 times", "Halfway to legend.", 20, QuestKind.SPIN, 50),
                 QuestStage("deck-100", "Deck Legend", "Spin 100 times", "The deck knows your name now.", 40, QuestKind.SPIN, 100)
@@ -197,7 +197,7 @@ object CurioQuests {
             id = "discovery", glyph = "explore", title = "Discovery", subtitle = "Go find things in the world",
             stages = listOf(
                 QuestStage("disc-1", "First Discovery", "Explore your first topic", "Open a topic and tap Explore.", 10, QuestKind.EXPLORE, 1),
-                QuestStage("disc-3", "Three Steps Out", "Explore 3 topics", "Three deep dives — the itch is real.", 5, QuestKind.EXPLORE, 3),
+                QuestStage("disc-3", "Three Steps Out", "Explore 3 topics", "Three deep dives. The itch is real.", 5, QuestKind.EXPLORE, 3),
                 QuestStage("disc-5", "Globe Trotter", "Explore 5 topics", "Five deep dives under your belt.", 15, QuestKind.EXPLORE, 5),
                 QuestStage("disc-10", "Trail Maker", "Explore 10 topics", "A trail of your own making.", 10, QuestKind.EXPLORE, 10),
                 QuestStage("disc-25", "Pathfinder", "Explore 25 topics", "A quarter century of exploration.", 25, QuestKind.EXPLORE, 25),
@@ -210,13 +210,13 @@ object CurioQuests {
             id = "keepsakes", glyph = "inventory_2", title = "Keepsakes", subtitle = "Fill your Cabinet",
             stages = listOf(
                 QuestStage("keep-1", "First Keepsake", "Save your first capture", "Write down what you found.", 10, QuestKind.SAVE, 1),
-                QuestStage("keep-3", "Souvenir Seeker", "Save 3 captures", "Three keepsakes — the shelf starts to fill.", 5, QuestKind.SAVE, 3),
+                QuestStage("keep-3", "Souvenir Seeker", "Save 3 captures", "Three keepsakes. The shelf starts to fill.", 5, QuestKind.SAVE, 3),
                 QuestStage("keep-5", "Notebook Keeper", "Save 5 captures", "Five keepsakes in the Cabinet.", 15, QuestKind.SAVE, 5),
                 QuestStage("keep-10", "Memory Keeper", "Save 10 captures", "A neat row of remembered moments.", 10, QuestKind.SAVE, 10),
                 QuestStage("keep-25", "Archivist", "Save 25 captures", "A growing archive of curiosity.", 25, QuestKind.SAVE, 25),
                 QuestStage("keep-50", "Archive Curator", "Save 50 captures", "Your Cabinet has a mind of its own now.", 20, QuestKind.SAVE, 50),
                 QuestStage("keep-100", "Librarian of Lanes", "Save 100 captures", "A hundred moments, preserved.", 35, QuestKind.SAVE, 100),
-                QuestStage("keep-formats", "Every Format", "Save one capture in every format", "Notes, sound bites, galleries — the full kit.", 30, QuestKind.FORMATS, CaptureFormat.entries.size)
+                QuestStage("keep-formats", "Every Format", "Save one capture in every format", "Notes, sound bites, galleries: the full kit.", 30, QuestKind.FORMATS, CaptureFormat.entries.size)
             )
         ),
         // ── The Tour — the guided walkthrough (drives the auto-guide) ──
@@ -225,7 +225,7 @@ object CurioQuests {
             stages = listOf(
                 QuestStage(
                     id = "tour-settings", title = "Look around Settings",
-                    description = "Appearance, reminders, recording, backup — make Curio yours.",
+                    description = "Appearance, reminders, recording, backup: make Curio yours.",
                     hint = "Open Settings and browse the sections.",
                     xpReward = 10, kind = QuestKind.SETTINGS, target = 1, navRoute = "settings"
                 ),

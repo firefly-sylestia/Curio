@@ -227,7 +227,7 @@ fun CurioFlowerBed(
                 mood = mood,
                 spriteSize = bedSize * 0.52f,
                 celebrateKey = celebrateKey,
-                contentDescription = if (sleeping) "Curio asleep in its flower bed — tap to wake" else null,
+                contentDescription = if (sleeping) "Curio asleep in its flower bed. Tap to wake" else null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = bedSize * 0.05f, bottom = bedSize * 0.18f)

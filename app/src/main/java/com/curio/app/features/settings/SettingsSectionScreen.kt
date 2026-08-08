@@ -363,7 +363,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
         SettingsRowPulse(highlightKey == "notif-overlay") {
             CompactSwitchRow(
                 "Display over other apps",
-                if (overlayUsable) "Granted — the bubble can float over other apps"
+                if (overlayUsable) "Granted. The bubble can float over other apps"
                 else "System permission for the floating bubble",
                 overlayUsable
             ) { enabled ->

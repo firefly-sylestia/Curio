@@ -1454,13 +1454,13 @@ private fun SoundBiteRender(
             override fun onError(error: Int) {
                 noteTranscribing = false
                 noteError = when (error) {
-                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech heard — try again."
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Listening timed out — try again."
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech heard. Try again."
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Listening timed out. Try again."
                     SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone access is needed to transcribe."
                     SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT ->
-                        "Speech service unreachable — check your connection."
+                        "Speech service unreachable. Check your connection."
                     SpeechRecognizer.ERROR_CLIENT -> "Speech recognition isn't available on this device."
-                    else -> "Couldn't transcribe — try again."
+                    else -> "Couldn't transcribe. Try again."
                 }
                 notePartial = ""
             }

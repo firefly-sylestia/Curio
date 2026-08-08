@@ -442,7 +442,7 @@ sealed class CaptureData {
      */
     fun toPreview(): String = when (this) {
         is SoundBite -> "Voice note · ${durationSeconds}s" +
-            if (!title.isNullOrBlank()) " — $title" else ""
+            if (!title.isNullOrBlank()) ", $title" else ""
         is ReelNotes -> buildString {
             if (rating > 0) append("★".repeat(rating) + " ")
             val text = reviewText.orEmpty()
@@ -457,7 +457,7 @@ sealed class CaptureData {
             if (source.length > 80) append("…")
         }
         is GalleryWall -> "Moodboard · $imageCount image${if (imageCount != 1) "s" else ""}" +
-            if (!caption.isNullOrBlank()) " — ${caption.take(40)}" else ""
+            if (!caption.isNullOrBlank()) ", ${caption.take(40)}" else ""
         is FieldNotes -> buildString {
             val parts = listOf(observed.orEmpty(), surprised.orEmpty(), learnNext.orEmpty())
                 .filter { it.isNotBlank() }
@@ -470,7 +470,7 @@ sealed class CaptureData {
             // blob could decode either to null — degrade instead of crashing.
             append("Wildcard · ${subFormat?.name ?: "Wildcard"}")
             val inner = subData?.toPreview().orEmpty()
-            if (inner.isNotBlank()) append(" — ${inner.take(60)}")
+            if (inner.isNotBlank()) append(", ${inner.take(60)}")
         }
         is Portfolio -> buildString {
             val secs = sections.orEmpty()
@@ -551,7 +551,7 @@ sealed class CaptureData {
         is Portfolio -> buildString {
             val secs = sections.orEmpty()
             secs.forEachIndexed { i, section ->
-                appendLine("— ${section.format.shortName} —")
+                appendLine("· ${section.format.shortName} ·")
                 append(section.data.toFullContent())
                 if (i != secs.lastIndex) appendLine()
             }

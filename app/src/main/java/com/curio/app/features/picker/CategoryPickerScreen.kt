@@ -140,9 +140,9 @@ fun CategoryPickerScreen(navController: NavController) {
 
         Text(
             text = if (multiSelectMode) {
-                "Tap to pick decks — then Mix to spin them together"
+                "Tap to pick decks, then Mix to spin them together"
             } else {
-                "Tap a deck to spin it — hold one to mix a few"
+                "Tap a deck to spin it, hold one to mix a few"
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

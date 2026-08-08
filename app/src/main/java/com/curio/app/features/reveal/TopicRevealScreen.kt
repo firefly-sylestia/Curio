@@ -730,7 +730,7 @@ fun TopicRevealScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         "Curio can show a small timer bubble that floats over " +
-                        "other apps — even while you're in the browser. It needs " +
+                        "other apps, even while you're in the browser. It needs " +
                         "the \"Display over other apps\" permission."
                     )
                     Text(
@@ -841,7 +841,7 @@ fun TopicRevealScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Time to ${action.verb.lowercase()} ${action.targetName} — roughly ${action.durationMinutes} min. ${exploreOpenCopy(cat)}",
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. ${exploreOpenCopy(cat)}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
@@ -904,7 +904,7 @@ fun TopicRevealScreen(
                             "Start exploring ${next.topicName} instead?"
                         )
                         Text(
-                            "The current session gets queued — paused with its time banked, " +
+                            "The current session gets queued: paused with its time banked, " +
                             "resumable anytime from Home. Or save this new topic for later " +
                             "and keep going.",
                             style = MaterialTheme.typography.bodySmall,

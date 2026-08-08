@@ -663,7 +663,7 @@ private fun SettingsNoResults(query: String) {
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Try a different word — like \"theme\", \"reminder\", or \"backup\".",
+            text = "Try a different word, like \"theme\", \"reminder\", or \"backup\".",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
             textAlign = TextAlign.Center
