@@ -1136,7 +1136,7 @@ private fun exportPngUri(
         paintProceduralCell(15, 11, bodyShadeHex)
         paintProceduralCell(15, 12, bodyShadeHex)
     }
-    if (design.isProceduralEnabled("accessories")) {
+    if (grid != "curled" && design.isProceduralEnabled("accessories")) {
         when (stage) {
             CurioPet.Stage.SPROUT -> {
                 paintProceduralCell(4, 2, "9CCB8B"); paintProceduralCell(5, 1, "9CCB8B")
@@ -1159,7 +1159,17 @@ private fun exportPngUri(
         }
     }
     if (design.isProceduralEnabled("antenna")) {
-        paintProceduralCell(7, 0, "FFFFFF", 0.9f)
+        if (grid == "curled") {
+            // Match the runtime sleepy nightcap and its pompom.
+            paintProceduralCell(7, 0, goldHex); paintProceduralCell(8, 0, goldHex)
+            listOf(6, 7, 8, 9).forEach { col ->
+                paintProceduralCell(col, 1, "9DB6E8")
+                paintProceduralCell(col, 2, "9DB6E8")
+                paintProceduralCell(col, 3, "FFF3DC")
+            }
+        } else {
+            paintProceduralCell(7, 0, "FFFFFF", 0.9f)
+        }
     }
     if (design.isProceduralEnabled("effects")) {
         if (moodName == CurioPet.Mood.SLEEPY.name) {
