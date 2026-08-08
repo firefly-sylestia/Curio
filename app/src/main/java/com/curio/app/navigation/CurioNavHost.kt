@@ -144,8 +144,8 @@ private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
  * Topic History, Manage Categories, Recents, Support/Bug Report, and the
  * Topic Database. Lightbox, Category Picker, Reveal, and the boot gates keep
  * their own treatments. Values are route PREFIXES (substringBefore("/")) so
- * parameterised routes like capture/{...}, edit-*/{...}, and settings/*
- * match their whole family.
+ * parameterised routes like capture/{...}, the edit-* family, and settings
+ * sub-pages all match by prefix.
  */
 private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.CAPTURE.substringBefore("/"),

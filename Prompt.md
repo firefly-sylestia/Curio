@@ -45,21 +45,48 @@
   (`interface Split { var isEnable: Boolean }`); `isUniversalApk` / `reset()` /
   `include()` are unchanged. Fixed to `isEnable = true` and pushed (`6389d60`).
 
+## Part 5 — CI compile errors after the AGP 9 fix (DONE)
+
+- Once the `isEnable` fix let CI past configuration, compilation surfaced errors
+  that had been accumulating unverified since commit 3425486 (every intervening CI
+  run died at the config stage):
+  1. `SettingsHubScreen.kt` — `Unresolved reference 'clip'` at 132/140: the
+     search-field refactor wrongly deleted `import androidx.compose.ui.draw.clip`
+     while `.clip()` was still used. Re-added (other removed imports verified
+     genuinely unused).
+  2. `CurioNavHost.kt` — the confusing `substringBefore` "none of the following
+     candidates" (138:79) + syntax errors (147:52+) were BOTH caused by ONE bug:
+     the KDoc line `edit-*/{...}, and settings/*` contains a literal `*/`, which
+     prematurely closed the block comment; the parser then swallowed the `{...}`
+     as a trailing lambda ("actual type is '() -> Unit', but 'String' was
+     expected") and derailed. **Reproduced empirically** with
+     `kotlin-compiler-embeddable-2.3.0` (from the Gradle cache) on a scratch
+     file: the buggy version emitted the exact CI errors, the reworded version
+     compiled clean. Reworded to `the edit-* family, and settings sub-pages all
+     match by prefix.`
+- Note: `scripts/check_braces.js` cannot catch this class of bug — a premature
+  `*/` followed by balanced `{...}` tokens keeps brace counts even.
+
 ## Validation
 
 - Kotlin delimiter balance OK on every edited file; `git diff --check` clean;
   no stale references to deleted private functions; code-reviewed after each part
   (reviewer fixes applied: config-time version capture, post-rename assertion,
   pop-screen shrink-out, shared search component, ScreenEntrance wrap).
+- Part 5 validated by compiling a faithful reproduction with the cached Kotlin
+  compiler (buggy version reproduces CI errors exactly; fixed version compiles).
 - Gradle builds remain CI-only per DOX rules; CI is the compile gate.
 
 ## Notes
 
-- CI workflow release work (release-only PR builds + per-ABI split APKs) was
-  completed and pushed earlier this session (commit 3425486).
+- CI workflow release work (release-only PR builds + per-ABI split release APKs)
+  was completed and pushed earlier this session (commit 3425486).
+- Per the user's "don't push" instruction, the repo `scripts/check_braces.js`
+  addition + `app/AGENTS.md` reference remain uncommitted in the working tree.
 - Unrelated working-tree changes (`docs/app/QUEST_AND_PET_REDESIGN_SPEC.md` deletion,
   untracked `docs/plans/`) remain untouched and out of commits.
 
 ## Completion
 
-All three parts committed and pushed (`0db21b7`, `468869a`, `6f6609f`).
+Parts 1-3 committed and pushed (`0db21b7`, `468869a`, `6f6609f`); Part 4 pushed
+(`6389d60`); Part 5 (clip import + KDoc `*/` fix) pushed as a new commit.
