@@ -1170,8 +1170,11 @@ private fun HeroCard(
     // mid-morph would make the height fight the expansion. The height
     // change itself is animated so the grow reads as a gentle bloom, not a
     // snap.
-    var titleOverflowPx by remember(resolved) { mutableStateOf(0) }
-    var settledOverflowPx by remember(resolved) { mutableStateOf(0) }
+    // Float state: the overflow is measured in px (size.height minus the
+    // 3rd line's bottom — both floats; Int minus Float yields Float), so
+    // Int state here was a compile error (v8.37 CI fix).
+    var titleOverflowPx by remember(resolved) { mutableStateOf(0f) }
+    var settledOverflowPx by remember(resolved) { mutableStateOf(0f) }
     LaunchedEffect(titleOverflowPx) {
         delay(420)
         settledOverflowPx = titleOverflowPx
@@ -1328,7 +1331,7 @@ private fun HeroCard(
                     onTextLayout = { result ->
                         titleOverflowPx = if (result.lineCount > 3) {
                             result.size.height - result.getLineBottom(2)
-                        } else 0
+                        } else 0f
                     }
                 )
                 Spacer(Modifier.weight(1f))

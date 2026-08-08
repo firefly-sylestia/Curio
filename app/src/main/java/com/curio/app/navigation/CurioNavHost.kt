@@ -218,54 +218,47 @@ fun CurioNavHost(
     // placeholder never rendered — the bar hid mid-morph, innerPadding grew
     // by the bar's height, and the watermark visibly shifted down. Compare
     // the prefixes so the reserve actually engages.
-    // v8.36 — the reserve now covers BOTH morph destinations (Reveal AND
+    // v8.36/v8.37 — the reserve covers BOTH morph destinations (Reveal AND
     // Entry Detail) AND both directions of travel: while the destination is
-    // on top, and while it is EXITING (popping reveal → spin, detail →
-    // cabinet). Without the exiting case the real bar swaps in mid-
-    // transition, innerPadding changes, and the SharedTransitionLayout
+    // on top (route-prefix check), and while it is EXITING (popping reveal
+    // → spin, detail → cabinet) — detected by the exiting screen's dock /
+    // wash spacer still being registered in revealBottomBarContent (it only
+    // clears when the destination leaves composition, i.e. after the pop
+    // transition finishes). Without the exiting case the real bar swaps in
+    // mid-transition, innerPadding changes, and the SharedTransitionLayout
     // re-lays out — the nav bar flashed the cream surface for a moment on
     // reveal close, and the cabinet→detail morph jolted as the grid
     // re-flowed. Detail joined the set in v8.36: its wash spacer registers
     // from EntryDetailScreen (mirroring the reveal dock), so the reserved
     // strip never shows a wrong-color band and the morph runs on a stable
-    // layout the whole visit.
+    // layout the whole visit. (v8.37 — this replaced the
+    // backStackEntry.previousBackStackEntry check, which navigation 2.9
+    // removed in the NavBackStackEntry rework.)
     val revealPrefix = CurioRoutes.REVEAL.substringBefore("/")
     val detailPrefix = CurioRoutes.ENTRY_DETAIL.substringBefore("/")
     val morphReservePrefixes = setOf(revealPrefix, detailPrefix)
-    val prevRoutePrefix = backStackEntry?.previousBackStackEntry?.destination?.route
-        ?.substringBefore("/")
-    val reserveBarSpace = routePrefix != null && (
-        routePrefix in morphReservePrefixes ||
-            prevRoutePrefix != null && prevRoutePrefix in morphReservePrefixes
-        )
+    var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+    val reserveBarSpace = (routePrefix != null && routePrefix in morphReservePrefixes) ||
+        revealBottomBarContent != null
     // v8.25 — the reveal page's category, resolved from the reveal route's
     // categorySlug so the reserved bottom strip below can wear the SAME wash
     // as the page from the very first frame. The reveal dock (which carries
     // the wash itself) registers a frame or two after the route switches —
     // without this the transparent morph placeholder showed the Scaffold's
     // plain cream surface in that gap (the "bottom nav flashes cream on
-    // open" bug). Keyed on the back-stack entry so a second reveal for a
-    // different category republishes the right wash.
-    // The reveal page's category — resolved from the reveal entry that's on
-    // top OR (while it pops back to Spin) the exiting reveal entry, so the
-    // reserved bottom strip wears the SAME wash as the page from the very
-    // first frame of both the open and close transitions (no cream band,
-    // no wrong-category tint).
-    val revealCat = if (routePrefix == revealPrefix || prevRoutePrefix == revealPrefix) {
-        val revealEntry = if (routePrefix == revealPrefix) backStackEntry
-                          else backStackEntry?.previousBackStackEntry
-        revealEntry?.let { entry ->
-            CurioCategories.byRouteSlug(
-                entry.arguments?.getString("categorySlug").orEmpty()
-            ) ?: CurioCategories.byId(CategoryId.WILDCARD)
-        }
+    // open" bug). No exiting-entry resolution is needed: while the reveal
+    // pops back, its own dock is still registered and paints the wash.
+    val revealCat = if (routePrefix == revealPrefix) {
+        CurioCategories.byRouteSlug(
+            backStackEntry?.arguments?.getString("categorySlug").orEmpty()
+        ) ?: CurioCategories.byId(CategoryId.WILDCARD)
     } else null
-    // The reserved strip's background: the reveal wash while a reveal entry
-    // is involved, the cabinet wash while a detail morph runs (the detail
+    // The reserved strip's background: the reveal wash while the reveal is
+    // on top, the cabinet wash while a detail morph runs (the detail
     // screen's own wash spacer registers a frame later), else the surface.
     val reserveBackground = when {
         revealCat != null -> revealCat.categoryBackgroundWash()
-        routePrefix == detailPrefix || prevRoutePrefix == detailPrefix ->
+        routePrefix == detailPrefix ->
             CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
         else -> MaterialTheme.colorScheme.surface
     }
@@ -290,7 +283,6 @@ fun CurioNavHost(
     // (the "morph starts a little down" artifact). Reserving the measured
     // height keeps innerPadding constant across the whole transition.
     var bottomBarHeightPx by rememberSaveable { mutableStateOf(0) }
-    var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
