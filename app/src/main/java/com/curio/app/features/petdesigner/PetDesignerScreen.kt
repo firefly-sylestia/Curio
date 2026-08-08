@@ -2197,7 +2197,7 @@ private fun FaceGridEditor(
     val latestOnPaint by rememberUpdatedState(onPaint)
     val rows = if (face.gridRows.size == gridSize) face.gridRows
     else List(gridSize) { ".".repeat(gridSize) }
-    var gestures = Modifier
+    var gestures: Modifier = Modifier
     if (drawMode) {
         gestures = gestures
             .pointerInput(gridSize, tool) {
@@ -2266,7 +2266,7 @@ private fun PixelGrid(
         grid == "curled" -> design.curledRows
         else -> design.bodyRows
     }
-    var gestures = Modifier
+    var gestures: Modifier = Modifier
     if (drawMode) {
         gestures = gestures
             .pointerInput(gridSize, tool) {
