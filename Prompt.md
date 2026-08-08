@@ -27,8 +27,20 @@ quests (current quest FUN, today's quests CURIOUS).
 - Brace balance ALL OK (4 files), `git diff --check` clean.
 - Reviewer (code-reviewer-deepseek-flash) passed.
 
+## v8.19 — fix the re-entry pulse (follow-up)
+
+Cosmetic fix in `PetLandmarks.kt`: poke counters persisted in the object's
+`reactCounters` map, so navigating back to a screen composed the landmark
+with a stale count > 0 and the `LaunchedEffect(reactKey)` fired a one-off
+pulse on arrival. Added `resetReactCount(id)` (removes the counter) and
+call it from the `PetLandmark` `onDispose` (beside the existing
+`remove(screen, id)`) — re-entry now composes at count 0. Only reader of
+`reactCount` is `PetLandmark` itself; ids are globally unique, so the
+id-scoped reset can't clobber a live landmark.
+
 ## Completion summary
 
 v8.18 shipped: four new landmarks across the capture screen (Save button),
-Cabinet (grid) and Quests (current + daily cards). **Committed locally,
-NOT pushed** — per the user's request; push is pending.
+Cabinet (grid) and Quests (current + daily cards). v8.19 fixed the one-off
+re-entry pulse. **Both committed locally, NOT pushed** — per the user's
+request; push is pending.

@@ -70,6 +70,15 @@ object PetLandmarks {
     }
 
     /**
+     * v8.19 — drop the poke counter for [id]. Called when a landmark leaves
+     * composition, so RE-ENTERING the screen composes at count 0 instead of
+     * pulsing once with a stale count from a previous visit.
+     */
+    fun resetReactCount(id: String) {
+        reactCounters.remove(id)
+    }
+
+    /**
      * Add/refresh one landmark — replaces any previous one with the same id.
      * Compare-and-set: onGloballyPositioned fires on every layout pass, and
      * an unchanged landmark must NOT rewrite the map (each write invalidates
@@ -118,7 +127,12 @@ fun PetLandmark(
         }
     }
     DisposableEffect(screen, id) {
-        onDispose { PetLandmarks.remove(screen, id) }
+        onDispose {
+            PetLandmarks.remove(screen, id)
+            // v8.19 — also drop the poke counter: navigating back to this
+            // screen composes at count 0, so no one-off pulse on arrival.
+            PetLandmarks.resetReactCount(id)
+        }
     }
     val landmarkModifier = Modifier
         .onGloballyPositioned { coords ->
