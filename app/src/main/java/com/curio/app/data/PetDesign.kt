@@ -58,7 +58,13 @@ data class PetDesign(
     /** Optional transparent drawn layers for tail, accessories, effects, and antenna art. */
     val details: Map<String, List<String>> = emptyMap(),
     /** Explicit per-element visibility overrides; absent keys stay procedurally enabled. */
-    val procedural: Map<String, Boolean> = emptyMap()
+    val procedural: Map<String, Boolean> = emptyMap(),
+    /**
+     * v8.48 — user-custom animation frames (key = animation id, e.g. "happy").
+     * An absent key plays the built-in animation; old designs without this
+     * field keep working unchanged.
+     */
+    val animations: Map<String, PetAnimation> = emptyMap()
 ) {
     /** The palette keys a design may recolor. */
     companion object {
@@ -896,3 +902,118 @@ object PetFacePresets {
 
     val ALL = listOf(SHY, PARTY, SLEEPYHEAD)
 }
+
+/**
+ * v8.48 — a keyframe of a [PetAnimation]: a small transform applied to the
+ * base design. Kept procedural (no per-frame pixel layers yet) so every
+ * animation plays on any custom design; future phases add pixel overrides.
+ */
+data class PetAnimationFrame(
+    val durationMs: Int = 180,
+    val offsetY: Float = 0f,
+    val scale: Float = 1f,
+    val rotationDegrees: Float = 0f
+)
+
+/**
+ * v8.48 — a named, looping animation: [frames] each transform the pet, and
+ * [mood] sets the face worn while it plays (a mood name string so the model
+ * stays independent of the sprite layer).
+ */
+data class PetAnimation(
+    val id: String,
+    val name: String,
+    val mood: String,
+    val frames: List<PetAnimationFrame>,
+    val loop: Boolean = true
+)
+
+/** v8.48 — built-in animation presets for the designer gallery + timeline. */
+val BUILTIN_ANIMATIONS: List<PetAnimation> = listOf(
+    PetAnimation("idle", "Idle", "HAPPY", listOf(
+        PetAnimationFrame(520, 0f, 1f, 0f),
+        PetAnimationFrame(520, -1.5f, 1.015f, 0f)
+    )),
+    PetAnimation("happy", "Happy", "HAPPY", listOf(
+        PetAnimationFrame(140, 0f, 1f, 0f),
+        PetAnimationFrame(160, -7f, 1.05f, 0f),
+        PetAnimationFrame(160, 0f, 0.96f, 0f),
+        PetAnimationFrame(160, -3f, 1.03f, 0f)
+    )),
+    PetAnimation("excited", "Excited", "EXCITED", listOf(
+        PetAnimationFrame(110, -4f, 1.06f, -3f),
+        PetAnimationFrame(110, 0f, 0.98f, 3f),
+        PetAnimationFrame(110, -6f, 1.08f, -2f),
+        PetAnimationFrame(110, 0f, 0.98f, 2f)
+    )),
+    PetAnimation("sleepy", "Sleepy", "SLEEPY", listOf(
+        PetAnimationFrame(700, 2f, 1f, 0f),
+        PetAnimationFrame(700, 1f, 0.99f, 0f)
+    )),
+    PetAnimation("curious", "Curious", "CURIOUS", listOf(
+        PetAnimationFrame(260, 0f, 1f, -4f),
+        PetAnimationFrame(260, -1f, 1f, 4f),
+        PetAnimationFrame(260, 0f, 1f, 0f)
+    )),
+    PetAnimation("proud", "Proud", "PROUD", listOf(
+        PetAnimationFrame(200, -6f, 1.07f, 0f),
+        PetAnimationFrame(400, -2f, 1.02f, 0f)
+    )),
+    PetAnimation("bouncy", "Bouncy", "BOUNCY", listOf(
+        PetAnimationFrame(120, 0f, 0.94f, 0f),
+        PetAnimationFrame(120, -8f, 1.06f, 0f),
+        PetAnimationFrame(120, -3f, 0.97f, 0f),
+        PetAnimationFrame(120, 0f, 1f, 0f)
+    )),
+    PetAnimation("focused", "Focused", "FOCUSED", listOf(
+        PetAnimationFrame(500, 0f, 1f, 0f),
+        PetAnimationFrame(500, 0f, 1.012f, 0f)
+    )),
+    PetAnimation("touch", "Touch", "HAPPY", listOf(
+        PetAnimationFrame(90, 0f, 0.86f, 0f),
+        PetAnimationFrame(260, 0f, 1f, 0f)
+    )),
+    PetAnimation("spin", "Spin landed", "EXCITED", listOf(
+        PetAnimationFrame(130, 0f, 1f, 0f),
+        PetAnimationFrame(130, 0f, 1f, 90f),
+        PetAnimationFrame(130, 0f, 1f, 180f),
+        PetAnimationFrame(130, 0f, 1f, 270f),
+        PetAnimationFrame(180, 0f, 1.05f, 360f)
+    )),
+    PetAnimation("reveal", "Reveal", "HAPPY", listOf(
+        PetAnimationFrame(120, 0f, 0.7f, 0f),
+        PetAnimationFrame(120, -2f, 1.1f, 0f),
+        PetAnimationFrame(180, 0f, 1f, 0f)
+    )),
+    PetAnimation("explore", "Explore", "CURIOUS", listOf(
+        PetAnimationFrame(240, -2f, 1f, 3f),
+        PetAnimationFrame(240, 0f, 1f, -2f),
+        PetAnimationFrame(240, 0f, 1f, 0f)
+    )),
+    PetAnimation("save", "Save", "HAPPY", listOf(
+        PetAnimationFrame(130, 0f, 0.95f, 0f),
+        PetAnimationFrame(130, -9f, 1.1f, 0f),
+        PetAnimationFrame(160, -2f, 1.02f, 0f),
+        PetAnimationFrame(160, 0f, 1f, 0f)
+    )),
+    PetAnimation("play", "Play", "BOUNCY", listOf(
+        PetAnimationFrame(110, -5f, 1.05f, -5f),
+        PetAnimationFrame(110, 0f, 0.95f, 5f),
+        PetAnimationFrame(110, -5f, 1.05f, 5f),
+        PetAnimationFrame(110, 0f, 0.95f, -5f)
+    )),
+    PetAnimation("levelup", "Level up", "PROUD", listOf(
+        PetAnimationFrame(140, -8f, 1.15f, -4f),
+        PetAnimationFrame(140, -4f, 1.05f, 4f),
+        PetAnimationFrame(140, -8f, 1.12f, -2f),
+        PetAnimationFrame(220, 0f, 1f, 0f)
+    ))
+)
+
+/** Looks up a built-in animation by id. */
+fun animationById(id: String): PetAnimation? =
+    BUILTIN_ANIMATIONS.firstOrNull { it.id == id }
+
+/** Display name for an animation id (built-in name or a readable fallback). */
+fun petAnimationName(id: String): String =
+    BUILTIN_ANIMATIONS.firstOrNull { it.id == id }?.name ?: id.replaceFirstChar { it.uppercase() }

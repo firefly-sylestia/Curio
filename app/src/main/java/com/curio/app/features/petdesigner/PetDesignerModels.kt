@@ -2,6 +2,7 @@ package com.curio.app.features.petdesigner
 
 import com.curio.app.data.PetFaceMoods
 import com.curio.app.data.PetReactionEvents
+import com.curio.app.data.petAnimationName
 
 /**
  * v8.45 — Pet Designer Universal Editor (redesign plan, Phase 1): the
@@ -54,6 +55,12 @@ internal sealed interface PetEditorTarget : java.io.Serializable {
     data class Reaction(val event: String) : PetEditorTarget {
         override val id = "reaction:$event"
         override val title = PetReactionEvents.label(event)
+    }
+
+    /** One animation — opens its frame timeline editor (v8.48). */
+    data class Animation(val animationId: String) : PetEditorTarget {
+        override val id = "animation:$animationId"
+        override val title = petAnimationName(animationId)
     }
 
     /** The full palette editor. */

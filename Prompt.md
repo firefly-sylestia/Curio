@@ -1,3 +1,79 @@
+# Request — Pet Designer Phase 4 (DONE, NOT COMMITTED — user wants one commit after the full redesign)
+
+## Phase 4 — Animations gallery + frame timeline (DONE)
+
+- **Data model** (PetDesign.kt): new `PetAnimationFrame` (durationMs, offsetY,
+  scale, rotationDegrees) + `PetAnimation` (id, name, mood, frames, loop);
+  `BUILTIN_ANIMATIONS` — 15 procedural presets (Idle, Happy, Excited, Sleepy,
+  Curious, Proud, Bouncy, Focused, Touch, Spin landed, Reveal, Explore, Save,
+  Play, Level up) built from transform keyframes + a face mood;
+  `animationById()` + `petAnimationName()`; PetDesign gains a trailing
+  `animations: Map<String, PetAnimation> = emptyMap()` field (backward-
+  compatible — no positional constructions exist; old designs unaffected).
+- **Gallery** (Animations landing): `AnimationGalleryCard` grid (3/row) — each
+  card loops a live mini preview via `PetAnimationPreview` (LaunchedEffect
+  frame counter + `AnimatedPetSprite` graphicsLayer transform), shows name +
+  frame count. Tap opens the timeline.
+- **Timeline** (PetEditorTarget.Animation): `AnimationTimelineEditor` — big
+  looping preview (120dp), Play/Pause + step buttons, per-frame duration slider
+  (60..1000ms, committed to design on slider release), scrollable frame
+  thumbnails (tap to inspect, pauses), previous-frame ghost onion-skin toggle,
+  Reset to built-in. Duration edits land in `design.animations` (saved via Save
+  pet); serialization of animations into the text format is deferred.
+- New PetEditorTarget.Animation (id `animation:<id>`), TargetPicker "Animations"
+  chip row, selectTarget no-op case. Imports added: LaunchedEffect, graphicsLayer,
+  Dp, delay, BUILTIN_ANIMATIONS, PetAnimation, PetAnimationFrame, animationById.
+
+## Phase 3 (DONE, NOT COMMITTED)
+
+## Phase 3 — professional color picker (DONE)
+
+- **Before/after preview** — `ColorEditorCard` header now shows two 52dp
+  `ColorPreviewColumn`s: "Original" (initialHex) vs "New" (hexDraft, accented
+  with the primary border + hex when changed).
+- **Draggable hue strip** — new `HueStrip` composable: a rounded gradient track
+  (13 hue stops, drawn with `Canvas` + `Brush.horizontalGradient`) with a white
+  thumb; tap or drag maps x→0..360 with a thumb inset so the knob never clips.
+  Replaces the Hue slider (Saturation/Lightness sliders kept). `rememberUpdatedState`
+  + `pointerInput(Unit)` so the drag detector never restarts mid-drag.
+- **Recent colors** — persisted in AppPreferences (`KEY_PET_RECENT_COLORS`, JSON
+  array like pinned topics): `getPetRecentColors`/`setPetRecentColors`, capped at
+  12, deduped. Screen-level `recentColors` state + `rememberColor()` called on
+  Apply; tappable scrollable chip row in the card.
+- Kept: hex input (monospace, error border), quick picks, Apply/Cancel. The
+  Apply path still calls `pushUndo()` (Phase 2) before mutating the palette.
+- Imports added: `Brush`, `CornerRadius`, `drawscope.Stroke`. Compile-safe:
+  no parameter named `size` inside the Canvas blocks.
+
+## Phase 2 (DONE, NOT COMMITTED)
+
+## Phase 2 — accurate colors + drawing UX overhaul (DONE)
+
+- **Color accuracy bug** (user: "custom colors show yellow etc"): `hexColor()` at
+  `PetDesignerScreen.kt` was `Color(0xFF000000L or (hex.toLong(16) shl 8))` — the
+  `shl 8` dropped the **blue channel** (pink FF9ECB → orange FF9E00). Fixed to
+  `Color(0xFF000000L or hex.toLong(16))`; all render sites (swatches, quick
+  palette, color editor, canvas pixels, blueprint ghost) flow through it, so one
+  line fixed both the swatches and the drawn color. Other `shl 8` (ARGB pack) is
+  correct and untouched.
+- **Draw toggle removed** (spec §10): `paintTool`+`drawMode` states replaced by a
+  single nullable `activeTool: PaintTool?`. Picking Brush/Fill/Erase/Pick in the
+  new `ToolTray` arms editing; tapping the active tool releases it so the canvas
+  scrolls safely. `CanvasStatus` banner shows "Editing with X"/"Choose a tool to
+  edit", per-tool helper text under the tray, and the canvas gains a 2dp primary
+  border when armed. `PixelGrid`/`FaceGridEditor` now take `tool: PaintTool?` and
+  wire gestures only when a tool is armed.
+- **Undo/Redo** (spec §11): full-`PetDesign` snapshot stacks capped at 50,
+  gesture-grouped (one snapshot per tap/drag-start, never per cell). Wired into:
+  body/curled, detail layers, faces, reactions (pixel gestures), grid size,
+  Copy body→asleep, Clear grid, Clear layer, shape presets, random palette,
+  palette recolor, reaction enable/anim, PNG import, and Reset changes.
+  Undo/Redo buttons live in the pinned SaveArea. Known gap: reaction dialogue
+  typing is not undo-per-keystroke (would flood the stack) — noted for later.
+- Remaining phases (not started): Phase 3 color picker upgrade, Phase 4 animation
+  gallery/timeline, Phase 5 actions/dialogue page, Phase 6 multi-pet, Phase 7
+  custom actions.
+
 # Request — UI polish: reveal dock small-screen fix, detail-style pop animations, Topic History redesign
 
 ## Part 1 — Topic Reveal action dock cut off on small screens (DONE)

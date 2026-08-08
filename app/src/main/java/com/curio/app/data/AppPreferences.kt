@@ -142,6 +142,8 @@ object AppPreferences {
     // v8.39 — custom reaction speech is saved with the pet design but stays
     // opt-in so the built-in Curie dialogue remains the default experience.
     private const val KEY_CUSTOM_REACTION_LINES = "custom_reaction_lines"
+    // v8.47 — recently-applied palette colors for the pet designer picker.
+    private const val KEY_PET_RECENT_COLORS = "pet_recent_colors"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -1061,6 +1063,24 @@ object AppPreferences {
     fun setPetBrainEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PET_BRAIN_ENABLED, enabled).apply()
         petBrainEnabledState = enabled
+    }
+
+    // ── Pet designer recent colors (v8.47 color picker) ────────────────
+    /** Recently-applied palette colors, most recent first (max 12). */
+    fun getPetRecentColors(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_PET_RECENT_COLORS, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { arr.getString(it) }.filter { it.length == 6 }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun setPetRecentColors(context: Context, colors: List<String>) {
+        val arr = JSONArray()
+        colors.take(12).forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_PET_RECENT_COLORS, arr.toString()).apply()
     }
 
     // v8.16 — auto-open the landed topic's reveal after a spin. v8.21 —
