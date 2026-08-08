@@ -77,6 +77,8 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.CurioPetHeroCard
 import com.curio.app.ui.pet.CurioPetSprite
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import kotlinx.coroutines.delay
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -203,30 +205,48 @@ fun QuestsScreen(navController: NavController) {
                 // (spec §3 + §4.1). Completing one fires the pet's
                 // celebration hop.
                 item {
-                    DailyCard(
-                        quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay(), context),
-                        // v8.3 — complete dailies are CLAIMED here (a tap
-                        // grants the XP) and in-progress ones can Go straight
-                        // to where the action happens. v8.6 — a claim that
-                        // crosses a level raises the level-up banner.
-                        onClaim = { questId ->
-                            val levelBefore = CurioQuests.levelForXp(CurioQuests.xpState)
-                            CurioQuests.claimDaily(context, questId)
-                            val levelAfter = CurioQuests.levelForXp(CurioQuests.xpState)
-                            if (levelAfter > levelBefore) levelUpBanner = levelAfter
-                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                            celebrate++
-                        },
-                        onGo = onQuestNavigate
-                    )
+                    // v8.18 — Today's quests is a CURIOUS landmark: the pet
+                    // sometimes tiptoes over and reads what's on for today.
+                    PetLandmark(
+                        id = "daily",
+                        kind = PetLandmarks.Kind.CURIOUS,
+                        screen = "quests"
+                    ) { m ->
+                        DailyCard(
+                            quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay(), context),
+                            // v8.3 — complete dailies are CLAIMED here (a tap
+                            // grants the XP) and in-progress ones can Go straight
+                            // to where the action happens. v8.6 — a claim that
+                            // crosses a level raises the level-up banner.
+                            onClaim = { questId ->
+                                val levelBefore = CurioQuests.levelForXp(CurioQuests.xpState)
+                                CurioQuests.claimDaily(context, questId)
+                                val levelAfter = CurioQuests.levelForXp(CurioQuests.xpState)
+                                if (levelAfter > levelBefore) levelUpBanner = levelAfter
+                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                celebrate++
+                            },
+                            onGo = onQuestNavigate,
+                            modifier = m
+                        )
+                    }
                 }
                 if (current != null) {
                     item {
-                        CurrentQuestCard(
-                            stage = current,
-                            showTourCta = offerTour,
-                            onNavigate = onQuestNavigate
-                        )
+                        // v8.18 — the active quest card is a FUN landmark:
+                        // the pet sometimes dashes over and boops it.
+                        PetLandmark(
+                            id = "quest",
+                            kind = PetLandmarks.Kind.FUN,
+                            screen = "quests"
+                        ) { m ->
+                            CurrentQuestCard(
+                                stage = current,
+                                showTourCta = offerTour,
+                                onNavigate = onQuestNavigate,
+                                modifier = m
+                            )
+                        }
                     }
                 }
                 // v8.5 — Category passport: every lane's stamp, tappable to
@@ -404,14 +424,15 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
 private fun CurrentQuestCard(
     stage: QuestStage,
     showTourCta: Boolean,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val roseHero = if (isCurioDarkTheme()) {
         CurioColors.HomeRosewoodDark
     } else {
         CurioColors.HomeRosewood
     }
-    CurioSettingsCard {
+    CurioSettingsCard(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -795,10 +816,11 @@ private fun dailyGoRoute(kind: CurioQuests.DailyKind): String? = when (kind) {
 private fun DailyCard(
     quests: List<DailyQuest>,
     onClaim: (String) -> Unit,
-    onGo: (String) -> Unit
+    onGo: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    CurioSettingsCard {
+    CurioSettingsCard(modifier = modifier) {
         CurioCardHeader(CurioIcons.EmojiEvents, "Today's quests", "Resets at 4 AM")
         Spacer(Modifier.height(2.dp))
         quests.forEach { quest ->

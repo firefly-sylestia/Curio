@@ -1,41 +1,26 @@
-# Request — v8.17: PLAY landmark kind (the pet's jig)
+# Request — v8.18: pet landmarks on more screens
 
-Follow-up to v8.16 (smarter pet landmark interactions + auto-open topic
-toggle, `60ddec7`, CI-fixed in `927276f`).
+Follow-up to v8.17 (PLAY landmark kind — the pet's jig at its flower bed,
+`6bb136d`). Shipped as a LOCAL commit only — the user asked to hold the push.
 
 ## What the user asked
 
-Add a third landmark kind — a special "tappable" spot where the pet does a
-little jig / play animation when it pokes it.
-
-## Analysis
-
-- v8.16's landmark system has `Kind.FUN` (boop a gadget) and `Kind.CURIOUS`
-  (read some text). A third kind needs a distinct gait + reaction, one
-  "special spot" wired into a screen, and a matching line.
-- The pet's own FLOWER BED on Home is the perfect special spot: when the pet
-  is awake and floating, the bed sits vacant, so the pet dashing home and
-  dancing at its own bed is charming and self-consistent (the overlay is
-  hidden while the pet is asleep/at home, so it never jigs at an occupied
-  bed).
+Add pet landmarks to more screens — the Save button on the capture screen,
+the Cabinet's grid, and the Quests cards — so the pet interacts with more of
+the app.
 
 ## Changes (4 files)
 
 | File | Change |
 | --- | --- |
-| `ui/pet/PetLandmarks.kt` | `Kind.PLAY` — a special spot: eager dash + poke + jig |
-| `data/CurioPet.kt` | `jigLine()` — 9 dance-y reaction lines ("Tippy tap tap!", "Dance break!", …) |
-| `ui/pet/CurioFloatingPet.kt` | PLAY branch in the landmark poke `when`: eager walk (15ms steps) → poke (spot springs a beat) → squish bounce → play-bow → celebration hop + twirl → hearts + `jigLine()` bubble. The `when` is now exhaustive (FUN/CURIOUS/PLAY). |
-| `features/home/HomeScreen.kt` | Flower bed wrapped in `PetLandmark("bed", PLAY, "home")` — the landmark modifier is handed to `CurioFlowerBed`'s root `modifier` (bounds-only, zero layout impact; bed keeps its own tap-to-wake). |
+| `ui/components/CurioSettingsCard.kt` | Gains a defaulted `modifier: Modifier = Modifier` param (applied as `modifier.fillMaxWidth()`) — backward compatible, all existing callers unchanged. Needed so quest cards can take the landmark modifier. |
+| `features/quests/QuestsScreen.kt` | `CurrentQuestCard` wrapped in `PetLandmark("quest", FUN, "quests")` (the pet dashes over and boops the active quest) and `DailyCard` in `PetLandmark("daily", CURIOUS, "quests")` (tiptoes over and reads today's quests). Both cards thread a defaulted `modifier` param into `CurioSettingsCard`. |
+| `features/capture/SaveCaptureScreen.kt` | The sticky Save CTA wrapped in `PetLandmark("save", FUN, "capture")` — the pet boops it while you write (route prefix matches the pet overlay's `capture` screen). |
+| `features/cabinet/CabinetScreen.kt` | The `LazyVerticalGrid` wrapped in `PetLandmark("grid", CURIOUS, "cabinet")` — the pet tiptoes over and peeks at your keepsakes; the whole shelf springs a beat (draw-only `graphicsLayer` pulse, sticky chips/hero stay put). |
 
-## Review fixes applied
-
-1. Reviewer passed with no blocking issues; accepted one polish: the jig now
-   fires `celebrateKey++` with the twirl so the moment reads as a real dance
-   instead of a generic spin.
-2. Left as-is per review: mid-jig tap latency (~2.5s, same pre-existing trait
-   as the CURIOUS tiptoe branch — the 4s `lastPokeAt` cooldown still applies),
-   and PLAY being exposed on only the one special spot (a product call).
+Landmark coverage now: home (greeting CURIOUS, flower bed PLAY), spin (Shuffle
+FUN), profile (avatar FUN), capture (Save FUN), cabinet (grid CURIOUS),
+quests (current quest FUN, today's quests CURIOUS).
 
 ## Validation
 
@@ -44,6 +29,6 @@ little jig / play animation when it pokes it.
 
 ## Completion summary
 
-v8.17 shipped: a third `PetLandmarks.Kind.PLAY` — the pet dashes to its
-flower bed on Home and does a little jig (squish → bow → hop+twirl, hearts,
-a dance line) while the bed springs a beat. Pushed to Alpha.
+v8.18 shipped: four new landmarks across the capture screen (Save button),
+Cabinet (grid) and Quests (current + daily cards). **Committed locally,
+NOT pushed** — per the user's request; push is pending.
