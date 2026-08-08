@@ -365,7 +365,9 @@ fun QuestsScreen(navController: NavController) {
                     CurioColors.CoralBlush, CurioColors.ButterYellow,
                     CurioColors.Sage, CurioColors.SkyMint
                 ),
-                trigger = levelUpBanner,
+                // Level-up can't smart-cast the delegated property, so feed
+                // the confetti a plain value (the block only runs non-null).
+                trigger = levelUpBanner ?: 0,
                 particleCount = CurioMotion.ConfettiParticleCountLarge,
                 modifier = Modifier
                     .align(Alignment.Center)
