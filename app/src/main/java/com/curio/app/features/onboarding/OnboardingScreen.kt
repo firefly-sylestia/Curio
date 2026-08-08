@@ -36,6 +36,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -76,10 +77,13 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioPet
+import com.curio.app.data.QuestGuide
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
+import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
@@ -133,6 +137,25 @@ fun OnboardingScreen(navController: NavController) {
     // "Want the daily shuffle reminder on?" — only reachable once
     // notifications are granted; applied to prefs the moment it flips.
     var reminderWanted by rememberSaveable { mutableStateOf(false) }
+    // v8.22 — the guided-tour ask: the pet offers the walkthrough the very
+    // first time the intro finishes (once taken or declined, never again —
+    // the Quests-page offer is the backstop after that).
+    var showTourAsk by rememberSaveable { mutableStateOf(false) }
+    // v8.22 — the pet comes OUT of its flower bed by itself during the
+    // intro (awake, away from home), so it's there to ask about the tour.
+    LaunchedEffect(Unit) {
+        CurioPet.wake()
+        CurioPet.comeOut()
+    }
+    // Finishing the intro asks about the tour first (if it hasn't been
+    // offered yet), then lands on Home.
+    val finishOrAsk: () -> Unit = {
+        if (AppPreferences.guideEnabledState && !AppPreferences.guideTourOfferedState) {
+            showTourAsk = true
+        } else {
+            finishOnboarding(context, navController)
+        }
+    }
 
     val requestNotifications = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -333,7 +356,7 @@ fun OnboardingScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TextButton(
-                    onClick = { finishOnboarding(context, navController) },
+                    onClick = finishOrAsk,
                     contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
                 ) {
                     Text(
@@ -345,7 +368,7 @@ fun OnboardingScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (isLastSlide) {
-                            finishOnboarding(context, navController)
+                            finishOrAsk()
                         } else {
                             scope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -365,6 +388,54 @@ fun OnboardingScreen(navController: NavController) {
                     )
                 }
             }
+        }
+
+        // ── The pet asks about the guided tour (v8.22) ────────────────────
+        if (showTourAsk) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Dismissed without answering = declined: never re-ask.
+                    AppPreferences.setGuideTourOffered(context, true)
+                    showTourAsk = false
+                    finishOnboarding(context, navController)
+                },
+                title = { Text("Take a quick tour?") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            CurioPetSprite(
+                                stage = CurioPet.currentStage(),
+                                mood = CurioPet.Mood.HAPPY,
+                                spriteSize = 46.dp
+                            )
+                            Text(
+                                "Your pet can walk you through Home, the deck, exploring, and saving your first keepsake — about a minute."
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        AppPreferences.setGuideTourOffered(context, true)
+                        showTourAsk = false
+                        // Land on Home first, THEN start the tour — the
+                        // NavHost runner navigates to the first step from a
+                        // clean stack (no race with the finish navigation).
+                        finishOnboarding(context, navController)
+                        QuestGuide.start()
+                    }) { Text("Take the tour") }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        AppPreferences.setGuideTourOffered(context, true)
+                        showTourAsk = false
+                        finishOnboarding(context, navController)
+                    }) { Text("Not now") }
+                }
+            )
         }
     }
 }

@@ -1,48 +1,45 @@
-# Request — v8.20: pet interacts with its home (drop-to-home) + cloud-ride walk
+# Request — v8.22: first-launch tutorial + boot-gate pet + tour redesign
 
-Follow-ups v8.18 (landmarks on capture/cabinet/quests, `1fb4ea6`) and v8.19
-(re-entry pulse fix, `ac521ce`) were pushed at the user's request before
-this work began.
+v8.21 (`9fb7360`, pushed) shipped the dizzy-on-drag / hearts / de-AI /
+auto-open-ON batch. This request is the guided-tour + boot-flow overhaul.
 
 ## What the user asked
 
-1. Make the pet interact with its **home** (the flower bed) — beyond the
-   v8.17 jig, make it possible to **drag the pet over the house and drop it
-   to place it** (go home).
-2. Add **cute walk animations** — the pet rides a little cloud while it
-   walks.
+1. The pet should stay at its house during startup (no floating pet on the
+   splash), come out of its bed on its own during the intro, and then ASK
+   about the tutorial the first time the app opens.
+2. Redesign the tutorial: the dialog must come FROM the pet's bubble, the
+   highlight must cover the REAL buttons (some were wrong), the highlighted
+   button must stay tappable, and the instructions were getting cut off.
 
-## Changes (2 files)
+## Changes (6 files + 1 deleted)
 
 | File | Change |
 | --- | --- |
-| `ui/pet/PetLandmarks.kt` | Added a hover channel for drop targets: `hoveredIds` snapshot map + `isHovered(id)` / `setHovered(id, boolean)` (no-op when unchanged — the drag loop reports every frame). The `PetLandmark` composable now animates a sustained **1.10 hover scale** (`animateFloatAsState` spring, multiplied into the poke pulse in the `graphicsLayer`) so the bed glows while the pet is dragged over it; `onDispose` also clears the hover. |
-| `ui/pet/CurioFloatingPet.kt` | **Drop-to-home**: the drag `pointerInput` is now keyed on `routePrefix` (stale `watching` capture in the tap handler got the same keying). While dragging on Home, the pet's 72dp rect vs the `bed` landmark's bounds (inflated by 12dp forgiveness) drives the hover glow; dropping over the bed squishes + hearts + "Home sweet home!" then fades the pet home (`leavingHome → appear.animateTo(0) → CurioPet.goHome()`). `onDragStart/Cancel` clear the hover. **CloudRide**: a new `CloudRide` sibling drawn UNDER the sprite — three white puffs + flat base + soft shade, alpha-fading in with `moving`, bobbing ±1.5dp with a gentle swell. The bob is an `Animatable` driven by `LaunchedEffect(visible)` so it **only runs while the cloud is shown** (no forever-ticking transition for an invisible cloud). |
+| `data/QuestGuide.kt` | `Step` gains `targetLandmark: String?` — 6 steps now name the exact landmark they highlight (`daily`, `spin`, `deck`, `start-exploring`, `save`, `grid`). |
+| `ui/pet/PetGuideOverlay.kt` | REWRITE. The pass-through window is now the step's landmark's REAL bounds (via `PetLandmarks.forScreen(routePrefix)` — snapshot state, so it snaps into place the moment the screen registers; falls back to the old position zones). The pet + bubble sit BESIDE the window — below it when the target is high on the screen, above when low — never covering the button. The dialog is now `GuideSpeechBubble`: a real speech bubble with a tail aimed at the pet, title, message (maxLines 4 — instructions no longer cut at 2), progress dots, action, skip, close. |
+| `navigation/CurioNavHost.kt` | Passes `screen = routePrefix` + `targetLandmark = step.targetLandmark` to the overlay; the floating pet is suppressed on the splash + crash routes (pet stays at its house during startup). |
+| `features/reveal/TopicRevealScreen.kt` | The Start exploring button is wrapped in `PetLandmark("start-exploring", FUN, "reveal")` so the tour highlights its real bounds. |
+| `features/onboarding/OnboardingScreen.kt` | The pet comes OUT of its bed automatically when the intro composes (`CurioPet.wake()` + `comeOut()`); finishing the intro asks "Take a quick tour?" the very first time (pet sprite in the dialog; accept → land on Home then `QuestGuide.start()`; decline/dismiss → marks offered). |
+| `ui/components/QuestGuideToast.kt` | DELETED — fully orphaned after the speech-bubble redesign (its only caller was PetGuideOverlay; verified no other refs). |
 
 ## Review fixes applied
 
-1. **Unresolved `bobPhase`** — the first fix pass for the "ticks forever"
-   nit removed the infinite transition but left `bobPhase` dangling (a CI
-   failure). Rebuilt CloudRide around an `Animatable` bob + visible-gated
-   loop, and dropped the now-unused `RepeatMode` / `infiniteRepeatable` /
-   `rememberInfiniteTransition` imports.
-2. **Stuck `dragged` on mid-drag navigation** — keying the drag handler on
-   `routePrefix` means a tab switch during a drag cancels the pointerInput
-   coroutine WITHOUT firing `onDragCancel`, leaving `dragged = true` (wander
-   pause + no auto-nap forever). Self-healed by clearing `dragged = false`
-   and the bed hover at the top of the pointerInput block (the new
-   coroutine starts immediately on restart).
+1. **Dead code** — `QuestGuideToast.kt` (pill + `GuidePointer`) had no
+   remaining callers; removed.
+2. **Race** — the tour-ask confirm used to `QuestGuide.start()` then
+   navigate Home; reordered to navigate Home FIRST, then start the tour, so
+   the NavHost runner picks up step 1 from a clean stack.
 
 ## Validation
 
-- Brace balance ALL OK (2 files), `git diff --check` clean, no `bobPhase`
-  refs, no stale transition imports.
-- Reviewer (code-reviewer-deepseek-flash) passed after fix #2.
+- Brace balance ALL OK (5 edited files), `git diff --check` clean.
+- Reviewer (code-reviewer-deepseek-flash) passed after the two fixes.
 
 ## Completion summary
 
-v8.20 shipped: the pet now interacts with its home — drag it over the
-flower bed (it glows as the drop target) and release to tuck it in; and it
-rides a cute bobbing cloud while it walks, fading in only on the move. Two
-review fixes applied (dangling `bobPhase` + stuck-`dragged` self-heal).
-Pushed to Alpha.
+v8.22 shipped: the pet stays at its house through the splash, comes out on
+its own during onboarding and asks for the guided tour on first launch; the
+tour itself now highlights the real buttons (window = landmark bounds, so
+the highlighted control stays tappable), talks through a speech bubble that
+points at the pet, and no longer cuts off instructions. Pushed to Alpha.

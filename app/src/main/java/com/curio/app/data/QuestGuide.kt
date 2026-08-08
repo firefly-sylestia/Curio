@@ -68,6 +68,13 @@ object QuestGuide {
         val waitFor: Wait? = null,
         val position: Position = Position.BOTTOM,
         /**
+         * v8.22 — the landmark id this step HIGHLIGHTS (the pet-guide draws
+         * its pass-through window over the REAL button's bounds, not a
+         * guessed zone). The screen registers it via [PetLandmarks]; null =
+         * fall back to the position-based window.
+         */
+        val targetLandmark: String? = null,
+        /**
          * v8.6 — true for action-wait steps: the runner only guides the user
          * back to [route] when they're PARKED on a bottom-nav tab, and never
          * yanks them away mid-flow (e.g. off the reveal while it auto-open
@@ -164,7 +171,8 @@ object QuestGuide {
         Step(
             "quests", "Daily Quest Hub",
             "Check the daily quests whenever you like — they're the fastest way to grow.",
-            position = Position.TOP
+            position = Position.TOP,
+            targetLandmark = "daily"
         ),
         Step(
             "spin", "Pick a lane & spin",
@@ -176,7 +184,8 @@ object QuestGuide {
             else
                 "Give Shuffle a tap — the deck picks something fresh for you.",
             waitFor = Wait.SPIN,
-            skipLabel = "Skip"
+            skipLabel = "Skip",
+            targetLandmark = "spin"
         ),
         Step(
             "spin", "Open the landed topic",
@@ -187,7 +196,8 @@ object QuestGuide {
             waitFor = Wait.REVEAL,
             hold = true,
             position = Position.TOP,
-            skipLabel = "Skip"
+            skipLabel = "Skip",
+            targetLandmark = "deck"
         ),
         Step(
             "", "Start exploring",
@@ -195,9 +205,10 @@ object QuestGuide {
             waitFor = Wait.EXPLORE,
             hold = true,
             // v8.15 — the Start exploring button lives in the reveal's
-            // bottom action dock, so the pet points at the bottom strip.
+            // bottom action dock; v8.22 — its REAL bounds are the highlight.
             position = Position.BOTTOM,
-            skipLabel = "Explore later"
+            skipLabel = "Explore later",
+            targetLandmark = "start-exploring"
         ),
         Step(
             "", "Capture what you found",
@@ -207,12 +218,14 @@ object QuestGuide {
             // v8.12 — the pill floats ABOVE the Save bar so it never covers
             // the button it's pointing at.
             position = Position.LOWER,
-            skipLabel = "Skip"
+            skipLabel = "Skip",
+            targetLandmark = "save"
         ),
         Step(
             "cabinet", "The Cabinet",
             "This is the Cabinet — every keepsake you save lands here.",
-            position = Position.TOP
+            position = Position.TOP,
+            targetLandmark = "grid"
         ),
         Step(
             "quests", "Reward & pet growth",

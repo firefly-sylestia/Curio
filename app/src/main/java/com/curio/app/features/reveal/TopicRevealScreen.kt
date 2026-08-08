@@ -84,6 +84,8 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
@@ -1018,12 +1020,20 @@ private fun RevealActionDock(
                 onClick = onAlready
             )
             if (!browseMode) {
-                RevealStartButton(
-                    enabled = resolved != null,
-                    cat = cat,
-                    modifier = Modifier.weight(1f),
-                    onClick = onExplore
-                )
+                // v8.22 — the Start exploring button is a tour landmark: the
+                // pet-guide highlights its REAL bounds on the tour step.
+                PetLandmark(
+                    id = "start-exploring",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "reveal"
+                ) { m ->
+                    RevealStartButton(
+                        enabled = resolved != null,
+                        cat = cat,
+                        modifier = m.weight(1f),
+                        onClick = onExplore
+                    )
+                }
             } else if (onSilentExplore != null) {
                 // Browse mode: Explore opens the search page silently.
                 RevealStartButton(

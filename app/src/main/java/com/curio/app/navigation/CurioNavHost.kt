@@ -777,6 +777,10 @@ fun CurioNavHost(
                         else -> "Next"
                     },
                     position = step.position,
+                    // v8.22 — the guide highlights the step's REAL target
+                    // landmark (found on the current screen's registry).
+                    screen = routePrefix,
+                    targetLandmark = step.targetLandmark,
                     actionEnabled = !waiting,
                     onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
                     onClose = { QuestGuide.stop() },
@@ -802,7 +806,15 @@ fun CurioNavHost(
     // Curio light-theme brand coral), so no accent is computed here anymore.
     // v8.15 — while the guided tour runs, the pet IS the guide (in
     // PetGuideOverlay), so the floating wanderer hides to avoid a duplicate.
-    if (!QuestGuide.active) CurioFloatingPet(routePrefix = routePrefix)
+    // v8.22 — during the boot gates the pet stays AT ITS HOUSE: no floating
+    // pet on the splash or crash screens (it comes out on its own during
+    // onboarding).
+    if (!QuestGuide.active &&
+        routePrefix != CurioRoutes.SPLASH &&
+        routePrefix != CurioRoutes.CRASH
+    ) {
+        CurioFloatingPet(routePrefix = routePrefix)
+    }
 
     // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"
     // overlay were replaced in v8.2: the tour is offered ONCE on the Quests
