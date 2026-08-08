@@ -1,15 +1,15 @@
-# Request — Fix CurioPetSprite color parsing
+# Request — Fix CurioPetSprite crash
 
 ## Completed
 
-Fixed the invalid Kotlin `Color(0xFF${...})` expressions in `CurioPetSprite.kt` without removing any features. All active-design palette colors and the inline `S` color now prepend the alpha channel and parse the six-digit hex string with `toLong(16).toULong()`.
+Fixed the reported `ArrayIndexOutOfBoundsException: length=20; index=61` crash in `CurioPetSprite.kt`. The previous `toLong(16).toULong()` conversion passed raw ARGB bits as Compose's packed color value, which made Compose interpret `61` as an invalid color-space index. All custom palette colors now use Android's ARGB parser before constructing the Compose `Color`.
 
 ## Validation
 
-- Confirmed no invalid `0xFF${...}` color expressions remain.
+- Confirmed every active-design palette color uses `petDesignColor`.
+- Confirmed the inline `S` palette color uses the same safe conversion.
 - `git diff --check` passed.
 - No Gradle build or compile command was run, per repository instructions.
-- Committed as `6055919` and pushed to `Alpha`.
 
 ## Preserved
 

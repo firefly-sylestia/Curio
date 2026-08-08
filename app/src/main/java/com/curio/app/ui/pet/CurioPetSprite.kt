@@ -41,6 +41,10 @@ import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
 
+/** Converts an RRGGBB design color into Compose's packed ARGB representation. */
+private fun petDesignColor(hex: String): Color =
+    Color(android.graphics.Color.parseColor("#$hex"))
+
 /**
  * The Curio pet sprite — a tiny pixelated "spark-spirit" rendered entirely
  * in Compose (spec §10.2): a round cream body, big eyes, a gold star-tipped
@@ -116,14 +120,14 @@ fun CurioPetSprite(
     // category pastel, never a dark-mode twin).
     // v8.34 — the active design's palette drives every body color (each key
     // falls back to the default look when the design doesn't recolor it).
-    val accent = Color(("FF" + activeDesign.colorOf('s')).toLong(16).toULong())
-    val ink = Color(("FF" + activeDesign.colorOf('o')).toLong(16).toULong())
-    val body = Color(("FF" + activeDesign.colorOf('b')).toLong(16).toULong())
-    val bodyShade = Color(("FF" + activeDesign.colorOf('B')).toLong(16).toULong())
+    val accent = petDesignColor(activeDesign.colorOf('s'))
+    val ink = petDesignColor(activeDesign.colorOf('o'))
+    val body = petDesignColor(activeDesign.colorOf('b'))
+    val bodyShade = petDesignColor(activeDesign.colorOf('B'))
     val bellyLight = Color(0xFFFFFBF0)
     val blush = Color(0xFFF7AFAF)
-    val gold = Color(("FF" + activeDesign.colorOf('G')).toLong(16).toULong())
-    val goldDeep = Color(("FF" + activeDesign.colorOf('g')).toLong(16).toULong())
+    val gold = petDesignColor(activeDesign.colorOf('G'))
+    val goldDeep = petDesignColor(activeDesign.colorOf('g'))
     // v8.26 — excited eyes wear a NATURAL warm brown (the ink family, one
     // step lighter) instead of gold: the gold stars read orangish against
     // the cream body. Sparkles and the antenna keep the gold.
@@ -423,7 +427,7 @@ fun CurioPetSprite(
                                 'S' -> drawPx(
                                     col,
                                     row,
-                                    Color(("FF" + activeDesign.colorOf('S')).toLong(16).toULong())
+                                    petDesignColor(activeDesign.colorOf('S'))
                                 )
                                 'G' -> drawPx(col, row, gold)
                                 'g' -> drawPx(col, row, goldDeep)
