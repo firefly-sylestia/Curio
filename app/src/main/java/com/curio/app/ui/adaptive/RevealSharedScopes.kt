@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.staticCompositionLocalOf
 
@@ -29,6 +30,17 @@ const val RevealSharedElementKey = "reveal-hero"
  */
 val RevealBoundsTransform = BoundsTransform { _, _ ->
     tween(320, easing = FastOutSlowInEasing)
+}
+
+/**
+ * Bounds animation for the Cabinet→Detail morph — a near-critically damped
+ * spring so the saved-entry card glides into the full-width detail hero
+ * banner smoothly. The reveal's short 320ms tween read as a mechanical snap
+ * on this much larger aspect change; the spring eases in AND out with no
+ * overshoot wobble (dampingRatio 0.9). v8.36.
+ */
+val CabinetBoundsTransform = BoundsTransform { _, _ ->
+    spring(dampingRatio = 0.9f, stiffness = 260f)
 }
 
 /** The SharedTransitionScope instance wrapping the NavHost. */

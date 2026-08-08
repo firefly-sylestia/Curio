@@ -1,0 +1,4 @@
+• The shuffle deck feels alive: peek cards fan BEHIND the main card, a swipe anywhere on the deck rotates topics, and every tick ripples top peeks → main card pulse → bottom peeks → main card pulse.
+• Topic Reveal no longer cuts long titles — the hero card grows to fit them.
+• Closing Topic Reveal no longer flashes a cream strip over the nav bar.
+• Opening a Cabinet entry is now a smooth glide — the card expands on a gentle spring and the page blooms in with it.

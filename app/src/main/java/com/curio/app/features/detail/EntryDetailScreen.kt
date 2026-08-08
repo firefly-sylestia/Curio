@@ -13,9 +13,13 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -39,7 +43,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.RowScope
@@ -106,7 +113,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.RevealBoundsTransform
+import com.curio.app.ui.adaptive.CabinetBoundsTransform
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
@@ -226,7 +233,16 @@ private fun noteSeed(entryId: String, salt: Int): Int =
     (entryId.hashCode() xor (salt * 0x1F31)) and 0x7fffffff
 
 @Composable
-fun EntryDetailScreen(entryId: String, navController: NavController) {
+fun EntryDetailScreen(
+    entryId: String,
+    navController: NavController,
+    // v8.36 — the detail page registers its own wash in the Scaffold's
+    // reserved bottom slot (mirroring the reveal dock) so the Cabinet→Detail
+    // morph keeps a stable layout and the strip below the page wears the
+    // entry's category wash instead of the theme surface.
+    onBottomBarContentChanged: (@Composable () -> Unit) -> Unit = {},
+    onBottomBarContentCleared: () -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val authority = remember { "${context.packageName}.fileprovider" }
@@ -256,6 +272,26 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
     // a plain patch. Hoisted once and shared with the hero's gradient so the
     // hero's final stop is, by construction, exactly the page color behind it.
     val wash = cat.categoryBackgroundWash()
+    // v8.36 — publish a wash-backed spacer into the reserved bottom slot.
+    // Identical recipe to the reveal dock: 80dp total with the nav-bar inset
+    // consumed INSIDE, so the placeholder → spacer swap never changes
+    // Scaffold innerPadding mid-morph (an innerPadding change would re-lay
+    // out the SharedTransitionLayout and jolt the Cabinet→Detail expansion).
+    val detailBottomBar = remember(wash) {
+        @Composable {
+            Surface(
+                color = wash,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+            ) {}
+        }
+    }
+    DisposableEffect(detailBottomBar) {
+        onBottomBarContentChanged(detailBottomBar)
+        onDispose { onBottomBarContentCleared() }
+    }
     // v7.5 — pastel mode lightens the hero gradient, so the hero content
     // (glyph, title, frosted bar, watermark scatter) flips from white to the
     // theme-aware onAccent ink — deep accent in light, light twin in dark.
@@ -375,7 +411,7 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
             val vis = LocalRevealVisibilityScope.current ?: return@run Modifier
             val state = scope.rememberSharedContentState("cabinet-${entryId}")
             scope.run {
-                Modifier.sharedElement(state, vis, boundsTransform = RevealBoundsTransform)
+                Modifier.sharedElement(state, vis, boundsTransform = CabinetBoundsTransform)
             }
         }
         Box(
@@ -624,6 +660,11 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
         // The category identity belongs to the reading flow. Keeping it in
         // this same scroll column prevents it from floating over the quick
         // fact and capture body on short screens.
+        // v8.36 — everything below the hero enters together with a soft
+        // delayed fade + rise so the page coordinates with the shared-element
+        // morph instead of popping in while the card is still expanding (the
+        // old "page animates differently from the hero" jank).
+        DetailContentEntrance {
         EntryDetailCategoryLabel(
             entry = resolvedEntry,
             category = cat
@@ -678,6 +719,7 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
             // stays 20dp to match the metadata column gutter.
         Box(modifier = Modifier.padding(horizontal = detailBodyGutter(), vertical = 8.dp)) {
             FormatBody(entry = resolvedEntry, category = cat, navController = navController)
+        }
         }
 
         Spacer(Modifier.height(32.dp))
@@ -742,6 +784,26 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
  *  (the hero and paper cards keep their own internal paddings). */
 @Composable
 private fun detailBodyGutter(): Dp = if (windowWidthSizeClass().isWide) 28.dp else 20.dp
+
+/**
+ * v8.36 — soft entrance for the detail content below the morphing hero: a
+ * delayed fade + rise (the hero's shared-element spring is ~400ms) so the
+ * page blooms in as the card finishes expanding, instead of popping in
+ * while it morphs. The MutableTransitionState pattern mirrors MorphEntrance
+ * so the enter runs on the first composition.
+ */
+@Composable
+private fun DetailContentEntrance(content: @Composable () -> Unit) {
+    val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    AnimatedVisibility(
+        visibleState = state,
+        enter = fadeIn(
+            animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing)
+        ) + slideInVertically(
+            animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing)
+        ) { it / 16 }
+    ) { content() }
+}
 
 private val EntryDetailHeroHeight = 360.dp
 /** Extra layout space reserved for the white sheet below the clipped hero. */

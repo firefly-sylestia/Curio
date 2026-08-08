@@ -107,6 +107,7 @@ import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBottomBar
+import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
@@ -217,12 +218,26 @@ fun CurioNavHost(
     // placeholder never rendered — the bar hid mid-morph, innerPadding grew
     // by the bar's height, and the watermark visibly shifted down. Compare
     // the prefixes so the reserve actually engages.
-    // v8.4 — the Entry Detail route is dropped from the reserve: its morph
-    // source (Cabinet) reads fine without the bar reserved, so no
-    // placeholder is needed there.
-    val reserveBarSpace = routePrefix != null && routePrefix in setOf(
-        CurioRoutes.REVEAL.substringBefore("/")
-    )
+    // v8.36 — the reserve now covers BOTH morph destinations (Reveal AND
+    // Entry Detail) AND both directions of travel: while the destination is
+    // on top, and while it is EXITING (popping reveal → spin, detail →
+    // cabinet). Without the exiting case the real bar swaps in mid-
+    // transition, innerPadding changes, and the SharedTransitionLayout
+    // re-lays out — the nav bar flashed the cream surface for a moment on
+    // reveal close, and the cabinet→detail morph jolted as the grid
+    // re-flowed. Detail joined the set in v8.36: its wash spacer registers
+    // from EntryDetailScreen (mirroring the reveal dock), so the reserved
+    // strip never shows a wrong-color band and the morph runs on a stable
+    // layout the whole visit.
+    val revealPrefix = CurioRoutes.REVEAL.substringBefore("/")
+    val detailPrefix = CurioRoutes.ENTRY_DETAIL.substringBefore("/")
+    val morphReservePrefixes = setOf(revealPrefix, detailPrefix)
+    val prevRoutePrefix = backStackEntry?.previousBackStackEntry?.destination?.route
+        ?.substringBefore("/")
+    val reserveBarSpace = routePrefix != null && (
+        routePrefix in morphReservePrefixes ||
+            prevRoutePrefix != null && prevRoutePrefix in morphReservePrefixes
+        )
     // v8.25 — the reveal page's category, resolved from the reveal route's
     // categorySlug so the reserved bottom strip below can wear the SAME wash
     // as the page from the very first frame. The reveal dock (which carries
@@ -231,12 +246,28 @@ fun CurioNavHost(
     // plain cream surface in that gap (the "bottom nav flashes cream on
     // open" bug). Keyed on the back-stack entry so a second reveal for a
     // different category republishes the right wash.
-    val revealCat = remember(backStackEntry) {
-        if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+    // The reveal page's category — resolved from the reveal entry that's on
+    // top OR (while it pops back to Spin) the exiting reveal entry, so the
+    // reserved bottom strip wears the SAME wash as the page from the very
+    // first frame of both the open and close transitions (no cream band,
+    // no wrong-category tint).
+    val revealCat = if (routePrefix == revealPrefix || prevRoutePrefix == revealPrefix) {
+        val revealEntry = if (routePrefix == revealPrefix) backStackEntry
+                          else backStackEntry?.previousBackStackEntry
+        revealEntry?.let { entry ->
             CurioCategories.byRouteSlug(
-                backStackEntry?.arguments?.getString("categorySlug").orEmpty()
+                entry.arguments?.getString("categorySlug").orEmpty()
             ) ?: CurioCategories.byId(CategoryId.WILDCARD)
-        } else null
+        }
+    } else null
+    // The reserved strip's background: the reveal wash while a reveal entry
+    // is involved, the cabinet wash while a detail morph runs (the detail
+    // screen's own wash spacer registers a frame later), else the surface.
+    val reserveBackground = when {
+        revealCat != null -> revealCat.categoryBackgroundWash()
+        routePrefix == detailPrefix || prevRoutePrefix == detailPrefix ->
+            CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.surface
     }
     // The reveal page paints its own category wash over the whole content
     // area, and its action dock wears the SAME wash (see RevealActionDock),
@@ -413,7 +444,21 @@ fun CurioNavHost(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
-                if (!wide && showBottomBar) {
+                // Reserve-first (v8.36): any live shared-element morph — a
+                // reveal or detail destination on top, OR one still exiting
+                // (popping back) — keeps the bottom strip as the screen's
+                // dock / wash spacer or the tinted placeholder, so the real
+                // bar never swaps in mid-transition (innerPadding changes
+                // mid-morph would re-lay out the SharedTransitionLayout and
+                // jolt the animation / flash the cream surface).
+                if (!wide && reserveBarSpace) {
+                    revealBottomBarContent?.invoke()
+                        ?: RevealBottomBarPlaceholder(
+                            bottomBarHeightPx = bottomBarHeightPx,
+                            density = density,
+                            background = reserveBackground
+                        )
+                } else if (!wide && showBottomBar) {
                     CurioBottomBar(
                         navController = navController,
                         // Measure the bar's real height so the morph
@@ -421,21 +466,6 @@ fun CurioNavHost(
                         // (see bottomBarHeightPx).
                         modifier = Modifier.onSizeChanged { bottomBarHeightPx = it.height }
                     )
-                } else if (!wide && reserveBarSpace) {
-                    // The reveal actions occupy the same bottom strip that
-                    // used to be only an invisible morph placeholder. This
-                    // keeps the Scaffold height stable while giving the
-                    // reserved area the reveal category tint — the
-                    // placeholder paints the wash itself so the strip never
-                    // shows the Scaffold's plain cream between the Spin wash
-                    // and the reveal dock (v8.25).
-                    revealBottomBarContent?.invoke()
-                        ?: RevealBottomBarPlaceholder(
-                            bottomBarHeightPx = bottomBarHeightPx,
-                            density = density,
-                            background = revealCat?.categoryBackgroundWash()
-                                ?: MaterialTheme.colorScheme.surface
-                        )
                 }
             },
             // Every screen applies its own statusBarsPadding().  This Scaffold
@@ -691,7 +721,14 @@ fun CurioNavHost(
                 ) {
                     EntryDetailScreen(
                         entryId = entry.arguments?.getString("entryId").orEmpty(),
-                        navController = navController
+                        navController = navController,
+                        // v8.36 — the detail page registers its own wash
+                        // spacer in the reserved bottom slot (mirroring the
+                        // reveal dock) so the cabinet→detail morph runs on a
+                        // stable Scaffold layout and the strip below the
+                        // page wears the entry's category wash.
+                        onBottomBarContentChanged = { revealBottomBarContent = it },
+                        onBottomBarContentCleared = { revealBottomBarContent = null }
                     )
                 }
             }

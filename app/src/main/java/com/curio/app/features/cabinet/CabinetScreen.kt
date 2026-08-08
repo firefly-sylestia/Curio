@@ -47,7 +47,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -90,7 +89,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.RevealBoundsTransform
+import com.curio.app.ui.adaptive.CabinetBoundsTransform
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
@@ -268,11 +267,12 @@ fun CabinetScreen(navController: NavController) {
     LaunchedEffect(cabinetWash) {
         CurioNavTint.publishCabinetWash(cabinetWash)
     }
-    // Hygiene: clear the handoff when the Cabinet leaves composition so a
-    // stale wash never lingers for another tab.
-    DisposableEffect(Unit) {
-        onDispose { CurioNavTint.publishCabinetWash(null) }
-    }
+    // The wash handoff is deliberately KEPT when the Cabinet leaves
+    // composition (v8.36, mirroring Spin's publishSpinWash): while a
+    // Cabinet→Detail morph runs, the NavHost's reserved bottom strip falls
+    // back to this published wash for its first frame (the detail page's own
+    // wash spacer registers a frame later). A stale wash is harmless — only
+    // the Cabinet route reads it, and Cabinet republishes on every visit.
 
     // The hero banner runs up BEHIND the status bar (it applies its own
     // status-bar inset), so the root Box carries no status-bar padding.
@@ -412,7 +412,7 @@ fun CabinetScreen(navController: NavController) {
                         val cardMorphMod = if (!selectionMode && sharedScope != null && visScope != null) {
                             val state = sharedScope.rememberSharedContentState("cabinet-${entry.id}")
                             sharedScope.run {
-                                Modifier.sharedElement(state, visScope, boundsTransform = RevealBoundsTransform)
+                                Modifier.sharedElement(state, visScope, boundsTransform = CabinetBoundsTransform)
                             }
                         } else Modifier
 

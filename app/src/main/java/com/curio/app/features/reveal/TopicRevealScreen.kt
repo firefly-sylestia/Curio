@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -73,6 +74,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -1121,6 +1123,9 @@ private fun RevealAlreadyButton(
 // Hero card — large category watermark with verb + duration badge
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** The reveal hero's resting height (matches the pre-v8.36 fixed size). */
+private val RevealHeroBaseHeight = 260.dp
+
 @Composable
 private fun HeroCard(
     cat: com.curio.app.data.CurioCategory,
@@ -1154,10 +1159,35 @@ private fun HeroCard(
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
 
+    // v8.36 — auto-growing hero: the title used to be hard-capped at 3
+    // lines, cutting very long topic names. The card now measures how much
+    // of the title spills past the 3-line fold (in px, from the layout
+    // result — so the growth tracks the REAL line height, including
+    // accessibility font scaling) and grows past the 260dp base by exactly
+    // that amount, so long titles show in full. The measurement is latched
+    // only after it has been stable for 420ms — during the shared-element
+    // morph the card resizes every frame and the title reflows, so latching
+    // mid-morph would make the height fight the expansion. The height
+    // change itself is animated so the grow reads as a gentle bloom, not a
+    // snap.
+    var titleOverflowPx by remember(resolved) { mutableStateOf(0) }
+    var settledOverflowPx by remember(resolved) { mutableStateOf(0) }
+    LaunchedEffect(titleOverflowPx) {
+        delay(420)
+        settledOverflowPx = titleOverflowPx
+    }
+    val density = LocalDensity.current
+    val heroHeight by animateDpAsState(
+        targetValue = RevealHeroBaseHeight +
+            with(density) { settledOverflowPx.toDp() },
+        animationSpec = tween(240, easing = FastOutSlowInEasing),
+        label = "revealHeroHeight"
+    )
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(260.dp)
+            .height(heroHeight)
             .then(
                 // Shared-element target: bounds animate from the Spin
                 // ticket's position/size to this hero when the topic opens.
@@ -1277,10 +1307,12 @@ private fun HeroCard(
                     }
                 }
 
-                // ── Middle — the topic name (card content, max 3 lines) ─
+                // ── Middle — the topic name (auto-grows the card) ──────
                 // Weighted spacers (not SpaceBetween) keep the title centred
                 // between the badge row and the bottom pills whether or not
-                // the badge is present (e.g. while the topic loads).
+                // the badge is present (e.g. while the topic loads). The
+                // measured line count feeds the hero's height so long names
+                // wrap in full instead of being cut at 3 lines (v8.36).
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = resolved?.name ?: cat.displayName,
@@ -1291,8 +1323,13 @@ private fun HeroCard(
                     ),
                     fontWeight = FontWeight.ExtraBold,
                     color = ink,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    // Height of the lines past the 3-line fold (0 when the
+                    // title fits) — feeds the auto-growing hero above.
+                    onTextLayout = { result ->
+                        titleOverflowPx = if (result.lineCount > 3) {
+                            result.size.height - result.getLineBottom(2)
+                        } else 0
+                    }
                 )
                 Spacer(Modifier.weight(1f))
 

@@ -1774,16 +1774,19 @@ private const val LandedRestScale = 1.02f
 // v7.1 — peek wipe timings. Soft partial-height glides + fades (no hard
 // slot cut), all under the ~340ms tick floor so each step completes before
 // the next tick lands.
-// v8.32 — CASCADE wave: during a shuffle the five fan cards no longer wipe
-// together — the TOP of the deck animates first and the wave rolls down one
-// card after another (top far → top near → hero → bottom near → bottom far),
-// each delayed PeekWaveStaggerMs behind the one above it. Wipes are much
-// shorter (120ms vs the old 320ms) so the whole cascade (last card starts at
-// 3×45=135ms and finishes ~255ms) still lands under the ~340ms tick floor —
-// the reel reads snappier and faster, never janky.
+// v8.36 — TWO-PHASE cascade: during a shuffle the TOP pair of peeks wipes
+// first, then the BOTTOM pair follows [PeekWaveGroupGapMs] later, and the
+// hero pulses once with each group (see the HeroTicketCard tick pulse).
+// Wipes are short (120ms) so each phase completes before the next tick
+// lands — the reel reads snappier and faster, never janky. (v8.32's
+// one-card-at-a-time roll-down was replaced by this grouped pattern per
+// user request: top peek first, then bottom peek, main card animating each
+// time.)
 private const val PeekWaveInMs = 120
 private const val PeekWaveOutMs = 110
-private const val PeekWaveStaggerMs = 45
+
+/** Gap between the top pair's wipe and the bottom pair's wipe. */
+private const val PeekWaveGroupGapMs = 110
 private const val PeekIdleInMs = 300
 private const val PeekIdleOutMs = 280
 
@@ -1881,15 +1884,45 @@ private fun Carousel(
         // fan so proportions stay identical; the roomy box grows ~6% to
         // match the up-scaled fan. v7.15 — the whole box also scales by
         // [fitScale] so the fan's layout footprint matches its size.
-        modifier = modifier.height(
-            when {
-                densityExtraCompact -> 325.dp
-                extraCompact -> 350.dp
-                compact -> 390.dp
-                roomy -> 470.dp
-                else -> 444.dp
-            } * fitScale
-        ),
+        // v8.36 — the swipe detector now lives on the WHOLE deck box (not
+        // just the front card), so a horizontal drag anywhere on the fan —
+        // on the peek cards or the hero — rotates the deck. Taps on the
+        // front card still open the topic: tap vs horizontal-drag
+        // disambiguation is handled by the gesture system (a tap never
+        // crosses drag slop, so the card's own clickable wins).
+        modifier = modifier
+            .pointerInput(enabled, shuffling, opening) {
+                if (enabled && !shuffling && !opening) {
+                    val swipeThreshold = 48.dp.toPx()
+                    var totalDrag = 0f
+                    while (true) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { totalDrag = 0f },
+                            onDragCancel = { totalDrag = 0f },
+                            onDragEnd = {
+                                when {
+                                    totalDrag <= -swipeThreshold -> onCycle(1)
+                                    totalDrag >= swipeThreshold -> onCycle(-1)
+                                }
+                                totalDrag = 0f
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                totalDrag += dragAmount
+                            }
+                        )
+                    }
+                }
+            }
+            .height(
+                when {
+                    densityExtraCompact -> 325.dp
+                    extraCompact -> 350.dp
+                    compact -> 390.dp
+                    roomy -> 470.dp
+                    else -> 444.dp
+                } * fitScale
+            ),
         contentAlignment = Alignment.Center
     ) {
         if (poolSize == 0) {
@@ -1904,40 +1937,13 @@ private fun Carousel(
                     landedTopic = landedTopic
                 )
                 if (slot == 0) {
-                    // v8.31 — a horizontal swipe on the front card rotates the
-                    // fan through the cards already visible around it: the
-                    // cycleIndex ±1 nudge re-resolves every slot, so the whole
-                    // deck streams one card forward/back and the front card's
-                    // AnimatedContent glide covers the swap. Taps still open
-                    // the topic the card is showing. Detector sits on a wrapper
-                    // Box BEFORE the card's own clickable so drags win over
-                    // taps; gestures under the 48dp threshold snap back (the
-                    // card never visually moves on a short flick).
-                    Box(
-                        modifier = Modifier.pointerInput(enabled, shuffling, opening) {
-                            if (enabled && !shuffling && !opening) {
-                                val swipeThreshold = 48.dp.toPx()
-                                var totalDrag = 0f
-                                while (true) {
-                                    detectHorizontalDragGestures(
-                                        onDragStart = { totalDrag = 0f },
-                                        onDragCancel = { totalDrag = 0f },
-                                        onDragEnd = {
-                                            when {
-                                                totalDrag <= -swipeThreshold -> onCycle(1)
-                                                totalDrag >= swipeThreshold -> onCycle(-1)
-                                            }
-                                            totalDrag = 0f
-                                        },
-                                        onHorizontalDrag = { change, dragAmount ->
-                                            change.consume()
-                                            totalDrag += dragAmount
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    ) {
+                    // v8.36 — the swipe detector was hoisted to the whole deck
+                    // Box above, so the front card only carries its tap-to-open
+                    // (the hero pulse covers the card's per-tick bounce). The
+                    // wrapper's zIndex keeps the hero ABOVE the peek cards (the
+                    // peeks fan at zIndex 2/5 — the old default-0 hero let them
+                    // draw IN FRONT of the main card).
+                    Box(modifier = Modifier.zIndex(10f)) {
                         HeroTicketCard(
                             accent = deckAccent,
                             gradient = deckGradient,
@@ -2118,14 +2124,17 @@ private fun HeroTicketCard(
     var tickDir by remember { mutableStateOf(1f) }
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
-        // v8.32 — the bounce lands when the hero's turn arrives in the
-        // cascade (mid-wave, after the top peeks) so the pulse reads as
-        // part of the ripple instead of firing ahead of the deck.
-        delay((2 * PeekWaveStaggerMs).toLong())
+        // v8.36 — the hero pulses once WITH each cascade group: first with
+        // the top pair of peeks' wipe, then again with the bottom pair's
+        // (the "each time they animate, the main card animates" rhythm).
         tickDir = -tickDir
         // v6.6 — calm breath instead of a kick: the card lifts barely
         // (1.02) and glides back on a heavily damped, low-stiffness
         // spring, so each tick reads as a soft pulse, never a slam.
+        tickPulse.snapTo(1.02f)
+        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
+        delay(PeekWaveGroupGapMs.toLong())
+        tickDir = -tickDir
         tickPulse.snapTo(1.02f)
         tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
     }
@@ -2412,15 +2421,12 @@ private fun HeroTicketCard(
                             targetState = topic,
                             transitionSpec = {
                                 if (shuffling) {
-                                    // v8.32 — the hero joins the cascade at
-                                    // its center slot (after the top peeks,
-                                    // before the bottom ones): its swap waits
-                                    // one stagger step past the top near peek
-                                    // and wipes a touch faster (180ms vs the
-                                    // old 300ms v6.10 rhythm) so the whole
-                                    // deck ripples top→bottom in one wave that
-                                    // still lands under the tick floor.
-                                    val heroDelay = 2 * PeekWaveStaggerMs
+                                    // v8.36 — the hero's content swap joins
+                                    // the FIRST cascade group (with the top
+                                    // peeks): it shows the new topic while the
+                                    // bottom pair still wipes, and pulses with
+                                    // both groups (see the tick pulse above).
+                                    val heroDelay = 0
                                     (slideInVertically(
                                         animationSpec = tween(180, delayMillis = heroDelay, easing = FastOutSlowInEasing)
                                     ) { height -> height / 2 } +
@@ -2760,18 +2766,18 @@ private fun PeekCard(
                 // before the next tick lands.
                 val dir = if (isTop) -1f else 1f
                 if (shuffling) {
-                    // v8.32 — cascade turn: the top of the deck wipes first
-                    // and the wave rolls down (slot -2 → -1 → hero → 1 → 2),
-                    // each card holding its topic until its stagger moment
-                    // then swapping fast. Enter AND exit share the delay so
-                    // the card visibly waits its turn instead of tearing.
+                    // v8.36 — two-phase cascade: the TOP pair of peeks wipes
+                    // together first (slots -2 & -1 at the same delay), then
+                    // the BOTTOM pair wipes together after PeekWaveGroupGapMs
+                    // (slots 1 & 2). The hero pulses once with each group.
+                    // Enter AND exit share the delay so the card visibly
+                    // waits its turn instead of tearing.
                     val waveTurn = when (slot) {
-                        -2 -> 0
-                        -1 -> 1
-                        1 -> 2
-                        else -> 3
+                        -2, -1 -> 0
+                        1, 2 -> 1
+                        else -> 0
                     }
-                    val waveDelay = waveTurn * PeekWaveStaggerMs
+                    val waveDelay = waveTurn * PeekWaveGroupGapMs
                     slideInVertically(
                         animationSpec = tween(PeekWaveInMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)
                     ) { height -> (height * dir * PeekWipeTravel).toInt() } +
