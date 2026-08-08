@@ -37,6 +37,14 @@
   hub's private copy; `SettingsHubScreen.kt` now uses it (private `SettingsSearchField`
   deleted, orphaned imports removed). Committed `6f6609f`.
 
+## Part 4 — CI fix: AGP 9 split toggle rename (DONE)
+
+- CI failed on `app/build.gradle.kts:118` — `Unresolved reference 'isEnabled'` in
+  `splits { abi { … } }`. Verified against the actual `gradle-api-9.2.1` sources jar
+  (Google Maven): AGP 9 renamed the `Split` toggle from `isEnabled` to `isEnable`
+  (`interface Split { var isEnable: Boolean }`); `isUniversalApk` / `reset()` /
+  `include()` are unchanged. Fixed to `isEnable = true` and pushed (`6389d60`).
+
 ## Validation
 
 - Kotlin delimiter balance OK on every edited file; `git diff --check` clean;
