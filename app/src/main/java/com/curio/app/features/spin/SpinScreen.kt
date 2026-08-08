@@ -1779,20 +1779,8 @@ private const val LandedRestScale = 1.02f
 // v7.1 — peek wipe timings. Soft partial-height glides + fades (no hard
 // slot cut), all under the ~340ms tick floor so each step completes before
 // the next tick lands.
-// v8.40 — the shuffle cascade is deliberately one card at a time:
-// top outer → top inner → bottom inner → bottom outer. Each wipe is short
-// enough to finish before the next card starts, so the deck reads like a
-// satisfying little chain instead of four cards moving together.
-private const val PeekWaveInMs = 72
-private const val PeekWaveOutMs = 62
-/** Delay between adjacent cards in the sequential cascade. */
-private const val PeekWaveCardGapMs = 78
-
-/** Hero heartbeat timing — one complete press/lift/settle per reel tick. */
-private const val HeroTickPressMs = 70
-private const val HeroTickSettleMs = 170
-/** Let the hero heartbeat lead before its topic content changes. */
-private const val HeroContentDelayMs = 90
+private const val PeekWipeInMs = 320
+private const val PeekWipeOutMs = 300
 private const val PeekIdleInMs = 300
 private const val PeekIdleOutMs = 280
 
@@ -2130,22 +2118,9 @@ private fun HeroTicketCard(
     var tickDir by remember { mutableStateOf(1f) }
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
-        // v8.40 — one deliberate heartbeat per reel tick. The old two-spring
-        // pulse restarted itself 110ms later, so the next topic often
-        // cancelled the first pulse while the second was still settling;
-        // the hero then looked like it was wobbling with every other card.
-        // Press first, lift into a tiny overshoot, then settle completely
-        // before the next fast tick can interrupt it.
         tickDir = -tickDir
-        tickPulse.snapTo(0.985f)
-        tickPulse.animateTo(
-            1.028f,
-            tween(HeroTickPressMs, easing = FastOutSlowInEasing)
-        )
-        tickPulse.animateTo(
-            1f,
-            tween(HeroTickSettleMs, easing = FastOutSlowInEasing)
-        )
+        tickPulse.snapTo(1.02f)
+        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
     }
 
     // ── Category switch — one welcoming bounce as the deck re-fans to the
@@ -2430,20 +2405,14 @@ private fun HeroTicketCard(
                             targetState = topic,
                             transitionSpec = {
                                 if (shuffling) {
-                                    // v8.40 — let the hero heartbeat lead the
-                                    // content handoff. The press/lift is the
-                                    // invitation; the new topic arrives just
-                                    // after it instead of all motion starting
-                                    // on the same frame.
-                                    val heroDelay = HeroContentDelayMs
                                     (slideInVertically(
-                                        animationSpec = tween(180, delayMillis = heroDelay, easing = FastOutSlowInEasing)
+                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
                                     ) { height -> height / 2 } +
-                                        fadeIn(animationSpec = tween(180, delayMillis = heroDelay, easing = FastOutSlowInEasing))) togetherWith
+                                        fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing))) togetherWith
                                     (slideOutVertically(
-                                        animationSpec = tween(160, delayMillis = heroDelay, easing = FastOutSlowInEasing)
+                                        animationSpec = tween(260, easing = FastOutSlowInEasing)
                                     ) { height -> -height / 2 } +
-                                        fadeOut(animationSpec = tween(160, delayMillis = heroDelay, easing = FastOutSlowInEasing))) using SizeTransform(clip = false)
+                                        fadeOut(animationSpec = tween(260, easing = FastOutSlowInEasing))) using SizeTransform(clip = false)
                                 } else {
                                     (slideInVertically(
                                         animationSpec = tween(300, easing = FastOutSlowInEasing)
@@ -2775,24 +2744,14 @@ private fun PeekCard(
                 // before the next tick lands.
                 val dir = if (isTop) -1f else 1f
                 if (shuffling) {
-                    // v8.40 — strict one-card-at-a-time cascade: top outer,
-                    // top inner, bottom inner, then bottom outer. No two peek
-                    // cards share a delay.
-                    val waveDelay = when (slot) {
-                        -2 -> 0
-                        -1 -> PeekWaveCardGapMs
-                        1 -> PeekWaveCardGapMs * 2
-                        2 -> PeekWaveCardGapMs * 3
-                        else -> 0
-                    }
                     slideInVertically(
-                        animationSpec = tween(PeekWaveInMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)
+                        animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * dir * PeekWipeTravel).toInt() } +
-                    fadeIn(animationSpec = tween(PeekWaveInMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)) togetherWith
+                    fadeIn(animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)) togetherWith
                     slideOutVertically(
-                        animationSpec = tween(PeekWaveOutMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)
+                        animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekWaveOutMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
+                    fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
                 } else {
                     // Idle re-fan (landing re-deal / category switch) — a
                     // slower, softer pass in the same per-side direction.

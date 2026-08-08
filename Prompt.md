@@ -1,17 +1,16 @@
-# Request — prevent detail-view text overlap and cramped sections
+# Request — restore pre-v8.32 Spin card animations only
 
 ## Completed
 
-- Kept the detail page's category label, quick fact, tags, and format body in one sequential reading column with explicit spacing.
-- Removed the nested tag `MorphEntrance`, which could scale/paint tags through neighboring long text during entry.
-- Replaced the detail-body `AnimatedVisibility` entrance with a measured `Box` whose content is fully laid out immediately and only fades via `graphicsLayer`; long descriptions and note cards no longer move through one another while the Cabinet → Detail morph settles.
-- Increased spacing between metadata, “My thoughts,” and the Field Notes sections (“Observed,” “Surprised me,” and “Want to learn next”) so similar long-text blocks have the same breathing room.
-- Preserved dynamic note-paper sizing and wrapping; no fixed-height content was introduced.
+- Compared commit `0e60e2a32a73cbb0a444732e170aeb2bb64f389d` with its parent `27f7596d5cc7765fbbea0cf50d41b80e50318331`.
+- Restored the pre-commit main-card heartbeat: the original soft spring pulse instead of the newer press/lift/settle timing.
+- Restored the pre-commit hero content reel timing: the original 300ms/260ms shuffle transition without the later delay.
+- Restored the pre-commit peek-card shuffle wipes: simultaneous 320ms/300ms transitions without the later cascade delays.
+- Preserved topic swiping and ordering behavior: `onDeckCycle`, `cycleIndex`, slot/topic resolution, gesture handling, z-index, card geometry, and design were not reverted.
 
 ## Validation
 
-- EntryDetailScreen delimiter balance passed.
+- SpinScreen delimiter balance passed.
 - `git diff --check` passed.
-- Animation import/use audit passed after removing obsolete `AnimatedVisibility`, `MutableTransitionState`, `fadeIn`, and `MorphEntrance` usage from this reading flow.
-- Code review found no concrete Kotlin/Compose or remaining-overlap blocker.
+- Static review confirmed the diff is limited to animation constants and transition specs; no swipe/topic-switching or z-index changes were included.
 - Gradle builds are forbidden locally by the Curio DOX rules; CI remains the compile gate.
