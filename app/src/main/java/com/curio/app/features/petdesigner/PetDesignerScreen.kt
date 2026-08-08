@@ -2328,9 +2328,10 @@ private fun FaceGridEditor(
  */
 private fun effectiveDetailRows(design: PetDesign, layer: String): List<String> {
     val authored = design.detailFor(layer)
-    if (authored.any { row -> row.any { it != '.' } }) return authored
     if (!design.isProceduralEnabled(layer)) return authored
-
+    // Start from the generated current part, then place authored pixels over
+    // it. Transparent authored cells must remain transparent so a partially
+    // redrawn layer still shows untouched generated pixels underneath.
     val pixels = when (layer) {
         "tail" -> listOf(
             Triple(14, 11, 'B'), Triple(15, 11, 'B'),
@@ -2365,6 +2366,13 @@ private fun effectiveDetailRows(design: PetDesign, layer: String): List<String> 
         val row = ((row16 + 0.5f) * design.gridSize / 16f).toInt()
             .coerceIn(0, design.gridSize - 1)
         rows[row][col] = key
+    }
+    authored.forEachIndexed { row, line ->
+        line.forEachIndexed { col, key ->
+            if (key != '.' && row in rows.indices && col in rows[row].indices) {
+                rows[row][col] = key
+            }
+        }
     }
     return rows.map { String(it) }
 }
