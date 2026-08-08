@@ -805,7 +805,11 @@ private fun DetailContentEntrance(content: @Composable () -> Unit) {
     ) { content() }
 }
 
-private val EntryDetailHeroHeight = 360.dp
+// Two-line topic names plus the frosted metadata strip need a little more
+// vertical breathing room on compact screens. Keeping this as the shared
+// hero/morph height prevents the body header from being painted underneath
+// the category and entry text while preserving one stable transition target.
+private val EntryDetailHeroHeight = 400.dp
 /** Extra layout space reserved for the white sheet below the clipped hero. */
 private val EntryDetailSheetExtent = 16.dp
 
@@ -849,23 +853,30 @@ private fun EntryDetailCategoryLabel(
             tint = category.categoryInk(),
             size = 22.dp
         )
-        Text(
-            text = category.displayName,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = category.categoryInk(),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        if (entry.title != null) {
+        // Keep the category and saved-entry title in one constrained text
+        // column. They used to be competing weighted children in the same
+        // row, so long titles could squeeze into the category label and
+        // appear to overlap it on narrow screens.
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             Text(
-                text = entry.title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                text = category.displayName,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = category.categoryInk(),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+                overflow = TextOverflow.Ellipsis
             )
+            if (!entry.title.isNullOrBlank()) {
+                Text(
+                    text = entry.title.orEmpty(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         if (entry.isLegacy) {
             Row(
@@ -881,7 +892,8 @@ private fun EntryDetailCategoryLabel(
                 Text(
                     text = "Legacy",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
             }
         }
@@ -3512,7 +3524,12 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
             rows.forEach { (label, value) ->
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(label, style = MaterialTheme.typography.labelMedium, color = category.categoryInk(), modifier = Modifier.width(92.dp))
-                    Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodySmall,
+                        softWrap = true,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
             if (!metadata.tags.isNullOrEmpty()) {
@@ -3558,6 +3575,7 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                             Text(
                                 value,
                                 style = MaterialTheme.typography.bodySmall,
+                                softWrap = true,
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -3603,7 +3621,12 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(label, style = MaterialTheme.typography.labelSmall, color = category.categoryInk(), modifier = Modifier.width(92.dp))
-                                    Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodySmall,
+                        softWrap = true,
+                        modifier = Modifier.weight(1f)
+                    )
                                 }
                             }
                         }
