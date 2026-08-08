@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -67,6 +68,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -252,17 +254,36 @@ fun TopicRevealScreen(
             }
         }
     }
+    // v8.44 — when the user LEAVES the reveal, the dock fades out in sync
+    // with the route's exit instead of lingering at full opacity until the
+    // destination finally disposes (the exit transition alone takes ~450ms,
+    // and the dock lives OUTSIDE the animated content, so it used to hang
+    // there for the whole fade). The fade is ALPHA ONLY — the dock still
+    // occupies the exact fixed-height bottom slot for the entire pop
+    // transition, so Scaffold innerPadding and the shared-element morph stay
+    // untouched (the v8.5 freeze rule) while the buttons gracefully vanish
+    // with the page.
+    var dockLeaving by remember { mutableStateOf(false) }
     val revealBottomBar = remember(cat) {
         @Composable {
-            RevealActionDock(
-                cat = cat,
-                browseMode = latestBrowseMode,
-                resolved = latestResolved,
-                isDone = latestIsDone,
-                onExplore = latestOnExplore,
-                onAlready = latestOnAlready,
-                onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null
+            val dockAlpha by animateFloatAsState(
+                targetValue = if (dockLeaving) 0f else 1f,
+                animationSpec = tween(200, easing = FastOutSlowInEasing),
+                label = "revealDockFade"
             )
+            Box(
+                modifier = Modifier.graphicsLayer { alpha = dockAlpha }
+            ) {
+                RevealActionDock(
+                    cat = cat,
+                    browseMode = latestBrowseMode,
+                    resolved = latestResolved,
+                    isDone = latestIsDone,
+                    onExplore = latestOnExplore,
+                    onAlready = latestOnAlready,
+                    onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null
+                )
+            }
         }
     }
     DisposableEffect(revealBottomBar) {
@@ -285,6 +306,7 @@ fun TopicRevealScreen(
      *  flight, so the foreground service starts while this activity is still
      *  foreground (a background FGS start throws on Android 12+). */
     fun openExploreBrowserAndGoHome(session: ExploreSession) {
+        dockLeaving = true
         showExploreDialog = false
         runCatching {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(session.searchUrl)))
@@ -561,6 +583,7 @@ fun TopicRevealScreen(
                     if (!browseMode && !engaged) {
                         resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
                     }
+                    dockLeaving = true
                     navController.popBackStack()
                 },
                 shape = CircleShape,
@@ -718,6 +741,7 @@ fun TopicRevealScreen(
         if (!browseMode && !engaged) {
             resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
         }
+        dockLeaving = true
         navController.popBackStack()
     }
 
@@ -815,6 +839,7 @@ fun TopicRevealScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
+                    dockLeaving = true
                     showAlreadyDoneDialog = false
                     navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
                         launchSingleTop = true
@@ -870,6 +895,7 @@ fun TopicRevealScreen(
                         // tagging "Resumed" if the user came back to it).
                         ExploreSessionStore.recordExplored(context, cat.id, topic.name)
                         ExploreSessionStore.removeUnexplored(context, cat.id, topic.name)
+                        dockLeaving = true
                         showExploreDialog = false
                         navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
                             launchSingleTop = true
@@ -1000,12 +1026,27 @@ private fun RevealActionDock(
         // paddings and typography so the actions always fit INSIDE the fixed
         // dock; tablets/wide windows keep the original generous metrics.
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 440.dp || maxHeight < 44.dp
+            // v8.44 — two INDEPENDENT squeezes instead of one blanket
+            // "compact": NARROW windows (every phone) tighten only the
+            // horizontal padding, while TIGHT height (the dock content area
+            // is 80dp minus the nav-bar inset — ~32dp on three-button-nav,
+            // ~48-56dp on gesture phones) gets the absolute-minimum metrics.
+            // Before, ALL phones got the minimum, so normal gesture phones
+            // showed tiny, squished buttons even though they had room.
+            val compact = maxWidth < 440.dp
+            val tight = maxHeight < 48.dp
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp, vertical = if (compact) 2.dp else 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(
+                        horizontal = 12.dp,
+                        vertical = when {
+                            tight -> 2.dp
+                            compact -> 4.dp
+                            else -> 8.dp
+                        }
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(if (tight) 6.dp else 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Already/Undo on the LEFT, Start exploring on the RIGHT.
@@ -1014,6 +1055,7 @@ private fun RevealActionDock(
                     cat = cat,
                     isDone = isDone,
                     compact = compact,
+                    tight = tight,
                     modifier = Modifier.weight(1f),
                     onClick = onAlready
                 )
@@ -1029,6 +1071,7 @@ private fun RevealActionDock(
                             enabled = resolved != null,
                             cat = cat,
                             compact = compact,
+                            tight = tight,
                             modifier = m.weight(1f),
                             onClick = onExplore
                         )
@@ -1040,6 +1083,7 @@ private fun RevealActionDock(
                         cat = cat,
                         label = "Explore",
                         compact = compact,
+                        tight = tight,
                         modifier = Modifier.weight(1f),
                         onClick = onSilentExplore
                     )
@@ -1056,6 +1100,9 @@ private fun RevealStartButton(
     modifier: Modifier = Modifier,
     label: String = "Start exploring",
     compact: Boolean = false,
+    // v8.44 — maxHeight < 48dp content area (three-button-nav phones): the
+    // absolute minimum that still fits; see RevealActionDock.
+    tight: Boolean = false,
     onClick: () -> Unit
 ) {
     // Fully transparent: the accent text + icon float directly on the page
@@ -1072,12 +1119,19 @@ private fun RevealStartButton(
             disabledContainerColor = Color.Transparent,
             disabledContentColor = ink.copy(alpha = 0.40f)
         ),
-        // Compact vertical padding: the dock is a fixed 80dp with the nav-bar
-        // inset consumed inside, so on inset-heavy devices the content area is
-        // ~30-50dp — the buttons must fit without clipping the gesture bar.
-        // Small windows tighten this further (see RevealActionDock).
-        contentPadding = if (compact) {
+        // Vertical padding: the dock is a fixed 80dp with the nav-bar inset
+        // consumed inside, so on inset-heavy devices the content area is
+        // ~32-56dp — the buttons must fit without clipping the gesture bar.
+        // v8.44 — three tiers: TIGHT (three-button-nav, ~32dp) keeps the
+        // absolute minimum; COMPACT (every phone) uses the roomier phone
+        // metrics (proper 8dp vertical padding, 18dp icon — the old blanket
+        // "compact" gave ALL phones the minimum, squishing gesture phones
+        // that actually had ~48-56dp); tablets keep the original generous
+        // metrics.
+        contentPadding = if (tight) {
             PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+        } else if (compact) {
+            PaddingValues(horizontal = 10.dp, vertical = 8.dp)
         } else {
             PaddingValues(horizontal = 20.dp, vertical = 10.dp)
         },
@@ -1085,12 +1139,22 @@ private fun RevealStartButton(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 8.dp)
+            horizontalArrangement = Arrangement.spacedBy(if (tight) 6.dp else 8.dp)
         ) {
-            CurioIcon(CurioIcons.AutoAwesome, null, tint = ink, size = if (compact) 16.dp else 20.dp)
+            CurioIcon(
+                CurioIcons.AutoAwesome,
+                null,
+                tint = ink,
+                size = if (tight) 16.dp else if (compact) 18.dp else 20.dp
+            )
             Text(
                 text = label,
-                style = if (compact) {
+                // Phones keep labelLarge (14sp): 16sp titleMedium would push
+                // "Start exploring" past the half-width button on ~360dp
+                // screens and ellipsize — the "squished" look is fixed by the
+                // roomier vertical padding + bigger icon instead. Tablets keep
+                // the original titleMedium (v8.44 review).
+                style = if (tight || compact) {
                     MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                 } else {
                     MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
@@ -1113,6 +1177,8 @@ private fun RevealAlreadyButton(
     isDone: Boolean,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    // v8.44 — three-button-nav phones, see RevealStartButton.
+    tight: Boolean = false,
     onClick: () -> Unit
 ) {
     // Fully transparent: the label + icon float on the page wash. Done
@@ -1129,9 +1195,9 @@ private fun RevealAlreadyButton(
         modifier = modifier
             .fillMaxWidth()
             .then(
-                // Compact vertical padding — see RevealStartButton's comment.
-                // Small windows tighten this further (see RevealActionDock).
-                if (compact) Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                // Vertical padding tiers — see RevealStartButton's comment.
+                if (tight) Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                else if (compact) Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
                 else Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
             )
     ) {
@@ -1143,7 +1209,7 @@ private fun RevealAlreadyButton(
                 name = if (isDone) CurioIcons.Close else CurioIcons.History,
                 contentDescription = null,
                 tint = ink,
-                size = if (compact) 16.dp else 18.dp
+                size = if (tight) 16.dp else 18.dp
             )
             Spacer(Modifier.width(if (compact) 6.dp else 8.dp))
             Text(

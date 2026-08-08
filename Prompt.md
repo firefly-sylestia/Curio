@@ -153,6 +153,31 @@
   (streak/saves/"Hey you") gated behind the FRIEND bond tier like the classic
   library (v8.29 rule).
 
+## Part 9 — Reveal dock: un-squish buttons on phones + stop it lingering on exit (DONE)
+
+- User: on the Topic Reveal screen the "Start exploring" / "Already watched"
+  buttons still look very small and squished, and the dock lingers for a
+  moment when switching away.
+- Root cause 1 (squish): `compact = maxWidth < 440.dp || maxHeight < 44.dp`
+  fired on EVERY phone, but its metrics were tuned for the worst case
+  (~32dp content = 80dp dock minus the 3-button-nav inset). Gesture phones
+  have ~48-56dp of room yet got the absolute-minimum treatment.
+- Root cause 2 (linger): the reveal's exit transition runs ~450ms, and the
+  dock lives OUTSIDE the animated content (Scaffold bottom slot, kept
+  registered during exit so the morph reserve never swaps — v8.5/v8.37), so
+  it stayed fully opaque until the destination disposed.
+- Fix in `TopicRevealScreen.kt` (v8.44):
+  - Two independent squeezes: `compact = maxWidth < 440.dp` (horizontal
+    only) + `tight = maxHeight < 48.dp` (three-button-nav). Three tiers:
+    tight (icon 16 / 14sp / 2dp pad — unchanged minimum), compact phone
+    (icon 18 / titleMedium 16sp / 8dp vertical padding — roomy, was 16dp
+    icon + 2dp pad), tablet (original generous metrics). Height math
+    verified per tier (26dp / 40dp / 52dp vs 32 / 48 / 56 available).
+  - `dockLeaving` state: the dock fades to 0 alpha over 200ms (alpha ONLY —
+    still occupies the exact 80dp slot, so innerPadding + shared-element
+    morph stay untouched) whenever the user leaves: close ✕, system back,
+    Explore-now → Home, and both Write-about-it dialogs.
+
 ## Part 6 — Spin deck swipe direction fix (DONE)
 
 - `SpinScreen.kt` `Carousel` — the deck-swipe mapping fired the OPPOSITE cycle on
