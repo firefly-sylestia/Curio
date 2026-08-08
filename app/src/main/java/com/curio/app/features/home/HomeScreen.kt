@@ -105,6 +105,8 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.pet.CurioFlowerBed
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -403,17 +405,26 @@ fun HomeScreen(navController: NavController) {
                             // hero). Proper hierarchy: the greeting reads as a
                             // compact kicker, and the NAME is the star —
                             // bigger and bolder than the greeting above it.
-                            Text(
-                                text = greetingWordForNow(),
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = questInk.copy(alpha = 0.92f),
-                                textAlign = TextAlign.Start,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            // v8.16 — the greeting is a CURIOUS pet landmark:
+                            // the pet sometimes tiptoes over and reads it
+                            // (the text itself just pulses — no layout move).
+                            PetLandmark(
+                                id = "greeting",
+                                kind = PetLandmarks.Kind.CURIOUS,
+                                screen = "home"
+                            ) { m ->
+                                Text(
+                                    text = greetingWordForNow(),
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold
+                                    ),
+                                    color = questInk.copy(alpha = 0.92f),
+                                    textAlign = TextAlign.Start,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = m.fillMaxWidth()
+                                )
+                            }
                             Spacer(Modifier.height(4.dp))
                             // v7.105 — the hero NAME is the hero now: larger
                             // than the greeting (36sp ExtraBold vs the 24sp

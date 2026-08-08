@@ -1,52 +1,82 @@
-# Prompt — Curio request log
+# Request — v8.16: smarter pet landmark interactions + auto-open topic-reveal toggle
 
-## Active request: v8.15 — pet-guided tour + quest-navigation fix (uncommitted)
+## What the user asked
 
-Working tree (5 files — 1 new overlay + 4 edits; NOT pushed — user wants to
-be asked before pushing):
+1. Make the pet's animation/wander **smarter, not just random** — it should interact
+   with things on screen (the spin button, the profile icon, headings/text) and
+   those things should **react** when it interacts with them — WITHOUT changing the
+   current layout of any screen.
+2. The pet's movement should adapt to what it's approaching.
+3. Add a toggle to NOT auto-open the topic reveal after the deck lands; when the
+   toggle is OFF, the "open it" dialogs/tour prompts should be off too. Default: OFF.
 
-**A. Quest navigation fix (the Home-tab dead tap)**
-- `CurioRoutes.navigateToTab` now pops back to the HOME root explicitly when
-  the current route is NOT an exact tab route ("home"/"spin"/"cabinet").
-  Scenario: Quests (pushed over Home) → passport stamp or discovery daily
-  "Go" pushes "spin/{slug}" on top → tapping the Home tab ran
-  popUpTo(HOME)+launchSingleTop, and once HOME was the top after the pop,
-  singleTop cancelled the navigate — the tap looked dead (user had to back
-  out to Quests first). The explicit pop guarantees every tab tap from a
-  pushed screen lands. Normal tab switches (exact tab roots) are unchanged.
+## Analysis
 
-**B. Pet-guided tour (replaces the floating pill overlay)**
-- NEW `ui/pet/PetGuideOverlay.kt`: the Curio pet itself guides the First
-  Journey. A dim SCRIM covers the screen and BLOCKS every other button, with
-  a pass-through WINDOW (the hole) over the step's target zone — the real
-  button there stays tappable (pointerInput consumes taps only outside the
-  hole; EvenOdd path + pulsing accent ring draw the window). The pet hops in
-  beside the window (springy appear per step), wears its new `pointing` pose
-  (raised wiggling coral paw + WIDE eyes + open mouth), and aims a pulsing
-  coral arrow into the window. Its speech card reuses QuestGuideToast
-  (pointer = null) with title/message/dots/action/skip/close. Pet + card
-  never overlap the hole. Geometry: BOTTOM/LOWER = bottom strip (Shuffle /
-  reveal dock / Save) with the pet above pointing DOWN; TOP = band below the
-  settings hero with the pet below pointing UP; CENTER (final) = no scrim.
-- `CurioPetSprite` gains `pointing: Boolean` (paw drawn on the facing side,
-  mirrored by the flip layer; gated `!sleeping && !dragged && !moving`).
-- `CurioNavHost`: overlay call replaces the toast block
-  (heroTopOffset = SettingsHeroTotalHeight); floating pet hidden while the
-  tour is active to avoid a duplicate pet.
-- `QuestGuide`: step 5 (Start exploring) position TOP → BOTTOM so the pet
-  points at the reveal's bottom action dock.
+### Pet landmarks (new system)
+- The floating pet wandered to purely random points every beat — it never noticed
+  the UI around it, and UI never reacted to it.
+- Plan: a landmark registry — screens publish a few "interesting things" (bounds
+  only, via `onGloballyPositioned`, ZERO layout impact) and the pet's wander loop
+  occasionally targets one, walks over with a kind-adapted gait, pokes it, and the
+  thing springs a beat (`graphicsLayer` scale pulse).
+- Screen-scoped: landmarks keyed by route prefix ("home", "spin", "profile"), so
+  navigating clears one screen's set and the pet only ever sees the current
+  screen's things. Registration is snapshot-state, so the overlay recomposes.
 
-**Validation** — balance + whitespace clean; review applied (no concrete
-compile/runtime issues; minor notes: step-3 tab bar sits inside the bottom
-hole but self-heals via the non-hold runner; TOP steps can clip on very
-short screens). CI runs on push.
+### Auto-open toggle
+- `SpinScreen` auto-navigated to the reveal in the settle effect (line ~774-798),
+  and the First Journey tour step "Open the landed topic" said "It's already open"
+  — a contradiction the user saw as an "open it open it dialog".
+- Plan: `AppPreferences.autoOpenRevealState` (KEY_AUTO_OPEN_REVEAL, **default
+  FALSE**) + a Settings → Appearance row. When OFF, the deck lands and the front
+  card stays tappable (manual `onDeckCardTap` already existed — that's the manual
+  open path). Tour step 3/4 copy adapts to the toggle.
 
-## Done previously (pushed)
+## Changes (9 files)
 
-- **v8.14** (`555b3af`) — pet home/sleep + time-of-day diorama, curled sleep
-  pose + nightcap + startle, 4 AM daily rollover (CurioQuests + StreakTracker),
-  Resets-at-4-AM UI, noteSpinning rename (JVM clash fix).
-- **v8.13** (`04beae0`) — smarter pet (passport-aware leastExploredLane),
-  medal badges, silent-explore +5 XP + wildcard passport peek fix.
-- **CI fix** (`d0669a5`) — LocalContext hoisted out of a lambda;
-  `blushing` declared after excited/proud/playing.
+| File | Change |
+| --- | --- |
+| `ui/pet/PetLandmarks.kt` | NEW — landmark registry (`Kind.FUN`/`CURIOUS`, upsert/remove/poke, `forScreen`) + `PetLandmark` composable (bounds tracking + poke pulse, zero layout impact) |
+| `data/CurioPet.kt` | `landmarkLine(funThing)` — 16 cute reaction lines for landmark pokes |
+| `ui/pet/CurioFloatingPet.kt` | Wander loop: 45% chance targets a FUN/CURIOUS landmark instead of a random point; FUN = eager quick steps + boop + hearts; CURIOUS = slow tiptoe + read-tilt + poke; gated on `!CurioPet.spinning` so the pet stays glued while the deck reels |
+| `features/home/HomeScreen.kt` | Greeting wrapped in `PetLandmark("greeting", CURIOUS, "home")` |
+| `features/profile/ProfileScreen.kt` | Avatar wrapped in `PetLandmark("avatar", FUN, "profile")` |
+| `features/spin/SpinScreen.kt` | Shuffle CTA wrapped in `PetLandmark("spin", FUN, "spin")`; auto-open gated on `AppPreferences.autoOpenRevealState` (manual tap path unchanged) |
+| `data/AppPreferences.kt` | `KEY_AUTO_OPEN_REVEAL` + getter/setter + `autoOpenRevealState` seed (default off) |
+| `features/settings/SettingsSectionScreen.kt` | Appearance row "Auto-open landed topic" |
+| `data/QuestGuide.kt` | Tour step 3/4 copy conditional on `autoOpenRevealState` (no more "It's already open" when auto-open is off) |
+
+## Review fixes applied
+
+1. **Landmark block ran during an active spin** — the landmark block preceded the
+   `watching` gate, so the pet could wander off mid-reel. Gated with
+   `!CurioPet.spinning` (SpinScreen flips it at 684/728). Reviewer #2 concern
+   (second revealFor at ~845) verified SAFE — that's the manual `onDeckCardTap`
+   path and must stay ungated.
+2. **Tour copy assumed auto-open** — now conditional; with the toggle OFF the tour
+   says "Tap the card to open the teaser".
+3. **Pet could hyper-boops the spin button** — on the Spin screen the wander
+   beat loops every ~300ms (the watching gate exits the wait loop early), so
+   the 45% landmark roll re-rolled constantly → a poke roughly every second.
+   Added a 4s `lastPokeAt` cooldown in `CurioFloatingPet` so pokes stay
+   occasional even where the beat loop cycles fast.
+4. **"Open it, open it!" contradicted auto-open** — the pet's REVEAL_OPEN cheer
+   said "Open it, open it!" right as the reveal opened BY ITSELF. The line now
+   adapts to `autoOpenRevealState` (auto-open ON → "There it is!" / "It opened
+   itself!"; OFF → the eager "Open it!" cheer stays for the manual tap).
+5. **`upsert` churn** — `onGloballyPositioned` fires every layout pass; upsert
+   now compare-and-sets (data-class equality) so unchanged landmarks never
+   rewrite the map.
+
+## Validation
+
+- Brace balance ALL OK (9 files), `git diff --check` clean.
+- Reviewer (code-reviewer-deepseek-flash) passed after the fixes above; the
+  remaining notes (landmark pulse on screen re-entry — cosmetic, accepted).
+
+## Completion summary
+
+v8.16 shipped: landmark interactions (pet pokes things, things react, movement
+adapts to kind, screen-scoped, zero layout impact, poke cooldown) + Auto-open
+landed topic toggle (Settings → Appearance, default OFF; tour copy + pet
+REVEAL_OPEN line adapt). Pushed to Alpha.

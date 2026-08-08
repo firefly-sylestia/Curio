@@ -150,9 +150,20 @@ object CurioPet {
         Event.SPIN_LANDED -> listOf(
             "It landed!", "Ooh — the deck chose well!", "A new topic, a new tale!"
         ).random()
-        Event.REVEAL_OPEN -> listOf(
-            "Open it, open it!", "A mystery awaits!", "Peek inside!"
-        ).random()
+        // v8.16 — the line adapts to the auto-open preference: when the
+        // reveal opens BY ITSELF (auto-open ON) the pet cheers the surprise
+        // instead of nagging "Open it, open it!" at an already-open page.
+        // With auto-open OFF the reveal only opens on the user's tap, so
+        // the eager "Open it!" cheer stays.
+        Event.REVEAL_OPEN -> if (AppPreferences.autoOpenRevealState)
+            listOf(
+                "There it is!", "It opened itself — how curious!", "Ta-da! A new tale!",
+                "Ooh, look what landed!"
+            ).random()
+        else
+            listOf(
+                "Open it, open it!", "A mystery awaits!", "Peek inside!"
+            ).random()
         Event.EXPLORE -> listOf(
             "Go explore!", "Adventure time!", "I'll wait right here — go see!"
         ).random()
@@ -441,6 +452,20 @@ object CurioPet {
         "Zoom zoom — chase me!", "Play with me!", "Tag! Your turn!",
         "I'm bored — come chase me!"
     ).random()
+
+    /**
+     * v8.16 — the pet's line when it pokes something on the current screen:
+     * [funThing] = a button/gadget (boop! hearts!), otherwise a curious
+     * read of some text. One sentence max, matching the passive-bubble rule.
+     */
+    fun landmarkLine(funThing: Boolean): String =
+        (if (funThing) listOf(
+            "Boop!", "Ooh — shiny!", "Hehe, hi!", "Tag! You're it!",
+            "I like this one!", "Spinny spinny!", "Wheee!", "Boop boop boop!"
+        ) else listOf(
+            "What's this?", "Hmm, interesting…", "*peeks*", "Read read read!",
+            "Ooh, words!", "I'm reading this.", "Scribble scribble!"
+        )).random()
 
     /**
      * One bubble per screen visit: returns a line the first time [screen]

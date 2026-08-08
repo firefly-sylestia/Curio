@@ -168,13 +168,22 @@ object QuestGuide {
         ),
         Step(
             "spin", "Pick a lane & spin",
-            "Tap Shuffle — the deck picks a fresh topic, then opens it for you.",
+            // v8.16 — copy adapts to the auto-open preference: with it OFF
+            // (the default) the deck lands and the user taps the card to
+            // open the teaser themselves.
+            if (AppPreferences.autoOpenRevealState)
+                "Tap Shuffle — the deck picks a fresh topic, then opens it for you."
+            else
+                "Tap Shuffle — the deck picks a fresh topic for you.",
             waitFor = Wait.SPIN,
             skipLabel = "Skip"
         ),
         Step(
             "spin", "Open the landed topic",
-            "Nice — you landed on a topic. It's already open: read the teaser, then start exploring.",
+            if (AppPreferences.autoOpenRevealState)
+                "Nice — you landed on a topic. It's already open: read the teaser, then start exploring."
+            else
+                "Nice — you landed on a topic. Tap the card to open the teaser, then start exploring.",
             waitFor = Wait.REVEAL,
             hold = true,
             position = Position.TOP,

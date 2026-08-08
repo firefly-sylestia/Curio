@@ -99,6 +99,8 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.toHsl
@@ -610,19 +612,28 @@ private fun ProfileHero(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clip(CircleShape)
-                                .background(fill)
-                                .border(BorderStroke(1.dp, ink.copy(alpha = 0.30f)), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                initial,
-                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                color = ink
-                            )
+                        // v8.16 — the avatar is a FUN pet landmark: the pet
+                        // sometimes dashes over and boops it (the avatar just
+                        // pulses — no layout change).
+                        PetLandmark(
+                            id = "avatar",
+                            kind = PetLandmarks.Kind.FUN,
+                            screen = "profile"
+                        ) { m ->
+                            Box(
+                                modifier = m
+                                    .size(72.dp)
+                                    .clip(CircleShape)
+                                    .background(fill)
+                                    .border(BorderStroke(1.dp, ink.copy(alpha = 0.30f)), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    initial,
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = ink
+                                )
+                            }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(

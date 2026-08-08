@@ -111,6 +111,7 @@ object AppPreferences {
     // companion design is decided).
     private const val KEY_PET_ENABLED = "pet_enabled"
     private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
+    private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     // v8.2 — the quest tour's one-time offer: once the user has taken OR
     // declined it ("No, thanks" / dismissing the prompt), the offer never
     // reappears and the first quest navigates normally.
@@ -317,6 +318,12 @@ object AppPreferences {
     // while the floating companion is off (the pet then stays in its bed).
     var floatingPetEnabledState by mutableStateOf(true)
         private set
+    // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
+    // moment the wheel settles. Default OFF: the deck lands, the front card
+    // stays tappable, and no reveal page or open-it prompt appears until the
+    // user taps the card.
+    var autoOpenRevealState by mutableStateOf(false)
+        private set
 
     // v8.2 — whether the one-time tour offer has been shown (taken or
     // declined). Suppresses the offer on the Quests page so it never nags.
@@ -396,6 +403,7 @@ object AppPreferences {
         guideTourOfferedState = isGuideTourOffered(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
+        autoOpenRevealState = isAutoOpenReveal(context)
         pinnedTopicsState = getPinnedTopics(context)
         savedQuotesState = getSavedQuotes(context)
         topicSentimentsState = getTopicSentiments(context)
@@ -1007,6 +1015,15 @@ object AppPreferences {
     fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
         floatingPetEnabledState = enabled
+    }
+
+    // v8.16 — auto-open the landed topic's reveal after a spin (default OFF).
+    fun isAutoOpenReveal(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_AUTO_OPEN_REVEAL, false)
+
+    fun setAutoOpenReveal(context: Context, enabled: Boolean) {
+        autoOpenRevealState = enabled
+        prefs(context).edit().putBoolean(KEY_AUTO_OPEN_REVEAL, enabled).apply()
     }
 
     // ── Daily reminder ───────────────────────────────────────────────

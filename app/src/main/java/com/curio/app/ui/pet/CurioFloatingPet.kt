@@ -139,6 +139,12 @@ fun CurioFloatingPet(
         var tapStreak by remember { mutableIntStateOf(0) }
         var lastTapAt by remember { mutableStateOf(0L) }
         var playDartTarget by remember { mutableStateOf<Offset?>(null) }
+        // v8.16 — landmark pokes keep a cooldown so the pet interacts often
+        // but never spams the same thing every beat. On the Spin screen the
+        // wander beat cycles every ~300ms (the watching gate exits the wait
+        // loop early), so without this the pet would boop the Shuffle button
+        // almost constantly while the deck waits.
+        var lastPokeAt by remember { mutableStateOf(0L) }
         val appear = remember { Animatable(0f) }
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
@@ -168,7 +174,10 @@ fun CurioFloatingPet(
         // WATCH the deck, so it stays put there. `watching` is a plain val
         // (not state), so it must be an effect key — otherwise the loop
         // would keep a stale value after navigating between screens.
-        LaunchedEffect(maxW, maxH, autoWander, CurioPet.awake, watching) {
+        // v8.16 — keyed on routePrefix too: the pet re-reads the current
+        // screen's landmarks (PetLandmarks.forScreen) fresh inside the loop,
+        // so navigating swaps which things it can poke.
+        LaunchedEffect(maxW, maxH, autoWander, CurioPet.awake, watching, routePrefix) {
             if (!autoWander) return@LaunchedEffect
             // A shared walker for gentle wanders and fast playful darts.
             // [stepMs] small = fast dash; [steps] = path length.
@@ -207,9 +216,66 @@ fun CurioFloatingPet(
                     walkTo(target, stepMs = 14, steps = 40)
                     continue
                 }
-                if (dragged || watching) {
-                    // Held in a drag (or glued to the Spin deck): pause a
-                    // beat so the loop never busy-spins while grabbed.
+                if (dragged) {
+                    // Held in a drag: pause a beat so the loop never
+                    // busy-spins while grabbed.
+                    delay(300)
+                    continue
+                }
+                // v8.16 — landmark interactions: instead of a random point,
+                // the pet sometimes walks TO an interesting thing on this
+                // screen (the spin button, the profile avatar, a heading)
+                // and POKES it — the thing springs back a beat. Movement
+                // adapts to what it's approaching: eager quick steps + a
+                // boop for FUN gadgets, a slow curious tiptoe + a read-tilt
+                // for CURIOUS text. Runs even while "watching" the deck.
+                val landmarks = PetLandmarks.forScreen(routePrefix)
+                // v8.16 — while the deck is actively reeling, the pet stays
+                // glued to watch it land; landmark pokes only happen when
+                // the deck is idle on the spin screen. The 4s cooldown keeps
+                // pokes occasional even where the beat loop cycles fast.
+                if (!CurioPet.spinning && landmarks.isNotEmpty() &&
+                    System.currentTimeMillis() - lastPokeAt > 4_000L &&
+                    Random.nextFloat() < 0.45f
+                ) {
+                    val target = landmarks.random()
+                    val c = target.bounds.center
+                    // Stand BESIDE the thing, never on top of it.
+                    val tx = (c.x + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
+                        .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
+                    val ty = (c.y + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
+                        .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                    when (target.kind) {
+                        PetLandmarks.Kind.FUN -> {
+                            // Eager approach — quick happy steps, then a
+                            // boop with hearts.
+                            if (Random.nextFloat() < 0.5f) playKey++
+                            walkTo(Offset(tx, ty), stepMs = 15, steps = 44)
+                            PetLandmarks.poke(target.id)
+                            squishKey++
+                            heartsKey++
+                            reaction = CurioPet.landmarkLine(funThing = true)
+                            reactionKey++
+                            lastTouch = System.currentTimeMillis()
+                        }
+                        PetLandmarks.Kind.CURIOUS -> {
+                            // Curious tiptoe — slow steps, a read-tilt, then
+                            // a gentle poke.
+                            thinking = true
+                            walkTo(Offset(tx, ty), stepMs = 36, steps = 56)
+                            thinking = false
+                            delay(420)
+                            PetLandmarks.poke(target.id)
+                            reaction = CurioPet.landmarkLine(funThing = false)
+                            reactionKey++
+                            lastTouch = System.currentTimeMillis()
+                        }
+                    }
+                    lastPokeAt = System.currentTimeMillis()
+                    continue
+                }
+                if (watching) {
+                    // Glued to the Spin deck between pokes: stay and watch.
                     delay(300)
                     continue
                 }

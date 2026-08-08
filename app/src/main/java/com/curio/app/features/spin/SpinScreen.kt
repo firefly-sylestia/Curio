@@ -106,6 +106,8 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
@@ -779,24 +781,30 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // again within that window cancels this effect (keyed on
         // shuffleCount) and no navigation happens.
         if (primary != null) {
-            // Keep the settled ticket visible as the source of the handoff:
-            // its restrained lift/scale and "Opening…" label should be on
-            // screen before the destination hero appears.
-            landingAlreadyOpened = true
-            isOpening = true
-            // v7.x — shortened from 600ms: the settle + confetti still get
-            // their beat, but the reveal arrives before the pause reads as
-            // a stall.
-            delay(450)
-            // Guard against a category switch during the pause: the effect
-            // captured `cat` at launch, so only navigate if it's still the
-            // active category.
-            if (cat.id != activeCategory.id) {
-                isOpening = false
-                return@LaunchedEffect
-            }
-            navController.navigate(CurioRoutes.revealFor(primary.categoryId.routeSlug, primary.name)) {
-                launchSingleTop = true
+            // v8.16 — auto-open is a user preference (Settings → Appearance,
+            // "Auto-open landed topic"), DEFAULT OFF: when disabled, the
+            // deck just lands and the front card stays tappable — no reveal
+            // page, no open-it prompt — until the user taps the card.
+            if (AppPreferences.autoOpenRevealState) {
+                // Keep the settled ticket visible as the source of the
+                // handoff: its restrained lift/scale and "Opening…" label
+                // should be on screen before the destination hero appears.
+                landingAlreadyOpened = true
+                isOpening = true
+                // v7.x — shortened from 600ms: the settle + confetti still
+                // get their beat, but the reveal arrives before the pause
+                // reads as a stall.
+                delay(450)
+                // Guard against a category switch during the pause: the
+                // effect captured `cat` at launch, so only navigate if it's
+                // still the active category.
+                if (cat.id != activeCategory.id) {
+                    isOpening = false
+                    return@LaunchedEffect
+                }
+                navController.navigate(CurioRoutes.revealFor(primary.categoryId.routeSlug, primary.name)) {
+                    launchSingleTop = true
+                }
             }
         }
     }
@@ -1240,37 +1248,46 @@ private fun ColumnScope.SpinDeckSection(
     )
 
     // ── Center spin button — the ONLY shuffle CTA (v6) ──────────────
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                top = when {
-                    densityExtraCompact -> 12.dp
-                    compact && extraCompact -> 12.dp
-                    compact -> 16.dp
-                    roomy -> 40.dp
-                    else -> 32.dp
-                },
-                bottom = when {
-                    densityExtraCompact -> 8.dp
-                    compact && extraCompact -> 8.dp
-                    compact -> 10.dp
-                    roomy -> 18.dp
-                    else -> 12.dp
-                }
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        SpinButton(
-            tint = deckAccent,
-            isShuffling = shuffling,
-            landedTopic = landedTopic,
-            pulseScale = buttonPulse,
-            enabled = enabled,
-            compact = compact,
-            fitScale = fitScale,
-            onClick = onSpinClick
-        )
+    // v8.16 — the spin button is a FUN pet landmark: the pet sometimes
+    // dashes over and boops it while the deck waits (it just pulses — no
+    // layout change, and the shared-element morph is untouched).
+    PetLandmark(
+        id = "spin",
+        kind = PetLandmarks.Kind.FUN,
+        screen = "spin"
+    ) { m ->
+        Box(
+            modifier = m
+                .fillMaxWidth()
+                .padding(
+                    top = when {
+                        densityExtraCompact -> 12.dp
+                        compact && extraCompact -> 12.dp
+                        compact -> 16.dp
+                        roomy -> 40.dp
+                        else -> 32.dp
+                    },
+                    bottom = when {
+                        densityExtraCompact -> 8.dp
+                        compact && extraCompact -> 8.dp
+                        compact -> 10.dp
+                        roomy -> 18.dp
+                        else -> 12.dp
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            SpinButton(
+                tint = deckAccent,
+                isShuffling = shuffling,
+                landedTopic = landedTopic,
+                pulseScale = buttonPulse,
+                enabled = enabled,
+                compact = compact,
+                fitScale = fitScale,
+                onClick = onSpinClick
+            )
+        }
     }
 }
 

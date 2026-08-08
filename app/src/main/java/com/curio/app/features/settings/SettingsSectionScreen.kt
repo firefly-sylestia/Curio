@@ -207,6 +207,19 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setFloatingPetEnabled(context, it)
             }
         }
+        CurioSettingsDivider()
+        // v8.16 — whether a landed topic's reveal opens itself as soon as
+        // the deck settles. Default OFF: the deck just lands and the front
+        // card stays tappable (no reveal page, no open-it prompt).
+        SettingsRowPulse(highlightKey == "appearance-auto-open") {
+            CompactSwitchRow(
+                "Auto-open landed topic",
+                "Open the topic reveal as soon as the deck lands",
+                AppPreferences.autoOpenRevealState
+            ) {
+                AppPreferences.setAutoOpenReveal(context, it)
+            }
+        }
     }
 }
 
