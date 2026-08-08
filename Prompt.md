@@ -43,5 +43,5 @@
 - No Gradle build, compile, lint, or test command was run because repository
   DOX rules forbid local Android build commands in this environment.
 - Pushed commits: `794f8e1`, `b3e2a90`, `f715b3b`, `dbc8c2e`, `5116b44`,
-  `eb73e35`, `92c349a`, `bf8abf8`; final preview-pose alignment is pending
-  its closeout push.
+  `eb73e35`, `92c349a`, `bf8abf8`, `be2b953`; final preview-pose alignment
+  is pushed. CI remains the final Android compile gate.
