@@ -1096,15 +1096,85 @@ private fun exportPngUri(
             }
         }
     }
+    fun paintProceduralCell(col: Int, row: Int, hex: String, alpha: Float = 1f) {
+        val cell = n * scale.toFloat() / 16f
+        val color = runCatching {
+            android.graphics.Color.parseColor("#$hex")
+        }.getOrDefault(0xFF4A3426.toInt())
+        paint.color = android.graphics.Color.argb(
+            (alpha.coerceIn(0f, 1f) * 255f).toInt(),
+            android.graphics.Color.red(color),
+            android.graphics.Color.green(color),
+            android.graphics.Color.blue(color)
+        )
+        canvas.drawRect(
+            col * cell, row * cell,
+            (col + 1) * cell, (row + 1) * cell,
+            paint
+        )
+    }
+
     paintRows(rows)
-    // Include every user-authored detail layer in PNG exports, not just the
-    // base pose. Transparent cells remain transparent and preserve the
-    // designer's layer artwork when shared outside Curio.
+    val face = design.faceFor(moodName)
+    if (face.gridRows.isNotEmpty()) {
+        // The export follows the selected Preview mood, including its
+        // hand-drawn face overlay.
+        paintRows(face.gridRows)
+    } else {
+        // Match the sprite's procedural face when the mood has no drawn
+        // overlay, so a PNG is not unexpectedly faceless.
+        val ink = design.colorOf('o')
+        val blush = design.colorOf('r')
+        val white = "FFFFFF"
+        when (face.eyes) {
+            EyeStyle.OPEN, EyeStyle.WIDE -> {
+                val rows = if (face.eyes == EyeStyle.WIDE) listOf(6, 7, 8) else listOf(7, 8)
+                rows.forEach { row ->
+                    paintProceduralCell(4, row, ink)
+                    paintProceduralCell(5, row, ink)
+                    paintProceduralCell(10, row, ink)
+                    paintProceduralCell(11, row, ink)
+                }
+                paintProceduralCell(4, 7, white)
+                paintProceduralCell(10, 7, white)
+            }
+            EyeStyle.BLINK -> {
+                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
+                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
+            }
+            EyeStyle.CLOSED -> {
+                paintProceduralCell(4, 8, ink); paintProceduralCell(5, 8, ink)
+                paintProceduralCell(10, 8, ink); paintProceduralCell(11, 8, ink)
+            }
+            EyeStyle.STAR, EyeStyle.DIZZY, EyeStyle.HAPPY -> {
+                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
+                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
+                paintProceduralCell(4, 7, white); paintProceduralCell(10, 7, white)
+            }
+        }
+        if (face.blush) {
+            paintProceduralCell(2, 9, blush, 0.5f); paintProceduralCell(3, 9, blush, 0.5f)
+            paintProceduralCell(12, 9, blush, 0.5f); paintProceduralCell(13, 9, blush, 0.5f)
+        }
+        when (face.mouth) {
+            MouthStyle.SMILE -> {
+                paintProceduralCell(6, 10, ink); paintProceduralCell(9, 10, ink)
+                paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
+            }
+            MouthStyle.WIDE -> {
+                paintProceduralCell(6, 10, ink); paintProceduralCell(9, 10, ink)
+                (6..9).forEach { col -> paintProceduralCell(col, 11, ink) }
+            }
+            MouthStyle.O -> {
+                paintProceduralCell(7, 10, ink); paintProceduralCell(8, 10, ink)
+                paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
+            }
+            MouthStyle.NONE -> Unit
+        }
+    }
+    // Include every user-authored detail layer last, matching the live sprite
+    // so custom art remains visibly on top of generated face/effect art.
     PetDesign.DETAIL_KEYS.forEach { layer -> paintRows(design.detailFor(layer)) }
-    // The export follows the selected Preview mood, including its optional
-    // hand-drawn face overlay. Reaction faces remain available through the
-    // text export because they are event-specific rather than one static pose.
-    design.faceFor(moodName).gridRows.takeIf { it.isNotEmpty() }?.let(::paintRows)
 
     val dir = File(context.cacheDir, "share")
     if (!dir.exists()) dir.mkdirs()
