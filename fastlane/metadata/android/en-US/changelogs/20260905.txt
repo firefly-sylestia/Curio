@@ -1,1 +1,2 @@
 The Curie detail editor now opens with current parts visible for immediate redraw, shows where each part sits on Curie, includes a live preview, and offers a before-edit blueprint toggle.
+Detail pages now keep category, descriptions, thoughts, and observation notes spaced and readable without entrance-animation overlap.

@@ -13,13 +13,9 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -153,7 +149,6 @@ import com.curio.app.ui.components.MoodBoardExport
 import com.curio.app.ui.components.MoodBoardFloatingCards
 import com.curio.app.ui.components.MoodBoardTiles
 import com.curio.app.ui.components.MoodBoardZoomOverlay
-import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.components.QuoteLimits
 import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
@@ -661,33 +656,42 @@ fun EntryDetailScreen(
         // this same scroll column prevents it from floating over the quick
         // fact and capture body on short screens.
         // v8.36 — everything below the hero enters together with a soft
-        // delayed fade + rise so the page coordinates with the shared-element
-        // morph instead of popping in while the card is still expanding (the
-        // old "page animates differently from the hero" jank).
+        // fade so the category, description, and captured body keep their
+        // measured vertical positions instead of sliding through one another
+        // while the shared-element morph is still settling.
         DetailContentEntrance {
-        EntryDetailCategoryLabel(
-            entry = resolvedEntry,
-            category = cat
-        )
+            // Keep the category, topic description, and captured entry body in
+            // one measured reading column. Previously these were loose
+            // siblings inside the animated container, so the body could appear
+            // to climb into the description while the entrance was running.
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                EntryDetailCategoryLabel(
+                    entry = resolvedEntry,
+                    category = cat
+                )
 
-        // ── Topic meta — quick fact and tags follow the category row.
-        Column(
-            modifier = Modifier
-                .padding(start = detailBodyGutter(), end = detailBodyGutter(), top = 8.dp, bottom = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // ── Quick fact (v7.38) — the topic's teaser directly under the
-            // fixed category label, backgroundless on the page wash.
-            QuickFactCard(
-                cat = cat,
-                teaser = resolvedEntry.topic.teaser
-            )
+                // ── Topic meta — quick fact and tags follow the category row.
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = detailBodyGutter())
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // ── Quick fact (v7.38) — the topic's teaser directly under
+                    // the fixed category label, backgroundless on the page wash.
+                    QuickFactCard(
+                        cat = cat,
+                        teaser = resolvedEntry.topic.teaser
+                    )
 
-            MorphEntrance {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     // ── Custom tags (v7.17) — the labels added on the save
                     // page, rendered as small #chips (the captured-at line
-                    // moved onto the hero's Date segment in v7.39).
+                    // moved onto the hero's Date segment in v7.39). Keep this
+                    // as a normal measured child: a nested scale/visibility
+                    // animation can paint tags through the long body below.
                     if (resolvedEntry.tags.isNotEmpty()) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -712,17 +716,21 @@ fun EntryDetailScreen(
                         }
                     }
                 }
+
+                // ── Format body ────────────────────────────────────────
+                // The category row and topic description now have explicit
+                // breathing room before the captured content begins.
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = detailBodyGutter())
+                        .fillMaxWidth()
+                ) {
+                    FormatBody(entry = resolvedEntry, category = cat, navController = navController)
+                }
             }
         }
 
-        // ── Format body ────────────────────────────────────────────────            // The category row is part of the scrolling content; horizontal
-            // stays 20dp to match the metadata column gutter.
-        Box(modifier = Modifier.padding(horizontal = detailBodyGutter(), vertical = 8.dp)) {
-            FormatBody(entry = resolvedEntry, category = cat, navController = navController)
-        }
-        }
-
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(40.dp))
         }
 
         // Keep scroll-linked controls in their own recomposition scope. The
@@ -786,23 +794,26 @@ fun EntryDetailScreen(
 private fun detailBodyGutter(): Dp = if (windowWidthSizeClass().isWide) 28.dp else 20.dp
 
 /**
- * v8.36 — soft entrance for the detail content below the morphing hero: a
- * delayed fade + rise (the hero's shared-element spring is ~400ms) so the
- * page blooms in as the card finishes expanding, instead of popping in
- * while it morphs. The MutableTransitionState pattern mirrors MorphEntrance
- * so the enter runs on the first composition.
+ * v8.36 — soft entrance for the detail content below the morphing hero.
+ * The body is placed in a normal measured [Box] immediately; only its alpha
+ * animates. This keeps long descriptions and note sections in their final
+ * positions while the Cabinet/Detail shared morph settles, instead of letting
+ * an AnimatedVisibility container resize or translate siblings mid-entrance.
  */
 @Composable
 private fun DetailContentEntrance(content: @Composable () -> Unit) {
-    val state = remember { MutableTransitionState(false).apply { targetState = true } }
-    AnimatedVisibility(
-        visibleState = state,
-        enter = fadeIn(
-            animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing)
-        ) + slideInVertically(
-            animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing)
-        ) { it / 16 }
-    ) { content() }
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing),
+        label = "detailContentFade"
+    )
+    Box(
+        modifier = Modifier.graphicsLayer { this.alpha = alpha }
+    ) {
+        content()
+    }
 }
 
 // Two-line topic names plus the frosted metadata strip need a little more
@@ -2314,33 +2325,35 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
 @Composable
 private fun MarginaliaRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.Marginalia ?: return
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         data.fieldMindMetadata?.let { metadata ->
             FieldMindMetadataCard(metadata = metadata, category = category)
         }
         // ── Journal — "My thoughts" on a note-paper page ──────────────
         if (!data.journalText.isNullOrBlank()) {
-            MarginaliaSectionHeader(label = "My thoughts", category = category)
-            val journalSheet = data.journalColor ?: NotePaperColor.CREAM
-            NotePaperCard(
-                style = data.journalStyle ?: data.notePaperStyle(),
-                seed = noteSeed(entry.id, 4),
-                paperColor = journalSheet,
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 22.dp),
-                ruleSpacing = SavedNoteRuleSpacing,
-                tailSpace = SavedNoteTailSpace,
-                minHeight = 120.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    buildRichAnnotated(
-                        data.journalText,
-                        data.journalSpans.orEmpty(),
-                        notePaperHighlight(journalSheet)
-                    ),
-                    style = savedNoteStyle(),
-                    color = notePaperInk(journalSheet)
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                MarginaliaSectionHeader(label = "My thoughts", category = category)
+                val journalSheet = data.journalColor ?: NotePaperColor.CREAM
+                NotePaperCard(
+                    style = data.journalStyle ?: data.notePaperStyle(),
+                    seed = noteSeed(entry.id, 4),
+                    paperColor = journalSheet,
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 22.dp),
+                    ruleSpacing = SavedNoteRuleSpacing,
+                    tailSpace = SavedNoteTailSpace,
+                    minHeight = 120.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        buildRichAnnotated(
+                            data.journalText,
+                            data.journalSpans.orEmpty(),
+                            notePaperHighlight(journalSheet)
+                        ),
+                        style = savedNoteStyle(),
+                        color = notePaperInk(journalSheet)
+                    )
+                }
             }
         }
 
@@ -3338,12 +3351,12 @@ private fun ExpandedMoodBoardDialog(
 @Composable
 private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.FieldNotes ?: return
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         data.fieldMindMetadata?.let { metadata ->
             FieldMindMetadataCard(metadata = metadata, category = category)
         }
         data.observed.takeIf { it.isNotBlank() }?.let { text ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Observed", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold), color = category.categoryInk())
                 val observedSheet = data.observedColor ?: NotePaperColor.CREAM
                 NotePaperCard(
@@ -3365,7 +3378,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
             }
         }
         data.surprised.takeIf { it.isNotBlank() }?.let { text ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Surprised me", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold), color = category.categoryInk())
                 val surprisedSheet = data.surprisedColor ?: NotePaperColor.CREAM
                 NotePaperCard(
@@ -3387,7 +3400,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
             }
         }
         data.learnNext.takeIf { it.isNotBlank() }?.let { text ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Want to learn next", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold), color = category.categoryInk())
                 val learnNextSheet = data.learnNextColor ?: NotePaperColor.CREAM
                 NotePaperCard(
