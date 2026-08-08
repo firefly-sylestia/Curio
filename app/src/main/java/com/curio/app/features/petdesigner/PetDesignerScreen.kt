@@ -872,7 +872,8 @@ fun PetDesignerScreen(navController: NavController) {
                             shape = RoundedCornerShape(18.dp),
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                             onClick = {
-                                val uri = exportPngUri(context, design, editingGrid, previewMood.name)
+                                val exportMood = if (editingGrid == "curled") CurioPet.Mood.SLEEPY.name else previewMood.name
+                                val uri = exportPngUri(context, design, editingGrid, exportMood, CurioPet.currentStage())
                                 if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
                             },
                             modifier = Modifier.weight(1f)
@@ -1070,7 +1071,8 @@ private fun exportPngUri(
     context: android.content.Context,
     design: PetDesign,
     grid: String,
-    moodName: String
+    moodName: String,
+    stage: CurioPet.Stage
 ): android.net.Uri? {
     val rows = when {
         grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
@@ -1170,6 +1172,59 @@ private fun exportPngUri(
                 paintProceduralCell(7, 11, ink); paintProceduralCell(8, 11, ink)
             }
             MouthStyle.NONE -> Unit
+        }
+    }
+    // Match the static parts of the live sprite that have a meaningful
+    // single-frame representation. Motion-only pieces (wag phase, bob,
+    // twinkle phase) intentionally use a calm deterministic frame.
+    val inkHex = design.colorOf('o')
+    val bodyShadeHex = design.colorOf('B')
+    val accentHex = design.colorOf('s')
+    val goldHex = design.colorOf('G')
+    val goldDeepHex = design.colorOf('g')
+    if (grid != "curled" && design.isProceduralEnabled("belly")) {
+        for (row in 9..11) for (col in 5..10) {
+            paintProceduralCell(col, row, if (row == 10) "FFFFFB" else "FFF6E5", 0.85f)
+        }
+    }
+    if (grid != "curled" && design.isProceduralEnabled("tail")) {
+        paintProceduralCell(14, 11, bodyShadeHex)
+        paintProceduralCell(15, 11, bodyShadeHex)
+        paintProceduralCell(15, 12, bodyShadeHex)
+    }
+    if (design.isProceduralEnabled("accessories")) {
+        when (stage) {
+            CurioPet.Stage.SPROUT -> {
+                paintProceduralCell(4, 2, "9CCB8B"); paintProceduralCell(5, 1, "9CCB8B")
+                paintProceduralCell(5, 2, "9CCB8B"); paintProceduralCell(5, 3, "9CCB8B")
+            }
+            CurioPet.Stage.TRAIL_BUDDY -> {
+                paintProceduralCell(13, 10, inkHex); paintProceduralCell(14, 10, accentHex)
+                paintProceduralCell(15, 10, accentHex); paintProceduralCell(13, 11, inkHex)
+                paintProceduralCell(14, 11, accentHex); paintProceduralCell(15, 11, accentHex)
+            }
+            CurioPet.Stage.ARCHIVE_PAL -> {
+                paintProceduralCell(14, 13, "D98BA0"); paintProceduralCell(15, 13, "D98BA0")
+                paintProceduralCell(14, 14, "D98BA0"); paintProceduralCell(15, 14, "FFFFFF")
+            }
+            CurioPet.Stage.SAGE -> {
+                paintProceduralCell(4, 0, goldHex); paintProceduralCell(8, 0, goldHex)
+                paintProceduralCell(6, 1, goldDeepHex)
+            }
+            else -> Unit
+        }
+    }
+    if (design.isProceduralEnabled("antenna")) {
+        paintProceduralCell(7, 0, "FFFFFF", 0.9f)
+    }
+    if (design.isProceduralEnabled("effects")) {
+        if (moodName == CurioPet.Mood.SLEEPY.name) {
+            paintProceduralCell(11, 3, inkHex, 0.85f); paintProceduralCell(12, 4, inkHex, 0.85f)
+            paintProceduralCell(12, 5, inkHex, 0.65f); paintProceduralCell(13, 6, inkHex, 0.65f)
+        }
+        if (face.sparkles) {
+            paintProceduralCell(1, 2, goldHex, 0.9f); paintProceduralCell(14, 3, goldHex, 0.9f)
+            paintProceduralCell(2, 13, goldHex, 0.8f); paintProceduralCell(13, 2, goldHex, 0.8f)
         }
     }
     // Include every user-authored detail layer last, matching the live sprite
