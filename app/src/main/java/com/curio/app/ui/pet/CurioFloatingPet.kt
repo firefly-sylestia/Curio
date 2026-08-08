@@ -27,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -607,35 +606,37 @@ fun CurioFloatingPet(
             }
         }
 
-        // ── Typing reaction (v8.35) — when the on-screen keyboard opens,
-        //    Curie hurries up above it and types along on a tiny keyboard.
-        //    Once per screen visit (60s cooldown), so it never spams.
-        LaunchedEffect(routePrefix, maxW, maxH) {
-            snapshotFlow { WindowInsets.ime.getBottom(density) > 0 }
-                .collect { imeOpen ->
-                    if (imeOpen && autoWander && CurioPet.awake && !dragged && !CurioPet.atHome) {
-                        val now = System.currentTimeMillis()
-                        if (now - lastTypingAt > 60_000L || lastTypingScreen != routePrefix) {
-                            lastTypingAt = now
-                            lastTypingScreen = routePrefix
-                            typingReaction = true
-                            lastTouch = System.currentTimeMillis()
-                            val kbTop = with(density) { WindowInsets.ime.getBottom(density) }
-                            val targetY = (maxH - kbTop - petPx - with(density) { 10.dp.toPx() })
-                                .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
-                            pos = Offset(
-                                (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
-                                targetY
-                            )
-                            facing = 1f
-                            squishKey++
-                            reaction = "Tap tap tap! I can type too!"
-                            reactionKey++
-                        }
-                    } else {
-                        typingReaction = false
-                    }
+        // ── Typing reaction (v8.35; v8.37 compile fix) — when the on-screen
+        //    keyboard opens, Curie hurries up above it and types along on a
+        //    tiny keyboard. Once per screen visit (60s cooldown), so it never
+        //    spams. WindowInsets.ime is @Composable (it reads the window's
+        //    live IME insets), so it's read HERE in composition — calling it
+        //    inside snapshotFlow/collect (non-composable lambdas) was a CI
+        //    compile failure (@Composable invocations in a non-composable
+        //    context). The recomposition on IME change re-keys the effect.
+        val imeBottomPx = WindowInsets.ime.getBottom(density)
+        LaunchedEffect(routePrefix, imeBottomPx, maxW, maxH) {
+            if (imeBottomPx > 0 && autoWander && CurioPet.awake && !dragged && !CurioPet.atHome) {
+                val now = System.currentTimeMillis()
+                if (now - lastTypingAt > 60_000L || lastTypingScreen != routePrefix) {
+                    lastTypingAt = now
+                    lastTypingScreen = routePrefix
+                    typingReaction = true
+                    lastTouch = System.currentTimeMillis()
+                    val targetY = (maxH - imeBottomPx - petPx - with(density) { 10.dp.toPx() })
+                        .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                    pos = Offset(
+                        (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                        targetY
+                    )
+                    facing = 1f
+                    squishKey++
+                    reaction = "Tap tap tap! I can type too!"
+                    reactionKey++
                 }
+            } else {
+                typingReaction = false
+            }
         }
 
         // Long-press: fade out, then hop back into the flower bed (the bed
