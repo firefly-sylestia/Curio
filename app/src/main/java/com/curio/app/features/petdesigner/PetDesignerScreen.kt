@@ -88,8 +88,11 @@ import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.BUILTIN_ANIMATIONS
 import com.curio.app.data.PetAnimation
 import com.curio.app.data.PetAnimationFrame
+import com.curio.app.data.PetDefinition
+import com.curio.app.data.PetRegistry
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
+import com.curio.app.data.definition
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.alpha
@@ -1093,6 +1096,62 @@ fun PetDesignerScreen(navController: NavController) {
                             }
                         }
                     )
+                }
+            }
+
+            // ── Pet library (Settings page, Phase 6) ─────────────────
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Pet library",
+                    "The designer is pet-aware — every pet lists the parts it can edit"
+                ) {
+                    val currentPet = design.definition
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PetRegistry.all.forEach { pet ->
+                            PetLibraryCard(
+                                pet = pet,
+                                current = currentPet.id == pet.id,
+                                onClick = {
+                                    if (currentPet.id == pet.id) {
+                                        toast = "\u201c${pet.displayName}\u201d is already your pet"
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        // Placeholder for future pets — the section lists the
+                        // registry, so a new entry appears here automatically.
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                            onClick = { toast = "More pets are on the way!" },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Pets,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                                    size = 28.dp,
+                                    modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
+                                )
+                                Text(
+                                    "More pets\ncoming soon",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(bottom = 10.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -4191,6 +4250,72 @@ private fun ActionPreview(
                     "${reaction.anim.name} · ${if (reaction.enabled) "enabled" else "disabled"}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Pet library (Phase 6) — registry-driven pet cards
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** v8.51 — one pet card in the Settings "Pet library". Renders the pet's
+ *  default look and marks whether the current design belongs to it. */
+@Composable
+private fun PetLibraryCard(
+    pet: PetDefinition,
+    current: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            1.dp,
+            if (current) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.Mood.HAPPY,
+                spriteSize = 56.dp,
+                design = pet.defaultDesign
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                pet.displayName,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                pet.tagline,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(6.dp))
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = if (current) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                else MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Text(
+                    if (current) "Your pet" else "Not selected",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
         }

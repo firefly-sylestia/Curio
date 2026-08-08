@@ -1,3 +1,30 @@
+# Request — Pet Designer Phase 6: multi-pet foundations (DONE)
+
+## Phase 6 — PetDefinition registry + backward-compatible species field (pushed)
+
+- **NEW `data/PetDefinition.kt`**: `PET_CURIE_ID="curie"` const,
+  `EditablePetPartType` enum (BODY/POSE/DETAIL_LAYER/FACE/EYES/MOUTH/
+  ACCESSORY/EFFECT/ANIMATION_FRAME/ACTION/DIALOGUE), `EditablePetPart`
+  (id/displayName/type/pixel/color/blueprint flags), `PetDefinition`
+  (id/displayName/tagline/defaultDesign/editableParts/animationIds/
+  actionEventIds), `PetRegistry` (CURIE with 7 editable parts, `all`,
+  `byId`, `resolve(id)` → CURIE fallback for unknown ids — never crashes),
+  and `val PetDesign.definition` extension.
+- **PetDesign.kt**: trailing `petSpeciesId: String = PET_CURIE_ID` field
+  (no positional constructions exist — safe); `toText` writes `# pet=`;
+  `toParsedOr` reads `# pet=` inside the `#`-comment branch (old parsers
+  skip it as a comment — backward compatible; old designs without it fall
+  back to fallback.petSpeciesId, so dirty-check / Reset-all stay stable).
+- **Screen**: Settings page gains "Pet library" SectionCard before Shapes &
+  inspiration — `PetRegistry.all` → `PetLibraryCard` (default-look sprite,
+  name, tagline, "Your pet" badge, primary border when current) + a
+  "More pets coming soon" placeholder (CurioIcons.Pets + toast). The
+  section lists the registry, so a future pet appears automatically.
+- Review fixes: removed unused `part()`/`partsOfType()` helpers, hoisted
+  `currentPet = design.definition`, narrowed `resolve(id: String)`.
+- Verified: braces + whitespace clean, no positional PetDesign
+  constructions, comment scan clean, code-reviewed. CI is the compile gate.
+
 # Request — Pet Designer Phase 5: Actions & dialogue page (DONE)
 
 ## Phase 5 — Actions landing cards + live action preview (pushed)

@@ -64,7 +64,13 @@ data class PetDesign(
      * An absent key plays the built-in animation; old designs without this
      * field keep working unchanged.
      */
-    val animations: Map<String, PetAnimation> = emptyMap()
+    val animations: Map<String, PetAnimation> = emptyMap(),
+    /**
+     * v8.51 — the species this design belongs to (multi-pet foundations,
+     * Phase 6). Old designs without this field resolve to Curie via
+     * [PetRegistry.resolve] — always readable, never crashes.
+     */
+    val petSpeciesId: String = PET_CURIE_ID
 ) {
     /** The palette keys a design may recolor. */
     companion object {
@@ -240,6 +246,7 @@ data class PetDesign(
     /** The full design as importable text (the format shown in the header). */
     fun toText(): String = buildString {
         appendLine("# Curie pet design")
+        appendLine("# pet=$petSpeciesId")
         appendLine("# size=$gridSize")
         appendLine("# Palette: one hex color per grid key")
         KEYS.forEach { key ->
@@ -283,9 +290,22 @@ data class PetDesign(
         val details = mutableMapOf<String, List<String>>()
         val procedural = mutableMapOf<String, Boolean>()
         var declaredSize: Int? = null
+        // v8.51 — the design's species (multi-pet). Absent in old designs
+        // and in hand-written text → falls back below.
+        var petId: String? = null
         text.lineSequence().forEach { raw ->
             val line = raw.trim()
-            if (line.isEmpty() || line.startsWith("#")) return@forEach
+            if (line.isEmpty()) return@forEach
+            if (line.startsWith("#")) {
+                // `# pet=...` is real metadata (written with the `#` so
+                // older parsers skip it as a comment); every other comment
+                // line is decorative.
+                if (line.startsWith("# pet=")) {
+                    petId = line.substring("# pet=".length).trim().lowercase()
+                        .takeIf { it.isNotBlank() }
+                }
+                return@forEach
+            }
             val eq = line.indexOf('=')
             when {
                 line.startsWith("size=") && eq > 0 -> {
@@ -389,7 +409,8 @@ data class PetDesign(
                         else parsedRows + List(size - parsedRows.size) { ".".repeat(size) }
                     }
             },
-            procedural = procedural
+            procedural = procedural,
+            petSpeciesId = petId ?: fallback.petSpeciesId
         )
     }
 
