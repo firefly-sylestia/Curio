@@ -1,0 +1,1 @@
+• Shuffle feels more rhythmic: peek cards now animate one at a time from top outer to bottom outer, while the hero gets one clean heartbeat per tick. Swipes keep the visible deck sequence and no longer jump to the wrong topic.

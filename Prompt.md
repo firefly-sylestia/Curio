@@ -1,49 +1,47 @@
-# Request — Reaction lines editor + custom pet save crash fix (v8.39)
+# Request — Addictive shuffle choreography + correct swipe sequence (v8.40)
 
-## Completed (v8.39)
+## Completed
 
-### Custom reaction lines
+Focused only on `SpinScreen.kt` animation and deck interaction. No z-index,
+layout, card ordering, colors, shapes, or visual card design were changed.
 
-- Added `PetReaction.lines`, persisted safely in the existing PetDesign text
-  format as URL-encoded `lines=` content. Multiple lines are separated by
-  newline before encoding, so semicolons, equals signs, percent signs, plus
-  signs, spaces, and Unicode cannot corrupt the parser.
-- Added a multiline editor under each selected reaction event in Settings →
-  Pet designer. The draft is bounded to 8 lines × 120 characters and keeps
-  the raw draft separate from normalized persisted lines so ordinary typing
-  does not move the cursor.
-- Curie chooses a random saved line for configured events and touch reactions
-  only when the new **Settings → Appearance → Custom reaction lines** toggle
-  is ON. The setting defaults OFF, and missing lines always fall back to
-  Curie's existing built-in dialogue.
-- The TOUCH reaction now honors its existing enabled toggle consistently;
-  disabled TOUCH suppresses its configured face, motion, and line.
-- Legacy designs without `lines=` continue to parse unchanged.
+### Shuffle choreography
 
-### Crash fix
+- The hero now has one clean heartbeat per reel tick: a tiny press-down,
+  lift/anticipation, then a controlled settle. The prior two pulse springs
+  restarted 110ms apart and overlapped with the hero content reel, producing
+  simultaneous, strange motion.
+- The hero topic content handoff starts 90ms after the heartbeat begins, so
+  the card motion leads and the new topic arrives as a readable release.
+- Peek cards now animate strictly one at a time in this order:
+  **top outer (`-2`) → top inner (`-1`) → bottom inner (`+1`) → bottom outer
+  (`+2`)**. Each card has its own delay; no two peek cards share a wave.
+- The per-card timings remain below the 340ms fastest shuffle tick so the
+  cascade completes before the next reel tick.
 
-- Fixed `PetDesign.toParsedOr` parsing of `face=MOOD;...` and
-  `react=EVENT;...` lines. The old code used the equals-sign index as the
-  substring end after the name prefix, causing `substring(5, 4)` / the
-  reported `StringIndexOutOfBoundsException` when loading a saved custom
-  design after PNG import/shape editing.
-- Parsing now uses the first semicolon after the mood/event name and safely
-  handles malformed or empty entries.
+### Swipe sequence
+
+- The existing user-selected direction is preserved: **left swipe → nearest
+  visible bottom peek (`+1`)**, right swipe → nearest visible top peek (`-1`).
+- The shuffle loop no longer resets `cycleIndex` from a separate tick counter
+  starting at hand index 1. It now advances the current hand position, so
+  manual swipes and subsequent shuffle ticks stay on the same visible topic
+  sequence instead of jumping to a top topic.
 
 ## Files changed
 
-- `app/src/main/java/com/curio/app/data/PetDesign.kt`
-- `app/src/main/java/com/curio/app/data/AppPreferences.kt`
-- `app/src/main/java/com/curio/app/features/petdesigner/PetDesignerScreen.kt`
-- `app/src/main/java/com/curio/app/features/settings/SettingsSectionScreen.kt`
-- `app/src/main/java/com/curio/app/features/settings/SettingsHubScreen.kt`
-- `app/src/main/java/com/curio/app/ui/pet/CurioFloatingPet.kt`
-- `app/AGENTS.md`, `Prompt.md`, version/changelog metadata
+- `app/src/main/java/com/curio/app/features/spin/SpinScreen.kt`
+- `app/build.gradle.kts` → versionCode 20260830
+- `fastlane/metadata/android/en-US/changelogs/20260830.txt`
+- `app/AGENTS.md` motion contract note retained; no new ownership boundary
+- `Prompt.md`
 
 ## Validation
 
-- Robust delimiter balance: all changed Kotlin files BALANCED.
+- SpinScreen delimiter balance: BALANCED.
 - `git diff --check`: clean.
-- Final code review: no concrete Kotlin/Compose blocker found.
-- Gradle compile/build/lint/test was not run because repository DOX rules
-  forbid local Android builds; CI on push is the compile gate.
+- Only SpinScreen was changed before release metadata.
+- Protected-scope diff check found no z-index/layout/design changes.
+- Final code review found no concrete animation, sequencing, or compile blocker.
+- No Gradle build was run because repository DOX rules forbid local Android
+  builds; CI on push is the compile gate.

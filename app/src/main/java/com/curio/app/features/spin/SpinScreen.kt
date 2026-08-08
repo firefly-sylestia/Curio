@@ -693,9 +693,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             CurioMotion.Durations.SpinMin.toLong(),
             CurioMotion.Durations.SpinMax.toLong() + 1
         )
-        val start = System.currentTimeMillis()
-        var tick = 0
-        while (true) {
+        val start = System.currentTimeMillis()        while (true) {
             val elapsed = System.currentTimeMillis() - start
             if (elapsed >= durationMs) break
             val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 1f)
@@ -707,7 +705,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             // completes before the next tick lands. Intervals ~340ms -> ~520ms.
             val eased = sin(progress * Math.PI.toFloat() / 2f)
             val interval = (340L + (180L * eased).toLong()).coerceAtMost(520L)
-            cycleIndex = ++tick
+            // Continue from the hand position the user is currently viewing.
+            // Using a separate tick counter here reset every spin to hand[1],
+            // which made the next swipe appear to pull the wrong visible peek
+            // after the deck had already been cycled manually.
+            if (hand.isNotEmpty()) {
+                cycleIndex = (cycleIndex + 1) % hand.size
+            }
             // Slot-machine ratchet: haptic intensity escalates as the wheel
             // decelerates — a light tick at the brisk opening cadence, a
             // firmer segment tick through the slowdown, and a solid
@@ -1774,19 +1778,20 @@ private const val LandedRestScale = 1.02f
 // v7.1 — peek wipe timings. Soft partial-height glides + fades (no hard
 // slot cut), all under the ~340ms tick floor so each step completes before
 // the next tick lands.
-// v8.36 — TWO-PHASE cascade: during a shuffle the TOP pair of peeks wipes
-// first, then the BOTTOM pair follows [PeekWaveGroupGapMs] later, and the
-// hero pulses once with each group (see the HeroTicketCard tick pulse).
-// Wipes are short (120ms) so each phase completes before the next tick
-// lands — the reel reads snappier and faster, never janky. (v8.32's
-// one-card-at-a-time roll-down was replaced by this grouped pattern per
-// user request: top peek first, then bottom peek, main card animating each
-// time.)
-private const val PeekWaveInMs = 120
-private const val PeekWaveOutMs = 110
+// v8.40 — the shuffle cascade is deliberately one card at a time:
+// top outer → top inner → bottom inner → bottom outer. Each wipe is short
+// enough to finish before the next card starts, so the deck reads like a
+// satisfying little chain instead of four cards moving together.
+private const val PeekWaveInMs = 72
+private const val PeekWaveOutMs = 62
+/** Delay between adjacent cards in the sequential cascade. */
+private const val PeekWaveCardGapMs = 78
 
-/** Gap between the top pair's wipe and the bottom pair's wipe. */
-private const val PeekWaveGroupGapMs = 110
+/** Hero heartbeat timing — one complete press/lift/settle per reel tick. */
+private const val HeroTickPressMs = 70
+private const val HeroTickSettleMs = 170
+/** Let the hero heartbeat lead before its topic content changes. */
+private const val HeroContentDelayMs = 90
 private const val PeekIdleInMs = 300
 private const val PeekIdleOutMs = 280
 
@@ -2124,19 +2129,22 @@ private fun HeroTicketCard(
     var tickDir by remember { mutableStateOf(1f) }
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
-        // v8.36 — the hero pulses once WITH each cascade group: first with
-        // the top pair of peeks' wipe, then again with the bottom pair's
-        // (the "each time they animate, the main card animates" rhythm).
+        // v8.40 — one deliberate heartbeat per reel tick. The old two-spring
+        // pulse restarted itself 110ms later, so the next topic often
+        // cancelled the first pulse while the second was still settling;
+        // the hero then looked like it was wobbling with every other card.
+        // Press first, lift into a tiny overshoot, then settle completely
+        // before the next fast tick can interrupt it.
         tickDir = -tickDir
-        // v6.6 — calm breath instead of a kick: the card lifts barely
-        // (1.02) and glides back on a heavily damped, low-stiffness
-        // spring, so each tick reads as a soft pulse, never a slam.
-        tickPulse.snapTo(1.02f)
-        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
-        delay(PeekWaveGroupGapMs.toLong())
-        tickDir = -tickDir
-        tickPulse.snapTo(1.02f)
-        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
+        tickPulse.snapTo(0.985f)
+        tickPulse.animateTo(
+            1.028f,
+            tween(HeroTickPressMs, easing = FastOutSlowInEasing)
+        )
+        tickPulse.animateTo(
+            1f,
+            tween(HeroTickSettleMs, easing = FastOutSlowInEasing)
+        )
     }
 
     // ── Category switch — one welcoming bounce as the deck re-fans to the
@@ -2421,12 +2429,12 @@ private fun HeroTicketCard(
                             targetState = topic,
                             transitionSpec = {
                                 if (shuffling) {
-                                    // v8.36 — the hero's content swap joins
-                                    // the FIRST cascade group (with the top
-                                    // peeks): it shows the new topic while the
-                                    // bottom pair still wipes, and pulses with
-                                    // both groups (see the tick pulse above).
-                                    val heroDelay = 0
+                                    // v8.40 — let the hero heartbeat lead the
+                                    // content handoff. The press/lift is the
+                                    // invitation; the new topic arrives just
+                                    // after it instead of all motion starting
+                                    // on the same frame.
+                                    val heroDelay = HeroContentDelayMs
                                     (slideInVertically(
                                         animationSpec = tween(180, delayMillis = heroDelay, easing = FastOutSlowInEasing)
                                     ) { height -> height / 2 } +
@@ -2766,18 +2774,16 @@ private fun PeekCard(
                 // before the next tick lands.
                 val dir = if (isTop) -1f else 1f
                 if (shuffling) {
-                    // v8.36 — two-phase cascade: the TOP pair of peeks wipes
-                    // together first (slots -2 & -1 at the same delay), then
-                    // the BOTTOM pair wipes together after PeekWaveGroupGapMs
-                    // (slots 1 & 2). The hero pulses once with each group.
-                    // Enter AND exit share the delay so the card visibly
-                    // waits its turn instead of tearing.
-                    val waveTurn = when (slot) {
-                        -2, -1 -> 0
-                        1, 2 -> 1
+                    // v8.40 — strict one-card-at-a-time cascade: top outer,
+                    // top inner, bottom inner, then bottom outer. No two peek
+                    // cards share a delay.
+                    val waveDelay = when (slot) {
+                        -2 -> 0
+                        -1 -> PeekWaveCardGapMs
+                        1 -> PeekWaveCardGapMs * 2
+                        2 -> PeekWaveCardGapMs * 3
                         else -> 0
                     }
-                    val waveDelay = waveTurn * PeekWaveGroupGapMs
                     slideInVertically(
                         animationSpec = tween(PeekWaveInMs, delayMillis = waveDelay, easing = FastOutSlowInEasing)
                     ) { height -> (height * dir * PeekWipeTravel).toInt() } +
