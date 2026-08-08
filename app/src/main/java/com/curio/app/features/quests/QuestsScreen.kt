@@ -71,6 +71,7 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioQuests.DailyQuest
 import com.curio.app.data.CurioQuests.QuestChain
 import com.curio.app.data.CurioQuests.QuestStage
+import com.curio.app.data.CurioQuests.WeeklyQuest
 import com.curio.app.data.PromoMode
 import com.curio.app.data.QuestGuide
 import com.curio.app.navigation.CurioRoutes
@@ -270,6 +271,21 @@ fun QuestsScreen(navController: NavController) {
                             modifier = m
                         )
                     }
+                }
+                // v8.42 — This week's quests: three rotating week-long goals
+                // under the daily stack (always-on, a new mix every Monday).
+                item {
+                    WeeklyCard(
+                        quests = CurioQuests.weeklyQuestsFor(CurioQuests.currentWeekKey()),
+                        onClaim = { questId ->
+                            val levelBefore = CurioQuests.levelForXp(CurioQuests.xpState)
+                            CurioQuests.claimWeekly(context, questId)
+                            val levelAfter = CurioQuests.levelForXp(CurioQuests.xpState)
+                            if (levelAfter > levelBefore) levelUpBanner = levelAfter
+                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                            celebrate++
+                        }
+                    )
                 }
                 if (current != null) {
                     item {
@@ -1052,6 +1068,144 @@ private fun DailyCard(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * v8.42 — this week's quests: three week-long goals under the daily stack,
+ * resetting every Monday 4 AM (always-on, user-confirmed). Same row rhythm
+ * as the dailies; claimed goals animate away and the header counts them.
+ */
+@Composable
+private fun WeeklyCard(
+    quests: List<WeeklyQuest>,
+    onClaim: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val awarded = CurioQuests.weeklyAwardedState
+    val doneCount = quests.count { it.id in awarded }
+    CurioSettingsCard(modifier = modifier) {
+        CurioCardHeader(
+            CurioIcons.CalendarToday,
+            "This week's quests",
+            "$doneCount of ${quests.size} done · New goals every Monday"
+        )
+        Spacer(Modifier.height(2.dp))
+        Column {
+            quests.forEach { quest ->
+                WeeklyQuestRow(
+                    quest = quest,
+                    done = quest.id in awarded,
+                    onClaim = { onClaim(quest.id) }
+                )
+            }
+        }
+        if (doneCount == quests.size) {
+            Text(
+                "All done this week! Fresh goals land Monday.",
+                style = MaterialTheme.typography.bodySmall,
+                color = CurioColors.Teal,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+    }
+}
+
+/** One weekly quest row — icon, title, description, progress bar, claim. */
+@Composable
+private fun WeeklyQuestRow(
+    quest: WeeklyQuest,
+    done: Boolean,
+    onClaim: () -> Unit
+) {
+    val progress = CurioQuests.weeklyProgress(quest)
+    val fraction by animateFloatAsState(
+        targetValue = (progress.toFloat() / quest.target.coerceAtLeast(1)).coerceIn(0f, 1f),
+        animationSpec = tween(450),
+        label = "weeklyProgress"
+    )
+    val claimable = !done && progress >= quest.target
+    val accent = CurioColors.Teal
+    // Claimed goals animate OUT (scale + fade) instead of vanishing.
+    AnimatedVisibility(
+        visible = !done,
+        exit = fadeOut(tween(200)) + scaleOut(targetScale = 0.8f, animationSpec = tween(200))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(
+                        if (done) CurioColors.Sage.copy(alpha = 0.18f)
+                        else accent.copy(alpha = 0.14f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = if (done) CurioIcons.Check else CurioIcons.CalendarToday,
+                    contentDescription = null,
+                    tint = if (done) CurioColors.Sage else accent,
+                    size = 18.dp
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    quest.title,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = if (done) FontWeight.ExtraBold else FontWeight.SemiBold
+                    ),
+                    color = if (done) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    quest.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(5.dp))
+                LinearProgressIndicator(
+                    progress = { fraction },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50)),
+                    color = if (done) CurioColors.Sage else accent,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            if (claimable) {
+                Surface(
+                    onClick = onClaim,
+                    shape = RoundedCornerShape(50),
+                    color = accent
+                ) {
+                    Text(
+                        "Claim +${quest.xpReward} XP",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                    )
+                }
+            } else {
+                Text(
+                    if (done) "Done" else "+${quest.xpReward} XP",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (done) CurioColors.Sage else accent
+                )
             }
         }
     }

@@ -3,6 +3,7 @@ package com.curio.app.data
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.json.JSONArray
@@ -54,6 +55,11 @@ object CurioQuests {
     private const val KEY_DAILY_PROGRESS = "daily_progress"
     private const val KEY_DAILY_AWARDED = "daily_awarded"
     private const val KEY_BEST_STREAK = "best_streak"
+    // Weekly quests (v8.42) — week-long goals, reset every Monday 4 AM.
+    private const val KEY_WEEKLY_DATE = "weekly_date"
+    private const val KEY_WEEKLY_PROGRESS = "weekly_progress"
+    private const val KEY_WEEKLY_LANES = "weekly_lanes"
+    private const val KEY_WEEKLY_AWARDED = "weekly_awarded"
     // Legacy keys — read once during migration, never written again.
     private const val KEY_LEGACY_JOURNEY_AWARDED = "journey_awarded"
     private const val KEY_LEGACY_ACHIEVEMENTS = "achievements"
@@ -76,6 +82,14 @@ object CurioQuests {
     var dailyAwardedState by mutableStateOf<Set<String>>(emptySet())
         private set
     var bestStreakState by mutableIntStateOf(0)
+        private set
+    var weeklyDateState by mutableLongStateOf(-1L)
+        private set
+    var weeklyProgressState by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+    var weeklyLanesState by mutableStateOf<Set<String>>(emptySet())
+        private set
+    var weeklyAwardedState by mutableStateOf<Set<String>>(emptySet())
         private set
 
     /** One-time cumulative counters that drive chain progress. */
@@ -438,7 +452,12 @@ object CurioQuests {
         dailyProgressState = readIntMap(prefs.getString(KEY_DAILY_PROGRESS, null))
         dailyAwardedState = readStringSet(prefs.getString(KEY_DAILY_AWARDED, null))
         bestStreakState = prefs.getInt(KEY_BEST_STREAK, 0)
+        weeklyDateState = prefs.getLong(KEY_WEEKLY_DATE, -1L)
+        weeklyProgressState = readIntMap(prefs.getString(KEY_WEEKLY_PROGRESS, null))
+        weeklyLanesState = readStringSet(prefs.getString(KEY_WEEKLY_LANES, null))
+        weeklyAwardedState = readStringSet(prefs.getString(KEY_WEEKLY_AWARDED, null))
         ensureDaily(context)
+        ensureWeekly(context)
         // Re-award any stage the counters already satisfy (post-migration
         // catch-up, also heals a killed write).
         checkAll(context)
@@ -503,6 +522,8 @@ object CurioQuests {
             .put("dailyCompleted", counters.dailyCompleted)
         val dailyProgress = JSONObject()
         dailyProgressState.forEach { (k, v) -> dailyProgress.put(k, v) }
+        val weeklyProgress = JSONObject()
+        weeklyProgressState.forEach { (k, v) -> weeklyProgress.put(k, v) }
         prefs(context).edit()
             .putInt(KEY_XP, xpState)
             .putString(KEY_LIFETIME, lifetime.toString())
@@ -513,6 +534,10 @@ object CurioQuests {
             .putString(KEY_DAILY_PROGRESS, dailyProgress.toString())
             .putString(KEY_DAILY_AWARDED, JSONArray(dailyAwardedState.toList()).toString())
             .putInt(KEY_BEST_STREAK, bestStreakState)
+            .putLong(KEY_WEEKLY_DATE, weeklyDateState)
+            .putString(KEY_WEEKLY_PROGRESS, weeklyProgress.toString())
+            .putString(KEY_WEEKLY_LANES, JSONArray(weeklyLanesState.toList()).toString())
+            .putString(KEY_WEEKLY_AWARDED, JSONArray(weeklyAwardedState.toList()).toString())
             .apply()
     }
 
@@ -566,6 +591,7 @@ object CurioQuests {
         ensureDaily(context)
         lifetimeState = lifetimeState.copy(spins = lifetimeState.spins + 1)
         bumpDaily(context, DailyKind.SPIN)
+        bumpWeekly(context, WeeklyKind.SPIN)
         // v8.10 — spinning the discovery daily's target lane completes it at
         // the spin itself (its "Go" chip routes into that lane's deck). This
         // is the ONLY path a Wildcard-targeted discovery can ever complete:
@@ -590,6 +616,8 @@ object CurioQuests {
         lifetimeState = lifetimeState.copy(explores = lifetimeState.explores + 1)
         categoriesState = categoriesState + categoryId.name
         bumpDaily(context, DailyKind.EXPLORE)
+        // v8.42 — the week's explore count + distinct-lane set (weekly quests).
+        bumpWeekly(context, WeeklyKind.EXPLORE, categoryId)
         // v8.6 — the "New Lane" discovery daily (spec §6.2) completes when the
         // passport's least-engaged lane is explored.
         val discoveryTarget = CurioPassport.leastEngaged(context)
@@ -615,6 +643,8 @@ object CurioQuests {
         lifetimeState = lifetimeState.copy(saves = lifetimeState.saves + 1)
         formatsState = formatsState + format.name
         bumpDaily(context, DailyKind.SAVE)
+        // v8.42 — the week's save count (weekly quests).
+        bumpWeekly(context, WeeklyKind.SAVE)
         write(context)
         addXp(context, 10)
         // The tour's Save step advances when a capture is saved.
@@ -626,6 +656,7 @@ object CurioQuests {
         ensureDaily(context)
         lifetimeState = lifetimeState.copy(quotes = lifetimeState.quotes + 1)
         bumpDaily(context, DailyKind.QUOTE)
+        bumpWeekly(context, WeeklyKind.QUOTE)
         write(context)
         addXp(context, 3)
     }
@@ -635,6 +666,7 @@ object CurioQuests {
         ensureDaily(context)
         lifetimeState = lifetimeState.copy(pins = lifetimeState.pins + 1)
         bumpDaily(context, DailyKind.PIN)
+        bumpWeekly(context, WeeklyKind.PIN)
         write(context)
         addXp(context, 3)
     }
@@ -656,6 +688,7 @@ object CurioQuests {
         ensureDaily(context)
         lifetimeState = lifetimeState.copy(likes = lifetimeState.likes + 1)
         bumpDaily(context, DailyKind.LIKE)
+        bumpWeekly(context, WeeklyKind.LIKE)
         write(context)
         addXp(context, 2)
     }
@@ -673,6 +706,7 @@ object CurioQuests {
         ensureDaily(context)
         lifetimeState = lifetimeState.copy(profileVisits = lifetimeState.profileVisits + 1)
         bumpDaily(context, DailyKind.PROFILE)
+        bumpWeekly(context, WeeklyKind.PROFILE)
         write(context)
         // 0 XP — the call is just a refresh so the tour chain checks run.
         addXp(context, 0)
@@ -729,6 +763,142 @@ object CurioQuests {
         if ((dailyProgressState[quest.kind.name] ?: 0) < quest.target) return
         dailyAwardedState = dailyAwardedState + quest.id
         lifetimeState = lifetimeState.copy(dailyCompleted = lifetimeState.dailyCompleted + 1)
+        write(context)
+        addXp(context, quest.xpReward)
+    }
+
+    // ── Weekly quests — three rotating week-long goals (v8.42) ─────────
+    // Always-on (user-confirmed): a scaled-up weekly analog of the daily
+    // trio. Progress accumulates through the week and resets every Monday
+    // 4 AM (the same 4 AM rollover the dailies use). Rewards are higher
+    // (~30–60 XP) because each goal spans seven days.
+    enum class WeeklyKind { SPIN, EXPLORE, SAVE, LANES, QUOTE, PIN, LIKE, PROFILE }
+
+    data class WeeklyQuest(
+        val id: String,
+        val title: String,
+        val description: String,
+        val xpReward: Int,
+        val kind: WeeklyKind,
+        val target: Int
+    )
+
+    /**
+     * The weekly pool — two tiers per kind. Each week picks THREE quests of
+     * DIFFERENT kinds (seeded by the week key) with one target tier per
+     * kind, so the week's goals are never the same two Mondays in a row
+     * and no obvious repeating cycle shows.
+     */
+    private val WeeklyPool: List<WeeklyQuest> = listOf(
+        WeeklyQuest("w-spin-15", "Deck Devotee", "Spin the deck 15 times", 35, WeeklyKind.SPIN, 15),
+        WeeklyQuest("w-spin-30", "Deck Dancer", "Spin the deck 30 times", 50, WeeklyKind.SPIN, 30),
+        WeeklyQuest("w-explore-7", "Seven Days of Wonder", "Explore 7 topics", 40, WeeklyKind.EXPLORE, 7),
+        WeeklyQuest("w-explore-12", "Trail Tender", "Explore 12 topics", 55, WeeklyKind.EXPLORE, 12),
+        WeeklyQuest("w-save-3", "Keepsake Keeper", "Save 3 captures", 50, WeeklyKind.SAVE, 3),
+        WeeklyQuest("w-save-5", "Shelf Builder", "Save 5 captures", 60, WeeklyKind.SAVE, 5),
+        WeeklyQuest("w-lanes-3", "Lane Wanderer", "Explore 3 different lanes", 45, WeeklyKind.LANES, 3),
+        WeeklyQuest("w-lanes-5", "Passport Pioneer", "Explore 5 different lanes", 60, WeeklyKind.LANES, 5),
+        WeeklyQuest("w-quote-4", "Quote Collector", "Bookmark 4 quotes", 35, WeeklyKind.QUOTE, 4),
+        WeeklyQuest("w-pin-3", "Pin Cushion", "Pin 3 topics", 35, WeeklyKind.PIN, 3),
+        WeeklyQuest("w-like-8", "Taste Tester", "Like 8 topics", 35, WeeklyKind.LIKE, 8),
+        WeeklyQuest("w-profile-3", "Profile Visitor", "Visit your profile 3 times", 30, WeeklyKind.PROFILE, 3)
+    )
+
+    /**
+     * This week's three quests — stable all week, a NEW mix every Monday
+     * 4 AM. Deterministic on [weekKey] via a small 64-bit xorshift seed, so
+     * the three kinds and their target tiers change every week without an
+     * obvious repeating cycle.
+     */
+    fun weeklyQuestsFor(weekKey: Long): List<WeeklyQuest> {
+        val byKind = WeeklyPool.groupBy { it.kind }
+        val allKinds = WeeklyPool.map { it.kind }.distinct()
+        // 64-bit xorshift seeded from the week key — deterministic per week.
+        var s = weekKey
+        s = s xor (s shl 13)
+        s = s xor (s ushr 7)
+        s = s xor (s shl 17)
+        s = s xor weekKey
+        fun next(max: Int): Int {
+            s = s xor (s shl 13)
+            s = s xor (s ushr 7)
+            s = s xor (s shl 17)
+            return ((s % max).toInt() + max) % max
+        }
+        // Pick 3 DISTINCT kinds (never three of the same action), then one
+        // target tier per kind.
+        val chosen = mutableListOf<WeeklyKind>()
+        val available = allKinds.toMutableList()
+        while (chosen.size < 3 && available.isNotEmpty()) {
+            chosen += available.removeAt(next(available.size))
+        }
+        return chosen.map { kind ->
+            val options = byKind.getValue(kind)
+            options[next(options.size)]
+        }
+    }
+
+    /**
+     * This week's key — ISO-style week (Monday first, 4 minimal days) with
+     * the daily 4 AM rollover applied, so a week runs Monday 4 AM → the
+     * next Monday 4 AM (matching the dailies' reset).
+     */
+    fun currentWeekKey(): Long {
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.HOUR_OF_DAY, 4)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        cal.firstDayOfWeek = Calendar.MONDAY
+        cal.minimalDaysInFirstWeek = 4
+        return cal.get(Calendar.YEAR).toLong() * 100L + cal.get(Calendar.WEEK_OF_YEAR).toLong()
+    }
+
+    /** Live progress for one weekly quest. */
+    fun weeklyProgress(quest: WeeklyQuest): Int = when (quest.kind) {
+        WeeklyKind.SPIN -> weeklyProgressState["SPIN"] ?: 0
+        WeeklyKind.EXPLORE -> weeklyProgressState["EXPLORE"] ?: 0
+        WeeklyKind.SAVE -> weeklyProgressState["SAVE"] ?: 0
+        WeeklyKind.LANES -> weeklyLanesState.size
+        WeeklyKind.QUOTE -> weeklyProgressState["QUOTE"] ?: 0
+        WeeklyKind.PIN -> weeklyProgressState["PIN"] ?: 0
+        WeeklyKind.LIKE -> weeklyProgressState["LIKE"] ?: 0
+        WeeklyKind.PROFILE -> weeklyProgressState["PROFILE"] ?: 0
+    }
+
+    // ── Weekly rollover — a new ISO week resets the week's goals ────────
+    private fun ensureWeekly(context: Context) {
+        val key = currentWeekKey()
+        if (weeklyDateState == key) return
+        weeklyDateState = key
+        weeklyProgressState = emptyMap()
+        weeklyLanesState = emptySet()
+        weeklyAwardedState = emptySet()
+        write(context)
+    }
+
+    /**
+     * Weekly counters fed by the same hooks as the dailies. [categoryId]
+     * (an explore's lane) always adds to the week's distinct-lane set.
+     */
+    private fun bumpWeekly(context: Context, kind: WeeklyKind, categoryId: CategoryId? = null) {
+        ensureWeekly(context)
+        weeklyProgressState = weeklyProgressState + (kind.name to ((weeklyProgressState[kind.name] ?: 0) + 1))
+        // An explore's lane always feeds the week's distinct-lane set too.
+        if (categoryId != null) weeklyLanesState = weeklyLanesState + categoryId.name
+        write(context)
+    }
+
+    /**
+     * Claim a completed weekly quest's XP (Quests page "Claim" button).
+     * No-op when the quest isn't complete or was already claimed this week.
+     */
+    fun claimWeekly(context: Context, questId: String) {
+        ensureWeekly(context)
+        val quest = weeklyQuestsFor(currentWeekKey()).firstOrNull { it.id == questId } ?: return
+        if (quest.id in weeklyAwardedState) return
+        if (weeklyProgress(quest) < quest.target) return
+        weeklyAwardedState = weeklyAwardedState + quest.id
         write(context)
         addXp(context, quest.xpReward)
     }

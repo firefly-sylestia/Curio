@@ -86,6 +86,35 @@
 - Unrelated working-tree changes (`docs/app/QUEST_AND_PET_REDESIGN_SPEC.md` deletion,
   untracked `docs/plans/`) remain untouched and out of commits.
 
+## Part 7 — Weekly quests (DONE)
+
+- User asked how much of the Quest & Pet Redesign spec was implemented, and
+  what happened to weekly quests. Audit result: ~90% shipped (Phases A–E:
+  daily-first IA, First Journey tutorial, category passport, reward moments,
+  pet with all 6 growth stages). Weekly/challenge quests were NEVER built —
+  the spec §8.1/#6 + §8.2/#6 marked them optional/deferred, and commit
+  8753d75 only RECORDED a "weekly chain" as a planned v8.28 hook in Prompt.md.
+- User chose (ask_user): weekly quests ship **always-on** (no toggle), and I
+  design the shape.
+- Implemented v8.42 (then made DYNAMIC per user follow-up — a fixed weekly
+  trio felt too predictable):
+  - `CurioQuests.kt` — `WeeklyKind` (SPIN/EXPLORE/SAVE/LANES/QUOTE/PIN/LIKE/
+    PROFILE), `WeeklyQuest`, private `WeeklyPool` (two tiers per kind),
+    `weeklyQuestsFor(weekKey)` picks 3 quests of DIFFERENT kinds (rotating
+    3-kind window across the 8 kinds + alternating tier) deterministic per
+    week; Monday-4AM ISO week rollover (`currentWeekKey`/`ensureWeekly`),
+    `bumpWeekly` generalized to all kinds (fed from spin/explore/save/quote/
+    pin/like/profile hooks; explore also feeds the distinct-lane set),
+    `weeklyProgress`/`isWeeklyDone`/`claimWeekly` (validates against
+    `weeklyQuestsFor(currentWeekKey())`); new prefs keys
+    `weekly_date/progress/lanes/awarded` in seed/write.
+  - `QuestsScreen.kt` — "This week's quests" `WeeklyCard` right under the
+    daily stack (always-on), teal accent + `CalendarToday` header ("New
+    goals every Monday"), rows with progress bars + Claim pill (same rhythm
+    as dailies, claimed rows animate out); level-up banner + haptic +
+    celebrate on claim like dailies.
+  - Store changelog 20260906.txt updated.
+
 ## Part 6 — Spin deck swipe direction fix (DONE)
 
 - `SpinScreen.kt` `Carousel` — the deck-swipe mapping fired the OPPOSITE cycle on
