@@ -872,7 +872,7 @@ fun PetDesignerScreen(navController: NavController) {
                             shape = RoundedCornerShape(18.dp),
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                             onClick = {
-                                val uri = exportPngUri(context, design, editingGrid)
+                                val uri = exportPngUri(context, design, editingGrid, previewMood.name)
                                 if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
                             },
                             modifier = Modifier.weight(1f)
@@ -1066,7 +1066,12 @@ private fun upscalePreset(rows: List<String>, gridSize: Int): List<String> =
  * Renders a design grid to a pixel-perfect PNG bitmap and returns its
  * shareable FileProvider URI (cache/share, which file_paths.xml exposes).
  */
-private fun exportPngUri(context: android.content.Context, design: PetDesign, grid: String): android.net.Uri? {
+private fun exportPngUri(
+    context: android.content.Context,
+    design: PetDesign,
+    grid: String,
+    moodName: String
+): android.net.Uri? {
     val rows = when {
         grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
         grid == "curled" -> design.curledRows
@@ -1096,6 +1101,10 @@ private fun exportPngUri(context: android.content.Context, design: PetDesign, gr
     // base pose. Transparent cells remain transparent and preserve the
     // designer's layer artwork when shared outside Curio.
     PetDesign.DETAIL_KEYS.forEach { layer -> paintRows(design.detailFor(layer)) }
+    // The export follows the selected Preview mood, including its optional
+    // hand-drawn face overlay. Reaction faces remain available through the
+    // text export because they are event-specific rather than one static pose.
+    design.faceFor(moodName).gridRows.takeIf { it.isNotEmpty() }?.let(::paintRows)
 
     val dir = File(context.cacheDir, "share")
     if (!dir.exists()) dir.mkdirs()
