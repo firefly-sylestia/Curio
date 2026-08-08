@@ -240,7 +240,8 @@ fun PetGuideOverlay(
                         stepCount = stepCount, actionLabel = actionLabel,
                         actionEnabled = actionEnabled, tailDown = true,
                         onClick = onClick, onClose = onClose,
-                        skipLabel = skipLabel, onSkip = onSkip
+                        skipLabel = skipLabel, onSkip = onSkip,
+                        compact = !actionEnabled
                     )
                     Spacer(Modifier.height(10.dp))
                     GuidePet(
@@ -262,7 +263,8 @@ fun PetGuideOverlay(
                         stepCount = stepCount, actionLabel = actionLabel,
                         actionEnabled = actionEnabled, tailDown = false,
                         onClick = onClick, onClose = onClose,
-                        skipLabel = skipLabel, onSkip = onSkip
+                        skipLabel = skipLabel, onSkip = onSkip,
+                        compact = !actionEnabled
                     )
                 }
                 // Window below: bubble above the pet, pet pointing down into
@@ -273,7 +275,8 @@ fun PetGuideOverlay(
                         stepCount = stepCount, actionLabel = actionLabel,
                         actionEnabled = actionEnabled, tailDown = true,
                         onClick = onClick, onClose = onClose,
-                        skipLabel = skipLabel, onSkip = onSkip
+                        skipLabel = skipLabel, onSkip = onSkip,
+                        compact = !actionEnabled
                     )
                     Spacer(Modifier.height(8.dp))
                     GuidePet(
@@ -350,24 +353,32 @@ private fun GuideSpeechBubble(
     onClose: (() -> Unit)?,
     skipLabel: String?,
     onSkip: (() -> Unit)?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /**
+     * v8.29 — wait steps use a NARROWER bubble that never eats taps, so it
+     * can't block the real button the step is waiting for.
+     */
+    compact: Boolean = false
 ) {
     val bubbleColor = MaterialTheme.colorScheme.surfaceContainerHigh
     // v8.24 — a happy confirmation bounce whenever the step advances. Wait
     // steps advance the moment the REAL action is done, so the bubble pops
     // and hops exactly on the "yay, done!" beat. The overshoot spring lands
     // past full size, then settles back.
-    val pop = remember { Animatable(0f) }
+    // v8.29 — starts FULLY VISIBLE on the first step (the old 0 start left
+    // the intro bubble invisible until the second step).
+    val pop = remember { Animatable(1f) }
     LaunchedEffect(stepIndex) {
         if (stepIndex > 0) {
             pop.snapTo(0f)
             pop.animateTo(1f, spring(dampingRatio = 0.42f, stiffness = 520f))
         }
     }
+    val bubbleMax = if (compact) 300.dp else 430.dp
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .widthIn(max = 430.dp)
+            .widthIn(max = bubbleMax)
             .graphicsLayer {
                 val t = pop.value
                 alpha = t.coerceIn(0f, 1f)
@@ -383,14 +394,17 @@ private fun GuideSpeechBubble(
             BubbleTail(color = bubbleColor, pullUp = false)
         }
         Surface(
-            onClick = { if (actionEnabled) onClick() },
+            // v8.29 — a DISABLED surface during wait steps: it never consumes
+            // taps, so the real button under/behind the bubble stays tappable.
+            onClick = onClick,
+            enabled = actionEnabled,
             shape = RoundedCornerShape(20.dp),
             color = bubbleColor,
             contentColor = MaterialTheme.colorScheme.onSurface,
             shadowElevation = 8.dp,
             tonalElevation = 2.dp,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-            modifier = Modifier.widthIn(max = 430.dp)
+            modifier = Modifier.widthIn(max = bubbleMax)
         ) {
             Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
                 // Title row + close.

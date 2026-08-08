@@ -1,5 +1,6 @@
 package com.curio.app.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -785,6 +786,10 @@ fun CurioNavHost(
         }
     }
     }
+    // v8.29 — the tour LOCKS navigation: the system back button can't wander
+    // off mid-tour (the overlay's X always closes it if the user wants out).
+    BackHandler(enabled = QuestGuide.active) { /* swallow — use the X to leave */ }
+
     // ── Quest tour overlay — rendered OUTSIDE the Scaffold's padded content
     //    box (a full-window sibling, like the floating pet) so its coordinate
     //    space IS the window: landmark bounds are window coordinates, and
@@ -845,7 +850,10 @@ fun CurioNavHost(
     if (!QuestGuide.active &&
         !CurioPet.floatingSuppressed &&
         routePrefix != CurioRoutes.SPLASH &&
-        routePrefix != CurioRoutes.CRASH
+        routePrefix != CurioRoutes.CRASH &&
+        // v8.29 — never during the onboarding intro: the pet introduces
+        // itself in the guided tour instead.
+        routePrefix != CurioRoutes.ONBOARDING
     ) {
         CurioFloatingPet(routePrefix = routePrefix)
     }

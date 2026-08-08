@@ -1,38 +1,56 @@
-# Request — v8.28: fix washed-out colors in light & pastel mode (done)
+# Request — v8.29: pet intro + dynamic bond + tour interaction fixes
 
 ## What the user asked
 
-Colors on the Quests category passport texts were not visible properly in
-pastel mode, and the saved-bookmark ("pin") icon was unreadable too. Make
-the text/icons a little darker in light and pastel mode.
+1. The pet should NOT show during the onboarding intro; it should introduce
+   itself inside the tutorial instead.
+2. Early pet dialogue acts like best friends from the start — it should be
+   dynamic and warm up over time.
+3. During the tutorial, clicking what the tour says to click doesn't work
+   (e.g. spin the deck). They want: the dialog gets out of the way, the pet
+   says "go ahead, spin it", the step HOLDS until the user really does the
+   action (no next step), the user can't navigate away, and the pet REACTS
+   when they do it.
 
-## Root cause
+## Root causes found
 
-`PassportStamp` (Quests page) tinted its lane glyph and status labels
-("Peeked" / "New · spin!") with `cat.themedAccent()` — in pastel mode that
-is an airy pastel (lightness 0.80), so the text washed out. The
-saved-quote bookmark in `EntryDetailScreen` did the same
-(`category.themedAccent()` as the icon tint). `categoryInk()` fixed the
-pastel case but only darkens PALE accents when pastel mode is ON — the
-wildcard coral accent (pale by nature) still washed out in plain light mode.
+- The tour speech bubble was an ENABLED clickable Surface even on wait
+  steps, so wherever it overlapped a target button it ate the tap; and its
+  pop animation started at 0 with `if (stepIndex > 0)` — the FIRST step's
+  bubble was invisible.
+- Onboarding woke the pet (wake()/comeOut()) so it floated behind the intro
+  slides, and the tour-ask dialog showed its own pet sprite.
+- Dialogue pools were uniformly warm ("Best friends!", "Past my bedtime…
+  but for you, I'll stay", "Mine now… I mean, ours!") with no familiarity
+  scaling.
+- No back-button lock during the tour.
 
 ## Fix (pushed)
 
-- NEW public helper `CurioCategory.readableAccentInk()` in
-  `ui/theme/CategoryInk.kt`: deep accent in light mode, deep hue twin for
-  pale accents (wildcard) in EVERY light theme (not just pastel), light
-  twin in dark mode.
-- `PassportStamp` (QuestsScreen): glyph + PEEKED/UNSEEN label tints →
-  `readableAccentInk()`; UNSEEN stamp border bumped to the ink at 0.45 so
-  the "New · spin!" outline reads. Fills keep the pastel accent.
-- `EntryDetailScreen` saved-quote bookmark icon tint →
-  `readableAccentInk()`.
-- Store changelog `20260817.txt`.
+- **QuestGuide.kt** — new step 0 "Meet Curio" (CENTER, route "") where the
+  pet introduces itself; wait-step copy rewritten as direct commands
+  ("Go ahead, spin it! I'll wait right here." / "Go on, tap the card to
+  open it." / "When you're ready, tap Start exploring below." / "Go on,
+  save what you found. It'll be yours to keep!").
+- **PetGuideOverlay.kt** — bubble Surface now `enabled = actionEnabled`
+  (disabled surfaces never consume taps → the real button stays tappable
+  during waits); `pop = remember { Animatable(1f) }` fixes the invisible
+  first bubble; wait steps use a compact 300dp bubble.
+- **CurioPet.kt** — new `Bond` (STRANGER <3, ACQUAINTANCE 3-5, FRIEND 6-11,
+  CLOSE 12+) from level; `isWarm()` gates the warm morning/afternoon/
+  evening/night twins, the SAVE line "Mine now… I mean, ours!", and the
+  touch tier-3 "Best friends!" / "You're my favorite!".
+- **CurioNavHost.kt** — `BackHandler(enabled = QuestGuide.active)` swallows
+  back mid-tour (the X still exits); onboarding route excluded from the
+  floating pet.
+- **OnboardingScreen.kt** — removed the wake/comeOut (pet stays home during
+  intro); tour-ask dialog has no pet sprite + neutral text; dropped the
+  unused CurioPetSprite import.
 
 ## Validation
 
-Brace balance + `git diff --check` pass on all 3 files. CI on push is the
-compile gate.
+Brace balance + `git diff --check` pass on all 5 files; no unused imports
+left. CI on push is the compile gate. Code review done.
 
 ## Parked v8.28 hooks spec (user picks, build later)
 

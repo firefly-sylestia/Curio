@@ -176,8 +176,11 @@ object CurioPet {
         Event.EXPLORE -> listOf(
             "Go explore!", "Adventure time!", "I'll wait right here. Go see!"
         ).random()
-        Event.SAVE -> listOf(
+        // v8.29 — "Mine now… I mean, ours!" only after the bond is FRIEND+.
+        Event.SAVE -> if (isWarm()) listOf(
             "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!"
+        ).random() else listOf(
+            "Keepsake saved!", "Tucked away safely!", "It's yours to keep!"
         ).random()
     }
 
@@ -291,6 +294,35 @@ object CurioPet {
         "Fresh day, fresh topics!"
     ).random()
 
+    // ── Bond (v8.29) — how familiar the pet is allowed to be ───────────
+    // The pet starts polite and neutral and only talks like a close friend
+    // once the player has actually grown with it (levels from XP). Warm,
+    // intimate lines ("Best friends!", "I saved your spot") stay gated
+    // behind the FRIEND tier, so a brand-new pet never acts familiar.
+    enum class Bond(val displayName: String) {
+        STRANGER("Stranger"), ACQUAINTANCE("Acquaintance"),
+        FRIEND("Friend"), CLOSE("Close friend")
+    }
+
+    /**
+     * The current bond tier — level sets the ceiling, but the FRIEND/CLOSE
+     * tiers also need real saved history, so warmth genuinely GROWS over
+     * time instead of arriving on day one with fast early leveling.
+     */
+    fun bond(): Bond {
+        val level = CurioQuests.levelForXp(CurioQuests.xpState)
+        val saves = CurioQuests.lifetimeState.saves
+        return when {
+            level >= 12 && saves >= 5 -> Bond.CLOSE
+            level >= 6 && saves >= 2 -> Bond.FRIEND
+            level >= 3 -> Bond.ACQUAINTANCE
+            else -> Bond.STRANGER
+        }
+    }
+
+    /** True once the pet can talk like a familiar friend (v8.29). */
+    private fun isWarm(): Boolean = bond().ordinal >= Bond.FRIEND.ordinal
+
     // ── Moods (spec §10.5) — derived from recent activity, never shaming ──
     // v8.13 — two more status moods: FOCUSED (the user is writing/saving on
     // the capture screen) and BOUNCY (a play session just ended — the pet is
@@ -358,8 +390,7 @@ object CurioPet {
     private val morningLines = listOf(
         "Morning! The deck smells fresh.",
         "Rise and shine. Something new is waiting.",
-        "Fresh eyes, fresh topics. Let's go!",
-        "Good morning! I saved your spot."
+        "Fresh eyes, fresh topics. Let's go!"
     )
     private val afternoonLines = listOf(
         "Afternoon wander? Let's go.",
@@ -372,9 +403,23 @@ object CurioPet {
         "Evening glow. Nice time for a discovery."
     )
     private val nightLines = listOf(
-        "Past my bedtime… but for you, I'll stay.",
         "Shh, night mode. One quiet spin?",
-        "The stars are out. The deck still shines."
+        "The stars are out. The deck still shines.",
+        "It's late, but the deck will be here tomorrow."
+    )
+    // v8.29 — the warmer twins only speak once the bond is FRIEND or closer.
+    private val warmMorningLines = listOf(
+        "Good morning! I saved your spot.",
+        "Morning! I missed this."
+    )
+    private val warmAfternoonLines = listOf(
+        "Afternoon! You always pick the best topics."
+    )
+    private val warmEveningLines = listOf(
+        "Evening! Cozy hour, and I'm glad you're here."
+    )
+    private val warmNightLines = listOf(
+        "Past my bedtime… but for you, I'll stay."
     )
     private val curiousLines = listOf(
         "We haven't tried __LANE__ yet. Want a new stamp?",
@@ -409,10 +454,12 @@ object CurioPet {
         ).random()
         Mood.EXCITED -> excitedLines.random()
         Mood.HAPPY -> when (timeOfDay()) {
-            TimeOfDay.MORNING -> morningLines.random()
-            TimeOfDay.AFTERNOON -> afternoonLines.random()
-            TimeOfDay.EVENING -> eveningLines.random()
-            TimeOfDay.NIGHT -> nightLines.random()
+            // v8.29 — strangers hear the polite lines; friends+ hear the
+            // warmer twins.
+            TimeOfDay.MORNING -> (if (isWarm()) warmMorningLines else morningLines).random()
+            TimeOfDay.AFTERNOON -> (if (isWarm()) warmAfternoonLines else afternoonLines).random()
+            TimeOfDay.EVENING -> (if (isWarm()) warmEveningLines else eveningLines).random()
+            TimeOfDay.NIGHT -> (if (isWarm()) warmNightLines else nightLines).random()
         }
         Mood.CURIOUS -> {
             val lane = leastExploredLane(context, lanes)
@@ -442,10 +489,22 @@ object CurioPet {
      * escalate from boop to play-bow to a big happy bounce.
      */
     fun touchReaction(tier: Int): String = when {
-        tier >= 3 -> listOf(
-            "Yay!", "I love boops!", "Best friends!", "Squee!",
-            "More, more, more!", "You're my favorite!", "Party time!"
-        ).random()
+        // v8.29 — intimacy scales with the bond: "Best friends!" and "You're
+        // my favorite!" only at CLOSE; FRIEND gets loving-but-restrained;
+        // strangers just celebrate happily.
+        tier >= 3 -> when {
+            bond() == Bond.CLOSE -> listOf(
+                "Yay!", "I love boops!", "Best friends!", "Squee!",
+                "More, more, more!", "You're my favorite!", "Party time!"
+            ).random()
+            isWarm() -> listOf(
+                "Yay!", "I love boops!", "Squee!", "More, more, more!",
+                "Party time!", "Hehe!"
+            ).random()
+            else -> listOf(
+                "Yay!", "Squee!", "More, more, more!", "Party time!", "Wheee!"
+            ).random()
+        }
         tier >= 2 -> listOf(
             "Hehehe!", "More, more!", "This is fun!", "Tag, you're it!",
             "Catch me!", "Bouncy bouncy!", "Again, again!"

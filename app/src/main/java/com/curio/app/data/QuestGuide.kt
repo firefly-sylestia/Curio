@@ -164,6 +164,13 @@ object QuestGuide {
     // Reward & pet growth. The action-wait steps (SPIN/REVEAL/EXPLORE/SAVE)
     // advance the moment the user really does the thing.
     private fun buildTourSteps(): List<Step> = listOf(
+        // v8.29 — the pet INTRODUCES ITSELF first (centered, no scrim): the
+        // tour never assumes the pet is already a familiar friend.
+        Step(
+            "", "Meet Curio",
+            "Hi! I'm Curio, your spark companion. Follow me and I'll show you the loop: spin, explore, save.",
+            position = Position.CENTER
+        ),
         Step(
             "home", "Welcome to Curio",
             "This is home. Your daily quests, the deck, and everything you've saved all live here.",
@@ -182,10 +189,12 @@ object QuestGuide {
             // v8.16 — copy adapts to the auto-open preference: with it ON
             // (the default since v8.21) the reveal opens by itself; OFF the
             // deck lands quietly and the user taps the card to open it.
+            // v8.29 — wait steps speak directly to the user and HOLD until
+            // the real action happens (the pet reacts when it does).
             if (AppPreferences.autoOpenRevealState)
-                "Give Shuffle a tap. The deck picks something fresh and opens it for you."
+                "Go ahead, spin it! I'll wait right here."
             else
-                "Give Shuffle a tap. The deck picks something fresh for you.",
+                "Go ahead, spin it! The deck picks something fresh for you.",
             waitFor = Wait.SPIN,
             skipLabel = "Skip",
             targetLandmark = "spin"
@@ -193,9 +202,9 @@ object QuestGuide {
         Step(
             "spin", "Open the landed topic",
             if (AppPreferences.autoOpenRevealState)
-                "Nice one! It's already open. Read the teaser, then start exploring."
+                "Nice one! It opened itself. Read the teaser, then start exploring."
             else
-                "Nice one! Tap the card to open the teaser, then start exploring.",
+                "Nice one! Go on, tap the card to open it.",
             waitFor = Wait.REVEAL,
             hold = true,
             position = Position.TOP,
@@ -204,7 +213,9 @@ object QuestGuide {
         ),
         Step(
             "", "Start exploring",
-            "Ready? Tap Start exploring on the topic, or save it for later.",
+            // v8.29 — every wait completion cheers, so the pet visibly
+            // reacts when the user does the thing.
+            "Great! When you're ready, tap Start exploring below.",
             waitFor = Wait.EXPLORE,
             hold = true,
             // v8.15 — the Start exploring button lives in the reveal's
@@ -215,7 +226,7 @@ object QuestGuide {
         ),
         Step(
             "", "Capture what you found",
-            "Back from exploring? Jot it down. Saving a note makes the discovery yours.",
+            "Nice! Go on, save what you found. It'll be yours to keep!",
             waitFor = Wait.SAVE,
             hold = true,
             // v8.12 — the pill floats ABOVE the Save bar so it never covers
@@ -232,7 +243,7 @@ object QuestGuide {
         ),
         Step(
             "quests", "Reward & pet growth",
-            "Every curious act earns XP and feeds your Curio pet. Watch it grow!",
+            "Every curious act earns XP and feeds me. Watch me grow!",
             position = Position.TOP
         ),
         Step(

@@ -84,7 +84,6 @@ import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
-import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
@@ -142,16 +141,10 @@ fun OnboardingScreen(navController: NavController) {
     // first time the intro finishes (once taken or declined, never again —
     // the Quests-page offer is the backstop after that).
     var showTourAsk by rememberSaveable { mutableStateOf(false) }
-    // v8.22 — the pet comes OUT of its flower bed by itself during the
-    // intro (awake, away from home), so it's there to ask about the tour.
-    LaunchedEffect(Unit) {
-        CurioPet.wake()
-        CurioPet.comeOut()
-    }
-    // v8.25 — while the tour-ask dialog is open the floating pet is
-    // suppressed: the dialog shows its own pet sprite, so the pet must not
-    // also wander behind the scrim (a duplicate pet on screen). Reset when
-    // the dialog closes, and on dispose as a safety net.
+    // v8.29 — the pet does NOT appear during the intro: it stays home and
+    // introduces itself inside the guided tour (its first step is a self-
+    // introduction). The suppress-flag below is kept as a safety net in case
+    // anything else wakes it mid-onboarding (e.g. the morning auto-wake).
     LaunchedEffect(showTourAsk) {
         CurioPet.suppressFloating(showTourAsk)
     }
@@ -412,21 +405,11 @@ fun OnboardingScreen(navController: NavController) {
                 },
                 title = { Text("Take a quick tour?") },
                 text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            CurioPetSprite(
-                                stage = CurioPet.currentStage(),
-                                mood = CurioPet.Mood.HAPPY,
-                                spriteSize = 46.dp
-                            )
-                            Text(
-                                "Your pet can walk you through Home, the deck, exploring, and saving your first keepsake. It takes about a minute."
-                            )
-                        }
-                    }
+                    // v8.29 — no pet sprite here: the pet introduces itself
+                    // inside the tour, not before it.
+                    Text(
+                        "A little guide will walk you through Home, the deck, exploring, and saving your first keepsake. It takes about a minute."
+                    )
                 },
                 confirmButton = {
                     TextButton(onClick = {
