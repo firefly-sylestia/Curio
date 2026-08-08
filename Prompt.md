@@ -74,9 +74,21 @@
 - Reviewer (code-reviewer-deepseek-flash) passed after the fixes above; the
   remaining notes (landmark pulse on screen re-entry — cosmetic, accepted).
 
+## CI fix (2nd cycle)
+
+CI caught two compile errors on the first push:
+1. `PetLandmarks.kt` — `positionInWindow()` is an EXTENSION on
+   `LayoutCoordinates`, not a member — added
+   `import androidx.compose.ui.layout.positionInWindow`.
+2. `PetGuideOverlay.kt` (v8.15, never CI-verified) — `BoxWithConstraintsScope`
+   is NOT a `Density` receiver, so the Dp→px calls in the two `Rect(...)` hole
+   constructions and `ringInset` were unresolved. Wrapped them in
+   `with(LocalDensity.current)` (the pattern CurioFloatingPet already uses);
+   the `drawBehind`/`graphicsLayer` toPx calls were already fine.
+
 ## Completion summary
 
 v8.16 shipped: landmark interactions (pet pokes things, things react, movement
 adapts to kind, screen-scoped, zero layout impact, poke cooldown) + Auto-open
 landed topic toggle (Settings → Appearance, default OFF; tour copy + pet
-REVEAL_OPEN line adapt). Pushed to Alpha.
+REVEAL_OPEN line adapt). Pushed to Alpha (CI fixes included).

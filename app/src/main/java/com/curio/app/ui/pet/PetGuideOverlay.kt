@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioPet
@@ -94,10 +95,14 @@ fun PetGuideOverlay(
     heroTopOffset: Dp = 204.dp
 ) {
     val accent = CurioColors.CategoryCoral
+    val density = LocalDensity.current
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         // The pass-through window over the step's target zone (null = the
         // centered final step — no blocking at all).
-        val hole: Rect? = when (position) {
+        // v8.16 CI fix — BoxWithConstraintsScope is NOT a Density receiver,
+        // so the Dp→px conversions need an explicit Density scope.
+        val hole: Rect? = with(density) {
+            when (position) {
             QuestGuide.Position.BOTTOM, QuestGuide.Position.LOWER -> {
                 val holeW = (maxWidth * 0.82f).coerceAtMost(340.dp)
                 val holeH = 170.dp
@@ -120,6 +125,7 @@ fun PetGuideOverlay(
             }
             QuestGuide.Position.CENTER -> null
         }
+        }
 
         // Soft pulsing ring around the window + the arrow's pulse — one
         // shared infinite transition so they breathe in sync.
@@ -137,7 +143,7 @@ fun PetGuideOverlay(
         // a pulsing accent ring around it; consumes touches only OUTSIDE the
         // window, so taps inside reach the real button underneath.
         if (hole != null) {
-            val ringInset = 5.dp.toPx()
+            val ringInset = with(density) { 5.dp.toPx() }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
