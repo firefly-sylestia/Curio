@@ -1,4 +1,33 @@
-# Request — Pet Designer Phase 4 (DONE, NOT COMMITTED — user wants one commit after the full redesign)
+# Request — Pet Designer v8.49 studio upgrade (DONE — committed & pushed 27f4e01 for phases 2-4, then 33a5cxx for the upgrade)
+
+## v8.49 — studio UI upgrade (DONE)
+
+- User: "upgrade the ui… switcher UI from the universal editor screen with per
+  fps… drawer… chips with a dialog box with preview of things with name tag…
+  blueprint being the pixels darker with shades and non color changing… bottom
+  nav save and reset needs upgrade too".
+- **Draw & switch strip** (sticky header on the Animations page): category chips
+  [Body & pose][Faces][Details][Animations] with active highlight; replaces the
+  old Animations TargetPicker rows (Actions page picker unchanged). Tapping a
+  chip opens a **preview picker dialog** (`DrawPickerDialog`) of name-tagged
+  cards: body = standing/sleeping sprites + palette swatch; faces = 7 mood
+  sprites; details = mini pixel-grid thumbs per layer; animations = 15 looping
+  previews. Picking loads the target into the editor below (the drawing canvas
+  stays the main part).
+- **Timeline per-FPS**: per-frame fps slider (1–20) replaces the ms slider
+  (readout "Frame 2 of 4 · 8 fps · 125 ms"); global playback-speed pills
+  0.5×/1×/2× (`speed` state scales the preview delay only, saved timing
+  untouched). Transport upgraded to circular icon buttons
+  (ChevronLeft/PlayArrow-Pause/ChevronRight) via `TransportIconButton`.
+- **Blueprint**: now renders as a darker, locked reference
+  (`lerp(color, Black, 0.35f)` at 0.9 alpha) that never changes color when
+  painted.
+- **Save footer upgrade**: `SaveArea` gains a `dirty` indicator (dot +
+  "Unsaved changes" when `design != initialDesign`, tracked via a new
+  `initialDesign` snapshot) and icon+label pills Undo/Redo/Reset
+  (`FooterAction`; new CurioIcons.Undo/Redo glyphs).
+
+## Phase 4 (DONE — committed in 27f4e01)
 
 ## Phase 4 — Animations gallery + frame timeline (DONE)
 

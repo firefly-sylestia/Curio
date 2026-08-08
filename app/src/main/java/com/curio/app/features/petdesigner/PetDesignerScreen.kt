@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
@@ -200,11 +201,14 @@ fun PetDesignerScreen(navController: NavController) {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val savedText = AppPreferences.petDesignState
+    // v8.49 — the design as it was when the editor opened; used for the
+    // "Unsaved changes" indicator in the footer.
+    val initialDesign = remember(savedText) {
+        savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) } ?: PetDesign.DEFAULT
+    }
     // Working copy — starts from the saved design (or default), edited live.
     var design by remember(savedText) {
-        mutableStateOf(
-            savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) } ?: PetDesign.DEFAULT
-        )
+        mutableStateOf(initialDesign)
     }
     // Which grid is being edited: "body" or "curled".
     var editingGrid by rememberSaveable { mutableStateOf("body") }
@@ -240,6 +244,8 @@ fun PetDesignerScreen(navController: NavController) {
     }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
+    // v8.49 — which preview picker dialog is open (body / faces / details / animations).
+    var pickerCategory by remember { mutableStateOf<String?>(null) }
     // v8.47 — recent colors for the professional color picker (persisted, capped at 12).
     var recentColors by remember { mutableStateOf(AppPreferences.getPetRecentColors(context)) }
     fun rememberColor(hex: String) {
@@ -415,6 +421,15 @@ fun PetDesignerScreen(navController: NavController) {
                     selected = target,
                     onSelect = ::selectTarget
                 )
+            }
+            // ── Sticky "Draw & switch" strip (Animations page, v8.49) ──
+            stickyHeader {
+                if (page == PetDesignerPage.ANIMATIONS) {
+                    DrawPickerStrip(
+                        selected = target,
+                        onOpenPicker = { pickerCategory = it }
+                    )
+                }
             }
             // ── One-tap personality presets (Actions page landing) ────
             item {
@@ -1166,6 +1181,7 @@ fun PetDesignerScreen(navController: NavController) {
             // ── Save area — always visible below the editor ──────────
             SaveArea(
                 design = design,
+                dirty = design != initialDesign,
                 toast = toast,
                 canUndo = undoStack.isNotEmpty(),
                 canRedo = redoStack.isNotEmpty(),
@@ -1195,6 +1211,22 @@ fun PetDesignerScreen(navController: NavController) {
             onBack = { navController.popBackStack() },
             compact = wide
         )
+
+        // ── Draw & switch preview picker overlay (v8.49) ─────────────
+        pickerCategory?.let { category ->
+            DialogScrim(onDismiss = { pickerCategory = null }) {
+                DrawPickerDialog(
+                    category = category,
+                    design = design,
+                    selected = target,
+                    onSelect = { t ->
+                        selectTarget(t)
+                        pickerCategory = null
+                    },
+                    onDismiss = { pickerCategory = null }
+                )
+            }
+        }
 
         // ── Color editor overlay ─────────────────────────────────────
         editingColorKey?.let { key ->
@@ -1329,43 +1361,18 @@ private fun TargetPicker(
     onSelect: (PetEditorTarget) -> Unit
 ) {
     if (page == PetDesignerPage.SETTINGS) return
+    // v8.49 — the Animations page is picked via the sticky "Draw & switch"
+    // strip + preview dialog instead of this chip list (the drawing canvas
+    // below is the main part, the strip lives above it).
+    if (page == PetDesignerPage.ANIMATIONS) return
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        CurioSectionLabel(
-            if (page == PetDesignerPage.ANIMATIONS) "Choose what to edit" else "Choose a reaction to edit"
+        CurioSectionLabel("Choose a reaction to edit")
+        TargetChipRow(
+            label = "Reactions",
+            targets = PetReactionEvents.ALL.map { PetEditorTarget.Reaction(it) },
+            selected = selected,
+            onSelect = onSelect
         )
-        if (page == PetDesignerPage.ANIMATIONS) {
-            TargetChipRow(
-                label = "Animations",
-                targets = BUILTIN_ANIMATIONS.map { PetEditorTarget.Animation(it.id) },
-                selected = selected,
-                onSelect = onSelect
-            )
-            TargetChipRow(
-                label = "Body & pose",
-                targets = listOf(PetEditorTarget.Body, PetEditorTarget.CurledPose, PetEditorTarget.Colors),
-                selected = selected,
-                onSelect = onSelect
-            )
-            TargetChipRow(
-                label = "Detail layers",
-                targets = PetDesign.DETAIL_KEYS.map { PetEditorTarget.DetailLayer(it) },
-                selected = selected,
-                onSelect = onSelect
-            )
-            TargetChipRow(
-                label = "Faces",
-                targets = PetFaceMoods.ALL.map { PetEditorTarget.Face(it) },
-                selected = selected,
-                onSelect = onSelect
-            )
-        } else {
-            TargetChipRow(
-                label = "Reactions",
-                targets = PetReactionEvents.ALL.map { PetEditorTarget.Reaction(it) },
-                selected = selected,
-                onSelect = onSelect
-            )
-        }
     }
 }
 
@@ -1432,6 +1439,7 @@ private fun TargetChip(
 @Composable
 private fun SaveArea(
     design: PetDesign,
+    dirty: Boolean,
     toast: String?,
     canUndo: Boolean,
     canRedo: Boolean,
@@ -1455,18 +1463,36 @@ private fun SaveArea(
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                SmallAction("Undo", canUndo) { onUndo() }
-                SmallAction("Redo", canRedo) { onRedo() }
-                SmallAction("Reset changes", design.isCustom) { onReset() }
-            }
-            if (toast != null) {
-                Text(
-                    toast,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FooterAction("Undo", CurioIcons.Undo, canUndo) { onUndo() }
+                    FooterAction("Redo", CurioIcons.Redo, canRedo) { onRedo() }
+                    FooterAction("Reset", CurioIcons.Refresh, design.isCustom) { onReset() }
+                }
+                if (dirty) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            "Unsaved changes",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else if (toast != null) {
+                    Text(
+                        toast,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
@@ -2481,13 +2507,17 @@ private fun AnimationTimelineEditor(
     var playing by rememberSaveable(animationId) { mutableStateOf(true) }
     var selectedFrame by rememberSaveable(animationId) { mutableStateOf(0) }
     var onionSkin by rememberSaveable { mutableStateOf(false) }
+    // v8.49 — global preview speed (0.5× / 1× / 2×); never touches saved timing.
+    var speed by rememberSaveable(animationId) { mutableStateOf(1f) }
     var frames by remember(animationId) {
         mutableStateOf(design.animations[animationId]?.frames ?: base.frames)
     }
-    LaunchedEffect(animationId, playing, frames) {
+    LaunchedEffect(animationId, playing, speed, frames) {
         if (!playing || frames.isEmpty()) return@LaunchedEffect
         while (true) {
-            delay(frames.getOrNull(selectedFrame)?.durationMs?.toLong() ?: 180L)
+            // Float division first — speed.toLong() would truncate 0.5f to 0
+            // and divide by zero (crash) on the 0.5× pill.
+            delay(((frames.getOrNull(selectedFrame)?.durationMs ?: 180) / speed).toLong())
             selectedFrame = (selectedFrame + 1) % frames.size
         }
     }
@@ -2532,38 +2562,60 @@ private fun AnimationTimelineEditor(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SmallAction(if (playing) "Pause" else "Play") {
-                if (!playing && frames.isNotEmpty()) selectedFrame = selectedFrame % frames.size
-                playing = !playing
-            }
-            Spacer(Modifier.width(8.dp))
-            SmallAction("◀ Frame", enabled = frames.isNotEmpty()) {
+            TransportIconButton(CurioIcons.ChevronLeft, "Previous frame", enabled = frames.isNotEmpty()) {
                 playing = false
                 selectedFrame = (selectedFrame - 1 + frames.size) % frames.size
             }
             Spacer(Modifier.width(8.dp))
-            SmallAction("Frame ▶", enabled = frames.isNotEmpty()) {
+            TransportIconButton(
+                icon = if (playing) CurioIcons.Pause else CurioIcons.PlayArrow,
+                contentDescription = if (playing) "Pause" else "Play"
+            ) {
+                if (!playing && frames.isNotEmpty()) selectedFrame = selectedFrame % frames.size
+                playing = !playing
+            }
+            Spacer(Modifier.width(8.dp))
+            TransportIconButton(CurioIcons.ChevronRight, "Next frame", enabled = frames.isNotEmpty()) {
                 playing = false
                 selectedFrame = (selectedFrame + 1) % frames.size
             }
+            Spacer(Modifier.width(14.dp))
+            listOf(0.5f, 1f, 2f).forEach { s ->
+                SpeedChip(
+                    label = when (s) {
+                        0.5f -> "0.5×"
+                        1f -> "1×"
+                        else -> "2×"
+                    },
+                    selected = speed == s
+                ) { speed = s }
+                Spacer(Modifier.width(6.dp))
+            }
         }
         Spacer(Modifier.height(12.dp))
+        val fps = (1000f / shown.durationMs).coerceIn(1f, 20f)
         Text(
-            "Frame ${selectedFrame + 1} of ${frames.size} — ${shown.durationMs} ms",
+            "Frame ${selectedFrame + 1} of ${frames.size} · ${kotlin.math.roundToInt(fps)} fps · ${shown.durationMs} ms",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
         )
         Slider(
-            value = shown.durationMs.toFloat().coerceIn(60f, 1000f),
-            onValueChange = { ms ->
+            value = fps,
+            onValueChange = { f ->
                 // Dragging the timing pauses playback so the loop doesn't
                 // advance the frame under the finger.
                 if (playing) playing = false
-                frames = frames.mapIndexed { i, f ->
-                    if (i == selectedFrame) f.copy(durationMs = ms.toInt()) else f
+                val ms = (1000f / f).toInt().coerceIn(50, 1000)
+                frames = frames.mapIndexed { i, fr ->
+                    if (i == selectedFrame) fr.copy(durationMs = ms) else fr
                 }
             },
             onValueChangeFinished = { commit(frames) },
-            valueRange = 60f..1000f
+            valueRange = 1f..20f
+        )
+        Text(
+            "Frame speed (fps) — higher = snappier",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(8.dp))
         Row(
@@ -2631,6 +2683,388 @@ private fun FrameThumb(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                 ),
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** v8.49 — the sticky category strip above the drawing canvas. */
+@Composable
+private fun DrawPickerStrip(
+    selected: PetEditorTarget?,
+    onOpenPicker: (String) -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(vertical = 6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CurioIcon(
+                    name = CurioIcons.Palette,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 16.dp
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    "Draw & switch",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                StripChip(
+                    "Body & pose",
+                    selected is PetEditorTarget.Body ||
+                        selected is PetEditorTarget.CurledPose || selected is PetEditorTarget.Colors
+                ) { onOpenPicker("body") }
+                StripChip("Faces", selected is PetEditorTarget.Face) { onOpenPicker("faces") }
+                StripChip("Details", selected is PetEditorTarget.DetailLayer) { onOpenPicker("details") }
+                StripChip("Animations", selected is PetEditorTarget.Animation) { onOpenPicker("animations") }
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Tap a chip to browse previews — pick one and it loads here for editing",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** v8.49 — one category chip in the Draw & switch strip. */
+@Composable
+private fun StripChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        onClick = onClick
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
+            ),
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+        )
+    }
+}
+
+/** v8.49 — the preview picker dialog: name-tagged cards per category. */
+@Composable
+private fun DrawPickerDialog(
+    category: String,
+    design: PetDesign,
+    selected: PetEditorTarget?,
+    onSelect: (PetEditorTarget) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(18.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text(
+            when (category) {
+                "body" -> "Pick a pose or the palette"
+                "faces" -> "Pick a face to draw"
+                "details" -> "Pick a detail layer"
+                else -> "Pick an animation"
+            },
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+        )
+        Spacer(Modifier.height(12.dp))
+        when (category) {
+            "body" -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    PickerCard(
+                        title = "Body",
+                        subtitle = "Standing pose",
+                        selected = selected is PetEditorTarget.Body,
+                        modifier = Modifier.weight(1f),
+                        preview = {
+                            CurioPetSprite(
+                                stage = CurioPet.currentStage(),
+                                mood = CurioPet.Mood.HAPPY,
+                                spriteSize = 46.dp,
+                                design = design
+                            )
+                        },
+                        onClick = { onSelect(PetEditorTarget.Body) }
+                    )
+                    PickerCard(
+                        title = "Curled pose",
+                        subtitle = "Asleep",
+                        selected = selected is PetEditorTarget.CurledPose,
+                        modifier = Modifier.weight(1f),
+                        preview = {
+                            CurioPetSprite(
+                                stage = CurioPet.currentStage(),
+                                mood = CurioPet.Mood.SLEEPY,
+                                spriteSize = 46.dp,
+                                design = design
+                            )
+                        },
+                        onClick = { onSelect(PetEditorTarget.CurledPose) }
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                PickerCard(
+                    title = "Colors",
+                    subtitle = "Palette & custom paint",
+                    selected = selected is PetEditorTarget.Colors,
+                    modifier = Modifier.fillMaxWidth(),
+                    preview = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            PALETTE_SLOTS.take(8).forEach { slot ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(hexColor(design.colorOf(slot.key)))
+                                )
+                            }
+                        }
+                    },
+                    onClick = { onSelect(PetEditorTarget.Colors) }
+                )
+            }
+            "faces" -> {
+                PetFaceMoods.ALL.chunked(2).forEach { rowMoods ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowMoods.forEach { mood ->
+                            PickerCard(
+                                title = PetFaceMoods.label(mood),
+                                subtitle = "Face",
+                                selected = selected is PetEditorTarget.Face && selected.mood == mood,
+                                modifier = Modifier.weight(1f),
+                                preview = {
+                                    CurioPetSprite(
+                                        stage = CurioPet.currentStage(),
+                                        mood = runCatching { CurioPet.Mood.valueOf(mood) }
+                                            .getOrDefault(CurioPet.Mood.HAPPY),
+                                        spriteSize = 40.dp,
+                                        design = design
+                                    )
+                                },
+                                onClick = { onSelect(PetEditorTarget.Face(mood)) }
+                            )
+                        }
+                        if (rowMoods.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+            "details" -> {
+                PetDesign.DETAIL_KEYS.chunked(2).forEach { rowKeys ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowKeys.forEach { key ->
+                            PickerCard(
+                                title = key.replaceFirstChar { it.uppercase() },
+                                subtitle = "Drawn layer",
+                                selected = selected is PetEditorTarget.DetailLayer && selected.key == key,
+                                modifier = Modifier.weight(1f),
+                                preview = {
+                                    MiniPixelThumb(rows = effectiveDetailRows(design, key), design = design)
+                                },
+                                onClick = { onSelect(PetEditorTarget.DetailLayer(key)) }
+                            )
+                        }
+                        if (rowKeys.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+            else -> {
+                BUILTIN_ANIMATIONS.chunked(2).forEach { rowAnims ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowAnims.forEach { anim ->
+                            PickerCard(
+                                title = anim.name,
+                                subtitle = "${anim.frames.size} frames",
+                                selected = selected is PetEditorTarget.Animation && selected.animationId == anim.id,
+                                modifier = Modifier.weight(1f),
+                                preview = {
+                                    PetAnimationPreview(animation = anim, design = design, spriteSize = 40.dp)
+                                },
+                                onClick = { onSelect(PetEditorTarget.Animation(anim.id)) }
+                            )
+                        }
+                        if (rowAnims.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            SmallAction("Close") { onDismiss() }
+        }
+    }
+}
+
+/** v8.49 — a name-tagged preview card in the picker dialog. */
+@Composable
+private fun PickerCard(
+    title: String,
+    subtitle: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    preview: @Composable () -> Unit,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            1.dp,
+            if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            preview()
+            Spacer(Modifier.height(6.dp))
+            Text(
+                title,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/** v8.49 — a tiny pixel-grid thumbnail for detail layers. */
+@Composable
+private fun MiniPixelThumb(rows: List<String>, design: PetDesign) {
+    // Full rows — truncating to 24 would crop 32×32 detail layers.
+    val cell = 3.dp
+    Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+        rows.forEach { line ->
+            Row(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
+                line.forEach { ch ->
+                    Box(
+                        modifier = Modifier
+                            .size(cell)
+                            .background(
+                                if (ch == '.') MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+                                else hexColor(design.colorOf(ch))
+                            )
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** v8.49 — circular icon transport button (play / step). */
+@Composable
+private fun TransportIconButton(
+    icon: String,
+    contentDescription: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = CircleShape,
+        color = if (enabled) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.size(42.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = icon,
+                contentDescription = contentDescription,
+                tint = if (enabled) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 20.dp
+            )
+        }
+    }
+}
+
+/** v8.49 — playback speed pill (0.5× / 1× / 2×). */
+@Composable
+private fun SpeedChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        onClick = onClick
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+            ),
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+        )
+    }
+}
+
+/** v8.49 — icon + label action pill for the save footer. */
+@Composable
+private fun FooterAction(label: String, icon: String, enabled: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (enabled) MaterialTheme.colorScheme.surfaceVariant
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        onClick = onClick,
+        enabled = enabled
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 14.dp
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (enabled) FontWeight.Bold else FontWeight.Medium
+                ),
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -3242,7 +3676,9 @@ private fun PixelGrid(
                                 .background(
                                     when {
                                         filled -> hexColor(design.colorOf(ch))
-                                        blueprintOnly -> hexColor(design.colorOf(blueprintKey)).copy(alpha = 0.28f)
+                                        // v8.49 — blueprint renders as a darker, locked
+                                        // reference: it never changes color when painted.
+                                        blueprintOnly -> lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
                                         else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
                                     }
                                 )
