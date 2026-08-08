@@ -115,7 +115,7 @@ private val PALETTE_SLOTS = listOf(
 private enum class PaintTool { BRUSH, FILL, ERASER, EYEDROPPER }
 
 /** Focused designer tabs keep the canvas and its less-used options from becoming one long scroll. */
-private enum class EditorTab { PREVIEW, BODY, FACES, COLORS, TOOLS }
+private enum class EditorTab { PREVIEW, BODY, DETAILS, FACES, COLORS, TOOLS }
 
 /** A curated palette of pleasant hex colors for the quick-pick swatches. */
 private val QUICK_HEX = listOf(
@@ -204,6 +204,8 @@ fun PetDesignerScreen(navController: NavController) {
     // Explicitly armed drawing mode: off means the canvas is safe to scroll.
     var drawMode by rememberSaveable { mutableStateOf(false) }
     var editorTab by rememberSaveable { mutableStateOf(EditorTab.PREVIEW) }
+    // Detail layers share the same protected canvas and palette as body art.
+    var detailLayer by rememberSaveable { mutableStateOf("tail") }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
     // When non-null, the import/export text dialog is open with this draft.
@@ -251,13 +253,30 @@ fun PetDesignerScreen(navController: NavController) {
     }
 
     // v8.35 — applies the active tool at a grid cell.
-    fun applyTool(row: Int, col: Int) {
+    fun applyTool(row: Int, col: Int, targetGrid: String = editingGrid) {
+        val grid = targetGrid
         when (paintTool) {
-            PaintTool.BRUSH -> design = design.withPixel(editingGrid, row, col, paintKey)
-            PaintTool.FILL -> design = design.withFloodFill(editingGrid, row, col, paintKey)
-            PaintTool.ERASER -> design = design.withPixel(editingGrid, row, col, '.')
+            PaintTool.BRUSH -> {
+                design = if (grid.startsWith("detail:")) {
+                    design.withDetailPixel(grid.removePrefix("detail:"), row, col, paintKey)
+                } else design.withPixel(grid, row, col, paintKey)
+            }
+            PaintTool.FILL -> {
+                design = if (grid.startsWith("detail:")) {
+                    design.withDetailFloodFill(grid.removePrefix("detail:"), row, col, paintKey)
+                } else design.withFloodFill(grid, row, col, paintKey)
+            }
+            PaintTool.ERASER -> {
+                design = if (grid.startsWith("detail:")) {
+                    design.withDetailPixel(grid.removePrefix("detail:"), row, col, '.')
+                } else design.withPixel(grid, row, col, '.')
+            }
             PaintTool.EYEDROPPER -> {
-                val rows = if (editingGrid == "curled") design.curledRows else design.bodyRows
+                val rows = when {
+                    grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
+                    grid == "curled" -> design.curledRows
+                    else -> design.bodyRows
+                }
                 val ch = rows.getOrNull(row)?.getOrNull(col) ?: '.'
                 if (ch != '.') {
                     paintKey = ch
@@ -427,6 +446,103 @@ fun PetDesignerScreen(navController: NavController) {
                             val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
                             design = design.withGrid(editingGrid, blank)
                         }
+                    }
+                }
+            }
+
+            // ── Drawable details editor ───────────────────────────────
+            item {
+                if (editorTab == EditorTab.DETAILS) SectionCard(
+                    "Draw every detail",
+                    "Paint Curie's tail, accessories, effects, or antenna on separate layers"
+                ) {
+                    Text(
+                        "Detail layer",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        PetDesign.DETAIL_KEYS.forEach { layer ->
+                            ChoiceChip(
+                                label = layer.replaceFirstChar { it.uppercase() },
+                                selected = detailLayer == layer,
+                                onClick = { detailLayer = layer }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Draw mode protects scrolling. Empty cells are transparent; your layer is placed over Curie's existing motion art.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    DrawModeRow(enabled = drawMode, onToggle = { drawMode = it })
+                    Spacer(Modifier.height(10.dp))
+                    QuickPaletteRow(
+                        selectedKey = paintKey,
+                        design = design,
+                        onSelect = {
+                            paintKey = it
+                            paintTool = PaintTool.BRUSH
+                        },
+                        onEdit = { editingColorKey = it }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    PixelGrid(
+                        design = design,
+                        grid = "detail:$detailLayer",
+                        tool = paintTool,
+                        drawMode = drawMode,
+                        onTool = { row, col, continuous ->
+                            if (paintTool == PaintTool.FILL || paintTool == PaintTool.EYEDROPPER) {
+                                if (!continuous) applyTool(row, col, "detail:$detailLayer")
+                            } else {
+                                applyTool(row, col, "detail:$detailLayer")
+                            }
+                        }
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        PaintTool.entries.forEach { tool ->
+                            ToolChip(tool = tool, selected = paintTool == tool, onClick = { paintTool = tool })
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Procedural elements",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Text(
+                        "Turn off only the generated part you want to replace with your drawing. The base antenna pixels remain editable on the Body canvas.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    PetDesign.PROCEDURAL_KEYS.forEach { element ->
+                        ToggleRow(
+                            label = if (element == "antenna") "Generated antenna extras" else "Generated ${element.replaceFirstChar { it.uppercase() }}",
+                            checked = design.isProceduralEnabled(element),
+                            onCheckedChange = { enabled ->
+                                design = design.withProceduralEnabled(element, enabled)
+                            }
+                        )
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    SmallAction("Clear ${detailLayer} layer", enabled = true) {
+                        design = design.withDetailGrid(
+                            detailLayer,
+                            List(design.gridSize) { ".".repeat(design.gridSize) }
+                        )
                     }
                 }
             }
@@ -717,10 +833,16 @@ fun PetDesignerScreen(navController: NavController) {
                             design = design.withGrid("body", upscalePreset(PetDesign.DEFAULT_BODY_16, design.gridSize))
                         }
                         SmallAction("Robot", enabled = true) {
-                            design = design.withGrid("body", upscalePreset(ROBOT_BODY, design.gridSize))
+                            design = design.copy(
+                                bodyRows = upscalePreset(ROBOT_BODY, design.gridSize),
+                                curledRows = upscalePreset(ROBOT_CURLED, design.gridSize)
+                            )
                         }
                         SmallAction("Ghost", enabled = true) {
-                            design = design.withGrid("body", upscalePreset(GHOST_BODY, design.gridSize))
+                            design = design.copy(
+                                bodyRows = upscalePreset(GHOST_BODY, design.gridSize),
+                                curledRows = upscalePreset(GHOST_CURLED, design.gridSize)
+                            )
                         }
                     }
                     Spacer(Modifier.height(8.dp))
@@ -945,24 +1067,36 @@ private fun upscalePreset(rows: List<String>, gridSize: Int): List<String> =
  * shareable FileProvider URI (cache/share, which file_paths.xml exposes).
  */
 private fun exportPngUri(context: android.content.Context, design: PetDesign, grid: String): android.net.Uri? {
-    val rows = if (grid == "curled") design.curledRows else design.bodyRows
+    val rows = when {
+        grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
+        grid == "curled" -> design.curledRows
+        else -> design.bodyRows
+    }
     val n = design.gridSize
     val scale = 12
     val bitmap = Bitmap.createBitmap(n * scale, n * scale, Bitmap.Config.ARGB_8888)
     val canvas = android.graphics.Canvas(bitmap)
     val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
-    rows.forEachIndexed { r, line ->
-        line.forEachIndexed { c, ch ->
-            val hex = design.colorFor(ch) ?: return@forEachIndexed
-            val color = runCatching { android.graphics.Color.parseColor("#$hex") }.getOrDefault(0xFF4A3426.toInt())
-            paint.color = color
-            canvas.drawRect(
-                c * scale.toFloat(), r * scale.toFloat(),
-                (c + 1) * scale.toFloat(), (r + 1) * scale.toFloat(),
-                paint
-            )
+    fun paintRows(source: List<String>) {
+        source.forEachIndexed { r, line ->
+            line.forEachIndexed { c, ch ->
+                val hex = design.colorFor(ch) ?: return@forEachIndexed
+                val color = runCatching { android.graphics.Color.parseColor("#$hex") }.getOrDefault(0xFF4A3426.toInt())
+                paint.color = color
+                canvas.drawRect(
+                    c * scale.toFloat(), r * scale.toFloat(),
+                    (c + 1) * scale.toFloat(), (r + 1) * scale.toFloat(),
+                    paint
+                )
+            }
         }
     }
+    paintRows(rows)
+    // Include every user-authored detail layer in PNG exports, not just the
+    // base pose. Transparent cells remain transparent and preserve the
+    // designer's layer artwork when shared outside Curio.
+    PetDesign.DETAIL_KEYS.forEach { layer -> paintRows(design.detailFor(layer)) }
+
     val dir = File(context.cacheDir, "share")
     if (!dir.exists()) dir.mkdirs()
     val file = File(dir, "curie_${grid}_${n}x$n.png")
@@ -1780,6 +1914,7 @@ private fun EditorTabRow(selected: EditorTab, onSelect: (EditorTab) -> Unit) {
             val label = when (tab) {
                 EditorTab.PREVIEW -> "Preview"
                 EditorTab.BODY -> "Body"
+                EditorTab.DETAILS -> "Details"
                 EditorTab.FACES -> "Faces"
                 EditorTab.COLORS -> "Colors"
                 EditorTab.TOOLS -> "Tools"
@@ -1945,7 +2080,11 @@ private fun PixelGrid(
 ) {
     val gridSize = design.gridSize
     val latestOnTool by rememberUpdatedState(onTool)
-    val rows = if (grid == "curled") design.curledRows else design.bodyRows
+    val rows = when {
+        grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
+        grid == "curled" -> design.curledRows
+        else -> design.bodyRows
+    }
     var gestures = Modifier
     if (drawMode) {
         gestures = gestures
@@ -2156,42 +2295,82 @@ private fun SaveButton(label: String, onClick: () -> Unit) {
     }
 }
 
-/** A square robot preset for the shapes row. */
+/** Detailed mechanical preset: panel seams, visor, and articulated feet. */
 private val ROBOT_BODY: List<String> = listOf(
-    ".......GG.......",
-    "......ooooo.....",
-    ".....obbbbbo....",
-    "....obbbbbbbbo..",
-    "...obbbbbbbbbbo.",
-    "..obbbbbbbbbbbo.",
-    ".obbbbbbbbbbbbo.",
-    ".obbbbbbbbbbbbo.",
-    ".obbbbbbbbbBBbo.",
-    ".obbbbbbbbbBBbo.",
-    ".obbbbbbbbbBBbo.",
-    ".osssssssssssso.",
-    ".oSSssssssssSSo.",
+    "......GGGG......",
+    ".....oGGGGo.....",
+    "....ooGGGGoo....",
+    "...oBBBBBBBBo...",
+    "..oBbbbbbbbbBo..",
+    ".oBbbbbbbbbbbBo.",
+    "oBbbbbbbbbbbbbBo",
+    "oBbbCbbbbCbbbbBo",
+    "oBbbCCCCCCCCbbBo",
+    "oBbbCbbbbCbbbbBo",
+    "oBbbbbbbbbbbbbBo",
+    ".oBbbbbbbbbbbBo.",
+    "..oSSssssssSSo..",
     "..oo..oooo..oo..",
     "..oo..oooo..oo..",
     "................"
 )
 
-/** A round ghost preset for the shapes row. */
+/** Detailed ghost preset: soft windows, spectral bands, and a scalloped hem. */
 private val GHOST_BODY: List<String> = listOf(
-    ".......GG.......",
-    "......ooooo.....",
-    ".....obbbbbo....",
-    "....obbbbbbbbo..",
-    "...obbbbbbbbbbo.",
-    "..obbbbbbbbbbbbo",
-    "..obbbbbbbbbbbbo",
-    "..obbbbbbbbbbbbo",
-    "..obbbbbbbbbbbbo",
-    "..obbbbbbbbbbbbo",
-    "..obbbbbbbbbBBbo",
-    "..obbbbbbbbbBBbo",
-    "..osssssssssssso",
+    "......GGGG......",
+    ".....oGGGGo.....",
+    "....ooGGGGoo....",
+    "...oBBBBBBBBo...",
+    "..oBbbbbbbbbBo..",
+    ".oBbbbbbbbbbbBo.",
+    "oBbbbbbbbbbbbbBo",
+    "oBbbbbbbbbbbbbBo",
+    "oBbbbDbbbbDbbbBo",
+    "oBbbbbbbbbbbbbBo",
+    "oBbbbbbbbbbbbbBo",
+    ".oBbbbbbbbbbbBo.",
     "..oSSssssssSSo..",
-    "..oo........oo..",
-    "..oo........oo.."
+    "..oooooooooooo..",
+    "..oo..oo..oo..o.",
+    "...oo......oo..."
 )
+
+/** Robot sleep pose: compact head, visor, and folded mechanical feet. */
+private val ROBOT_CURLED: List<String> = listOf(
+    "......GGGG......",
+    ".....oGGGGo.....",
+    "....oBBBBBo.....",
+    "...oBbbbbBbo....",
+    "..oBbbbbbbbBo...",
+    ".oBbbCCCCbbBo...",
+    "oBbbbbbbbbbbBo..",
+    "oBbbbbbbbbbbBo..",
+    ".oBbbbbbbbbBo...",
+    "..oSSssssSSo....",
+    "...oBBBBBBo.....",
+    "....oBBBBBo.....",
+    ".....oooo.......",
+    "................",
+    "................",
+    "................"
+).map { it.padEnd(16, '.') }
+
+/** Ghost sleep pose: a hovering, scalloped spectral curl with a soft window. */
+private val GHOST_CURLED: List<String> = listOf(
+    "......GGGG......",
+    ".....oGGGGo.....",
+    "....oBBBBBo.....",
+    "...oBbbbbBbo....",
+    "..oBbbbbbbbBo...",
+    ".oBbbbDDbbbBo...",
+    "oBbbbbbbbbbbBo..",
+    "oBbbbbbbbbbbBo..",
+    ".oBbbbbbbbbBo...",
+    "..oSSssssSSo....",
+    "...oooooooo.....",
+    "....oo..oo......",
+    "...oo....oo.....",
+    "................",
+    "................",
+    "................"
+).map { it.padEnd(16, '.') }

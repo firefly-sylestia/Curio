@@ -1,40 +1,41 @@
-# Request — Curie Pet Designer drawn faces, focused editing, and easier colors (v8.42)
+# Request — Curie drawable details, improved Robot/Ghost presets, and full visual editing (v8.43)
 
 ## Completed
 
-- Added backward-compatible transparent pixel face overlays to `PetFace`.
-  Existing saved designs without `grid=` continue using procedural eyes,
-  mouth, blush, and sparkles as before.
-- Added mood and reaction face overlay editing in the Pet designer. Drawn
-  overlays are serialized URL-encoded in existing `face=` / `react=` config
-  lines and resized with the body canvas.
-- Updated `CurioPetSprite` to render custom face overlays while preserving
-  the body, motion, tail, accessories, sparkles, and sleep pose. Procedural
-  face art is suppressed only when a custom overlay exists.
-- Refactored Pet designer navigation into focused Preview, Body, Faces,
-  Colors, and Tools tabs so editing options no longer form one long scroll.
-- Added explicit Draw mode. When off, body and face canvases do not consume
-  scroll gestures; when on, brush/fill/erase/eyedropper gestures are active.
-- Docked a quick body palette beside the canvas and retained the full palette
-  in Colors. Existing hex + HSL picker remains available via palette editing.
-- Face eyedroppers return to Brush mode after selecting a color.
-- Stabilized body and face pointer-input handlers with updated callbacks, so
-  recomposition during a drag no longer cancels continuous painting.
-- Empty custom grid values no longer suppress legacy procedural faces.
+- Added four optional transparent detail layers to `PetDesign`: `tail`,
+  `accessories`, `effects`, and `antenna`.
+- Added per-element procedural visibility settings for tail, belly,
+  accessories, effects, and antenna extras. Missing settings remain enabled,
+  preserving every older saved design.
+- Added URL-encoded `detail=` and `procedural=` lines to the text format;
+  parsing, grid resizing, and old-format fallback remain tolerant.
+- Added a focused Details tab to the Pet designer. It reuses the protected
+  Draw mode, brush/fill/erase/eyedropper tools, quick palette, clear-layer
+  action, and 24/32-pixel canvas behavior.
+- Custom detail layers render as the final visual layer, so users can draw
+  over generated art without changing Curie's existing motion or animation.
+- PNG export now includes all four custom detail layers.
+- Improved Robot and Ghost presets with detailed panel/window pixel art and
+  dedicated, validated curled asleep poses.
+- Preset body and curled grids are applied together so Sleepy preview matches
+  the chosen Robot/Ghost shape.
+- Clarified that the antenna toggle controls generated antenna extras (glint,
+  nightcap, thinking mark); the base antenna remains directly editable in the
+  Body canvas.
 
-## Files changed
+## Compatibility
 
-- `app/src/main/java/com/curio/app/data/PetDesign.kt`
-- `app/src/main/java/com/curio/app/features/petdesigner/PetDesignerScreen.kt`
-- `app/src/main/java/com/curio/app/ui/pet/CurioPetSprite.kt`
-- `Prompt.md`
+- Existing saved designs without `detail=` or `procedural=` lines use the
+  previous procedural behavior unchanged.
+- Existing positional `PetDesign` construction remains source-compatible via
+  default values for the new fields.
 
 ## Validation
 
-- Kotlin delimiter balance passed for all three changed Kotlin files.
-- `git diff --check` passed.
-- Static review checked serialization fallback, custom rendering, draw-mode
-  gesture protection, tab helper signatures, reaction eyedropper state, and
-  pointer-input stability.
-- No Gradle command was run because repository DOX rules forbid local Android
-  builds; CI on push remains the compile gate.
+- Changed Kotlin files pass delimiter-balance checks.
+- Robot/Ghost body and curled presets each contain 16 rows of 16 characters.
+- `git diff --check` passes.
+- Static blocker review found no remaining compile blocker; CI remains the
+  final Android compile gate.
+- No Gradle build, compile, lint, or test command was run because repository
+  DOX rules forbid local Android build commands in this environment.

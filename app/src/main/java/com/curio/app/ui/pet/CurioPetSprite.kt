@@ -386,7 +386,8 @@ fun CurioPetSprite(
     ) {
         // One motion layer carries the aura, the bob/hop/wiggle/lean and the
         // breathing + squish scales so the glow always moves with the sprite.
-        val auraOn = stage == CurioPet.Stage.LANE_GUARDIAN || stage == CurioPet.Stage.SAGE
+        val auraOn = activeDesign.isProceduralEnabled("effects") &&
+            (stage == CurioPet.Stage.LANE_GUARDIAN || stage == CurioPet.Stage.SAGE)
         val auraColor = if (stage == CurioPet.Stage.SAGE) gold else accent
         Box(
             modifier = Modifier
@@ -462,6 +463,17 @@ fun CurioPetSprite(
                         )
                     }
 
+                    /** Draws one user-authored full-canvas detail layer. */
+                    fun drawDetailLayer(layer: String) {
+                        activeDesign.details[layer]?.forEachIndexed { row, line ->
+                            line.forEachIndexed { col, ch ->
+                                activeDesign.colorFor(ch)?.let { hex ->
+                                    drawGridPx(col, row, petDesignColor(hex))
+                                }
+                            }
+                        }
+                    }
+
                     // Body — static pattern with the accent scarf. v8.14 —
                     // asleep pets CURL UP into a cozy ball instead of
                     // standing with closed eyes. v8.34 — the active design's
@@ -494,10 +506,12 @@ fun CurioPetSprite(
                         }
                         // The nightcap — a pointed cap; the gold antenna star
                         // doubles as the pompom on top.
-                        drawPx(7, 0, gold); drawPx(8, 0, gold)
-                        drawPx(6, 1, cap); drawPx(7, 1, cap); drawPx(8, 1, cap); drawPx(9, 1, cap)
-                        drawPx(6, 2, cap); drawPx(7, 2, cap); drawPx(8, 2, cap); drawPx(9, 2, cap)
-                        drawPx(6, 3, capTrim); drawPx(7, 3, capTrim); drawPx(8, 3, capTrim); drawPx(9, 3, capTrim)
+                        if (activeDesign.isProceduralEnabled("antenna")) {
+                            drawPx(7, 0, gold); drawPx(8, 0, gold)
+                            drawPx(6, 1, cap); drawPx(7, 1, cap); drawPx(8, 1, cap); drawPx(9, 1, cap)
+                            drawPx(6, 2, cap); drawPx(7, 2, cap); drawPx(8, 2, cap); drawPx(9, 2, cap)
+                            drawPx(6, 3, capTrim); drawPx(7, 3, capTrim); drawPx(8, 3, capTrim); drawPx(9, 3, capTrim)
+                        }
                         if (activeCustomGrid != null) {
                             activeCustomGrid.forEachIndexed { row, line ->
                                 line.forEachIndexed { col, ch ->
@@ -509,16 +523,18 @@ fun CurioPetSprite(
                         }
                     } else {
                         // Soft belly patch — a lighter tummy inside the blob.
-                        drawRoundRect(
-                            color = bellyLight.copy(alpha = 0.85f),
-                            topLeft = Offset(5 * opx, 9 * opx),
-                            size = Size(6 * opx, 3 * opx),
-                            cornerRadius = CornerRadius(3 * opx)
-                        )
+                        if (activeDesign.isProceduralEnabled("belly")) {
+                            drawRoundRect(
+                                color = bellyLight.copy(alpha = 0.85f),
+                                topLeft = Offset(5 * opx, 9 * opx),
+                                size = Size(6 * opx, 3 * opx),
+                                cornerRadius = CornerRadius(3 * opx)
+                            )
+                        }
 
                         // Little tail on the sprite's right side — wags when
                         // walking, excited, or mid-play (faster while playing).
-                        if (!dragged) {
+                        if (!dragged && activeDesign.isProceduralEnabled("tail")) {
                             val wagFreq = if (playing) 18f else 10f
                             val wag = if (moving || excited || playing) {
                                 sin(bobPhase * wagFreq * PI.toFloat())
@@ -530,7 +546,7 @@ fun CurioPetSprite(
                         }
 
                         // Ear flick — a tiny perk of the left ear.
-                        if (flicking) {
+                        if (flicking && activeDesign.isProceduralEnabled("accessories")) {
                             drawPx(2, 1, ink)
                             drawPx(2, 0, ink)
                         }
@@ -644,7 +660,7 @@ fun CurioPetSprite(
                         // arm on the facing side that lifts a beat to say
                         // "here!". The flip layer mirrors it to the other
                         // side when the pet faces left.
-                        if (pointingNow) {
+                        if (pointingNow && activeDesign.isProceduralEnabled("accessories")) {
                             val pawLift = if (sin(bobPhase * 4f * PI.toFloat()) > 0f) -1 else 0
                             drawPx(13, 9 + pawLift, accent)
                             drawPx(14, 9 + pawLift, accent)
@@ -655,7 +671,7 @@ fun CurioPetSprite(
                         }
 
                         // Growth accessories (spec §10.4).
-                        when (stage) {
+                        if (activeDesign.isProceduralEnabled("accessories")) when (stage) {
                             CurioPet.Stage.SPROUT -> {
                                 drawPx(4, 2, leaf); drawPx(5, 1, leaf); drawPx(5, 2, leaf); drawPx(5, 3, leaf)
                             }
@@ -692,7 +708,7 @@ fun CurioPetSprite(
 
                     // Sleep Z's — v8.14 pronounced: three z's drifting up-right
                     // above the curled ball.
-                    if (sleeping) {
+                    if (sleeping && activeDesign.isProceduralEnabled("effects")) {
                         val drift = ((breathePhase * 2f) % 1f).toInt()
                         drawPx(11, 3 - drift, ink, 0.85f); drawPx(12, 4 - drift, ink, 0.85f); drawPx(11, 4 - drift, ink, 0.85f)
                         drawPx(12, 5 - drift, ink, 0.65f); drawPx(13, 6 - drift, ink, 0.65f); drawPx(12, 6 - drift, ink, 0.65f)
@@ -701,7 +717,7 @@ fun CurioPetSprite(
 
                     // Excited sparkles around the pet (v8.35 — toggleable in
                     // the Face/Excitement editor via the design's face).
-                    if (sparklesOn) {
+                    if (sparklesOn && activeDesign.isProceduralEnabled("effects")) {
                         val twinkle = sin(bobPhase * 8f * PI.toFloat()) * 0.5f + 0.5f
                         drawPx(1, 2, gold, twinkle * 0.9f)
                         drawPx(14, 3, gold, (1f - twinkle) * 0.9f)
@@ -711,7 +727,7 @@ fun CurioPetSprite(
 
                     // v8.21 — while dizzy, little whoosh marks trail beside
                     // the pet so the spin feels like it's actually moving.
-                    if (dizzy) {
+                    if (dizzy && activeDesign.isProceduralEnabled("effects")) {
                         val whoosh = sin(bobPhase * 10f * PI.toFloat())
                         val a = 0.45f + whoosh * 0.25f
                         drawPx(1, 6, ink, a); drawPx(0, 7, ink, a * 0.8f); drawPx(1, 8, ink, a)
@@ -719,16 +735,24 @@ fun CurioPetSprite(
                     }
 
                     // A white glint twinkles on the antenna star.
-                    if (sin(bobPhase * 2f * PI.toFloat()) > 0.78f) {
+                    if (activeDesign.isProceduralEnabled("antenna") && sin(bobPhase * 2f * PI.toFloat()) > 0.78f) {
                         drawPx(7, 0, white, 0.9f)
                     }
 
                     // A tiny "?" hovers above the antenna while thinking.
-                    if (thinkingNow) {
+                    if (thinkingNow && activeDesign.isProceduralEnabled("antenna")) {
                         drawPx(9, 0, ink)
                         drawPx(8, 1, ink); drawPx(9, 1, ink)
                         drawPx(9, 2, ink)
                     }
+
+                    // User-authored details are the final visual layer so
+                    // every aspect can be drawn over generated art without
+                    // changing Curie's existing motion or z-order behavior.
+                    drawDetailLayer("tail")
+                    drawDetailLayer("accessories")
+                    drawDetailLayer("antenna")
+                    drawDetailLayer("effects")
                 }
             }
         }

@@ -54,7 +54,11 @@ data class PetDesign(
      * Per-event reaction rules (key = event name, e.g. "TOUCH"). An absent
      * event uses the built-in reaction for that event.
      */
-    val reactions: Map<String, PetReaction> = emptyMap()
+    val reactions: Map<String, PetReaction> = emptyMap(),
+    /** Optional transparent drawn layers for tail, accessories, effects, and antenna art. */
+    val details: Map<String, List<String>> = emptyMap(),
+    /** Explicit per-element visibility overrides; absent keys stay procedurally enabled. */
+    val procedural: Map<String, Boolean> = emptyMap()
 ) {
     /** The palette keys a design may recolor. */
     companion object {
@@ -63,6 +67,12 @@ data class PetDesign(
         const val DEFAULT_GRID_SIZE = 24
         const val MIN_GRID_SIZE = 16
         val SUPPORTED_SIZES = listOf(24, 32)
+
+        /** Drawable detail layers exposed by the compact Details editor. */
+        val DETAIL_KEYS = listOf("tail", "accessories", "effects", "antenna")
+
+        /** Procedural art elements that can be independently hidden. */
+        val PROCEDURAL_KEYS = listOf("tail", "belly", "accessories", "effects", "antenna")
 
         val DEFAULT_PALETTE: Map<Char, String> = mapOf(
             'b' to "FFF3DC", // body — warm cream
@@ -233,6 +243,15 @@ data class PetDesign(
         bodyRows.forEach { appendLine(it) }
         appendLine("# Curled (asleep) grid — $gridSize rows of exactly $gridSize chars")
         curledRows.forEach { appendLine(it) }
+        details.forEach { (layer, rows) ->
+            val encoded = runCatching {
+                java.net.URLEncoder.encode(rows.joinToString("\n"), "UTF-8")
+            }.getOrDefault("")
+            appendLine("detail=$layer;grid=$encoded")
+        }
+        procedural.forEach { (element, enabled) ->
+            appendLine("procedural=$element;enabled=${if (enabled) 1 else 0}")
+        }
         DEFAULT_FACES.keys.forEach { mood ->
             appendLine("face=$mood;${faces[mood]?.toConfig() ?: DEFAULT_FACES[mood]?.toConfig() ?: PetFace().toConfig()}")
         }
@@ -255,6 +274,8 @@ data class PetDesign(
         val rows = mutableListOf<String>()
         val faces = mutableMapOf<String, PetFace>()
         val reactions = mutableMapOf<String, PetReaction>()
+        val details = mutableMapOf<String, List<String>>()
+        val procedural = mutableMapOf<String, Boolean>()
         var declaredSize: Int? = null
         text.lineSequence().forEach { raw ->
             val line = raw.trim()
@@ -263,6 +284,34 @@ data class PetDesign(
             when {
                 line.startsWith("size=") && eq > 0 -> {
                     declaredSize = line.substring(5).trim().toIntOrNull()
+                }
+                line.startsWith("detail=") && eq == 6 -> {
+                    val separator = line.indexOf(';', startIndex = 7)
+                    val layerEnd = if (separator >= 0) separator else line.length
+                    val layer = line.substring(7, layerEnd).trim().lowercase()
+                    val config = if (separator >= 0) line.substring(separator + 1) else ""
+                    val value = config.split(';')
+                        .firstOrNull { it.startsWith("grid=") }
+                        ?.substringAfter('=')
+                        .orEmpty()
+                    if (layer in DETAIL_KEYS && value.isNotBlank()) {
+                        runCatching {
+                            details[layer] = java.net.URLDecoder.decode(value, "UTF-8").split("\n")
+                        }
+                    }
+                }
+                line.startsWith("procedural=") && eq == 10 -> {
+                    val separator = line.indexOf(';', startIndex = 11)
+                    val elementEnd = if (separator >= 0) separator else line.length
+                    val element = line.substring(11, elementEnd).trim().lowercase()
+                    val enabled = if (separator >= 0) {
+                        line.substring(separator + 1).split(';')
+                            .firstOrNull { it.startsWith("enabled=") }
+                            ?.substringAfter('=')
+                            ?.let { it == "1" || it.equals("true", ignoreCase = true) }
+                            ?: true
+                    } else true
+                    if (element in PROCEDURAL_KEYS) procedural[element] = enabled
                 }
                 line.startsWith("face=") && eq == 4 -> {
                     // The mood name is between `face=` and the first `;`.
@@ -325,7 +374,16 @@ data class PetDesign(
             curledRows = curled,
             gridSize = size,
             faces = faceMap.mapValues { (_, face) -> normalize(face) },
-            reactions = reactionMap.mapValues { (_, reaction) -> reaction.copy(face = normalize(reaction.face)) }
+            reactions = reactionMap.mapValues { (_, reaction) -> reaction.copy(face = normalize(reaction.face)) },
+            details = details.mapValues { (_, layer) ->
+                layer.map { (it + ".".repeat(size)).take(size) }
+                    .take(size)
+                    .let { parsedRows ->
+                        if (parsedRows.size == size) parsedRows
+                        else parsedRows + List(size - parsedRows.size) { ".".repeat(size) }
+                    }
+            },
+            procedural = procedural
         )
     }
 
@@ -443,7 +501,8 @@ data class PetDesign(
             bodyRows = resizeGrid(bodyRows, gridSize, newSize),
             curledRows = resizeGrid(curledRows, gridSize, newSize),
             faces = faces.mapValues { (_, face) -> resizeFace(face) },
-            reactions = reactions.mapValues { (_, reaction) -> reaction.copy(face = resizeFace(reaction.face)) }
+            reactions = reactions.mapValues { (_, reaction) -> reaction.copy(face = resizeFace(reaction.face)) },
+            details = details.mapValues { (_, rows) -> resizeGrid(rows, gridSize, newSize) }
         )
     }
 
@@ -464,6 +523,60 @@ data class PetDesign(
     /** Overrides one event's reaction rule. */
     fun withReaction(eventName: String, reaction: PetReaction): PetDesign =
         copy(reactions = reactions + (eventName to reaction))
+
+    /** Returns a normalized transparent detail layer, or a blank canvas. */
+    fun detailFor(layer: String): List<String> {
+        val rows = details[layer] ?: return List(gridSize) { ".".repeat(gridSize) }
+        return rows.map { (it + ".".repeat(gridSize)).take(gridSize) }
+            .take(gridSize)
+            .let { normalized ->
+                if (normalized.size == gridSize) normalized
+                else normalized + List(gridSize - normalized.size) { ".".repeat(gridSize) }
+            }
+    }
+
+    /** Paints one cell in a transparent detail layer. */
+    fun withDetailPixel(layer: String, row: Int, col: Int, key: Char): PetDesign {
+        if (layer !in DETAIL_KEYS || row !in 0 until gridSize || col !in 0 until gridSize) return this
+        val rows = detailFor(layer).toMutableList()
+        val chars = rows[row].toCharArray()
+        chars[col] = key
+        rows[row] = String(chars)
+        return copy(details = details + (layer to rows))
+    }
+
+    /** Flood-fills one connected region in a transparent detail layer. */
+    fun withDetailFloodFill(layer: String, row: Int, col: Int, key: Char): PetDesign {
+        if (layer !in DETAIL_KEYS || row !in 0 until gridSize || col !in 0 until gridSize) return this
+        val work = detailFor(layer).map { it.toCharArray() }
+        val target = work[row][col]
+        if (target == key) return this
+        val stack = ArrayDeque<Pair<Int, Int>>()
+        stack.add(row to col)
+        while (stack.isNotEmpty()) {
+            val (r, c) = stack.removeLast()
+            if (r !in 0 until gridSize || c !in 0 until gridSize || work[r][c] != target) continue
+            work[r][c] = key
+            stack.add(r - 1 to c); stack.add(r + 1 to c)
+            stack.add(r to c - 1); stack.add(r to c + 1)
+        }
+        return copy(details = details + (layer to work.map { String(it) }))
+    }
+
+    /** Replaces a complete detail layer. */
+    fun withDetailGrid(layer: String, rows: List<String>): PetDesign {
+        if (layer !in DETAIL_KEYS) return this
+        val cleaned = rows.map { (it + ".".repeat(gridSize)).take(gridSize) }
+            .take(gridSize)
+        return copy(details = details + (layer to cleaned))
+    }
+
+    /** Sets whether one procedural element remains visible. */
+    fun withProceduralEnabled(element: String, enabled: Boolean): PetDesign =
+        if (element in PROCEDURAL_KEYS) copy(procedural = procedural + (element to enabled)) else this
+
+    /** Missing flags intentionally mean enabled for old designs. */
+    fun isProceduralEnabled(element: String): Boolean = procedural[element] ?: true
 }
 
 /**
