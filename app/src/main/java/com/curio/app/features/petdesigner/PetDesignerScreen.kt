@@ -872,8 +872,9 @@ fun PetDesignerScreen(navController: NavController) {
                             shape = RoundedCornerShape(18.dp),
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                             onClick = {
-                                val exportMood = if (editingGrid == "curled") CurioPet.Mood.SLEEPY.name else previewMood.name
-                                val uri = exportPngUri(context, design, editingGrid, exportMood, CurioPet.currentStage())
+                                val exportMood = previewMood.name
+                                val exportGrid = if (previewMood == CurioPet.Mood.SLEEPY) "curled" else "body"
+                                val uri = exportPngUri(context, design, exportGrid, exportMood, CurioPet.currentStage())
                                 if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
                             },
                             modifier = Modifier.weight(1f)
@@ -894,7 +895,7 @@ fun PetDesignerScreen(navController: NavController) {
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Text(
-                                    "Current pose · ${design.gridSize}×${design.gridSize}",
+                                    "Preview pose · ${design.gridSize}×${design.gridSize}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                 )
