@@ -295,6 +295,14 @@ fun CurioPetHeroCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                    // v8.43 — the pet's own developed sayings (learning brain).
+                    if (info.coinedSayings > 0) {
+                        Text(
+                            "Its own sayings: ${info.coinedSayings}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             },
             confirmButton = {

@@ -111,6 +111,12 @@ object AppPreferences {
     // companion design is decided).
     private const val KEY_PET_ENABLED = "pet_enabled"
     private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
+    // v8.43 — the pet's local LEARNING model (CurioPetBrain): the pet
+    // observes real activity and grows its own personality + catchphrases.
+    // Default ON per the user; off falls back to the classic rule-based
+    // lines. Independent of [KEY_PET_ENABLED]: the pet layer can be on
+    // while the learning brain is off.
+    private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
     private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     // v8.2 — the quest tour's one-time offer: once the user has taken OR
     // declined it ("No, thanks" / dismissing the prompt), the offer never
@@ -326,6 +332,11 @@ object AppPreferences {
     // while the floating companion is off (the pet then stays in its bed).
     var floatingPetEnabledState by mutableStateOf(true)
         private set
+    // v8.43 — whether the pet's learning brain is on (default ON): the pet
+    // builds a personality from the user's real activity and develops its
+    // own catchphrases. Off = classic rule-based lines only.
+    var petBrainEnabledState by mutableStateOf(true)
+        private set
     // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
     // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
     // itself when the deck lands (the tour and pet lines adapt). Turn it
@@ -426,6 +437,7 @@ object AppPreferences {
         guideTourOfferedState = isGuideTourOffered(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
+        petBrainEnabledState = isPetBrainEnabled(context)
         autoOpenRevealState = isAutoOpenReveal(context)
         customReactionLinesState = isCustomReactionLinesEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
@@ -1040,6 +1052,15 @@ object AppPreferences {
     fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
         floatingPetEnabledState = enabled
+    }
+
+    // v8.43 — the pet's learning brain toggle (default ON; Appearance).
+    fun isPetBrainEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_BRAIN_ENABLED, true)
+
+    fun setPetBrainEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_BRAIN_ENABLED, enabled).apply()
+        petBrainEnabledState = enabled
     }
 
     // v8.16 — auto-open the landed topic's reveal after a spin. v8.21 —

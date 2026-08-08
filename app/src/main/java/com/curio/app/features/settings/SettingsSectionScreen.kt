@@ -207,6 +207,18 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setFloatingPetEnabled(context, it)
             }
         }
+        // v8.43 — the pet's learning brain (CurioPetBrain): observes real
+        // activity, builds a personality, and develops its own catchphrases
+        // over time. Default ON; off = classic rule-based lines only.
+        SettingsRowPulse(highlightKey == "appearance-pet-brain") {
+            CompactSwitchRow(
+                "Pet brain",
+                "The pet learns your habits and grows its own personality",
+                AppPreferences.petBrainEnabledState
+            ) {
+                AppPreferences.setPetBrainEnabled(context, it)
+            }
+        }
         CurioSettingsDivider()
         // v8.16 — whether a landed topic's reveal opens itself as soon as
         // the deck settles. Default OFF: the deck just lands and the front

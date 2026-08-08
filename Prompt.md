@@ -115,6 +115,44 @@
     celebrate on claim like dailies.
   - Store changelog 20260906.txt updated.
 
+## Part 8 — Real pet AI: on-device learning brain (DONE)
+
+- User rejected cloud/LLM pet AI and asked for OUR OWN smart model: a local,
+  personalized pet that "gets smarter and learns over time and develops its own
+  things". User chose (ask_user): Settings toggle, default ON; mostly the pet's
+  PERSONALITY rather than dialogue content.
+- Implemented v8.43 as `data/CurioPetBrain.kt` (NEW) — a fully on-device model
+  (no network, no LLM), gated by `AppPreferences.petBrainEnabledState`:
+  - Observation: `observeActivity` (per spoken screen visit — time-of-day
+    histogram + trait decay after idle), `observeExplore`, `observeLevelUp`,
+    `observeXp`, `observeTouch`, `observePlay`.
+  - Traits: persistent 5-dimension vector (CURIOSITY/PLAYFULNESS/WARMTH/
+    ENERGY/NIGHT_OWL, 0..1, JSON in prefs) nudged by real behavior, decayed on
+    long idle; `dominantTrait` picks the voice.
+  - Preferences: `favoriteLane` from passport engagement (>25% share = learned
+    lane); activity histogram drives NIGHT_OWL and the morning/night coining.
+  - Catchphrases: `maybeCoin` (≤1/day, cap 8) — the pet COINS its own lines
+    from strong recurring patterns (night owl, morning ritual, a dominant
+    lane, streak ≥7, saves ≥10, playful, curious, warm) and remembers them
+    forever; they surface ~30% of the time.
+  - Voice: `say()` — one-sentence, fully GROUNDED lines (level, streak, saves,
+    lane, time of day — never invented topic facts, spec §10.6/10.7); returns
+    null when off/too young so the classic library answers.
+- Wiring: `CurioPet.bubbleFor` observes + tries `CurioPetBrain.say()` first
+  with classic `lineFor` fallback; all five note hooks
+  (noteTouch/notePlay/noteXpEarned/noteLevelUp/noteLaneExplored) feed the
+  brain. NOTE: brain function named `say()` (not `lineFor`) — same-name
+  overload with identical params but different return types is illegal in
+  Kotlin.
+- Settings: "Pet brain" toggle row in Appearance (default ON), mirroring the
+  Curie/Floating pet rows (key `pet_brain_enabled`).
+- Store changelog 20260906.txt updated (kept ≤500 chars).
+- Code review fixes applied: coined sayings surfaced in the pet tap dialog
+  (`TapInfo.coinedSayings` + "Its own sayings: N" line in CurioPetCompanion),
+  all brain lines normalized to one sentence (spec §10.7), and familiar lines
+  (streak/saves/"Hey you") gated behind the FRIEND bond tier like the classic
+  library (v8.29 rule).
+
 ## Part 6 — Spin deck swipe direction fix (DONE)
 
 - `SpinScreen.kt` `Carousel` — the deck-swipe mapping fired the OPPOSITE cycle on

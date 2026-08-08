@@ -228,6 +228,7 @@ object CurioPet {
     fun noteTouch(context: Context) {
         val p = prefs(context)
         p.edit().putInt(KEY_PET_BOOPS, p.getInt(KEY_PET_BOOPS, 0) + 1).apply()
+        CurioPetBrain.observeTouch(context)
     }
 
     /** The pet played (a dart / self-started game — persisted). */
@@ -237,6 +238,7 @@ object CurioPet {
             .putInt(KEY_PET_PLAYS, p.getInt(KEY_PET_PLAYS, 0) + 1)
             .putLong(KEY_LAST_PLAY_AT, System.currentTimeMillis())
             .apply()
+        CurioPetBrain.observePlay(context)
     }
 
     private fun touchCount(context: Context): Int = prefs(context).getInt(KEY_PET_BOOPS, 0)
@@ -604,7 +606,14 @@ object CurioPet {
         }
         p.edit().putString(KEY_LAST_BUBBLE_SCREEN, screen)
             .putLong(KEY_LAST_BUBBLE_AT, now).apply()
-        return lineFor(context, mood(context, lanes, screen), lanes)
+        // v8.43 — every spoken screen visit feeds the learning brain (the
+        // time-of-day histogram + trait decay), then the brain's
+        // personalized voice gets first say; the classic rule-based library
+        // answers until the brain has enough signal (spec §10.6 fallback).
+        CurioPetBrain.observeActivity(context, timeOfDay())
+        val currentMood = mood(context, lanes, screen)
+        return CurioPetBrain.say(context, currentMood, lanes)
+            ?: lineFor(context, currentMood, lanes)
     }
 
     /** What tapping the pet reveals: mood, personality, growth status. */
@@ -613,7 +622,10 @@ object CurioPet {
         val stage: Stage,
         val persona: Persona,
         val nextStageLabel: String,
-        val nextQuestTitle: String?
+        val nextQuestTitle: String?,
+        // v8.43 — catchphrases the learning brain coined from the user's
+        // habits (0 = the pet hasn't found its own words yet).
+        val coinedSayings: Int
     )
 
     fun tapInfo(context: Context, lanes: Set<String>): TapInfo {
@@ -623,7 +635,8 @@ object CurioPet {
             stage = stage,
             persona = persona(context),
             nextStageLabel = nextStageHint(stage),
-            nextQuestTitle = CurioQuests.currentQuest()?.title
+            nextQuestTitle = CurioQuests.currentQuest()?.title,
+            coinedSayings = CurioPetBrain.coinedCount(context)
         )
     }
 
@@ -639,16 +652,21 @@ object CurioPet {
     }
 
     // ── Activity hooks (called from CurioQuests) ───────────────────────
+    // v8.43 — each real action also feeds the learning brain, so the pet's
+    // personality genuinely grows from what the user does.
     fun noteXpEarned(context: Context) {
         prefs(context).edit().putLong(KEY_LAST_XP_AT, System.currentTimeMillis()).apply()
+        CurioPetBrain.observeXp(context)
     }
 
     fun noteLevelUp(context: Context) {
         prefs(context).edit().putLong(KEY_LAST_LEVEL_AT, System.currentTimeMillis()).apply()
+        CurioPetBrain.observeLevelUp(context)
     }
 
     fun noteLaneExplored(context: Context) {
         prefs(context).edit().putLong(KEY_LAST_NEW_LANE_AT, System.currentTimeMillis()).apply()
+        CurioPetBrain.observeExplore(context)
     }
 
     fun lastXpAt(context: Context): Long = prefs(context).getLong(KEY_LAST_XP_AT, 0L)
