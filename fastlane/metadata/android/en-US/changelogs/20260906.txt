@@ -1,0 +1,1 @@
+Saved-entry pages now open with a pop-up from the center of the screen instead of sliding in from the side, and the blank strip at the bottom of a saved entry is gone — the page's tinted background runs straight to the bottom.

@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
 import androidx.compose.foundation.background
@@ -107,7 +109,6 @@ import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBottomBar
-import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
@@ -131,6 +132,10 @@ private fun safeDecode(raw: String?): String =
  */
 private fun isRevealRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route == CurioRoutes.REVEAL
+
+/** True when the route is the saved-entry detail page (any entry id). */
+private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
+    entry.destination.route?.substringBefore("/") == CurioRoutes.ENTRY_DETAIL.substringBefore("/")
 
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     initialState: NavBackStackEntry,
@@ -218,25 +223,22 @@ fun CurioNavHost(
     // placeholder never rendered — the bar hid mid-morph, innerPadding grew
     // by the bar's height, and the watermark visibly shifted down. Compare
     // the prefixes so the reserve actually engages.
-    // v8.36/v8.37 — the reserve covers BOTH morph destinations (Reveal AND
-    // Entry Detail) AND both directions of travel: while the destination is
-    // on top (route-prefix check), and while it is EXITING (popping reveal
-    // → spin, detail → cabinet) — detected by the exiting screen's dock /
-    // wash spacer still being registered in revealBottomBarContent (it only
-    // clears when the destination leaves composition, i.e. after the pop
-    // transition finishes). Without the exiting case the real bar swaps in
-    // mid-transition, innerPadding changes, and the SharedTransitionLayout
-    // re-lays out — the nav bar flashed the cream surface for a moment on
-    // reveal close, and the cabinet→detail morph jolted as the grid
-    // re-flowed. Detail joined the set in v8.36: its wash spacer registers
-    // from EntryDetailScreen (mirroring the reveal dock), so the reserved
-    // strip never shows a wrong-color band and the morph runs on a stable
-    // layout the whole visit. (v8.37 — this replaced the
+    // v8.36/v8.37 — the reserve covers the Reveal morph destination in both
+    // directions of travel: while the reveal is on top (route-prefix check),
+    // and while it is EXITING (popping reveal → spin) — detected by the
+    // exiting screen's dock still being registered in revealBottomBarContent
+    // (it only clears when the destination leaves composition, i.e. after
+    // the pop transition finishes). Without the exiting case the real bar
+    // swaps in mid-transition, innerPadding changes, and the
+    // SharedTransitionLayout re-lays out — the nav bar flashed the cream
+    // surface for a moment on reveal close. (v8.37 — this replaced the
     // backStackEntry.previousBackStackEntry check, which navigation 2.9
     // removed in the NavBackStackEntry rework.)
+    // v8.38 — Entry Detail no longer reserves the slot: its bottom wash
+    // strip is gone (the page pops up edge-to-edge), so only the reveal
+    // route keeps the reserve.
     val revealPrefix = CurioRoutes.REVEAL.substringBefore("/")
-    val detailPrefix = CurioRoutes.ENTRY_DETAIL.substringBefore("/")
-    val morphReservePrefixes = setOf(revealPrefix, detailPrefix)
+    val morphReservePrefixes = setOf(revealPrefix)
     var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
     val reserveBarSpace = (routePrefix != null && routePrefix in morphReservePrefixes) ||
         revealBottomBarContent != null
@@ -254,12 +256,10 @@ fun CurioNavHost(
         ) ?: CurioCategories.byId(CategoryId.WILDCARD)
     } else null
     // The reserved strip's background: the reveal wash while the reveal is
-    // on top, the cabinet wash while a detail morph runs (the detail
-    // screen's own wash spacer registers a frame later), else the surface.
+    // on top, else the surface. (The detail page reserves nothing — it pops
+    // up edge-to-edge with no bottom strip.)
     val reserveBackground = when {
         revealCat != null -> revealCat.categoryBackgroundWash()
-        routePrefix == detailPrefix ->
-            CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
         else -> MaterialTheme.colorScheme.surface
     }
     // The reveal page paints its own category wash over the whole content
@@ -535,6 +535,14 @@ fun CurioNavHost(
                     // the hero (its staggered entrance) reads cleanly.
                     isRevealRoute(targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // Entry Detail pops up from the screen center (scale +
+                    // fade) like a modal — it never slides in from the side
+                    // (v8.38).
+                    isDetailRoute(targetState) ->
+                        scaleIn(
+                            initialScale = 0.88f,
+                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Splash → Home / Onboarding: special elastic morph
                     initialState.destination.route == CurioRoutes.SPLASH ->
                         fadeIn(
@@ -562,6 +570,12 @@ fun CurioNavHost(
                     // vanish under the ~450ms morph).
                     isRevealRoute(targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // The screen under the detail pop-up (the Cabinet grid)
+                    // dims out over the SAME 450ms as the pop — no slide, and
+                    // the longer fade masks the bottom-bar space release as a
+                    // gentle dim instead of a snap (v8.38).
+                    isDetailRoute(targetState) ->
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Navigating away from splash: no exit needed
                     initialState.destination.route == CurioRoutes.SPLASH ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
@@ -581,6 +595,10 @@ fun CurioNavHost(
                     // directional slide would fight it.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // Popping back from Entry Detail: the page below fades
+                    // back in while the detail shrinks away (v8.38).
+                    isDetailRoute(initialState) ->
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Tab switch back: crossfade too (no directional slide).
                     isTabSwitch(initialState, targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
@@ -599,6 +617,14 @@ fun CurioNavHost(
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // The detail page shrinks back down as it pops away — the
+                    // matched fade keeps the shrink smooth over the same
+                    // duration as the page beneath fading back in (v8.38).
+                    isDetailRoute(initialState) ->
+                        scaleOut(
+                            targetScale = 0.88f,
+                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     isTabSwitch(initialState, targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
@@ -713,14 +739,7 @@ fun CurioNavHost(
                 ) {
                     EntryDetailScreen(
                         entryId = entry.arguments?.getString("entryId").orEmpty(),
-                        navController = navController,
-                        // v8.36 — the detail page registers its own wash
-                        // spacer in the reserved bottom slot (mirroring the
-                        // reveal dock) so the cabinet→detail morph runs on a
-                        // stable Scaffold layout and the strip below the
-                        // page wears the entry's category wash.
-                        onBottomBarContentChanged = { revealBottomBarContent = it },
-                        onBottomBarContentCleared = { revealBottomBarContent = null }
+                        navController = navController
                     )
                 }
             }

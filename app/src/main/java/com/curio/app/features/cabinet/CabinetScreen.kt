@@ -87,9 +87,6 @@ import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
-import com.curio.app.ui.adaptive.LocalRevealSharedScope
-import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.CabinetBoundsTransform
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
@@ -403,22 +400,12 @@ fun CabinetScreen(navController: NavController) {
                     modifier = m.fillMaxSize()
                 ) {
                     items(visibleEntries, key = { it.id }) { entry ->
-                        // ── Cabinet→Detail morph: match this card to the
-                        //    entry detail hero via shared element. The modifier
-                        //    only attaches when NOT in selection mode (otherwise
-                        //    a multi-select card would become a morph source).
-                        val sharedScope = LocalRevealSharedScope.current
-                        val visScope = LocalRevealVisibilityScope.current
-                        val cardMorphMod = if (!selectionMode && sharedScope != null && visScope != null) {
-                            val state = sharedScope.rememberSharedContentState("cabinet-${entry.id}")
-                            sharedScope.run {
-                                Modifier.sharedElement(state, visScope, boundsTransform = CabinetBoundsTransform)
-                            }
-                        } else Modifier
-
+                        // v8.38 — the Cabinet→Detail morph is gone: the detail
+                        // page pops up from center instead of expanding out of
+                        // the card, so the card carries no shared element.
                         CurioEntryCard(
                             entry = entry,
-                            modifier = cardMorphMod,
+                            modifier = Modifier,
                             selected = entry.id in selectedEntryIds,
                             onLongClick = {
                                 // v7.107 — promo/demo mode disables multi-select:

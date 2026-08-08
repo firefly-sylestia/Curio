@@ -1,16 +1,57 @@
-# Request — restore pre-v8.32 Spin card animations only
+# Request — remove the detail page's reserved bottom strip; pop-up entrance animation
 
-## Completed
+## Analysis
 
-- Compared commit `0e60e2a32a73cbb0a444732e170aeb2bb64f389d` with its parent `27f7596d5cc7765fbbea0cf50d41b80e50318331`.
-- Restored the pre-commit main-card heartbeat: the original soft spring pulse instead of the newer press/lift/settle timing.
-- Restored the pre-commit hero content reel timing: the original 300ms/260ms shuffle transition without the later delay.
-- Restored the pre-commit peek-card shuffle wipes: simultaneous 320ms/300ms transitions without the later cascade delays.
-- Preserved topic swiping and ordering behavior: `onDeckCycle`, `cycleIndex`, slot/topic resolution, gesture handling, z-index, card geometry, and design were not reverted.
+- The detail page (`EntryDetailScreen`) published an 80dp wash-colored spacer
+  into the NavHost Scaffold's reserved bottom slot (v8.36). It exists so the
+  Cabinet→Detail shared-element morph runs on a stable layout: if the bottom
+  bar's space vanished the instant the route switched, Scaffold `innerPadding`
+  would change mid-morph, re-laying out the `SharedTransitionLayout` and
+  jolting the expansion.
+- The user saw that fixed, non-scrolling band as a "placeholder scaffold" at
+  the bottom of the page and asked to remove it, and to change the page's
+  entrance from slide/fade to a center pop-up. When asked about a follow-up
+  option, the user chose: remove the strip entirely and keep the page's plain
+  tinted background (no inset-height spacer either).
+
+## Changes
+
+- `EntryDetailScreen.kt` — removed the bottom-slot registration entirely
+  (`onBottomBarContentChanged` / `onBottomBarContentCleared` params, the
+  `detailBottomBar` Surface, and its publishing `DisposableEffect`), and
+  removed the hero's Cabinet shared-element morph (`heroMorphMod` /
+  `sharedElement("cabinet-{entryId}")`) — the pop-up replaces the card
+  expansion. The page keeps its category-wash background (`background(wash)`)
+  as the only bottom treatment. Orphaned imports (`LocalRevealSharedScope`,
+  `LocalRevealVisibilityScope`, `CabinetBoundsTransform`, `WindowInsets`,
+  `navigationBars`, `windowInsetsPadding`) removed.
+- `CurioNavHost.kt` — Entry Detail no longer reserves the Scaffold bottom slot
+  (only the Reveal route keeps the reserve + its wash placeholder). The
+  `ENTRY_DETAIL` route now: enters with `scaleIn(0.88) + fadeIn` (center pop),
+  has its underlying screen exit with a matched 450ms fade (no slide), pops
+  back out with `scaleOut(0.88) + fadeOut` at the same 450ms, and the page
+  below fades back in. Removed the dead `CurioNavTint.cabinetWash` branch +
+  import.
+- `CabinetScreen.kt` — removed the card's shared-element declaration (now
+  inert; the detail hero no longer declares the matching key) + its three
+  imports (`LocalRevealSharedScope`, `LocalRevealVisibilityScope`,
+  `CabinetBoundsTransform`).
+- `app/build.gradle.kts` — versionCode 20260905 → 20260906.
+- `fastlane/metadata/android/en-US/changelogs/20260906.txt` — store note.
+
+## Notes
+
+- No strip is published at all (per user): the system-nav inset region at the
+  physical bottom shows the theme surface, which matches how every other
+  no-bottom-bar wash screen (e.g. Save capture) already behaves.
+- Removing the reserve means the exiting screen re-lays out (grid snaps ~80dp)
+  at navigation start in both directions; the matched 450ms fades mask it.
+- The NavHost still provides the shared-element CompositionLocals for the
+  detail composable — harmless (nobody reads them there now).
 
 ## Validation
 
-- SpinScreen delimiter balance passed.
-- `git diff --check` passed.
-- Static review confirmed the diff is limited to animation constants and transition specs; no swipe/topic-switching or z-index changes were included.
-- Gradle builds are forbidden locally by the Curio DOX rules; CI remains the compile gate.
+- `git diff --check` passed; delimiter balance checked on all edited Kotlin
+  files; removed imports verified unused via code search.
+- Gradle builds are forbidden locally by the Curio DOX rules; CI remains the
+  compile gate.

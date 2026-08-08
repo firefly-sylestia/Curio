@@ -39,10 +39,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.RowScope
@@ -107,9 +104,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import com.curio.app.ui.adaptive.LocalRevealSharedScope
-import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.CabinetBoundsTransform
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
@@ -230,13 +224,7 @@ private fun noteSeed(entryId: String, salt: Int): Int =
 @Composable
 fun EntryDetailScreen(
     entryId: String,
-    navController: NavController,
-    // v8.36 — the detail page registers its own wash in the Scaffold's
-    // reserved bottom slot (mirroring the reveal dock) so the Cabinet→Detail
-    // morph keeps a stable layout and the strip below the page wears the
-    // entry's category wash instead of the theme surface.
-    onBottomBarContentChanged: (@Composable () -> Unit) -> Unit = {},
-    onBottomBarContentCleared: () -> Unit = {}
+    navController: NavController
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -267,26 +255,6 @@ fun EntryDetailScreen(
     // a plain patch. Hoisted once and shared with the hero's gradient so the
     // hero's final stop is, by construction, exactly the page color behind it.
     val wash = cat.categoryBackgroundWash()
-    // v8.36 — publish a wash-backed spacer into the reserved bottom slot.
-    // Identical recipe to the reveal dock: 80dp total with the nav-bar inset
-    // consumed INSIDE, so the placeholder → spacer swap never changes
-    // Scaffold innerPadding mid-morph (an innerPadding change would re-lay
-    // out the SharedTransitionLayout and jolt the Cabinet→Detail expansion).
-    val detailBottomBar = remember(wash) {
-        @Composable {
-            Surface(
-                color = wash,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-            ) {}
-        }
-    }
-    DisposableEffect(detailBottomBar) {
-        onBottomBarContentChanged(detailBottomBar)
-        onDispose { onBottomBarContentCleared() }
-    }
     // v7.5 — pastel mode lightens the hero gradient, so the hero content
     // (glyph, title, frosted bar, watermark scatter) flips from white to the
     // theme-aware onAccent ink — deep accent in light, light twin in dark.
@@ -398,22 +366,10 @@ fun EntryDetailScreen(
         // never re-rolls) while the card rectangle — the title, the frosted
         // Date · Mood · Type card and the back / more controls — stays
         // perfectly LEVEL.
-        // ── Cabinet→Detail morph target: the hero banner is the shared-
-        //    element match for the Cabinet entry card ("cabinet-{entryId}").
-        //    When navigated from Cabinet, the card expands into this hero.
-        val heroMorphMod = run {
-            val scope = LocalRevealSharedScope.current ?: return@run Modifier
-            val vis = LocalRevealVisibilityScope.current ?: return@run Modifier
-            val state = scope.rememberSharedContentState("cabinet-${entryId}")
-            scope.run {
-                Modifier.sharedElement(state, vis, boundsTransform = CabinetBoundsTransform)
-            }
-        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(EntryDetailHeroHeight + EntryDetailSheetExtent)
-                .then(heroMorphMod)
         ) {
             // ── White under-sheet — ONE SOLID white sheet layered BEHIND
             // the hero's torn bottom edge. The tear lives ONLY on the hero
