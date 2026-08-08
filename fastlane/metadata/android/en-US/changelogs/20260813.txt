@@ -1,0 +1,4 @@
+• The pet's cloud ride is smaller and tucked under its feet, and the sprite's excited eyes went from the orangish gold to a natural warm brown.
+• Throwing the pet around now has real feel: it keeps a little momentum after you fling it, then settles with a glide.
+• Speech bubbles now fade and rise in and out smoothly, and reactions last longer (2-3s) so you can actually read them.
+• The pet's curious line "I'm reading this." is now "Let me read this!", and a full dialog reference (docs/PET_DIALOGUE.txt) lists every pet line and what it's for, so it's easy to tweak later.

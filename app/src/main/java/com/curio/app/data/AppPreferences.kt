@@ -103,6 +103,21 @@ object AppPreferences {
     // transcription never appears or starts until the user opts in.
     private const val KEY_VOICE_TO_TEXT_ENABLED = "voice_to_text_enabled"
     private const val KEY_GUIDE_ENABLED = "guide_enabled"
+    // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
+    // rule-based dialogue + the category passport/discovery features on
+    // Quests and Home. Default ON; a user-facing Appearance toggle gates
+    // the whole companion layer so it can be A/B'd and reverted without a
+    // code change (per the experiment rules, the toggle is removed once the
+    // companion design is decided).
+    private const val KEY_PET_ENABLED = "pet_enabled"
+    private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
+    // v8.43 — the pet's local LEARNING model (CurioPetBrain): the pet
+    // observes real activity and grows its own personality + catchphrases.
+    // Default ON per the user; off falls back to the classic rule-based
+    // lines. Independent of [KEY_PET_ENABLED]: the pet layer can be on
+    // while the learning brain is off.
+    private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
+    private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     // v8.2 — the quest tour's one-time offer: once the user has taken OR
     // declined it ("No, thanks" / dismissing the prompt), the offer never
     // reappears and the first quest navigates normally.
@@ -119,6 +134,16 @@ object AppPreferences {
     // restart and nothing else in the app honored them.
     private const val KEY_HIDDEN_CATEGORIES = "hidden_categories"
     private const val KEY_CATEGORY_ORDER = "category_order"
+    // v8.34 — custom pet design (Pet designer playground): the imported
+    // design's full text (palette + body/curled grids). Always-on when
+    // saved — the pet sprite renders this instead of the default until the
+    // user resets it. Null = default design.
+    private const val KEY_PET_DESIGN = "pet_design"
+    // v8.39 — custom reaction speech is saved with the pet design but stays
+    // opt-in so the built-in Curie dialogue remains the default experience.
+    private const val KEY_CUSTOM_REACTION_LINES = "custom_reaction_lines"
+    // v8.47 — recently-applied palette colors for the pet designer picker.
+    private const val KEY_PET_RECENT_COLORS = "pet_recent_colors"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -295,6 +320,38 @@ object AppPreferences {
     var guideEnabledState by mutableStateOf(true)
         private set
 
+    /**
+     * Curio pet companion state (v8.5) — gates the pixel pet sprite, its
+     * rule-based dialogue, and the passport/discovery companion layer on
+     * Quests and Home (spec §10). Default ON. Seeded from prefs in
+     * [initThemeMode]; off hides the pet entirely and restores the plain
+     * quests layout.
+     */
+    var petEnabledState by mutableStateOf(true)
+        private set
+    // v8.8 — whether the pet floats freely on every screen (draggable +
+    // wanders). Independent of [petEnabledState]: the pet layer can be on
+    // while the floating companion is off (the pet then stays in its bed).
+    var floatingPetEnabledState by mutableStateOf(true)
+        private set
+    // v8.43 — whether the pet's learning brain is on (default ON): the pet
+    // builds a personality from the user's real activity and develops its
+    // own catchphrases. Off = classic rule-based lines only.
+    var petBrainEnabledState by mutableStateOf(true)
+        private set
+    // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
+    // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
+    // itself when the deck lands (the tour and pet lines adapt). Turn it
+    // OFF to make the deck land quietly with the front card staying
+    // tappable until the user opens it manually.
+    var autoOpenRevealState by mutableStateOf(true)
+        private set
+
+    // v8.39 — custom reaction lines are an explicit opt-in. The editor can
+    // always be used, but Curie only speaks saved custom lines when enabled.
+    var customReactionLinesState by mutableStateOf(false)
+        private set
+
     // v8.2 — whether the one-time tour offer has been shown (taken or
     // declined). Suppresses the offer on the Quests page so it never nags.
     var guideTourOfferedState by mutableStateOf(false)
@@ -344,6 +401,15 @@ object AppPreferences {
     var categoryOrderState by mutableStateOf<List<CategoryId>>(emptyList())
         private set
 
+    /**
+     * Reactive custom-pet-design state (v8.34) — the design's import text,
+     * or null when the pet wears its default look. Updated by
+     * [setPetDesign] / [clearPetDesign] so the pet sprite recomposes
+     * instantly when a design is saved in the designer playground.
+     */
+    var petDesignState by mutableStateOf<String?>(null)
+        private set
+
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
         themeStyleState = getThemeStyle(context)
@@ -371,11 +437,17 @@ object AppPreferences {
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         guideEnabledState = isGuideEnabled(context)
         guideTourOfferedState = isGuideTourOffered(context)
+        petEnabledState = isPetEnabled(context)
+        floatingPetEnabledState = isFloatingPetEnabled(context)
+        petBrainEnabledState = isPetBrainEnabled(context)
+        autoOpenRevealState = isAutoOpenReveal(context)
+        customReactionLinesState = isCustomReactionLinesEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
         savedQuotesState = getSavedQuotes(context)
         topicSentimentsState = getTopicSentiments(context)
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
+        petDesignState = getPetDesign(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -965,6 +1037,71 @@ object AppPreferences {
         prefs(context).edit().putBoolean(KEY_GUIDE_TOUR_OFFERED, offered).apply()
     }
 
+    // ── Curio pet companion (v8.5) ───────────────────────────────────
+    /** Whether the Curio pet companion layer is on (default ON). */
+    fun isPetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_ENABLED, true)
+
+    fun setPetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_ENABLED, enabled).apply()
+        petEnabledState = enabled
+    }
+
+    // v8.8 — floating pet toggle (default ON; see the Appearance settings).
+    fun isFloatingPetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_FLOATING_PET_ENABLED, true)
+
+    fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
+        floatingPetEnabledState = enabled
+    }
+
+    // v8.43 — the pet's learning brain toggle (default ON; Appearance).
+    fun isPetBrainEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_BRAIN_ENABLED, true)
+
+    fun setPetBrainEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_BRAIN_ENABLED, enabled).apply()
+        petBrainEnabledState = enabled
+    }
+
+    // ── Pet designer recent colors (v8.47 color picker) ────────────────
+    /** Recently-applied palette colors, most recent first (max 12). */
+    fun getPetRecentColors(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_PET_RECENT_COLORS, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { arr.getString(it) }.filter { it.length == 6 }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun setPetRecentColors(context: Context, colors: List<String>) {
+        val arr = JSONArray()
+        colors.take(12).forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_PET_RECENT_COLORS, arr.toString()).apply()
+    }
+
+    // v8.16 — auto-open the landed topic's reveal after a spin. v8.21 —
+    // default ON (the reveal opens as soon as the deck settles).
+    fun isAutoOpenReveal(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_AUTO_OPEN_REVEAL, true)
+
+    fun setAutoOpenReveal(context: Context, enabled: Boolean) {
+        autoOpenRevealState = enabled
+        prefs(context).edit().putBoolean(KEY_AUTO_OPEN_REVEAL, enabled).apply()
+    }
+
+    /** Whether Curie may speak the custom reaction lines saved in the Pet designer. */
+    fun isCustomReactionLinesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CUSTOM_REACTION_LINES, false)
+
+    fun setCustomReactionLinesEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CUSTOM_REACTION_LINES, enabled).apply()
+        customReactionLinesState = enabled
+    }
+
     // ── Daily reminder ───────────────────────────────────────────────
     fun isReminderEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_REMINDER_ENABLED, false)
@@ -1027,6 +1164,24 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_LAST_SPIN_CATEGORIES, names.joinToString(",")).apply()
         setLastSpinCategory(context, ids.first())
     }
+
+    // ── Custom pet design (v8.34 — Pet designer playground) ──────────
+    /** The saved custom pet-design text, or null for the default look. */
+    fun getPetDesign(context: Context): String? =
+        prefs(context).getString(KEY_PET_DESIGN, null)
+
+    /** Saves a custom pet design (always-on: the pet wears it everywhere). */
+    fun setPetDesign(context: Context, text: String) {
+        prefs(context).edit().putString(KEY_PET_DESIGN, text).apply()
+        petDesignState = text
+    }
+
+    /** Removes the custom design, returning the pet to its default look. */
+    fun clearPetDesign(context: Context) {
+        prefs(context).edit().remove(KEY_PET_DESIGN).apply()
+        petDesignState = null
+    }
+
 
     // ── Landed Spin topic (per category) — persisted so the landed card ──
     //    survives ANY navigation. rememberSaveable alone dies when the

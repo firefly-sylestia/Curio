@@ -148,7 +148,7 @@ fun ExperimentsScreen(navController: NavController) {
                         text = when (AppPreferences.smartDensityModeState) {
                             SmartDensityMode.OFF -> "Density sizing off"
                             SmartDensityMode.COMPACT -> "Smaller on low-density phones · larger on high-density"
-                            SmartDensityMode.EXTRA_COMPACT -> "2x — even smaller on very low-density phones"
+                            SmartDensityMode.EXTRA_COMPACT -> "2x: even smaller on very low-density phones"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

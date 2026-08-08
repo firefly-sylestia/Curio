@@ -1,8 +1,6 @@
 package com.curio.app.features.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -15,14 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +33,6 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +51,7 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCardHeader
+import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
@@ -321,9 +316,10 @@ fun SettingsHubScreen(navController: NavController) {
             ) {
                 // ── Search — filters every section below as you type ──
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    SettingsSearchField(
+                    CurioSearchField(
                         query = query,
-                        onQueryChange = { query = it }
+                        onQueryChange = { query = it },
+                        placeholder = "Search settings"
                     )
                 }
                 if (searching) {
@@ -428,7 +424,8 @@ private val SettingsSections = listOf(
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint, and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
                     SettingsRowEntry(CurioIcons.Notifications, "Notifications", "Reminders and explore controls", CurioRoutes.SETTINGS_NOTIFICATIONS),
-                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING)
+                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING),
+                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER)
                 )
             )
         )
@@ -500,6 +497,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
     SettingsDeepRow(CurioIcons.Schedule, "Entry date & mood", "Date, mood, and attachments on saved entries", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-entry"),
     SettingsDeepRow(CurioIcons.Flag, "Guided tour", "Small quest dialogs that walk you through Curio", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-guide"),
+    SettingsDeepRow(CurioIcons.Edit, "Custom reaction lines", "Let Curie speak your saved lines for each event", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-reaction-lines"),
     // ── Notifications ────────────────────────────────────────────────
     SettingsDeepRow(CurioIcons.Notifications, "Daily shuffle reminder", "A daily nudge to spin the deck", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-reminder"),
     SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-sessions"),
@@ -579,67 +577,6 @@ private fun filterSettingsSections(
     }
 }
 
-/** Compact search box — magnifier + live query + one-tap clear. */
-@Composable
-private fun SettingsSearchField(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            CurioIcon(
-                name = CurioIcons.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 20.dp
-            )
-            Box(modifier = Modifier.weight(1f)) {
-                if (query.isEmpty()) {
-                    Text(
-                        "Search settings",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
-                BasicTextField(
-                    value = query,
-                    onValueChange = onQueryChange,
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge,
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            if (query.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .clickable { onQueryChange("") },
-                    contentAlignment = Alignment.Center
-                ) {
-                    CurioIcon(
-                        name = CurioIcons.Close,
-                        contentDescription = "Clear search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 18.dp
-                    )
-                }
-            }
-        }
-    }
-}
-
 /** Friendly empty state when the search matches nothing. */
 @Composable
 private fun SettingsNoResults(query: String) {
@@ -663,7 +600,7 @@ private fun SettingsNoResults(query: String) {
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Try a different word — like \"theme\", \"reminder\", or \"backup\".",
+            text = "Try a different word, like \"theme\", \"reminder\", or \"backup\".",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
             textAlign = TextAlign.Center

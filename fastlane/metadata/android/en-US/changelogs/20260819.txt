@@ -1,0 +1,1 @@
+• The pet now reacts to your taps: when you open a card yourself it cheers "You picked it!", and it only says "It opened itself" when the deck really auto-opens a topic.

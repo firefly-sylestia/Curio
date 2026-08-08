@@ -1,0 +1,1 @@
+Pet designer playground! Draw your own companion: tap-paint a 16x16 pixel grid (awake + asleep poses), recolor the palette with hex codes or quick picks, roll a random palette, or jump-start with preset shapes. Save to wear it everywhere, or copy/paste the plain-text design to share it.

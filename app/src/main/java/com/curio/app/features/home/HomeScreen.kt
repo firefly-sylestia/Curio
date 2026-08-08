@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -103,6 +104,9 @@ import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.pet.CurioFlowerBed
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -194,6 +198,42 @@ fun HomeScreen(navController: NavController) {
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
     val streakDays = StreakTracker.getStreak(context)
     val reminderEnabled = AppPreferences.reminderEnabledState
+    // v8.8 — the pet's flower bed at Home (spec §10.3): the pet naps here
+    // when the app opens and stays asleep until tapped; once awake the bed
+    // sits vacant while the pet floats around the app.
+    val homePetSprite: (@Composable () -> Unit)? = if (AppPreferences.petEnabledState) {
+        {
+            // v8.17 — the flower bed is the pet's PLAY landmark: while it
+            // floats, the pet sometimes dashes back home and does a little
+            // jig at its own (vacant) bed. Bounds-only, like every landmark
+            // — the bed's layout never changes, it just springs a beat.
+            PetLandmark(
+                id = "bed",
+                kind = PetLandmarks.Kind.PLAY,
+                screen = "home"
+            ) { m ->
+                CurioFlowerBed(
+                    petInside = !CurioPet.awake || CurioPet.atHome ||
+                        !AppPreferences.floatingPetEnabledState,
+                    sleeping = !CurioPet.awake,
+                    bedSize = 52.dp,
+                    onTap = {
+                        when {
+                            !CurioPet.awake -> CurioPet.wake()
+                            CurioPet.atHome -> CurioPet.comeOut()
+                            else -> Unit // already floating — the bed is vacant
+                        }
+                    },
+                    contentDescription = when {
+                        !CurioPet.awake -> "Curie asleep in its flower bed. Tap to wake"
+                        CurioPet.atHome -> "Curie sitting in its flower bed. Tap to come out"
+                        else -> "Curie's flower bed"
+                    },
+                    modifier = m
+                )
+            }
+        }
+    } else null
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val recentEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
@@ -376,17 +416,26 @@ fun HomeScreen(navController: NavController) {
                             // hero). Proper hierarchy: the greeting reads as a
                             // compact kicker, and the NAME is the star —
                             // bigger and bolder than the greeting above it.
-                            Text(
-                                text = greetingWordForNow(),
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = questInk.copy(alpha = 0.92f),
-                                textAlign = TextAlign.Start,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            // v8.16 — the greeting is a CURIOUS pet landmark:
+                            // the pet sometimes tiptoes over and reads it
+                            // (the text itself just pulses — no layout move).
+                            PetLandmark(
+                                id = "greeting",
+                                kind = PetLandmarks.Kind.CURIOUS,
+                                screen = "home"
+                            ) { m ->
+                                Text(
+                                    text = greetingWordForNow(),
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold
+                                    ),
+                                    color = questInk.copy(alpha = 0.92f),
+                                    textAlign = TextAlign.Start,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = m.fillMaxWidth()
+                                )
+                            }
                             Spacer(Modifier.height(4.dp))
                             // v7.105 — the hero NAME is the hero now: larger
                             // than the greeting (36sp ExtraBold vs the 24sp
@@ -514,32 +563,43 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                QuestShuffleCard(
-                    accent = homeRoseAccent(),
-                    onShuffle = {
-                        // v7.94 — shuffle only VISIBLE lanes: hidden
-                        // categories (Manage Categories) never get dealt.
-                        val all = CurioCategories.visible
-                        val pickMix = Random.nextBoolean()
-                        val chosen =
-                            if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
-                            else listOf(all.random())
-                        AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
-                        // Keep the random single/mix selection intact, but
-                        // bypass the generic tab restore here. Restoring a
-                        // previous Spin composition can hide this newly chosen
-                        // deck and make every tap look like the same category.
-                        navController.navigate(
-                            CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
-                        ) {
-                            popUpTo(CurioRoutes.HOME) { saveState = true }
-                            // This is an explicit fresh shuffle, so even an
-                            // identical random draw must create a new deck.
-                            launchSingleTop = false
-                            restoreState = false
-                        }
-                    }
-                )
+                // v8.25 — the quest block is the tour's HOME landmark: the
+                // First Journey's welcome step highlights the real
+                // TODAY'S QUEST card instead of a guessed bottom zone.
+                PetLandmark(
+                    id = "quest",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "home"
+                ) { m ->
+                    QuestShuffleCard(
+                        accent = homeRoseAccent(),
+                        pet = homePetSprite,
+                        onShuffle = {
+                            // v7.94 — shuffle only VISIBLE lanes: hidden
+                            // categories (Manage Categories) never get dealt.
+                            val all = CurioCategories.visible
+                            val pickMix = Random.nextBoolean()
+                            val chosen =
+                                if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
+                                else listOf(all.random())
+                            AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
+                            // Keep the random single/mix selection intact, but
+                            // bypass the generic tab restore here. Restoring a
+                            // previous Spin composition can hide this newly chosen
+                            // deck and make every tap look like the same category.
+                            navController.navigate(
+                                CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
+                            ) {
+                                popUpTo(CurioRoutes.HOME) { saveState = true }
+                                // This is an explicit fresh shuffle, so even an
+                                // identical random draw must create a new deck.
+                                launchSingleTop = false
+                                restoreState = false
+                            }
+                        },
+                        modifier = m
+                    )
+                }
             }
             Spacer(Modifier.height(20.dp))
 
@@ -914,7 +974,7 @@ fun HomeScreen(navController: NavController) {
         AlertDialog(
             onDismissRequest = { pendingUnpin = null },
             title = { Text("Unpin ${pinned.topicName}?") },
-            text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck — you can pin it again anytime.") },
+            text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck. You can pin it again anytime.") },
             confirmButton = {
                 TextButton(onClick = {
                     AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
@@ -1053,7 +1113,10 @@ private fun TopBarPill(
 @Composable
 private fun QuestShuffleCard(
     accent: Color,
-    onShuffle: () -> Unit
+    pet: (@Composable () -> Unit)? = null,
+    onShuffle: () -> Unit,
+    // v8.25 — the tour's home landmark modifier (bounds tracking only).
+    modifier: Modifier = Modifier
 ) {
     // Deep ink twin for the eyebrow — the airy pastel accent reads too
     // light against the page, so the eyebrow wears the darker ink instead
@@ -1067,7 +1130,7 @@ private fun QuestShuffleCard(
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
         shadowElevation = 0.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -1076,6 +1139,17 @@ private fun QuestShuffleCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            // v8.5 — the pet sits at the head of the daily quest summary
+            // (spec §10.3). Never intercepts taps: the row's shuffle click
+            // still fires.
+            pet?.let {
+                Box(
+                    modifier = Modifier.size(46.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    it()
+                }
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "TODAY'S QUEST",
@@ -1967,9 +2041,9 @@ private fun CurrentlyExploringCard(
                 Text(
                     when {
                         session.paused ->
-                            "Paused at ${formatElapsed(elapsedMillis)} — ${session.verb.lowercase()} ${session.targetName}"
+                            "Paused at ${formatElapsed(elapsedMillis)}: ${session.verb.lowercase()} ${session.targetName}"
                         overRecommended ->
-                            "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far — past the ~${session.durationMinutes} min mark"
+                            "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far, past the ~${session.durationMinutes} min mark"
                         else ->
                             "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far · ~${session.durationMinutes} min recommended"
                     },
@@ -1992,7 +2066,7 @@ private fun CurrentlyExploringCard(
                         ),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Done — write about it", style = MaterialTheme.typography.labelLarge)
+                        Text("Done and write about it", style = MaterialTheme.typography.labelLarge)
                     }
                     OutlinedButton(
                         onClick = onKeepExploring,

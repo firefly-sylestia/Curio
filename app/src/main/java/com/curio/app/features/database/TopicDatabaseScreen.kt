@@ -47,6 +47,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.openSilentExplore
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
@@ -58,6 +59,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -76,6 +78,10 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun TopicDatabaseScreen(navController: NavController) {
+    // Hoisted (v8.13) — the silent Explore chip needs a Context, but
+    // LocalContext.current is @Composable and cannot be called inside the
+    // row's non-composable onExplore lambda.
+    val context = LocalContext.current
     // v7.97 — SAVEABLE state: the search query, the selected category filter
     // and the scroll position survive leaving the screen (Topic Reveal
     // round-trips, tab switches, rotation, process death) instead of
@@ -332,6 +338,14 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 cat = CurioCategories.byId(row.topic.categoryId),
                                 topic = row.topic,
                                 done = row.done,
+                                // v8.12/8.13 — a silent Explore chip: opens the
+                                // topic's search page without quest chains,
+                                // dailies, recents or done-marks; it still
+                                // feeds the passport + awards the tiny
+                                // exploration XP (browsing shouldn't inflate
+                                // quest progress, but the pet knows you were
+                                // there).
+                                onExplore = { openSilentExplore(context, row.topic) },
                                 onClick = {
                                     // Browse-Topics mode: the reveal opens
                                     // read-only (no explore, no recents
@@ -429,7 +443,8 @@ private fun DatabaseTopicRow(
     cat: CurioCategory,
     topic: CurioTopic,
     done: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onExplore: (() -> Unit)? = null
 ) {
     Surface(
         onClick = onClick,
@@ -512,6 +527,34 @@ private fun DatabaseTopicRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+            // v8.12 — silent explore chip: open the topic's search page with
+            // no tracking. Nested inside the clickable row, so its own tap
+            // consumes the event instead of opening the read-only reveal.
+            if (onExplore != null) {
+                Surface(
+                    onClick = onExplore,
+                    shape = RoundedCornerShape(50),
+                    color = cat.accent.copy(alpha = 0.14f),
+                    modifier = Modifier.padding(start = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.AutoAwesome, null,
+                            tint = cat.accent,
+                            size = 14.dp
+                        )
+                        Text(
+                            text = "Explore",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = cat.accent
+                        )
+                    }
+                }
             }
             CurioIcon(
                 CurioIcons.ChevronRight, null,

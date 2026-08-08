@@ -1,0 +1,1 @@
+The deck now shuffles as a wave — each card flips one after another (top first, bottom last) instead of all at once, and the front card pulses mid-ripple, so the spin feels snappier and faster.

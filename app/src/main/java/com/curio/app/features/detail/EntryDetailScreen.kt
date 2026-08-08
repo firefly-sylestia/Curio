@@ -104,9 +104,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import com.curio.app.ui.adaptive.LocalRevealSharedScope
-import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
@@ -146,7 +143,6 @@ import com.curio.app.ui.components.MoodBoardExport
 import com.curio.app.ui.components.MoodBoardFloatingCards
 import com.curio.app.ui.components.MoodBoardTiles
 import com.curio.app.ui.components.MoodBoardZoomOverlay
-import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.components.QuoteLimits
 import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
@@ -162,6 +158,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
 import com.curio.app.ui.theme.lightAccentTint
@@ -225,7 +222,10 @@ private fun noteSeed(entryId: String, salt: Int): Int =
     (entryId.hashCode() xor (salt * 0x1F31)) and 0x7fffffff
 
 @Composable
-fun EntryDetailScreen(entryId: String, navController: NavController) {
+fun EntryDetailScreen(
+    entryId: String,
+    navController: NavController
+) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val authority = remember { "${context.packageName}.fileprovider" }
@@ -366,22 +366,10 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
         // never re-rolls) while the card rectangle — the title, the frosted
         // Date · Mood · Type card and the back / more controls — stays
         // perfectly LEVEL.
-        // ── Cabinet→Detail morph target: the hero banner is the shared-
-        //    element match for the Cabinet entry card ("cabinet-{entryId}").
-        //    When navigated from Cabinet, the card expands into this hero.
-        val heroMorphMod = run {
-            val scope = LocalRevealSharedScope.current ?: return@run Modifier
-            val vis = LocalRevealVisibilityScope.current ?: return@run Modifier
-            val state = scope.rememberSharedContentState("cabinet-${entryId}")
-            scope.run {
-                Modifier.sharedElement(state, vis, boundsTransform = RevealBoundsTransform)
-            }
-        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(EntryDetailHeroHeight + EntryDetailSheetExtent)
-                .then(heroMorphMod)
         ) {
             // ── White under-sheet — ONE SOLID white sheet layered BEHIND
             // the hero's torn bottom edge. The tear lives ONLY on the hero
@@ -623,29 +611,43 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
         // The category identity belongs to the reading flow. Keeping it in
         // this same scroll column prevents it from floating over the quick
         // fact and capture body on short screens.
-        EntryDetailCategoryLabel(
-            entry = resolvedEntry,
-            category = cat
-        )
+        // v8.36 — everything below the hero enters together with a soft
+        // fade so the category, description, and captured body keep their
+        // measured vertical positions instead of sliding through one another
+        // while the shared-element morph is still settling.
+        DetailContentEntrance {
+            // Keep the category, topic description, and captured entry body in
+            // one measured reading column. Previously these were loose
+            // siblings inside the animated container, so the body could appear
+            // to climb into the description while the entrance was running.
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                EntryDetailCategoryLabel(
+                    entry = resolvedEntry,
+                    category = cat
+                )
 
-        // ── Topic meta — quick fact and tags follow the category row.
-        Column(
-            modifier = Modifier
-                .padding(start = detailBodyGutter(), end = detailBodyGutter(), top = 8.dp, bottom = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // ── Quick fact (v7.38) — the topic's teaser directly under the
-            // fixed category label, backgroundless on the page wash.
-            QuickFactCard(
-                cat = cat,
-                teaser = resolvedEntry.topic.teaser
-            )
+                // ── Topic meta — quick fact and tags follow the category row.
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = detailBodyGutter())
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // ── Quick fact (v7.38) — the topic's teaser directly under
+                    // the fixed category label, backgroundless on the page wash.
+                    QuickFactCard(
+                        cat = cat,
+                        teaser = resolvedEntry.topic.teaser
+                    )
 
-            MorphEntrance {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     // ── Custom tags (v7.17) — the labels added on the save
                     // page, rendered as small #chips (the captured-at line
-                    // moved onto the hero's Date segment in v7.39).
+                    // moved onto the hero's Date segment in v7.39). Keep this
+                    // as a normal measured child: a nested scale/visibility
+                    // animation can paint tags through the long body below.
                     if (resolvedEntry.tags.isNotEmpty()) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -670,16 +672,21 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
                         }
                     }
                 }
+
+                // ── Format body ────────────────────────────────────────
+                // The category row and topic description now have explicit
+                // breathing room before the captured content begins.
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = detailBodyGutter())
+                        .fillMaxWidth()
+                ) {
+                    FormatBody(entry = resolvedEntry, category = cat, navController = navController)
+                }
             }
         }
 
-        // ── Format body ────────────────────────────────────────────────            // The category row is part of the scrolling content; horizontal
-            // stays 20dp to match the metadata column gutter.
-        Box(modifier = Modifier.padding(horizontal = detailBodyGutter(), vertical = 8.dp)) {
-            FormatBody(entry = resolvedEntry, category = cat, navController = navController)
-        }
-
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(40.dp))
         }
 
         // Keep scroll-linked controls in their own recomposition scope. The
@@ -742,7 +749,34 @@ fun EntryDetailScreen(entryId: String, navController: NavController) {
 @Composable
 private fun detailBodyGutter(): Dp = if (windowWidthSizeClass().isWide) 28.dp else 20.dp
 
-private val EntryDetailHeroHeight = 360.dp
+/**
+ * v8.36 — soft entrance for the detail content below the morphing hero.
+ * The body is placed in a normal measured [Box] immediately; only its alpha
+ * animates. This keeps long descriptions and note sections in their final
+ * positions while the Cabinet/Detail shared morph settles, instead of letting
+ * an AnimatedVisibility container resize or translate siblings mid-entrance.
+ */
+@Composable
+private fun DetailContentEntrance(content: @Composable () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing),
+        label = "detailContentFade"
+    )
+    Box(
+        modifier = Modifier.graphicsLayer { this.alpha = alpha }
+    ) {
+        content()
+    }
+}
+
+// Two-line topic names plus the frosted metadata strip need a little more
+// vertical breathing room on compact screens. Keeping this as the shared
+// hero/morph height prevents the body header from being painted underneath
+// the category and entry text while preserving one stable transition target.
+private val EntryDetailHeroHeight = 400.dp
 /** Extra layout space reserved for the white sheet below the clipped hero. */
 private val EntryDetailSheetExtent = 16.dp
 
@@ -786,23 +820,30 @@ private fun EntryDetailCategoryLabel(
             tint = category.categoryInk(),
             size = 22.dp
         )
-        Text(
-            text = category.displayName,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = category.categoryInk(),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        if (entry.title != null) {
+        // Keep the category and saved-entry title in one constrained text
+        // column. They used to be competing weighted children in the same
+        // row, so long titles could squeeze into the category label and
+        // appear to overlap it on narrow screens.
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             Text(
-                text = entry.title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                text = category.displayName,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = category.categoryInk(),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+                overflow = TextOverflow.Ellipsis
             )
+            if (!entry.title.isNullOrBlank()) {
+                Text(
+                    text = entry.title.orEmpty(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         if (entry.isLegacy) {
             Row(
@@ -818,7 +859,8 @@ private fun EntryDetailCategoryLabel(
                 Text(
                     text = "Legacy",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
             }
         }
@@ -1454,13 +1496,13 @@ private fun SoundBiteRender(
             override fun onError(error: Int) {
                 noteTranscribing = false
                 noteError = when (error) {
-                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech heard — try again."
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Listening timed out — try again."
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech heard. Try again."
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Listening timed out. Try again."
                     SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone access is needed to transcribe."
                     SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT ->
-                        "Speech service unreachable — check your connection."
+                        "Speech service unreachable. Check your connection."
                     SpeechRecognizer.ERROR_CLIENT -> "Speech recognition isn't available on this device."
-                    else -> "Couldn't transcribe — try again."
+                    else -> "Couldn't transcribe. Try again."
                 }
                 notePartial = ""
             }
@@ -2239,33 +2281,35 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
 @Composable
 private fun MarginaliaRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.Marginalia ?: return
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         data.fieldMindMetadata?.let { metadata ->
             FieldMindMetadataCard(metadata = metadata, category = category)
         }
         // ── Journal — "My thoughts" on a note-paper page ──────────────
         if (!data.journalText.isNullOrBlank()) {
-            MarginaliaSectionHeader(label = "My thoughts", category = category)
-            val journalSheet = data.journalColor ?: NotePaperColor.CREAM
-            NotePaperCard(
-                style = data.journalStyle ?: data.notePaperStyle(),
-                seed = noteSeed(entry.id, 4),
-                paperColor = journalSheet,
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 22.dp),
-                ruleSpacing = SavedNoteRuleSpacing,
-                tailSpace = SavedNoteTailSpace,
-                minHeight = 120.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    buildRichAnnotated(
-                        data.journalText,
-                        data.journalSpans.orEmpty(),
-                        notePaperHighlight(journalSheet)
-                    ),
-                    style = savedNoteStyle(),
-                    color = notePaperInk(journalSheet)
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                MarginaliaSectionHeader(label = "My thoughts", category = category)
+                val journalSheet = data.journalColor ?: NotePaperColor.CREAM
+                NotePaperCard(
+                    style = data.journalStyle ?: data.notePaperStyle(),
+                    seed = noteSeed(entry.id, 4),
+                    paperColor = journalSheet,
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 22.dp),
+                    ruleSpacing = SavedNoteRuleSpacing,
+                    tailSpace = SavedNoteTailSpace,
+                    minHeight = 120.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        buildRichAnnotated(
+                            data.journalText,
+                            data.journalSpans.orEmpty(),
+                            notePaperHighlight(journalSheet)
+                        ),
+                        style = savedNoteStyle(),
+                        color = notePaperInk(journalSheet)
+                    )
+                }
             }
         }
 
@@ -2463,7 +2507,11 @@ private fun RenderQuoteCards(
                         CurioIcon(
                             name = if (saved) CurioIcons.Bookmark else CurioIcons.BookmarkBorder,
                             contentDescription = if (saved) "Remove bookmark" else "Bookmark quote",
-                            tint = if (saved) category.themedAccent()
+                            // v8.28 — saved bookmark wears the readable ink
+                            // (deep in light + pastel, deep twin for pale
+                            // accents, light twin in dark) so it never
+                            // washes out on the pastel wash.
+                            tint = if (saved) category.readableAccentInk()
                                    else notePaperInk(quoteSheet).copy(alpha = 0.45f),
                             size = 18.dp,
                             modifier = Modifier.padding(4.dp)
@@ -3259,12 +3307,12 @@ private fun ExpandedMoodBoardDialog(
 @Composable
 private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.FieldNotes ?: return
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         data.fieldMindMetadata?.let { metadata ->
             FieldMindMetadataCard(metadata = metadata, category = category)
         }
         data.observed.takeIf { it.isNotBlank() }?.let { text ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Observed", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold), color = category.categoryInk())
                 val observedSheet = data.observedColor ?: NotePaperColor.CREAM
                 NotePaperCard(
@@ -3286,7 +3334,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
             }
         }
         data.surprised.takeIf { it.isNotBlank() }?.let { text ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Surprised me", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold), color = category.categoryInk())
                 val surprisedSheet = data.surprisedColor ?: NotePaperColor.CREAM
                 NotePaperCard(
@@ -3308,7 +3356,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
             }
         }
         data.learnNext.takeIf { it.isNotBlank() }?.let { text ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Want to learn next", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold), color = category.categoryInk())
                 val learnNextSheet = data.learnNextColor ?: NotePaperColor.CREAM
                 NotePaperCard(
@@ -3445,7 +3493,12 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
             rows.forEach { (label, value) ->
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(label, style = MaterialTheme.typography.labelMedium, color = category.categoryInk(), modifier = Modifier.width(92.dp))
-                    Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodySmall,
+                        softWrap = true,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
             if (!metadata.tags.isNullOrEmpty()) {
@@ -3491,6 +3544,7 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                             Text(
                                 value,
                                 style = MaterialTheme.typography.bodySmall,
+                                softWrap = true,
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -3536,7 +3590,12 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(label, style = MaterialTheme.typography.labelSmall, color = category.categoryInk(), modifier = Modifier.width(92.dp))
-                                    Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodySmall,
+                        softWrap = true,
+                        modifier = Modifier.weight(1f)
+                    )
                                 }
                             }
                         }

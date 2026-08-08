@@ -342,7 +342,7 @@ class ExploreSessionService : Service() {
             .setColor(accent)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setContentTitle(
-                if (paused) "Paused — ${session.topicName}"
+                if (paused) "Paused: ${session.topicName}"
                 else "Exploring ${session.topicName}"
             )
             .setContentIntent(openAppIntent())

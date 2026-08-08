@@ -65,6 +65,21 @@ fun CurioCategory.themedAccent(): Color {
 }
 
 /**
+ * v8.28 — text/icon ink for category accents on PLAIN surfaces in EVERY
+ * light theme: like [categoryInk], but pale accents (e.g. the wildcard
+ * coral, which is pastel by nature) get their deep hue twin even when
+ * pastel mode is OFF. Used by small label text and glyphs (quest passport
+ * stamps, saved bookmarks) that must never wash out in plain light mode
+ * either. Dark mode still resolves the light twin, exactly like
+ * [categoryInk].
+ */
+@Composable
+fun CurioCategory.readableAccentInk(): Color {
+    if (isCurioDarkTheme()) return lightAccent
+    return if (accent.isPale()) deepHueInk(accent) else accent
+}
+
+/**
  * Ink color for content sitting ON an accent fill (buttons, selected cards,
  * chips, hero gradients).
  *

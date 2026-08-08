@@ -199,7 +199,7 @@ fun PromoModeScreen(navController: NavController) {
                 item {
                     Text(
                         text = if (promoOn) {
-                            "All screens now show demo content — Home, Profile, Quests & Cabinet. Screenshot away; everything stays tappable."
+                            "All screens now show demo content: Home, Profile, Quests & Cabinet. Screenshot away; everything stays tappable."
                         } else {
                             "Home, Profile, Quests & Cabinet show your real data while promo mode is off."
                         },
@@ -842,7 +842,7 @@ fun PromoAppScreenshot() {
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Curio — discover something new,\nexplore it your way.",
+                    text = "Curio. Discover something new,\nexplore it your way.",
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.Bold,
                         lineHeight = 18.sp

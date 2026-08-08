@@ -13,9 +13,9 @@ concurrency:
 
 jobs:
   release:
-    name: Build and publish signed release APK
+    name: Build and publish signed release APKs
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Check out Curio
@@ -67,7 +67,7 @@ jobs:
           fi
           echo "Release keystore decoded (${size} bytes)."
 
-      - name: Build signed release APK
+      - name: Build signed release APKs (universal + per-ABI)
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -75,26 +75,106 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew validateTopics assembleRelease --stacktrace
 
-      - name: Verify release APK and signature
+      - name: Verify release APKs and signatures
         run: |
           set -euo pipefail
-          apk=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' ! -name '*-unsigned.apk' | head -n 1)
-          if [ -z "$apk" ]; then
+          # ABI splits + universal APK all live here (see app/build.gradle.kts).
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/release/*.apk)
+          if [ "${#apks[@]}" -eq 0 ]; then
             echo "::error::No signed release APK was produced."
             exit 1
           fi
-          echo "Release APK: $apk"
           sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
           apksigner=$(find "$sdk_root/build-tools" -type f -name apksigner | sort -V | tail -n 1)
           if [ -z "$apksigner" ]; then
             echo "::error::Android build-tools apksigner was not found."
             exit 1
           fi
-          "$apksigner" verify --print-certs "$apk"
-          if "$apksigner" verify --print-certs "$apk" 2>&1 | grep -q 'CN=Android Debug'; then
-            echo "::error::Release APK is signed with the Android debug key."
+          for apk in "${apks[@]}"; do
+            echo "Release APK: $apk"
+            "$apksigner" verify --print-certs "$apk"
+            if "$apksigner" verify --print-certs "$apk" 2>&1 | grep -q 'CN=Android Debug'; then
+              echo "::error::Release APK $apk is signed with the Android debug key."
+              exit 1
+            fi
+          done
+          echo "Verified ${#apks[@]} release APK(s) — none signed with the debug key."
+
+      - name: Read app version for APK naming
+        id: version
+        run: |
+          set -euo pipefail
+          # printReleaseVersion prints "versionName:versionCode" (app/build.gradle.kts).
+          version=$(./gradlew -q printReleaseVersion | grep -m1 -E '^[0-9][0-9.]*:[0-9]+$' || true)
+          if [ -z "$version" ]; then
+            echo "::error::Could not read the app version from Gradle (printReleaseVersion)."
             exit 1
           fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Rename release APKs and write install guide
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          cd app/build/outputs/apk/release
+          # VERSION is "versionName:versionCode" from the printReleaseVersion task.
+          vname="${VERSION%%:*}"
+          vcode="${VERSION##*:}"
+          # minSdk 26 == Android 8.0 (see defaultConfig in app/build.gradle.kts).
+          # Every APK below requires Android 8.0 or newer; the ABI picks the CPU.
+          min_android="8.0"
+
+          body="$GITHUB_WORKSPACE/release-body.md"
+          {
+            echo "## Curio $vname ($vcode)"
+            echo ""
+            echo "All APKs require **Android $min_android (API 26) or newer**. Pick the one that matches your device's CPU — when in doubt, use the **universal** APK."
+            echo ""
+            echo "| File | Best for | Size |"
+            echo "|---|---|---|"
+          } > "$body"
+
+          for apk in *.apk; do
+            base="${apk%.apk}"
+            abi="${base#app-}"
+            abi="${abi%-release}"
+            new_name="Curio-${vname}-${vcode}-${abi}-Android${min_android}+.apk"
+            size=$(du -h "$apk" | cut -f1)
+            case "$abi" in
+              universal)   desc="Every Android $min_android+ device — the safe default (largest download)" ;;
+              arm64-v8a)   desc="Modern 64-bit phones and tablets (most devices since ~2017)" ;;
+              armeabi-v7a) desc="Older 32-bit phones (before 2017)" ;;
+              x86_64)      desc="64-bit emulators / Chromebooks" ;;
+              x86)         desc="32-bit emulators" ;;
+              *)           desc="See project README" ;;
+            esac
+            echo "| \`$new_name\` | $desc | ~$size |" >> "$body"
+            mv "$apk" "$new_name"
+          done
+
+          # Hard guard: every expected split APK must exist after renaming, so a
+          # naming drift in AGP (which cannot be verified locally per repo rules)
+          # fails the release loudly instead of publishing a partial set.
+          for expected in universal armeabi-v7a arm64-v8a x86_64 x86; do
+            if [ ! -f "Curio-${vname}-${vcode}-${expected}-Android${min_android}+.apk" ]; then
+              echo "::error::Expected release APK missing after rename: $expected"
+              exit 1
+            fi
+          done
+
+          echo "" >> "$body"
+          echo "**How do I know which one to install?**" >> "$body"
+          echo "- **Unsure?** Use the \`universal\` APK — it works on every device." >> "$body"
+          echo "- Check your device's CPU ABI: open **Settings → About phone** and look for processor/ABI info, or run \`adb shell getprop ro.product.cpu.abi\`." >> "$body"
+          echo "- The ABI is the CPU architecture; any device running Android ${min_android}+ whose ABI matches can install that APK." >> "$body"
+
+          echo "--- Release body ---"
+          cat "$body"
+          echo "--- Release APKs ---"
+          ls -la
 
       - name: Determine prerelease status
         id: prerelease
@@ -111,6 +191,9 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           prerelease: ${{ steps.prerelease.outputs.value }}
+          # The install-guide body from the rename step is prepended to GitHub's
+          # auto-generated release notes (commit list since the last tag).
+          body_path: release-body.md
           generate_release_notes: true
           files: app/build/outputs/apk/release/*.apk
           fail_on_unmatched_files: true

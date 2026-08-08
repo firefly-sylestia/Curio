@@ -167,7 +167,7 @@ fun RecentScreen(navController: NavController) {
                 CurioEmptyState(
                     glyph = CurioIcons.History,
                     headline = "No discoveries yet",
-                    subtext = "Explore a topic or save a capture — your recent finds will show up here.",
+                    subtext = "Explore a topic or save a capture. Your recent finds will show up here.",
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
                 )
             } else {

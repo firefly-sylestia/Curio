@@ -1,0 +1,7 @@
+Curie’s Pet designer is easier to use:
+• Draw custom mood and reaction faces pixel by pixel
+• New focused editor tabs and protected Draw mode
+• Quick body-color palette beside the canvas
+• Improved color editing with hex, HSL, and quick picks
+• Smooth continuous painting while dragging
+• Existing designs keep their procedural face fallback

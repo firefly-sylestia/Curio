@@ -23,6 +23,10 @@ object CurioColors {
     // ── Warm pastel foundation ─────────────────────────────────────────
     val CoralBlush       = Color(0xFFFF8FA3)  // Soft pink — primary
     val ButterYellow     = Color(0xFFFFD97D)  // Warm butter — secondary
+    // v8.33 — deep gold ink for LIGHT surfaces: ButterYellow is a pale pastel
+    // that vanishes on the cream background, so bonus/rank text + icons wear
+    // this readable dark gold in light mode (dark mode keeps the bright butter).
+    val GoldInk          = Color(0xFFB8860B)  // Dark goldenrod — readable on light
     val SkyMint          = Color(0xFF8FE3CF)  // Soft mint — tertiary
     val CreamWhite       = Color(0xFFFFFBF5)  // Warm white — ink on primary/error fills + decorative accents
     val SoftCream        = Color(0xFFF7F0E4)  // Soft cream — light-mode background (user-preferred, less white)

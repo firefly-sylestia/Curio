@@ -109,6 +109,8 @@ object CurioIcons {
     const val Palette     = "palette"
     const val ScienceGlyph = "science"
     const val Colorize    = "colorize"   // eyedropper — Pastel colors mode
+    const val Undo        = "undo"      // ↩ — pet designer undo
+    const val Redo        = "redo"      // ↪ — pet designer redo
     const val Layers      = "layers"     // stacked cards — Deck cards look (v7.7)
 
     // ── Note-paper style chips (Ruled/Torn/Coffee/Folded/Red-margin)
@@ -148,6 +150,14 @@ object CurioIcons {
     const val EmojiEvents     = "workspace_premium"     // trophy — achievements shelf (v7.89: glyph verified in font subset; "emoji_events" was tofu)
     const val Flag            = "flag"                  // journey marker
     const val WorkspacePremium = "workspace_premium"    // badge — level milestones
+    // v8.34 — paw glyph for the Pet designer Settings entry (Material Symbols "pets").
+    const val Pets = "pets"
+    // v8.35 — pet designer tool glyphs (verified present in the bundled font subset).
+    const val Brush = "brush"                 // paint brush — paint tool
+    const val Fill = "format_paint"           // paint roller — fill bucket tool
+    const val Eraser = "ink_eraser"           // eraser — erase tool
+    const val Keyboard = "keyboard"           // typing reaction
+    const val Wallpaper = "wallpaper"         // PNG export
     const val TaskAlt         = "task_alt"              // current quest
     const val Database        = "database"              // v7.89 — Browse Topics drawer entry (verified in font subset)
     const val SupportAgent    = "support_agent"          // v7.89 — Support & diagnostics drawer entry (verified in font subset)

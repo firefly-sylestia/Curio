@@ -1,0 +1,1 @@
+• Fixed washed-out colors: quest passport stamps (labels and lane glyphs) and the saved-bookmark icon now use a deeper, readable ink in light and pastel mode, so they no longer fade into the background.

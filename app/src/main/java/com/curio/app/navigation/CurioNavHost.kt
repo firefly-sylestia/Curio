@@ -1,5 +1,6 @@
 package com.curio.app.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -9,8 +10,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -43,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -61,6 +65,7 @@ import androidx.navigation.navArgument
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioPet
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.QuestGuide
@@ -68,6 +73,7 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryBackgroundWash
 import kotlinx.coroutines.delay
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
@@ -90,6 +96,7 @@ import com.curio.app.features.recent.RecentScreen
 import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
+import com.curio.app.features.petdesigner.PetDesignerScreen
 import com.curio.app.features.picker.CategoryPickerScreen
 import com.curio.app.features.reveal.TopicRevealScreen
 import com.curio.app.features.spin.SpinScreen
@@ -104,8 +111,8 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBottomBar
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.GuidePointer
-import com.curio.app.ui.components.QuestGuideToast
+import com.curio.app.ui.pet.CurioFloatingPet
+import com.curio.app.ui.pet.PetGuideOverlay
 import com.curio.app.ui.theme.CurioMotion
 
 /**
@@ -125,6 +132,41 @@ private fun safeDecode(raw: String?): String =
  */
 private fun isRevealRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route == CurioRoutes.REVEAL
+
+/** True when the route is the saved-entry detail page (any entry id). */
+private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
+    entry.destination.route?.substringBefore("/") == CurioRoutes.ENTRY_DETAIL.substringBefore("/")
+
+/**
+ * Push destinations that use the detail page's center pop-up (scale + fade)
+ * instead of the generic horizontal slide — v8.4x: Save/Capture (+ its edit
+ * routes), Profile, Quests, Settings (hub + every section), Pet Designer,
+ * Topic History, Manage Categories, Recents, Support/Bug Report, and the
+ * Topic Database. Lightbox, Category Picker, Reveal, and the boot gates keep
+ * their own treatments. Values are route PREFIXES (substringBefore("/")) so
+ * parameterised routes like capture/{...}, the edit-* family, and settings
+ * sub-pages all match by prefix.
+ */
+private val popScreenRoutePrefixes: Set<String> = setOf(
+    CurioRoutes.CAPTURE.substringBefore("/"),
+    CurioRoutes.EDIT_MOODBOARD.substringBefore("/"),
+    CurioRoutes.EDIT_ENTRY.substringBefore("/"),
+    CurioRoutes.PROFILE,
+    CurioRoutes.QUESTS,
+    CurioRoutes.SETTINGS,
+    CurioRoutes.EXPERIMENTS,
+    CurioRoutes.PET_DESIGNER,
+    CurioRoutes.TOPIC_HISTORY,
+    CurioRoutes.MANAGE_CATEGORIES,
+    CurioRoutes.RECENTS_ALL,
+    CurioRoutes.SUPPORT,
+    CurioRoutes.BUG_REPORT,
+    CurioRoutes.DATABASE
+)
+
+/** True when the destination is one of the center-pop push screens. */
+private fun isPopScreenRoute(entry: NavBackStackEntry): Boolean =
+    entry.destination.route?.substringBefore("/") in popScreenRoutePrefixes
 
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     initialState: NavBackStackEntry,
@@ -150,13 +192,47 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * Upgraded navigation transitions:
  *  - Forward navigations: slide left + fade (matched tweens)
  *  - Back navigations: slide right + fade (matched tweens)
- *  - Tab switches (bottom nav): simple crossfade (no directional slide)
+ *  - Modal push screens (detail + Capture/Profile/Quests/Settings/Pet
+ *    Designer/Topic History/Manage Categories/Recents/Support/Bug Report/
+ *    Database): center pop — scale up + fade in, shrink + fade out (v8.4x)
+ *  - Tab switches (bottom nav): subtle scale-fade (no directional slide)
  *  - Splash → Home / Onboarding: fade-only reveal
  * v7.17 — the old exit/pop-enter slides used underdamped springs that
  * overshot and bounced (and never matched their paired fade) — the
  * page-switch glitch. All transitions now use matched tweens, and tab
  * switches crossfade.
  */
+@Composable
+private fun RevealBottomBarPlaceholder(
+    bottomBarHeightPx: Int,
+    density: androidx.compose.ui.unit.Density,
+    // v8.25 — the reserved strip wears the reveal page's category wash (not
+    // the Scaffold's plain cream surface), so no cream band ever flashes
+    // between the Spin wash and the reveal dock registering.
+    background: Color
+) {
+    val reserve = if (bottomBarHeightPx > 0) {
+        with(density) { bottomBarHeightPx.toDp() }
+    } else null
+    // The fallback (no measured height yet — e.g. a deep link straight into
+    // Reveal) must reserve the SAME 80dp total as the measured bar AND the
+    // reveal dock (which is height(80.dp) with the nav-bar inset consumed
+    // INSIDE), so the placeholder → dock swap never changes Scaffold
+    // innerPadding mid-transition (an innerPadding change re-lays out the
+    // SharedTransitionLayout and freezes the reveal morph — v8.5).
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(background)
+            .then(
+                if (reserve != null) Modifier.height(reserve)
+                else Modifier
+                    .height(80.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+            )
+    )
+}
+
 @Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
@@ -181,12 +257,55 @@ fun CurioNavHost(
     // placeholder never rendered — the bar hid mid-morph, innerPadding grew
     // by the bar's height, and the watermark visibly shifted down. Compare
     // the prefixes so the reserve actually engages.
-    // v8.4 — the Entry Detail route is dropped from the reserve: its morph
-    // source (Cabinet) reads fine without the bar reserved, so no
-    // placeholder is needed there.
-    val reserveBarSpace = routePrefix != null && routePrefix in setOf(
-        CurioRoutes.REVEAL.substringBefore("/")
-    )
+    // v8.36/v8.37 — the reserve covers the Reveal morph destination in both
+    // directions of travel: while the reveal is on top (route-prefix check),
+    // and while it is EXITING (popping reveal → spin) — detected by the
+    // exiting screen's dock still being registered in revealBottomBarContent
+    // (it only clears when the destination leaves composition, i.e. after
+    // the pop transition finishes). Without the exiting case the real bar
+    // swaps in mid-transition, innerPadding changes, and the
+    // SharedTransitionLayout re-lays out — the nav bar flashed the cream
+    // surface for a moment on reveal close. (v8.37 — this replaced the
+    // backStackEntry.previousBackStackEntry check, which navigation 2.9
+    // removed in the NavBackStackEntry rework.)
+    // v8.38 — Entry Detail no longer reserves the slot: its bottom wash
+    // strip is gone (the page pops up edge-to-edge), so only the reveal
+    // route keeps the reserve.
+    val revealPrefix = CurioRoutes.REVEAL.substringBefore("/")
+    val morphReservePrefixes = setOf(revealPrefix)
+    var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+    val reserveBarSpace = (routePrefix != null && routePrefix in morphReservePrefixes) ||
+        revealBottomBarContent != null
+    // v8.25 — the reveal page's category, resolved from the reveal route's
+    // categorySlug so the reserved bottom strip below can wear the SAME wash
+    // as the page from the very first frame. The reveal dock (which carries
+    // the wash itself) registers a frame or two after the route switches —
+    // without this the transparent morph placeholder showed the Scaffold's
+    // plain cream surface in that gap (the "bottom nav flashes cream on
+    // open" bug). No exiting-entry resolution is needed: while the reveal
+    // pops back, its own dock is still registered and paints the wash.
+    val revealCat = if (routePrefix == revealPrefix) {
+        CurioCategories.byRouteSlug(
+            backStackEntry?.arguments?.getString("categorySlug").orEmpty()
+        ) ?: CurioCategories.byId(CategoryId.WILDCARD)
+    } else null
+    // The reserved strip's background: the reveal wash while the reveal is
+    // on top, else the surface. (The detail page reserves nothing — it pops
+    // up edge-to-edge with no bottom strip.)
+    val reserveBackground = when {
+        revealCat != null -> revealCat.categoryBackgroundWash()
+        else -> MaterialTheme.colorScheme.surface
+    }
+    // The reveal page paints its own category wash over the whole content
+    // area, and its action dock wears the SAME wash (see RevealActionDock),
+    // so the Scaffold's default background never shows as a strip behind
+    // the transparent dock while the reveal is open — and the Scaffold's
+    // containerColor stays CONSTANT across the whole route transition.
+    // (v8.5 regression fix: painting the Scaffold container with a
+    // dynamically-computed revealWash here restarted/disrupted the
+    // shared-element route transition — the morph froze and the entire
+    // reveal page stayed invisible except the dock, which lives outside
+    // the SharedTransitionLayout. The dock now carries the wash itself.)
     // The bottom bar's exact measured height (px) — captured from the real
     // bar so the invisible morph-transition placeholder can reserve IDENTICAL
     // space. M3's NavigationBar consumes the nav-bar inset inside its 80dp
@@ -217,13 +336,28 @@ fun CurioNavHost(
     //    pops up from other screens.
     // ── Quest tour runner — auto-navigate to the current step's screen so
     //    every overlay tap advances the walkthrough to the next place.
+    //    v8.6 — HOLD steps (First Journey's real-action waits) only guide the
+    //    user back when they're PARKED on a bottom-nav tab and not already on
+    //    the step's route — never yank someone away mid-flow (e.g. off the
+    //    reveal while it auto-opens after a spin); the step advances via
+    //    QuestGuide.onWait when the REAL action happens. Also persists the
+    //    exact tour position so it survives process death (spec §7.3).
     LaunchedEffect(QuestGuide.active, QuestGuide.index, routePrefix) {
-        if (!QuestGuide.active) return@LaunchedEffect
-        val step = QuestGuide.current ?: return@LaunchedEffect
-        if (step.route.isEmpty()) return@LaunchedEffect
-        if (routePrefix != step.route) {
-            navController.navigateToQuestRoute(step.route)
+        if (QuestGuide.active) {
+            val step = QuestGuide.current
+            if (step != null && step.route.isNotEmpty()) {
+                val parkedOnTab = routePrefix != null &&
+                    routePrefix in CurioRoutes.bottomNavRoutePrefixes
+                if (step.hold) {
+                    if (parkedOnTab && routePrefix != step.route) {
+                        navController.navigateToQuestRoute(step.route)
+                    }
+                } else if (routePrefix != step.route) {
+                    navController.navigateToQuestRoute(step.route)
+                }
+            }
         }
+        QuestGuide.persist(context)
     }
     // When the tour ends (Finish / the overlay's X), land the user back on a
     // stable tab instead of leaving the pushed tour screens stacked.
@@ -336,34 +470,27 @@ fun CurioNavHost(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
-                if (!wide && showBottomBar) {
+                // Reserve-first (v8.36): any live shared-element morph — a
+                // reveal or detail destination on top, OR one still exiting
+                // (popping back) — keeps the bottom strip as the screen's
+                // dock / wash spacer or the tinted placeholder, so the real
+                // bar never swaps in mid-transition (innerPadding changes
+                // mid-morph would re-lay out the SharedTransitionLayout and
+                // jolt the animation / flash the cream surface).
+                if (!wide && reserveBarSpace) {
+                    revealBottomBarContent?.invoke()
+                        ?: RevealBottomBarPlaceholder(
+                            bottomBarHeightPx = bottomBarHeightPx,
+                            density = density,
+                            background = reserveBackground
+                        )
+                } else if (!wide && showBottomBar) {
                     CurioBottomBar(
                         navController = navController,
                         // Measure the bar's real height so the morph
                         // placeholder below can reserve exactly this much
                         // (see bottomBarHeightPx).
                         modifier = Modifier.onSizeChanged { bottomBarHeightPx = it.height }
-                    )
-                } else if (!wide && reserveBarSpace) {
-                    // Invisible placeholder sized to the REAL bar's measured
-                    // height so shared-element morph transitions never
-                    // relayout the exiting tab screen. Must match the bar
-                    // pixel-for-pixel (M3's NavigationBar consumes the
-                    // nav-bar inset inside its 80dp min height — an
-                    // "80dp + insets" spacer would be taller by the inset
-                    // and shift the layout the moment the morph starts).
-                    // Falls back to the old estimate if the bar was never
-                    // measured (e.g. a deep link landing straight on Reveal).
-                    val reserve = if (bottomBarHeightPx > 0) {
-                        with(density) { bottomBarHeightPx.toDp() }
-                    } else null
-                    Spacer(
-                        modifier = Modifier.fillMaxWidth().then(
-                            if (reserve != null) Modifier.height(reserve)
-                            else Modifier
-                                .heightIn(min = 80.dp)
-                                .windowInsetsPadding(WindowInsets.navigationBars)
-                        )
                     )
                 }
             },
@@ -442,6 +569,15 @@ fun CurioNavHost(
                     // the hero (its staggered entrance) reads cleanly.
                     isRevealRoute(targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // Entry Detail and the modal-style push screens pop up
+                    // from the screen center (scale + fade) like a modal — they
+                    // never slide in from the side (v8.38 detail; v8.4x the
+                    // same pop for the screens in popScreenRoutePrefixes).
+                    isDetailRoute(targetState) || isPopScreenRoute(targetState) ->
+                        scaleIn(
+                            initialScale = 0.88f,
+                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Splash → Home / Onboarding: special elastic morph
                     initialState.destination.route == CurioRoutes.SPLASH ->
                         fadeIn(
@@ -450,9 +586,13 @@ fun CurioNavHost(
                                 delayMillis = 0
                             )
                         )
-                    // Tab switches: simple crossfade (no directional slide)
+                    // Tab switches: subtle scale-fade (no directional slide) —
+                    // the incoming tab grows gently while it fades in.
                     isTabSwitch(initialState, targetState) ->
-                        fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
+                        scaleIn(
+                            initialScale = 0.97f,
+                            animationSpec = tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other forward navigations: slide left + fade
                     else -> slideInHorizontally(
                         initialOffsetX = { fullWidth -> fullWidth / 4 },
@@ -469,9 +609,23 @@ fun CurioNavHost(
                     // vanish under the ~450ms morph).
                     isRevealRoute(targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // The screen under the detail pop-up / modal push dims out
+                    // over the SAME 450ms as the pop — no slide, and the longer
+                    // fade masks the bottom-bar space release as a gentle dim
+                    // instead of a snap (v8.38 detail; v8.4x pop screens).
+                    isDetailRoute(targetState) || isPopScreenRoute(targetState) ->
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Navigating away from splash: no exit needed
                     initialState.destination.route == CurioRoutes.SPLASH ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
+                    // A pop screen that opens a NON-pop push (e.g. Settings →
+                    // Lightbox) shrinks away the same way it popped in, so the
+                    // modal language stays consistent (v8.4x).
+                    isPopScreenRoute(initialState) ->
+                        scaleOut(
+                            targetScale = 0.88f,
+                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     isTabSwitch(initialState, targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other exits: slide out slightly + fade
@@ -488,9 +642,18 @@ fun CurioNavHost(
                     // directional slide would fight it.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // Tab switch back: crossfade too (no directional slide).
+                    // Popping back from Entry Detail / a pop screen: the page
+                    // below fades back in while the modal shrinks away (v8.38
+                    // detail; v8.4x pop screens).
+                    isDetailRoute(initialState) || isPopScreenRoute(initialState) ->
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // Tab switch back: subtle scale-fade too (no directional
+                    // slide).
                     isTabSwitch(initialState, targetState) ->
-                        fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
+                        scaleIn(
+                            initialScale = 0.97f,
+                            animationSpec = tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
                         // Back navigation: slide right + fade
                         slideInHorizontally(
@@ -506,6 +669,15 @@ fun CurioNavHost(
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // The detail page / pop screen shrinks back down as it
+                    // pops away — the matched fade keeps the shrink smooth over
+                    // the same duration as the page beneath fading back in
+                    // (v8.38 detail; v8.4x pop screens).
+                    isDetailRoute(initialState) || isPopScreenRoute(initialState) ->
+                        scaleOut(
+                            targetScale = 0.88f,
+                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     isTabSwitch(initialState, targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
@@ -586,10 +758,12 @@ fun CurioNavHost(
                     TopicRevealScreen(
                         categorySlug = entry.arguments?.getString("categorySlug").orEmpty(),
                         topicName    = safeDecode(entry.arguments?.getString("topicName")),
-                        navController = navController,
-                        // Browse-Topics mode: read-only reveal (see CurioRoutes).
-                        browseMode = entry.arguments?.getString("browse") == "1"
-                    )
+                    navController = navController,
+                    // Browse-Topics mode: read-only reveal (see CurioRoutes).
+                    browseMode = entry.arguments?.getString("browse") == "1",
+                    onBottomBarContentChanged = { revealBottomBarContent = it },
+                    onBottomBarContentCleared = { revealBottomBarContent = null }
+                )
                 }
             }
             composable(
@@ -702,6 +876,9 @@ fun CurioNavHost(
             composable(CurioRoutes.FIELDMIND_OBSERVATION) {
                 FieldMindObservationScreen(navController = navController)
             }
+            composable(CurioRoutes.PET_DESIGNER) {
+                PetDesignerScreen(navController = navController)
+            }
             composable(route = CurioRoutes.LIGHTBOX) {
                 // The image URI is handed off out-of-band via LightboxTarget
                 // (see CurioRoutes.lightbox) — no route arg, so no encoding/
@@ -710,51 +887,80 @@ fun CurioNavHost(
             }
         }
         }
-        // ── Quest tour overlay (v8.1/v8.3) — a compact IN-APP floating pill,
-        //    NOT a dialog. MOVES WITH THE STEP (v8.3): bottom of the screen
-        //    for the tab steps, below the settings-family hero for Quests /
-        //    Settings, centered on the final step — with a pointer arrow at
-        //    the content it describes and progress dots. Rendered only while
-        //    a tour is active; the tour itself is started from the Quests
-        //    page (v8.2), never auto-shown.
-        if (QuestGuide.active) {
-            QuestGuide.current?.let { step ->
-                QuestGuideToast(
-                    title = step.title,
-                    message = step.message,
-                    stepIndex = QuestGuide.index + 1,
-                    stepCount = QuestGuide.steps.size,
-                    pointer = when (step.position) {
-                        QuestGuide.Position.BOTTOM -> GuidePointer.UP
-                        QuestGuide.Position.TOP -> GuidePointer.DOWN
-                        QuestGuide.Position.CENTER -> null
-                    },
-                    actionLabel = if (QuestGuide.isLast) "Finish" else "Next",
-                    onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
-                    onClose = { QuestGuide.stop() },
-                    modifier = Modifier
-                        .align(
-                            when (step.position) {
-                                QuestGuide.Position.BOTTOM -> Alignment.BottomCenter
-                                QuestGuide.Position.TOP -> Alignment.TopCenter
-                                QuestGuide.Position.CENTER -> Alignment.Center
-                            }
-                        )
-                        // TOP steps (Quests / Settings) sit below the screen
-                        // hero instead of floating over it.
-                        .padding(
-                            start = 16.dp,
-                            top = if (step.position == QuestGuide.Position.TOP)
-                                SettingsHeroTotalHeight + 8.dp else 10.dp,
-                            end = 16.dp,
-                            bottom = 10.dp
-                        )
-                )
-            }
-        }
             }
         }
     }
+    }
+    // v8.29 — the tour LOCKS navigation: the system back button can't wander
+    // off mid-tour (the overlay's X always closes it if the user wants out).
+    BackHandler(enabled = QuestGuide.active) { /* swallow — use the X to leave */ }
+
+    // ── Quest tour overlay — rendered OUTSIDE the Scaffold's padded content
+    //    box (a full-window sibling, like the floating pet) so its coordinate
+    //    space IS the window: landmark bounds are window coordinates, and
+    //    bottom-bar-slot landmarks (the reveal's Start exploring dock) sit
+    //    BELOW the padded content area. An overlay inside that box drew
+    //    those holes off the bottom edge, so the highlight landed in the
+    //    wrong place and the scrim blocked the real button (v8.25).
+    //    v8.15 — the tour overlay is PET-GUIDED: the pet walks to the step's
+    //    target and points at it through a scrim window (see PetGuideOverlay).
+    //    The tour itself is started from the Quests page (v8.2) or the
+    //    first-launch ask (v8.22), never auto-shown elsewhere.
+    if (QuestGuide.active) {
+        QuestGuide.current?.let { step ->
+            // v8.6 — action-wait steps disable the action and relabel it
+            // "Do this to continue": the tour advances the moment the
+            // REAL action happens (spec §7.3), the X always closes it.
+            val waiting = step.waitFor != null
+            PetGuideOverlay(
+                title = step.title,
+                message = step.message,
+                stepIndex = QuestGuide.index + 1,
+                stepCount = QuestGuide.steps.size,
+                actionLabel = when {
+                    QuestGuide.isLast -> "Finish"
+                    waiting -> "Do this to continue"
+                    else -> "Next"
+                },
+                position = step.position,
+                // v8.22 — the guide highlights the step's REAL target
+                // landmark (found on the current screen's registry).
+                screen = routePrefix,
+                targetLandmark = step.targetLandmark,
+                actionEnabled = !waiting,
+                onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
+                onClose = { QuestGuide.stop() },
+                // v8.12 — wait steps offer "Skip"/"Explore later": the
+                // tour guides but never blocks, so the user can move on
+                // without doing the action.
+                skipLabel = if (waiting) step.skipLabel ?: "Skip" else null,
+                onSkip = { QuestGuide.next() },
+                // TOP steps window the band below the settings hero.
+                heroTopOffset = SettingsHeroTotalHeight
+            )
+        }
+    }
+    // v8.8 — the floating Curio pet: a global overlay drawn above the whole
+    // Scaffold (over the bottom bar too). Renders only while the pet layer,
+    // the floating toggle and the pet's awake state are on; it wanders, can
+    // be dragged anywhere, long-pressed home into its flower bed, and naps
+    // back after a long idle. v8.10 — the sprite wears ONE fixed color (the
+    // Curio light-theme brand coral), so no accent is computed here anymore.
+    // v8.15 — while the guided tour runs, the pet IS the guide (in
+    // PetGuideOverlay), so the floating wanderer hides to avoid a duplicate.
+    // v8.22 — during the boot gates the pet stays AT ITS HOUSE: no floating
+    // pet on the splash or crash screens (it comes out on its own during
+    // onboarding). v8.25 — the pet also hides while a dialog shows its own
+    // pet sprite (the onboarding tour-ask), so it never appears twice.
+    if (!QuestGuide.active &&
+        !CurioPet.floatingSuppressed &&
+        routePrefix != CurioRoutes.SPLASH &&
+        routePrefix != CurioRoutes.CRASH &&
+        // v8.29 — never during the onboarding intro: the pet introduces
+        // itself in the guided tour instead.
+        routePrefix != CurioRoutes.ONBOARDING
+    ) {
+        CurioFloatingPet(routePrefix = routePrefix)
     }
 
     // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"
@@ -795,7 +1001,7 @@ fun CurioNavHost(
                         // The double-confirmation step — make the cost of
                         // cancelling explicit before the session is dropped.
                         Text(
-                            "This ends the session now — the ${formatElapsed(elapsedMillis)} isn't saved and you won't be asked to write about ${activeSession.topicName}. You can explore it again anytime.",
+                            "This ends the session now. The ${formatElapsed(elapsedMillis)} isn't saved and you won't be asked to write about ${activeSession.topicName}. You can explore it again anytime.",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     } else {
@@ -811,14 +1017,14 @@ fun CurioNavHost(
                             )
                             Text(
                                 if (activeSession.paused)
-                                    "Paused at ${formatElapsed(elapsedMillis)} — tap Resume on the bubble or notification to continue"
+                                    "Paused at ${formatElapsed(elapsedMillis)}. Tap Resume on the bubble or notification to continue"
                                 else
                                     "You've been exploring for ${formatElapsed(elapsedMillis)}",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                             )
                         }
                         Text(
-                            "You started ${activeSession.verb.lowercase()} ${activeSession.targetName} — if you're done, write it down while it's fresh. Or keep exploring, no rush.",
+                            "You started ${activeSession.verb.lowercase()} ${activeSession.targetName}. If you're done, write it down while it's fresh. Or keep exploring, no rush.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -858,7 +1064,7 @@ fun CurioNavHost(
                         navController.navigate(
                             CurioRoutes.captureFor(activeSession.categoryId.routeSlug, activeSession.topicName)
                         ) { launchSingleTop = true }
-                    }) { Text("Done — write about it") }
+                    }) { Text("Done and write about it") }
                 }
             },
             dismissButton = {

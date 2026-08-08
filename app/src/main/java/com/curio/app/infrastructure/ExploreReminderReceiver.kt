@@ -94,7 +94,7 @@ class ExploreReminderReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Done exploring ${session.topicName}?")
-            .setContentText("If you're finished, come back and write it down — ${session.verb} ${session.targetName}.")
+            .setContentText("If you're finished, come back and write it down: ${session.verb} ${session.targetName}.")
             .setContentIntent(openAppIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -105,7 +105,7 @@ class ExploreReminderReceiver : BroadcastReceiver() {
             .setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(
-                        "If you're finished, come back and write it down — ${session.verb} ${session.targetName}.\n" +
+                        "If you're finished, come back and write it down: ${session.verb} ${session.targetName}.\n" +
                             session.reflectionQuestion()
                     )
             )

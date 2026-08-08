@@ -47,7 +47,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -88,9 +87,6 @@ import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
-import com.curio.app.ui.adaptive.LocalRevealSharedScope
-import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
@@ -99,6 +95,8 @@ import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.MorphEntrance
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -266,11 +264,12 @@ fun CabinetScreen(navController: NavController) {
     LaunchedEffect(cabinetWash) {
         CurioNavTint.publishCabinetWash(cabinetWash)
     }
-    // Hygiene: clear the handoff when the Cabinet leaves composition so a
-    // stale wash never lingers for another tab.
-    DisposableEffect(Unit) {
-        onDispose { CurioNavTint.publishCabinetWash(null) }
-    }
+    // The wash handoff is deliberately KEPT when the Cabinet leaves
+    // composition (v8.36, mirroring Spin's publishSpinWash): while a
+    // Cabinet→Detail morph runs, the NavHost's reserved bottom strip falls
+    // back to this published wash for its first frame (the detail page's own
+    // wash spacer registers a frame later). A stale wash is harmless — only
+    // the Cabinet route reads it, and Cabinet republishes on every visit.
 
     // The hero banner runs up BEHIND the status bar (it applies its own
     // status-bar inset), so the root Box carries no status-bar padding.
@@ -341,7 +340,7 @@ fun CabinetScreen(navController: NavController) {
                     CurioEmptyState(
                         glyph = CurioIcons.Inventory2,
                         headline = "Your Cabinet is empty",
-                        subtext = "Every capture you save will live here — shuffle to find your first one.",
+                        subtext = "Every capture you save will live here. Shuffle to find your first one.",
                         tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                         ctaLabel = "Discover something",
                         onCtaClick = {
@@ -376,61 +375,61 @@ fun CabinetScreen(navController: NavController) {
             }
             }
         } else {
-            LazyVerticalGrid(
-                state = gridState,
-                // Phones keep the 2-column grid; wide windows gain columns
-                // automatically (3 across on the ~720dp content column).
-                columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = contentTop,
-                    bottom = 24.dp
-                ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(visibleEntries, key = { it.id }) { entry ->
-                    // ── Cabinet→Detail morph: match this card to the
-                    //    entry detail hero via shared element. The modifier
-                    //    only attaches when NOT in selection mode (otherwise
-                    //    a multi-select card would become a morph source).
-                    val sharedScope = LocalRevealSharedScope.current
-                    val visScope = LocalRevealVisibilityScope.current
-                    val cardMorphMod = if (!selectionMode && sharedScope != null && visScope != null) {
-                        val state = sharedScope.rememberSharedContentState("cabinet-${entry.id}")
-                        sharedScope.run {
-                            Modifier.sharedElement(state, visScope, boundsTransform = RevealBoundsTransform)
-                        }
-                    } else Modifier
-
-                    CurioEntryCard(
-                        entry = entry,
-                        modifier = cardMorphMod,
-                        selected = entry.id in selectedEntryIds,
-                        onLongClick = {
-                            // v7.107 — promo/demo mode disables multi-select:
-                            // bulk delete would no-op on the sample entries.
-                            if (!promoOn) {
-                                selectionMode = true
-                                selectedEntryIds = selectedEntryIds + entry.id
-                            }
-                        },
-                        onClick = {
-                            if (selectionMode) {
-                                selectedEntryIds = if (entry.id in selectedEntryIds) {
-                                    selectedEntryIds - entry.id
-                                } else {
-                                    selectedEntryIds + entry.id
+            // v8.18 — the Cabinet grid is a CURIOUS landmark: the pet
+            // sometimes tiptoes over and peeks at your saved keepsakes
+            // (the whole shelf springs a beat — bounds only, no layout
+            // change, and the sticky chips/hero stay put above it).
+            PetLandmark(
+                id = "grid",
+                kind = PetLandmarks.Kind.CURIOUS,
+                screen = "cabinet"
+            ) { m ->
+                LazyVerticalGrid(
+                    state = gridState,
+                    // Phones keep the 2-column grid; wide windows gain columns
+                    // automatically (3 across on the ~720dp content column).
+                    columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = contentTop,
+                        bottom = 24.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = m.fillMaxSize()
+                ) {
+                    items(visibleEntries, key = { it.id }) { entry ->
+                        // v8.38 — the Cabinet→Detail morph is gone: the detail
+                        // page pops up from center instead of expanding out of
+                        // the card, so the card carries no shared element.
+                        CurioEntryCard(
+                            entry = entry,
+                            modifier = Modifier,
+                            selected = entry.id in selectedEntryIds,
+                            onLongClick = {
+                                // v7.107 — promo/demo mode disables multi-select:
+                                // bulk delete would no-op on the sample entries.
+                                if (!promoOn) {
+                                    selectionMode = true
+                                    selectedEntryIds = selectedEntryIds + entry.id
                                 }
-                            } else {
-                                navController.navigate(
-                                    CurioRoutes.entryDetail(entry.id)
-                                ) { launchSingleTop = true }
+                            },
+                            onClick = {
+                                if (selectionMode) {
+                                    selectedEntryIds = if (entry.id in selectedEntryIds) {
+                                        selectedEntryIds - entry.id
+                                    } else {
+                                        selectedEntryIds + entry.id
+                                    }
+                                } else {
+                                    navController.navigate(
+                                        CurioRoutes.entryDetail(entry.id)
+                                    ) { launchSingleTop = true }
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -523,7 +522,7 @@ fun CabinetScreen(navController: NavController) {
                     CabinetHeroActionPill(
                         onClick = { sortNewestFirst = !sortNewestFirst },
                         glyph = if (sortNewestFirst) CurioIcons.ArrowDownward else CurioIcons.ArrowUpward,
-                        contentDescription = if (sortNewestFirst) "Newest first — tap for oldest" else "Oldest first — tap for newest",
+                        contentDescription = if (sortNewestFirst) "Newest first. Tap for oldest" else "Oldest first. Tap for newest",
                         ink = ink,
                         emphasized = sortNewestFirst
                     )
