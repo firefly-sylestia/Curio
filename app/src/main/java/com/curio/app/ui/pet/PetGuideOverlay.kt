@@ -115,35 +115,42 @@ fun PetGuideOverlay(
         // landmark's bounds (published via onGloballyPositioned, inflated a
         // touch so the whole control reads as highlighted). The landmark map
         // is snapshot state, so this recomposes the moment the screen
-        // registers (or unregisters) it. No landmark → the position-based
-        // fallback zone.
-        val hole: Rect? = targetLandmark?.let { id ->
-            PetLandmarks.forScreen(screen).firstOrNull { it.id == id }?.bounds
+        // registers (or unregisters) it. Steps WITHOUT a landmark fall back
+        // to the position-based zone.
+        // v8.25 — a step that NAMES a landmark never falls back to the
+        // position zone while the screen is still registering it (the first
+        // frame or two): a guessed zone could cover the REAL button the step
+        // is waiting for and swallow its tap. Until the landmark appears the
+        // scrim stays off entirely, so the real button is always tappable.
+        val hole: Rect? = if (targetLandmark != null) {
+            PetLandmarks.forScreen(screen).firstOrNull { it.id == targetLandmark }?.bounds
                 ?.inflate(with(density) { 6.dp.toPx() })
-        } ?: with(density) {
-            when (position) {
-            QuestGuide.Position.BOTTOM, QuestGuide.Position.LOWER -> {
-                val holeW = (maxWidth * 0.82f).coerceAtMost(340.dp)
-                val holeH = 170.dp
-                val left = (maxWidth - holeW) / 2f
-                val top = maxHeight - holeH - 16.dp
-                Rect(
-                    left = left.toPx(), top = top.toPx(),
-                    right = (left + holeW).toPx(), bottom = (top + holeH).toPx()
-                )
+        } else {
+            with(density) {
+                when (position) {
+                QuestGuide.Position.BOTTOM, QuestGuide.Position.LOWER -> {
+                    val holeW = (maxWidth * 0.82f).coerceAtMost(340.dp)
+                    val holeH = 170.dp
+                    val left = (maxWidth - holeW) / 2f
+                    val top = maxHeight - holeH - 16.dp
+                    Rect(
+                        left = left.toPx(), top = top.toPx(),
+                        right = (left + holeW).toPx(), bottom = (top + holeH).toPx()
+                    )
+                }
+                QuestGuide.Position.TOP -> {
+                    val holeW = (maxWidth * 0.86f).coerceAtMost(360.dp)
+                    val holeH = 140.dp
+                    val left = (maxWidth - holeW) / 2f
+                    val top = heroTopOffset + 8.dp
+                    Rect(
+                        left = left.toPx(), top = top.toPx(),
+                        right = (left + holeW).toPx(), bottom = (top + holeH).toPx()
+                    )
+                }
+                QuestGuide.Position.CENTER -> null
+                }
             }
-            QuestGuide.Position.TOP -> {
-                val holeW = (maxWidth * 0.86f).coerceAtMost(360.dp)
-                val holeH = 140.dp
-                val left = (maxWidth - holeW) / 2f
-                val top = heroTopOffset + 8.dp
-                Rect(
-                    left = left.toPx(), top = top.toPx(),
-                    right = (left + holeW).toPx(), bottom = (top + holeH).toPx()
-                )
-            }
-            QuestGuide.Position.CENTER -> null
-        }
         }
 
         // Soft pulsing ring around the window + the arrow's pulse — one

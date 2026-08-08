@@ -166,11 +166,14 @@ object QuestGuide {
     private fun buildTourSteps(): List<Step> = listOf(
         Step(
             "home", "Welcome to Curio",
-            "This is home — your daily quests, the deck, and everything you've saved all live here."
+            "This is home. Your daily quests, the deck, and everything you've saved all live here.",
+            // v8.25 — highlight the real TODAY'S QUEST card (registered as
+            // the "quest" landmark on Home) instead of a guessed bottom zone.
+            targetLandmark = "quest"
         ),
         Step(
             "quests", "Daily Quest Hub",
-            "Check the daily quests whenever you like — they're the fastest way to grow.",
+            "Check the daily quests whenever you like. They're the fastest way to grow.",
             position = Position.TOP,
             targetLandmark = "daily"
         ),
@@ -180,9 +183,9 @@ object QuestGuide {
             // (the default since v8.21) the reveal opens by itself; OFF the
             // deck lands quietly and the user taps the card to open it.
             if (AppPreferences.autoOpenRevealState)
-                "Give Shuffle a tap — the deck picks something fresh and opens it for you."
+                "Give Shuffle a tap. The deck picks something fresh and opens it for you."
             else
-                "Give Shuffle a tap — the deck picks something fresh for you.",
+                "Give Shuffle a tap. The deck picks something fresh for you.",
             waitFor = Wait.SPIN,
             skipLabel = "Skip",
             targetLandmark = "spin"
@@ -190,7 +193,7 @@ object QuestGuide {
         Step(
             "spin", "Open the landed topic",
             if (AppPreferences.autoOpenRevealState)
-                "Nice one! It's already open — read the teaser, then start exploring."
+                "Nice one! It's already open. Read the teaser, then start exploring."
             else
                 "Nice one! Tap the card to open the teaser, then start exploring.",
             waitFor = Wait.REVEAL,
@@ -201,7 +204,7 @@ object QuestGuide {
         ),
         Step(
             "", "Start exploring",
-            "Ready? Tap Start exploring on the topic — or save it for later.",
+            "Ready? Tap Start exploring on the topic, or save it for later.",
             waitFor = Wait.EXPLORE,
             hold = true,
             // v8.15 — the Start exploring button lives in the reveal's
@@ -212,7 +215,7 @@ object QuestGuide {
         ),
         Step(
             "", "Capture what you found",
-            "Back from exploring? Jot it down — saving a note makes the discovery yours.",
+            "Back from exploring? Jot it down. Saving a note makes the discovery yours.",
             waitFor = Wait.SAVE,
             hold = true,
             // v8.12 — the pill floats ABOVE the Save bar so it never covers
@@ -223,18 +226,18 @@ object QuestGuide {
         ),
         Step(
             "cabinet", "The Cabinet",
-            "This is the Cabinet — every keepsake you save lands here.",
+            "This is the Cabinet. Every keepsake you save lands here.",
             position = Position.TOP,
             targetLandmark = "grid"
         ),
         Step(
             "quests", "Reward & pet growth",
-            "Every curious act earns XP and feeds your Curio pet — watch it grow!",
+            "Every curious act earns XP and feeds your Curio pet. Watch it grow!",
             position = Position.TOP
         ),
         Step(
             "", "You're all set",
-            "That's the loop — spin, explore, save. You're all set!",
+            "That's the loop: spin, explore, save. You're all set!",
             position = Position.CENTER
         )
     )

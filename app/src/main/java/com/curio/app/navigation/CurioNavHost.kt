@@ -61,6 +61,7 @@ import androidx.navigation.navArgument
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioPet
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.QuestGuide
@@ -779,53 +780,54 @@ fun CurioNavHost(
             }
         }
         }
-        // ── Quest tour overlay (v8.1/v8.3) — a compact IN-APP floating pill,
-        //    NOT a dialog. MOVES WITH THE STEP (v8.3): bottom of the screen
-        //    for the tab steps, below the settings-family hero for Quests /
-        //    Settings, centered on the final step — with a pointer arrow at
-        //    the content it describes and progress dots. Rendered only while
-        //    a tour is active; the tour itself is started from the Quests
-        //    page (v8.2), never auto-shown. v8.15 — the tour overlay is now
-        //    PET-GUIDED: the pet walks to the step's target and points at it
-        //    through a scrim window (see PetGuideOverlay), replacing the
-        //    floating pill.
-        if (QuestGuide.active) {
-            QuestGuide.current?.let { step ->
-                // v8.6 — action-wait steps disable the action and relabel it
-                // "Do this to continue": the tour advances the moment the
-                // REAL action happens (spec §7.3), the X always closes it.
-                val waiting = step.waitFor != null
-                PetGuideOverlay(
-                    title = step.title,
-                    message = step.message,
-                    stepIndex = QuestGuide.index + 1,
-                    stepCount = QuestGuide.steps.size,
-                    actionLabel = when {
-                        QuestGuide.isLast -> "Finish"
-                        waiting -> "Do this to continue"
-                        else -> "Next"
-                    },
-                    position = step.position,
-                    // v8.22 — the guide highlights the step's REAL target
-                    // landmark (found on the current screen's registry).
-                    screen = routePrefix,
-                    targetLandmark = step.targetLandmark,
-                    actionEnabled = !waiting,
-                    onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
-                    onClose = { QuestGuide.stop() },
-                    // v8.12 — wait steps offer "Skip"/"Explore later": the
-                    // tour guides but never blocks, so the user can move on
-                    // without doing the action.
-                    skipLabel = if (waiting) step.skipLabel ?: "Skip" else null,
-                    onSkip = { QuestGuide.next() },
-                    // TOP steps window the band below the settings hero.
-                    heroTopOffset = SettingsHeroTotalHeight
-                )
-            }
-        }
             }
         }
     }
+    }
+    // ── Quest tour overlay — rendered OUTSIDE the Scaffold's padded content
+    //    box (a full-window sibling, like the floating pet) so its coordinate
+    //    space IS the window: landmark bounds are window coordinates, and
+    //    bottom-bar-slot landmarks (the reveal's Start exploring dock) sit
+    //    BELOW the padded content area. An overlay inside that box drew
+    //    those holes off the bottom edge, so the highlight landed in the
+    //    wrong place and the scrim blocked the real button (v8.25).
+    //    v8.15 — the tour overlay is PET-GUIDED: the pet walks to the step's
+    //    target and points at it through a scrim window (see PetGuideOverlay).
+    //    The tour itself is started from the Quests page (v8.2) or the
+    //    first-launch ask (v8.22), never auto-shown elsewhere.
+    if (QuestGuide.active) {
+        QuestGuide.current?.let { step ->
+            // v8.6 — action-wait steps disable the action and relabel it
+            // "Do this to continue": the tour advances the moment the
+            // REAL action happens (spec §7.3), the X always closes it.
+            val waiting = step.waitFor != null
+            PetGuideOverlay(
+                title = step.title,
+                message = step.message,
+                stepIndex = QuestGuide.index + 1,
+                stepCount = QuestGuide.steps.size,
+                actionLabel = when {
+                    QuestGuide.isLast -> "Finish"
+                    waiting -> "Do this to continue"
+                    else -> "Next"
+                },
+                position = step.position,
+                // v8.22 — the guide highlights the step's REAL target
+                // landmark (found on the current screen's registry).
+                screen = routePrefix,
+                targetLandmark = step.targetLandmark,
+                actionEnabled = !waiting,
+                onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
+                onClose = { QuestGuide.stop() },
+                // v8.12 — wait steps offer "Skip"/"Explore later": the
+                // tour guides but never blocks, so the user can move on
+                // without doing the action.
+                skipLabel = if (waiting) step.skipLabel ?: "Skip" else null,
+                onSkip = { QuestGuide.next() },
+                // TOP steps window the band below the settings hero.
+                heroTopOffset = SettingsHeroTotalHeight
+            )
+        }
     }
     // v8.8 — the floating Curio pet: a global overlay drawn above the whole
     // Scaffold (over the bottom bar too). Renders only while the pet layer,
@@ -837,8 +839,10 @@ fun CurioNavHost(
     // PetGuideOverlay), so the floating wanderer hides to avoid a duplicate.
     // v8.22 — during the boot gates the pet stays AT ITS HOUSE: no floating
     // pet on the splash or crash screens (it comes out on its own during
-    // onboarding).
+    // onboarding). v8.25 — the pet also hides while a dialog shows its own
+    // pet sprite (the onboarding tour-ask), so it never appears twice.
     if (!QuestGuide.active &&
+        !CurioPet.floatingSuppressed &&
         routePrefix != CurioRoutes.SPLASH &&
         routePrefix != CurioRoutes.CRASH
     ) {

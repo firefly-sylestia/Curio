@@ -148,6 +148,16 @@ fun OnboardingScreen(navController: NavController) {
         CurioPet.wake()
         CurioPet.comeOut()
     }
+    // v8.25 — while the tour-ask dialog is open the floating pet is
+    // suppressed: the dialog shows its own pet sprite, so the pet must not
+    // also wander behind the scrim (a duplicate pet on screen). Reset when
+    // the dialog closes, and on dispose as a safety net.
+    LaunchedEffect(showTourAsk) {
+        CurioPet.setFloatingSuppressed(showTourAsk)
+    }
+    DisposableEffect(Unit) {
+        onDispose { CurioPet.setFloatingSuppressed(false) }
+    }
     // Finishing the intro asks about the tour first (if it hasn't been
     // offered yet), then lands on Home.
     val finishOrAsk: () -> Unit = {
@@ -413,7 +423,7 @@ fun OnboardingScreen(navController: NavController) {
                                 spriteSize = 46.dp
                             )
                             Text(
-                                "Your pet can walk you through Home, the deck, exploring, and saving your first keepsake — about a minute."
+                                "Your pet can walk you through Home, the deck, exploring, and saving your first keepsake. It takes about a minute."
                             )
                         }
                     }

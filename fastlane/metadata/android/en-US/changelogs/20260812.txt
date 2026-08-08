@@ -1,0 +1,3 @@
+• Fresh-install tour fixes: the welcome step now highlights the real TODAY'S QUEST card on Home, the topic page's highlight lands exactly on the Start exploring button (the tour overlay now covers the whole screen, so bottom-docked buttons are no longer missed or blocked), and the spin step no longer blocks the Shuffle button while the screen loads, so the tour always advances when you really tap it.
+• The pet no longer appears twice on first launch: while the "Take a quick tour?" dialog shows its own pet, the floating pet hides behind it.
+• Tour dialog copy cleaned up: the guided-tour steps and the tour offer read smoother, with no more em dashes.

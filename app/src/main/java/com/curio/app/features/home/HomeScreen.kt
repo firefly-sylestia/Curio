@@ -563,33 +563,43 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                QuestShuffleCard(
-                    accent = homeRoseAccent(),
-                    pet = homePetSprite,
-                    onShuffle = {
-                        // v7.94 — shuffle only VISIBLE lanes: hidden
-                        // categories (Manage Categories) never get dealt.
-                        val all = CurioCategories.visible
-                        val pickMix = Random.nextBoolean()
-                        val chosen =
-                            if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
-                            else listOf(all.random())
-                        AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
-                        // Keep the random single/mix selection intact, but
-                        // bypass the generic tab restore here. Restoring a
-                        // previous Spin composition can hide this newly chosen
-                        // deck and make every tap look like the same category.
-                        navController.navigate(
-                            CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
-                        ) {
-                            popUpTo(CurioRoutes.HOME) { saveState = true }
-                            // This is an explicit fresh shuffle, so even an
-                            // identical random draw must create a new deck.
-                            launchSingleTop = false
-                            restoreState = false
-                        }
-                    }
-                )
+                // v8.25 — the quest block is the tour's HOME landmark: the
+                // First Journey's welcome step highlights the real
+                // TODAY'S QUEST card instead of a guessed bottom zone.
+                PetLandmark(
+                    id = "quest",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "home"
+                ) { m ->
+                    QuestShuffleCard(
+                        accent = homeRoseAccent(),
+                        pet = homePetSprite,
+                        onShuffle = {
+                            // v7.94 — shuffle only VISIBLE lanes: hidden
+                            // categories (Manage Categories) never get dealt.
+                            val all = CurioCategories.visible
+                            val pickMix = Random.nextBoolean()
+                            val chosen =
+                                if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
+                                else listOf(all.random())
+                            AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
+                            // Keep the random single/mix selection intact, but
+                            // bypass the generic tab restore here. Restoring a
+                            // previous Spin composition can hide this newly chosen
+                            // deck and make every tap look like the same category.
+                            navController.navigate(
+                                CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
+                            ) {
+                                popUpTo(CurioRoutes.HOME) { saveState = true }
+                                // This is an explicit fresh shuffle, so even an
+                                // identical random draw must create a new deck.
+                                launchSingleTop = false
+                                restoreState = false
+                            }
+                        },
+                        modifier = m
+                    )
+                }
             }
             Spacer(Modifier.height(20.dp))
 
@@ -1104,7 +1114,9 @@ private fun TopBarPill(
 private fun QuestShuffleCard(
     accent: Color,
     pet: (@Composable () -> Unit)? = null,
-    onShuffle: () -> Unit
+    onShuffle: () -> Unit,
+    // v8.25 — the tour's home landmark modifier (bounds tracking only).
+    modifier: Modifier = Modifier
 ) {
     // Deep ink twin for the eyebrow — the airy pastel accent reads too
     // light against the page, so the eyebrow wears the darker ink instead
@@ -1118,7 +1130,7 @@ private fun QuestShuffleCard(
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
         shadowElevation = 0.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier

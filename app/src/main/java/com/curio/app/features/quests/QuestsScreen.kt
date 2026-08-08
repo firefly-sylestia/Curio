@@ -333,9 +333,9 @@ fun QuestsScreen(navController: NavController) {
             title = { Text("Take a quick tour?") },
             text = {
                 Text(
-                    "A small guide can walk you through every screen — Home, " +
-                        "Spin, the Cabinet, Profile, Quests and Settings — so you " +
-                        "know where everything lives. Takes about a minute."
+                    "A small guide can walk you through every screen: Home, " +
+                        "Spin, the Cabinet, Profile, Quests and Settings. " +
+                        "It takes about a minute."
                 )
             },
             confirmButton = {
