@@ -1,4 +1,4 @@
-# Request — Curie Pet Designer drawn faces, focused editing, and easier colors (v8.41)
+# Request — Curie Pet Designer drawn faces, focused editing, and easier colors (v8.42)
 
 ## Completed
 
@@ -18,6 +18,8 @@
 - Docked a quick body palette beside the canvas and retained the full palette
   in Colors. Existing hex + HSL picker remains available via palette editing.
 - Face eyedroppers return to Brush mode after selecting a color.
+- Stabilized body and face pointer-input handlers with updated callbacks, so
+  recomposition during a drag no longer cancels continuous painting.
 - Empty custom grid values no longer suppress legacy procedural faces.
 
 ## Files changed
@@ -32,6 +34,7 @@
 - Kotlin delimiter balance passed for all three changed Kotlin files.
 - `git diff --check` passed.
 - Static review checked serialization fallback, custom rendering, draw-mode
-  gesture protection, tab helper signatures, and reaction eyedropper state.
+  gesture protection, tab helper signatures, reaction eyedropper state, and
+  pointer-input stability.
 - No Gradle command was run because repository DOX rules forbid local Android
   builds; CI on push remains the compile gate.

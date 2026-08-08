@@ -1878,27 +1878,28 @@ private fun FaceGridEditor(
     onPaint: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
+    val latestOnPaint by rememberUpdatedState(onPaint)
     val rows = if (face.gridRows.size == gridSize) face.gridRows
     else List(gridSize) { ".".repeat(gridSize) }
     var gestures = Modifier
     if (drawMode) {
         gestures = gestures
-            .pointerInput(gridSize, tool, face.gridRows) {
+            .pointerInput(gridSize, tool) {
                 detectTapGestures { offset ->
                     val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                    onPaint(row, col, false)
+                    latestOnPaint(row, col, false)
                 }
             }
-            .pointerInput(gridSize, tool, face.gridRows) {
+            .pointerInput(gridSize, tool) {
                 detectDragGestures(
                     onDragStart = { offset ->
                         val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                        onPaint(row, col, false)
+                        latestOnPaint(row, col, false)
                     },
                     onDrag = { change, _ ->
                         change.consume()
                         val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
-                        onPaint(row, col, true)
+                        latestOnPaint(row, col, true)
                     }
                 )
             }
@@ -1943,6 +1944,7 @@ private fun PixelGrid(
     onTool: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
+    val latestOnTool by rememberUpdatedState(onTool)
     val rows = if (grid == "curled") design.curledRows else design.bodyRows
     var gestures = Modifier
     if (drawMode) {
@@ -1950,19 +1952,19 @@ private fun PixelGrid(
             .pointerInput(gridSize, tool) {
                 detectTapGestures(onTap = { offset ->
                     val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
-                    onTool(r, c, false)
+                    latestOnTool(r, c, false)
                 })
             }
             .pointerInput(gridSize, tool) {
                 detectDragGestures(
                     onDragStart = { offset ->
                         val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
-                        onTool(r, c, false)
+                        latestOnTool(r, c, false)
                     },
                     onDrag = { change, _ ->
                         change.consume()
                         val (r, c) = cellAtPosition(change.position, size.width, size.height, gridSize)
-                        onTool(r, c, true)
+                        latestOnTool(r, c, true)
                     }
                 )
             }
