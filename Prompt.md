@@ -14,7 +14,9 @@
   action, and 24/32-pixel canvas behavior.
 - Custom detail layers render as the final visual layer, so users can draw
   over generated art without changing Curie's existing motion or animation.
-- PNG export now includes all four custom detail layers.
+- PNG export includes the selected mood face, static generated body details,
+  all four custom detail layers, and the complete Star/Dizzy/Happy eye shapes;
+  animated motion phases remain intentionally deterministic in a single PNG.
 - Improved Robot and Ghost presets with detailed panel/window pixel art and
   dedicated, validated curled asleep poses.
 - Preset body and curled grids are applied together so Sleepy preview matches
@@ -39,3 +41,5 @@
   final Android compile gate.
 - No Gradle build, compile, lint, or test command was run because repository
   DOX rules forbid local Android build commands in this environment.
+- Pushed commits: `794f8e1`, `b3e2a90`, `f715b3b`, `dbc8c2e`, `5116b44`,
+  `eb73e35`; the final eye-shape polish is pending its closeout push.

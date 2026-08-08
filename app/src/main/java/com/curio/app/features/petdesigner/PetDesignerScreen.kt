@@ -1196,10 +1196,23 @@ private fun exportPngUri(
                 paintProceduralCell(4, 8, ink); paintProceduralCell(5, 8, ink)
                 paintProceduralCell(10, 8, ink); paintProceduralCell(11, 8, ink)
             }
-            EyeStyle.STAR, EyeStyle.DIZZY, EyeStyle.HAPPY -> {
-                paintProceduralCell(4, 7, ink); paintProceduralCell(5, 7, ink)
-                paintProceduralCell(10, 7, ink); paintProceduralCell(11, 7, ink)
+            EyeStyle.STAR -> {
+                val star = design.colorOf('y')
+                listOf(4 to 6, 5 to 6, 3 to 7, 4 to 7, 5 to 7, 6 to 7, 4 to 8, 5 to 8,
+                    10 to 6, 11 to 6, 9 to 7, 10 to 7, 11 to 7, 12 to 7, 10 to 8, 11 to 8)
+                    .forEach { (col, row) -> paintProceduralCell(col, row, star) }
                 paintProceduralCell(4, 7, white); paintProceduralCell(10, 7, white)
+            }
+            EyeStyle.DIZZY -> {
+                listOf(4 to 6, 5 to 6, 4 to 7, 5 to 7, 4 to 8, 5 to 8, 3 to 7, 6 to 7,
+                    10 to 6, 11 to 6, 10 to 7, 11 to 7, 10 to 8, 11 to 8, 9 to 7, 12 to 7)
+                    .forEach { (col, row) -> paintProceduralCell(col, row, ink) }
+                paintProceduralCell(4, 7, white); paintProceduralCell(5, 6, white)
+                paintProceduralCell(10, 7, white); paintProceduralCell(11, 6, white)
+            }
+            EyeStyle.HAPPY -> {
+                listOf(4 to 8, 5 to 7, 5 to 8, 10 to 8, 10 to 7, 11 to 8)
+                    .forEach { (col, row) -> paintProceduralCell(col, row, ink) }
             }
         }
         if (face.blush) {
