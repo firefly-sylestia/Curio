@@ -478,7 +478,7 @@ object CurioPet {
             "I like this one!", "Spinny spinny!", "Wheee!", "Boop boop boop!"
         ) else listOf(
             "What's this?", "Hmm, interesting…", "*peeks*", "Read read read!",
-            "Ooh, words!", "I'm reading this.", "Scribble scribble!"
+            "Ooh, words!", "Let me read this!", "Scribble scribble!"
         )).random()
 
     /**

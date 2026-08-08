@@ -42,7 +42,10 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -54,12 +57,14 @@ private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 private val HEARTS_W = 132.dp
 private val HEARTS_H = 84.dp
 // v8.20 — the little cloud the pet rides while it walks (under the sprite).
-// v8.23 — it is a PIXEL cloud now, drawn on a 16×8 grid in the pet's own
-// style (soft rounded pixels), so the ride reads on-style instead of as a
-// blurry vector blob.
-private val CLOUD_W = 96.dp
-private val CLOUD_H = 42.dp
-private const val CLOUD_GRID_W = 16
+// v8.23 — it is a PIXEL cloud now, drawn in the pet's own style (soft
+// rounded pixels), so the ride reads on-style instead of as a blurry blob.
+// v8.26 — smaller and tucked right under the feet; the grid is 20 wide so
+// the full 20-char pixel rows render (the old 16-col grid clipped the
+// right edge and made the silhouette lopsided).
+private val CLOUD_W = 80.dp
+private val CLOUD_H = 32.dp
+private const val CLOUD_GRID_W = 20
 private const val CLOUD_GRID_H = 8
 // v8.20 — how close a drop must be to the flower bed to count as "home".
 private val DROP_FORGIVENESS = 12.dp
@@ -137,6 +142,9 @@ fun CurioFloatingPet(
         var facing by remember { mutableStateOf(1f) }
         var moving by remember { mutableStateOf(false) }
         var dragged by remember { mutableStateOf(false) }
+        // v8.26 — true while the post-throw glide is running, so the wander
+        // loop holds off until the pet finishes sliding.
+        var gliding by remember { mutableStateOf(false) }
         var thinking by remember { mutableStateOf(false) }
         var squishKey by remember { mutableIntStateOf(0) }
         var playKey by remember { mutableIntStateOf(0) }
@@ -145,6 +153,9 @@ fun CurioFloatingPet(
         var heartsKey by remember { mutableIntStateOf(0) }
         var reaction by remember { mutableStateOf<String?>(null) }
         var reactionKey by remember { mutableIntStateOf(0) }
+        // v8.26 — the speech bubble fades + rises in and out instead of
+        // popping, so line changes feel smooth rather than abrupt.
+        val bubbleAnim = remember { Animatable(0f) }
         var lastMood by remember { mutableStateOf<CurioPet.Mood?>(null) }
         var lastTouch by remember { mutableStateOf(System.currentTimeMillis()) }
         var leavingHome by remember { mutableStateOf(false) }
@@ -207,7 +218,9 @@ fun CurioFloatingPet(
                 moving = true
                 val start = pos
                 for (i in 1..steps) {
-                    if (dragged || !CurioPet.awake) break
+                    // v8.26 — a throw-glide owns the position: hold the walk
+                    // until the slide settles.
+                    if (dragged || gliding || !CurioPet.awake) break
                     val t = i.toFloat() / steps
                     pos = Offset(
                         start.x + (target.x - start.x) * t,
@@ -223,7 +236,7 @@ fun CurioFloatingPet(
                 val waitMs = Random.nextLong(2800, 7000)
                 var waited = 0L
                 while (waited < waitMs && playDartTarget == null &&
-                    !dragged && !watching && CurioPet.awake
+                    !dragged && !watching && !gliding && CurioPet.awake
                 ) {
                     delay(200)
                     waited += 200
@@ -446,20 +459,25 @@ fun CurioFloatingPet(
             }
         }
 
-        // Bubble auto-dismiss — the reaction shows for a beat, then the pet
-        // settles back to its idle wander (v8.11: a touch shorter so it
-        // feels snappy, not chatty).
+        // Bubble lifecycle — fade + rise IN, hold a readable beat, fade OUT,
+        // then clear. v8.26 — animated both ways so a new line never pops or
+        // vanishes abruptly; the ~2.3s hold keeps reactions in the 2-3s range
+        // (dizzy, cheers, home drops) so they read at a glance.
         LaunchedEffect(reactionKey) {
             if (reaction != null) {
-                delay(1500)
+                bubbleAnim.snapTo(0f)
+                bubbleAnim.animateTo(1f, tween(180, easing = FastOutSlowInEasing))
+                delay(2300)
+                bubbleAnim.animateTo(0f, tween(180, easing = FastOutSlowInEasing))
                 reaction = null
             }
         }
 
         // v8.21 — the dizzy spell wears off a beat after the drag ends.
+        // v8.26 — 2.5s so a flung pet visibly reels before it settles.
         LaunchedEffect(recovering) {
             if (recovering) {
-                delay(1600)
+                delay(2500)
                 recovering = false
             }
         }
@@ -482,7 +500,9 @@ fun CurioFloatingPet(
                 .offset {
                     IntOffset(
                         (pos.x + petPx / 2f - with(density) { CLOUD_W.toPx() } / 2f).roundToInt(),
-                        (pos.y + petPx * 0.66f).roundToInt()
+                        // v8.26 — tucked higher up under the feet so the
+                        // smaller puff reads as a proper ride, not a mat.
+                        (pos.y + petPx * 0.72f).roundToInt()
                     )
                 }
                 .size(CLOUD_W, CLOUD_H)
@@ -508,8 +528,25 @@ fun CurioFloatingPet(
                     dizzy = false
                     recovering = false
                     PetLandmarks.setHovered("bed", false)
+                    // v8.26 — throw momentum: the drag tracks its own
+                    // velocity; on release the pet keeps a little of the
+                    // fling and slides on with friction before settling.
+                    var lastDragPos: Offset? = null
+                    var lastDragAt = 0L
+                    var dragVelX = 0f
+                    var dragVelY = 0f
+                    var glideJob: Job? = null
                     detectDragGestures(
                         onDragStart = {
+                            glideJob?.cancel()
+                            gliding = false
+                            // v8.26 — a fresh drag starts with clean velocity
+                            // so a quick re-grab never inherits a throw's
+                            // momentum.
+                            lastDragPos = null
+                            lastDragAt = 0L
+                            dragVelX = 0f
+                            dragVelY = 0f
                             dragged = true
                             // v8.21 — flinging it around makes it dizzy.
                             dizzy = true
@@ -531,6 +568,21 @@ fun CurioFloatingPet(
                                 )
                             )
                             if (amount.x != 0f) facing = if (amount.x > 0f) 1f else -1f
+                            // Rolling velocity estimate (px/s), blended so a
+                            // single jittery frame can't spike the fling.
+                            val now = System.currentTimeMillis()
+                            val prev = lastDragPos
+                            lastDragPos = Offset(pos.x, pos.y)
+                            if (prev != null && now > lastDragAt) {
+                                val dt = (now - lastDragAt) / 1000f
+                                if (dt > 0f) {
+                                    val vx = (pos.x - prev.x) / dt
+                                    val vy = (pos.y - prev.y) / dt
+                                    dragVelX = dragVelX * 0.55f + vx * 0.45f
+                                    dragVelY = dragVelY * 0.55f + vy * 0.45f
+                                }
+                            }
+                            lastDragAt = now
                             // v8.20 — glow the flower bed while the pet is
                             // dragged over it (the drop target reads before
                             // the drop). No-op on screens without a bed.
@@ -579,8 +631,58 @@ fun CurioFloatingPet(
                                 reaction = CurioPet.dizzyLine()
                                 reactionKey++
                             }
+                            // v8.26 — throw momentum: a real fling keeps a
+                            // LITTLE of its speed on release (capped, and
+                            // friction-worn) so the pet glides a short way
+                            // in the thrown direction before settling.
+                            val speed = hypot(dragVelX, dragVelY)
+                            val flingMin = with(density) { 350.dp.toPx() }
+                            val flingCap = with(density) { 620.dp.toPx() }
+                            if (speed > flingMin) {
+                                val v0 = speed.coerceAtMost(flingCap)
+                                val dirX = dragVelX / speed
+                                val dirY = dragVelY / speed
+                                gliding = true
+                                glideJob = launch {
+                                    try {
+                                        var v = v0
+                                        var px = pos.x
+                                        var py = pos.y
+                                        val decay = 8f
+                                        val stop = with(density) { 26.dp.toPx() }
+                                        var lastN = System.nanoTime()
+                                        while (v > stop && !dragged && !leavingHome) {
+                                            val nowN = System.nanoTime()
+                                            val dt = ((nowN - lastN) / 1_000_000_000f)
+                                                .coerceIn(0f, 0.05f)
+                                            lastN = nowN
+                                            v -= v * decay * dt
+                                            px += dirX * v * dt
+                                            py += dirY * v * dt
+                                            pos = Offset(
+                                                px.coerceIn(
+                                                    marginPx,
+                                                    (maxW - petPx - marginPx).coerceAtLeast(marginPx)
+                                                ),
+                                                py.coerceIn(
+                                                    marginPx,
+                                                    (maxH - petPx - marginPx).coerceAtLeast(marginPx)
+                                                )
+                                            )
+                                            if (dirX != 0f) facing = if (dirX > 0f) 1f else -1f
+                                            delay(16)
+                                        }
+                                    } finally {
+                                        gliding = false
+                                    }
+                                }
+                            }
+                            dragVelX = 0f
+                            dragVelY = 0f
                         },
                         onDragCancel = {
+                            glideJob?.cancel()
+                            gliding = false
                             dragged = false
                             dizzy = false
                             recovering = false
@@ -697,6 +799,12 @@ fun CurioFloatingPet(
                         )
                     }
                     .height(FLOAT_SIZE)
+                    // v8.26 — fade + gentle rise so the bubble glides in and
+                    // out instead of snapping (driven by [bubbleAnim]).
+                    .graphicsLayer {
+                        alpha = bubbleAnim.value
+                        translationY = (1f - bubbleAnim.value) * 8.dp.toPx()
+                    }
             ) {
                 PetSpeechBubble(
                     text = text,
@@ -746,10 +854,11 @@ private fun HeartsOverlay(key: Int, modifier: Modifier = Modifier) {
 /**
  * v8.20 — the puff of cloud the pet rides while it walks. Drawn in its own
  * offset sibling under the sprite (never inside its touch box). v8.23 —
- * REDESIGNED as a PIXEL cloud in the pet's own style: a 16×8 grid of soft
- * rounded pixels (the same drawing language as the sprite) with a fluffy
- * three-lobe silhouette, cool top highlights and a shaded base — detailed,
- * fluffy and on-style instead of a blurry vector blob. Bobbing gently,
+ * REDESIGNED as a PIXEL cloud in the pet's own style: soft rounded pixels
+ * (the same drawing language as the sprite) with a fluffy three-lobe
+ * silhouette, cool top highlights and a shaded base — detailed, fluffy and
+ * on-style instead of a blurry vector blob. v8.26 — smaller (80×32) and on
+ * a 20-wide grid so every row of the pixel art renders. Bobbing gently,
  * fading in with movement so it only shows on the go.
  */
 @Composable

@@ -1,62 +1,62 @@
-# Request — v8.25b: fresh-install tour + pet fixes
+# Request — v8.26: pet polish (cloud, eyes, throw momentum, bubble, dialog)
 
 ## What the user asked
 
-1. On a fresh install the pet shows at the right time, but when the tour-ask
-   dialog appears the pet ALSO shows behind it (a duplicate pet).
-2. During the intro/tour the Home highlight and the explore highlight are
-   wrong.
-3. When the tour waits for the user to tap the spin button, the tap doesn't
-   work.
-4. Improve the tour dialog copy and don't use em dashes.
+1. Make the ride cloud even smaller.
+2. Change "I'm reading this." to something else.
+3. Change the orangish excited eyes to a more natural, different look.
+4. Make throwing the pet dynamic: it should keep a little momentum after a
+   fling (not too much).
+5. The dialog/bubble change isn't smooth (pops) — make it smooth.
+6. Reactions (dizzy, etc.) should last ~2-3 seconds.
+7. Export the pet's dialog as a txt so the user can improve the copy later —
+   keep a note of what each line is FOR so it's easy to edit.
 
 ## Analysis
 
-- **Pet duplicate:** the onboarding "Take a quick tour?" dialog shows its own
-  `CurioPetSprite`, but the floating pet (awake since the intro) keeps
-  wandering behind the dialog scrim. The NavHost only gates the floater on
-  the tour being active, the route and the pet's awake state.
-- **Explore highlight wrong + spin tap blocked:** `PetGuideOverlay` was
-  rendered INSIDE the Scaffold's `innerPadding`-padded content box, so its
-  coordinate space ended above the bottom bar. The reveal's Start exploring
-  button lives in the Scaffold bottom-bar slot, so its landmark's window
-  coordinates fell BELOW the overlay: the pass-through hole was drawn off
-  the bottom edge, the highlight landed wrong and the scrim covered the
-  real button (blocking the tap). The spin button sits in-content so it
-  aligned, but the same mechanism bit it via the fallback zone: while a
-  screen is still registering its landmark (first frame(s)), the step fell
-  back to a guessed position zone that could cover the real button and
-  swallow the tap.
-- **Home highlight wrong:** the home step had no landmark and fell back to
-  the BOTTOM position zone (a strip above the bottom nav) — a meaningless
-  highlight for "welcome to home".
-- **Em dashes:** the QuestGuide step messages, the onboarding ask dialog and
-  the Quests tour-offer dialog all used em dashes.
+- **Cloud:** `CLOUD_W/H` were 96×42dp with a 16-col pixel grid whose 20-char
+  rows got clipped on the right (lopsided). Shrunk to 80×32dp, grid widened
+  to 20 so the full art renders, and it's tucked under the feet (y offset
+  0.66 → 0.72 of pet height).
+- **Eyes:** the EXCITED `EyeStyle.STAR` used `gold` (0xFFFFD97D) which reads
+  orangish on the cream body. Swapped to a natural warm brown `starEye`
+  (0xFF7A4E2E — the ink family, one step lighter); sparkles/antenna keep gold.
+- **Throw momentum:** `detectDragGestures` gives no velocity, so the
+  pointerInput now tracks a rolling blended px/s velocity; on release, if
+  the speed clears 350dp/s it launches a short friction glide (capped at
+  620dp/s, decay 8/s, stops at 26dp/s ≈ max ~75dp slide) — "a little, not
+  too much". Glide job is cancelled on drag start/cancel.
+- **Smooth bubble:** new `bubbleAnim` Animatable — bubble fades + rises in
+  (180ms), holds ~2.3s, fades out (180ms), then clears. The bubble Box got a
+  graphicsLayer alpha + 8dp rise.
+- **Reaction timing:** bubble hold 1500 → 2300ms; dizzy recovery 1600 →
+  2500ms (2-3s reactions).
+- **Line swap:** curious-poke list: "I'm reading this." → "Let me read this!".
+- **Dialog txt:** new `docs/PET_DIALOGUE.txt` — every pet + tour line grouped
+  by purpose (mood bubbles, event reactions, spin cheer, touch tiers,
+  landmark pokes, jig, dizzy, drawer, morning greeting, home drop, check-in
+  dialog, tour steps, onboarding ask) with code locations and editing notes.
 
-## Changes (7 files + 1 changelog)
+## Changes
 
 | File | Change |
 | --- | --- |
-| `data/CurioPet.kt` | New `floatingSuppressed` flag — UI screens suppress the floating pet while a dialog shows its own pet sprite. |
-| `features/onboarding/OnboardingScreen.kt` | Sets `CurioPet.floatingSuppressed` while the tour-ask dialog is open (reset on dispose); tour-ask copy without em dashes. |
-| `navigation/CurioNavHost.kt` | PetGuideOverlay moved OUT of the padded content box to the top-level full-window Box (sibling of the floating pet), so overlay coordinates == window coordinates and bottom-bar-slot landmarks (the reveal dock) align; floating pet also gated on `!CurioPet.floatingSuppressed`. |
-| `ui/pet/PetGuideOverlay.kt` | A step that NAMES a landmark never falls back to the position zone while the screen registers it — scrim stays off (hole null) so the real button is always tappable. |
-| `data/QuestGuide.kt` | Home step now targets the real "quest" landmark; all step messages rewritten without em dashes. |
-| `features/home/HomeScreen.kt` | TODAY'S QUEST card registered as the "quest" landmark (`QuestShuffleCard` gains a `modifier` param). |
-| `features/quests/QuestsScreen.kt` | Tour-offer dialog copy without em dashes. |
-| `fastlane/metadata/android/en-US/changelogs/20260812.txt` | NEW — release notes. |
+| `ui/pet/CurioFloatingPet.kt` | Smaller cloud (80×32, 20-col grid, tucked under feet); animated bubble in/out; throw-momentum glide with velocity tracking; bubble hold 2.3s; dizzy recovery 2.5s. |
+| `ui/pet/CurioPetSprite.kt` | STAR (excited) eyes now natural warm brown instead of gold. |
+| `data/CurioPet.kt` | "I'm reading this." → "Let me read this!". |
+| `docs/PET_DIALOGUE.txt` | NEW — full dialog reference with purpose labels + code locations. |
+| `fastlane/metadata/android/en-US/changelogs/20260813.txt` | NEW — release notes. |
 
 ## Validation
 
-- Brace balance ALL OK (all 7 edited files), `git diff --check` clean.
+- Brace balance ALL OK (3 edited files), `git diff --check` clean, diffs
+  visually reviewed.
 - No compile/build commands run (environment has no Android SDK — CI gates
   compilation on push per root AGENTS.md).
-- Reviewer (code-reviewer-deepseek-flash) passed.
 
 ## Completion summary
 
-v8.25b shipped: the pet no longer doubles up behind the tour-ask dialog, the
-tour's Home and Start-exploring highlights now land on the real controls
-(the overlay covers the whole window, so bottom-docked buttons align), the
-spin step never blocks the Shuffle button while the deck loads, and all tour
-dialog copy was rewritten without em dashes. Pushed to Alpha.
+v8.26 shipped: smaller tucked cloud, natural brown excited eyes, a little
+throw momentum after flings, smooth fade/rise speech bubbles, 2.3s bubble
+hold + 2.5s dizzy recovery, "Let me read this!" line, and a full
+docs/PET_DIALOGUE.txt reference for future copy edits.

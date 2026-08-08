@@ -105,6 +105,10 @@ fun CurioPetSprite(
     val blush = Color(0xFFF7AFAF)
     val gold = Color(0xFFFFD97D)
     val goldDeep = Color(0xFFE0B050)
+    // v8.26 — excited eyes wear a NATURAL warm brown (the ink family, one
+    // step lighter) instead of gold: the gold stars read orangish against
+    // the cream body. Sparkles and the antenna keep the gold.
+    val starEye = Color(0xFF7A4E2E)
     val leaf = Color(0xFF9CCB8B)
     val bookCover = Color(0xFFD98BA0)
     val white = Color.White
@@ -488,17 +492,18 @@ fun CurioPetSprite(
                                 drawPx(4, 7, white); drawPx(10, 7, white)
                             }
                             EyeStyle.STAR -> {
-                                // v8.21 — big shiny gold stars with a white
-                                // glint: genuinely excited, not a sparse
-                                // cross. Each eye is a 4×3 star with a
-                                // highlight where the light catches.
-                                drawPx(4, 6, gold); drawPx(5, 6, gold)
-                                drawPx(3, 7, gold); drawPx(4, 7, gold); drawPx(5, 7, gold); drawPx(6, 7, gold)
-                                drawPx(4, 8, gold); drawPx(5, 8, gold)
+                                // v8.26 — natural warm-brown sparkle eyes
+                                // with a white glint (the old gold read
+                                // orangish on the cream body). Each eye is
+                                // a 4×3 star with a highlight where the
+                                // light catches.
+                                drawPx(4, 6, starEye); drawPx(5, 6, starEye)
+                                drawPx(3, 7, starEye); drawPx(4, 7, starEye); drawPx(5, 7, starEye); drawPx(6, 7, starEye)
+                                drawPx(4, 8, starEye); drawPx(5, 8, starEye)
                                 drawPx(4, 7, white)
-                                drawPx(10, 6, gold); drawPx(11, 6, gold)
-                                drawPx(9, 7, gold); drawPx(10, 7, gold); drawPx(11, 7, gold); drawPx(12, 7, gold)
-                                drawPx(10, 8, gold); drawPx(11, 8, gold)
+                                drawPx(10, 6, starEye); drawPx(11, 6, starEye)
+                                drawPx(9, 7, starEye); drawPx(10, 7, starEye); drawPx(11, 7, starEye); drawPx(12, 7, starEye)
+                                drawPx(10, 8, starEye); drawPx(11, 8, starEye)
                                 drawPx(10, 7, white)
                             }
                             EyeStyle.DIZZY -> {
