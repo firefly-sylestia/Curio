@@ -24,6 +24,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -830,6 +832,28 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
 
     // ── Deck interaction callbacks — shared by the normal and compact
     //    layout branches (the Carousel call lives in SpinDeckSection) ─
+    // ── Deck swipe — the front card swaps through the visible fan ──
+    // A horizontal swipe nudges cycleIndex ±1, which re-resolves every
+    // fan slot so the whole deck streams one card forward/back through
+    // the cards already visible around the front (v8.31). When a landed
+    // card fronts the deck, the first swipe dismisses it (clears the
+    // pin) and lands on the neighbor that was already visible in the
+    // swiped direction — resolveTopicForSlot's wrap-around makes that
+    // exact card come to the front. The fan never re-deals: hand is
+    // keyed on filteredPool only, so a swipe is a pure rotation.
+    val onDeckCycle: (Int) -> Unit = { delta ->
+        if (!shuffling && filteredPool.isNotEmpty() && !isOpening && hand.isNotEmpty()) {
+            // Cleared unconditionally: the pointerInput block captures this
+            // lambda once, so reading the recomputed `landedTopic` val would
+            // go stale in the captured closure — the MutableState delegate
+            // write is always live. Setting the same value is a no-op recompose
+            // and won't re-fire the persist effect, so it's safe on idle deck.
+            landedTopicName = null
+            val size = hand.size
+            cycleIndex = ((cycleIndex + delta) % size + size) % size
+        }
+    }
+
     val onDeckCardTap: () -> Unit = {
         if (!shuffling && filteredPool.isNotEmpty() && !isOpening) {
             // v7.106 — the front card is ALWAYS openable: the restored
@@ -993,6 +1017,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         buttonPulse = buttonPulse,
                         fitScale = wideFit,
                         onCardTap = onDeckCardTap,
+                        onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
                     )
                 }
@@ -1063,6 +1088,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     buttonPulse = buttonPulse,
                     fitScale = fitScale,
                     onCardTap = onDeckCardTap,
+                    onCycle = onDeckCycle,
                     onSpinClick = onSpinClick
                 )
             }
@@ -1103,6 +1129,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         buttonPulse = buttonPulse,
                         fitScale = fitScale,
                         onCardTap = onDeckCardTap,
+                        onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
                     )
                 }
@@ -1818,6 +1845,7 @@ private fun Carousel(
     roomy: Boolean = false,
     fitScale: Float = 1f,
     onCardTap: () -> Unit,
+    onCycle: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val poolSize = displayPool.size
@@ -1866,23 +1894,58 @@ private fun Carousel(
                     landedTopic = landedTopic
                 )
                 if (slot == 0) {
-                    HeroTicketCard(
-                        accent = deckAccent,
-                        gradient = deckGradient,
-                        isMixed = isMixed,
-                        mixSeed = mixSeed,
-                        scale = deckScale,
-                        topic = topic,
-                        cat = cat,
-                        landed = landedTopic != null,
-                        shuffling = shuffling,
-                        opening = opening,
-                        // The front card can show an idle-deck topic before the
-                        // first shuffle, so its tap target must follow the
-                        // rendered card instead of requiring a landed topic.
-                        enabled = enabled && topic != null,
-                        onTap = onCardTap
-                    )
+                    // v8.31 — a horizontal swipe on the front card rotates the
+                    // fan through the cards already visible around it: the
+                    // cycleIndex ±1 nudge re-resolves every slot, so the whole
+                    // deck streams one card forward/back and the front card's
+                    // AnimatedContent glide covers the swap. Taps still open
+                    // the topic the card is showing. Detector sits on a wrapper
+                    // Box BEFORE the card's own clickable so drags win over
+                    // taps; gestures under the 48dp threshold snap back (the
+                    // card never visually moves on a short flick).
+                    Box(
+                        modifier = Modifier.pointerInput(enabled, shuffling, opening) {
+                            if (enabled && !shuffling && !opening) {
+                                val swipeThreshold = 48.dp.toPx()
+                                var totalDrag = 0f
+                                while (true) {
+                                    detectHorizontalDragGestures(
+                                        onDragStart = { totalDrag = 0f },
+                                        onDragCancel = { totalDrag = 0f },
+                                        onDragEnd = {
+                                            when {
+                                                totalDrag <= -swipeThreshold -> onCycle(1)
+                                                totalDrag >= swipeThreshold -> onCycle(-1)
+                                            }
+                                            totalDrag = 0f
+                                        },
+                                        onHorizontalDrag = { change, dragAmount ->
+                                            change.consume()
+                                            totalDrag += dragAmount
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        HeroTicketCard(
+                            accent = deckAccent,
+                            gradient = deckGradient,
+                            isMixed = isMixed,
+                            mixSeed = mixSeed,
+                            scale = deckScale,
+                            topic = topic,
+                            cat = cat,
+                            landed = landedTopic != null,
+                            shuffling = shuffling,
+                            opening = opening,
+                            // The front card can show an idle-deck topic before the
+                            // first shuffle, so its tap target must follow the
+                            // rendered card instead of requiring a landed topic.
+                            enabled = enabled && topic != null,
+                            onTap = onCardTap
+                        )
+                    }
                 } else {
                     PeekCard(
                         slot = slot,
