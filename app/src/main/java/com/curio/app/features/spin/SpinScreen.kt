@@ -1452,7 +1452,7 @@ private fun FilterSheet(
                 text = "Pick what you're in the mood for",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 20.dp, bottom = 10.dp)
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
             )
 
             // ── Active filter summary chips — this is what was missing ─

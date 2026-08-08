@@ -54,8 +54,13 @@ private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 private val HEARTS_W = 132.dp
 private val HEARTS_H = 84.dp
 // v8.20 — the little cloud the pet rides while it walks (under the sprite).
+// v8.23 — it is a PIXEL cloud now, drawn on a 16×8 grid in the pet's own
+// style (soft rounded pixels), so the ride reads on-style instead of as a
+// blurry vector blob.
 private val CLOUD_W = 96.dp
 private val CLOUD_H = 42.dp
+private const val CLOUD_GRID_W = 16
+private const val CLOUD_GRID_H = 8
 // v8.20 — how close a drop must be to the flower bed to count as "home".
 private val DROP_FORGIVENESS = 12.dp
 
@@ -740,9 +745,12 @@ private fun HeartsOverlay(key: Int, modifier: Modifier = Modifier) {
 
 /**
  * v8.20 — the puff of cloud the pet rides while it walks. Drawn in its own
- * offset sibling under the sprite (never inside its touch box); three soft
- * overlapping puffs + a flat base, bobbing gently, fading in with movement
- * so it only shows on the go.
+ * offset sibling under the sprite (never inside its touch box). v8.23 —
+ * REDESIGNED as a PIXEL cloud in the pet's own style: a 16×8 grid of soft
+ * rounded pixels (the same drawing language as the sprite) with a fluffy
+ * three-lobe silhouette, cool top highlights and a shaded base — detailed,
+ * fluffy and on-style instead of a blurry vector blob. Bobbing gently,
+ * fading in with movement so it only shows on the go.
  */
 @Composable
 private fun CloudRide(visible: Boolean, modifier: Modifier = Modifier) {
@@ -773,28 +781,45 @@ private fun CloudRide(visible: Boolean, modifier: Modifier = Modifier) {
             scaleY = 1f + bob.value * 0.04f
         }
     ) {
-        val w = size.width
-        val h = size.height
-        val puff = Color.White
-        val shadow = Color(0xFFDCD5C8)
-        val cY = h * 0.55f
-        // Three overlapping puffs + a flat base make the cloud read soft.
-        drawCircle(puff, radius = w * 0.22f, center = Offset(w * 0.30f, cY))
-        drawCircle(puff, radius = w * 0.27f, center = Offset(w * 0.48f, cY - h * 0.16f))
-        drawCircle(puff, radius = w * 0.21f, center = Offset(w * 0.68f, cY))
-        drawRoundRect(
-            color = puff,
-            topLeft = Offset(w * 0.12f, cY),
-            size = Size(w * 0.76f, h * 0.34f),
-            cornerRadius = CornerRadius(w * 0.12f)
+        // v8.23 — the pixel cloud: 'H' crisp highlights, 'W' fluffy body,
+        // 'w' under-shade, 'd' deep base. Every cell is a slightly-rounded,
+        // slightly-overlapping square — the sprite's own softened pixel look.
+        val highlight = Color.White
+        val body = Color(0xFFF6F8FE)
+        val shade = Color(0xFFDCE3F2)
+        val deep = Color(0xFFC9D2E8)
+        val cloud = listOf(
+            ".....HHHHHWW......",
+            "...HWWWWWWWWWW....",
+            "..WWWWWWWWWWWWWW..",
+            ".WWWWWWWWWWWWWWWW.",
+            ".WWWWWWWWWWWWWWWW.",
+            "WWWWWWWWWWWWWWWWWW",
+            "wWWWWWWWWWWWWWWWWw",
+            ".dddddddddddddddd."
         )
-        // A whisper of shade under the puffs for definition.
-        drawRoundRect(
-            color = shadow.copy(alpha = 0.85f),
-            topLeft = Offset(w * 0.16f, h * 0.82f),
-            size = Size(w * 0.68f, h * 0.12f),
-            cornerRadius = CornerRadius(w * 0.06f)
-        )
+        val px = size.width / CLOUD_GRID_W
+        fun pxAt(col: Int, row: Int, color: Color, alpha: Float = 1f) {
+            if (col !in 0 until CLOUD_GRID_W || row !in 0 until CLOUD_GRID_H) return
+            drawRoundRect(
+                color = color.copy(alpha = alpha),
+                // v8.23 — center the 6% overlap so the cloud's outer edges
+                // round symmetrically instead of clipping at the canvas.
+                topLeft = Offset(col * px - px * 0.03f, row * px - px * 0.03f),
+                size = Size(px * 1.06f, px * 1.06f),
+                cornerRadius = CornerRadius(px * 0.18f)
+            )
+        }
+        cloud.forEachIndexed { row, line ->
+            line.forEachIndexed { col, ch ->
+                when (ch) {
+                    'H' -> pxAt(col, row, highlight)
+                    'W' -> pxAt(col, row, body)
+                    'w' -> pxAt(col, row, shade)
+                    'd' -> pxAt(col, row, deep)
+                }
+            }
+        }
     }
 }
 
