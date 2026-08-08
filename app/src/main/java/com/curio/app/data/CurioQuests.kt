@@ -29,8 +29,10 @@ import java.util.Calendar
  *    screen; the in-app guide overlay drives this chain, and tapping the
  *    very first quest launches the full auto-navigating quest tour
  *    (see [QuestGuide]).
- *  - **Daily quests** — three quests picked per day from a rotating pool
- *    (seeded by the calendar day, stable all day, resets at midnight).
+ *  - **Daily quests** — five quests picked per day from a rotating pool
+ *    (seeded by the calendar day, stable all day, resets at 4 AM): three
+ *    CORE quests first, then two BONUS quests (higher rewards) that
+ *    unlock once the core trio is claimed (v8.27).
  *
  * Persistence mirrors the other data objects: one SharedPreferences file
  * (`curio_quests`, listed in [CurioBackupManager] so it ships with the
@@ -249,7 +251,7 @@ object CurioQuests {
                 ),
                 QuestStage(
                     id = "tour-daily", title = "Complete a daily quest",
-                    description = "Finish one of today's three quests.",
+                    description = "Finish one of today's quests.",
                     hint = "Check Today's quests below and knock one out.",
                     xpReward = 15, kind = QuestKind.DAILY, target = 1
                 ),
@@ -340,38 +342,58 @@ object CurioQuests {
         val title: String,
         val xpReward: Int,
         val kind: DailyKind,
-        val target: Int
+        val target: Int,
+        /**
+         * v8.27 — bonus quests: higher-reward dailies that unlock only after
+         * the three CORE quests are claimed. The Quests page hides completed
+         * core quests and reveals these once the core trio is done.
+         */
+        val bonus: Boolean = false
     )
 
     private val DailyPool: List<DailyQuest> = listOf(
-        DailyQuest("d-spin-1", "Spin the deck once", 10, DailyKind.SPIN, 1),
-        DailyQuest("d-spin-3", "Spin the deck 3 times", 15, DailyKind.SPIN, 3),
-        DailyQuest("d-explore-1", "Explore a topic", 15, DailyKind.EXPLORE, 1),
-        DailyQuest("d-save-1", "Save a capture", 15, DailyKind.SAVE, 1),
-        DailyQuest("d-quote-1", "Bookmark a quote", 10, DailyKind.QUOTE, 1),
-        DailyQuest("d-pin-1", "Pin a topic for later", 10, DailyKind.PIN, 1),
-        DailyQuest("d-profile-1", "Visit your profile", 10, DailyKind.PROFILE, 1),
-        DailyQuest("d-like-1", "Like a topic", 10, DailyKind.LIKE, 1),
+        // ── Core — one warm-up + the discovery quest + one creation (spec
+        //    §5.1). v8.27 — rewards raised ~50% (the daily economy is now
+        //    a full 5-quest day paying ~120+ XP instead of ~45).
+        DailyQuest("d-spin-1", "Spin the deck once", 15, DailyKind.SPIN, 1),
+        DailyQuest("d-spin-3", "Spin the deck 3 times", 20, DailyKind.SPIN, 3),
+        DailyQuest("d-explore-1", "Explore a topic", 20, DailyKind.EXPLORE, 1),
+        DailyQuest("d-save-1", "Save a capture", 25, DailyKind.SAVE, 1),
+        DailyQuest("d-quote-1", "Bookmark a quote", 15, DailyKind.QUOTE, 1),
+        DailyQuest("d-pin-1", "Pin a topic for later", 15, DailyKind.PIN, 1),
+        DailyQuest("d-profile-1", "Visit your profile", 15, DailyKind.PROFILE, 1),
+        DailyQuest("d-like-1", "Like a topic", 15, DailyKind.LIKE, 1),
         // Discovery role — "New Lane": explore the passport's least-engaged
         // lane (its stamp becomes EXPLORED). The UI titles it with the lane
         // name and routes its CTA to that lane's Spin deck (spec §6.3).
-        DailyQuest("d-lane-1", "Try a new lane", 20, DailyKind.DISCOVERY, 1)
+        DailyQuest("d-lane-1", "Try a new lane", 30, DailyKind.DISCOVERY, 1),
+        // ── Bonus (v8.27) — bigger payouts, revealed after the core trio is
+        //    claimed. Picked deterministically, two per day, never repeated.
+        DailyQuest("d-b-spin-5", "Spin the deck 5 times", 30, DailyKind.SPIN, 5, bonus = true),
+        DailyQuest("d-b-explore-2", "Explore 2 topics", 35, DailyKind.EXPLORE, 2, bonus = true),
+        DailyQuest("d-b-save-2", "Save 2 captures", 40, DailyKind.SAVE, 2, bonus = true),
+        DailyQuest("d-b-quote-2", "Bookmark 2 quotes", 25, DailyKind.QUOTE, 2, bonus = true),
+        DailyQuest("d-b-pin-2", "Pin 2 topics for later", 25, DailyKind.PIN, 2, bonus = true),
+        DailyQuest("d-b-like-3", "Like 3 topics", 25, DailyKind.LIKE, 3, bonus = true),
+        DailyQuest("d-b-profile-2", "Visit your profile twice", 20, DailyKind.PROFILE, 2, bonus = true)
     )
 
     /**
-     * The three quests live for [epochDay] — stable all day, new at midnight.
-     * Role diversity (spec §5.1): one warm-up + the discovery quest + one
-     * creation quest. When [context] is given and every lane is already
-     * mastered there is nothing left to discover — the discovery slot is
-     * replaced by a second creation quest instead.
+     * The five quests live for [epochDay] — stable all day, new at 4 AM.
+     * Role diversity for the CORE trio (spec §5.1): one warm-up + the
+     * discovery quest + one creation quest. When [context] is given and
+     * every lane is already mastered there is nothing left to discover —
+     * the discovery slot is replaced by a second creation quest instead.
+     * v8.27 — two BONUS quests (higher rewards) follow the core trio and
+     * unlock in the UI once all three core quests are claimed.
      */
     fun dailyQuestsFor(epochDay: Long, context: Context? = null): List<DailyQuest> {
         val warmups = DailyPool.filter {
-            it.kind == DailyKind.SPIN || it.kind == DailyKind.EXPLORE || it.kind == DailyKind.PROFILE
+            !it.bonus && (it.kind == DailyKind.SPIN || it.kind == DailyKind.EXPLORE || it.kind == DailyKind.PROFILE)
         }
         val creations = DailyPool.filter {
-            it.kind == DailyKind.SAVE || it.kind == DailyKind.QUOTE ||
-                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE
+            !it.bonus && (it.kind == DailyKind.SAVE || it.kind == DailyKind.QUOTE ||
+                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE)
         }
         val discovery = DailyPool.firstOrNull { it.kind == DailyKind.DISCOVERY }
         fun pick(list: List<DailyQuest>): DailyQuest {
@@ -379,13 +401,19 @@ object CurioQuests {
             return list[if (base < 0) base + list.size else base]
         }
         val hasDiscoveryTarget = context == null || CurioPassport.leastEngaged(context) != null
-        return if (discovery != null && hasDiscoveryTarget) {
+        val core: List<DailyQuest> = if (discovery != null && hasDiscoveryTarget) {
             listOf(pick(warmups), discovery, pick(creations))
         } else {
             val c0 = pick(creations)
             val c1 = creations[(creations.indexOf(c0) + 1) % creations.size]
             listOf(pick(warmups), c0, c1)
         }
+        // v8.27 — the two bonus quests, picked deterministically and never
+        // the same on one day.
+        val bonusPool = DailyPool.filter { it.bonus }
+        val b0 = pick(bonusPool)
+        val b1 = bonusPool[(bonusPool.indexOf(b0) + 1) % bonusPool.size]
+        return core + listOf(b0, b1)
     }
 
     // ── Seed / persistence ──────────────────────────────────────────────

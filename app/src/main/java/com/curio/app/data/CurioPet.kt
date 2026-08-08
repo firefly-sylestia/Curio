@@ -113,13 +113,13 @@ object CurioPet {
      * sprite (the onboarding tour-ask), the floating pet is hidden so the
      * pet never appears twice (once in the dialog, once wandering behind
      * it). Set/cleared by the screen that owns the dialog via
-     * [setFloatingSuppressed].
+     * [suppressFloating].
      */
     var floatingSuppressed by mutableStateOf(false)
         private set
 
     /** v8.25 — hide ([value] = true) or restore the floating pet. */
-    fun setFloatingSuppressed(value: Boolean) {
+    fun suppressFloating(value: Boolean) {
         floatingSuppressed = value
     }
 

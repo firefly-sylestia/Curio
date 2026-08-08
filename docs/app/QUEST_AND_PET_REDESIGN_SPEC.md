@@ -136,6 +136,14 @@ Every day should generate three quests with distinct roles:
    - Examples: Save a note, add an image, record a thought, pin a topic.
    - Reward: 20–35 XP.
 
+> **v8.27 — five quests a day.** The day now ships **three CORE quests**
+> (the warm-up / discovery / creation trio above) plus **two BONUS quests**
+> that unlock once all three core quests are claimed. Bonus rewards are
+> higher (25–40 XP) and the core rewards were raised ~50%, so a full day
+> pays roughly 120–140 XP instead of ~45. On the Quests page, claimed core
+> quests hide away (animated out) and the bonus pair pops in with a gold
+> "Bonus quests unlocked!" line once the trio is done.
+
 ### 5.2 Daily quest ordering
 
 Daily quests must appear at the top of the Quests page, directly under the pet/level hero. If screen height is limited, show the first two daily quests and a “Show third” affordance rather than pushing all daily content below chains.

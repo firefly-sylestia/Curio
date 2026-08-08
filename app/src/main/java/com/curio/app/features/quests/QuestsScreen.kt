@@ -1,6 +1,16 @@
 package com.curio.app.features.quests
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,11 +81,15 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.ConfettiBurst
+import com.curio.app.ui.components.CurioBadgeMedal
+import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.chainBadgeColor
 import com.curio.app.ui.pet.CurioPetHeroCard
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.PetLandmark
@@ -84,6 +99,7 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.themedAccent
 
 /**
@@ -102,7 +118,8 @@ import com.curio.app.ui.theme.themedAccent
  *  4. Quest chains — every chain (Tour, Deck, Discovery, Keepsakes, Shelf,
  *     Pin Board, Flame, Taste, Ladder) with its stages; the next stage is
  *     the hero, later stages preview as locked.
- *  5. Today's quests — the three daily quests with mini progress bars.
+ *  5. Today's quests — five dailies a day (three core + two bonus), with
+ *     mini progress bars and claimable rewards.
  *  6. Badge shelf — every chain stage as a badge, in a two-column grid.
  */
 @Composable
@@ -127,6 +144,28 @@ fun QuestsScreen(navController: NavController) {
         if (levelUpBanner != null) {
             delay(2500)
             levelUpBanner = null
+        }
+    }
+    // v8.27 — live badge-unlock toast: a chain badge earned while this page
+    // is open (e.g. right after a daily claim) pops a medal toast and hops
+    // the pet (spec §9.1 — the reward moment).
+    var seenAwardedIds by remember { mutableStateOf(CurioQuests.awardedStagesState) }
+    var newBadgeStage by remember { mutableStateOf<QuestStage?>(null) }
+    LaunchedEffect(CurioQuests.awardedStagesState) {
+        val newIds = CurioQuests.awardedStagesState - seenAwardedIds
+        if (newIds.isNotEmpty()) {
+            seenAwardedIds = CurioQuests.awardedStagesState
+            val stage = CurioQuests.allStages().firstOrNull { it.id in newIds }
+            if (stage != null) {
+                newBadgeStage = stage
+                celebrate++
+            }
+        }
+    }
+    LaunchedEffect(newBadgeStage) {
+        if (newBadgeStage != null) {
+            delay(2600)
+            newBadgeStage = null
         }
     }
     // The pet's one-shot bubble for this visit (spec §10.7 — one per screen
@@ -313,6 +352,55 @@ fun QuestsScreen(navController: NavController) {
                             "Your Curio pet grew a little. Keep going!",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+        // v8.27 — reward moments: confetti rains on a level-up, and a medal
+        // toast pops when a badge unlocks live on this page.
+        if (levelUpBanner != null) {
+            ConfettiBurst(
+                colors = listOf(
+                    CurioColors.CoralBlush, CurioColors.ButterYellow,
+                    CurioColors.Sage, CurioColors.SkyMint
+                ),
+                trigger = levelUpBanner,
+                particleCount = CurioMotion.ConfettiParticleCountLarge,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxSize(),
+                onComplete = {}
+            )
+        }
+        newBadgeStage?.let { stage ->
+            Surface(
+                onClick = { newBadgeStage = null },
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 10.dp,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 28.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    CurioBadgeMedal(stage = stage, medalSize = 42.dp)
+                    Column {
+                        Text(
+                            "Badge unlocked!",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = CurioColors.Sage
+                        )
+                        Text(
+                            stage.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -548,6 +636,14 @@ private fun PathsCard(
         activeChains.forEach { chain ->
             PathRow(chain = chain, onNavigate = onNavigate)
         }
+        // v8.27 — PINNED badges: the earned medals (and a couple of locked
+        // silhouettes for aspiration) live ON the page; the row below still
+        // opens the full two-column shelf.
+        CurioBadgeStrip(
+            earnedLimit = 5,
+            lockedPreview = 2,
+            onViewAll = { showBadges = true }
+        )
         // Badge shelf — one tappable row that opens the grid in a dialog
         // (v8.7 — no permanent two-column board dominating the page).
         Spacer(Modifier.height(4.dp))
@@ -811,7 +907,12 @@ private fun dailyGoRoute(kind: CurioQuests.DailyKind): String? = when (kind) {
     else -> null
 }
 
-/** Today's three quests with mini progress bars (v8.3 — claimable rewards). */
+/**
+ * Today's quests — three CORE quests with mini progress bars (v8.3 —
+ * claimable rewards), then TWO BONUS quests that unlock once the core trio
+ * is claimed (v8.27). Completed quests animate away, the bonus row pops in
+ * with a gold sparkle, and claiming pops a "+N XP" chip and hops the pet.
+ */
 @Composable
 private fun DailyCard(
     quests: List<DailyQuest>,
@@ -819,55 +920,207 @@ private fun DailyCard(
     onGo: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    val awarded = CurioQuests.dailyAwardedState
+    val core = quests.filterNot { it.bonus }
+    val bonus = quests.filter { it.bonus }
+    val coreDone = core.all { it.id in awarded }
+    // v8.27 — while the core trio is open, claimed core quests HIDE (they
+    // animate out); once ALL THREE are claimed the bonus quests take over.
+    val doneCount = quests.count { it.id in awarded }
+    // v8.27 — claim XP pop: a tiny "+N XP" chip pops near the header every
+    // time a quest's reward is claimed.
+    var xpPop by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    LaunchedEffect(xpPop?.second) {
+        if (xpPop != null) {
+            delay(1000)
+            xpPop = null
+        }
+    }
     CurioSettingsCard(modifier = modifier) {
-        CurioCardHeader(CurioIcons.EmojiEvents, "Today's quests", "Resets at 4 AM")
+        CurioCardHeader(
+            CurioIcons.EmojiEvents,
+            "Today's quests",
+            "$doneCount of ${quests.size} done · Resets at 4 AM"
+        )
         Spacer(Modifier.height(2.dp))
-        quests.forEach { quest ->
-            val progress = CurioQuests.dailyProgressState[quest.kind.name] ?: 0
-            val done = quest.id in CurioQuests.dailyAwardedState
-            val fraction = (progress.toFloat() / quest.target).coerceIn(0f, 1f)
-            // v8.6 — the discovery daily names the lane the passport wants
-            // the user to try, and its Go chip routes straight into that
-            // lane's Spin deck (spec §6.2/§6.3).
-            val discoveryLane = if (quest.kind == CurioQuests.DailyKind.DISCOVERY) {
-                CurioPassport.leastEngaged(context)
-            } else null
-            val questTitle = when {
-                discoveryLane != null -> "New lane, try ${discoveryLane.displayName}"
-                quest.kind == CurioQuests.DailyKind.DISCOVERY -> "Try a new lane"
-                else -> quest.title
-            }
-            val goRoute = when {
-                discoveryLane != null -> CurioRoutes.spinWithCategory(discoveryLane.id.routeSlug)
-                quest.kind == CurioQuests.DailyKind.DISCOVERY -> null
-                else -> dailyGoRoute(quest.kind)
-            }
+        // v8.27 — bonus unlock line: pops in gold once the core trio is done.
+        AnimatedVisibility(
+            visible = coreDone && bonus.isNotEmpty(),
+            enter = fadeIn(tween(220)) + scaleIn(initialScale = 0.85f)
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 5.dp),
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(
-                            if (done) CurioColors.Sage.copy(alpha = 0.18f)
-                            else CurioColors.CoralBlush.copy(alpha = 0.14f)
-                        ),
-                    contentAlignment = Alignment.Center
+                CurioIcon(
+                    name = CurioIcons.AutoAwesome,
+                    contentDescription = null,
+                    tint = CurioColors.ButterYellow,
+                    size = 16.dp
+                )
+                Text(
+                    "Bonus quests unlocked!",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = CurioColors.ButterYellow
+                )
+            }
+        }
+        if (coreDone) {
+            // v8.27 — the bonus pair pops in as one group (fade + grow) the
+            // moment the core trio is claimed; claimed core rows animate out
+            // individually while the core list is showing.
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(240)) + scaleIn(initialScale = 0.92f)
+            ) {
+                Column {
+                    bonus.forEach { quest ->
+                        DailyQuestRow(
+                            quest = quest,
+                            done = quest.id in awarded,
+                            onClaim = { id ->
+                                onClaim(id)
+                                xpPop = quest.xpReward to ((xpPop?.second ?: 0) + 1)
+                            },
+                            onGo = onGo
+                        )
+                    }
+                }
+            }
+        } else {
+            core.forEach { quest ->
+                DailyQuestRow(
+                    quest = quest,
+                    done = quest.id in awarded,
+                    onClaim = { id ->
+                        onClaim(id)
+                        xpPop = quest.xpReward to ((xpPop?.second ?: 0) + 1)
+                    },
+                    onGo = onGo
+                )
+            }
+        }
+        if (doneCount == quests.size) {
+            Text(
+                "All done today! Fresh quests land at 4 AM.",
+                style = MaterialTheme.typography.bodySmall,
+                color = CurioColors.Sage,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+        // The floating "+N XP" claim chip.
+        AnimatedVisibility(
+            visible = xpPop != null,
+            enter = fadeIn(tween(150)) + scaleIn(initialScale = 0.6f),
+            exit = fadeOut(tween(200)) + scaleOut(targetScale = 0.7f, animationSpec = tween(200))
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = CurioColors.Sage.copy(alpha = 0.14f),
+                    border = BorderStroke(1.dp, CurioColors.Sage.copy(alpha = 0.30f))
                 ) {
-                    CurioIcon(
-                        name = if (done) CurioIcons.Check else CurioIcons.TaskAlt,
-                        contentDescription = null,
-                        tint = if (done) CurioColors.Sage else CurioColors.CoralBlush,
-                        size = 18.dp
+                    Text(
+                        "+${xpPop?.first ?: 0} XP",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = CurioColors.Sage,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
-                Column(modifier = Modifier.weight(1f)) {
+            }
+        }
+    }
+}
+
+/** One daily quest row — title, animated progress, and Claim / Go chip. */
+@Composable
+private fun DailyQuestRow(
+    quest: DailyQuest,
+    done: Boolean,
+    onClaim: (String) -> Unit,
+    onGo: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val progress = CurioQuests.dailyProgressState[quest.kind.name] ?: 0
+    val fraction by animateFloatAsState(
+        targetValue = (progress.toFloat() / quest.target.coerceAtLeast(1)).coerceIn(0f, 1f),
+        animationSpec = tween(450),
+        label = "dailyProgress"
+    )
+    // v8.6 — the discovery daily names the lane the passport wants the user
+    // to try, and its Go chip routes straight into that lane's Spin deck
+    // (spec §6.2/§6.3).
+    val discoveryLane = if (quest.kind == CurioQuests.DailyKind.DISCOVERY) {
+        CurioPassport.leastEngaged(context)
+    } else null
+    val questTitle = when {
+        discoveryLane != null -> "New lane, try ${discoveryLane.displayName}"
+        quest.kind == CurioQuests.DailyKind.DISCOVERY -> "Try a new lane"
+        else -> quest.title
+    }
+    val goRoute = when {
+        discoveryLane != null -> CurioRoutes.spinWithCategory(discoveryLane.id.routeSlug)
+        quest.kind == CurioQuests.DailyKind.DISCOVERY -> null
+        else -> dailyGoRoute(quest.kind)
+    }
+    val claimable = !done && progress >= quest.target
+    // v8.27 — bonus quests wear gold + a sparkle glyph; the Claim pill
+    // softly pulses ONLY while it's ready to claim (spec §5.3: "card glows
+    // softly"), so an idle page never drives a permanent animation loop.
+    val accent = if (quest.bonus) CurioColors.ButterYellow else CurioColors.CoralBlush
+    val pulseAlpha = if (claimable) {
+        val pulse = rememberInfiniteTransition(label = "claimPulse")
+        pulse.animateFloat(
+            initialValue = 1f,
+            targetValue = 0.55f,
+            animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+            label = "claimPulseAlpha"
+        ).value
+    } else 1f
+    // Claimed quests animate OUT (scale + fade) instead of vanishing.
+    AnimatedVisibility(
+        visible = !done,
+        exit = fadeOut(tween(200)) + scaleOut(targetScale = 0.8f, animationSpec = tween(200))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(
+                        if (done) CurioColors.Sage.copy(alpha = 0.18f)
+                        else accent.copy(alpha = 0.14f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = when {
+                        done -> CurioIcons.Check
+                        quest.bonus -> CurioIcons.AutoAwesome
+                        else -> CurioIcons.TaskAlt
+                    },
+                    contentDescription = null,
+                    tint = if (done) CurioColors.Sage else accent,
+                    size = 18.dp
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     Text(
                         questTitle,
                         style = MaterialTheme.typography.bodyLarge.copy(
@@ -876,69 +1129,79 @@ private fun DailyCard(
                         color = if (done) MaterialTheme.colorScheme.onSurfaceVariant
                         else MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
-                    Spacer(Modifier.height(5.dp))
-                    LinearProgressIndicator(
-                        progress = { fraction },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(50)),
-                        color = if (done) CurioColors.Sage else CurioColors.CoralBlush,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                }
-                Spacer(Modifier.width(6.dp))
-                val claimable = !done && progress >= quest.target
-                if (claimable) {
-                    // v8.3 — Claim pill: a tap grants the quest's XP.
-                    Surface(
-                        onClick = { onClaim(quest.id) },
-                        shape = RoundedCornerShape(50),
-                        color = CurioColors.CoralBlush
-                    ) {
+                    if (quest.bonus && !done) {
                         Text(
-                            "Claim +${quest.xpReward} XP",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                            "BONUS",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.8.sp
+                            ),
+                            color = CurioColors.ButterYellow
                         )
                     }
-                } else {
+                }
+                Spacer(Modifier.height(5.dp))
+                LinearProgressIndicator(
+                    progress = { fraction },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50)),
+                    color = if (done) CurioColors.Sage else accent,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            if (claimable) {
+                // v8.3 — Claim pill: a tap grants the quest's XP.
+                Surface(
+                    onClick = { onClaim(quest.id) },
+                    shape = RoundedCornerShape(50),
+                    color = accent,
+                    modifier = Modifier.graphicsLayer { alpha = pulseAlpha }
+                ) {
                     Text(
-                        if (done) "Done" else "+${quest.xpReward} XP",
+                        "Claim +${quest.xpReward} XP",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (done) CurioColors.Sage else CurioColors.CoralBlush
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
                     )
-                    // v8.3 — Go chip on in-progress dailies: jump to the
-                    // screen where this quest's action happens. v8.6 — the
-                    // discovery quest's Go chip targets the least-engaged
-                    // lane's Spin deck.
-                    if (!done) {
-                        goRoute?.let { route ->
-                            Spacer(Modifier.width(4.dp))
-                            Surface(
-                                onClick = { onGo(route) },
-                                shape = RoundedCornerShape(50),
-                                color = CurioColors.CoralBlush.copy(alpha = 0.14f)
+                }
+            } else {
+                Text(
+                    if (done) "Done" else "+${quest.xpReward} XP",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (done) CurioColors.Sage else accent
+                )
+                // v8.3 — Go chip on in-progress dailies: jump to the screen
+                // where this quest's action happens. v8.6 — the discovery
+                // quest's Go chip targets the least-engaged lane's Spin deck.
+                if (!done) {
+                    goRoute?.let { route ->
+                        Spacer(Modifier.width(4.dp))
+                        Surface(
+                            onClick = { onGo(route) },
+                            shape = RoundedCornerShape(50),
+                            color = accent.copy(alpha = 0.14f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
-                                ) {
-                                    Text(
-                                        "Go",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = CurioColors.CoralBlush
-                                    )
-                                    CurioForwardArrow(
-                                        "Go to quest",
-                                        tint = CurioColors.CoralBlush,
-                                        size = 12.dp
-                                    )
-                                }
+                                Text(
+                                    "Go",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = accent
+                                )
+                                CurioForwardArrow(
+                                    "Go to quest",
+                                    tint = accent,
+                                    size = 12.dp
+                                )
                             }
                         }
                     }

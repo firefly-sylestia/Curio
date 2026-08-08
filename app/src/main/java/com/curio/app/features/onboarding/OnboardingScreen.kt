@@ -153,10 +153,10 @@ fun OnboardingScreen(navController: NavController) {
     // also wander behind the scrim (a duplicate pet on screen). Reset when
     // the dialog closes, and on dispose as a safety net.
     LaunchedEffect(showTourAsk) {
-        CurioPet.setFloatingSuppressed(showTourAsk)
+        CurioPet.suppressFloating(showTourAsk)
     }
     DisposableEffect(Unit) {
-        onDispose { CurioPet.setFloatingSuppressed(false) }
+        onDispose { CurioPet.suppressFloating(false) }
     }
     // Finishing the intro asks about the tour first (if it hasn't been
     // offered yet), then lands on Home.
