@@ -205,8 +205,13 @@ fun TopicRevealScreen(
     LaunchedEffect(cat.id, resolved?.id) {
         if (resolved != null) {
             CurioPassport.noteReveal(context, cat.id)
-            // The pet leans in when the topic reveal opens (spec §10.6).
-            CurioPet.reactTo(CurioPet.Event.REVEAL_OPEN)
+            // v8.30 — the pet reacts to the REAL cause: the spin's auto-open
+            // says "it opened itself"; any user tap gets a touch reaction
+            // ("You picked it!") instead of claiming it auto-opened.
+            val auto = CurioPet.consumeRevealAuto()
+            CurioPet.reactTo(
+                if (auto) CurioPet.Event.REVEAL_AUTO else CurioPet.Event.REVEAL_TAPPED
+            )
             QuestGuide.onWait(QuestGuide.Wait.REVEAL)
         }
     }

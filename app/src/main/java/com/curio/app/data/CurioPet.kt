@@ -141,12 +141,35 @@ object CurioPet {
 
     // ── One-shot events (v8.9) — screens bump these on real actions and the
     //    floating pet watches [eventCount] to react (hop + line).
-    enum class Event { SPIN_LANDED, REVEAL_OPEN, EXPLORE, SAVE }
+    // v8.30 — REVEAL_OPEN split by cause: REVEAL_TAPPED = the USER opened
+    // the card with a tap (reacts to the touch); REVEAL_AUTO = the deck
+    // auto-opened it after a spin.
+    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE }
 
     var eventCount by mutableIntStateOf(0)
         private set
     var lastEvent by mutableStateOf<Event?>(null)
         private set
+
+    /**
+     * v8.30 — marks the NEXT reveal open as the spin's AUTO-open, so the
+     * reveal screen can pick the right pet line. Set right before the
+     * auto-navigation and consumed (and cleared) when the reveal composes.
+     */
+    var pendingRevealAuto by mutableStateOf(false)
+        private set
+
+    /** v8.30 — the spin auto-open is about to navigate. */
+    fun markRevealAuto() {
+        pendingRevealAuto = true
+    }
+
+    /** v8.30 — the reveal consumed the pending auto-open marker (clears it). */
+    fun consumeRevealAuto(): Boolean {
+        val was = pendingRevealAuto
+        pendingRevealAuto = false
+        return was
+    }
 
     /** Called by the screens where the action really happens. */
     fun reactTo(event: Event) {
@@ -159,20 +182,17 @@ object CurioPet {
         Event.SPIN_LANDED -> listOf(
             "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!"
         ).random()
-        // v8.16 — the line adapts to the auto-open preference: when the
-        // reveal opens BY ITSELF (auto-open ON) the pet cheers the surprise
-        // instead of nagging "Open it, open it!" at an already-open page.
-        // With auto-open OFF the reveal only opens on the user's tap, so
-        // the eager "Open it!" cheer stays.
-        Event.REVEAL_OPEN -> if (AppPreferences.autoOpenRevealState)
-            listOf(
-                "There it is!", "It opened itself, sneaky!", "Ta-da! A new tale!",
-                "Ooh, look what landed!", "Surprise!"
-            ).random()
-        else
-            listOf(
-                "Open it, open it!", "Come see what's inside!", "I'm dying of curiosity!"
-            ).random()
+        // v8.30 — the USER's tap gets a touch reaction, never "it opened
+        // itself".
+        Event.REVEAL_TAPPED -> listOf(
+            "You picked it!", "Ooh, good choice!", "That one called to you!",
+            "Nice pick!", "It knew you'd tap it!"
+        ).random()
+        // v8.30 — only the spin's true AUTO-open says the surprise lines.
+        Event.REVEAL_AUTO -> listOf(
+            "There it is!", "It opened itself, sneaky!", "Ta-da! A new tale!",
+            "Ooh, look what landed!", "Surprise!"
+        ).random()
         Event.EXPLORE -> listOf(
             "Go explore!", "Adventure time!", "I'll wait right here. Go see!"
         ).random()

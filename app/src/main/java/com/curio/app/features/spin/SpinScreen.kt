@@ -802,6 +802,10 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     isOpening = false
                     return@LaunchedEffect
                 }
+                // v8.30 — tell the pet this open is the auto-open so it says
+                // "It opened itself!" here and "You picked it!" when the
+                // user taps the card instead.
+                CurioPet.markRevealAuto()
                 navController.navigate(CurioRoutes.revealFor(primary.categoryId.routeSlug, primary.name)) {
                     launchSingleTop = true
                 }
