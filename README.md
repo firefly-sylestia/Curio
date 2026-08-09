@@ -2,7 +2,7 @@
 
 > **Explore something. Notice more. Keep the discovery.**
 
-A curated discovery app for curious people. Spin a roulette deck of 3,133 topics across 11 lanes (more coming), then capture what you notice in a beautiful, personal offline library. No accounts. No feed. No ads. Just you, a topic, and the world.
+A curated discovery app for curious people. Spin a roulette deck of 5,838 hand-written topics across 11 lanes (500+ in every lane), then capture what you notice in a beautiful, personal offline library. No accounts. No feed. No ads. Just you, a topic, and the world.
 
 ---
 
@@ -96,11 +96,12 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 
 ### Discovery — The Spin
 - **11 curated lanes**: Artists · Albums · Directors · Films · Authors · Books · Painters · Artworks · Scientists · Discoveries · Wildcard
-- **3,133 topics** — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
+- **5,838 topics** (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
 - Roulette deck with stacked cards, category-tinted edges, shadows, and satisfying shuffle
 - Single-lane or mixed decks (2–4 categories blended into one)
 - Anti-repeat history — never see the same topic twice in a row
 - Topic reveal pages with full explore action
+- **Browse Topics** — the whole catalog in one place: search, filter by lane, and sort A–Z or newest/oldest by year
 - "Today's Quest" — one-tap random shuffle on Home
 - Manage Categories — show, hide, or reorder lanes
 
@@ -128,6 +129,16 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - Saved shelf — bookmarked quotes, pinned topics
 - Legacy section for imported FieldMind records
 - Recents feed on Home
+
+### Quests & the Curio Pet
+- **Daily quests** — a fresh warm-up / discovery / creation trio every day, with bonus quests that unlock when the core trio is claimed
+- **Weekly quests** — three rotating goals refreshed every Monday
+- **Category passport** — stamps for every lane you explore; quests nudge you toward underexplored categories
+- **Journey chains** — first-run tutorial quests that walk you through the whole Discover → Explore → Capture loop
+- **XP + 50 levels** — quest completion, spins, explores, and saves earn XP; levels unlock titles and grow the pet
+- **Curio pet companion** — a pixel pet that lives on your screen, reacts to exploration, and grows with XP across six growth stages
+- **Pet brain** — the pet learns from your habits on-device (favorite lanes, time-of-day rhythms, streaks) and develops its own catchphrases over time
+- **Pet designer** — a full pixel editor: draw the body, faces, and accessories; build frame-by-frame animations; author custom reaction actions with triggers (tap, reveal, save, level-up, app open, time of day, idle, and more); then share or import designs as text
 
 ### Profile & Stats
 - Display name + curiosity tagline
@@ -203,7 +214,7 @@ We'd love contributions! Here's how:
 - Link to any related issues
 
 ### Topic Contributions
-The 3,133 curated topics are hand-picked. If you have topics to suggest for any lane (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries), open a **Feature Request** with specifics.
+The 5,838 curated topics are hand-picked. If you have topics to suggest for any lane (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries), open a **Feature Request** with specifics.
 
 ---
 
@@ -220,11 +231,11 @@ Curio is **free and open source** under the [MIT License](LICENSE). See LICENSE 
 - **Cloud sync** — all data is local. Use Backup & Restore (Settings) to export and keep your library safe
 - **Localization** — English only in v1.0
 - **Google Play** — distributed via GitHub Releases; Play Store support coming next
-- **Content depth varies** — all 11 lanes ship, but topic counts differ per category
+- **Content depth grows** — every lane ships 500+ topics today, and the catalog keeps growing
 - **Images need network** — topic and entry images load from the web (your data is always offline)
 
 ### Planned
-- **More topics and categories** — the catalog grows over time; suggestions welcome
+- **More topics and categories** — every lane already has 500+; the catalog keeps growing and suggestions are welcome
 - **Google Play listing** — once polished
 - **Accessibility & localization** — after launch
 - **iOS version** — long-term goal
