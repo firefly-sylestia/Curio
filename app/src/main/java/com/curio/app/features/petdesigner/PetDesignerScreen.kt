@@ -70,6 +70,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -293,6 +294,11 @@ fun PetDesignerScreen(navController: NavController) {
     var previewMood by rememberSaveable { mutableStateOf(CurioPet.Mood.HAPPY) }
     // v8.35 — the face editor's selected mood + the reaction editor's event.
     var faceMood by rememberSaveable { mutableStateOf(PetFaceMoods.HAPPY) }
+    // v8.36 — face editor: blueprint ghost + zoom.
+    var faceBlueprint by rememberSaveable { mutableStateOf(true) }
+    var faceZoom by rememberSaveable { mutableStateOf(1f) }
+    // v8.36 — body/detail editor zoom.
+    var gridZoom by rememberSaveable { mutableStateOf(1f) }
     var reactEvent by rememberSaveable { mutableStateOf(PetReactionEvents.TOUCH) }
     // Keep raw editor text separate from the normalized persisted lines so
     // typing does not trim the field or jump the cursor on every keystroke.
@@ -833,6 +839,7 @@ fun PetDesignerScreen(navController: NavController) {
                         design = design,
                         grid = editingGrid,
                         tool = activeTool,
+                        zoom = gridZoom,
                         onTool = { row, col, continuous ->
                             // Fill + eyedropper act once per gesture; brush
                             // and eraser paint continuously while dragging.
@@ -852,6 +859,8 @@ fun PetDesignerScreen(navController: NavController) {
                         activeTool = activeTool,
                         onSelect = { activeTool = it }
                     )
+                    Spacer(Modifier.height(8.dp))
+                    SliderRow(label = "Zoom", value = gridZoom, max = 3f) { gridZoom = it }
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Copy body → asleep", enabled = editingGrid == "body") {
@@ -947,6 +956,7 @@ fun PetDesignerScreen(navController: NavController) {
                         rowsOverride = editorRows,
                         blueprintRows = blueprintRows,
                         showBlueprint = showBlueprint,
+                        zoom = gridZoom,
                         tool = activeTool,
                         onTool = { row, col, continuous ->
                             val mutating = activeTool == PaintTool.BRUSH ||
@@ -978,6 +988,36 @@ fun PetDesignerScreen(navController: NavController) {
                         activeTool = activeTool,
                         onSelect = { activeTool = it }
                     )
+                    Spacer(Modifier.height(12.dp))
+                    // v8.36 — nudge the whole part around the body so the
+                    // user can reposition the tail, belly, accessories, etc.
+                    Text(
+                        "Move ${detailLayer} layer",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Text(
+                        "Nudge the whole part one pixel at a time to sit it exactly where you want on the body.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val nudge: (Int, Int) -> Unit = { dr, dc ->
+                            pushUndo()
+                            val base = detailEditorDrafts[detailLayer] ?: blueprintRows
+                            val nudged = nudgeDetailRows(base, dr, dc)
+                            detailEditorDrafts = detailEditorDrafts + (detailLayer to nudged)
+                            design = design
+                                .withDetailGrid(detailLayer, nudged)
+                                .withProceduralEnabled(detailLayer, false)
+                        }
+                        SmallAction("←") { nudge(0, -1) }
+                        SmallAction("→") { nudge(0, 1) }
+                        SmallAction("↑") { nudge(-1, 0) }
+                        SmallAction("↓") { nudge(1, 0) }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    SliderRow(label = "Zoom", value = gridZoom, max = 3f) { gridZoom = it }
                     Spacer(Modifier.height(10.dp))
                     // v8.52 — the per-element disable toggles moved to Settings →
                     // Accessories (one place to change/disable every part).
@@ -1065,12 +1105,71 @@ fun PetDesignerScreen(navController: NavController) {
                             )
                         }
                     }
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(14.dp))
+                    // v8.36 — quick style controls: pick the eyes / mouth the
+                    // face wears without touching a pixel.
                     Text(
-                        "Draw this face directly — transparent cells leave Curie's normal body visible.",
+                        "Eyes",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        EyeStyle.entries.forEach { style ->
+                            ChoiceChip(
+                                label = style.name.lowercase().replaceFirstChar { it.uppercase() },
+                                selected = face.eyes == style,
+                                onClick = {
+                                    pushUndo()
+                                    design = design.withFace(faceMood, face.copy(eyes = style))
+                                }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "Mouth",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        MouthStyle.entries.forEach { style ->
+                            ChoiceChip(
+                                label = style.name.lowercase().replaceFirstChar { it.uppercase() },
+                                selected = face.mouth == style,
+                                onClick = {
+                                    pushUndo()
+                                    design = design.withFace(faceMood, face.copy(mouth = style))
+                                }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    ToggleRow("Blush cheeks", face.blush) {
+                        pushUndo()
+                        design = design.withFace(faceMood, face.copy(blush = it))
+                    }
+                    ToggleRow("Sparkle eyes", face.sparkles) {
+                        pushUndo()
+                        design = design.withFace(faceMood, face.copy(sparkles = it))
+                    }
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        "Paint this face",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                    Text(
+                        "The blueprint ghost below marks where the default ${PetFaceMoods.label(faceMood).lowercase()} face sits — paint over it and your pixels replace it.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(Modifier.height(8.dp))
+                    ToggleRow("Show face blueprint", faceBlueprint) { faceBlueprint = it }
                     Spacer(Modifier.height(8.dp))
                     ToolTray(
                         activeTool = activeTool,
@@ -1081,6 +1180,9 @@ fun PetDesignerScreen(navController: NavController) {
                         design = design,
                         face = face,
                         tool = activeTool,
+                        blueprintRows = faceBlueprintRows(design, faceMood),
+                        showBlueprint = faceBlueprint,
+                        zoom = faceZoom,
                         onPaint = { row, col, continuous ->
                             if (!(activeTool == PaintTool.FILL && continuous)) {
                                 if (activeTool != PaintTool.EYEDROPPER && !continuous) pushUndo()
@@ -1102,6 +1204,8 @@ fun PetDesignerScreen(navController: NavController) {
                             }
                         }
                     )
+                    Spacer(Modifier.height(8.dp))
+                    SliderRow(label = "Zoom", value = faceZoom, max = 3f) { faceZoom = it }
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "Procedural fallback: ${face.eyes.name} eyes · ${face.mouth.name} mouth · blush ${if (face.blush) "on" else "off"}",
@@ -1375,6 +1479,37 @@ fun PetDesignerScreen(navController: NavController) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "Disable generated parts (tail, belly, effects, antenna) or draw your own on the detail layers. Every accessory has a live preview in the dialog.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // ── Edit body parts (Settings, v8.36) — jump straight into the
+            //    detail editor for any part, belly included. ──────────────
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Edit body parts",
+                    "Redraw or reposition the tail, belly, accessories, effects and antenna"
+                ) {
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        PetDesign.DETAIL_KEYS.forEach { layer ->
+                            ChoiceChip(
+                                label = layer.replaceFirstChar { it.uppercase() },
+                                selected = false,
+                                onClick = {
+                                    selectTarget(PetEditorTarget.DetailLayer(layer))
+                                    page = PetDesignerPage.EDITOR
+                                }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Pick a part to open its editor — redraw it over the blueprint ghost, nudge it around the body, or erase it.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -3050,6 +3185,8 @@ private fun AnimationTimelineEditor(
     var playing by rememberSaveable(animationId) { mutableStateOf(false) }
     var selectedFrame by rememberSaveable(animationId) { mutableStateOf(0) }
     var onionSkin by rememberSaveable { mutableStateOf(false) }
+    // v8.36 — zoom for the per-frame drawing grid.
+    var frameZoom by rememberSaveable(animationId) { mutableStateOf(1f) }
     // v8.52 — per-frame drawing state: which grid ("body"/"curled"), the
     // active paint tool, and the paint color (shares the design palette, but
     // is independent so picking a frame tool never disturbs the main editor).
@@ -3130,7 +3267,9 @@ private fun AnimationTimelineEditor(
                 .padding(top = 14.dp),
             contentAlignment = Alignment.Center
         ) {
-            val previewSize = maxWidth
+            // v8.36 — cap the preview so the frame strip + drawing grid stay
+            // reachable together; it still plays at true proportions.
+            val previewSize = maxWidth.coerceAtMost(190.dp)
             if (onionSkin && selectedFrame > 0) {
                 AnimatedPetSprite(
                     animation = base,
@@ -3333,6 +3472,7 @@ private fun AnimationTimelineEditor(
                 rowsOverride = draftRows(selectedFrame, frameGrid),
                 blueprintRows = eyeBlueprintRows(design, base.mood),
                 showBlueprint = true,
+                zoom = frameZoom,
                 tool = frameTool,
                 onTool = paintHandler
             )
@@ -3341,6 +3481,7 @@ private fun AnimationTimelineEditor(
                 design = design,
                 grid = "frame",
                 rowsOverride = draftRows(selectedFrame, frameGrid),
+                zoom = frameZoom,
                 tool = frameTool,
                 onTool = paintHandler
             )
@@ -3350,6 +3491,8 @@ private fun AnimationTimelineEditor(
             activeTool = frameTool,
             onSelect = { frameTool = it; playing = false }
         )
+        Spacer(Modifier.height(8.dp))
+        SliderRow(label = "Zoom", value = frameZoom, max = 3f) { frameZoom = it }
         Spacer(Modifier.height(12.dp))
         val resetLabel = if (frameGrid == "eyes") "eyes" else "pose"
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -3455,6 +3598,45 @@ private fun eyeBlueprintRows(design: PetDesign, moodName: String): List<String> 
     val rows = Array(16) { CharArray(16) { '.' } }
     EYE_STYLE_PIXELS[style]?.forEach { (col, row, slot) ->
         if (slot != "white") rows[row][col] = 'o'
+    }
+    return rows.map { String(it) }
+}
+
+/** Mouth glyphs for the face blueprint (16×16 space, matching the eyes). */
+private val MOUTH_PIXELS: Map<MouthStyle, List<Pair<Int, Int>>> = mapOf(
+    MouthStyle.SMILE to listOf(7 to 10, 8 to 10, 7 to 11, 8 to 11),
+    MouthStyle.WIDE to listOf(
+        6 to 10, 7 to 10, 8 to 10, 9 to 10,
+        6 to 11, 7 to 11, 8 to 11, 9 to 11,
+        7 to 12, 8 to 12
+    ),
+    MouthStyle.O to listOf(6 to 10, 7 to 10, 8 to 10, 9 to 10, 6 to 11, 9 to 11),
+    MouthStyle.NONE to emptyList()
+)
+
+/**
+ * v8.36 — the face blueprint: the mood's procedural eyes + mouth + blush
+ * projected onto the full canvas, so painting the face always has the
+ * default face as a locked reference underneath.
+ */
+private fun faceBlueprintRows(design: PetDesign, moodName: String): List<String> {
+    val gridSize = design.gridSize
+    val face = design.faceFor(moodName)
+    val small = Array(16) { CharArray(16) { '.' } }
+    EYE_STYLE_PIXELS[face.eyes]?.forEach { (col, row, slot) ->
+        if (slot != "white") small[row][col] = 'o'
+    }
+    MOUTH_PIXELS[face.mouth]?.forEach { (col, row) -> small[row][col] = 'o' }
+    if (face.blush) listOf(2 to 9, 13 to 9).forEach { (col, row) -> small[row][col] = 'o' }
+    val rows = MutableList(gridSize) { CharArray(gridSize) { '.' } }
+    small.forEachIndexed { r, line ->
+        line.forEachIndexed { c, ch ->
+            if (ch != '.') {
+                val col = ((c + 0.5f) * gridSize / 16f).toInt().coerceIn(0, gridSize - 1)
+                val row = ((r + 0.5f) * gridSize / 16f).toInt().coerceIn(0, gridSize - 1)
+                rows[row][col] = ch
+            }
+        }
     }
     return rows.map { String(it) }
 }
@@ -4305,39 +4487,19 @@ private fun FaceGridEditor(
     design: PetDesign,
     face: com.curio.app.data.PetFace,
     tool: PaintTool?,
+    blueprintRows: List<String>? = null,
+    showBlueprint: Boolean = false,
+    zoom: Float = 1f,
     onPaint: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
     val latestOnPaint by rememberUpdatedState(onPaint)
     val rows = if (face.gridRows.size == gridSize) face.gridRows
     else List(gridSize) { ".".repeat(gridSize) }
-    var gestures: Modifier = Modifier
-    if (tool != null) {
-        gestures = gestures
-            .pointerInput(gridSize, tool) {
-                detectTapGestures { offset ->
-                    val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                    latestOnPaint(row, col, false)
-                }
-            }
-            .pointerInput(gridSize, tool) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                        latestOnPaint(row, col, false)
-                    },
-                    onDrag = { change, _ ->
-                        change.consume()
-                        val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
-                        latestOnPaint(row, col, true)
-                    }
-                )
-            }
-    }
-    Box(
+    val blueprint = if (showBlueprint) blueprintRows else null
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .then(gestures)
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = if (tool != null) 2.dp else 1.dp,
@@ -4346,26 +4508,111 @@ private fun FaceGridEditor(
                 shape = RoundedCornerShape(12.dp)
             )
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            rows.forEach { line ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    line.forEach { ch ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(0.5.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(
-                                    if (ch == '.') MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
-                                    else hexColor(design.colorOf(ch))
-                                )
+        // v8.36 — zoom + blueprint ghost (same fit-or-scroll behavior as the
+        // pixel grid, so faces zoom in for easy eye/mouth editing).
+        val density = LocalDensity.current
+        val maxWpx = with(density) { maxWidth.toPx() }
+        val cellPx = (maxWpx / gridSize) * zoom.coerceIn(1f, 3f)
+        val overflows = cellPx * gridSize > maxWpx
+        // v8.36 — same fit-vs-overflow pattern as PixelGrid: concurrent
+        // tap + drag when the grid fits the screen, tap-only when zoomed
+        // past it so horizontal scrolling is never overridden by painting.
+        var gestures: Modifier = Modifier
+        if (tool != null) {
+            if (overflows) {
+                gestures = gestures.pointerInput(gridSize, tool) {
+                    detectTapGestures { offset ->
+                        val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
+                        latestOnPaint(row, col, false)
+                    }
+                }
+            } else {
+                gestures = gestures
+                    .pointerInput(gridSize, tool) {
+                        detectTapGestures { offset ->
+                            val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
+                            latestOnPaint(row, col, false)
+                        }
+                    }
+                    .pointerInput(gridSize, tool) {
+                        detectDragGestures(
+                            onDragStart = { offset ->
+                                val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
+                                latestOnPaint(row, col, false)
+                            },
+                            onDrag = { change, _ ->
+                                change.consume()
+                                val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
+                                latestOnPaint(row, col, true)
+                            }
                         )
+                    }
+            }
+        }
+        val gridContent: @Composable () -> Unit = {
+            Column(
+                modifier = Modifier
+                    .width(with(density) { (cellPx * gridSize).toDp() })
+                    .then(gestures)
+            ) {
+                rows.forEachIndexed { rowIndex, line ->
+                    Row(modifier = Modifier.height(with(density) { cellPx.toDp() })) {
+                        line.forEachIndexed { colIndex, ch ->
+                            val filled = ch != '.'
+                            val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
+                            val blueprintOnly = !filled && blueprintKey != null && blueprintKey != '.'
+                            Box(
+                                modifier = Modifier
+                                    .width(with(density) { cellPx.toDp() })
+                                    .height(with(density) { cellPx.toDp() })
+                                    .padding(0.5.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(
+                                        when {
+                                            filled -> hexColor(design.colorOf(ch))
+                                            blueprintOnly -> lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
+                                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
+                                        }
+                                    )
+                            )
+                        }
                     }
                 }
             }
         }
+        if (overflows) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                gridContent()
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                gridContent()
+            }
+        }
     }
+}
+
+/**
+ * v8.36 — shifts a detail layer's pixels by (dr, dc); pixels pushed past
+ * the edge are dropped, transparent cells fill the gaps.
+ */
+private fun nudgeDetailRows(rows: List<String>, dr: Int, dc: Int): List<String> {
+    val n = rows.size
+    val out = MutableList(n) { CharArray(n) { '.' } }
+    rows.forEachIndexed { r, line ->
+        line.forEachIndexed { c, ch ->
+            if (ch != '.') {
+                val nr = r + dr
+                val nc = c + dc
+                if (nr in 0 until n && nc in 0 until n) out[nr][nc] = ch
+            }
+        }
+    }
+    return out.map { String(it) }
 }
 
 /**
@@ -4383,6 +4630,13 @@ private fun effectiveDetailRows(design: PetDesign, layer: String): List<String> 
         "tail" -> listOf(
             Triple(14, 11, 'B'), Triple(15, 11, 'B'),
             Triple(15, 12, 'B'), Triple(15, 10, 'B')
+        )
+        "belly" -> listOf(
+            // A soft cream belly patch on the lower torso.
+            Triple(5, 10, 'B'), Triple(6, 10, 'B'), Triple(7, 10, 'B'), Triple(8, 10, 'B'), Triple(9, 10, 'B'), Triple(10, 10, 'B'),
+            Triple(4, 11, 'B'), Triple(5, 11, 'B'), Triple(6, 11, 'B'), Triple(7, 11, 'B'), Triple(8, 11, 'B'), Triple(9, 11, 'B'), Triple(10, 11, 'B'), Triple(11, 11, 'B'),
+            Triple(4, 12, 'B'), Triple(5, 12, 'B'), Triple(6, 12, 'B'), Triple(7, 12, 'B'), Triple(8, 12, 'B'), Triple(9, 12, 'B'), Triple(10, 12, 'B'), Triple(11, 12, 'B'),
+            Triple(5, 13, 'B'), Triple(6, 13, 'B'), Triple(7, 13, 'B'), Triple(8, 13, 'B'), Triple(9, 13, 'B'), Triple(10, 13, 'B')
         )
         "accessories" -> listOf(
             Triple(2, 1, 'o'), Triple(2, 0, 'o'),
@@ -4436,6 +4690,7 @@ private fun PixelGrid(
     rowsOverride: List<String>? = null,
     blueprintRows: List<String>? = null,
     showBlueprint: Boolean = false,
+    zoom: Float = 1f,
     onTool: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
@@ -4446,33 +4701,9 @@ private fun PixelGrid(
         else -> design.bodyRows
     }
     val blueprint = if (showBlueprint) blueprintRows else null
-    var gestures: Modifier = Modifier
-    if (tool != null) {
-        gestures = gestures
-            .pointerInput(gridSize, tool) {
-                detectTapGestures(onTap = { offset ->
-                    val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
-                    latestOnTool(r, c, false)
-                })
-            }
-            .pointerInput(gridSize, tool) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
-                        latestOnTool(r, c, false)
-                    },
-                    onDrag = { change, _ ->
-                        change.consume()
-                        val (r, c) = cellAtPosition(change.position, size.width, size.height, gridSize)
-                        latestOnTool(r, c, true)
-                    }
-                )
-            }
-    }
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .then(gestures)
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = if (tool != null) 2.dp else 1.dp,
@@ -4481,31 +4712,93 @@ private fun PixelGrid(
                 shape = RoundedCornerShape(12.dp)
             )
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            rows.forEachIndexed { rowIndex, line ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    line.forEachIndexed { colIndex, ch ->
-                        val filled = ch != '.'
-                        val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
-                        val blueprintOnly = !filled && blueprintKey != null && blueprintKey != '.'
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(0.5.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(
-                                    when {
-                                        filled -> hexColor(design.colorOf(ch))
-                                        // v8.49 — blueprint renders as a darker, locked
-                                        // reference: it never changes color when painted.
-                                        blueprintOnly -> lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
-                                        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                                    }
-                                )
+        // v8.36 — zoom: cells grow so small parts (faces, details) are easy
+        // to edit. When the zoomed grid still fits the screen it stays
+        // centered with full tap + drag painting; when it overflows, it
+        // becomes horizontally scrollable and painting switches to taps so
+        // the brush never fights the scroll.
+        val density = LocalDensity.current
+        val maxWpx = with(density) { maxWidth.toPx() }
+        val cellPx = (maxWpx / gridSize) * zoom.coerceIn(1f, 3f)
+        val overflows = cellPx * gridSize > maxWpx
+        // v8.36 — when the grid fits, tap + drag paint run as concurrent
+        // coroutines (two pointerInput blocks); when zoomed past the screen,
+        // only tap paints, so the brush never fights the horizontal scroll.
+        var gestures: Modifier = Modifier
+        if (tool != null) {
+            if (overflows) {
+                gestures = gestures.pointerInput(gridSize, tool) {
+                    detectTapGestures(onTap = { offset ->
+                        val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
+                        latestOnTool(r, c, false)
+                    })
+                }
+            } else {
+                gestures = gestures
+                    .pointerInput(gridSize, tool) {
+                        detectTapGestures(onTap = { offset ->
+                            val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
+                            latestOnTool(r, c, false)
+                        })
+                    }
+                    .pointerInput(gridSize, tool) {
+                        detectDragGestures(
+                            onDragStart = { offset ->
+                                val (r, c) = cellAtPosition(offset, size.width, size.height, gridSize)
+                                latestOnTool(r, c, false)
+                            },
+                            onDrag = { change, _ ->
+                                change.consume()
+                                val (r, c) = cellAtPosition(change.position, size.width, size.height, gridSize)
+                                latestOnTool(r, c, true)
+                            }
                         )
                     }
+            }
+        }
+        val gridMod = Modifier
+            .width(with(density) { (cellPx * gridSize).toDp() })
+            .then(gestures)
+        val gridContent: @Composable () -> Unit = {
+            Column(modifier = gridMod) {
+                rows.forEachIndexed { rowIndex, line ->
+                    Row(modifier = Modifier.height(with(density) { cellPx.toDp() })) {
+                        line.forEachIndexed { colIndex, ch ->
+                            val filled = ch != '.'
+                            val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
+                            val blueprintOnly = !filled && blueprintKey != null && blueprintKey != '.'
+                            Box(
+                                modifier = Modifier
+                                    .width(with(density) { cellPx.toDp() })
+                                    .height(with(density) { cellPx.toDp() })
+                                    .padding(0.5.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(
+                                        when {
+                                            filled -> hexColor(design.colorOf(ch))
+                                            // v8.49 — blueprint renders as a darker, locked
+                                            // reference: it never changes color when painted.
+                                            blueprintOnly -> lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
+                                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                        }
+                                    )
+                            )
+                        }
+                    }
                 }
+            }
+        }
+        if (overflows) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                gridContent()
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                gridContent()
             }
         }
     }

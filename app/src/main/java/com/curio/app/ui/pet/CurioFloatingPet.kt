@@ -82,7 +82,7 @@ private const val CLOUD_GRID_H = 8
 private val DROP_FORGIVENESS = 12.dp
 // v8.35 — the tiny pixel keyboard Curie types on while the user types.
 private val TYPING_W = 150.dp
-private val TYPING_H = 34.dp
+private val TYPING_H = 60.dp
 
 /**
  * The floating Curio pet (v8.8) — a global overlay that lives on top of
@@ -597,12 +597,17 @@ fun CurioFloatingPet(
             val latest = CurioPet.lastEvent
             if (CurioPet.eventCount > seenEvents && latest != null) {
                 seenEvents = CurioPet.eventCount
+                // v9.2 — the touch / play / level-up events map to their own
+                // reaction rules (all present in PetReactionEvents).
                 val event = when (latest) {
                     CurioPet.Event.SPIN_LANDED -> PetReactionEvents.SPIN_LANDED
                     CurioPet.Event.REVEAL_TAPPED,
                     CurioPet.Event.REVEAL_AUTO -> PetReactionEvents.REVEAL
                     CurioPet.Event.EXPLORE -> PetReactionEvents.EXPLORE
                     CurioPet.Event.SAVE -> PetReactionEvents.SAVE
+                    CurioPet.Event.TOUCH -> PetReactionEvents.TOUCH
+                    CurioPet.Event.PLAY -> PetReactionEvents.PLAY
+                    CurioPet.Event.LEVEL_UP -> PetReactionEvents.LEVEL_UP
                 }
                 fireReaction(event, CurioPet.eventLine(latest))
                 if (latest == CurioPet.Event.SAVE) heartsKey++
@@ -612,6 +617,10 @@ fun CurioFloatingPet(
                     CurioPet.Event.REVEAL_TAPPED,
                     CurioPet.Event.REVEAL_AUTO -> fireCustomActions(PetActionTrigger.REVEAL)
                     CurioPet.Event.SAVE -> fireCustomActions(PetActionTrigger.SAVE)
+                    // v9.2 — custom actions can ride the level-up moment.
+                    // (Touch already fires TAP actions in its own handler, so
+                    // it isn't re-fired here.)
+                    CurioPet.Event.LEVEL_UP -> fireCustomActions(PetActionTrigger.LEVEL_UP)
                     else -> Unit
                 }
             }
@@ -1131,7 +1140,7 @@ fun CurioFloatingPet(
                 .offset {
                     IntOffset(
                         (pos.x + petPx / 2f - with(density) { TYPING_W.toPx() } / 2f).roundToInt(),
-                        (pos.y - with(density) { 34.dp.toPx() }).roundToInt()
+                        (pos.y - with(density) { 60.dp.toPx() }).roundToInt()
                     )
                 }
                 .size(TYPING_W, TYPING_H)
@@ -1171,41 +1180,152 @@ fun CurioFloatingPet(
 }
 
 /**
- * v8.35 — the tiny pixel keyboard Curie "types" on while the user's own
- * keyboard is open: a row of keys with one pulsing in turn (a paw tapping
- * its way across).
+ * v8.36 — the premium mini keyboard Curie "types" on while the user's own
+ * keyboard is open: a tiny 3-row keyboard with a screen strip (typed dots +
+ * blinking caret) and a little hand that sweeps across the keys, lighting
+ * them up as it taps. Calm, premium, readable — not the old flashing strip.
  */
 @Composable
 private fun TypingKeyboard(visible: Boolean, accent: Color, modifier: Modifier = Modifier) {
     val density = LocalDensity.current
     val alpha by animateFloatAsState(
-        targetValue = if (visible) 0.92f else 0f,
+        targetValue = if (visible) 0.95f else 0f,
         animationSpec = tween(200),
         label = "typingAlpha"
     )
-    val flash = remember { Animatable(0f) }
+    val sweep = remember { Animatable(0f) }
+    val pressing = remember { mutableStateOf(true) }
     LaunchedEffect(visible) {
         if (visible) {
-            flash.snapTo(0f)
+            sweep.snapTo(0f)
+            pressing.value = true
             while (true) {
-                flash.animateTo(1f, tween(110, easing = LinearEasing))
-                flash.snapTo(0f)
+                // Sweep across the keys typing…
+                sweep.animateTo(1f, tween(1700, easing = LinearEasing))
+                // …then glide back to the home key (no keys pressed).
+                pressing.value = false
+                sweep.animateTo(0f, tween(650, easing = LinearEasing))
+                pressing.value = true
             }
         }
     }
     Canvas(modifier = modifier.graphicsLayer { this.alpha = alpha }) {
-        val keyW = size.width / 7f
-        val active = (flash.value * 7f).toInt().coerceIn(0, 6)
-        for (i in 0 until 7) {
-            val x = i * keyW + with(density) { 1.dp.toPx() }
-            val w = keyW - with(density) { 2.dp.toPx() }
-            drawRoundRect(
-                color = if (i == active) accent else Color(0xFFFFFFFF),
-                topLeft = Offset(x, 0f),
-                size = Size(w, size.height),
-                cornerRadius = CornerRadius(with(density) { 5.dp.toPx() })
+        val w = size.width
+        val h = size.height
+        val d = with(density) { 1.dp.toPx() }
+
+        // Keyboard body with a soft drop shadow.
+        drawRoundRect(
+            color = Color(0x59000000),
+            topLeft = Offset(0f, 2.5f * d),
+            size = size,
+            cornerRadius = CornerRadius(9f * d)
+        )
+        drawRoundRect(color = Color(0xE01C1F2C), cornerRadius = CornerRadius(9f * d))
+
+        // Screen strip: typed dots + blinking caret.
+        val inset = 4f * d
+        val screenTop = 4f * d
+        val screenH = 11f * d
+        drawRoundRect(
+            color = Color(0xFF0D0F16),
+            topLeft = Offset(inset, screenTop),
+            size = Size(w - inset * 2, screenH),
+            cornerRadius = CornerRadius(3f * d)
+        )
+        val dots = if (pressing.value) ((sweep.value * 16f).toInt() % 4).coerceAtLeast(1) else 3
+        for (i in 0 until dots) {
+            drawCircle(
+                color = accent.copy(alpha = 0.9f),
+                radius = 1.1f * d,
+                center = Offset(inset + 5f * d + i * 4.5f * d, screenTop + screenH / 2f)
             )
         }
+        if ((sweep.value * 9f).toInt() % 2 == 0) {
+            drawRoundRect(
+                color = Color(0xFFA5D8FF),
+                topLeft = Offset(inset + 5f * d + dots * 4.5f * d + 2f * d, screenTop + 1.5f * d),
+                size = Size(1.2f * d, screenH - 3f * d),
+                cornerRadius = CornerRadius(1f * d)
+            )
+        }
+
+        // Key rows: 5 / 5 / 3 + wide space. Centers are collected in key order
+        // so the hand can glide along a single continuous path.
+        val keyTop = screenTop + screenH + 5f * d
+        val gap = 2f * d
+        val keyH = (h - keyTop - 4f * d - gap * 2) / 3f
+        val keyW = (w - gap * 6f) / 5f
+        val spaceW = w - gap * 2 - 3 * (keyW + gap)
+        val centers = ArrayList<Offset>(13)
+        for (row in 0 until 3) {
+            val y = keyTop + row * (keyH + gap) + keyH / 2f
+            val small = if (row < 2) 5 else 3
+            for (col in 0 until small) {
+                centers.add(Offset(gap + col * (keyW + gap) + keyW / 2f, y))
+            }
+            if (row == 2) {
+                val left = gap + 3 * (keyW + gap)
+                centers.add(Offset((left + w - gap) / 2f, y))
+            }
+        }
+
+        // Hand position glides along the key path (continuous in both directions).
+        val seg = sweep.value * 14f
+        val idx = seg.toInt().coerceIn(0, 13)
+        val frac = seg - idx
+        val a = centers[idx.coerceAtMost(12)]
+        val b = centers[(idx + 1).coerceAtMost(12)]
+        val handX = a.x + (b.x - a.x) * frac
+        val handY = a.y + (b.y - a.y) * frac
+        val pressedIdx = if (pressing.value) idx.coerceAtMost(12) else -1
+
+        for (i in centers.indices) {
+            val c = centers[i]
+            val wide = i == 12
+            val kw = if (wide) spaceW else keyW
+            val pressed = i == pressedIdx
+            val keyRad = CornerRadius(3f * d)
+            if (pressed) {
+                // Soft glow under the tapped key.
+                drawCircle(color = accent.copy(alpha = 0.5f), radius = kw * 0.55f, center = c)
+            }
+            val keyCol = if (pressed) accent else Color(0xFFF3EFE7)
+            val keySize =
+                if (pressed) Size(kw - 2f * d, keyH - 1.5f * d) else Size(kw, keyH)
+            val keyOff =
+                if (pressed) Offset(c.x - keySize.width / 2f, c.y - keySize.height / 2f + 1.5f * d)
+                else Offset(c.x - keySize.width / 2f, c.y - keySize.height / 2f)
+            if (!pressed) {
+                // Shallow bottom shade for a keycap feel.
+                drawRoundRect(
+                    color = Color(0xFFB9B3A6),
+                    topLeft = Offset(keyOff.x, keyOff.y + 1f * d),
+                    size = keySize,
+                    cornerRadius = keyRad
+                )
+            }
+            drawRoundRect(color = keyCol, topLeft = keyOff, size = keySize, cornerRadius = keyRad)
+            drawCircle(
+                color = if (pressed) Color(0xFFFFFFFF) else Color(0xFFB9B3A6),
+                radius = 0.8f * d,
+                center = Offset(c.x, c.y)
+            )
+        }
+
+        // The little hand resting on the active key: palm + three fingers + thumb.
+        val hs = 6f * d
+        val handCol = Color(0xFF262938)
+        drawRoundRect(
+            color = handCol,
+            topLeft = Offset(handX - hs * 0.7f, handY - hs * 0.3f),
+            size = Size(hs * 1.4f, hs * 0.85f),
+            cornerRadius = CornerRadius(hs * 0.35f)
+        )
+        repeat(3) { i ->
+            drawCircle(handCol, hs * 0.2f, Offset(handX + (i - 1) * hs * 0.5f, handY - hs * 0.5f))
+        }
+        drawCircle(handCol, hs * 0.16f, Offset(handX - hs * 0.8f, handY + hs * 0.1f))
     }
 }
 

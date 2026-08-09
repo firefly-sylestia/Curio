@@ -144,7 +144,8 @@ object CurioPet {
     // v8.30 — REVEAL_OPEN split by cause: REVEAL_TAPPED = the USER opened
     // the card with a tap (reacts to the touch); REVEAL_AUTO = the deck
     // auto-opened it after a spin.
-    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE }
+    // v9.2 — the pet now reacts to touches, play sessions and level-ups too.
+    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE, TOUCH, PLAY, LEVEL_UP }
 
     var eventCount by mutableIntStateOf(0)
         private set
@@ -180,27 +181,41 @@ object CurioPet {
     /** A short, cute line for the pet's reaction to [event]. */
     fun eventLine(event: Event): String = when (event) {
         Event.SPIN_LANDED -> listOf(
-            "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!"
+            "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!",
+            "Spin-spin-spin! …I mean, ooh."
         ).random()
         // v8.30 — the USER's tap gets a touch reaction, never "it opened
         // itself".
         Event.REVEAL_TAPPED -> listOf(
             "You picked it!", "Ooh, good choice!", "That one called to you!",
-            "Nice pick!", "It knew you'd tap it!"
+            "Nice pick!", "It knew you'd tap it!", "Ooh, the good kind of surprise!"
         ).random()
         // v8.30 — only the spin's true AUTO-open says the surprise lines.
         Event.REVEAL_AUTO -> listOf(
             "There it is!", "It opened itself, sneaky!", "Ta-da! A new tale!",
-            "Ooh, look what landed!", "Surprise!"
+            "Ooh, look what landed!", "Surprise!", "It chose FOR us. Bold."
         ).random()
         Event.EXPLORE -> listOf(
-            "Go explore!", "Adventure time!", "I'll wait right here. Go see!"
+            "Go explore!", "Adventure time!", "I'll wait right here. Go see!",
+            "Bring back a story!"
         ).random()
         // v8.29 — "Mine now… I mean, ours!" only after the bond is FRIEND+.
         Event.SAVE -> if (isWarm()) listOf(
-            "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!"
+            "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!",
+            "Our shelf grows!"
         ).random() else listOf(
-            "Keepsake saved!", "Tucked away safely!", "It's yours to keep!"
+            "Keepsake saved!", "Tucked away safely!", "It's yours to keep!",
+            "Captured for later!"
+        ).random()
+        // v9.2 — the pet answers the touch / play / level-up moments too.
+        Event.TOUCH -> listOf(
+            "Boop!", "Hehe — again!", "That's my favorite spot."
+        ).random()
+        Event.PLAY -> listOf(
+            "Wheee!", "You're good at this!", "One more round!"
+        ).random()
+        Event.LEVEL_UP -> listOf(
+            "We leveled up!", "Feel that? Growth!", "Shiny new spark!"
         ).random()
     }
 
@@ -229,6 +244,8 @@ object CurioPet {
         val p = prefs(context)
         p.edit().putInt(KEY_PET_BOOPS, p.getInt(KEY_PET_BOOPS, 0) + 1).apply()
         CurioPetBrain.observeTouch(context)
+        // v9.2 — boops trigger the pet's TOUCH reaction (hop + line).
+        reactTo(Event.TOUCH)
     }
 
     /** The pet played (a dart / self-started game — persisted). */
@@ -239,6 +256,8 @@ object CurioPet {
             .putLong(KEY_LAST_PLAY_AT, System.currentTimeMillis())
             .apply()
         CurioPetBrain.observePlay(context)
+        // v9.2 — a play session starts the pet's PLAY reaction.
+        reactTo(Event.PLAY)
     }
 
     private fun touchCount(context: Context): Int = prefs(context).getInt(KEY_PET_BOOPS, 0)
@@ -350,7 +369,10 @@ object CurioPet {
     // the capture screen) and BOUNCY (a play session just ended — the pet is
     // still full of beans). All moods are state-derived, so the pet reads
     // the user's behavior instead of wearing a fixed face.
-    enum class Mood { PROUD, EXCITED, HAPPY, CURIOUS, SLEEPY, FOCUSED, BOUNCY }
+    // v9.2 — three new emotions: SHY (a blushy first-contact), GRUMPY (a
+    // long daytime lull before it nods off) and PLAYFUL (the post-play high
+    // fading gently out of BOUNCY).
+    enum class Mood { PROUD, EXCITED, HAPPY, CURIOUS, SLEEPY, FOCUSED, BOUNCY, SHY, GRUMPY, PLAYFUL }
 
     fun mood(context: Context, lanes: Set<String>, screen: String? = null): Mood {
         val now = System.currentTimeMillis()
@@ -361,8 +383,15 @@ object CurioPet {
             screen == "capture" -> Mood.FOCUSED
             // A play session just ended (a dart, a self-started game).
             now - lastPlayAt(context) < 5 * 60_000L -> Mood.BOUNCY
+            // v9.2 — the play high lingers a little softer before it fades.
+            now - lastPlayAt(context) < 30 * 60_000L -> Mood.PLAYFUL
             now - lastXpAt(context) < 120_000L -> Mood.HAPPY
+            // v9.2 — a brand-new bond gets one shy blush moment the first
+            // time the user engages, then grows out of it.
+            bond() == Bond.STRANGER && now - lastXpAt(context) < 5 * 60_000L -> Mood.SHY
             leastExploredLane(context, lanes) != null -> Mood.CURIOUS
+            // v9.2 — a long daytime lull reads grumpy before it reads sleepy.
+            timeOfDay() != TimeOfDay.NIGHT && now - lastXpAt(context) > 6 * 3_600_000L -> Mood.GRUMPY
             // v8.14 — natural bed time: after dark the pet gets drowsy once
             // the day's excitement cools (30 min without XP) and dozes off.
             timeOfDay() == TimeOfDay.NIGHT && now - lastXpAt(context) > 30 * 60_000L -> Mood.SLEEPY
@@ -465,6 +494,22 @@ object CurioPet {
         "I'm still bouncing from that game!",
         "Best play date ever. …Round two?"
     )
+    // v9.2 — lines for the three new emotions.
+    private val shyLines = listOf(
+        "H-hi. I'm still getting used to you…",
+        "*hides behind the deck*",
+        "You're nice. I think. Probably."
+    )
+    private val grumpyLines = listOf(
+        "Hmph. The deck hasn't moved in a while…",
+        "I'm not pouting. I'm conserving energy.",
+        "A spin would fix this mood, just saying."
+    )
+    private val playfulLines = listOf(
+        "That game left me sparkling! Again?",
+        "I could do three more rounds. Four. Maybe five.",
+        "Boop me. I dare you."
+    )
 
     /** A passive bubble line for the current [mood]. */
     fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String = when (mood) {
@@ -493,6 +538,9 @@ object CurioPet {
         }
         Mood.FOCUSED -> focusedLines.random()
         Mood.BOUNCY -> bouncyLines.random()
+        Mood.SHY -> shyLines.random()
+        Mood.GRUMPY -> grumpyLines.random()
+        Mood.PLAYFUL -> playfulLines.random()
         Mood.SLEEPY -> sleepyLines.random()
     }
 
@@ -662,6 +710,8 @@ object CurioPet {
     fun noteLevelUp(context: Context) {
         prefs(context).edit().putLong(KEY_LAST_LEVEL_AT, System.currentTimeMillis()).apply()
         CurioPetBrain.observeLevelUp(context)
+        // v9.2 — leveling up fires the pet's LEVEL_UP reaction.
+        reactTo(Event.LEVEL_UP)
     }
 
     fun noteLaneExplored(context: Context) {

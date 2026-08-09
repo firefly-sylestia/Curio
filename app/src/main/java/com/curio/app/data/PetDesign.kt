@@ -83,12 +83,14 @@ data class PetDesign(
     companion object {
         val KEYS = listOf('b', 'B', 'o', 's', 'S', 'G', 'g', 'c', 'C', 'd', 'D', 'r', 'y')
 
-        const val DEFAULT_GRID_SIZE = 24
+        // v9.2 — the default look ships at a detailed 32×32 (ears, fluffy
+        // tail, hands and all); the 16/24 art stays for size conversion.
+        const val DEFAULT_GRID_SIZE = 32
         const val MIN_GRID_SIZE = 16
         val SUPPORTED_SIZES = listOf(24, 32)
 
         /** Drawable detail layers exposed by the compact Details editor. */
-        val DETAIL_KEYS = listOf("tail", "accessories", "effects", "antenna")
+        val DETAIL_KEYS = listOf("tail", "belly", "accessories", "effects", "antenna")
 
         /** Procedural art elements that can be independently hidden. */
         val PROCEDURAL_KEYS = listOf("tail", "belly", "accessories", "effects", "antenna")
@@ -149,22 +151,109 @@ data class PetDesign(
             "................"
         )
 
-        /** The default 24×24 body — a clean 1.5× upscale of the 16 art. */
-        val DEFAULT_BODY: List<String> = resizeGrid(DEFAULT_BODY_16, 16, 24)
+        /**
+         * v9.2 — the default 32×32 body, redrawn with proper outer ears,
+         * little hands at the sides, a floofier scarf and a warm shaded
+         * tummy. Face (eyes/mouth/blush) stays procedural so every mood
+         * wears its own expression on the same art.
+         */
+        val DEFAULT_BODY_32: List<String> = listOf(
+            "...............GG...............",
+            ".........o.....oo.....o.........",
+            "........ooo...oo...ooo..........",
+            ".......obbo...oo...obbo.........",
+            "......obbbbo.oo.obbbbo..........",
+            ".....obbbbbbo..obbbbbbo.........",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "..obbbbbbbbbbbbbbbbbbbbbbbbbbo..",
+            "..obbbbbbbbbbbbbbbbbbbbbbbbbbo..",
+            "..osssssssssssssssssssssssssso..",
+            ".oSSssssssssssssssssssssssSSo...",
+            "..osssssssssssssssssssssssssso..",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            "oo..obbbbbbbbbbbbbbbbbbbbbbo..oo",
+            "....obbbbbbbbbbbbbbbbbbbbbbo....",
+            "....obbbbbbbbbbbbbbbbbbbbBBbbo..",
+            ".....obbbbbbbbbbbbbbbbbbBBbbo...",
+            "......oobbbbbbbbbbbbbbbbbboo....",
+            "............oo....oo............",
+            "................................",
+            "................................"
+        )
 
-        /** The default 24×24 curled pose. */
-        val DEFAULT_CURLED: List<String> = resizeGrid(DEFAULT_CURLED_16, 16, 24)
+        /**
+         * v9.2 — the default 32×32 curled (asleep) pose: a cozy ball with
+         * its ears tucked and a fluffy tail curled around the front.
+         */
+        val DEFAULT_CURLED_32: List<String> = listOf(
+            "................................",
+            "................................",
+            "................................",
+            "................................",
+            "................................",
+            "...............GG...............",
+            ".........o.....oo.....o.........",
+            "........ooo...oo...ooo..........",
+            ".......obbo...oo...obbo.........",
+            "......obbbbbbbbbbbbbbbbbbo......",
+            ".....obbbbbbbbbbbbbbbbbbbbo.....",
+            "....obbbbbbbbbbbbbbbbbbbbbbo....",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "..osssssssssssssssssssssssssso..",
+            "..obbbbbbbbbbbbbbbbbbbbbbbbbbo..",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbo..",
+            "..obbbbbbbbbbbbbbbbbbbbbbbbo....",
+            "...obbbbbbbbbbbbbbbbbbbbbbo.....",
+            ".....obbbbbbbbbbbbbbbbbbo.......",
+            ".......obbbbbbbbbbbbbbo.........",
+            ".........oooooooooooooo.........",
+            "................................",
+            "................................",
+            "................................",
+            "................................"
+        )
+
+        /** The default 32×32 body (v9.2 — ships at the detailed size). */
+        val DEFAULT_BODY: List<String> = DEFAULT_BODY_32
+
+        /** The default 32×32 curled pose (v9.2). */
+        val DEFAULT_CURLED: List<String> = DEFAULT_CURLED_32
 
         // ── Default faces per mood (v8.35) — mirrors the sprite's built-in
         //    faces so an untouched design looks exactly as before.
         val DEFAULT_FACES: Map<String, PetFace> = mapOf(
-            "HAPPY" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = false, sparkles = false),
+            // v9.2 — the default HAPPY face blushes (cute cheeks) so the
+            // rested pet reads soft and fluffy, not plain.
+            "HAPPY" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = true, sparkles = false),
             "EXCITED" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true),
             "SLEEPY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.NONE, blush = false, sparkles = false),
             "CURIOUS" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = false, sparkles = false),
             "PROUD" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.WIDE, blush = true, sparkles = false),
             "BOUNCY" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.WIDE, blush = true, sparkles = false),
-            "FOCUSED" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = false, sparkles = false)
+            "FOCUSED" to PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE, blush = false, sparkles = false),
+            // v9.2 — three new emotions: shy (wide-eyed + blush), grumpy
+            // (half-lidded pout) and playful (star eyes + happy mouth).
+            "SHY" to PetFace(eyes = EyeStyle.WIDE, mouth = MouthStyle.SMILE, blush = true, sparkles = false),
+            "GRUMPY" to PetFace(eyes = EyeStyle.BLINK, mouth = MouthStyle.NONE, blush = false, sparkles = false),
+            "PLAYFUL" to PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)
         )
 
         // ── Default reaction rules per event.
@@ -1126,8 +1215,12 @@ object PetFaceMoods {
     const val PROUD = "PROUD"
     const val BOUNCY = "BOUNCY"
     const val FOCUSED = "FOCUSED"
+    // v9.2 — three new emotions.
+    const val SHY = "SHY"
+    const val GRUMPY = "GRUMPY"
+    const val PLAYFUL = "PLAYFUL"
 
-    val ALL = listOf(HAPPY, EXCITED, SLEEPY, CURIOUS, PROUD, BOUNCY, FOCUSED)
+    val ALL = listOf(HAPPY, EXCITED, SLEEPY, CURIOUS, PROUD, BOUNCY, FOCUSED, SHY, GRUMPY, PLAYFUL)
 
     fun label(mood: String): String = when (mood) {
         HAPPY -> "Happy"
@@ -1137,6 +1230,9 @@ object PetFaceMoods {
         PROUD -> "Proud"
         BOUNCY -> "Bouncy"
         FOCUSED -> "Focused"
+        SHY -> "Shy"
+        GRUMPY -> "Grumpy"
+        PLAYFUL -> "Playful"
         else -> mood
     }
 }

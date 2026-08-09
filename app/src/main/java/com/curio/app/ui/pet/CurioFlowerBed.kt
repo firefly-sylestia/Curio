@@ -168,21 +168,21 @@ fun CurioFlowerBed(
             // Stars at night — a few twinkling dots.
             if (tod == CurioPet.TimeOfDay.NIGHT) {
                 val tw = (sin(twinkle * 2f * kotlin.math.PI.toFloat()) * 0.5f + 0.5f)
-                drawPx(1, 1, star, 0.4f + 0.6f * tw)
-                drawPx(3, 3, star, 0.3f + 0.5f * (1f - tw))
-                drawPx(13, 2, star, 0.4f + 0.6f * (1f - tw))
-                drawPx(15, 5, star, 0.3f + 0.5f * tw)
+                drawPx(2, 2, star, 0.4f + 0.6f * tw)
+                drawPx(6, 6, star, 0.3f + 0.5f * (1f - tw))
+                drawPx(26, 4, star, 0.4f + 0.6f * (1f - tw))
+                drawPx(30, 10, star, 0.3f + 0.5f * tw)
             }
 
             // The celestial body — sun by day, moon by night.
             when (tod) {
-                CurioPet.TimeOfDay.MORNING -> drawCircle(sun.copy(alpha = 0.9f), radius = 2f * px, center = Offset(2.4f * px, 2.2f * px))
-                CurioPet.TimeOfDay.AFTERNOON -> drawCircle(sun.copy(alpha = 0.95f), radius = 2.2f * px, center = Offset(13.2f * px, 2f * px))
-                CurioPet.TimeOfDay.EVENING -> drawCircle(sunEvening.copy(alpha = 0.9f), radius = 2.2f * px, center = Offset(8f * px, 6.5f * px))
+                CurioPet.TimeOfDay.MORNING -> drawCircle(sun.copy(alpha = 0.9f), radius = 2f * px, center = Offset(4.8f * px, 4.4f * px))
+                CurioPet.TimeOfDay.AFTERNOON -> drawCircle(sun.copy(alpha = 0.95f), radius = 2.2f * px, center = Offset(26.4f * px, 4f * px))
+                CurioPet.TimeOfDay.EVENING -> drawCircle(sunEvening.copy(alpha = 0.9f), radius = 2.2f * px, center = Offset(16f * px, 13f * px))
                 CurioPet.TimeOfDay.NIGHT -> {
-                    drawCircle(moon.copy(alpha = 0.95f), radius = 1.8f * px, center = Offset(2.6f * px, 2.2f * px))
+                    drawCircle(moon.copy(alpha = 0.95f), radius = 1.8f * px, center = Offset(5.2f * px, 4.4f * px))
                     // A little crescent carve so it reads as a moon, not a sun.
-                    drawCircle(skyNight, radius = 1.4f * px, center = Offset(3.2f * px, 1.8f * px))
+                    drawCircle(skyNight, radius = 1.4f * px, center = Offset(6.4f * px, 3.6f * px))
                 }
             }
 
@@ -205,19 +205,30 @@ fun CurioFlowerBed(
                 }
             }
 
+            // v8.36 — at night the bed settles into the dark: a soft navy
+            // wash over the bed keeps the lamp glow as the only warm light.
+            if (tod == CurioPet.TimeOfDay.NIGHT) {
+                drawRoundRect(
+                    color = skyNight.copy(alpha = 0.22f),
+                    topLeft = Offset(2f * px, 1f * px),
+                    size = Size(28f * px, 15f * px),
+                    cornerRadius = CornerRadius(px * 2f)
+                )
+            }
+
             // A warm glow around the lamp — stronger at night.
-            val lampGlow = if (tod == CurioPet.TimeOfDay.NIGHT) 0.35f else 0.16f
+            val lampGlow = if (tod == CurioPet.TimeOfDay.NIGHT) 0.4f else 0.16f
             drawCircle(
                 color = gold.copy(alpha = lampGlow),
                 radius = 2.6f * px,
-                center = Offset(13.5f * px, 2.2f * px)
+                center = Offset(27f * px, 4.4f * px)
             )
 
             // A soft shadow under the bed so it reads as standing on the page.
             drawRoundRect(
                 color = ink.copy(alpha = 0.10f),
-                topLeft = Offset(3 * px, (BED_GRID_H - 1) * px),
-                size = Size(10 * px, px),
+                topLeft = Offset(6 * px, (BED_GRID_H - 1) * px),
+                size = Size(20 * px, px),
                 cornerRadius = CornerRadius(px * 0.5f)
             )
         }
@@ -266,8 +277,9 @@ fun CurioFlowerBed(
     }
 }
 
-private const val BED_GRID_W = 16
-private const val BED_GRID_H = 16
+// v8.36 — the home grew up: a 32-column detailed diorama (was 16).
+private const val BED_GRID_W = 32
+private const val BED_GRID_H = 18
 
 /**
  * The bed — a cozy v8.14 diorama: headboard (top), a tiny lamp on the
@@ -278,20 +290,22 @@ private const val BED_GRID_H = 16
  * 'D' grass deep.
  */
 private val BED_ROWS: List<String> = listOf(
-    "....wwwwwwww....",
-    "...wwwwwwwwwwll.",
-    "...wwwwwwwwwwll.",
-    "..wmFgFfmmmmmw..",
-    "..wmfFfFmmmmmw..",
-    "..wmmmmmmmmmmw..",
-    "..wmmmmmmmmmmw..",
-    "..wmmmmmkkkkkw..",
-    "..wmmmmmKKKKKw..",
-    "..wwwwwwwwwwww..",
-    "..wwwwwwwwwwww..",
-    ".GGGGGGGGGGGGGG.",
-    "GGGGGGGGGGGGGGGG",
-    ".D.D..DD..D.D..D.",
-    "................",
-    "................"
+    "............wwwwwwww............",
+    "..........wwwwwwwwwwww..........",
+    "..........wwwwwlwwlwwlw.........",
+    "..........wwwwwlwwlwwlw.........",
+    "......wwwwwwwwwwwwwwwwwwwwww....",
+    ".......wmmFgFmFgFmFgFmmFgFmmw...",
+    ".......wmmFfFmFfFmFfFmmFfFmmw...",
+    "......wmmmmmmmmmmmmmmmmmmmmmmw..",
+    "......wmmmmmkkkkkkkkkkkkkkkkmw..",
+    "......wmmmmmKKKKKKKKKKKKKKKKmw..",
+    "......wmmmmmkkkkkkkkkkkkkkkkmw..",
+    "......wmmmmmmmmmmmmmmmmmmmmmmw..",
+    ".....wwwwwwwwwwwwwwwwwwwwww.....",
+    "....wwwwwwwwwwwwwwwwwwwwwwww....",
+    "..GGGGGGGGGGGGGGGGGGGGGGGGGGGG..",
+    "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    ".D.D..DD..D.D..DD..D.D..DD..D.D.",
+    "................................"
 )

@@ -306,6 +306,10 @@ object CurioPetBrain {
             CurioPet.Mood.SLEEPY -> "Even my glow dims for you — I'll be here tomorrow."
             CurioPet.Mood.FOCUSED -> "Write it down — I'll keep watch."
             CurioPet.Mood.BOUNCY -> "That game did me good — again soon?"
+            // v9.2 — the three new emotions get their own grounded lines.
+            CurioPet.Mood.SHY -> if (warm) "Look at us, all friendly now." else "I'm still warming up — give me a boop?"
+            CurioPet.Mood.GRUMPY -> "The deck's gone quiet. One spin to fix that?"
+            CurioPet.Mood.PLAYFUL -> "That play session left me glowing."
         }
         return "$opening, $body"
     }
