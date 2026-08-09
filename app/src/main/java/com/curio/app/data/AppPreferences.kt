@@ -348,13 +348,13 @@ object AppPreferences {
         private set
     // v8.43 — whether the pet's learning brain is on (default ON): the pet
     // builds a personality from the user's real activity and develops its
-    // own catchphrases. Off = classic rule-based lines only.    var petBrainEnabledState by mutableStateOf(true)
+    // own catchphrases. Off = classic rule-based lines only.
+    var petBrainEnabledState by mutableStateOf(true)
         private set
     /** Experimental ONNX brain opt-in; deliberately OFF by default. */
     var neuralPetBrainEnabledState by mutableStateOf(false)
         private set
     // v8.16 — whether the Spin deck auto-opens the landed topic's reveal
- the
     // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
     // itself when the deck lands (the tour and pet lines adapt). Turn it
     // OFF to make the deck land quietly with the front card staying
