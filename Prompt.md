@@ -1,3 +1,14 @@
+# Request — Reveal buttons under the hero + toggleable Spin landing FX (DONE)
+
+## v8.57 — Spin landing FX experiment + reveal action row relocation (in progress → pushed)
+
+- User: "in spin shuffle page the explore now and already watched button have really need to be fixed remove it from the bottom place it just below the hero card and remove the bottom scaffold too… just place that scaffold height into the background watermark at the bottom… theme aware and background accent aware. now we will be making the animations of the spin beautiful and addicting without changing the design of the shuffle deck… want that new beautiful smooth and addictive animation to be a toggle one for testing dont change the current one keep it but disable it when the new one gets on. and there are more testing options for main card and deck peek cards so redesign those options and add for new changes behind the toggle for testing."
+- **Part A — Topic Reveal (`TopicRevealScreen.kt`)**: `RevealActionDock` (the floating Start exploring / Already watched pill dock) deleted; the buttons now live in a theme-aware inline row directly under the hero card (v8.57 comment at line 1061). The dock's old 80dp wash scaffold is replaced by an invisible morph-safe `RevealWashStrip` so the NavHost shared-element contract (placeholder reserves the strip) is untouched; the watermark backdrop trims its bottom padding by the dock height. Stray `}` from the deletion fixed.
+- **Part B — Spin landing FX (gated experiment, default OFF, classic untouched)**: `AppPreferences` gains the master `spinLandingFxState` (default false) + 4 independent layers defaulting ON: `spinFxReelState` (cubic ease-out reel glide 300→540ms vs classic sine 340→520ms + silkier tick pulse spring 0.72/300 vs 0.85/420), `spinFxCatchState` (Bouncy spring catch instead of Deliberate settle + accent glow flash), `spinFxRingState` (expanding double-stroke shockwave ring), `spinFxSparkleState` (10 rotating 4-point star sparks + white cores with per-spin seed). All wired into `HeroTicketCard` overlays (matchParentSize Canvases) and the reel loop in `SpinScreen.kt`.
+- **Experiments regrouped (`ExperimentsScreen.kt`)**: "Card surfaces" split into Main card / Deck peek cards / Deck & controls groups; new "Spin landing FX" card with the master toggle + 4 layer switches (dimmed + disabled while master is off). `ExperimentSwitchRow` gains an `enabled` param.
+- **Version bump** 20260914 → 20260915 + store changelog 20260915.txt.
+- Verified: braces clean (125 files), `git diff --check` clean, imports added (matchParentSize, StrokeCap, alpha). CI is the compile gate.
+
 # Request — Pet Studio v9 redesign: bottom nav, custom pets, center-of-screen editor (DONE)
 
 ## v8.56 — full Pet Studio redesign (pushed)

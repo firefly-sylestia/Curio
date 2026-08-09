@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -80,6 +81,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -704,8 +706,22 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             // ~340ms floor keeps the fastest early ticks readable and sits
             // ABOVE the ~310ms staggered peek wave, so every transition
             // completes before the next tick lands. Intervals ~340ms -> ~520ms.
-            val eased = sin(progress * Math.PI.toFloat() / 2f)
-            val interval = (340L + (180L * eased).toLong()).coerceAtMost(520L)
+            // v9.1 — premium reel: when the Spin landing FX experiment is on
+            // (with its reel layer), the wheel glides on a cubic ease-out —
+            // a confident opening cadence easing through a long, silky tail
+            // so the stop reads like a prize wheel locking in. The classic
+            // sine ease is untouched when the experiment is off.
+            val fxReel = AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState
+            val eased = if (fxReel) {
+                1f - (1f - progress) * (1f - progress) * (1f - progress)
+            } else {
+                sin(progress * Math.PI.toFloat() / 2f)
+            }
+            val interval = if (fxReel) {
+                (300L + (240L * eased).toLong()).coerceAtMost(540L)
+            } else {
+                (340L + (180L * eased).toLong()).coerceAtMost(520L)
+            }
             // Continue from the hand position the user is currently viewing.
             // Using a separate tick counter here reset every spin to hand[1],
             // which made the next swipe appear to pull the wrong visible peek
@@ -2123,7 +2139,14 @@ private fun HeroTicketCard(
         if (!shuffling || topic == null) return@LaunchedEffect
         tickDir = -tickDir
         tickPulse.snapTo(1.02f)
-        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
+        // v9.1 — the premium reel rides a silkier pulse (softer spring) so
+        // every tick glides instead of snapping; the classic pulse is
+        // untouched when the experiment is off.
+        if (AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState) {
+            tickPulse.animateTo(1f, spring(dampingRatio = 0.72f, stiffness = 300f))
+        } else {
+            tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
+        }
     }
 
     // ── Category switch — one welcoming bounce as the deck re-fans to the
@@ -2135,6 +2158,17 @@ private fun HeroTicketCard(
             tickPulse.animateTo(1f, CurioMotion.Springs.Elastic)
         }
     }
+
+    // ── Premium landing FX (v9.1 — experimental, gated) ────────────────
+    // The classic landing feel stays exactly as-is when the master toggle
+    // is off. With it on, the landing plays a spring catch (the settle
+    // branch below), a shockwave ring, a sparkle burst and a brief glow
+    // flash — each an independent A/B layer. All reads are reactive state,
+    // so flipping toggles in Experiments recomposes the hero instantly.
+    val fxOn = AppPreferences.spinLandingFxState
+    val fxCatch = fxOn && AppPreferences.spinFxCatchState
+    val fxRing = fxOn && AppPreferences.spinFxRingState
+    val fxSparkle = fxOn && AppPreferences.spinFxSparkleState
 
     // ── Landing settle — seamless handoff from the shuffle tick pulse to
     //    the elastic rest spring. On landing, snap to wherever the pulse
@@ -2166,12 +2200,47 @@ private fun HeroTicketCard(
                 // controlled Deliberate spring (85% damping, no bounce)
                 // instead of the extreme Elastic overshoot, so the wheel's
                 // stop reads as a confident rest, not a violent bounce.
-                launch { settleScale.animateTo(LandedRestScale, CurioMotion.Springs.Deliberate) }
-                launch { settleY.animateTo(0f, CurioMotion.Springs.Deliberate) }
+                // v9.1 — the premium catch swaps in the gummy Bouncy spring
+                // (one juicy overshoot that reads as the wheel locking in);
+                // the classic settle stays untouched when the FX is off.
+                val catchSpring = if (fxCatch) CurioMotion.Springs.Bouncy
+                                  else CurioMotion.Springs.Deliberate
+                launch { settleScale.animateTo(LandedRestScale, catchSpring) }
+                launch { settleY.animateTo(0f, catchSpring) }
             }
         } else {
             settleScale.snapTo(1f)
             settleY.snapTo(0f)
+        }
+    }
+
+    // ── Premium landing FX layers — ring, sparkle and glow play in
+    //    parallel with the settle spring the moment the wheel lands (never
+    //    on a restored / on-entry landed ticket), and stay fully inert when
+    //    the experiment is off.
+    val ringProgress = remember { Animatable(0f) }
+    val sparkleProgress = remember { Animatable(0f) }
+    val glowAlpha = remember { Animatable(0f) }
+    var sparkleSeed by remember { mutableIntStateOf(0) }
+    LaunchedEffect(landed) {
+        if (!landed || landedOnEntry) {
+            ringProgress.snapTo(0f)
+            sparkleProgress.snapTo(0f)
+            glowAlpha.snapTo(0f)
+        } else {
+            if (fxRing) {
+                ringProgress.snapTo(0f)
+                ringProgress.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
+            } else ringProgress.snapTo(0f)
+            if (fxSparkle) {
+                sparkleSeed++
+                sparkleProgress.snapTo(0f)
+                sparkleProgress.animateTo(1f, tween(850, easing = LinearEasing))
+            } else sparkleProgress.snapTo(0f)
+            if (fxCatch) {
+                glowAlpha.snapTo(0.5f)
+                glowAlpha.animateTo(0f, tween(600, easing = FastOutSlowInEasing))
+            } else glowAlpha.snapTo(0f)
         }
     }
     // When the user taps to open, settle back to EXACT scale 1 before the
@@ -2535,6 +2604,60 @@ private fun HeroTicketCard(
                             }
                         }
                     }
+                }
+            }
+
+            // ── Premium landing FX — shockwave ring, sparkle burst and the
+            //    catch glow, drawn above the card (and expanding past its
+            //    edges). Gated by the experiment (v9.1); fully inert off.
+            if (fxRing && ringProgress.value > 0f) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val p = ringProgress.value
+                    val base = size.minDimension * 0.30f
+                    val radius = base + base * 1.7f * p
+                    val alpha = (1f - p) * 0.55f
+                    val strokeW = 3.dp.toPx() * (1f - p * 0.7f) + 1.dp.toPx()
+                    drawCircle(color = accent.copy(alpha = alpha), radius = radius, center = center, style = Stroke(width = strokeW))
+                    drawCircle(color = Color.White.copy(alpha = alpha * 0.45f), radius = radius * 0.82f, center = center, style = Stroke(width = strokeW * 0.6f))
+                }
+            }
+            if (fxSparkle && sparkleProgress.value > 0f) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val p = sparkleProgress.value
+                    val base = size.minDimension * 0.32f
+                    val fade = (1f - p).coerceIn(0f, 1f)
+                    val piF = Math.PI.toFloat() / 180f
+                    repeat(10) { i ->
+                        val angle = ((i * 36f + sparkleSeed * 11f) % 360f) * piF
+                        val dist = base * (0.9f + p * 1.2f) + (i % 3) * 5f
+                        val x = center.x + cos(angle) * dist
+                        val y = center.y + sin(angle) * dist
+                        val s = (7f - 3.5f * p) * (0.8f + (i % 4) * 0.15f)
+                        val alpha = fade * 0.95f
+                        rotate(degrees = p * 30f + i * 14f, pivot = Offset(x, y)) {
+                            drawLine(color = accent.copy(alpha = alpha), start = Offset(x - s, y), end = Offset(x + s, y), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                            drawLine(color = accent.copy(alpha = alpha), start = Offset(x, y - s), end = Offset(x, y + s), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                        }
+                        drawCircle(color = Color.White.copy(alpha = alpha * 0.9f), radius = 1.6.dp.toPx() * (1f - p * 0.5f), center = Offset(x, y))
+                    }
+                }
+            }
+            if (fxCatch && glowAlpha.value > 0f) {
+                Canvas(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(30.dp))
+                ) {
+                    val r = size.minDimension * 0.75f
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(accent.copy(alpha = 0.45f * glowAlpha.value), Color.Transparent),
+                            center = center,
+                            radius = r
+                        ),
+                        radius = r,
+                        center = center
+                    )
                 }
             }
         }

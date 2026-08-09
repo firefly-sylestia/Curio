@@ -91,6 +91,7 @@ import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
+import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
@@ -256,36 +257,16 @@ fun TopicRevealScreen(
             }
         }
     }
-    // v8.44 — when the user LEAVES the reveal, the dock fades out in sync
-    // with the route's exit instead of lingering at full opacity until the
-    // destination finally disposes (the exit transition alone takes ~450ms,
-    // and the dock lives OUTSIDE the animated content, so it used to hang
-    // there for the whole fade). The fade is ALPHA ONLY — the dock still
-    // occupies the exact fixed-height bottom slot for the entire pop
-    // transition, so Scaffold innerPadding and the shared-element morph stay
-    // untouched (the v8.5 freeze rule) while the buttons gracefully vanish
-    // with the page.
-    var dockLeaving by remember { mutableStateOf(false) }
+    // v8.57 — the reveal no longer owns action buttons at the bottom: Start
+    // exploring / Already … live inline right below the hero card. The
+    // bottomBar slot still registers a static WASH STRIP (no buttons) so the
+    // NavHost's morph reserve stays registered for the WHOLE visit — including
+    // the pop transition, when the exiting screen's strip keeps Scaffold
+    // innerPadding constant (the v8.5/v8.36 freeze rule). The strip wears the
+    // same category wash as the page, so it reads as plain background.
     val revealBottomBar = remember(cat) {
         @Composable {
-            val dockAlpha by animateFloatAsState(
-                targetValue = if (dockLeaving) 0f else 1f,
-                animationSpec = tween(200, easing = FastOutSlowInEasing),
-                label = "revealDockFade"
-            )
-            Box(
-                modifier = Modifier.graphicsLayer { alpha = dockAlpha }
-            ) {
-                RevealActionDock(
-                    cat = cat,
-                    browseMode = latestBrowseMode,
-                    resolved = latestResolved,
-                    isDone = latestIsDone,
-                    onExplore = latestOnExplore,
-                    onAlready = latestOnAlready,
-                    onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null
-                )
-            }
+            RevealWashStrip(cat = cat)
         }
     }
     DisposableEffect(revealBottomBar) {
@@ -308,7 +289,6 @@ fun TopicRevealScreen(
      *  flight, so the foreground service starts while this activity is still
      *  foreground (a background FGS start throws on Android 12+). */
     fun openExploreBrowserAndGoHome(session: ExploreSession) {
-        dockLeaving = true
         showExploreDialog = false
         runCatching {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(session.searchUrl)))
@@ -536,7 +516,14 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            CurioWatermarkBackdrop(activeCat = cat)
+            // v8.57 — the bottom action dock is gone, so the watermark's
+            // glyph band is trimmed by the dock's former height (80dp) at
+            // the bottom: the pattern ends where the old scaffold used to
+            // sit, leaving a calm wash band below it.
+            CurioWatermarkBackdrop(
+                activeCat = cat,
+                modifier = Modifier.padding(bottom = 80.dp)
+            )
         }
 
         Column(
@@ -585,7 +572,6 @@ fun TopicRevealScreen(
                     if (!browseMode && !engaged) {
                         resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
                     }
-                    dockLeaving = true
                     navController.popBackStack()
                 },
                 shape = CircleShape,
@@ -621,6 +607,22 @@ fun TopicRevealScreen(
                         cat = cat,
                         resolved = resolved,
                         modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                // ── 2.5 Action row — Start exploring / Already … ───────
+                // v8.57 — the actions moved OUT of the bottom dock to sit
+                // right below the hero card: always visible, no scaffold.
+                RevealContentEntrance(delayMillis = 40) {
+                    RevealActionRow(
+                        cat = cat,
+                        browseMode = latestBrowseMode,
+                        resolved = latestResolved,
+                        isDone = latestIsDone,
+                        onExplore = latestOnExplore,
+                        onAlready = latestOnAlready,
+                        onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null,
+                        modifier = Modifier.padding(top = 16.dp)
                     )
                 }
 
@@ -738,12 +740,10 @@ fun TopicRevealScreen(
     }
 
     // Leaving via the system back gesture without engaging → recently-unexplored
-    // (never in Browse-Topics mode — reading from the database is silent).
-    BackHandler {
+    // (never in Browse-Topics mode — reading from the database is silent).        BackHandler {
         if (!browseMode && !engaged) {
             resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
         }
-        dockLeaving = true
         navController.popBackStack()
     }
 
@@ -841,7 +841,6 @@ fun TopicRevealScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    dockLeaving = true
                     showAlreadyDoneDialog = false
                     navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
                         launchSingleTop = true
@@ -897,7 +896,6 @@ fun TopicRevealScreen(
                         // tagging "Resumed" if the user came back to it).
                         ExploreSessionStore.recordExplored(context, cat.id, topic.name)
                         ExploreSessionStore.removeUnexplored(context, cat.id, topic.name)
-                        dockLeaving = true
                         showExploreDialog = false
                         navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
                             launchSingleTop = true
@@ -979,8 +977,6 @@ fun TopicRevealScreen(
         }
     }
 
-}
-
 /**
  * Horizontal size tiers for the reveal action pill: NARROW fits ~320dp
  * screens (small devices, split-screen) without ellipsizing the labels,
@@ -1038,43 +1034,18 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
     )
 }
 
+/**
+ * v8.57 — the reveal's bottom-bar slot content: a static WASH STRIP with no
+ * buttons. It keeps the NavHost morph reserve registered (and wearing the
+ * page's category wash) for the whole visit — including the pop transition —
+ * so Scaffold innerPadding never changes mid-morph (the v8.5 freeze rule).
+ * It reads as plain page background; the real actions live inline below the
+ * hero card ([RevealActionRow]).
+ */
 @Composable
-private fun RevealActionDock(
-    cat: com.curio.app.data.CurioCategory,
-    browseMode: Boolean,
-    resolved: CurioTopic?,
-    isDone: Boolean,
-    onExplore: () -> Unit,
-    onAlready: () -> Unit,
-    // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
-    onSilentExplore: (() -> Unit)? = null
+private fun RevealWashStrip(
+    cat: com.curio.app.data.CurioCategory
 ) {
-    // Wash-backed dock: the dock wears the SAME category wash the reveal
-    // page paints behind it, so the actions sit on the page tint like a
-    // transparent dock — but unlike true transparency, the wash also covers
-    // the nav-bar strip below the buttons, so the Scaffold's cream background
-    // can never show through as a band behind the dock. (v8.5 — the Scaffold
-    // containerColor must stay constant across the route transition; the
-    // wash lives HERE instead.)
-    // v8.5 regression fix (THE morph freeze): the dock must reserve EXACTLY
-    // the same total height as the bottom bar it replaces (80dp — M3's
-    // NavigationBar consumes the nav-bar inset inside its 80dp min height,
-    // and the NavHost's morph placeholder reserves that measured height). A
-    // taller dock (80dp + inset via heightIn) changed Scaffold innerPadding
-    // the moment this dock swapped in for the placeholder mid-transition,
-    // re-laying out the SharedTransitionLayout and freezing the shared-
-    // element morph — the whole reveal page stayed invisible except this
-    // dock, which lives outside the layout. The nav-bar inset is still
-    // consumed, but INSIDE the fixed 80dp (height first, then the inset as
-    // internal padding).
-    // v8.49 — the actions now FLOAT above the wash as an elevated pill
-    // instead of being squeezed into the strip's cramped content area (80dp
-    // minus the nav-bar inset, ~32-56dp on phones). The pill is anchored
-    // above the nav-bar inset with a small gap, so its buttons keep
-    // comfortable heights even on three-button-nav phones; if the pill is
-    // taller than the visible strip its top simply floats over the reveal's
-    // reserved bottom padding — a free overlay, nothing is clipped or
-    // re-laid out, and the 80dp morph reserve is untouched.
     Surface(
         color = cat.categoryBackgroundWash(),
         tonalElevation = 0.dp,
@@ -1082,79 +1053,87 @@ private fun RevealActionDock(
             .fillMaxWidth()
             .height(80.dp)
             .windowInsetsPadding(WindowInsets.navigationBars)
-    ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            // v8.55 — the dock now adapts on BOTH axes. Horizontal tiers
-            // (narrow < 340dp / compact < 440dp / standard) rescale paddings
-            // and typography so the labels never ellipsize on small screens,
-            // and a vertical `tight` tier (less than 48dp of strip — 3-button
-            // nav, landscape) trims the pill so it floats with a small gap
-            // instead of towering over the reserved content padding. The 80dp
-            // scaffold slot + nav-bar inset stay EXACTLY as before (morph
-            // freeze rule above).
-            val tier = when {
-                maxWidth < 340.dp -> RevealDockTier.NARROW
-                maxWidth < 440.dp -> RevealDockTier.COMPACT
-                else -> RevealDockTier.STANDARD
-            }
-            val m = revealDockMetrics(tier, tight = maxHeight < 48.dp)
-            Surface(
-                shape = RoundedCornerShape(m.pillRadius),
-                // v8.55 — theme-aware pill: surfaceContainerHigh (not plain
-                // surface) so the floating pill stays visible in EVERY theme —
-                // in the AMOLED style `surface` is pure black, which made the
-                // pill vanish against the black wash. Mirrors CurioTopicCard's
-                // elevated-surface convention.
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 1.dp,
-                shadowElevation = m.shadow,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = m.pillPadH, vertical = m.pillPadV)
-                    .fillMaxWidth()
+    ) {}
+}
+
+/**
+ * v8.57 — Start exploring / Already … — now a theme-aware inline row right
+ * below the hero card (was a floating bottom dock). Reuses the tier metrics
+ * so the pair resizes cleanly on every screen size.
+ */
+@Composable
+private fun RevealActionRow(
+    cat: CurioCategory,
+    browseMode: Boolean,
+    resolved: CurioTopic?,
+    isDone: Boolean,
+    onExplore: () -> Unit,
+    onAlready: () -> Unit,
+    // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
+    onSilentExplore: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val tier = when {
+            maxWidth < 340.dp -> RevealDockTier.NARROW
+            maxWidth < 440.dp -> RevealDockTier.COMPACT
+            else -> RevealDockTier.STANDARD
+        }
+        // The dock's vertical squeeze tier was for the pinned bottom slot;
+        // inline under the hero the width tiers (NARROW/COMPACT/STANDARD)
+        // alone resize the pair cleanly on every screen.
+        val m = revealDockMetrics(tier, tight = false)
+        Surface(
+            shape = RoundedCornerShape(m.pillRadius),
+            // Theme-aware action card: the elevated container step stays
+            // visible in every theme (AMOLED included) and reads as a
+            // premium pill on the category wash.
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 1.dp,
+            shadowElevation = m.shadow,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = m.rowPadH,
+                    vertical = m.rowPadV
+                ),
+                horizontalArrangement = Arrangement.spacedBy(m.rowGap),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.padding(
-                        horizontal = m.rowPadH,
-                        vertical = m.rowPadV
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(m.rowGap),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Already/Undo on the LEFT, Start exploring on the RIGHT.
-                    RevealAlreadyButton(
-                        enabled = resolved != null,
-                        cat = cat,
-                        isDone = isDone,
-                        metrics = m,
-                        modifier = Modifier.weight(1f),
-                        onClick = onAlready
-                    )
-                    if (!browseMode) {
-                        // v8.22 — the Start exploring button is a tour landmark:
-                        // the pet-guide highlights its REAL bounds on the tour step.
-                        PetLandmark(
-                            id = "start-exploring",
-                            kind = PetLandmarks.Kind.FUN,
-                            screen = "reveal"
-                        ) { lm ->
-                            RevealStartButton(
-                                enabled = resolved != null,
-                                metrics = m,
-                                modifier = lm.weight(1f),
-                                onClick = onExplore
-                            )
-                        }
-                    } else if (onSilentExplore != null) {
-                        // Browse mode: Explore opens the search page silently.
+                // Already/Undo on the LEFT, Start exploring on the RIGHT.
+                RevealAlreadyButton(
+                    enabled = resolved != null,
+                    cat = cat,
+                    isDone = isDone,
+                    metrics = m,
+                    modifier = Modifier.weight(1f),
+                    onClick = onAlready
+                )
+                if (!browseMode) {
+                    // v8.22 — the Start exploring button is a tour landmark:
+                    // the pet-guide highlights its REAL bounds on the tour step.
+                    PetLandmark(
+                        id = "start-exploring",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "reveal"
+                    ) { lm ->
                         RevealStartButton(
                             enabled = resolved != null,
-                            label = "Explore",
                             metrics = m,
-                            modifier = Modifier.weight(1f),
-                            onClick = onSilentExplore
+                            modifier = lm.weight(1f),
+                            onClick = onExplore
                         )
                     }
+                } else if (onSilentExplore != null) {
+                    // Browse mode: Explore opens the search page silently.
+                    RevealStartButton(
+                        enabled = resolved != null,
+                        label = "Explore",
+                        metrics = m,
+                        modifier = Modifier.weight(1f),
+                        onClick = onSilentExplore
+                    )
                 }
             }
         }
