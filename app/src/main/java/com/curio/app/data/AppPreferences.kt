@@ -445,6 +445,9 @@ object AppPreferences {
     /** v9.5 — evolution path chosen at level 7 (null = baby, no choice yet). */
     var evoPathState by mutableStateOf<String?>(null)
         private set
+    /** v9.6 — experimental per-part size and position controls. */
+    var petPartTransformsState by mutableStateOf(false)
+        private set
 
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
@@ -492,6 +495,7 @@ object AppPreferences {
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
         evoPathState = getEvoPath(context)
+        petPartTransformsState = isPetPartTransformsEnabled(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -1337,6 +1341,17 @@ object AppPreferences {
     fun setEvoPath(context: Context, path: CurioPet.EvoPath) {
         prefs(context).edit().putString(KEY_EVO_PATH, path.name).apply()
         evoPathState = path.name
+    }
+
+    // ── Pet editor experiments (v9.6) ────────────────────────────────
+    private const val KEY_PET_PART_TRANSFORMS = "pet_part_transforms"
+
+    fun isPetPartTransformsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_PART_TRANSFORMS, false)
+
+    fun setPetPartTransformsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_PART_TRANSFORMS, enabled).apply()
+        petPartTransformsState = enabled
     }
 
     // ── Internal ─────────────────────────────────────────────────────

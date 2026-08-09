@@ -39,6 +39,14 @@ import kotlin.math.min
  * Missing palette keys fall back to the default look, so a design only has
  * to list the colors it actually changes.
  */
+/** v9.6 — placement transform for one authored body part. Scale affects the
+ * part around the canvas center; offsets are design-grid cells. */
+data class DetailTransform(
+    val scale: Float = 1f,
+    val offsetX: Int = 0,
+    val offsetY: Int = 0
+)
+
 data class PetDesign(
     val palette: Map<Char, String>,
     val bodyRows: List<String>,
@@ -59,6 +67,8 @@ data class PetDesign(
     val details: Map<String, List<String>> = emptyMap(),
     /** Explicit per-element visibility overrides; absent keys stay procedurally enabled. */
     val procedural: Map<String, Boolean> = emptyMap(),
+    /** v9.6 — per-layer size and position, separate from editor canvas zoom. */
+    val detailTransforms: Map<String, DetailTransform> = emptyMap(),
     /**
      * v8.48 — user-custom animation frames (key = animation id, e.g. "happy").
      * An absent key plays the built-in animation; old designs without this
@@ -447,7 +457,8 @@ data class PetDesign(
             val encoded = runCatching {
                 java.net.URLEncoder.encode(rows.joinToString("\n"), "UTF-8")
             }.getOrDefault("")
-            appendLine("detail=$layer;grid=$encoded")
+            val transform = detailTransforms[layer] ?: DetailTransform()
+            appendLine("detail=$layer;grid=$encoded;scale=${transform.scale};x=${transform.offsetX};y=${transform.offsetY}")
         }
         procedural.forEach { (element, enabled) ->
             appendLine("procedural=$element;enabled=${if (enabled) 1 else 0}")
@@ -528,6 +539,7 @@ data class PetDesign(
         val reactions = mutableMapOf<String, PetReaction>()
         val details = mutableMapOf<String, List<String>>()
         val procedural = mutableMapOf<String, Boolean>()
+        val detailTransforms = mutableMapOf<String, DetailTransform>()
         var declaredSize: Int? = null
         // v8.51 — the design's species (multi-pet). Absent in old designs
         // and in hand-written text → falls back below.
@@ -569,6 +581,18 @@ data class PetDesign(
                         runCatching {
                             details[layer] = java.net.URLDecoder.decode(value, "UTF-8").split("\n")
                         }
+                    }
+                    if (layer in DETAIL_KEYS) {
+                        val transform = config.split(';').associate {
+                            val separatorIndex = it.indexOf('=')
+                            if (separatorIndex > 0) it.substring(0, separatorIndex) to it.substring(separatorIndex + 1)
+                            else "" to ""
+                        }
+                        detailTransforms[layer] = DetailTransform(
+                            scale = transform["scale"]?.toFloatOrNull()?.coerceIn(0.5f, 2f) ?: 1f,
+                            offsetX = transform["x"]?.toIntOrNull()?.coerceIn(-16, 16) ?: 0,
+                            offsetY = transform["y"]?.toIntOrNull()?.coerceIn(-16, 16) ?: 0
+                        )
                     }
                 }
                 line.startsWith("procedural=") && eq == 10 -> {
@@ -781,6 +805,7 @@ data class PetDesign(
                         else parsedRows + List(size - parsedRows.size) { ".".repeat(size) }
                     }
             },
+            detailTransforms = detailTransforms,
             procedural = procedural,
             animations = builtAnimations,
             petSpeciesId = petId ?: fallback.petSpeciesId,
@@ -904,6 +929,12 @@ data class PetDesign(
             faces = faces.mapValues { (_, face) -> resizeFace(face) },
             reactions = reactions.mapValues { (_, reaction) -> reaction.copy(face = resizeFace(reaction.face)) },
             details = details.mapValues { (_, rows) -> resizeGrid(rows, gridSize, newSize) },
+            detailTransforms = detailTransforms.mapValues { (_, transform) ->
+                transform.copy(
+                    offsetX = (transform.offsetX.toFloat() * newSize / gridSize).toInt(),
+                    offsetY = (transform.offsetY.toFloat() * newSize / gridSize).toInt()
+                )
+            },
             // v8.52 — per-frame pixel layers follow the canvas size too.
             animations = animations.mapValues { (_, anim) ->
                 anim.copy(frames = anim.frames.map { fr ->
@@ -980,6 +1011,17 @@ data class PetDesign(
             .take(gridSize)
         return copy(details = details + (layer to cleaned))
     }
+
+    /** Returns the saved transform for a detail layer. */
+    fun detailTransform(layer: String): DetailTransform = detailTransforms[layer] ?: DetailTransform()
+
+    /** Sets the saved transform for a detail layer. */
+    fun withDetailTransform(layer: String, transform: DetailTransform): PetDesign =
+        if (layer in DETAIL_KEYS) copy(detailTransforms = detailTransforms + (layer to transform.copy(
+            scale = transform.scale.coerceIn(0.5f, 2f),
+            offsetX = transform.offsetX.coerceIn(-16, 16),
+            offsetY = transform.offsetY.coerceIn(-16, 16)
+        ))) else this
 
     /** Sets whether one procedural element remains visible. */
     fun withProceduralEnabled(element: String, enabled: Boolean): PetDesign =

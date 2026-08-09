@@ -94,6 +94,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.DetailTransform
 import com.curio.app.data.EyeStyle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.CustomPetAction
@@ -1030,36 +1031,115 @@ fun PetDesignerScreen(navController: NavController) {
                         activeTool = activeTool,
                         onSelect = { activeTool = it }
                     )
-                    Spacer(Modifier.height(12.dp))
-                    // v8.36 — nudge the whole part around the body so the
-                    // user can reposition the tail, belly, accessories, etc.
-                    Text(
-                        "Move ${detailLayer} layer",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Text(
-                        "Nudge the whole part one pixel at a time to sit it exactly where you want on the body.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val nudge: (Int, Int) -> Unit = { dr, dc ->
-                            pushUndo()
-                            val base = detailEditorDrafts[detailLayer] ?: blueprintRows
-                            val nudged = nudgeDetailRows(base, dr, dc)
-                            detailEditorDrafts = detailEditorDrafts + (detailLayer to nudged)
-                            design = design
-                                .withDetailGrid(detailLayer, nudged)
-                                .withProceduralEnabled(detailLayer, false)
+                    if (AppPreferences.petPartTransformsState) {
+                        var transformUndoPushed by remember(detailLayer) { mutableStateOf(false) }
+                        val transform = design.detailTransform(detailLayer)
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            "Part placement",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                        )
+                        Text(
+                            "Resize and place the ${detailLayer} relative to Curie's body. This does not zoom the drawing canvas.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Part size",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.width(88.dp)
+                            )
+                            Slider(
+                                value = transform.scale,
+                                onValueChange = {
+                                    if (!transformUndoPushed) {
+                                        pushUndo()
+                                        transformUndoPushed = true
+                                    }
+                                    design = design.withDetailTransform(detailLayer, transform.copy(scale = it))
+                                },
+                                onValueChangeFinished = { transformUndoPushed = false },
+                                valueRange = 0.5f..2f,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                "${(transform.scale * 100).roundToInt()}%",
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.width(42.dp),
+                                textAlign = TextAlign.End
+                            )
                         }
-                        SmallAction("←") { nudge(0, -1) }
-                        SmallAction("→") { nudge(0, 1) }
-                        SmallAction("↑") { nudge(-1, 0) }
-                        SmallAction("↓") { nudge(1, 0) }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "X position",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.width(88.dp)
+                            )
+                            Slider(
+                                value = transform.offsetX.toFloat(),
+                                onValueChange = {
+                                    if (!transformUndoPushed) {
+                                        pushUndo()
+                                        transformUndoPushed = true
+                                    }
+                                    design = design.withDetailTransform(detailLayer, transform.copy(offsetX = it.roundToInt()))
+                                },
+                                onValueChangeFinished = { transformUndoPushed = false },
+                                valueRange = -16f..16f,
+                                steps = 31,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                transform.offsetX.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.width(42.dp),
+                                textAlign = TextAlign.End
+                            )
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Y position",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.width(88.dp)
+                            )
+                            Slider(
+                                value = transform.offsetY.toFloat(),
+                                onValueChange = {
+                                    if (!transformUndoPushed) {
+                                        pushUndo()
+                                        transformUndoPushed = true
+                                    }
+                                    design = design.withDetailTransform(detailLayer, transform.copy(offsetY = it.roundToInt()))
+                                },
+                                onValueChangeFinished = { transformUndoPushed = false },
+                                valueRange = -16f..16f,
+                                steps = 31,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                transform.offsetY.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.width(42.dp),
+                                textAlign = TextAlign.End
+                            )
+                        }
+                        SmallAction("Reset part placement", enabled = transform != DetailTransform()) {
+                            pushUndo()
+                            design = design.withDetailTransform(detailLayer, DetailTransform())
+                        }
                     }
                     Spacer(Modifier.height(8.dp))
-                    SliderRow(label = "Zoom", value = gridZoom, max = 3f) { gridZoom = it }
+                    Text(
+                        "Drawing zoom",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    SliderRow(label = "Canvas", value = gridZoom, max = 3f) { gridZoom = it }
                     Spacer(Modifier.height(10.dp))
                     // v8.52 — the per-element disable toggles moved to Settings →
                     // Accessories (one place to change/disable every part).
@@ -1529,6 +1609,22 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Edit body parts (Settings, v8.36) — jump straight into the
             //    detail editor for any part, belly included. ──────────────
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Part placement controls",
+                    "Test resizing and positioning each detail relative to Curie's body"
+                ) {
+                    ToggleRow("Enable part size & position", AppPreferences.petPartTransformsState) {
+                        AppPreferences.setPetPartTransformsEnabled(context, it)
+                    }
+                    Text(
+                        "When enabled, Part size and X/Y change the selected detail itself. Drawing zoom stays only for pixel precision.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
             item {
                 if (page == PetDesignerPage.SETTINGS) SectionCard(
                     "Edit body parts",

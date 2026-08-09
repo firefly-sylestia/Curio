@@ -24,6 +24,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
+import com.curio.app.data.DetailTransform
 import com.curio.app.data.EyeStyle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
@@ -574,12 +576,27 @@ fun CurioPetSprite(
                         )
                     }
 
-                    /** Draws one user-authored full-canvas detail layer. */
+                    /** Draws one authored detail layer with its saved body-relative transform. */
                     fun drawDetailLayer(layer: String) {
-                        activeDesign.details[layer]?.forEachIndexed { row, line ->
-                            line.forEachIndexed { col, ch ->
-                                activeDesign.colorFor(ch)?.let { hex ->
-                                    drawGridPx(col, row, petDesignColor(hex))
+                        val rows = activeDesign.details[layer] ?: return
+                        val transform = if (AppPreferences.petPartTransformsState) {
+                            activeDesign.detailTransform(layer)
+                        } else {
+                            DetailTransform()
+                        }
+                        val offsetX = transform.offsetX * px
+                        val offsetY = transform.offsetY * px
+                        translate(left = offsetX, top = offsetY) {
+                            scale(
+                                scale = transform.scale,
+                                pivot = Offset(size.width / 2f, size.height / 2f)
+                            ) {
+                                rows.forEachIndexed { row, line ->
+                                    line.forEachIndexed { col, ch ->
+                                        activeDesign.colorFor(ch)?.let { hex ->
+                                            drawGridPx(col, row, petDesignColor(hex))
+                                        }
+                                    }
                                 }
                             }
                         }
