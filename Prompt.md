@@ -1,3 +1,21 @@
+# Request — Fix missing Compose imports from CI
+
+## User request
+Fix CI compile errors for unresolved `DisposableEffect`, `onDispose`, and `windowInsetsPadding`.
+
+## Completed changes
+- Restored `androidx.compose.runtime.DisposableEffect` in `TopicRevealScreen.kt`.
+- Restored `androidx.compose.foundation.layout.windowInsetsPadding` in `CurioNavHost.kt`.
+- `onDispose` is supplied by the `DisposableEffect` scope; no separate import is required.
+
+## Validation
+- `git diff --check` passed.
+- `node scripts/check_braces.js` passed.
+- No neural model/ONNX references exist outside the historical `Prompt.md` log.
+- Gradle was not run locally per repository rules; CI is the compile source of truth.
+
+---
+
 # Request — Fix Topic Browser sort lag and pet sprite artifacts
 
 ## User request
