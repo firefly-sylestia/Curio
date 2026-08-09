@@ -1,3 +1,12 @@
+# Request — Hide Pet Studio animation UI + unlock editor from start (DONE)
+
+- User confirmed: hide **all animation UI** in Pet Studio for now, but keep the animation implementation/data available for a future re-entry. Also unlock the editor immediately; no level-7/baby-stage lock.
+- Current implementation in `PetDesignerScreen.kt`: removed the Pets animation gallery, full-screen player entry point, editor frame-timeline route, picker Animations category/cards, animated reaction/custom-action previews and animation-selection controls, and animated custom-pet card previews. Static pet sprites remain in those cards. Animation models, serialization, runtime playback, dormant preview/editor/player composables, reaction animation data, and custom action animation IDs remain intact.
+- Removed the baby editor lock so body/details/colors/faces/reactions/custom actions can be opened from the beginning. Evolution dialog/system remains unchanged.
+- VersionCode `20260916` → `20260917`; added `fastlane/metadata/android/en-US/changelogs/20260917.txt`.
+- Verified: `node scripts/check_braces.js` passes for 125 files, `git diff --check` passes, and stale references/imports (`playerAnimation`, `PET_CARD_ANIMATION`, `petAnimationName`, `key`, editor-lock text) are absent. Gradle compile/build/lint/test commands are forbidden here; CI is the compile gate.
+- Code review: no critical blockers. The remaining animation composables are dormant private implementations kept for future re-entry.
+
 # Request — Reveal buttons under the hero + toggleable Spin landing FX (DONE)
 
 ## v8.57 — Spin landing FX experiment + reveal action row relocation (in progress → pushed)

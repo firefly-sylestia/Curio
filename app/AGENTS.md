@@ -136,17 +136,17 @@ app/src/main/java/com/curio/app/
   changing animation. The procedural antenna extras remain independently
   toggleable; the base antenna pixels are edited in the Body canvas.
 - `PetDesignerScreen` (Settings → Pet designer) is a three-page studio
-  (v8.52): **Pets** (pick a species from `PetRegistry`, animations/previews
-  below), **Editor** (choose a target via the preview dialog, then only that
-  editor — incl. the animation timeline with per-frame body/curled/eyes
-  pixel layers), and **Settings** (Accessories dialog, disable toggles,
-  personality presets, shapes). A slim sticky **EditorToolbar** is the ONE
-  place for Save / Undo / Redo / Reset / Import / Export (the old pinned
-  footer SaveArea is gone — no duplicate buttons). Eyes are authored on a
-  fixed 16×16 grid per animation frame (`PetAnimationFrame.eyeGrid`,
-  `EYE_STYLE_PIXELS` blueprint behind). PNG export/import shares via
-  FileProvider `${applicationId}.fileprovider` (`res/xml/file_paths.xml`
-  cache/share).
+  (v8.52): **Pets** (pick a species from `PetRegistry`), **Editor** (choose a
+  target via the preview dialog, then only that editor), and **Settings**
+  (Accessories dialog, disable toggles, personality presets, shapes). The
+  editor is available from the start, including for baby pets. Animation
+  gallery/player/timeline and animation-selection controls are currently
+  hidden from the studio UI while their models, serializers, renderers, and
+  runtime playback remain in place for a future re-entry. A slim sticky
+  **EditorToolbar** is the ONE place for Save / Undo / Redo / Reset / Import /
+  Export (the old pinned footer SaveArea is gone — no duplicate buttons).
+  PNG export/import shares via FileProvider `${applicationId}.fileprovider`
+  (`res/xml/file_paths.xml` cache/share).
 
 ### Experimental features (A/B testing)
 - Per root `AGENTS.md`, any experimental/test behavior MUST be gated behind a **user-facing Settings toggle** so it can be A/B-compared against the current behavior and reverted without a code change — never hardcoded as the only path.

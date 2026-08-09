@@ -56,7 +56,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -115,7 +114,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import com.curio.app.data.animationById
 import com.curio.app.data.definition
-import com.curio.app.data.petAnimationName
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
@@ -169,10 +167,6 @@ private val QUICK_HEX = listOf(
     "4A3426", "5C4436", "6E5448", "3E4A5C", "4A5C6E", "5C4A6E",
     "FFD97D", "E0B050", "B8860B", "C0A040", "D9C060", "F0C060"
 )
-
-/** v8.56 — the gentle looping animation pet cards play (idle, safe fallback). */
-private val PET_CARD_ANIMATION: PetAnimation =
-    animationById("idle") ?: BUILTIN_ANIMATIONS.first()
 
 /** Hex parse with the same tolerance as [PetDesign]. */
 private fun parseHex(text: String): String? {
@@ -308,8 +302,6 @@ fun PetDesignerScreen(navController: NavController) {
     // saved text on rotation, so a surviving slot pointer would let Save
     // clobber a custom pet with the wrong design.
     var activeCustomSlot by remember { mutableStateOf<Int?>(null) }
-    // v8.56 — the full-screen animation player (Pets page gallery tap).
-    var playerAnimation by remember { mutableStateOf<PetAnimation?>(null) }
     // v8.47 — recent colors for the professional color picker (persisted, capped at 12).
     var recentColors by remember { mutableStateOf(AppPreferences.getPetRecentColors(context)) }
     fun rememberColor(hex: String) {
@@ -629,27 +621,16 @@ fun PetDesignerScreen(navController: NavController) {
             //    only chooser, and after that ONLY the chosen editor renders.
             item {
                 if (page == PetDesignerPage.EDITOR) {
-                    // v9.5 — baby pets can't edit; the editor unlocks after evolution.
-                    val stage = CurioPet.currentStage()
-                    if (stage == CurioPet.Stage.BABY) {
-                        SectionCard("🔒 Editor locked", "Your pet is still a baby! Reach level 7, evolve it, and the editor will unlock.") {
-                            Text(
-                                "Evolve at level 7 to unlock custom colors, faces, and accessories.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                    // The editor is available immediately, including for a baby pet.
+                    // Local val so the nullable target smart-casts cleanly.
+                    val currentTarget = target
+                    if (currentTarget == null) {
+                        EditorPickPrompt(onOpenPicker = { pickerCategory = "body" })
                     } else {
-                        // Local val so the nullable target smart-casts cleanly.
-                        val currentTarget = target
-                        if (currentTarget == null) {
-                            EditorPickPrompt(onOpenPicker = { pickerCategory = "body" })
-                        } else {
-                            EditorTargetHeader(
-                                target = currentTarget,
-                                onChange = { pickerCategory = "body" }
-                            )
-                        }
+                        EditorTargetHeader(
+                            target = currentTarget,
+                            onChange = { pickerCategory = "body" }
+                        )
                     }
                 }
             }
@@ -771,48 +752,10 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Animation gallery (Pets page, v8.56) — tapping a card
-            //    opens the full-screen player (fixes the old dead-tap bug:
-            //    the target used to be set on the wrong page, so tapping
-            //    Animations did nothing). ───────────────────────────────
-            item {
-                if (page == PetDesignerPage.PETS) SectionCard(
-                    "Animations",
-                    "Tap one to watch it full screen — then edit its frames"
-                ) {
-                    BUILTIN_ANIMATIONS.chunked(3).forEach { row ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            row.forEach { anim ->
-                                AnimationGalleryCard(
-                                    animation = anim,
-                                    design = design,
-                                    onClick = { playerAnimation = anim },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            repeat(3 - row.size) {
-                                Spacer(Modifier.weight(1f))
-                            }
-                        }
-                        Spacer(Modifier.height(8.dp))
-                    }
-                }
-            }
-
-            // ── Animation timeline editor (Editor target, v8.48) ─────
-            item {
-                val animTarget = target as? PetEditorTarget.Animation
-                if (page == PetDesignerPage.EDITOR && animTarget != null) AnimationTimelineEditor(
-                    animationId = animTarget.animationId,
-                    design = design,
-                    onDesignChange = { design = it },
-                    onPushUndo = { pushUndo() },
-                    onEditColor = { editingColorKey = it }
-                )
-            }
+            // Animation gallery and frame timeline intentionally stay out of the
+            // Pet Studio UI while the animation editor is being refined. Their
+            // models, serializers, renderers, and editor implementation remain
+            // available for a future re-entry.
 
             // ── Body / curled pose pixel editor (Editor targets) ──────
             item {
@@ -1374,14 +1317,8 @@ fun PetDesignerScreen(navController: NavController) {
                     }
                     Spacer(Modifier.height(10.dp))
                     val reaction = design.reactionFor(reactEvent)
-                    // v8.50 — live action preview: the pet plays the chosen
-                    // animation wearing the reaction face, over a speech bubble.
-                    ActionPreview(
-                        event = reactEvent,
-                        design = design,
-                        reaction = reaction,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    // The animated action preview is intentionally hidden while
+                    // animation UI is out of the Pet Studio.
                     Spacer(Modifier.height(12.dp))
                     Text(
                         "Reaction lines (optional)",
@@ -1442,15 +1379,6 @@ fun PetDesignerScreen(navController: NavController) {
                         pushUndo()
                         design = design.withReaction(reactEvent, reaction.copy(enabled = it))
                     }
-                    LabeledChips(
-                        label = "Animation",
-                        options = ReactionAnim.entries.map { it.name },
-                        selected = reaction.anim.name,
-                        onSelect = {
-                            pushUndo()
-                            design = design.withReaction(reactEvent, reaction.copy(anim = ReactionAnim.valueOf(it)))
-                        }
-                    )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction(
@@ -1853,19 +1781,8 @@ fun PetDesignerScreen(navController: NavController) {
             }
         }
 
-        // ── Full-screen animation player (v8.56 — Pets page gallery) ──
-        playerAnimation?.let { anim ->
-            AnimationPlayerDialog(
-                animation = anim,
-                design = design,
-                onEditFrames = {
-                    playerAnimation = null
-                    selectTarget(PetEditorTarget.Animation(anim.id))
-                    page = PetDesignerPage.EDITOR
-                },
-                onDismiss = { playerAnimation = null }
-            )
-        }
+        // The full-screen animation player remains implemented but has no
+        // active UI entry point while animation editing is hidden.
 
         // ── Color editor overlay ─────────────────────────────────────
         editingColorKey?.let { key ->
@@ -3948,7 +3865,6 @@ private fun DrawPickerDialog(
             StripChip("Body & pose", category == "body") { onCategoryChange("body") }
             StripChip("Faces", category == "faces") { onCategoryChange("faces") }
             StripChip("Details", category == "details") { onCategoryChange("details") }
-            StripChip("Animations", category == "animations") { onCategoryChange("animations") }
             StripChip("Actions", category == "actions") { onCategoryChange("actions") }
         }
         Spacer(Modifier.height(12.dp))
@@ -4081,10 +3997,11 @@ private fun DrawPickerDialog(
                                 selected = selected is PetEditorTarget.Reaction && selected.event == event,
                                 modifier = Modifier.weight(1f),
                                 preview = {
-                                    ReactionSpritePreview(
-                                        design = design,
-                                        reaction = design.reactionFor(event),
-                                        spriteSize = 40.dp
+                                    CurioPetSprite(
+                                        stage = CurioPet.currentStage(),
+                                        mood = CurioPet.Mood.HAPPY,
+                                        spriteSize = 40.dp,
+                                        design = design
                                     )
                                 },
                                 onClick = { onSelect(PetEditorTarget.Reaction(event)) }
@@ -4122,10 +4039,12 @@ private fun DrawPickerDialog(
                                         selected.actionId == action.id,
                                     modifier = Modifier.weight(1f),
                                     preview = {
-                                        val anim = design.animations[action.animationId]
-                                            ?: animationById(action.animationId)
-                                            ?: BUILTIN_ANIMATIONS.first()
-                                        PetAnimationPreview(animation = anim, design = design, spriteSize = 40.dp)
+                                        CurioPetSprite(
+                                            stage = CurioPet.currentStage(),
+                                            mood = CurioPet.Mood.HAPPY,
+                                            spriteSize = 40.dp,
+                                            design = design
+                                        )
                                     },
                                     onClick = { onSelect(PetEditorTarget.CustomAction(action.id)) }
                                 )
@@ -4161,29 +4080,7 @@ private fun DrawPickerDialog(
                     onClick = { onSelect(PetEditorTarget.CustomAction(PetEditorTarget.NEW_CUSTOM_ACTION_ID)) }
                 )
             }
-            else -> {
-                BUILTIN_ANIMATIONS.chunked(2).forEach { rowAnims ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        rowAnims.forEach { anim ->
-                            PickerCard(
-                                title = anim.name,
-                                subtitle = "${anim.frames.size} frames",
-                                selected = selected is PetEditorTarget.Animation && selected.animationId == anim.id,
-                                modifier = Modifier.weight(1f),
-                                preview = {
-                                    PetAnimationPreview(animation = anim, design = design, spriteSize = 40.dp)
-                                },
-                                onClick = { onSelect(PetEditorTarget.Animation(anim.id)) }
-                            )
-                        }
-                        if (rowAnims.size == 1) Spacer(Modifier.weight(1f))
-                    }
-                    Spacer(Modifier.height(10.dp))
-                }
-            }
+            else -> Unit
         }
         Spacer(Modifier.height(6.dp))
         Row(
@@ -5367,13 +5264,11 @@ private fun ActionPreview(
             }
         }
     }
-}
-
-/**
+}    /**
  * v8.53 — Phase 7: the custom action editor. Name + trigger (+ param for
- * time/idle triggers) + animation + dialogue lines + enabled, with a live
- * preview wearing the chosen animation and a speech bubble. Duplicate and
- * Delete live here too — the only place custom actions are edited.
+ * time/idle triggers) + dialogue lines + enabled. Animation selection and
+ * preview remain implemented in the data/runtime layer but are hidden here
+ * while the animation UI is being refined. Duplicate and Delete live here too.
  */
 @Composable
 private fun CustomActionEditor(
@@ -5387,11 +5282,6 @@ private fun CustomActionEditor(
     onDuplicate: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val anim = design.animations[action.animationId]
-        ?: animationById(action.animationId)
-        ?: BUILTIN_ANIMATIONS.first()
-    var replayKey by rememberSaveable(action.id) { mutableStateOf(0) }
-    val bubble = action.dialogueLines.firstOrNull() ?: "${anim.name}!"
     SectionCard(
         "Custom action",
         "A behavior you made — it fires on its own trigger, wherever your pet is"
@@ -5498,86 +5388,6 @@ private fun CustomActionEditor(
             else -> Unit
         }
         Spacer(Modifier.height(10.dp))
-        Text(
-            "Animation",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Which move the pet does — pick any animation, including ones you drew in the timeline.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(8.dp))
-        val animationOptions = BUILTIN_ANIMATIONS.map { it.id to it.name } +
-            design.animations.keys.filter { animationById(it) == null }.map { it to petAnimationName(it) }
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            animationOptions.forEach { (id, name) ->
-                ChoiceChip(
-                    label = name,
-                    selected = action.animationId == id,
-                    onClick = { onUpdate(action.copy(animationId = id)) }
-                )
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        // Live preview — the chosen animation looping with the speech bubble.
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "Live preview",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(8.dp))
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
-                ) {
-                    Text(
-                        "\u201c$bubble\u201d",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                // key(replayKey) remounts the preview so Replay restarts the
-                // loop from frame one (a plain recomposition would not).
-                key(replayKey) {
-                    PetAnimationPreview(
-                        animation = anim,
-                        design = design,
-                        spriteSize = 96.dp,
-                        playing = true
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    SmallAction("Replay", enabled = true) { replayKey++ }
-                    Text(
-                        "${anim.name} · ${PetActionTrigger.label(action.trigger.kind)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(12.dp))
         Text(
             "What does it say? (optional)",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
@@ -5705,13 +5515,11 @@ private fun CustomPetCard(
                     .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // v8.56 follow-up — the card plays the pet's idle animation
-                // on loop instead of a static sprite (PetAnimationPreview
-                // resolves the design's custom frames automatically).
-                PetAnimationPreview(
-                    animation = PET_CARD_ANIMATION,
-                    design = parsed,
-                    spriteSize = 56.dp
+                CurioPetSprite(
+                    stage = CurioPet.currentStage(),
+                    mood = CurioPet.Mood.HAPPY,
+                    spriteSize = 56.dp,
+                    design = parsed
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -6054,12 +5862,11 @@ private fun PetLibraryCard(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // v8.56 follow-up — the card plays the pet's idle animation on
-            // loop instead of a static sprite.
-            PetAnimationPreview(
-                animation = PET_CARD_ANIMATION,
-                design = design,
-                spriteSize = 56.dp
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.Mood.HAPPY,
+                spriteSize = 56.dp,
+                design = design
             )
             Spacer(Modifier.height(6.dp))
             Text(
