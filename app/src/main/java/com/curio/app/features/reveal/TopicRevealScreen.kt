@@ -730,10 +730,9 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // The action dock is rendered by the Scaffold bottom slot so
-                // it occupies the existing reveal placeholder below this
-                // scrolling content.
-                Spacer(Modifier.height(24.dp))
+                // v8.57 — extra clearance so content never hides behind the
+                // 80dp wash strip in the scaffold's bottom bar.
+                Spacer(Modifier.height(80.dp))
             }
 
         }
@@ -1086,14 +1085,14 @@ private fun RevealActionRow(
         // inline under the hero the width tiers (NARROW/COMPACT/STANDARD)
         // alone resize the pair cleanly on every screen.
         val m = revealDockMetrics(tier, tight = false)
+        // v8.57 — the action row sits directly on the category wash, no
+        // floating pill: transparent background so the buttons feel part
+        // of the themed page instead of a disconnected surface card.
         Surface(
             shape = RoundedCornerShape(m.pillRadius),
-            // Theme-aware action card: the elevated container step stays
-            // visible in every theme (AMOLED included) and reads as a
-            // premium pill on the category wash.
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 1.dp,
-            shadowElevation = m.shadow,
+            color = Color.Transparent,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -1162,10 +1161,12 @@ private fun RevealStartButton(
         enabled = enabled,
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            // v8.57 — themed to the category accent so the button wears the
+            // lane's own color instead of the generic theme primary.
+            containerColor = cat.themedAccent(),
+            contentColor = cat.onAccent(),
+            disabledContainerColor = cat.themedAccent().copy(alpha = 0.35f),
+            disabledContentColor = cat.onAccent().copy(alpha = 0.45f)
         ),
         contentPadding = PaddingValues(
             horizontal = metrics.startPadH,
@@ -1180,7 +1181,7 @@ private fun RevealStartButton(
             CurioIcon(
                 CurioIcons.AutoAwesome,
                 null,
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = cat.onAccent(),
                 size = metrics.icon
             )
             Text(
