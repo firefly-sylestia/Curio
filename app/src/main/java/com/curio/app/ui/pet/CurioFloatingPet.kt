@@ -53,6 +53,7 @@ import com.curio.app.data.PetFace
 import com.curio.app.data.PetLifeDirector
 import com.curio.app.data.PetLifeRoutine
 import com.curio.app.data.PetReactionEvents
+import com.curio.app.data.TourController
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
 import java.util.Calendar
@@ -133,11 +134,9 @@ fun CurioFloatingPet(
     // scope is the safe host for the glide (cancelled when the pet leaves
     // composition).
     val glideScope = rememberCoroutineScope()
-    if (!AppPreferences.petEnabledState ||
-        !AppPreferences.floatingPetEnabledState ||
-        !CurioPet.awake ||
-        CurioPet.atHome
-    ) return
+    val tourActive = TourController.active
+    if ((!AppPreferences.petEnabledState || !AppPreferences.floatingPetEnabledState) && !tourActive) return
+    if (!CurioPet.awake || CurioPet.atHome) return
 
     // Reduced motion: no autonomous wandering — the pet still follows touch.
     val animatorScale = remember {
@@ -204,6 +203,13 @@ fun CurioFloatingPet(
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
         val watching = routePrefix?.startsWith("spin") == true
+        // The Tour turns the ordinary wanderer into a deliberate guide: read
+        // the currently registered landmark so Curie can walk beside the real
+        // control instead of merely speaking from a random corner.
+        val tourStep = TourController.currentStep
+        val tourLandmark = if (tourStep != null && routePrefix == tourStep.routePrefix) {
+            PetLandmarks.forScreen(routePrefix).firstOrNull { it.id == tourStep.landmarkId }
+        } else null
         // v8.13 — the pet knows when the user is writing on the capture
         // screen and wears its quiet FOCUSED mood there.
         val captureScreen = routePrefix?.startsWith("capture") == true
@@ -384,6 +390,35 @@ fun CurioFloatingPet(
             )
         }
 
+        // During the Tour, move once to the current real landmark and stay
+        // there until the user advances. This keeps the guide legible and
+        // prevents autonomous pokes from triggering unrelated UI behavior.
+        LaunchedEffect(tourStep?.id, tourLandmark?.bounds, maxW, maxH) {
+            val step = tourStep ?: return@LaunchedEffect
+            val landmark = tourLandmark ?: return@LaunchedEffect
+            val center = landmark.bounds.center
+            val side = if (center.x > maxW / 2f) -1f else 1f
+            val target = Offset(
+                (center.x + side * petPx * 0.95f)
+                    .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                (center.y - petPx / 2f)
+                    .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+            )
+            facing = if (target.x >= pos.x) 1f else -1f
+            moving = true
+            val start = pos
+            repeat(34) { frame ->
+                if (TourController.currentStep?.id != step.id || dragged) return@LaunchedEffect
+                val t = (frame + 1) / 34f
+                pos = Offset(
+                    start.x + (target.x - start.x) * t,
+                    start.y + (target.y - start.y) * t
+                )
+                delay(18)
+            }
+            moving = false
+        }
+
         // ── Autonomy: wander, think, and PLAY (v8.11) ───────────────────
         // Keyed on awake too: the loop dies when the pet naps and restarts
         // fresh when it wakes again. On the Spin screen the pet prefers to
@@ -393,7 +428,7 @@ fun CurioFloatingPet(
         // v8.16 — keyed on routePrefix too: the pet re-reads the current
         // screen's landmarks (PetLandmarks.forScreen) fresh inside the loop,
         // so navigating swaps which things it can poke.
-        LaunchedEffect(maxW, maxH, autoWander, CurioPet.awake, watching, routePrefix) {
+        LaunchedEffect(maxW, maxH, autoWander, CurioPet.awake, watching, routePrefix, tourStep?.id) {
             if (!autoWander) return@LaunchedEffect
             // A shared walker for gentle wanders and fast playful darts.
             // [stepMs] small = fast dash; [steps] = path length.
@@ -415,6 +450,10 @@ fun CurioFloatingPet(
                 moving = false
             }
             while (CurioPet.awake) {
+                if (TourController.currentStep != null) {
+                    delay(240)
+                    continue
+                }
                 // Wait for the next wander beat, but answer a pending tap
                 // dart within ~200ms instead of the full 3-7s pause.
                 val waitMs = Random.nextLong(2800, 7000)
@@ -1250,7 +1289,8 @@ fun CurioFloatingPet(
         // lifted by the pet's own height and the bubble bottom-aligns to it,
         // so its tail touches the pet's head (padding is never used to move
         // it — that would overlay the face).
-        reaction?.let { text ->
+        val visibleBubble = tourStep?.dialogue ?: reaction
+        visibleBubble?.let { text ->
             Box(
                 modifier = Modifier
                     .offset {
@@ -1263,8 +1303,9 @@ fun CurioFloatingPet(
                     // v8.26 — fade + gentle rise so the bubble glides in and
                     // out instead of snapping (driven by [bubbleAnim]).
                     .graphicsLayer {
-                        alpha = bubbleAnim.value
-                        translationY = (1f - bubbleAnim.value) * 8.dp.toPx()
+                        val bubbleProgress = if (tourStep != null) 1f else bubbleAnim.value
+                        alpha = bubbleProgress
+                        translationY = (1f - bubbleProgress) * 8.dp.toPx()
                     }
             ) {
                 PetSpeechBubble(

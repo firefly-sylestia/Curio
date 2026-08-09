@@ -90,6 +90,7 @@ import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
+import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.ExploreSessionService
@@ -575,26 +576,32 @@ fun HomeScreen(navController: NavController) {
                         accent = homeRoseAccent(),
                         pet = homePetSprite,
                         onShuffle = {
-                            // v7.94 — shuffle only VISIBLE lanes: hidden
-                            // categories (Manage Categories) never get dealt.
-                            val all = CurioCategories.visible
-                            val pickMix = Random.nextBoolean()
-                            val chosen =
-                                if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
-                                else listOf(all.random())
-                            AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
-                            // Keep the random single/mix selection intact, but
-                            // bypass the generic tab restore here. Restoring a
-                            // previous Spin composition can hide this newly chosen
-                            // deck and make every tap look like the same category.
-                            navController.navigate(
-                                CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
-                            ) {
-                                popUpTo(CurioRoutes.HOME) { saveState = true }
-                                // This is an explicit fresh shuffle, so even an
-                                // identical random draw must create a new deck.
-                                launchSingleTop = false
-                                restoreState = false
+                            if (TourController.consumeTap("quest")) {
+                                TourController.routeForCurrentStep()?.let { nextRoute ->
+                                    navController.navigate(nextRoute) { launchSingleTop = true }
+                                }
+                            } else {
+                                // v7.94 — shuffle only VISIBLE lanes: hidden
+                                // categories (Manage Categories) never get dealt.
+                                val all = CurioCategories.visible
+                                val pickMix = Random.nextBoolean()
+                                val chosen =
+                                    if (pickMix) all.shuffled().take(2 + Random.nextInt(2))
+                                    else listOf(all.random())
+                                AppPreferences.setLastSpinCategories(context, chosen.map { it.id })
+                                // Keep the random single/mix selection intact, but
+                                // bypass the generic tab restore here. Restoring a
+                                // previous Spin composition can hide this newly chosen
+                                // deck and make every tap look like the same category.
+                                navController.navigate(
+                                    CurioRoutes.spinWithCategories(chosen.map { it.id.routeSlug })
+                                ) {
+                                    popUpTo(CurioRoutes.HOME) { saveState = true }
+                                    // This is an explicit fresh shuffle, so even an
+                                    // identical random draw must create a new deck.
+                                    launchSingleTop = false
+                                    restoreState = false
+                                }
                             }
                         },
                         modifier = m

@@ -109,6 +109,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
+import com.curio.app.data.TourController
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioQuests
@@ -912,7 +913,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
     }
     val onSpinClick: () -> Unit = {
-        if (!shuffling && filteredPool.isNotEmpty()) shuffleCount++
+        if (TourController.consumeTap("spin")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else if (!shuffling && filteredPool.isNotEmpty()) {
+            shuffleCount++
+        }
     }
 
     // ── Overall layout ─────────────────────────────────────────────────

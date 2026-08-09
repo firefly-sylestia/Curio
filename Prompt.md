@@ -1,32 +1,37 @@
-# Request — Reimagine the pet experience
+# Request — Reimagine The Tour around Curie
 
 ## User request
-- Try something new for the pet experience because the pet's interactions feel repetitive and users may get bored.
-- Add many more animations, reactions, fun/creative interactions, and more viewing angles.
-- User approved: always-on rollout; screen-aware routines; personality routines; toy/play moments; a much larger animation library; multiple viewpoints; authored-pixel-view direction.
+- Redesign The Tour so Curie is the guide: it walks to the real control, speaks in a speech bubble, and asks the user to tap that control.
+- No overlay/scrim; the user can still interact with the app.
+- Next and Skip should be floating controls below the speech bubble, not embedded in the bubble.
+- Tour should cover Home and other screens, and the pet should move to the next task automatically after the user taps the demonstrated control.
+- Do not open or perform the task in the tour; show the surrounding UI only.
+- Do not save entries, explore topics, or use undo while touring. Replace “Already watched” with an “Express yourself” writing action.
+- Normal Explore offers explicit Google and YouTube choices.
+- Onboarding completion offers the user a choice to take the tour; accepting wakes Curie and starts it from Home.
 
-## Implemented — Pet Life runtime foundation
-- Added `app/src/main/java/com/curio/app/data/PetLife.kt` with:
-  - `PetViewAngle` values: front, three-quarter, side, back, looking up/down, and curled.
-  - Screen-aware routine catalogs for Home, Spin, Quests, Reveal, Capture, Cabinet, Profile, and fallback routes.
-  - Personality-weighted selection for Cuddly, Bouncy, Explorer, and Sparky personas.
-  - Recent routine-id exclusion window to prevent immediate repetition.
-- Extended `PetAnimationFrame` with backward-compatible `view` metadata.
-- Added `v=` animation-frame serialization/parsing; old saved animation text preserves built-in frame viewpoints when the field is absent.
-- Added nine built-in Pet Life animations: look around, wave, stretch, side peek, stumble, look up, turn around, victory, and inspect.
-- Wired `CurioFloatingPet` to choose and play Pet Life routines around current-screen landmarks, drawers, edge peeks, and autonomous play moments.
-- Custom actions cancel ambient Pet Life routines so the two scenes do not overlap.
-- Added recent-routine memory and routine completion/reset handling.
-- Wired runtime and timeline previews through `viewAngle`.
-- Added visible BACK-view cues: the front face/mouth/blush are suppressed and a spine/scarf-nape silhouette is drawn.
-- Preserved existing saved designs and old animation call sites through defaults.
+## Confirmed decisions
+- A demonstrated tap is a safe demo tap: it advances the transient Tour and suppresses the underlying mutation, navigation, browser launch, save, explore, and undo action.
+- Start with a Home-first Tour.
+- The tour reveal is read-only browse mode and uses the real David Bowie topic for stable landmark placement.
+- The tour is transient and is not persisted.
+
+## Implemented
+- `TourController` owns the transient offer, steps, safe landmark tap consumption, and route handoff.
+- Onboarding completion calls `TourController.offer()`; Home displays “Take a tiny tour?” / “Maybe later”.
+- Accepting the offer wakes Curie and lets the existing entrance/movement animation guide it to the registered Home/Spin/Reveal landmarks.
+- Home shuffle and Spin controls consume safe Tour taps before their normal side effects.
+- Reveal registers `express-yourself` and `start-exploring` landmarks; tour taps do not write, open capture, launch a browser, or record reveal activity.
+- Reveal normal writing action is “Express yourself” with no done/undo state.
+- Normal Explore now has a provider choice dialog with Google and YouTube buttons; URLs share the existing query builder.
+- Tour guidance remains scrim-free; only Skip and Next are added as floating bottom controls.
 
 ## Validation
-- `node scripts/check_braces.js` passed: 124 files checked.
+- `node scripts/check_braces.js` passed.
 - `git diff --check` passed.
-- Audited all `PetAnimationFrame` constructors and `view` call sites.
-- Final blocker-only review found no Kotlin compile blockers.
-- Local Gradle compile/build/lint/test commands were not run per repository rules; CI remains the Android/Kotlin compile gate.
+- Gradle is forbidden locally by repository instructions; CI remains the compilation source of truth.
 
-## Known continuation
-- The runtime now uses authored viewpoint metadata and a distinct BACK treatment, but the Pet Studio does not yet expose a dedicated viewpoint-painting editor for authoring true side/back pixel grids. Continue with that editor pass after CI confirms this runtime foundation.
+## Remaining closeout
+- Review latest diff once more for generated/partial files.
+- Update release note if required by the active version metadata.
+- Commit and push the related Tour changes; do not include unrelated `pet_brain_emotional_v3.zip`.

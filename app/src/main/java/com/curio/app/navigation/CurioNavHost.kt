@@ -65,6 +65,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPet
+import com.curio.app.data.TourController
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.formatElapsed
@@ -843,6 +844,50 @@ fun CurioNavHost(
         }
     }
     }
+    // ── Pet-led Tour offer and controls ─────────────────────────────────
+    // The offer is intentionally rendered on Home after onboarding; the Tour
+    // itself has no scrim and leaves every demonstrated control tappable.
+    if (routePrefix == CurioRoutes.HOME && TourController.offerPending) {
+        AlertDialog(
+            onDismissRequest = { TourController.declineOffer() },
+            title = { Text("Take a tiny tour?") },
+            text = { Text("Curie can walk you through the main controls. Nothing will start, open, or be saved while you tour.") },
+            confirmButton = {
+                TextButton(onClick = { TourController.start() }) { Text("Take the tour") }
+            },
+            dismissButton = {
+                TextButton(onClick = { TourController.declineOffer() }) { Text("Maybe later") }
+            }
+        )
+    }
+
+    val tourStep = TourController.currentStep
+    if (tourStep != null && routePrefix == tourStep.routePrefix) {
+        fun advanceTourAndNavigate() {
+            TourController.advance()
+            val nextRoute = TourController.routeForCurrentStep()
+            if (nextRoute != null && nextRoute != currentRoute) {
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        }
+        // A transparent full-screen parent would still participate in pointer
+        // dispatch. Keep only the controls themselves in this layer so the
+        // real screen remains completely tappable with no scrim.
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 20.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(bottom = 18.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TextButton(onClick = { TourController.skip() }) { Text("Skip") }
+                TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
+            }
+        }
+    }
+
     // v8.8 — the floating Curio pet: a global overlay drawn above the whole
     // Scaffold (over the bottom bar too). Renders only while the pet layer,
     // the floating toggle and the pet's awake state are on; it wanders, can

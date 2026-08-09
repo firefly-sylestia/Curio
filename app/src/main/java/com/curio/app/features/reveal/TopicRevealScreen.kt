@@ -96,9 +96,12 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.TourController
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildExploreSearchUrl
+import com.curio.app.data.buildGoogleSearchUrl
+import com.curio.app.data.buildYouTubeSearchUrl
 import com.curio.app.data.categoryOpensYouTube
 import com.curio.app.data.openSilentExplore
 import com.curio.app.infrastructure.ExploreSessionService
@@ -196,7 +199,6 @@ fun TopicRevealScreen(
     // marked state once the topic is done, and the unwatch action appears.
     // Reads doneTopicsState inside composition, so it updates the moment
     // markDone / unmarkDone changes the set.
-    val isDone = resolved != null && ExploreSessionStore.isDone(cat.id, resolved.name)
     // v7 — like/dislike teaches the shuffle: liked topics (and their whole
     // category) get more weight, disliked get less — never fully blocked.
     // Reads the REACTIVE sentiment state so the buttons toggle instantly.
@@ -208,8 +210,8 @@ fun TopicRevealScreen(
     // derives from counts > 0, never exact values).
     // v8.6 — the First Journey tour's "Open the landed topic" step advances
     // the moment the reveal really opens (spec §7.2 step 5).
-    LaunchedEffect(cat.id, resolved?.id) {
-        if (resolved != null) {
+    LaunchedEffect(cat.id, resolved?.id, browseMode) {
+        if (resolved != null && !browseMode) {
             CurioPassport.noteReveal(context, cat.id)
             // v8.30 — the pet reacts to the REAL cause: the spin's auto-open
             // says "it opened itself"; any user tap gets a touch reaction
@@ -228,30 +230,41 @@ fun TopicRevealScreen(
     // recently-unexplored so Home can offer to resume it.
     var engaged by rememberSaveable { mutableStateOf(false) }
     var showExploreDialog by rememberSaveable { mutableStateOf(false) }
-    // v7.80 — "Already watched/listened/read/explored" — marks the topic
-    // done (never shows in the shuffle again) and asks whether to write
-    // about it now.
-    var showAlreadyDoneDialog by rememberSaveable { mutableStateOf(false) }
 
     val latestBrowseMode by rememberUpdatedState(browseMode)
     val latestResolved by rememberUpdatedState(resolved)
-    val latestIsDone by rememberUpdatedState(isDone)
-    val latestOnExplore by rememberUpdatedState<() -> Unit> { showExploreDialog = true }
+    val latestOnExplore by rememberUpdatedState<() -> Unit> {
+        if (TourController.consumeTap("start-exploring")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else {
+            showExploreDialog = true
+        }
+    }
     // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
     // explore: opens the topic's search page without recording quests,
     // passport, pet events, recents or a timer — browsing must not count.
     val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
-        latestResolved?.let { topic -> openSilentExplore(context, topic) }
+        if (TourController.consumeTap("start-exploring")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else {
+            latestResolved?.let { topic -> openSilentExplore(context, topic) }
+        }
     }
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
-        val currentTopic = latestResolved
-        if (currentTopic != null) {
-            engaged = true
-            if (latestIsDone) {
-                ExploreSessionStore.unmarkDone(context, cat.id, currentTopic.name)
-            } else {
-                ExploreSessionStore.markDone(context, cat.id, currentTopic.name)
-                if (!latestBrowseMode) showAlreadyDoneDialog = true
+        if (TourController.consumeTap("express-yourself")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else if (!latestBrowseMode) {
+            latestResolved?.let { topic ->
+                engaged = true
+                navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
+                    launchSingleTop = true
+                }
             }
         }
     }
@@ -463,7 +476,7 @@ fun TopicRevealScreen(
     }
 
     /** Starts a timed explore session, opens the search page (Google — YouTube for music), back to Home. */
-    fun startExploreSession(topic: CurioTopic) {
+    fun startExploreSession(topic: CurioTopic, searchUrl: String = buildExploreSearchUrl(topic)) {
         engaged = true
         // Engaging for real — record as recently-explored and clear any
         // recently-unexplored entry. recordExplored tags the row "Resumed"
@@ -479,7 +492,7 @@ fun TopicRevealScreen(
             targetName = action.targetName,
             durationMinutes = action.durationMinutes,
             instruction = action.instruction,
-            searchUrl = buildExploreSearchUrl(topic),
+            searchUrl = searchUrl,
             startMillis = System.currentTimeMillis()
         )
         // Starting a new explore while another session is running would
@@ -616,7 +629,6 @@ fun TopicRevealScreen(
                         cat = cat,
                         browseMode = latestBrowseMode,
                         resolved = latestResolved,
-                        isDone = latestIsDone,
                         onExplore = latestOnExplore,
                         onAlready = latestOnAlready,
                         onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null,
@@ -821,35 +833,7 @@ fun TopicRevealScreen(
         )
     }
 
-    // v7.80/v7.92 — "Already …" confirmation: shown right after marking the
-    // topic done; it only asks whether to write about it now. Dismissing
-    // closes the dialog and STAYS on the reveal screen — the button has
-    // already flipped to the marked-done state (tapping it again undoes),
-    // so there's no reason to pop back anymore.
-    if (showAlreadyDoneDialog && resolved != null) {
-        val topic = resolved
-        AlertDialog(
-            onDismissRequest = { showAlreadyDoneDialog = false },
-            title = { Text("${alreadyDoneLabel(cat)}?") },
-            text = {
-                Text(
-                    "${topic.name} is marked as done and won't show up in the " +
-                        "next shuffle. Want to write about it now?"
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showAlreadyDoneDialog = false
-                    navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
-                        launchSingleTop = true
-                    }
-                }) { Text("Write about it") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAlreadyDoneDialog = false }) { Text("Not now") }
-            }
-        )
-    }
+    var showProviderDialog by rememberSaveable { mutableStateOf(false) }
 
     if (showExploreDialog && resolved != null) {
         val topic = resolved
@@ -883,15 +867,15 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { startExploreSession(topic) }) { Text("Explore now") }
+                TextButton(onClick = {
+                    showExploreDialog = false
+                    showProviderDialog = true
+                }) { Text("Explore now") }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         engaged = true
-                        // Writing about it counts as engaging — record as
-                        // recently-explored (clears the unexplored entry,
-                        // tagging "Resumed" if the user came back to it).
                         ExploreSessionStore.recordExplored(context, cat.id, topic.name)
                         ExploreSessionStore.removeUnexplored(context, cat.id, topic.name)
                         showExploreDialog = false
@@ -899,7 +883,31 @@ fun TopicRevealScreen(
                             launchSingleTop = true
                         }
                     }
-                ) { Text("Write about it") }
+                ) { Text("Express yourself") }
+            }
+        )
+    }
+
+    if (showProviderDialog && resolved != null) {
+        val topic = resolved
+        AlertDialog(
+            onDismissRequest = { showProviderDialog = false },
+            title = { Text("Choose where to explore") },
+            text = { Text("Pick a search companion for ${topic.name}.") },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        showProviderDialog = false
+                        startExploreSession(topic, buildGoogleSearchUrl(topic))
+                    }) { Text("Google") }
+                    TextButton(onClick = {
+                        showProviderDialog = false
+                        startExploreSession(topic, buildYouTubeSearchUrl(topic))
+                    }) { Text("YouTube") }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showProviderDialog = false }) { Text("Not now") }
             }
         )
     }
@@ -1070,7 +1078,6 @@ private fun RevealActionRow(
     cat: CurioCategory,
     browseMode: Boolean,
     resolved: CurioTopic?,
-    isDone: Boolean,
     onExplore: () -> Unit,
     onAlready: () -> Unit,
     // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
@@ -1104,16 +1111,22 @@ private fun RevealActionRow(
                 ),
                 horizontalArrangement = Arrangement.spacedBy(m.rowGap),
                 verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Already/Undo on the LEFT, Start exploring on the RIGHT.
+            ) {                    // Express yourself on the LEFT, Explore on the RIGHT.
+
+                PetLandmark(
+                    id = "express-yourself",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "reveal"
+                ) { lm ->
                 RevealAlreadyButton(
-                    enabled = resolved != null,
+                    enabled = resolved != null &&
+                        (!browseMode || TourController.currentStep?.landmarkId == "express-yourself"),
                     cat = cat,
-                    isDone = isDone,
                     metrics = m,
-                    modifier = Modifier.weight(1f),
+                    modifier = lm.weight(1f),
                     onClick = onAlready
                 )
+                }
                 if (!browseMode) {
                     // v8.22 — the Start exploring button is a tour landmark:
                     // the pet-guide highlights its REAL bounds on the tour step.
@@ -1132,14 +1145,20 @@ private fun RevealActionRow(
                     }
                 } else if (onSilentExplore != null) {
                     // Browse mode: Explore opens the search page silently.
-                    RevealStartButton(
-                        cat = cat,
-                        enabled = resolved != null,
-                        label = "Explore",
-                        metrics = m,
-                        modifier = Modifier.weight(1f),
-                        onClick = onSilentExplore
-                    )
+                    PetLandmark(
+                        id = "start-exploring",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "reveal"
+                    ) { lm ->
+                        RevealStartButton(
+                            cat = cat,
+                            enabled = resolved != null,
+                            label = "Explore",
+                            metrics = m,
+                            modifier = lm.weight(1f),
+                            onClick = onSilentExplore
+                        )
+                    }
                 }
             }
         }
@@ -1209,16 +1228,13 @@ private fun RevealStartButton(
 private fun RevealAlreadyButton(
     enabled: Boolean,
     cat: com.curio.app.data.CurioCategory,
-    isDone: Boolean,
     modifier: Modifier = Modifier,
     metrics: RevealDockMetrics,
     onClick: () -> Unit
 ) {
-    // v8.49 — text-style action on the opaque floating pill (was
-    // transparent-on-wash). Done state reads in the category ink; idle in
-    // the muted onSurfaceVariant. Disabled fades it like the Start button.
+    // v8.49 — text-style writing action on the transparent inline row.
     // v8.55 — the tier metrics resize it with the pill.
-    val baseInk = if (isDone) cat.categoryInk() else MaterialTheme.colorScheme.onSurfaceVariant
+    val baseInk = MaterialTheme.colorScheme.onSurfaceVariant
     val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
     Surface(
         onClick = onClick,
@@ -1241,14 +1257,14 @@ private fun RevealAlreadyButton(
             horizontalArrangement = Arrangement.Center
         ) {
             CurioIcon(
-                name = if (isDone) CurioIcons.Close else CurioIcons.History,
+                name = CurioIcons.Edit,
                 contentDescription = null,
                 tint = ink,
                 size = metrics.icon
             )
             Spacer(Modifier.width(metrics.gap))
             Text(
-                text = if (isDone) undoLabel(cat) else alreadyDoneLabel(cat),
+                text = "Express yourself",
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontSize = metrics.textSp,
                     fontWeight = FontWeight.Bold
@@ -1709,29 +1725,6 @@ private fun exploreOpenCopy(cat: com.curio.app.data.CurioCategory): String =
     if (categoryOpensYouTube(cat.id)) "We'll open YouTube to get you started."
     else "We'll open a Google search to get you started."
 
-/** The "Already …" label — the category's verb, per category (v7.80).
- *  Films/Directors → watched, Albums/Artists → listened, Books/Authors →
- *  read, Artworks/Painters → seen, everything else → explored. */
-private fun alreadyDoneLabel(cat: com.curio.app.data.CurioCategory): String = when (cat.id) {
-    CategoryId.FILMS, CategoryId.DIRECTORS -> "Already watched"
-    CategoryId.ALBUMS, CategoryId.ARTISTS -> "Already listened"
-    CategoryId.BOOKS, CategoryId.AUTHORS -> "Already read"
-    CategoryId.ARTWORKS -> "Already seen"
-    CategoryId.PAINTERS -> "Already explored"
-    else -> "Already explored"
-}
-
-/** The undo label — mirrors [alreadyDoneLabel] per category (Films →
- *  "Unwatched" ↔ "Already watched", Books → "Unread" ↔ "Already read",
- *  etc.). Shown on the already-pill's done state; tapping unmarks it. */
-private fun undoLabel(cat: com.curio.app.data.CurioCategory): String = when (cat.id) {
-    CategoryId.FILMS, CategoryId.DIRECTORS -> "Unwatched"
-    CategoryId.ALBUMS, CategoryId.ARTISTS -> "Unlistened"
-    CategoryId.BOOKS, CategoryId.AUTHORS -> "Unread"
-    CategoryId.ARTWORKS -> "Unseen"
-    CategoryId.PAINTERS -> "Unexplored"
-    else -> "Unexplored"
-}
 
 /** Circular like/dislike toggle — active state fills with the category accent. */
 @Composable

@@ -77,6 +77,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.TourController
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
@@ -805,6 +806,9 @@ private fun PageDot(selected: Boolean, onClick: () -> Unit) {
 
 private fun finishOnboarding(context: Context, navController: NavController) {
     CurioOnboardingState.markComplete(context)
+    // The tour offer belongs on Home so the pet can physically emerge from
+    // its house there; onboarding itself stays focused on setup.
+    TourController.offer()
     navController.navigate(CurioRoutes.HOME) {
         popUpTo(CurioRoutes.ONBOARDING) { inclusive = true }
         // launchSingleTop dedups the replay path: onboarding is pushed on
