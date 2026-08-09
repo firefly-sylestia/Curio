@@ -1,24 +1,18 @@
-# Request — Remove Faces editor and stabilize Topic Reveal morph
+# Request — Reveal bottom nav only from the main card
 
 ## User request
-Remove the Faces editor UI and its option from Pet Designer. Keep the underlying face data/runtime available. Keep the normal bottom navigation visible on Topic Reveal so the shared Spin → Reveal morph does not change content height.
+Keep the bottom navigation bar on the Topic Reveal page when it is opened from the Spin main card, but hide it when the reveal is opened from the topic browser (Browse Topics database).
 
 ## Changes completed
-- Removed the active reaction face-canvas editor from Pet Designer.
-- Removed mood-face preview cards, face blueprint helpers, and the face picker path from the studio UI.
-- Removed the personality-presets section that exposed bulk mood-face editing.
-- Preserved `PetFace`, mood data, reaction data, serializers, presets, and sprite rendering for compatibility.
-- Kept only the minimal eye-blueprint helper needed by the dormant animation timeline implementation.
-- Added Topic Reveal to bottom-navigation route visibility so the Scaffold reserves the same bar height during the morph.
-- Kept Shuffle selected while Reveal is open on both phone bottom navigation and wide-window navigation rail.
-- Updated the app DOX contract and store changelog to remove stale Faces-editor wording and document Reveal navigation behavior.
+- Added `isBrowseRevealRoute(entry)` in `CurioNavHost.kt`: true when the destination is `CurioRoutes.REVEAL` with the `browse` argument equal to `"1"` (the read-only browse mode used only by `revealForBrowse`, which the topic browser navigates with).
+- Gated `showBottomBar` so browse-mode Reveal hides the bar while every other Reveal (main-card, Home recents, pinned, Topic History, Recent, tour) keeps it.
+- Guarded `isTabSwitch` so browse-mode Reveal is not treated as a tab crossfade — it transitions as a pushed page.
 
 ## Validation
 - `node scripts/check_braces.js` passed: 125 files checked.
 - `git diff --check` passed.
-- Focused symbol search found no remaining Pet Designer Faces-editor UI symbols or `PetEditorTarget.Face`.
-- Focused review checked phone/rail route selection, morph height behavior, and runtime face-data preservation.
+- Focused review confirmed the helper, bar gating, and tab-switch guard are correct and compile-safe, with the `browse` argument defaulting to `"0"` and set to `"1"` only by the topic-browser path.
 - Local Gradle compile/build/lint/test commands were not run because repository instructions forbid local Android builds; CI remains authoritative.
 
 ## Status
-Implementation and static validation are complete. Per the user's standing preference, ask for confirmation before committing and pushing.
+Implementation and static validation are complete. Per the user's standing preference, ask for confirmation before committing and pushing. Also still uncommitted from the prior request: the deck-peek animation default restoration (option-gated tail fade).

@@ -72,6 +72,7 @@ object AppPreferences {
     private const val KEY_PEEK_HAIRLINE = "peek_hairline"
     private const val KEY_PEEK_SHADOWS = "peek_shadows"
     private const val KEY_PEEK_TITLES = "peek_titles"
+    private const val KEY_PEEK_TAIL_FADE = "peek_tail_fade"
     // v7.13 — Main card (hero ticket) redesign toggles: enhanced gradient
     // fill, accent border, soft shadow. All OFF by default so the current
     // hero card stays exactly as-is until enabled. (Enhanced typography was
@@ -217,6 +218,9 @@ object AppPreferences {
     var peekShadowsState by mutableStateOf(false)
         private set
     var peekTitlesState by mutableStateOf(false)
+        private set
+    /** Experimental newer peek motion: travel first, then fade at the exit tail. */
+    var peekTailFadeState by mutableStateOf(false)
         private set
 
     // Main card (hero ticket) redesign (v7.13, EXPERIMENTAL) — the Spin
@@ -437,6 +441,7 @@ object AppPreferences {
         peekHairlineState = isPeekHairlineEnabled(context)
         peekShadowsState = isPeekShadowsEnabled(context)
         peekTitlesState = isPeekTitlesEnabled(context)
+        peekTailFadeState = isPeekTailFadeEnabled(context)
         heroGradientState = isHeroGradientEnabled(context)
         heroBorderState = isHeroBorderEnabled(context)
         heroShadowState = isHeroShadowEnabled(context)
@@ -556,6 +561,15 @@ object AppPreferences {
     fun setPeekTitlesEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_TITLES, enabled).apply()
         peekTitlesState = enabled
+    }
+
+    /** Whether the newer travel-then-tail-fade peek motion is on (default off). */
+    fun isPeekTailFadeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PEEK_TAIL_FADE, false)
+
+    fun setPeekTailFadeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PEEK_TAIL_FADE, enabled).apply()
+        peekTailFadeState = enabled
     }
 
     // ── Main card (hero ticket) redesign (v7.13 experimental) ──────────

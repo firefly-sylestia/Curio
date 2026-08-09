@@ -112,6 +112,10 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Roomier deck titles", "Two-line near-card titles", AppPreferences.peekTitlesState) {
                         AppPreferences.setPeekTitlesEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Tail-fade peek motion", "Newer travel-first motion that fades cards at the end", AppPreferences.peekTailFadeState) {
+                        AppPreferences.setPeekTailFadeEnabled(context, it)
+                    }
                 }
             }
             item {

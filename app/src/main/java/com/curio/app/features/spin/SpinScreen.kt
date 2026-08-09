@@ -2806,6 +2806,7 @@ private fun PeekCard(
     val hairlineOn = AppPreferences.peekHairlineState
     val shadowsOn = AppPreferences.peekShadowsState
     val titlesOn = AppPreferences.peekTitlesState
+    val tailFadeOn = AppPreferences.peekTailFadeState
     // 1a — top-lit crown: a whisper of light at the card top so the top
     // peek catches light and whispers "next up" on the reel. The base is
     // always the level-darkened blend; the gradient toggle layers the
@@ -2901,16 +2902,20 @@ private fun PeekCard(
                     slideOutVertically(
                         animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    // The outgoing card completes its travel first; only its
-                    // final tail dissolves. This prevents the card from
-                    // becoming transparent in the middle of the glide.
-                    fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 90,
-                            delayMillis = PeekWipeOutMs - 90,
-                            easing = FastOutSlowInEasing
+                    // The classic default fades across the full motion. The
+                    // experimental tail-fade option preserves the newer
+                    // travel-first, end-only fade behavior.
+                    if (tailFadeOn) {
+                        fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 90,
+                                delayMillis = PeekWipeOutMs - 90,
+                                easing = FastOutSlowInEasing
+                            )
                         )
-                    ) using SizeTransform(clip = false)
+                    } else {
+                        fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing))
+                    } using SizeTransform(clip = false)
                 } else {
                     // Idle re-fan (landing re-deal / category switch) — a
                     // slower, softer pass in the same per-side direction.
@@ -2921,13 +2926,17 @@ private fun PeekCard(
                     slideOutVertically(
                         animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 90,
-                            delayMillis = PeekIdleOutMs - 90,
-                            easing = FastOutSlowInEasing
+                    if (tailFadeOn) {
+                        fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 90,
+                                delayMillis = PeekIdleOutMs - 90,
+                                easing = FastOutSlowInEasing
+                            )
                         )
-                    ) using SizeTransform(clip = false)
+                    } else {
+                        fadeOut(animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing))
+                    } using SizeTransform(clip = false)
                 }
             },
             label = "peekSlot_$slot"

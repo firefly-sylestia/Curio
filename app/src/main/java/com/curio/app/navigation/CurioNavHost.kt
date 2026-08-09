@@ -130,6 +130,16 @@ private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route?.substringBefore("/") == CurioRoutes.ENTRY_DETAIL.substringBefore("/")
 
 /**
+ * True when the destination is the Topic Reveal page opened from the Browse
+ * Topics database (browse=1). Browse-mode reveals are read-only and are
+ * pushed from the topic browser — they are NOT part of the Spin morph flow,
+ * so the bottom navigation bar stays hidden on them.
+ */
+private fun isBrowseRevealRoute(entry: NavBackStackEntry?): Boolean =
+    entry?.destination?.route == CurioRoutes.REVEAL &&
+        entry.arguments?.getString("browse") == "1"
+
+/**
  * Push destinations that use the detail page's center pop-up (scale + fade)
  * instead of the generic horizontal slide — v8.4x: Save/Capture (+ its edit
  * routes), Profile, Quests, Settings (hub + every section), Pet Designer,
@@ -164,7 +174,10 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     initialState: NavBackStackEntry,
     targetState: NavBackStackEntry
 ): Boolean =
-    initialState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes &&
+    // Browse-mode Reveal is a pushed read-only page, not a tab — it never
+    // crossfades like a tab switch.
+    !isBrowseRevealRoute(targetState) && !isBrowseRevealRoute(initialState) &&
+        initialState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes &&
         targetState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes
 
 /**
@@ -203,7 +216,12 @@ fun CurioNavHost(
     val routePrefix = remember(currentRoute) {
         currentRoute?.substringBefore("/")
     }
-    val showBottomBar = routePrefix in CurioRoutes.bottomNavRoutePrefixes
+    // Browse-mode Topic Reveal (opened from the topic browser) is a pushed
+    // read-only page — no bottom nav. Reveal opened from the Spin main card
+    // keeps the bar for shared-morph height stability.
+    val showBottomBar =
+        routePrefix in CurioRoutes.bottomNavRoutePrefixes &&
+            !isBrowseRevealRoute(backStackEntry)
     // Topic Reveal keeps the same Scaffold content height as the Spin deck;
     // the normal bottom bar remains visible while the shared hero morphs.
     val context = LocalContext.current
