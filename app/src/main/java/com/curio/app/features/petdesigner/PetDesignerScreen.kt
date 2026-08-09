@@ -3502,8 +3502,6 @@ private fun FrameThumb(
     }
 }
 
-/** v8.49 — the sticky category strip above the drawing canvas. */
-@Composable
 /** v8.49 — one category chip in the Draw & switch strip / picker dialog. */
 @Composable
 private fun StripChip(label: String, selected: Boolean, onClick: () -> Unit) {
