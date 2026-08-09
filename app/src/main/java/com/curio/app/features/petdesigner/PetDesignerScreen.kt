@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -38,6 +40,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -106,7 +111,6 @@ import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
@@ -212,6 +216,8 @@ fun PetDesignerScreen(navController: NavController) {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val savedText = AppPreferences.petDesignState
+    // v8.56 — the two user-saved custom pet slots (reactive list of 2).
+    val customPets = AppPreferences.customPetsState
     // v8.49 — the design as it was when the editor opened; used for the
     // "Unsaved changes" indicator in the footer.
     val initialDesign = remember(savedText) {
@@ -261,6 +267,14 @@ fun PetDesignerScreen(navController: NavController) {
     var importMenuOpen by remember { mutableStateOf(false) }
     // v8.52 — the Settings → Accessories dialog.
     var accessoriesOpen by remember { mutableStateOf(false) }
+    // v8.56 — which custom-pet slot the working design belongs to (null =
+    // the built-in pet). Plain `remember` (NOT saveable) to match the
+    // working design's own lifetime: `design` re-parses from the global
+    // saved text on rotation, so a surviving slot pointer would let Save
+    // clobber a custom pet with the wrong design.
+    var activeCustomSlot by remember { mutableStateOf<Int?>(null) }
+    // v8.56 — the full-screen animation player (Pets page gallery tap).
+    var playerAnimation by remember { mutableStateOf<PetAnimation?>(null) }
     // v8.47 — recent colors for the professional color picker (persisted, capped at 12).
     var recentColors by remember { mutableStateOf(AppPreferences.getPetRecentColors(context)) }
     fun rememberColor(hex: String) {
@@ -442,16 +456,55 @@ fun PetDesignerScreen(navController: NavController) {
     // v8.52 — Pets page: switch the working design to another species. An
     // untouched design is replaced by the pet's default art so the new look
     // shows immediately; custom designs keep their pixels but get re-tagged.
+    // v8.56 — selecting the built-in pet also leaves any custom slot.
     fun selectPet(pet: PetDefinition) {
-        if (design.definition.id == pet.id) {
+        if (design.definition.id == pet.id && activeCustomSlot == null) {
             toast = "\u201c${pet.displayName}\u201d is already your pet"
             return
         }
         pushUndo()
         resetDetailEditor()
+        activeCustomSlot = null
         design = if (design.isCustom) design.copy(petSpeciesId = pet.id)
         else pet.defaultDesign.copy(petSpeciesId = pet.id)
         toast = "\u201c${pet.displayName}\u201d is now your pet"
+    }
+
+    // v8.56 — load a saved custom-pet slot into the working design.
+    fun selectCustomPet(slot: Int) {
+        val text = customPets.getOrNull(slot) ?: return
+        if (activeCustomSlot == slot) {
+            toast = "You're already editing Custom ${slot + 1}"
+            return
+        }
+        val parsed = PetDesign.DEFAULT.toParsedOr(text, design)
+        pushUndo()
+        resetDetailEditor()
+        design = parsed
+        activeCustomSlot = slot
+        reactionLineDraft = parsed.reactionFor(reactEvent).lines.joinToString("\n")
+        toast = "\u201cCustom ${slot + 1}\u201d is now your pet"
+    }
+
+    // v8.56 — copy the working design into the first empty custom slot.
+    // No pushUndo: the working design itself doesn't change (the slot write
+    // is its own persisted copy, not an editable edit).
+    fun saveAsNewPet() {
+        val slot = customPets.indexOfFirst { it == null }
+        if (slot == -1) {
+            toast = "Both custom pet slots are full — delete one to make room"
+            return
+        }
+        AppPreferences.setCustomPet(context, slot, design.toText())
+        activeCustomSlot = slot
+        toast = "Saved as Custom ${slot + 1} — it's now your pet"
+    }
+
+    // v8.56 — delete one custom-pet slot (if it was active, back to Curie).
+    fun deleteCustomPet(slot: Int) {
+        AppPreferences.clearCustomPet(context, slot)
+        if (activeCustomSlot == slot) activeCustomSlot = null
+        toast = "Custom ${slot + 1} removed"
     }
 
     Box(
@@ -475,20 +528,10 @@ fun PetDesignerScreen(navController: NavController) {
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
                 top = SettingsHeroTotalHeight + 8.dp,
-                bottom = 24.dp
+                bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item { CurioSectionLabel("Pet designer") }
-            item {
-                // v8.45 — the local Pet Designer navbar (separate from the
-                // app-wide nav). Switching pages resets the editor target so
-                // every page lands on its picker first.
-                PetDesignerNavbar(page = page, onSelect = { newPage ->
-                    page = newPage
-                    target = null
-                })
-            }
             // ── Sticky studio toolbar: the ONE place for save / import /
             //    export / undo / redo / reset (v8.52 — the old pinned
             //    footer SaveArea is gone, so no duplicate buttons). ──────
@@ -505,15 +548,28 @@ fun PetDesignerScreen(navController: NavController) {
                         onReset = {
                             pushUndo()
                             resetDetailEditor()
+                            activeCustomSlot = null
                             design = PetDesign.DEFAULT
                             reactionLineDraft = PetDesign.DEFAULT.reactionFor(reactEvent).lines.joinToString("\n")
                         },
                         onSave = {
                             if (design.isCustom) {
                                 AppPreferences.setPetDesign(context, design.toText())
-                                toast = "Saved — Curie wears it everywhere"
+                                // v8.56 — saving while editing a custom pet
+                                // also refreshes its slot so the Pets page
+                                // card always shows the latest look.
+                                val slot = activeCustomSlot
+                                if (slot != null) {
+                                    AppPreferences.setCustomPet(context, slot, design.toText())
+                                    toast = "Saved — Custom ${slot + 1} updated"
+                                } else {
+                                    toast = "Saved — Curie wears it everywhere"
+                                }
                             } else {
                                 AppPreferences.clearPetDesign(context)
+                                // Using the default look also detaches from
+                                // any custom pet slot being edited.
+                                activeCustomSlot = null
                                 toast = "Default look restored"
                             }
                         },
@@ -525,22 +581,33 @@ fun PetDesignerScreen(navController: NavController) {
                             if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
                         }
                     )
-                    // ── "Choose what to edit" chooser strip (Editor page) ──
-                    if (page == PetDesignerPage.EDITOR) {
-                        DrawPickerStrip(
-                            selected = target,
-                            onOpenPicker = { pickerCategory = it }
+                }
+            }
+
+            // ── Editor page: picker trigger / Editing header (v8.56) ──
+            //    The editor is the center of the screen — one dialog is the
+            //    only chooser, and after that ONLY the chosen editor renders.
+            item {
+                if (page == PetDesignerPage.EDITOR) {
+                    // Local val so the nullable target smart-casts cleanly.
+                    val currentTarget = target
+                    if (currentTarget == null) {
+                        EditorPickPrompt(onOpenPicker = { pickerCategory = "body" })
+                    } else {
+                        EditorTargetHeader(
+                            target = currentTarget,
+                            onChange = { pickerCategory = "body" }
                         )
                     }
                 }
             }
-            // ── Pets library (Pets page, v8.52) — pick a companion ───
+
+            // ── My pets (Pets page, v8.56) — built-in + custom slots ──
             item {
                 if (page == PetDesignerPage.PETS) SectionCard(
-                    "Pets",
-                    "Pick your companion — its animations and previews show below"
+                    "My pets",
+                    "Your companion, plus up to two custom pets you saved"
                 ) {
-                    val currentPet = design.definition
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -548,11 +615,39 @@ fun PetDesignerScreen(navController: NavController) {
                         PetRegistry.all.forEach { pet ->
                             PetLibraryCard(
                                 pet = pet,
-                                current = currentPet.id == pet.id,
+                                current = activeCustomSlot == null,
                                 onClick = { selectPet(pet) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
+                        CustomPetCard(
+                            slot = 0,
+                            designText = customPets.getOrNull(0),
+                            active = activeCustomSlot == 0,
+                            onClick = {
+                                if (customPets.getOrNull(0) == null) saveAsNewPet()
+                                else selectCustomPet(0)
+                            },
+                            onDelete = { deleteCustomPet(0) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CustomPetCard(
+                            slot = 1,
+                            designText = customPets.getOrNull(1),
+                            active = activeCustomSlot == 1,
+                            onClick = {
+                                if (customPets.getOrNull(1) == null) saveAsNewPet()
+                                else selectCustomPet(1)
+                            },
+                            onDelete = { deleteCustomPet(1) },
+                            modifier = Modifier.weight(1f)
+                        )
                         // Placeholder for future pets — the section lists the
                         // registry, so a new entry appears here automatically.
                         Surface(
@@ -583,12 +678,16 @@ fun PetDesignerScreen(navController: NavController) {
                             }
                         }
                     }
+                    if (customPets.any { it == null }) {
+                        Spacer(Modifier.height(10.dp))
+                        SmallAction("＋ Save as new pet", enabled = true) { saveAsNewPet() }
+                    }
                 }
             }
 
-            // ── Live preview (Pets page + Editor landing) ────────────
+            // ── Live preview (Pets page) ─────────────────────────────
             item {
-                if ((page == PetDesignerPage.PETS || page == PetDesignerPage.EDITOR) && target == null) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
+                if (page == PetDesignerPage.PETS) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
                     CurioPetSprite(
                         stage = CurioPet.currentStage(),
                         mood = previewMood,
@@ -617,11 +716,14 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Animation gallery (Pets page + Editor landing, v8.48) ──
+            // ── Animation gallery (Pets page, v8.56) — tapping a card
+            //    opens the full-screen player (fixes the old dead-tap bug:
+            //    the target used to be set on the wrong page, so tapping
+            //    Animations did nothing). ───────────────────────────────
             item {
-                if ((page == PetDesignerPage.PETS || page == PetDesignerPage.EDITOR) && target == null) SectionCard(
+                if (page == PetDesignerPage.PETS) SectionCard(
                     "Animations",
-                    "Every card plays a looping preview — tap one to open its frame timeline"
+                    "Tap one to watch it full screen — then edit its frames"
                 ) {
                     BUILTIN_ANIMATIONS.chunked(3).forEach { row ->
                         Row(
@@ -632,7 +734,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 AnimationGalleryCard(
                                     animation = anim,
                                     design = design,
-                                    onClick = { selectTarget(PetEditorTarget.Animation(anim.id)) },
+                                    onClick = { playerAnimation = anim },
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -1339,6 +1441,7 @@ fun PetDesignerScreen(navController: NavController) {
                         }
                         SmallAction("Reset all", enabled = design.isCustom) {
                             resetDetailEditor()
+                            activeCustomSlot = null
                             design = PetDesign.DEFAULT
                             reactionLineDraft = PetDesign.DEFAULT.reactionFor(reactEvent).lines.joinToString("\n")
                         }
@@ -1346,6 +1449,15 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
         }
+        // v8.56 — the studio's bottom navigation bar (Pets / Editor /
+        // Settings) — a real app-style bar, always visible.
+        PetStudioBottomNav(
+            page = page,
+            onSelect = { newPage ->
+                page = newPage
+                target = null
+            }
+        )
         }
 
         SettingsHeroHeader(
@@ -1360,6 +1472,7 @@ fun PetDesignerScreen(navController: NavController) {
             DialogScrim(onDismiss = { pickerCategory = null }) {
                 DrawPickerDialog(
                     category = category,
+                    onCategoryChange = { pickerCategory = it },
                     design = design,
                     selected = target,
                     onSelect = { t ->
@@ -1412,6 +1525,20 @@ fun PetDesignerScreen(navController: NavController) {
                     onDismiss = { accessoriesOpen = false }
                 )
             }
+        }
+
+        // ── Full-screen animation player (v8.56 — Pets page gallery) ──
+        playerAnimation?.let { anim ->
+            AnimationPlayerDialog(
+                animation = anim,
+                design = design,
+                onEditFrames = {
+                    playerAnimation = null
+                    selectTarget(PetEditorTarget.Animation(anim.id))
+                    page = PetDesignerPage.EDITOR
+                },
+                onDismiss = { playerAnimation = null }
+            )
         }
 
         // ── Color editor overlay ─────────────────────────────────────
@@ -1498,45 +1625,70 @@ fun PetDesignerScreen(navController: NavController) {
 // v8.45 — Universal editor shell: local navbar + target picker + save area
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** The local Pet Designer navbar (Animations / Actions / Settings). */
+/**
+ * v8.56 — the Pet studio's bottom navigation bar (icons + labels, mirroring
+ * the main app's bar). Switching pages clears the editor target so every
+ * page lands on its picker first.
+ */
 @Composable
-private fun PetDesignerNavbar(
+private fun PetStudioBottomNav(
     page: PetDesignerPage,
     onSelect: (PetDesignerPage) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 3.dp,
+        // The NavHost content is already padded above the system nav-bar
+        // inset, so the bar must not consume it again (double padding).
+        windowInsets = WindowInsets(0.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        PetDesignerPage.entries.forEach { p ->
-            val selected = p == page
-            Surface(
-                onClick = { onSelect(p) },
-                shape = RoundedCornerShape(50),
-                color = if (selected) MaterialTheme.colorScheme.surface else Color.Transparent,
-                shadowElevation = if (selected) 2.dp else 0.dp,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = when (p) {
-                        PetDesignerPage.PETS -> "Pets"
-                        PetDesignerPage.EDITOR -> "Editor"
-                        PetDesignerPage.SETTINGS -> "Settings"
-                    },
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
-                    ),
-                    color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(vertical = 10.dp)
-                )
-            }
+        PetStudioTab(CurioIcons.Pets, "Pets", page == PetDesignerPage.PETS) {
+            onSelect(PetDesignerPage.PETS)
+        }
+        PetStudioTab(CurioIcons.Brush, "Editor", page == PetDesignerPage.EDITOR) {
+            onSelect(PetDesignerPage.EDITOR)
+        }
+        PetStudioTab(CurioIcons.Settings, "Settings", page == PetDesignerPage.SETTINGS) {
+            onSelect(PetDesignerPage.SETTINGS)
         }
     }
+}
+
+/** One icon + label tab in the studio bottom bar. */
+@Composable
+private fun RowScope.PetStudioTab(
+    icon: String,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    NavigationBarItem(
+        selected = selected,
+        onClick = onClick,
+        icon = {
+            CurioIcon(
+                name = icon,
+                contentDescription = label,
+                size = 22.dp
+            )
+        },
+        label = {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
+                )
+            )
+        },
+        colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            selectedTextColor = MaterialTheme.colorScheme.onSurface,
+            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    )
 }
 
 /**
@@ -3346,58 +3498,7 @@ private fun FrameThumb(
 
 /** v8.49 — the sticky category strip above the drawing canvas. */
 @Composable
-private fun DrawPickerStrip(
-    selected: PetEditorTarget?,
-    onOpenPicker: (String) -> Unit
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.background,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(vertical = 6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CurioIcon(
-                    name = CurioIcons.Palette,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 16.dp
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    "Choose what to edit",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.height(6.dp))
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                StripChip(
-                    "Body & pose",
-                    selected is PetEditorTarget.Body ||
-                        selected is PetEditorTarget.CurledPose || selected is PetEditorTarget.Colors
-                ) { onOpenPicker("body") }
-                StripChip("Faces", selected is PetEditorTarget.Face) { onOpenPicker("faces") }
-                StripChip("Details", selected is PetEditorTarget.DetailLayer) { onOpenPicker("details") }
-                StripChip("Animations", selected is PetEditorTarget.Animation) { onOpenPicker("animations") }
-                StripChip(
-                    "Actions",
-                    selected is PetEditorTarget.Reaction || selected is PetEditorTarget.CustomAction
-                ) { onOpenPicker("actions") }
-            }
-            Spacer(Modifier.height(4.dp))
-            Text(
-                "Tap a chip to browse previews — pick one and it loads here for editing",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/** v8.49 — one category chip in the Draw & switch strip. */
+/** v8.49 — one category chip in the Draw & switch strip / picker dialog. */
 @Composable
 private fun StripChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
@@ -3420,6 +3521,7 @@ private fun StripChip(label: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 private fun DrawPickerDialog(
     category: String,
+    onCategoryChange: (String) -> Unit,
     design: PetDesign,
     selected: PetEditorTarget?,
     onSelect: (PetEditorTarget) -> Unit,
@@ -3431,15 +3533,20 @@ private fun DrawPickerDialog(
             .verticalScroll(rememberScrollState())
     ) {
         Text(
-            when (category) {
-                "body" -> "Pick a pose or the palette"
-                "faces" -> "Pick a face to draw"
-                "details" -> "Pick a detail layer"
-                "actions" -> "Pick an action to edit"
-                else -> "Pick an animation"
-            },
+            "What do you want to edit?",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
         )
+        Spacer(Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            StripChip("Body & pose", category == "body") { onCategoryChange("body") }
+            StripChip("Faces", category == "faces") { onCategoryChange("faces") }
+            StripChip("Details", category == "details") { onCategoryChange("details") }
+            StripChip("Animations", category == "animations") { onCategoryChange("animations") }
+            StripChip("Actions", category == "actions") { onCategoryChange("actions") }
+        }
         Spacer(Modifier.height(12.dp))
         when (category) {
             "body" -> {
@@ -5019,6 +5126,392 @@ private fun CustomActionEditor(
 
 /** v8.51 — one pet card in the Settings "Pet library". Renders the pet's
  *  default look and marks whether the current design belongs to it. */
+/**
+ * v8.56 — one custom-pet slot card on the Pets page. Empty slots are the
+ * "Save as new pet" affordance; filled slots show the saved design, a
+ * "Your pet" badge when active, and a tiny ✕ delete button.
+ */
+@Composable
+private fun CustomPetCard(
+    slot: Int,
+    designText: String?,
+    active: Boolean,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (designText == null) {
+        // Empty slot → save-as-new-pet card.
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+            onClick = onClick,
+            modifier = modifier
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = 26.dp,
+                    modifier = Modifier.padding(top = 14.dp, bottom = 8.dp)
+                )
+                Text(
+                    "Save as\nnew pet",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+            }
+        }
+        return
+    }
+    val parsed = remember(designText) { PetDesign.DEFAULT.toParsedOr(designText, PetDesign.DEFAULT) }
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            1.dp,
+            if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CurioPetSprite(
+                    stage = CurioPet.currentStage(),
+                    mood = CurioPet.Mood.HAPPY,
+                    spriteSize = 56.dp,
+                    design = parsed
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Custom ${slot + 1}",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    "Your saved look",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(6.dp))
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                    else MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        if (active) "Your pet" else "Not selected",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+            // Tiny delete affordance (top-right corner).
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
+                onClick = onDelete,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .size(24.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        name = CurioIcons.Close,
+                        contentDescription = "Delete custom pet",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 13.dp
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * v8.56 — the Editor page's single picker trigger (shown while no target is
+ * chosen). The editor is the center of the screen: this is the ONLY
+ * affordance until the user picks what to edit.
+ */
+@Composable
+private fun EditorPickPrompt(onOpenPicker: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+        onClick = onOpenPicker,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CurioIcon(
+                name = CurioIcons.Palette,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                size = 30.dp
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "What do you want to edit?",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Pick something and it opens right here — one editor at a time.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(12.dp))
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Choose",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
+        }
+    }
+}
+
+/** v8.56 — the "Editing — {title}" header with a Change chip. */
+@Composable
+private fun EditorTargetHeader(
+    target: PetEditorTarget,
+    onChange: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = targetIcon(target),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    size = 18.dp
+                )
+            }
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Editing",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    target.title,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            StripChip("Change", selected = false) { onChange() }
+        }
+    }
+}
+
+/** Small glyph for the Editing header. */
+private fun targetIcon(target: PetEditorTarget): String = when (target) {
+    is PetEditorTarget.Body, is PetEditorTarget.CurledPose -> CurioIcons.Brush
+    is PetEditorTarget.Colors -> CurioIcons.Palette
+    is PetEditorTarget.DetailLayer -> CurioIcons.Layers
+    is PetEditorTarget.Face -> CurioIcons.Star
+    is PetEditorTarget.Reaction -> CurioIcons.AutoAwesome
+    is PetEditorTarget.CustomAction -> CurioIcons.Add
+    is PetEditorTarget.Animation -> CurioIcons.PlayArrow
+}
+
+/**
+ * v8.56 — full-screen animation player: big looping preview with play/pause
+ * + frame stepping, and an "Edit frames" jump into the editor. Replaces the
+ * old dead-tap gallery behavior (the target used to be set on the wrong
+ * page, so tapping an animation did nothing).
+ */
+@Composable
+private fun AnimationPlayerDialog(
+    animation: PetAnimation,
+    design: PetDesign,
+    onEditFrames: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    // Resolve the design's custom frames (an absent key = built-in frames).
+    val effective = design.animations[animation.id] ?: animation
+    var playing by remember(animation.id) { mutableStateOf(true) }
+    var frameIndex by remember(animation.id) { mutableStateOf(0) }
+    LaunchedEffect(animation.id, playing, effective.frames) {
+        if (!playing || effective.frames.isEmpty()) return@LaunchedEffect
+        while (true) {
+            delay(effective.frames[frameIndex].durationMs.toLong())
+            frameIndex = (frameIndex + 1) % effective.frames.size
+        }
+    }
+    val frame = effective.frames.getOrNull(frameIndex) ?: PetAnimationFrame()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.72f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Top bar: animation name + close.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    animation.name,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+                Surface(
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.15f),
+                    onClick = onDismiss
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Close,
+                        contentDescription = "Close player",
+                        tint = Color.White,
+                        size = 20.dp,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.weight(1f))
+            // Big preview on a soft glass card.
+            Box(
+                modifier = Modifier
+                    .size(190.dp)
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(Color.White.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center
+            ) {
+                AnimatedPetSprite(
+                    animation = effective,
+                    frame = frame,
+                    design = design,
+                    spriteSize = 130.dp,
+                    ghost = false,
+                    staticPose = !playing
+                )
+            }
+            Spacer(Modifier.height(18.dp))
+            Text(
+                "${effective.frames.size} frames · loops",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+            Spacer(Modifier.height(22.dp))
+            // Transport: step back / play-pause / step forward.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TransportIconButton(
+                    CurioIcons.ChevronLeft,
+                    "Previous frame",
+                    enabled = effective.frames.isNotEmpty()
+                ) {
+                    frameIndex = (frameIndex - 1 + effective.frames.size) % effective.frames.size
+                    playing = false
+                }
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                    onClick = { playing = !playing },
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            name = if (playing) CurioIcons.Pause else CurioIcons.PlayArrow,
+                            contentDescription = if (playing) "Pause" else "Play",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            size = 30.dp
+                        )
+                    }
+                }
+                TransportIconButton(
+                    CurioIcons.ChevronRight,
+                    "Next frame",
+                    enabled = effective.frames.isNotEmpty()
+                ) {
+                    frameIndex = (frameIndex + 1) % effective.frames.size
+                    playing = false
+                }
+            }
+            Spacer(Modifier.weight(1f))
+            // Edit frames → the editor.
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primary,
+                onClick = onEditFrames,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+            ) {
+                Text(
+                    "Edit frames",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 14.dp)
+                )
+            }
+            Spacer(Modifier.height(36.dp))
+        }
+    }
+}
+
 @Composable
 private fun PetLibraryCard(
     pet: PetDefinition,

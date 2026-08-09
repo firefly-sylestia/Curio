@@ -144,6 +144,9 @@ object AppPreferences {
     private const val KEY_CUSTOM_REACTION_LINES = "custom_reaction_lines"
     // v8.47 — recently-applied palette colors for the pet designer picker.
     private const val KEY_PET_RECENT_COLORS = "pet_recent_colors"
+    // v8.56 — the two user-saved custom pet slots (Pet studio Pets page).
+    private const val KEY_PET_CUSTOM_1 = "pet_custom_1"
+    private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -410,6 +413,15 @@ object AppPreferences {
     var petDesignState by mutableStateOf<String?>(null)
         private set
 
+    /**
+     * Reactive custom-pet slots (v8.56) — the two user-saved pet designs
+     * (full design text) or null when a slot is empty. Updated by
+     * [setCustomPet] / [clearCustomPet] so the Pet studio's Pets page cards
+     * recompose the moment a pet is saved or removed.
+     */
+    var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
+        private set
+
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
         themeStyleState = getThemeStyle(context)
@@ -448,6 +460,7 @@ object AppPreferences {
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
         petDesignState = getPetDesign(context)
+        customPetsState = getCustomPets(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -1180,6 +1193,27 @@ object AppPreferences {
     fun clearPetDesign(context: Context) {
         prefs(context).edit().remove(KEY_PET_DESIGN).apply()
         petDesignState = null
+    }
+
+    // ── Custom pet slots (v8.56 — Pet studio Pets page) ──────────────
+    /** The two saved custom-pet design texts (null = empty slot). */
+    fun getCustomPets(context: Context): List<String?> = listOf(
+        prefs(context).getString(KEY_PET_CUSTOM_1, null),
+        prefs(context).getString(KEY_PET_CUSTOM_2, null)
+    )
+
+    /** Saves a custom-pet design into one of the two slots (always-on). */
+    fun setCustomPet(context: Context, index: Int, text: String) {
+        val key = if (index == 0) KEY_PET_CUSTOM_1 else KEY_PET_CUSTOM_2
+        prefs(context).edit().putString(key, text).apply()
+        customPetsState = getCustomPets(context)
+    }
+
+    /** Removes one custom-pet slot (returns it to the empty state). */
+    fun clearCustomPet(context: Context, index: Int) {
+        val key = if (index == 0) KEY_PET_CUSTOM_1 else KEY_PET_CUSTOM_2
+        prefs(context).edit().remove(key).apply()
+        customPetsState = getCustomPets(context)
     }
 
 

@@ -1,3 +1,17 @@
+# Request — Pet Studio v9 redesign: bottom nav, custom pets, center-of-screen editor (DONE)
+
+## v8.56 — full Pet Studio redesign (pushed)
+
+- User: "redesign and reimagine the pet screen layout and everything… current one has bugs and not premium cute… the pet and more coming is good but it doesnt have custom pet save… user can add 2 extra custom pet… when i tap the button animations nothing was happening and the editor was too confusing and too many buttons… add a bottom nav bar style and more features… i dont like the current one." Then: "the current design plan is bad clear it and dont take any reference coz i hate it… make a new one."
+- **Old plans deleted**: `docs/plans/PET_SCREEN_REDESIGN_PLAN.md` + `PET_DESIGNER_UNIVERSAL_EDITOR_PLAN.md` removed; new plan written at `docs/plans/PET_STUDIO_REDESIGN.md` from scratch (no references to the old docs).
+- **Direction (ask_user)**: bottom bar icons+labels · custom pets: BOTH an explicit Save-as-new-pet button AND Save refreshes that pet · editor = center of screen with a picker DIALOG as the only chooser · animation tap = full-screen player · keep every feature, reorganized · custom pets always-on.
+- **Bottom NavigationBar** (`PetStudioBottomNav`): Pets 🐾 / Editor 🖌 / Settings ⚙ icons + labels, mirrors the main app's bar, windowInsets=0 (NavHost already pads the nav inset). Old top `PetDesignerNavbar` deleted.
+- **Custom pets (always-on)**: `AppPreferences` gains 2 slots (`pet_custom_1/2` + reactive `customPetsState` + get/set/clear). Pets page = Curie card + 2 custom cards + "More pets coming soon" placeholder (rows of 2) + a "＋ Save as new pet" pill. Empty slot = dashed Save-as-new-pet card; filled slot = saved design sprite, "Your pet" badge, tiny ✕ delete. Save while editing a custom pet refreshes its slot; Reset/Reset-all returns to the built-in pet.
+- **Editor = center of screen**: one "What do you want to edit?" prompt card → the picker DIALOG (now with category chips INSIDE it — Body & pose / Faces / Details / Animations / Actions) → after choosing, an "Editing — {title}" header with a Change chip and ONLY that editor. Old `DrawPickerStrip` deleted; Live preview/gallery no longer appear on the Editor page.
+- **Full-screen animation player** (`AnimationPlayerDialog`): fixes the dead-tap bug (gallery used to set a hidden target on the wrong page) — tap an animation → dark full-screen player (big looping preview, play/pause, frame-step, "Edit frames" → Editor page with that animation open).
+- **Version bump** 20260913 → 20260914 + store changelog 20260914.txt.
+- Verified: braces clean (125 files), `git diff --check` clean, stale refs gone (PetDesignerNavbar/DrawPickerStrip/CurioSectionLabel), code-reviewed. CI is the compile gate.
+
 # Request — CI compile fix (Topic Database sort) + reveal action dock small-screen/theme fix (DONE)
 
 ## v8.55 — un-squish the reveal dock + fix the sort compile error (pushed)
