@@ -1048,9 +1048,13 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
 private fun RevealWashStrip(
     cat: com.curio.app.data.CurioCategory
 ) {
+    // v8.57 — invisible spacer: keeps Scaffold innerPadding stable so
+    // content never shifts during the morph transition. Transparent
+    // surface sits at the same z-index as the watermark background.
     Surface(
-        color = cat.categoryBackgroundWash(),
+        color = Color.Transparent,
         tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
