@@ -53,12 +53,6 @@ node_modules
 ./release-key.jks
 
 # Python
-.venv/
-**/.venv/
 __pycache__/
 *.pyc
-*.pt
-*.pth
-*.onnx
-*.onnx.data
 /result

@@ -1,3 +1,1 @@
 Curie now guides the first-run Tour: she comes out of her home, walks to real controls, and speaks without blocking the screen. Tour taps are safe demos—nothing is saved, opened, or explored. Reveal actions now say “Express yourself,” and Explore offers Google or YouTube.
-
-Added an opt-in ONNX Runtime Mobile neural-brain preview with recurrent hidden-state persistence and a safe fallback to Curio’s existing local brain. The model asset remains intentionally separate until it passes longer training and evaluation.

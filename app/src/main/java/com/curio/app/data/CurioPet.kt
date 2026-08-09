@@ -677,19 +677,11 @@ object CurioPet {
         }
         p.edit().putString(KEY_LAST_BUBBLE_SCREEN, screen)
             .putLong(KEY_LAST_BUBBLE_AT, now).apply()
-        // v8.43 — every spoken screen visit feeds the existing local learning
-        // brain first, even when the experimental neural preview is enabled.
-        // This prevents the ONNX path from silently stopping personality
-        // learning while it remains a speech-only integration boundary.
+        // v8.43 — every spoken screen visit feeds the learning brain (the
+        // time-of-day histogram + trait decay), then the brain's
+        // personalized voice gets first say; the classic rule-based library
+        // answers until the brain has enough signal (spec §10.6 fallback).
         CurioPetBrain.observeActivity(context, timeOfDay())
-        // The optional neural path gets first say after the local activity
-        // signal is recorded. It returns null on any unavailable/invalid
-        // runtime state, preserving the existing Kotlin dialogue fallback.
-        NeuralPetBrain.infer(context, NeuralPetObservation.encode(context, screen))?.let {
-            return NeuralPetBrain.speechFor(it)
-        }
-        // The rule-based learner's personalized voice gets first say; the
-        // classic library answers until that learner has enough signal.
         val currentMood = mood(context, lanes, screen)
         return CurioPetBrain.say(context, currentMood, lanes)
             ?: lineFor(context, currentMood, lanes)
