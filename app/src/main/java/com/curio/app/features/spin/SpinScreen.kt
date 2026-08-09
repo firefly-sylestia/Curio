@@ -717,7 +717,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 sin(progress * Math.PI.toFloat() / 2f)
             }
             val interval = if (fxReel) {
-                (300L + (240L * eased).toLong()).coerceAtMost(540L)
+                // v9.2 — the premium reel is noticeably faster and brisker
+                // (140→370ms), so the wheel reads as a quick prize-wheel
+                // spin instead of a gentle shuffle. The classic sine reel
+                // stays the same calm cadence (340→520ms).
+                (140L + (230L * eased).toLong()).coerceAtMost(370L)
             } else {
                 (340L + (180L * eased).toLong()).coerceAtMost(520L)
             }
@@ -2137,7 +2141,7 @@ private fun HeroTicketCard(
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
         tickDir = -tickDir
-        tickPulse.snapTo(1.02f)
+        tickPulse.snapTo(if (AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState) 1.04f else 1.02f)
         // v9.1 — the premium reel rides a silkier pulse (softer spring) so
         // every tick glides instead of snapping; the classic pulse is
         // untouched when the experiment is off.
@@ -2199,13 +2203,14 @@ private fun HeroTicketCard(
                 // controlled Deliberate spring (85% damping, no bounce)
                 // instead of the extreme Elastic overshoot, so the wheel's
                 // stop reads as a confident rest, not a violent bounce.
-                // v9.1 — the premium catch swaps in a smooth, quick spring
-                // (75% damping / 400 stiffness — a controlled settle with a
-                // whisper of overshoot, never gummy-bouncy); the classic
-                // settle stays untouched when the FX is off.
-                val catchSpring = if (fxCatch)
+                // v9.2 — the premium catch compresses the card to 0.97 and
+                // springs it back to rest (75% damping, visible squish that
+                // reads as a controlled lock-in); the classic settle stays
+                // untouched when the FX is off.
+                val catchSpring = if (fxCatch) {
+                    settleScale.snapTo(0.97f)
                     spring(dampingRatio = 0.75f, stiffness = 400f)
-                else CurioMotion.Springs.Deliberate
+                } else CurioMotion.Springs.Deliberate
                 launch { settleScale.animateTo(LandedRestScale, catchSpring) }
                 launch { settleY.animateTo(0f, catchSpring) }
             }
@@ -2616,10 +2621,10 @@ private fun HeroTicketCard(
                     val p = ringProgress.value
                     val base = size.minDimension * 0.30f
                     val radius = base + base * 1.7f * p
-                    val alpha = (1f - p) * 0.55f
+                    val alpha = (1f - p) * 0.85f
                     val strokeW = 3.dp.toPx() * (1f - p * 0.7f) + 1.dp.toPx()
                     drawCircle(color = accent.copy(alpha = alpha), radius = radius, center = center, style = Stroke(width = strokeW))
-                    drawCircle(color = Color.White.copy(alpha = alpha * 0.45f), radius = radius * 0.82f, center = center, style = Stroke(width = strokeW * 0.6f))
+                    drawCircle(color = Color.White.copy(alpha = alpha * 0.60f), radius = radius * 0.82f, center = center, style = Stroke(width = strokeW * 0.6f))
                 }
             }
             if (fxSparkle && sparkleProgress.value > 0f) {
@@ -2628,13 +2633,13 @@ private fun HeroTicketCard(
                     val base = size.minDimension * 0.32f
                     val fade = (1f - p).coerceIn(0f, 1f)
                     val piF = Math.PI.toFloat() / 180f
-                    repeat(10) { i ->
+                    repeat(14) { i ->
                         val angle = ((i * 36f + sparkleSeed * 11f) % 360f) * piF
                         val dist = base * (0.9f + p * 1.2f) + (i % 3) * 5f
                         val x = center.x + cos(angle) * dist
                         val y = center.y + sin(angle) * dist
-                        val s = (7f - 3.5f * p) * (0.8f + (i % 4) * 0.15f)
-                        val alpha = fade * 0.95f
+                        val s = (10f - 5f * p) * (0.8f + (i % 4) * 0.15f)
+                        val alpha = fade * 1.0f
                         rotate(degrees = p * 30f + i * 14f, pivot = Offset(x, y)) {
                             drawLine(color = accent.copy(alpha = alpha), start = Offset(x - s, y), end = Offset(x + s, y), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
                             drawLine(color = accent.copy(alpha = alpha), start = Offset(x, y - s), end = Offset(x, y + s), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
@@ -2652,7 +2657,7 @@ private fun HeroTicketCard(
                     val r = size.minDimension * 0.75f
                     drawCircle(
                         brush = Brush.radialGradient(
-                            colors = listOf(accent.copy(alpha = 0.45f * glowAlpha.value), Color.Transparent),
+                            colors = listOf(accent.copy(alpha = 0.70f * glowAlpha.value), Color.Transparent),
                             center = center,
                             radius = r
                         ),
