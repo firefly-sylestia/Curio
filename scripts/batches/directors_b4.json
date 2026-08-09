@@ -1,0 +1,631 @@
+[
+  {
+    "id": "director-clint-eastwood",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Clint Eastwood",
+    "teaser": "Eastwood directs fast and cheap on purpose — he famously shoots most scenes in one or two takes because he believes the first instinct is usually right.",
+    "imageUrl": "",
+    "byline": "Director · Clint Eastwood",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Unforgiven (1992), the ending",
+      "durationMinutes": 20,
+      "instruction": "Watch the final shootout and the last line — 'I've always been lucky when it comes to killin' folks.' Eastwood spent his career playing violence; here he takes it apart. Notice how quiet the ending is."
+    },
+    "tags": ["Western", "1990s", "Revisionist"],
+    "tier": 1
+  },
+  {
+    "id": "director-rob-reiner",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Rob Reiner",
+    "teaser": "Reiner directed When Harry Met Sally and This Is Spinal Tap — he had never been behind a camera when he made the mockumentary, and it defined the genre.",
+    "imageUrl": "",
+    "byline": "Director · Rob Reiner",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "When Harry Met Sally (1989), the deli scene",
+      "durationMinutes": 12,
+      "instruction": "Watch the Katz's deli scene and the famous line that follows. Reiner rehearsed the fake-orgasm bit for days until the crew was in hysterics. Notice how the film earns the joke through build-up."
+    },
+    "tags": ["Comedy", "1980s", "Romance"],
+    "tier": 1
+  },
+  {
+    "id": "director-ron-howard",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ron Howard",
+    "teaser": "Howard was a child star — he played Opie on The Andy Griffith Show — and directing let him tell stories from the other side of the camera.",
+    "imageUrl": "",
+    "byline": "Director · Ron Howard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Apollo 13 (1995), the launch sequence",
+      "durationMinutes": 20,
+      "instruction": "Watch the launch and the 'failure is not an option' sequence. Howard shot the launch with real NASA footage intercut with staged scenes. Notice how the panic is conveyed through procedure."
+    },
+    "tags": ["Hollywood", "1990s", "Historical Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-peter-jackson",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Peter Jackson",
+    "teaser": "Jackson started with splatter horror on a home video camera in New Zealand — his Bad Taste was made on weekends with his friends, decades before the Shire existed.",
+    "imageUrl": "",
+    "byline": "Director · Peter Jackson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Lord of the Rings: The Fellowship of the Ring (2001), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — the history of the Ring, then the Shire. Jackson built the entire trilogy's visual language in the first half hour. Notice how the Shire's smallness makes the quest feel huge."
+    },
+    "tags": ["New Zealand", "Fantasy", "2000s"],
+    "tier": 1
+  },
+  {
+    "id": "director-tim-burton",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Tim Burton",
+    "teaser": "Burton was a Disney animator who got fired for being 'too weird' — his first solo film, Pee-wee's Big Adventure, made the weirdness bankable.",
+    "imageUrl": "",
+    "byline": "Director · Tim Burton",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Edward Scissorhands (1990), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — the suburb in candy colors, the castle on the hill. Burton films the suburbs as pastel conformity and the castle as dark freedom. Notice how the two worlds never blend."
+    },
+    "tags": ["Fantasy", "1990s", "Gothic"],
+    "tier": 1
+  },
+  {
+    "id": "director-baz-luhrmann",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Baz Luhrmann",
+    "teaser": "Luhrmann made his Romeo + Juliet with actors in Hawaiian shirts and a modern Verona Beach — the film's rule is that the play's words stay, but everything else gets rebuilt.",
+    "imageUrl": "",
+    "byline": "Director · Baz Luhrmann",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Romeo + Juliet (1996), the ball scene",
+      "durationMinutes": 15,
+      "instruction": "Watch the Capulet ball — the aquarium, the costumes, the slow-motion meeting through the tank. Luhrmann's style is maximalism: notice how the film's emotion is conveyed through image and music, not just words."
+    },
+    "tags": ["Australia", "1990s", "Shakespeare"],
+    "tier": 1
+  },
+  {
+    "id": "director-danny-boyle",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Danny Boyle",
+    "teaser": "Boyle directed Trainspotting and Slumdog Millionaire, and his films always move — he started in theater and brought that energy to cinema.",
+    "imageUrl": "",
+    "byline": "Director · Danny Boyle",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Trainspotting (1996), the 'Choose Life' monologue",
+      "durationMinutes": 12,
+      "instruction": "Watch the opening monologue — Renton sprinting from police while listing the consumer choices he rejects. Boyle's montage defines a generation in two minutes. Notice the energy: the film never stops moving."
+    },
+    "tags": ["UK", "1990s", "Cult"],
+    "tier": 1
+  },
+  {
+    "id": "director-stephen-frears",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Stephen Frears",
+    "teaser": "Frears directed The Queen with Helen Mirren, who won the Oscar — the film showed the royal family's silence as strategy rather than weakness.",
+    "imageUrl": "",
+    "byline": "Director · Stephen Frears",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Queen (2006), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the aftermath of Diana's death, the royals at Balmoral. Frears films the family as a trapped institution. Notice how the weather and the deer become metaphors for a monarchy in retreat."
+    },
+    "tags": ["UK", "2000s", "Biopic"],
+    "tier": 1
+  },
+  {
+    "id": "director-mike-nichols",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mike Nichols",
+    "teaser": "Nichols came from improv comedy — he was half of the legendary duo Nichols and May — and brought that ear for dialogue to The Graduate and Who's Afraid of Virginia Woolf?",
+    "imageUrl": "",
+    "byline": "Director · Mike Nichols",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Graduate (1967), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — the airport, the fish tank, Mrs. Robinson's pass. Nichols films Benjamin's underwater world before he ever speaks. Notice the camera work: it's all about being watched."
+    },
+    "tags": ["Hollywood", "1960s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-robert-redford",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Robert Redford",
+    "teaser": "Redford won the Best Director Oscar for Ordinary People — his first film — and used the prize money and fame to found the Sundance Film Festival.",
+    "imageUrl": "",
+    "byline": "Director · Robert Redford",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ordinary People (1980), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the family's funeral, the silence at the dinner table. Redford directs grief as quietness; the film's power is in what's not said. Notice the swimming pool scene's subtext."
+    },
+    "tags": ["Hollywood", "1980s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-warren-beatty",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Warren Beatty",
+    "teaser": "Beatty directed Reds, a three-hour epic about American communists, at the height of the Cold War — the studio bet against him, and he made a $40 million hit.",
+    "imageUrl": "",
+    "byline": "Director · Warren Beatty",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Reds (1981), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — the journalists' talking heads, the romance of radicalism. Beatty intercut real witnesses of the 1910s to ground his fiction. Notice how politics and romance share the frame."
+    },
+    "tags": ["Hollywood", "1980s", "Epic"],
+    "tier": 1
+  },
+  {
+    "id": "director-barbra-streisand",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Barbra Streisand",
+    "teaser": "Streisand directed, produced, wrote, and starred in Yentl — it took her 14 years to get it made, and she became the first woman to win Best Director at the Golden Globes for it.",
+    "imageUrl": "",
+    "byline": "Director · Barbra Streisand",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Yentl (1983), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a girl who wants to study forbidden texts, dressed as a boy. Streisand made the film as a battle for a woman's right to learn. Notice the songs: they're internal monologues."
+    },
+    "tags": ["Hollywood", "1980s", "Musical"],
+    "tier": 1
+  },
+  {
+    "id": "director-steven-soderbergh",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Steven Soderbergh",
+    "teaser": "Soderbergh won the Palme d'Or at 26 for sex, lies, and videotape — then spent years directing and shooting his own films with a tiny crew under a pseudonym.",
+    "imageUrl": "",
+    "byline": "Director · Steven Soderbergh",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Traffic (2000), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — three storylines, three color grades: yellow for Mexico, blue for Washington, warm for San Diego. Soderbergh graded each strand differently so you always know where you are. Notice how he signals the war on drugs is unwinnable."
+    },
+    "tags": ["2000s", "Crime", "Ensemble"],
+    "tier": 1
+  },
+  {
+    "id": "director-spike-jonze",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Spike Jonze",
+    "teaser": "Jonze was a skateboard photographer and music-video director before film — he directed Being John Malkovich as his first feature, a script he'd been given and loved.",
+    "imageUrl": "",
+    "byline": "Director · Spike Jonze",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Her (2013), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a lonely man talks to his computer. Jonze builds a near-future that's soft and warm instead of cold. Notice how the film's color palette — coral, pink, sunlight — sells the romance."
+    },
+    "tags": ["Sci-Fi", "2010s", "Romance"],
+    "tier": 1
+  },
+  {
+    "id": "director-michel-gondry",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Michel Gondry",
+    "teaser": "Gondry came from music videos and commercials — he once built a camera rig that spun upside down inside a car, and his dreams of visual invention are famous.",
+    "imageUrl": "",
+    "byline": "Director · Michel Gondry",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Eternal Sunshine of the Spotless Mind (2004), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Joel waking, driving to Montauk, meeting Clementine. Gondry shoots memory erasure as physical effects: sets collapsing, characters fading. Notice how the 'dream' logic is built with practical tricks."
+    },
+    "tags": ["2000s", "Romance", "Mind-bender"],
+    "tier": 1
+  },
+  {
+    "id": "director-edgar-wright",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Edgar Wright",
+    "teaser": "Wright's films are edited like comic books — his 'Cornetto trilogy' with Simon Pegg made him the king of the sight-gag cut.",
+    "imageUrl": "",
+    "byline": "Director · Edgar Wright",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Shaun of the Dead (2004), the record-toss gag",
+      "durationMinutes": 12,
+      "instruction": "Watch the scene where Shaun tosses a record at a zombie — Wright cuts to the exact needle-drop moment. His comedy is built on rhythm: notice how the music and the edits are choreographed together."
+    },
+    "tags": ["UK", "2000s", "Comedy"],
+    "tier": 1
+  },
+  {
+    "id": "director-guy-ritchie",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Guy Ritchie",
+    "teaser": "Ritchie's Lock, Stock and Two Smoking Barrels was financed partly by selling his own house — it made him famous overnight for hyper-kinetic British crime comedies.",
+    "imageUrl": "",
+    "byline": "Director · Guy Ritchie",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lock, Stock and Two Smoking Barrels (1998), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the card game, the debt, the plan. Ritchie introduces a dozen characters with freeze-frames and voiceover. Notice how the style is the substance: the movie is about momentum."
+    },
+    "tags": ["UK", "1990s", "Crime"],
+    "tier": 1
+  },
+  {
+    "id": "director-matthew-vaughn",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Matthew Vaughn",
+    "teaser": "Vaughn produced Lock, Stock and Snatch before directing Layer Cake — then he made Kick-Ass and Kingsman, films that turn spy and superhero tropes inside out.",
+    "imageUrl": "",
+    "byline": "Director · Matthew Vaughn",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kingsman: The Secret Service (2014), the church fight",
+      "durationMinutes": 12,
+      "instruction": "Watch the church massacre — a single continuous scene of chaos set to Lynyrd Skynyrd. Vaughn choreographs violence as ballet. Notice how the film's cheeky tone lets it get away with everything."
+    },
+    "tags": ["UK", "2010s", "Action"],
+    "tier": 1
+  },
+  {
+    "id": "director-christopher-guest",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Christopher Guest",
+    "teaser": "Guest's mockumentaries — Spinal Tap, Best in Show, Waiting for Guffman — are improvised from outlines, and his actors never know each other's lines.",
+    "imageUrl": "",
+    "byline": "Director · Christopher Guest",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "This Is Spinal Tap (1984), the 'Stonehenge' scene",
+      "durationMinutes": 12,
+      "instruction": "Watch the Stonehenge stage-set disaster — the miniature monument descending as the band rocks out. Guest's genius is that the joke is always about ego and failure. Notice how deadpan everyone stays."
+    },
+    "tags": ["Mockumentary", "1980s", "Comedy"],
+    "tier": 1
+  },
+  {
+    "id": "director-todd-phillips",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Todd Phillips",
+    "teaser": "Phillips directed Old School and The Hangover before Joker — a $60 million character study that became a $1 billion phenomenon and won Joaquin Phoenix the Oscar.",
+    "imageUrl": "",
+    "byline": "Director · Todd Phillips",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Joker (2019), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Arthur Fleck's therapy session, his laugh that isn't a laugh. Phillips shot on 35mm with a 1970s palette. Notice how the city is Gotham but filmed like 1970s New York."
+    },
+    "tags": ["2010s", "Comic Book", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-judd-apatow",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Judd Apatow",
+    "teaser": "Apatow came from stand-up and sitcom writing — his films are famous for long improvised takes and a loose, hang-out feel that made him the king of 2000s comedy.",
+    "imageUrl": "",
+    "byline": "Director · Judd Apatow",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 40-Year-Old Virgin (2005), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Andy's morning routine, the intervention. Apatow's comedy comes from letting scenes run long. Notice how much of the humor is character, not jokes."
+    },
+    "tags": ["2000s", "Comedy", "Romance"],
+    "tier": 1
+  },
+  {
+    "id": "director-alexander-payne",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alexander Payne",
+    "teaser": "Payne's films — Election, Sideways, Nebraska — are about small failures told with empathy; he often writes scripts with his writing partner Jim Taylor.",
+    "imageUrl": "",
+    "byline": "Director · Alexander Payne",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sideways (2004), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the road trip, the wine, the bride. Payne films California's wine country as a place where middle-aged men go to avoid their lives. Notice the wine talk: it's code for everything else."
+    },
+    "tags": ["2000s", "Comedy-Drama", "Indie"],
+    "tier": 1
+  },
+  {
+    "id": "director-sam-raimi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sam Raimi",
+    "teaser": "Raimi made The Evil Dead for $350,000 with his friends from Michigan State — they built the camera rigs themselves, including a camera strapped to a plank held by a running man.",
+    "imageUrl": "",
+    "byline": "Director · Sam Raimi",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Evil Dead II (1987), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening recap and the cabin sequence. Raimi's camera is a character — it whooshes through the woods at ground level. Notice the 'shaky-cam' is actually precise: every shake is choreographed."
+    },
+    "tags": ["Horror", "1980s", "Cult"],
+    "tier": 1
+  },
+  {
+    "id": "director-peter-weir",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Peter Weir",
+    "teaser": "Weir made Witness, The Year of Living Dangerously, and The Truman Show — he's known for films where reality quietly shifts under your feet.",
+    "imageUrl": "",
+    "byline": "Director · Peter Weir",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Truman Show (1998), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Truman's perfect morning, the hidden cameras, the crew in the sky. Weir stages the unreality so that you catch it at the same pace Truman does. Notice the product placement: it's a gag and a warning."
+    },
+    "tags": ["Australia", "1990s", "Dystopia"],
+    "tier": 1
+  },
+  {
+    "id": "director-m-night-shyamalan",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "M. Night Shyamalan",
+    "teaser": "Shyamalan wrote The Sixth Sense in 1994 and sold it in 1995 — the twist ending was so protected that actors were given pages without the final scene until the shoot.",
+    "imageUrl": "",
+    "byline": "Director · M. Night Shyamalan",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Sixth Sense (1999), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening and notice every scene with Cole and Malcolm — Shyamalan plants the twist in plain sight, from the very first scene. On a second viewing, watch only Bruce Willis's face."
+    },
+    "tags": ["1990s", "Thriller", "Supernatural"],
+    "tier": 1
+  },
+  {
+    "id": "director-darren-aronofsky",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Darren Aronofsky",
+    "teaser": "Aronofsky shot Requiem for a Dream with a handheld camera called the 'snorricam' strapped to the actors' chests — the drug scenes are filmed from inside the bodies.",
+    "imageUrl": "",
+    "byline": "Director · Darren Aronofsky",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Requiem for a Dream (2000), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the montages of addiction building through repetition. Aronofsky's signature is the hip-hop montage: the same shots repeated faster and faster. Notice how the film traps you in the rhythm."
+    },
+    "tags": ["2000s", "Drama", "Dark"],
+    "tier": 1
+  },
+  {
+    "id": "director-richard-linklater",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Richard Linklater",
+    "teaser": "Linklater shot Boyhood over 12 years with the same actors — nobody had ever made a feature film that literally watched its cast grow up.",
+    "imageUrl": "",
+    "byline": "Director · Richard Linklater",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Boyhood (2014), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — Mason at six, his family moving again. Linklater filmed for a few weeks each year for 12 years. Notice how the time-lapse of a childhood is disguised as ordinary scenes."
+    },
+    "tags": ["2010s", "Coming-of-age", "Slow Cinema"],
+    "tier": 1
+  },
+  {
+    "id": "director-john-sayles",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "John Sayles",
+    "teaser": "Sayles financed his own films by writing studio scripts — he used the money from writing movies like Piranha to make the independent films he actually wanted to direct.",
+    "imageUrl": "",
+    "byline": "Director · John Sayles",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lone Star (1996), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a skeleton found in the desert, a town's history buried with it. Sayles cuts between past and present with almost no visual cues. Notice how every conversation is about borders — literal and metaphorical."
+    },
+    "tags": ["1990s", "Mystery", "Social"],
+    "tier": 1
+  },
+  {
+    "id": "director-jim-jarmusch",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jim Jarmusch",
+    "teaser": "Jarmusch shot Stranger Than Paradise for about $120,000 in black and white — the film's deadpan minimalism made him the patron saint of American indie cinema.",
+    "imageUrl": "",
+    "byline": "Director · Jim Jarmusch",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Stranger Than Paradise (1984), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — long takes, deadpan faces, the emptiness between words. Jarmusch's style is the pause. Notice how the film's silences are funnier than its dialogue."
+    },
+    "tags": ["Indie", "1980s", "Deadpan"],
+    "tier": 1
+  },
+  {
+    "id": "director-gus-van-sant",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Gus Van Sant",
+    "teaser": "Van Sant directed Good Will Hunting and then went the opposite way with Elephant, a Palme d'Or winner about a school shooting told in long, unbroken takes.",
+    "imageUrl": "",
+    "byline": "Director · Gus Van Sant",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Elephant (2003), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — students walking through hallways, the camera following each one. Van Sant films the school as a maze with no exit. Notice how the dread is built from ordinary time."
+    },
+    "tags": ["2000s", "Art House", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-ang-lee",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ang Lee",
+    "teaser": "Lee has directed everything from Jane Austen (Sense and Sensibility) to kung fu (Crouching Tiger) to a 3D war epic — he says he makes each film to learn a new language.",
+    "imageUrl": "",
+    "byline": "Director · Ang Lee",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Brokeback Mountain (2005), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the sheep, the mountain, the two men who can't say what they're feeling. Lee films the Wyoming landscape as both freedom and trap. Notice how the film says almost everything through weather."
+    },
+    "tags": ["Taiwan", "2000s", "Romance"],
+    "tier": 1
+  },
+  {
+    "id": "director-zhang-yimou",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Zhang Yimou",
+    "teaser": "Zhang was a factory worker and photographer before film school — his early films like Raise the Red Lantern made him the face of China's 'Fifth Generation' directors.",
+    "imageUrl": "",
+    "byline": "Director · Zhang Yimou",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hero (2002), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the black palace, the archer, the chess duel. Zhang's film is told in color-coded chapters, each version of the story in its own palette. Notice how the fight scenes are conversations."
+    },
+    "tags": ["China", "2000s", "Wuxia"],
+    "tier": 1
+  },
+  {
+    "id": "director-chen-kaige",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Chen Kaige",
+    "teaser": "Chen's Farewell My Concubine won the Palme d'Or in 1993 — the first Chinese film to do so — and was immediately banned in China for its portrayal of the Cultural Revolution.",
+    "imageUrl": "",
+    "byline": "Director · Chen Kaige",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Farewell My Concubine (1993), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — the Peking opera school, the children training until they bleed. Chen films a century of Chinese history through two performers' lives. Notice how the opera roles become their identities."
+    },
+    "tags": ["China", "1990s", "Historical"],
+    "tier": 1
+  },
+  {
+    "id": "director-tsui-hark",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Tsui Hark",
+    "teaser": "Tsui Hark reinvented the wuxia film with Once Upon a Time in China — he's known as the 'Steven Spielberg of Hong Kong' for his willingness to try anything.",
+    "imageUrl": "",
+    "byline": "Director · Tsui Hark",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Once Upon a Time in China (1991), the warehouse fight",
+      "durationMinutes": 15,
+      "instruction": "Watch the finale in the warehouse — Wong Fei-hung fighting with a ladder. Tsui's action is physics-defying and playful. Notice how the set itself is a weapon: every prop gets used."
+    },
+    "tags": ["Hong Kong", "1990s", "Wuxia"],
+    "tier": 1
+  },
+  {
+    "id": "director-john-woo",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "John Woo",
+    "teaser": "Woo invented the 'gun-fu' action style — slow-motion shootouts with doves flying through the bullets — and defined Hong Kong action cinema for a generation.",
+    "imageUrl": "",
+    "byline": "Director · John Woo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hard Boiled (1992), the hospital shootout",
+      "durationMinutes": 20,
+      "instruction": "Watch the hospital finale — a 40-minute continuous shootout filmed in one location with a moving camera. Woo films violence as opera. Notice the doves: his trademark symbol of innocence in the crossfire."
+    },
+    "tags": ["Hong Kong", "1990s", "Action"],
+    "tier": 1
+  },
+  {
+    "id": "director-jackie-chan",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jackie Chan",
+    "teaser": "Chan directs and performs all his own stunts — he's broken nearly every bone in his body, and his end-credits blooper reels are famous proof of the danger.",
+    "imageUrl": "",
+    "byline": "Director · Jackie Chan",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Police Story (1985), the shopping mall finale",
+      "durationMinutes": 18,
+      "instruction": "Watch the mall fight and the chandelier jump — Chan slid down the pole and crashed through glass with no safety wires. Notice how the stunt work is edited to be continuous: the danger is real and visible."
+    },
+    "tags": ["Hong Kong", "1980s", "Action"],
+    "tier": 1
+  },
+  {
+    "id": "director-sammo-hung",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sammo Hung",
+    "teaser": "Sammo Hung was the eldest of the famous 'Seven Little Fortunes' opera troupe and taught Bruce Lee's co-stars — his own films made him a legend of Hong Kong action comedy.",
+    "imageUrl": "",
+    "byline": "Director · Sammo Hung",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Eastern Condors (1987), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a POW squad dropped into Vietnam. Sammo combines war film and martial arts with his signature physical comedy. Notice how the action is always character-driven."
+    },
+    "tags": ["Hong Kong", "1980s", "Action"],
+    "tier": 1
+  }
+]

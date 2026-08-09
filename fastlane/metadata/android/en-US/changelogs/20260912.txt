@@ -1,0 +1,1 @@
+• The pet animation editor now previews each frame perfectly still — no more blinking eyes or swaying body while you draw. Zoom, rotate and lift are visible on the paused frame with a readout, and playback only runs when you press Play.

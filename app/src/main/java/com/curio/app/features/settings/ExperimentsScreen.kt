@@ -18,6 +18,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,26 +73,10 @@ fun ExperimentsScreen(navController: NavController) {
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item { CurioSectionLabel("Card surfaces") }
+            item { CurioSectionLabel("Spin visuals") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Layers, "Card & deck look", "Independent visual tests for Spin")
-                    ExperimentSwitchRow("Top-lit deck cards", "Peek cards catch light at the top edge", AppPreferences.peekGradientState) {
-                        AppPreferences.setPeekGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Tinted deck edges", "Category-tinted hairline on peek cards", AppPreferences.peekHairlineState) {
-                        AppPreferences.setPeekHairlineEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Deck card shadows", "Soft ambient depth under peek cards", AppPreferences.peekShadowsState) {
-                        AppPreferences.setPeekShadowsEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Roomier deck titles", "Two-line near-card titles", AppPreferences.peekTitlesState) {
-                        AppPreferences.setPeekTitlesEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
+                    CurioCardHeader(CurioIcons.Layers, "Main card", "Hero ticket looks")
                     ExperimentSwitchRow("Enhanced main gradient", "Richer top-lit depth on the hero card", AppPreferences.heroGradientState) {
                         AppPreferences.setHeroGradientEnabled(context, it)
                     }
@@ -107,13 +92,66 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Material card blends", "Device palette with a category-color whisper", AppPreferences.materialCardBlendsState) {
                         AppPreferences.setMaterialCardBlendsEnabled(context, it)
                     }
+                }
+            }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    CurioCardHeader(CurioIcons.Layers, "Deck peek cards", "The fan behind the hero")
+                    ExperimentSwitchRow("Top-lit deck cards", "Peek cards catch light at the top edge", AppPreferences.peekGradientState) {
+                        AppPreferences.setPeekGradientEnabled(context, it)
+                    }
                     CurioSettingsDivider()
+                    ExperimentSwitchRow("Tinted deck edges", "Category-tinted hairline on peek cards", AppPreferences.peekHairlineState) {
+                        AppPreferences.setPeekHairlineEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Deck card shadows", "Soft ambient depth under peek cards", AppPreferences.peekShadowsState) {
+                        AppPreferences.setPeekShadowsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Roomier deck titles", "Two-line near-card titles", AppPreferences.peekTitlesState) {
+                        AppPreferences.setPeekTitlesEnabled(context, it)
+                    }
+                }
+            }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    CurioCardHeader(CurioIcons.Layers, "Deck & controls", "Shuffle button and pastel accents")
                     ExperimentSwitchRow("3D shuffle button", "Raised gradient, shadow, and orbiting dots", AppPreferences.threeDButtonState) {
                         AppPreferences.set3DButtonGradientEnabled(context, it)
                     }
                     CurioSettingsDivider()
                     ExperimentSwitchRow("Pastel crown depth", "A subtle darker crown on pastel cards", AppPreferences.pastelCrownDepthState) {
                         AppPreferences.setPastelCrownDepthEnabled(context, it)
+                    }
+                }
+            }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    CurioCardHeader(CurioIcons.AutoAwesome, "Spin landing FX", "Premium landing feel — in testing")
+                    ExperimentSwitchRow(
+                        "Premium landing FX",
+                        "Buttery reel, spring catch, ring + sparkles",
+                        AppPreferences.spinLandingFxState
+                    ) {
+                        AppPreferences.setSpinLandingFxEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    val fxOn = AppPreferences.spinLandingFxState
+                    ExperimentSwitchRow("Buttery reel glide", "Smooth prize-wheel deceleration", AppPreferences.spinFxReelState, enabled = fxOn) {
+                        AppPreferences.setSpinFxReelEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Spring catch", "Smooth controlled settle as the wheel locks in", AppPreferences.spinFxCatchState, enabled = fxOn) {
+                        AppPreferences.setSpinFxCatchEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Shockwave ring", "Accent ring radiates from the landed card", AppPreferences.spinFxRingState, enabled = fxOn) {
+                        AppPreferences.setSpinFxRingEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Sparkle burst", "Star sparks around the landed card", AppPreferences.spinFxSparkleState, enabled = fxOn) {
+                        AppPreferences.setSpinFxSparkleEnabled(context, it)
                     }
                 }
             }
@@ -148,7 +186,7 @@ fun ExperimentsScreen(navController: NavController) {
                         text = when (AppPreferences.smartDensityModeState) {
                             SmartDensityMode.OFF -> "Density sizing off"
                             SmartDensityMode.COMPACT -> "Smaller on low-density phones · larger on high-density"
-                            SmartDensityMode.EXTRA_COMPACT -> "2x — even smaller on very low-density phones"
+                            SmartDensityMode.EXTRA_COMPACT -> "2x: even smaller on very low-density phones"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -173,8 +211,19 @@ fun ExperimentsScreen(navController: NavController) {
 }
 
 @Composable
-private fun ExperimentSwitchRow(title: String, subtitle: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+private fun ExperimentSwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .alpha(if (enabled) 1f else 0.45f)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
@@ -183,7 +232,7 @@ private fun ExperimentSwitchRow(title: String, subtitle: String, checked: Boolea
                 Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Switch(checked = checked, onCheckedChange = onCheckedChange)
+            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
         }
     }
 }

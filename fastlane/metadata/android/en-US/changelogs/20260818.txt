@@ -1,0 +1,3 @@
+• The pet stays home during the intro and now introduces itself at the start of the guided tour.
+• Tour steps that ask you to do something (spin, open, explore, save) hold until you really do it: the pet tells you "go ahead", the bubble never blocks the button, and the pet celebrates the moment you finish.
+• The pet's personality now grows with you: it starts polite and neutral and only warms up to "best friends" talk as you level up together.

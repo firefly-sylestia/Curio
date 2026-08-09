@@ -67,8 +67,8 @@ app/src/main/java/com/curio/app/
 ### Identity
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
-- `minSdk = 26`, `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "0.1.0-curio"`, `versionCode = 1`
+- `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
+- `versionName = "1.0.0"`, `versionCode = 20260918`
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
@@ -116,6 +116,51 @@ app/src/main/java/com/curio/app/
 - New icons must be declared in the `CurioIcons` object (snake_case ligature names) — do NOT inline glyph names in screens.
 - **All design-system primitives (the `CurioIcon` composable + `CurioIcons` glyph constants object) live under `ui/theme/`.** Components in `ui/components/` consume them via import — they do not re-export them. Wrong-package imports (e.g. `import com.curio.app.ui.components.CurioIcon`) compile silently against an empty package and only fail in CI's `compileDebugKotlin`. Always import from `ui.theme.*`.
 
+### Curie pet layer (v8.43)
+- `data/PetDesign.kt` owns the pet look contract: backward-compatible 16/24/32
+  canvases plus the 64×64 evolved default (all convertible via dominant-key
+  resample), a 13-key palette (incl. `r` blush + `y` eye colors), per-mood
+  faces (`PetFace`), per-event reaction rules (`PetReaction`), optional
+  authored reaction lines, four transparent detail layers (`tail`,
+  `accessories`, `effects`, `antenna`), and per-element procedural visibility
+  overrides. Evolved path ornaments live in the toggleable `accessories` layer.
+  Animations (`PetAnimation`) are transform
+  keyframes plus v8.52 per-frame pixel layers (`PetAnimationFrame.bodyRows` /
+  `curledRows`) and backward-compatible `PetViewAngle` metadata, so each
+  frame can be a fully different pose/view; `CurioPetSprite` accepts
+  `bodyOverride`/`curledOverride`/`viewAngle` to render them. The always-on
+  Pet Life director (`data/PetLife.kt`) chooses screen-aware, personality-
+  weighted routines and keeps a recent-id cooldown so autonomous behavior
+  does not immediately repeat. Missing
+  detail/toggle fields preserve the prior procedural behavior for older saved
+  designs. The text format (palette lines + grids + `detail=` / `procedural=`
+  / `face=` / `react=` / `size=` / `anim=` / `frame=` / `customAction=`
+  lines) is documented in
+  that file's KDoc/source implementation.
+- `CurioPetSprite` renders any grid size, preserves existing motion, and draws
+  authored detail layers last so the user can replace generated art without
+  changing animation. The procedural antenna extras remain independently
+  toggleable; the base antenna pixels are edited in the Body canvas.
+- `PetDesignerScreen` (Settings → Pet designer) is a three-page studio
+  (v8.52): **Pets** (pick a species from `PetRegistry`), **Editor** (choose a
+  target via the preview dialog, then only that editor), and **Settings**
+  (Accessories dialog, disable toggles, personality presets, shapes). The
+  editor is available from the start, including for baby pets. Animation
+  gallery/player/timeline and animation-selection controls are currently
+  hidden from the studio UI while their models, serializers, renderers, and
+  runtime playback remain in place for a future re-entry. A slim sticky
+  **EditorToolbar** is the ONE place for Save / Undo / Redo / Reset / Import /
+  Export (the old pinned footer SaveArea is gone — no duplicate buttons).
+  The Faces editor shows mood face-only previews and a creamy pixel board with
+  an explicit Painting toggle; face zoom is not shown. Details drawing and the
+  entire Actions editor are currently hidden from the studio, while detail,
+  reaction, and custom-action data/runtime behavior remain preserved.
+
+  PNG export/import shares via FileProvider `${applicationId}.fileprovider`
+  (`res/xml/file_paths.xml` cache/share). The home/house scene is a fixed
+  layered sprite composition; the legacy home editor is removed from the
+  studio UI, while old saved bed rows remain dormant compatibility data.
+
 ### Experimental features (A/B testing)
 - Per root `AGENTS.md`, any experimental/test behavior MUST be gated behind a **user-facing Settings toggle** so it can be A/B-compared against the current behavior and reverted without a code change — never hardcoded as the only path.
 - Remove the toggle once the experiment is decided, keeping the winning behavior hardcoded.
@@ -141,7 +186,7 @@ Topic data lives in JSON files under `app/src/main/assets/topics/{category}.json
 - `MainActivity` compiles and runs as `com.curio.app` on debug builds with `applicationId = "com.curio.app.debug"`.
 - No background workers, no widgets, no Room/SharedPreferences persistence wiring yet — those arrive in Phase 4+.
 - **CI gate**: this environment has no Android SDK, so CI on push to `revamp` is the source of truth for compilation. Local Gradle compile/build/lint/test commands are explicitly forbidden by root AGENTS.md.
-- **CI expectations (flavorless)**: CI calls `./gradlew assembleDebug assembleRelease` for Android checks and `./gradlew assembleRelease` for tagged releases. Output APKs are at `app/build/outputs/apk/{debug,release}/`. Release signing uses the repository keystore secrets when configured; local builds fall back to the debug signing key.
+- **CI expectations (flavorless)**: CI calls `./gradlew lintDebug validateTopics assembleRelease` for Android checks (release-only — no debug APK is built) and `./gradlew validateTopics assembleRelease` for tagged releases. Release outputs are ABI splits + a universal APK at `app/build/outputs/apk/release/` (see the `splits { abi { … } }` block); the release workflow renames them `Curio-{versionName}-{versionCode}-{abi}-Android8.0+.apk`. `printReleaseVersion` prints `versionName:versionCode` for that naming. Release signing uses the repository keystore secrets when configured; local builds fall back to the debug signing key.
 - All placeholder screens route correctly: tapping the Home hero with no chip → `PICKER`; with a chip → `spin/{slug}`; bottom-nav switching preserves each tab's back stack; back arrow pops the current route.
 
 ## Session Lessons Learned
@@ -186,7 +231,7 @@ These patterns and anti-patterns were learned the hard way (CI compile failures,
 
 ### Static validation when Gradle is unavailable
 - This environment has no Android SDK → no local `./gradlew` commands. Pre-CI validation = only static checks:
-  1. **Delimiter balance**: a Python script that strips Kotlin comments/strings and counts `{}[]()`. Write it to `/tmp/check_balance.py` to avoid JSON escaping.
+  1. **Delimiter balance**: `node scripts/check_braces.js` — repo-homed Kotlin/KTS checker that strips comments/strings and verifies `{}[]()` balance (run it on the whole repo, or pass specific files). This replaced the ad-hoc scripts that used to be written to /tmp mid-session.
   2. **`git diff --check`** — catches whitespace errors.
   3. **Import hygiene**: after removing a usage, `grep` the file for the removed symbol to confirm no remaining references (CI catches stale imports as compile errors).
   4. **Code review**: spawn a `code-reviewer-glm` or `code-reviewer-deepseek` agent with the full file list and the key risky patterns to check.

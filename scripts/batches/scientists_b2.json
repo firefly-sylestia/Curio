@@ -1,0 +1,302 @@
+[
+  {
+    "id": "scientist-joule",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "James Prescott Joule",
+    "teaser": "English brewer who measured the mechanical equivalent of heat with exquisite care — stirring water, squeezing gas, and letting weights fall into insulated vessels — establishing that energy is conserved. The unit of energy, the joule, carries his name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Joule's 1843–1850 experiments on the mechanical equivalent of heat",
+      "durationMinutes": 60,
+      "instruction": "Read how Joule showed that a fixed amount of mechanical work always produces the same quantity of heat — no matter how it's done. His paddle-wheel experiments, repeated to absurd precision, gave the modern value for the conversion. His 1847 lecture was initially ignored; Kelvin heard it and realized Joule was right about energy conservation.",
+      "tags": [
+        "Physics",
+        "19th Century",
+        "British"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-orsted",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Hans Christian Ørsted",
+    "teaser": "Danish physicist who, during a lecture in 1820, noticed that an electric current deflected a nearby compass needle — proving electricity and magnetism are linked. He had found electromagnetism, one of the great unifications of physics, and changed the course of science in a single classroom demonstration.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ørsted's 1820 announcement 'Experiments on the Effect of a Current of Electricity on the Magnetic Needle'",
+      "durationMinutes": 30,
+      "instruction": "Read how the discovery was almost accidental — Ørsted was demonstrating heat from a wire when he noticed the needle move. He followed up with weeks of careful experiments, published in Latin, that swept through Europe in months. Within a year, Ampère and Faraday were building on his result.",
+      "tags": [
+        "Physics",
+        "19th Century",
+        "Danish"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-millikan",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Robert Millikan",
+    "teaser": "American physicist whose famous oil-drop experiment (1909) measured the charge of a single electron by balancing tiny charged oil drops in an electric field. His careful measurements gave the electron's charge and mass, and earned him the 1923 Nobel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Millikan's oil-drop experiment",
+      "durationMinutes": 60,
+      "instruction": "Read how Millikan sprayed oil droplets between charged plates, watched them through a microscope, and timed their falling and rising speeds — computing each drop's charge. Every drop's charge was a whole multiple of one value: the electron's charge, 1.6 × 10⁻¹⁹ coulombs. The experiment is a masterpiece of precision measurement.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-de-broglie",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Louis de Broglie",
+    "teaser": "French aristocrat and physicist who in his 1924 doctoral thesis proposed that particles like electrons also behave as waves, with wavelength inversely proportional to momentum. The idea — wave-particle duality — won the 1929 Nobel and led directly to the wave equation of quantum mechanics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "de Broglie's 1924 thesis 'Recherches sur la théorie des quanta'",
+      "durationMinutes": 60,
+      "instruction": "Read his reasoning: if light, once thought a wave, is also particles, then matter, once thought particles, should also have waves. The electron microscope and the diffraction of electrons through crystals — demonstrated by Davisson and Germer in 1927 — confirmed the idea. Every particle is also a wave.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-schwinger",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Julian Schwinger",
+    "teaser": "American physicist who, alongside Feynman and Tomonaga, built quantum electrodynamics — the theory of how light and matter interact — reconciling quantum mechanics with relativity. Their QED is the most precise theory in science, accurate to one part in a billion. Shared the 1965 Nobel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Schwinger's papers on quantum electrodynamics (1948)",
+      "durationMinutes": 60,
+      "instruction": "Read how Schwinger, working independently of Feynman, tamed the infinities of QED with a procedure called renormalization — systematically subtracting the unphysical parts. His style was formal mathematics; Feynman's was pictures. Both reached the same answer, and their rivalry produced the theory behind all of electronics.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-tomonaga",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Sin-Itiro Tomonaga",
+    "teaser": "Japanese physicist who, isolated in wartime Japan, independently developed renormalized quantum electrodynamics during World War II — not knowing Schwinger and Feynman were doing the same in America. The three shared the 1965 Nobel for founding modern quantum field theory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tomonaga's 1943–48 papers on super-many-time theory",
+      "durationMinutes": 60,
+      "instruction": "Read how Tomonaga, working with minimal resources in wartime Tokyo, reformulated quantum mechanics with many times — one per particle — which let him handle the infinities that plagued QED. His work reached the West only after the war, when it was recognized as equivalent to the American breakthroughs. Great science, done in near-isolation.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "Japanese"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-glashow",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Sheldon Glashow",
+    "teaser": "American physicist who worked out the mathematics of electroweak unification at 28, in 1961, laying the groundwork Weinberg and Salam completed. He also predicted the charm quark — found in 1974. Shared the 1979 Nobel, and co-founded the theory of the 'grand unification' of forces.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Glashow's 1961 paper on partial symmetries of weak interactions",
+      "durationMinutes": 60,
+      "instruction": "Read how Glashow combined electromagnetism and the weak force using a gauge symmetry — the first workable version of the idea. His model lacked the mechanism to give the W and Z mass; that came from Higgs and others. Glashow later proposed the GIM mechanism, which predicted charm quarks years before they were observed.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-higgs",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Peter Higgs",
+    "teaser": "British physicist who in 1964 proposed the mechanism by which particles acquire mass: a field filling all of space, with a particle attached — the Higgs boson. It took 48 years and the world's largest machine to find it, in 2012, and Higgs shared the 2013 Nobel. He reportedly said, 'I never expected it in my lifetime.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Higgs's 1964 paper 'Broken Symmetries and the Masses of Gauge Bosons'",
+      "durationMinutes": 60,
+      "instruction": "Read the short paper where Higgs showed that a symmetry-breaking field could give mass to the W and Z without breaking the theory. The idea was initially rejected — his first paper was returned — but it became the keystone of the standard model. The boson found at CERN in 2012 has his name; the field fills every point in space.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-englert",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "François Englert",
+    "teaser": "Belgian physicist who, with Robert Brout, proposed the mass-generation mechanism in 1964 — months before Peter Higgs published his version. Englert shared the 2013 Nobel for the mechanism and its boson, confirmed at CERN in 2012. Brout, who died in 2011, was not eligible.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Englert & Brout's 1964 paper on broken symmetry and vector meson masses",
+      "durationMinutes": 60,
+      "instruction": "Read how the Brussels pair, working from condensed-matter physics ideas about broken symmetry, showed that a scalar field can endow gauge bosons with mass. Their paper preceded Higgs's by a few weeks, which is why the mechanism is sometimes called the Englert–Brout–Higgs mechanism. The 2012 discovery capped a half-century search.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "Belgian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-yukawa",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Hideki Yukawa",
+    "teaser": "Japanese physicist who in 1935 predicted a new particle — the meson — as the carrier of the strong nuclear force, reasoning from the known range of nuclear attraction. The pion was found in 1947, and Yukawa became the first Japanese Nobel laureate in 1949. He worked from intuition and analogy, with almost no data.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yukawa's 1935 paper on the interaction of elementary particles",
+      "durationMinutes": 60,
+      "instruction": "Read how Yukawa, then 28 and working in near-isolation in Japan, used the range of the nuclear force — about a femtometer — to deduce the mass of its carrier particle, predicting it would weigh about 200 electron masses. The muon, found in 1936, was at first mistaken for it; the true pion arrived in 1947, in cosmic rays photographed in Britain.",
+      "tags": [
+        "Physics",
+        "20th Century",
+        "Japanese"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-penzias",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Arno Penzias",
+    "teaser": "American radio astronomer who, with Robert Wilson, discovered the cosmic microwave background in 1965 — the afterglow of the Big Bang. They found a persistent hiss in their horn antenna that wouldn't go away, even after cleaning out pigeon droppings. The discovery confirmed the Big Bang and won the 1978 Nobel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Penzias & Wilson's 1965 letter 'A Measurement of Excess Antenna Temperature at 4080 Mc/s'",
+      "durationMinutes": 30,
+      "instruction": "Read how the pair tried everything — cooling the receiver, removing the pigeons — before realizing the noise was real and came from every direction: radiation left over from the universe's hot beginning. Physicists at Princeton, who had been about to look for exactly this, connected the dots. The universe's baby picture had been found by accident.",
+      "tags": [
+        "Astronomy",
+        "20th Century",
+        "German-American"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-robert-wilson",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Robert Woodrow Wilson",
+    "teaser": "American radio astronomer who, with Arno Penzias, detected the faint microwave glow left over from the Big Bang while testing a supersensitive antenna built for satellite communications. He shared the 1978 Nobel and went on to pioneer millimeter-wave astronomy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wilson & Penzias's discovery of the cosmic microwave background",
+      "durationMinutes": 30,
+      "instruction": "Read how the persistent hiss — equivalent to a temperature of about 3 kelvin — matched the prediction of a relic radiation field from a hot early universe. Wilson later led efforts that made the 7-meter Bell Labs antenna a workhorse for mapping carbon monoxide in space. Two engineers, one historic noise.",
+      "tags": [
+        "Astronomy",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-hoyle",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Fred Hoyle",
+    "teaser": "British astronomer who showed how stars build heavy elements (carbon, oxygen, iron) in their cores — and coined the term 'Big Bang' as a put-down of a theory he opposed, preferring a steady-state universe. He also predicted the carbon-12 resonance needed for life, essentially by faith in the numbers. The name stuck.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hoyle's 1953 prediction of the carbon-12 resonance and the B2FH paper (1957)",
+      "durationMinutes": 60,
+      "instruction": "Read how Hoyle calculated that carbon synthesis in stars requires an energy level that hadn't been observed — and told experimentalist Willy Fowler to go look for it. It was found exactly there. The B2FH paper, which he co-authored, explained the cosmic origin of the elements. His 'Big Bang' jab became the theory's permanent name.",
+      "tags": [
+        "Astronomy",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-shapley",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Harlow Shapley",
+    "teaser": "American astronomer who measured the distances to globular star clusters and showed the solar system is not at the center of the Milky Way — we're out in the suburbs, 27,000 light-years from the galactic core. His 'Great Debate' with Curtis in 1920 over the scale of the universe became legend.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shapley's 1918 studies of globular clusters and the Great Debate of 1920",
+      "durationMinutes": 60,
+      "instruction": "Read how Shapley used variable stars in globular clusters to measure distances, finding the clusters (and the galactic center) far from us — a Copernican demotion of our place in the galaxy. In the Great Debate he argued the spiral nebulae were inside our galaxy; he was wrong about that, but right that the universe is far larger than imagined.",
+      "tags": [
+        "Astronomy",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-payne-gaposchkin",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Cecilia Payne-Gaposchkin",
+    "teaser": "British-American astronomer whose 1925 doctoral thesis showed the sun and stars are mostly hydrogen and helium — overturning the belief that stars match Earth's composition. Her examiner, Henry Norris Russell, persuaded her to soften the conclusion; he later reached the same result himself and published it first. She is regarded as the greatest woman astronomer of her generation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Payne-Gaposchkin's 1925 thesis 'Stellar Atmospheres'",
+      "durationMinutes": 60,
+      "instruction": "Read how she applied the new quantum theory of spectra to classify stellar light, finding hydrogen vastly more abundant than metals in stellar atmospheres — at a time when astronomers assumed star composition matched the Earth's. The 'impossible' result was soon accepted. She later catalogued 3 million stars and named variable stars as a professor at Harvard.",
+      "tags": [
+        "Astronomy",
+        "20th Century",
+        "British-American"
+      ],
+      "tier": 2
+    }
+  }
+]

@@ -1,0 +1,401 @@
+[
+  {
+    "id": "book-a-tale-of-two-cities",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Tale of Two Cities",
+    "teaser": "Dickens's 1859 novel of London and Paris during the French Revolution — resurrection, sacrifice, and the most famous ending in English fiction. The guillotine's shadow over a love story.",
+    "imageUrl": "",
+    "byline": "Charles Dickens",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters and the ending",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the wine cask breaks in the street and the shadows of the era are drawn, then the final pages. Notice how Dickens foreshadows the blood. Write what Carton's sacrifice claims about love and meaning."
+    },
+    "tags": [
+      "British",
+      "Historical",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-david-copperfield",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "David Copperfield",
+    "teaser": "Dickens's 1850 autobiographical novel of David's rise from the blacking factory to the novelist's desk — with Mr. Micawber, Uriah Heep, and the warmth of the first-person. Dickens called it his favorite child.",
+    "imageUrl": "",
+    "byline": "Charles Dickens",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the factory and the stepfather",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where David's childhood is shadowed by the Murdstones. Notice how Dickens draws on his own hidden past. Write how the first-person voice turns the novel into a search for a place to belong."
+    },
+    "tags": [
+      "British",
+      "Autobiographical",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-hard-times",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Hard Times",
+    "teaser": "Dickens's 1854 novel of the industrial town Coketown and the school of 'facts' — the Gradgrind family raised on statistics, the circus girl Sissy Jupe, and the question of what humans actually need. Dickens's most political novel.",
+    "imageUrl": "",
+    "byline": "Charles Dickens",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the schoolroom of facts",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Gradgrind's school demands facts and only facts. Notice how Dickens opposes the circus to the countinghouse. Write what the novel says about education, imagination, and the steam engine's human cost."
+    },
+    "tags": [
+      "British",
+      "Industrial",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-pickwick-papers",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Pickwick Papers",
+    "teaser": "Dickens's 1836 first novel — Mr. Pickwick and his club's comic rambles through England, with Sam Weller's proverbs and the Fleet prison's shadows. The book that made Dickens famous overnight.",
+    "imageUrl": "",
+    "byline": "Charles Dickens",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the club and the first adventures",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the Pickwick Club's expeditions begin in comedy. Notice how the serial structure keeps each chapter self-contained. Write how the novel's warmth — and its sudden turn to the debtors' prison — shows Dickens's range."
+    },
+    "tags": [
+      "British",
+      "Comedy",
+      "Serial"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-nicholas-nickleby",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Nicholas Nickleby",
+    "teaser": "Dickens's 1839 novel of Nicholas's fight against his uncle Ralph and the monstrous schoolmaster Wackford Squeers — a serial that attacked Yorkshire boarding schools and championed the underdog.",
+    "imageUrl": "",
+    "byline": "Charles Dickens",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the family and the school",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the Nickleby family's ruin sends Nicholas to Dotheboys Hall. Notice how Dickens builds the horror of Squeers through comedy. Write what the novel's crusade against child abuse achieved in its own time."
+    },
+    "tags": [
+      "British",
+      "Social",
+      "Serial"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-tess-of-the-durbervilles",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Tess of the d'Urbervilles",
+    "teaser": "Hardy's 1891 novel of Tess Durbeyfield, 'a pure woman' destroyed by a society that will not let her be pure — the seduction, the murder, and the sacrifice at Stonehenge. Hardy's most beloved tragedy.",
+    "imageUrl": "",
+    "byline": "Thomas Hardy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the d'Urberville claim",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the family's false pedigree sets Tess's fate in motion. Notice how Hardy indicts the world rather than Tess. Write what the subtitle 'a pure woman' is arguing against, and how the ending completes the argument."
+    },
+    "tags": [
+      "British",
+      "Tragedy",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-far-from-the-madding-crowd",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Far from the Madding Crowd",
+    "teaser": "Hardy's 1874 novel of Bathsheba Everdene, the farm she inherits, and the three men who love her — the shepherd Gabriel Oak, the farmer Boldwood, and the soldier Troy. Hardy's sunniest great novel.",
+    "imageUrl": "",
+    "byline": "Thomas Hardy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the meeting on the road",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Gabriel Oak first sees Bathsheba and loses his flock. Notice how Hardy makes the Wessex landscape a character. Write what the title promises about the world the novel explores — and how the love plot tests it."
+    },
+    "tags": [
+      "British",
+      "Wessex",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-judge-the-obscure",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Jude the Obscure",
+    "teaser": "Hardy's 1895 novel of Jude Fawley, the stonemason who dreams of Oxford — and of Sue Bridehead, with whom he breaks every rule. The novel that ended the Victorian novel, and Hardy's fiction career.",
+    "imageUrl": "",
+    "byline": "Thomas Hardy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the dream of Christminster",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Jude's longing for the university city is established. Notice how Hardy turns the institutions of class into the novel's villains. Write why the book so scandalized its readers — and what it demands we look at."
+    },
+    "tags": [
+      "British",
+      "Class",
+      "Tragedy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-mayor-of-casterbridge",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Mayor of Casterbridge",
+    "teaser": "Hardy's 1886 novel of Michael Henchard, who sells his wife at a fair and spends his life paying for it — a tragedy of character, corn markets, and the town that watches. 'Character is fate' made flesh.",
+    "imageUrl": "",
+    "byline": "Thomas Hardy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the sale at the fair",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the drunken Henchard auctions his wife and wakes to the horror. Notice how Hardy presents the act and its lifelong consequences. Write how the novel's title — the man and the office — frames his rise and fall."
+    },
+    "tags": [
+      "British",
+      "Tragedy",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-silas-marner",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Silas Marner",
+    "teaser": "George Eliot's 1861 novel of the weaver who hoards gold until it is stolen and a child arrives in its place — a fable about what money and love actually buy. Eliot's most perfect small book.",
+    "imageUrl": "",
+    "byline": "George Eliot",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the weaver and the gold",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Silas's wronged past and his miserly present are established. Notice how Eliot makes the gold almost human. Write what the theft and the foundling Eppie teach Silas — and the novel's readers — about what is truly valuable."
+    },
+    "tags": [
+      "British",
+      "Fable",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-mill-on-the-floss",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Mill on the Floss",
+    "teaser": "Eliot's 1860 novel of Maggie Tulliver, too clever and too loving for her provincial world — and of the brother who cannot forgive her. The novel of family love and its ruin, ending in the flood.",
+    "imageUrl": "",
+    "byline": "George Eliot",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the mill and the children",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Maggie and Tom's childhood in the mill is established. Notice how Eliot grounds the tragedy in the economics of the family. Write what the river and the flood mean, and whether the ending is escape or punishment."
+    },
+    "tags": [
+      "British",
+      "Family",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-adam-bede",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Adam Bede",
+    "teaser": "Eliot's 1859 first novel — the carpenter Adam, the beautiful Hetty, and the infanticide at the heart of the English countryside. Eliot's warmest and most human story, rooted in her own childhood.",
+    "imageUrl": "",
+    "byline": "George Eliot",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the workshop and the village",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the village world of Hayslope is established. Notice how Eliot's realism treats the poorest characters with full dignity. Write how the novel's sympathy — extended even to Hetty's crime — was radical for its time."
+    },
+    "tags": [
+      "British",
+      "Realism",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-romola",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Romola",
+    "teaser": "Eliot's 1863 historical novel set in Renaissance Florence — Romola, the scholar's daughter, and her brilliant faithless husband Tito, against the backdrop of Savonarola's city. Eliot's most ambitious book.",
+    "imageUrl": "",
+    "byline": "George Eliot",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Florence and the marriage",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Romola's world of learning and Tito's charm are established. Notice how Eliot reconstructs Florence from its archives. Write what the novel says about the collision of ideals — Savonarola's, Tito's, Romola's — in a real city."
+    },
+    "tags": [
+      "British",
+      "Historical",
+      "Renaissance"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "book-shirley",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Shirley",
+    "teaser": "Charlotte Brontë's 1849 novel of the West Riding, the Luddite riots, and two very different women — the quiet Caroline and the heiress Shirley, whose name she made a girl's name. Brontë's most social novel.",
+    "imageUrl": "",
+    "byline": "Charlotte Brontë",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the mill and the two women",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the mill owners and the workers' unrest are established. Notice how Brontë connects the industrial conflict to the women's restricted lives. Write what Shirley's independence meant in 1849, and why the novel names a new kind of heroine."
+    },
+    "tags": [
+      "British",
+      "Industrial",
+      "Victorian"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "book-villette",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Villette",
+    "teaser": "Charlotte Brontë's 1853 novel of Lucy Snowe, who goes alone to a Belgian city and teaches in a girls' school — the loneliest and most modern of Brontë's books, and the one she called her best.",
+    "imageUrl": "",
+    "byline": "Charlotte Brontë",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the voyage and the school",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Lucy's solitary journey and her arrival at Madame Beck's school are narrated with cool control. Notice how Brontë withholds Lucy's feelings even as she shows them. Write what the novel's ambiguous ending leaves the reader to decide."
+    },
+    "tags": [
+      "British",
+      "Modernism",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-agnes-grey",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Agnes Grey",
+    "teaser": "Anne Brontë's 1847 novel of a governess's trials in two impossible households — the quietest and most honest of the Brontë novels, and the sharpest portrait of the governess's life in English fiction.",
+    "imageUrl": "",
+    "byline": "Anne Brontë",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the first post",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Agnes's hopes for her first governess post meet the Bloomfield children's cruelty. Notice how Anne Brontë reports the indignities without melodrama. Write what the novel reveals about the status of the Victorian governess."
+    },
+    "tags": [
+      "British",
+      "Governess",
+      "Victorian"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-tenant-of-wildfell-hall",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Tenant of Wildfell Hall",
+    "teaser": "Anne Brontë's 1848 novel of Helen Graham, who leaves her drunken husband and earns her own living — the first sustained feminist novel in English, shocking enough that her sister Charlotte suppressed a reprint.",
+    "imageUrl": "",
+    "byline": "Anne Brontë",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the tenant arrives",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the village's gossip meets Helen's secrecy, then the diary that explains her flight. Notice how Brontë uses the frame to build suspense. Write what the novel risks by defending a wife's right to leave."
+    },
+    "tags": [
+      "British",
+      "Feminist",
+      "Victorian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-woman-who-could-not-die",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Professor",
+    "teaser": "Charlotte Brontë's 1857 novel, written before Jane Eyre and published after her death — William Crimsworth's years teaching in Brussels. Brontë's first attempt at the story she would perfect in Villette.",
+    "imageUrl": "",
+    "byline": "Charlotte Brontë",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the mill and the decision",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Crimsworth rejects his brother's mill and sails for the continent. Notice how Brontë's male narrator is cool where her female narrators are fierce. Write how this early novel prefigures Villette — and what changed in between."
+    },
+    "tags": [
+      "British",
+      "Victorian",
+      "Brussels"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "book-north-and-south",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "North and South",
+    "teaser": "Elizabeth Gaskell's 1855 novel of Margaret Hale, moved from the rural south to the industrial north — where the mill master John Thornton and the striking workers teach her a new England. The industrial novel's masterpiece.",
+    "imageUrl": "",
+    "byline": "Elizabeth Gaskell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the move to Milton",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Margaret's displacement into the mill town is rendered with exactness. Notice how Gaskell gives both master and worker their arguments. Write what the novel proposes about the possibility of understanding across class lines."
+    },
+    "tags": [
+      "British",
+      "Industrial",
+      "Classic"
+    ],
+    "tier": 1
+  }
+]

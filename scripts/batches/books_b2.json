@@ -1,0 +1,443 @@
+[
+  {
+    "id": "book-plague",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Plague",
+    "teaser": "Albert Camus's 1947 allegory of a city shut by a disease and the ordinary people — the doctor, the journalist, the exile — who choose solidarity. It has been reread in every quarantine since.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the rats and the closed gates",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the plague arrives as dead rats and a doctor's tired vigilance. Notice how Camus keeps the narration clinical even as panic grows. Write what the novel says about how ordinary people become heroes."
+    },
+    "tags": [
+      "French",
+      "Allegory",
+      "Nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-metamorphosis",
+    "categoryId": "BOOKS",
+    "subtype": "Novella",
+    "name": "The Metamorphosis",
+    "teaser": "Kafka's 1915 novella — one morning Gregor Samsa wakes as an enormous insect, and the story watches his family get on with life around him. The most famous first sentence in modern fiction.",
+    "imageUrl": "",
+    "byline": "Franz Kafka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The full novella",
+      "durationMinutes": 60,
+      "instruction": "Read the novella, noticing that no one ever asks how or why the transformation happened. Write how Kafka treats the monstrous event with total domestic realism — and what the family's relief at Gregor's death says about the book."
+    },
+    "tags": [
+      "German",
+      "Absurd",
+      "Novella"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-siddhartha",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Siddhartha",
+    "teaser": "Hermann Hesse's 1922 novel of a Brahmin's son who leaves asceticism, wealth, and love behind to listen to a river. A spiritual bildungsroman that found millions of readers looking for the same river.",
+    "imageUrl": "",
+    "byline": "Hermann Hesse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The chapters about the river and the ferryman",
+      "durationMinutes": 60,
+      "instruction": "Read the chapters where Siddhartha learns from Vasudeva, the ferryman. Notice how the river teaches by being listened to rather than explained. Write what the river's laughter means — and why wisdom cannot be passed in words."
+    },
+    "tags": [
+      "German",
+      "Spiritual",
+      "Nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-steppenwolf",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Steppenwolf",
+    "teaser": "Hermann Hesse's 1927 novel of Harry Haller, who feels half-man, half-wolf, and is led through a Magic Theatre where every door plays with his identity. A psychedelic novel before psychedelics.",
+    "imageUrl": "",
+    "byline": "Hermann Hesse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters and the Magic Theatre",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters and then the ending's Magic Theatre. Notice how Hesse dramatizes the plurality of the self. Write what the wolf represents — is it a sickness to be cured or a part to be welcomed?"
+    },
+    "tags": [
+      "German",
+      "Modernism",
+      "Nobel"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-magic-mountain",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Magic Mountain",
+    "teaser": "Thomas Mann's 1924 novel of Hans Castorp, who visits a tuberculosis sanatorium for three weeks and stays seven years, absorbing Europe's arguments about time, disease, and death before the war ends everything.",
+    "imageUrl": "",
+    "byline": "Thomas Mann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — arrival at the sanatorium",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the flatland's clock time gives way to the mountain's strange time. Notice how Mann's irony and length are part of the subject. Write how the sanatorium functions as a pressure chamber for the era."
+    },
+    "tags": [
+      "German",
+      "Nobel",
+      "Time"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-tin-drum",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Tin Drum",
+    "teaser": "Günter Grass's 1959 novel of Oskar Matzerath, who decides to stop growing at three and drums his way through Nazi Germany and beyond. A picaresque, grotesque, furious reckoning with the German past.",
+    "imageUrl": "",
+    "byline": "Günter Grass",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the decision to stop growing",
+      "durationMinutes": 75,
+      "instruction": "Read the chapters where Oskar chooses to remain a child. Notice how Grass blends fairy tale, history, and obscenity. Write what Oskar's drum and his refusal to grow say about the adults who built the world around him."
+    },
+    "tags": [
+      "German",
+      "Nobel",
+      "Grotesque"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-perfume",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Perfume",
+    "teaser": "Patrick Süskind's 1985 novel of Jean-Baptiste Grenouille, born with no scent of his own and gifted with perfect smell — who murders to capture the world's fragrances. A historical novel and a fable of obsession.",
+    "imageUrl": "",
+    "byline": "Patrick Süskind",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — birth in the fish market",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters set in 18th-century Paris, where smell is the whole sensory world. Notice how Süskind makes absence — Grenouille's missing scent — the engine. Write what the murderer's quest for a perfect perfume ultimately seeks."
+    },
+    "tags": [
+      "German",
+      "Historical",
+      "Obsession"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-reader",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Reader",
+    "teaser": "Bernhard Schlink's 1995 novel of a boy's affair with an older woman who is later revealed as a former camp guard. A German reckoning with guilt, illiteracy, and the generations after the Holocaust.",
+    "imageUrl": "",
+    "byline": "Bernhard Schlink",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the affair and the readings",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Michael reads aloud to Hanna. Notice how the private ritual prefigures the public trial. Write how the novel asks what it means to love someone who did something unforgivable."
+    },
+    "tags": [
+      "German",
+      "Guilt",
+      "Holocaust"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-unbearable-lightness",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Unbearable Lightness of Being",
+    "teaser": "Milan Kundera's 1984 novel of love and politics in Prague — Tomas, Tereza, Sabina, and the Soviet tanks of 1968, with Nietzsche's eternal return weighing every choice. It made 'kitsch' a critical term.",
+    "imageUrl": "",
+    "byline": "Milan Kundera",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the question of eternal return",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Kundera sets up the philosophical wager before the story begins. Notice how essay and narrative interleave. Write how the novel's title — lightness as burden, weight as meaning — organizes the love story."
+    },
+    "tags": [
+      "Czech",
+      "Philosophy",
+      "Politics"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-godot",
+    "categoryId": "BOOKS",
+    "subtype": "Drama",
+    "name": "Waiting for Godot",
+    "teaser": "Samuel Beckett's 1953 play in which two men wait by a tree for someone who never arrives, twice. The most famous statement of the modern condition — a tragedy that plays as a comedy.",
+    "imageUrl": "",
+    "byline": "Samuel Beckett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening of the play and the ending",
+      "durationMinutes": 60,
+      "instruction": "Read the first exchanges between Vladimir and Estragon, then the final 'Let's go / We can't / Why not / Waiting for Godot.' Notice how the repetition is the meaning. Write what waiting itself does to identity in the play."
+    },
+    "tags": [
+      "Irish",
+      "Absurd",
+      "Drama"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-sun-also-rises",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Sun Also Rises",
+    "teaser": "Hemingway's 1926 novel of the lost generation — Jake Barnes, Brett Ashley, and their expatriate circle drinking and fishing and running with the bulls in Pamplona. The style changed American prose forever.",
+    "imageUrl": "",
+    "byline": "Ernest Hemingway",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Paris and the first bullfight",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters. Notice how Hemingway's sentences are short, factual, and full of what is not said. Write what the iceberg principle (the part under water) hides in Jake and Brett's relationship, and how the prose makes you feel it."
+    },
+    "tags": [
+      "American",
+      "Lost Generation",
+      "Nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-sound-and-fury",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Sound and the Fury",
+    "teaser": "Faulkner's 1929 novel of the Compson family told in four voices — beginning with Benjy's, who cannot tell time. A stream-of-consciousness masterpiece of decline in the American South.",
+    "imageUrl": "",
+    "byline": "William Faulkner",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Benjy's section",
+      "durationMinutes": 75,
+      "instruction": "Read Benjy's section, where past and present merge through smells and events. Notice how Faulkner forces you to feel rather than follow. Write how the broken chronology itself dramatizes the family's collapse."
+    },
+    "tags": [
+      "American",
+      "Nobel",
+      "Modernism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-east-of-eden",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "East of Eden",
+    "teaser": "John Steinbeck's 1952 retelling of the Cain and Abel story in California's Salinas Valley — the Trask brothers, the Hamiltons, and a mother who owns a brothel. Steinbeck called it his big book, the one he was saving up for.",
+    "imageUrl": "",
+    "byline": "John Steinbeck",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the valley and the Trask brothers",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the landscape and the family are laid out like Genesis. Notice how Steinbeck treats the word 'timshel' — the Hebrew 'thou mayest' — as the book's core. Write what the difference between must and mayest means."
+    },
+    "tags": [
+      "American",
+      "Epic",
+      "Nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-native-son",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Native Son",
+    "teaser": "Richard Wright's 1940 novel of Bigger Thomas, a young Black man in Chicago whose fear and rage ignite a crime and a trial. A landmark of American protest literature, still searing today.",
+    "imageUrl": "",
+    "byline": "Richard Wright",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the rat and the job",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the killing of the rat introduces the novel's atmosphere. Notice how Wright makes the reader inhabit Bigger's fear. Write what the book argues about how a society manufactures the criminals it fears."
+    },
+    "tags": [
+      "American",
+      "Protest",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-invisible-man",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Invisible Man",
+    "teaser": "Ralph Ellison's 1952 novel of a nameless narrator who descends into a basement of light bulbs and tells why he is invisible — not unseen in fantasy but unseen in fact. The great American novel of identity.",
+    "imageUrl": "",
+    "byline": "Ralph Ellison",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the battle royal",
+      "durationMinutes": 75,
+      "instruction": "Read the battle royal chapter, where the narrator is made to fight blindfolded for the entertainment of white men. Notice how Ellison layers symbol onto event. Write how the prologue's 1,369 light bulbs connect to the search for identity."
+    },
+    "tags": [
+      "American",
+      "National Book Award",
+      "Identity"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-go-tell-it-on-the-mountain",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Go Tell It on the Mountain",
+    "teaser": "James Baldwin's 1953 debut novel of a boy's fourteenth birthday in a Harlem storefront church — John Grimes's crisis of faith and family, told in a voice that fused the Bible and blues into literature.",
+    "imageUrl": "",
+    "byline": "James Baldwin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — John's Saturday and the threshing floor",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the church and the street both claim John. Notice how Baldwin's prose carries the cadence of the sermon. Write how the novel treats salvation as both promise and inheritance — what does John choose?"
+    },
+    "tags": [
+      "American",
+      "Faith",
+      "Harlem"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-autobiography-malcolm-x",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "The Autobiography of Malcolm X",
+    "teaser": "Malcolm X's 1965 life story, told to Alex Haley — from a Lansing childhood to Boston crime, prison study, the Nation of Islam, Mecca, and a new vision before his assassination. One of the great American testimonies.",
+    "imageUrl": "",
+    "byline": "Malcolm X and Alex Haley",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the early years and the conk",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where young Malcolm straightens his hair and learns the rules of the street. Notice how the book is built as a conversion narrative. Write how each turning point — prison, the Nation, Mecca — transforms his understanding of himself."
+    },
+    "tags": [
+      "American",
+      "Memoir",
+      "Civil Rights"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-wretched-of-the-earth",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Wretched of the Earth",
+    "teaser": "Frantz Fanon's 1961 manifesto on decolonization, written while the Algerian war burned — on violence, the colonial psychology, and the birth of a new humanity. Sartre's preface called it a cry.",
+    "imageUrl": "",
+    "byline": "Frantz Fanon",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapter — Concerning Violence",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapter. Notice how Fanon writes as a psychiatrist and a revolutionary at once, describing the colonial world as a compartmentalized reality. Write what he claims violence 'unbinds' in the colonized, and how you assess that claim."
+    },
+    "tags": [
+      "Algerian",
+      "Decolonization",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-silent-spring",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Silent Spring",
+    "teaser": "Rachel Carson's 1962 exposé of DDT and the chemical industry's assault on life — a book that began with a fable of a town where the birds fell silent and ended with the birth of environmentalism.",
+    "imageUrl": "",
+    "byline": "Rachel Carson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapter — A Fable for Tomorrow",
+      "durationMinutes": 45,
+      "instruction": "Read the opening fable, then a chapter on the chemistry of poisons. Notice how Carson moves from story to science to indictment. Write how she makes biochemistry urgent and readable — and what the book's legacy changed in law."
+    },
+    "tags": [
+      "American",
+      "Environment",
+      "Science"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-sand-county-almanac",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "A Sand County Almanac",
+    "teaser": "Aldo Leopold's 1949 almanac of his Wisconsin farm — month by month, from the January thaw to the December pines, ending with the land ethic that founded modern conservation thinking.",
+    "imageUrl": "",
+    "byline": "Aldo Leopold",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening months — January and February",
+      "durationMinutes": 60,
+      "instruction": "Read the January and February chapters. Notice how Leopold turns the skunk's track and the chickadee's call into precise observation and philosophy. Write what his 'land ethic' — extending ethics to the land itself — asks of us."
+    },
+    "tags": [
+      "American",
+      "Nature",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-guns-germs-steel",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Guns, Germs, and Steel",
+    "teaser": "Jared Diamond's 1997 Pulitzer winner asking why history unfolded differently across continents — geography and biology rather than racial genius. A sweeping answer to an enormous question.",
+    "imageUrl": "",
+    "byline": "Jared Diamond",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the question and the answer's shape",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Diamond frames the question of why some peoples conquered others. Notice how he insists on environmental rather than biological explanation. Write how his argument holds up as a model for asking big historical questions."
+    },
+    "tags": [
+      "American",
+      "History",
+      "Pulitzer"
+    ],
+    "tier": 1
+  }
+]

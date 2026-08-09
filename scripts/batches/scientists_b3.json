@@ -1,0 +1,282 @@
+[
+  {
+    "id": "scientist-frege",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Logician",
+    "name": "Gottlob Frege",
+    "teaser": "German logician who invented modern logic — quantifiers, variables, formal proof — in his 1879 Begriffsschrift, trying to show arithmetic could be derived from pure logic. His project failed when Russell found a paradox in his system, but he had created the language in which all of mathematics is now written.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Frege's Begriffsschrift (1879) and the Frege–Russell correspondence (1902)",
+      "durationMinutes": 90,
+      "instruction": "Read how Frege's notation — horizontal bars and strokes — introduced the ∀ and ∃ quantifiers and the idea of a fully formal proof. When Russell wrote to him in 1902 about the paradox of the set of all sets, Frege's reply began: 'Your discovery of the contradiction has surprised me beyond words.' The setback became the seed of set theory's axioms.",
+      "tags": [
+        "Logic",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-russell",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Logician",
+    "name": "Bertrand Russell",
+    "teaser": "British philosopher and mathematician who, with Whitehead, spent a decade deriving all of mathematics from logic in Principia Mathematica (1910–13) — three volumes, 2,000 pages, and the most influential formalization ever attempted. He also discovered Russell's paradox, which shook the foundations of set theory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Principia Mathematica, and Russell's paradox (the barber who shaves everyone who doesn't shave himself)",
+      "durationMinutes": 90,
+      "instruction": "Read about the paradox: does the set of all sets that don't contain themselves contain itself? Either answer contradicts the other — showing naive set theory was inconsistent. Principia's response was the theory of types. The book famously takes 360 pages to prove that 1+1=2. Russell later won the Nobel Prize in Literature.",
+      "tags": [
+        "Logic",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-galois",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Évariste Galois",
+    "teaser": "French mathematician who, as a teenager, solved the 350-year-old problem of when polynomial equations can be solved by radicals — inventing group theory overnight. He died at 20 in a duel, having spent his last night writing out his mathematics, ending with 'I have no time.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Galois's 1831 memoir on the solvability of equations",
+      "durationMinutes": 90,
+      "instruction": "Read how Galois attached to each equation a 'group' of permutations of its roots — if that group has the right structure, the equation is solvable by radicals; otherwise not. This is why the quintic has no general formula. His memoir was rejected, lost, and published posthumously; group theory, one of mathematics' deepest tools, grew from those pages.",
+      "tags": [
+        "Mathematics",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-laplace",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Pierre-Simon Laplace",
+    "teaser": "French mathematician and astronomer who completed the mechanical picture of the solar system — showing it is stable under Newton's laws — and wrote the five-volume Celestial Mechanics. His demon, a mind that knew every position and force, could predict the entire future. He also gave us the Laplace transform and probability theory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Laplace's Exposition du système du monde (1796) and the nebular hypothesis",
+      "durationMinutes": 90,
+      "instruction": "Read his nebular hypothesis — that the solar system condensed from a rotating cloud — which remains the basis of planet formation theory. Then consider his demon, from his 1814 Essay on Probability: perfect knowledge of the present implies perfect knowledge of the future. He is said to have told Napoleon that God was a hypothesis he had no need of.",
+      "tags": [
+        "Mathematics",
+        "18th-19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-lagrange",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Joseph-Louis Lagrange",
+    "teaser": "Italian-born mathematician who reformed mechanics in his 1788 Mécanique Analytique — a book with not a single diagram, reducing all of mechanics to equations. He developed the calculus of variations, the Lagrange equations, and number theory results that still bear his name. Euler called him the greatest mathematician of the age.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lagrange's Mécanique Analytique (1788), preface and first sections",
+      "durationMinutes": 90,
+      "instruction": "Read the preface, where he boasts that his book contains no figures — mechanics has become analysis. His method: from a single scalar function, the Lagrangian, derive all the equations of motion. The 'Lagrangian' formulation is now the language of quantum field theory — the most precise theory ever built, descended from that diagram-free book.",
+      "tags": [
+        "Mathematics",
+        "18th Century",
+        "Italian-French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-cauchy",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Augustin-Louis Cauchy",
+    "teaser": "French mathematician who made analysis rigorous — defining limits, continuity, and convergence so precisely that calculus finally stood on solid ground. He wrote over 800 papers, more than any other mathematician, and his name is attached to dozens of theorems in complex analysis.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cauchy's Cours d'analyse (1821), on limits and continuity",
+      "durationMinutes": 90,
+      "instruction": "Read how Cauchy replaced 'infinitesimals' — which Leibniz had used loosely — with precise statements about sequences and epsilons: a limit is a number the sequence approaches arbitrarily closely. His rigorous definition of continuity and convergence ended centuries of hand-waving. Every calculus student today uses Cauchy's framework.",
+      "tags": [
+        "Mathematics",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-germain",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Sophie Germain",
+    "teaser": "French mathematician who, barred from the École Polytechnique because she was a woman, submitted work under a male pseudonym — until Gauss discovered the truth and became her champion. She made the first real progress on Fermat's Last Theorem and wrote the mathematics of vibrating plates, winning a prize Gauss helped arrange.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Germain's work on Fermat's Last Theorem and elastic surfaces",
+      "durationMinutes": 60,
+      "instruction": "Read how Germain, writing as 'Monsieur Le Blanc,' corresponded with Gauss and Lagrange, who were astonished by her talent. Her number theory showed that if p is a 'Germain prime,' certain cases of Fermat's Last Theorem hold. Her prize-winning 1816 work on the vibrations of elastic surfaces founded the modern theory of plates. Gauss wrote her: 'the noblest example of what a woman can achieve.'",
+      "tags": [
+        "Mathematics",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-kovalevskaya",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Sofia Kovalevskaya",
+    "teaser": "Russian mathematician who, denied university entry at home, studied in Germany under Weierstrass and became the first woman to earn a doctorate in mathematics (1874) and the first woman professor in Northern Europe. She won the Prix Bordin of the Paris Academy for a paper on Saturn's rings.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kovalevskaya's 1888 Prix Bordin memoir on the rotation of a rigid body",
+      "durationMinutes": 60,
+      "instruction": "Read how she solved the 'Kovalevskaya top' — a case of rigid-body rotation found integrable, a century-old open problem, winning a prize so handsome it was doubled. She also worked on partial differential equations and became a novelist. Her memoir A Russian Childhood describes growing up brilliant and restless in 19th-century Russia.",
+      "tags": [
+        "Mathematics",
+        "19th Century",
+        "Russian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-klein",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Felix Klein",
+    "teaser": "German mathematician who unified geometry through symmetry — his Erlangen Program (1872) defined geometries as the study of properties invariant under groups of transformations. He also proposed the Klein bottle, a one-sided surface that can't exist in ordinary 3D space.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Klein's Erlangen Program (1872)",
+      "durationMinutes": 60,
+      "instruction": "Read how Klein's manifesto said: a geometry is determined by its symmetries. Euclidean geometry preserves distances; projective geometry preserves lines; each is a subgroup structure. This one idea organized a sprawling field. His Klein bottle — a surface with no inside or outside — is a topology icon that cannot be embedded without self-intersection in 3D.",
+      "tags": [
+        "Mathematics",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-wiles",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Andrew Wiles",
+    "teaser": "British mathematician who proved Fermat's Last Theorem in 1994 — 358 years after Fermat scribbled in a margin that he had a proof too small to fit. Wiles worked in secret for seven years, found a fatal gap, and fixed it with help from Richard Taylor. The proof runs over 100 pages and uses mathematics Fermat never dreamed of.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wiles's proof of Fermat's Last Theorem (1995), and its seven years of secrecy",
+      "durationMinutes": 90,
+      "instruction": "Read how Wiles connected Fermat's equation to elliptic curves and modular forms — the Taniyama–Shimura conjecture — proving enough of it to rule out counterexamples. He announced the proof in 1993; a gap appeared, and the final version, with Taylor, was published in 1995. Fermat's 'I have discovered a truly marvelous proof' remains forever unverifiable.",
+      "tags": [
+        "Mathematics",
+        "20th-21st Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-perelman",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Grigori Perelman",
+    "teaser": "Russian mathematician who proved the Poincaré conjecture — one of the Clay Institute's million-dollar Millennium Problems — in 2003, then refused the prize, the Fields Medal, and interviews. He used Richard Hamilton's Ricci flow, a geometric heat equation, to straighten out 3D shapes. He now lives in St. Petersburg, working odd jobs.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Perelman's 2003 proof of the Poincaré conjecture via Ricci flow",
+      "durationMinutes": 90,
+      "instruction": "Read how the Ricci flow smooths a space — like heat spreading — until it reveals its true shape, with 'surgery' needed when it pinches. Perelman's three preprints, posted to the arXiv, resolved the conjecture and the Thurston geometrization program. He declined the $1 million prize, saying his contribution wasn't exceptional — and withdrew from mathematics.",
+      "tags": [
+        "Mathematics",
+        "21st Century",
+        "Russian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-nash",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "John Nash",
+    "teaser": "American mathematician who at 21 proved the existence of equilibrium in games — the Nash equilibrium — founding modern game theory and winning the 1994 Nobel in Economics. Decades of schizophrenia interrupted his career; his recovery and life became the film A Beautiful Mind. He also proved deep theorems in geometry.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nash's 1950 dissertation 'Non-Cooperative Games'",
+      "durationMinutes": 60,
+      "instruction": "Read how Nash's equilibrium — a strategy profile where no player can improve by changing alone — unified and generalized von Neumann's earlier game theory. It now models auctions, traffic, and evolution. His geometric work, the Nash embedding theorem, was called 'one of the most original theorems of the century' by Gromov. He and his wife died in a car crash in 2015, days after he received the Abel Prize.",
+      "tags": [
+        "Mathematics",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-minsky",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Computer Scientist",
+    "name": "Marvin Minsky",
+    "teaser": "American AI pioneer and co-founder of MIT's AI Lab who built the first neural network machine (the Snarc, 1951) and wrote The Society of Mind, proposing that intelligence emerges from many simple agents. He co-designed the first head-mounted display and advised on 2001: A Space Odyssey's HAL.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Minsky's Perceptrons (1969) and The Society of Mind (1986)",
+      "durationMinutes": 60,
+      "instruction": "Read about the debate: with Papert, Minsky's Perceptrons showed limits of single-layer neural networks, cooling the first AI winter — a result deep learning later overturned. The Society of Mind argues intelligence is many small minds working together. His dictum: 'If you understand something in only one way, you don't really understand it at all.'",
+      "tags": [
+        "Computing",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-hinton",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Computer Scientist",
+    "name": "Geoffrey Hinton",
+    "teaser": "British-Canadian cognitive psychologist who kept the neural network flame alive through two AI winters and made it burn again: backpropagation, deep learning, and the breakthroughs that gave us modern speech recognition and image AI. Shared the 2018 Turing Award and the 2024 Nobel Prize in Physics. He later warned that AI could become an existential risk.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rumelhart, Hinton & Williams's 1986 backpropagation paper, and Hinton's 2012 AlexNet breakthrough",
+      "durationMinutes": 60,
+      "instruction": "Read how backpropagation — propagating errors backward through a network — made multi-layer learning practical, and how in 2012 Hinton's students won the ImageNet competition by a landslide, crashing the network's error rate from 26% to 15%. That win kicked off the deep learning era. Hinton left Google in 2023 to speak freely about AI risks.",
+      "tags": [
+        "Computing",
+        "20th-21st Century",
+        "British-Canadian"
+      ],
+      "tier": 1
+    }
+  }
+]

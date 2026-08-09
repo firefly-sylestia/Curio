@@ -121,7 +121,7 @@ fun CurioCrashScreen(navController: NavController) {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = "Curio paused the explore timer, bubble and reminders so the app could open safely. " +
-                            "The crash below is the latest one — tap Restart Curio to start clean and continue normally.",
+                            "The crash below is the latest one. Tap Restart Curio to start clean and continue normally.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )

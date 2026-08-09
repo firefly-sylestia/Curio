@@ -1,0 +1,304 @@
+================================================================================
+CURIO — PET DIALOGUE REFERENCE (edit-friendly)
+================================================================================
+Every line the Curio pet (and the tour guide) says, grouped by WHEN/WHY it
+appears, with the exact code location so you can find and polish each one.
+
+Legend
+  • [picks one at random]  = the pet shows ONE line from that group per event
+  • __LANE__               = replaced at show time with a category name
+  • (caption)              = my note on what the line is FOR, not spoken text
+
+--------------------------------------------------------------------------------
+1. PASSIVE MOOD BUBBLES — shown when the pet idles in a mood
+   Location: app/src/main/java/com/curio/app/data/CurioPet.kt
+            (lineFor, excitedLines/happyLines/morningLines/afternoonLines/
+             eveningLines/nightLines/curiousLines/sleepyLines/focusedLines/
+             bouncyLines)
+
+  PROUD (leveled up in last 90s) [picks one at random]:
+    • "Level {N}. I grew a little!"     (N = your level)
+    • "Shiny! We leveled up together."
+    • "Do you feel that? That's growth!"
+
+  EXCITED (explored a new lane in last 60s):
+    • "Ooh! Somewhere new!"
+    • "Wheee, new ground!"
+    • "The deck has taste!"
+    • "Fresh paths ahead!"
+
+  HAPPY — morning (6-11h):
+    • "Morning! The deck smells fresh."
+    • "Rise and shine. Something new is waiting."
+    • "Fresh eyes, fresh topics. Let's go!"
+    • "Good morning! I saved your spot."
+  HAPPY — afternoon (12-17h):
+    • "Afternoon wander? Let's go."
+    • "Bright and busy. A good time to peek."
+    • "Midday! Perfect for a quick spin."
+  HAPPY — evening (18-21h):
+    • "Evening! Cozy hour, warm lamp."
+    • "The day's winding down. One more spin?"
+    • "Evening glow. Nice time for a discovery."
+  HAPPY — night (22h-5h):
+    • "Past my bedtime… but for you, I'll stay."
+    • "Shh, night mode. One quiet spin?"
+    • "The stars are out. The deck still shines."
+
+  CURIOUS (there is a lane you never tried) [__LANE__ is the lane name]:
+    • "We haven't tried __LANE__ yet. Want a new stamp?"
+    • "I wonder what __LANE__ hides…"
+    • "Pssst, __LANE__ is calling."
+    (fallback when every lane is tried)
+    • "Spin something new today?"
+
+  FOCUSED (you're writing/saving on the capture screen):
+    • "Write it down. I'll guard your thoughts."
+    • "Quiet paws, I promise."
+    • "Take your time. This one's a keeper."
+
+  BOUNCY (right after a play session):
+    • "Phew, that was fun. Again soon?"
+    • "I'm still bouncing from that game!"
+    • "Best play date ever. …Round two?"
+
+  SLEEPY (long idle / after dark):
+    • "I'll keep your seat warm. Come spin when you're ready."
+    • "Yawn… the deck can wait a moment."
+    • "Soft blanket, warm lamp… I'm ready when you are."
+
+--------------------------------------------------------------------------------
+2. EVENT REACTIONS — real actions bump these (hop + line)
+   Location: CurioPet.kt (eventLine)
+
+  SPIN LANDED:
+    • "It landed!"
+    • "Ooh, the deck chose well!"
+    • "A new topic, a new tale!"
+  REVEAL OPENED — auto-open ON (reveal opens by itself):
+    • "There it is!"
+    • "It opened itself, sneaky!"
+    • "Ta-da! A new tale!"
+    • "Ooh, look what landed!"
+    • "Surprise!"
+  REVEAL OPENED — auto-open OFF (you tap it open):
+    • "Open it, open it!"
+    • "Come see what's inside!"
+    • "I'm dying of curiosity!"
+  EXPLORED A TOPIC:
+    • "Go explore!"
+    • "Adventure time!"
+    • "I'll wait right here. Go see!"
+  SAVED A CAPTURE:
+    • "Keepsake saved!"
+    • "Mine now… I mean, ours!"
+    • "Tucked away safely!"
+
+--------------------------------------------------------------------------------
+3. SPIN CHEER — while the deck is reeling
+   Location: CurioPet.kt (spinCheer)
+
+    • "Go, go, go!"
+    • "Spinny spin!"
+    • "Ooh, where will it land?"
+    • "Come on, good one!"
+    • "Round and round!"
+    • "I can't watch. Okay, I'm watching."
+
+--------------------------------------------------------------------------------
+4. TOUCH REACTIONS — tap the floating pet (escalates with rapid taps)
+   Location: CurioPet.kt (touchReaction)
+
+  3+ rapid taps — celebration:
+    • "Yay!"
+    • "I love boops!"
+    • "Best friends!"
+    • "Squee!"
+    • "More, more, more!"
+    • "You're my favorite!"
+    • "Party time!"
+  2 rapid taps — playful:
+    • "Hehehe!"
+    • "More, more!"
+    • "This is fun!"
+    • "Tag, you're it!"
+    • "Catch me!"
+    • "Bouncy bouncy!"
+    • "Again, again!"
+  1 tap — soft boop:
+    • "Boop!"
+    • "Hehe!"
+    • "Wheee!"
+    • "Ooh!"
+    • "That tickles!"
+    • "Hihi!"
+    • "Boop boop!"
+    • "Again!"
+    • "You found me!"
+    • "Poke!"
+    • "Hi hi hi!"
+    • "Soft paws!"
+    • "Mrow!"
+    • "Pfft!"
+
+--------------------------------------------------------------------------------
+5. SELF-STARTED GAME — the pet play-bows and zooms off
+   Location: CurioPet.kt (playInitiation)
+
+    • "Wanna play? Catch me!"
+    • "Boop! You're it!"
+    • "I'm feeling bouncy!"
+    • "Zoom zoom, chase me!"
+    • "Play with me!"
+    • "Tag! Your turn!"
+    • "I'm bored, come chase me!"
+
+--------------------------------------------------------------------------------
+6. LANDMARK POKES — the pet wanders to a screen element and boops it
+   Location: CurioPet.kt (landmarkLine)
+
+  FUN things (buttons/gadgets — boop + hearts):
+    • "Boop!"
+    • "Ooh, shiny!"
+    • "Hehe, hi!"
+    • "Tag! You're it!"
+    • "I like this one!"
+    • "Spinny spinny!"
+    • "Wheee!"
+    • "Boop boop boop!"
+  CURIOUS things (text — read-tilt + gentle poke):
+    • "What's this?"
+    • "Hmm, interesting…"
+    • "*peeks*"
+    • "Read read read!"
+    • "Ooh, words!"
+    • "Let me read this!"          (v8.26 — was "I'm reading this.")
+    • "Scribble scribble!"
+
+--------------------------------------------------------------------------------
+7. JIG — the pet dances at a special spot (its flower bed)
+   Location: CurioPet.kt (jigLine)
+
+    • "Tippy tap tap!"
+    • "Happy feet!"
+    • "Wiggle wiggle!"
+    • "Da-da-daaaa!"
+    • "Jiggle jiggle!"
+    • "Party paws!"
+    • "Dance break!"
+    • "Shake it off!"
+    • "Tap dance time!"
+
+--------------------------------------------------------------------------------
+8. DIZZY — after being flung around by a drag (v8.21+)
+   Location: CurioPet.kt (dizzyLine)
+
+    • "Whoa… the room is spinning!"
+    • "Wheee, dizzy!"
+    • "Spin spin… okay, stop!"
+    • "Whoa whoa whoa!"
+    • "I think I need a sit-down…"
+    • "So dizzy!"
+    • "We-e-ee! …Whew!"
+    • "The floor is wobbly!"
+
+--------------------------------------------------------------------------------
+9. DRAWER PEEK — a filter/category sheet opened
+   Location: CurioPet.kt (drawerLine)
+
+    • "Ooh, a drawer!"
+    • "Peek peek, what's in there?"
+    • "Can I come too?"
+    • "Hmm, so many choices!"
+    • "Ooh, filters!"
+    • "What are we picking?"
+    • "I'll wait right here!"
+    • "Ooh, shiny options!"
+
+--------------------------------------------------------------------------------
+10. MORNING GREETING — the pet wakes on its own at morning launch
+    Location: CurioPet.kt (morningGreeting)
+
+    • "Good morning!"
+    • "Morning! Ready for a spin?"
+    • "Rise and shine!"
+    • "Fresh day, fresh topics!"
+
+--------------------------------------------------------------------------------
+11. HOME DROP / LONG-PRESS — sent back to its flower bed
+    Location: app/src/main/java/com/curio/app/ui/pet/CurioFloatingPet.kt
+             (hardcoded inline — NOT in CurioPet.kt)
+
+    • "Home sweet home!"
+
+--------------------------------------------------------------------------------
+12. PET CHECK-IN DIALOG — tap the pet in the hero card
+    Location: app/src/main/java/com/curio/app/ui/pet/CurioPetCompanion.kt
+             (the mood line reuses section 1; the rest are labels)
+
+    • "{stage name}"                       (dialog title, e.g. "Curious Sprout")
+    • {mood line}                          (from section 1)
+    • "Personality: {name} — {tagline}"    (taglines below)
+    • "Next growth: {hint}"                (e.g. "Reach Level 3 to grow.")
+    • "Next quest: {quest title}"
+    • Buttons: "Okay" / "Go to quest"
+
+  PERSONALITY TAGLINES (CurioPet.kt, persona enum):
+    CUDDLY    → "loves boops and scritches"
+    BOUNCY    → "always up for a game"
+    EXPLORER  → "can't pass up a new lane"
+    SPARKY    → "still finding its spark"
+
+--------------------------------------------------------------------------------
+13. FIRST-JOURNEY TOUR — the guided walkthrough pill
+    Location: app/src/main/java/com/curio/app/data/QuestGuide.kt
+             (buildTourSteps; some lines adapt to the auto-open setting)
+
+  Home (welcome):
+    • "This is home. Your daily quests, the deck, and everything you've
+       saved all live here."
+  Quests hub:
+    • "Check the daily quests whenever you like. They're the fastest way
+       to grow."
+  Spin — auto-open ON:
+    • "Give Shuffle a tap. The deck picks something fresh and opens it for
+       you."
+  Spin — auto-open OFF:
+    • "Give Shuffle a tap. The deck picks something fresh for you."
+  Open the landed topic — auto-open ON:
+    • "Nice one! It's already open. Read the teaser, then start exploring."
+  Open the landed topic — auto-open OFF:
+    • "Nice one! Tap the card to open the teaser, then start exploring."
+  Start exploring:
+    • "Ready? Tap Start exploring on the topic, or save it for later."
+  Capture what you found:
+    • "Back from exploring? Jot it down. Saving a note makes the discovery
+       yours."
+  The Cabinet:
+    • "This is the Cabinet. Every keepsake you save lands here."
+  Reward & pet growth:
+    • "Every curious act earns XP and feeds your Curio pet. Watch it grow!"
+  You're all set (final):
+    • "That's the loop: spin, explore, save. You're all set!"
+  Skip labels on wait steps: "Skip" / "Explore later" / "Skip"
+
+--------------------------------------------------------------------------------
+14. ONBOARDING TOUR-ASK DIALOG — after the intro, before Home
+    Location: app/src/main/java/com/curio/app/features/onboarding/OnboardingScreen.kt
+
+  Title:
+    • "Take a quick tour?"
+  Body:
+    • "Your pet can walk you through Home, the deck, exploring, and saving
+       your first keepsake. It takes about a minute."
+  Buttons:
+    • "Take the tour" / "Not now"
+
+--------------------------------------------------------------------------------
+Notes for future edits
+  • Keep one sentence per passive bubble (the pill shows max 2 lines).
+  • Try to avoid em dashes (—) in user-facing copy; use "…" or plain text.
+  • Lines are picked at random per group — to change the mood, edit the
+    matching group in CurioPet.kt (section headers name the list variable).
+  • The pet's REACTION TIMING (how long a bubble stays up) lives in
+    CurioFloatingPet.kt: hold ≈ 2.3s + fade, dizzy recovery 2.5s.

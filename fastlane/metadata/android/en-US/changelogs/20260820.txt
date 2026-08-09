@@ -1,0 +1,1 @@
+Swipe the deck's front card left or right to browse the cards already visible in the fan — the whole deck streams to the next topic, and tapping still opens what you're looking at.

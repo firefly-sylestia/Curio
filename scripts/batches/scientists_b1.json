@@ -1,0 +1,462 @@
+[
+  {
+    "id": "scientist-alhazen",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Ibn al-Haytham (Alhazen)",
+    "teaser": "Basran polymath who wrote the Book of Optics around 1011, proving light travels in straight lines, explaining reflection and refraction, and inventing the camera obscura. He is called the father of modern optics — and of the scientific method, insisting experiments must test theories.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ibn al-Haytham's Book of Optics (Kitab al-Manazir), Book I",
+      "durationMinutes": 60,
+      "instruction": "Read Book I, where al-Haytham describes how light enters the eye and how vision works through rays — overturning the ancient idea that the eye emits rays. Notice his method: he states a hypothesis, then devises experiments. The camera obscura he described is the ancestor of every photograph and movie.",
+      "tags": [
+        "Optics",
+        "Islamic Golden Age",
+        "Physics"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-avicenna",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physician",
+    "name": "Avicenna (Ibn Sina)",
+    "teaser": "Persian physician and philosopher whose Canon of Medicine was the standard medical textbook in Europe for 600 years. He described contagious diseases, quarantine, clinical trials, and the anatomy of the eye — all while serving as vizier to rulers and writing on philosophy, logic, and astronomy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Avicenna's Canon of Medicine, Book I (the principles of medicine)",
+      "durationMinutes": 60,
+      "instruction": "Read Book I, where Avicenna lays out the causes of disease, the importance of environment, and the testing of drugs. He was the first to describe meningitis, recognize the contagiousness of tuberculosis, and discuss clinical pharmacology — testing drugs on humans and animals before prescribing.",
+      "tags": [
+        "Medicine",
+        "Islamic Golden Age",
+        "Persian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-al-biruni",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Al-Biruni",
+    "teaser": "Central Asian scholar who calculated the Earth's radius to within 1% using a mountain and trigonometry — in 1020, without leaving the region. He catalogued minerals, wrote about India, and was the first to suggest the Indus valley was once a sea. A polymath who treated science as evidence, not opinion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Al-Biruni's geodesic calculation and his Kitab al-Tahdid",
+      "durationMinutes": 60,
+      "instruction": "Read about his mountain method: measure the angle to the horizon from a mountain top of known height, then use trigonometry to get the Earth's radius. He got about 6,340 km — remarkably close to the true 6,371. His measured latitude of his home city was accurate to an arcminute.",
+      "tags": [
+        "Geodesy",
+        "Islamic Golden Age",
+        "Astronomy"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-al-khwarizmi",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Al-Khwarizmi",
+    "teaser": "Baghdad mathematician whose book on solving equations gave us the word 'algebra' (al-jabr) and whose name gave us 'algorithm.' He systematized Hindu numerals and zero, and his 9th-century texts carried Indian mathematics to Europe, where they became arithmetic.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Al-Khwarizmi's Al-Kitab al-mukhtasar fi hisab al-jabr wal-muqabala",
+      "durationMinutes": 60,
+      "instruction": "Read the opening of his algebra book, where he solves linear and quadratic equations by six standard methods — completing the square is the centerpiece. Note there are no symbols: everything is in words. His arithmetic book, using Indian numerals, is why we write numbers the way we do.",
+      "tags": [
+        "Mathematics",
+        "Islamic Golden Age",
+        "Algebra"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-hero",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Engineer",
+    "name": "Hero of Alexandria",
+    "teaser": "Greek engineer of the 1st century CE who built the first steam engine (the aeolipile), vending machines, and automatic temple doors. His treatise on pneumatics is a catalog of machines powered by air, water, and steam — a thousand years before the Industrial Revolution.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hero's Pneumatica (the aeolipile and the automatic temple doors)",
+      "durationMinutes": 60,
+      "instruction": "Read the description of the aeolipile — a hollow sphere with bent nozzles that spins when steam escapes — and notice that no one in antiquity built on it: it was a toy, not a power source. Also read his formula for the area of a triangle, which is still called Heron's formula.",
+      "tags": [
+        "Engineering",
+        "Ancient",
+        "Greek"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-eratosthenes",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Geographer",
+    "name": "Eratosthenes",
+    "teaser": "Librarian of Alexandria who measured the circumference of the Earth around 240 BCE by comparing shadows in two cities 800 km apart — getting a result within a few percent of the truth. He also measured the tilt of the Earth's axis and the distance to the sun and moon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Eratosthenes's shadow experiment (via Cleomedes)",
+      "durationMinutes": 60,
+      "instruction": "Read how he used a well in Syene where the sun shone straight down at noon on the solstice, and a vertical stick in Alexandria that cast a shadow of 7.2 degrees. The ratio of that angle to a full circle gives the fraction of the Earth's circumference between the cities. Simple geometry, world-shaking result.",
+      "tags": [
+        "Geodesy",
+        "Ancient",
+        "Greek"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-democritus",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Philosopher",
+    "name": "Democritus",
+    "teaser": "Greek philosopher who proposed that everything is made of tiny indivisible particles — atoms — moving in empty space, around 400 BCE. He had no experiments, only reasoning, yet his picture of matter was closer to modern physics than anything that followed for 2,000 years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The fragments of Democritus on atoms and void",
+      "durationMinutes": 60,
+      "instruction": "Read the surviving fragments, collected from later writers. Democritus argued that atoms are eternal, differ in shape and size, and combine to make everything — even the soul. He also proposed that the Milky Way is a mass of distant stars. His atomic theory was dismissed by Aristotle, and the word 'atom' waited 2,300 years to become real physics.",
+      "tags": [
+        "Philosophy",
+        "Ancient",
+        "Greek"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-pythagoras",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Mathematician",
+    "name": "Pythagoras",
+    "teaser": "Greek thinker who taught that numbers are the essence of reality. His school discovered that harmonious musical notes come from simple ratios of string lengths — the first link between mathematics and the physical world — and proved the theorem that still bears his name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Pythagorean theorem and the music of the spheres",
+      "durationMinutes": 60,
+      "instruction": "Try the experiment: pluck a string, then halve its length — the pitch rises an octave, a ratio of 2:1. Other pleasing intervals are also simple ratios. Read how this discovery — that nature follows numbers — inspired the 'music of the spheres' and the belief that the cosmos runs on mathematics.",
+      "tags": [
+        "Mathematics",
+        "Ancient",
+        "Greek"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-vesalius",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Anatomist",
+    "name": "Andreas Vesalius",
+    "teaser": "Flemish anatomist who, at 28, published De Humani Corporis Fabrica (1543), built on his own dissections of executed criminals — correcting Galen's 1,400-year-old errors. He proved Galen had dissected animals, not humans, and founded modern anatomy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vesalius's De Humani Corporis Fabrica, Book I (the skeleton)",
+      "durationMinutes": 60,
+      "instruction": "Read the plates and text on the skeleton. Vesalius dissected and drew with artists, showing muscles, bones, and organs as they actually are — not as Galen said. The book's woodcuts are masterpieces. He reportedly demonstrated a Galen error to his students by dissecting a monkey and a human side by side.",
+      "tags": [
+        "Anatomy",
+        "Renaissance",
+        "Flemish"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-harvey",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physician",
+    "name": "William Harvey",
+    "teaser": "English physician who proved the heart pumps blood in a circle around the body — not the liver making blood and the body consuming it, as believed for 1,500 years. His 1628 book On the Motion of the Heart and Blood in Animals is one of the founding works of physiology.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Harvey's Exercitatio Anatomica de Motu Cordis (1628), chapters on circulation",
+      "durationMinutes": 60,
+      "instruction": "Read Harvey's argument, which is quantitative: the heart pumps far more blood per hour than the body could contain or consume, so blood must return in a circle. He reasoned from measurement, not authority — the essence of the new science. The capillaries that complete the circuit were found by Malpighi a few years later.",
+      "tags": [
+        "Medicine",
+        "17th Century",
+        "British"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-boyle",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Robert Boyle",
+    "teaser": "Irish-born natural philosopher whose 1661 book The Sceptical Chymist argued that chemistry should be based on experiments, not mystical elements, and whose law (PV = constant) describes how gases compress. He was the first to define an element in modern terms.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Boyle's The Sceptical Chymist (1661) and the Boyle's Law experiments",
+      "durationMinutes": 60,
+      "instruction": "Read how Boyle used an air pump — built with Robert Hooke — to show that air has weight and spring, and how halving the volume of a trapped gas doubles its pressure. His definition of an element as a substance that cannot be broken down by chemical means cleared the ground for Lavoisier a century later.",
+      "tags": [
+        "Chemistry",
+        "17th Century",
+        "British"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-huygens",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Christiaan Huygens",
+    "teaser": "Dutch scientist who explained Saturn's rings, discovered its moon Titan, built the first pendulum clock, and proposed that light is a wave. His wave theory of light — published in 1690 — was vindicated by experiment and underlies everything from lenses to quantum mechanics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Huygens's Traité de la Lumière (1690) and the pendulum clock",
+      "durationMinutes": 60,
+      "instruction": "Read his wave explanation: each point of a wavefront spawns new waves, and light propagates through their envelopes. This 'Huygens principle' is still taught. Also read how he solved the longitude problem with a pendulum clock accurate enough for navigation — only to be beaten by the chronometer.",
+      "tags": [
+        "Physics",
+        "17th Century",
+        "Dutch"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-halley",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Astronomer",
+    "name": "Edmond Halley",
+    "teaser": "English astronomer who mapped the southern sky, plotted magnetic variation, and — using Newton's gravity — predicted the return of a comet, now named for him. He also realized the atmosphere is an ocean and proposed a hollow-Earth model that kept people arguing for a century.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Halley's 1705 Synopsis of the Astronomy of Comets",
+      "durationMinutes": 60,
+      "instruction": "Read how Halley used three past apparitions (1531, 1607, 1682) and Newton's inverse-square law to compute a single orbit, and predicted a 1758 return — which happened, sixteen years after his death. He also measured the height of the atmosphere from twilight, and published the first mortality tables, founding actuarial science.",
+      "tags": [
+        "Astronomy",
+        "17th-18th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-cavendish",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Henry Cavendish",
+    "teaser": "Reclusive millionaire who discovered hydrogen, measured the density of the Earth with a torsion balance — the Cavendish experiment — and weighed the world with astonishing accuracy. He published little, spoke less, and was the greatest experimental physicist of his age.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cavendish's 1798 experiment to measure the Earth's density",
+      "durationMinutes": 60,
+      "instruction": "Read how Cavendish used a delicate torsion balance with lead balls to measure the gravitational attraction between laboratory masses — from which the Earth's mass follows. His value for the Earth's density, 5.45 g/cm³, is within 1% of the modern figure. He also showed hydrogen burns to water, a step to understanding water's composition.",
+      "tags": [
+        "Physics",
+        "18th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-volta",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Alessandro Volta",
+    "teaser": "Italian physicist who, after disproving Galvani's 'animal electricity' with a famous frog-leg experiment, built the first battery — the voltaic pile, 1800 — stacking copper and zinc discs in acid. It delivered a steady electric current for the first time, launching the age of electricity.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Volta's 1800 letter to the Royal Society on the voltaic pile",
+      "durationMinutes": 60,
+      "instruction": "Read the letter where Volta describes the pile: alternating discs of two metals separated by brine-soaked cloth, producing current continuously. Within months, Nicholson and Carlisle used it to split water into hydrogen and oxygen — electrolysis was born. The unit of electric potential, the volt, honors him.",
+      "tags": [
+        "Physics",
+        "18th-19th Century",
+        "Italian"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-ampere",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "André-Marie Ampère",
+    "teaser": "French physicist who, a week after hearing of Oersted's discovery that electricity deflects a compass, worked out the mathematics of the force between current-carrying wires. He founded electrodynamics and gave his name to the unit of electric current, the ampere.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ampère's memoir on the mutual action of electric currents (1820)",
+      "durationMinutes": 60,
+      "instruction": "Read how Ampère showed that parallel currents attract and antiparallel ones repel, and formulated the law for the force between them. He also built the first solenoid and proposed the idea of the galvanometer. Maxwell later called Ampère's law 'one of the most brilliant achievements in science.'",
+      "tags": [
+        "Physics",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-ohm",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physicist",
+    "name": "Georg Ohm",
+    "teaser": "German schoolteacher whose 1827 book showed that current through a wire is proportional to voltage — Ohm's law, V = IR. The idea was mocked for years; he had to resign his teaching post. Today his law is the first thing every electronics student learns, and the ohm is the unit of resistance.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ohm's 1827 Die galvanische Kette, mathematisch bearbeitet",
+      "durationMinutes": 60,
+      "instruction": "Read the opening, where Ohm — inspired by Fourier's heat theory — treated electricity as a flow along a conductor with a 'conductivity' per length. His careful experiments with wires of different metals and thicknesses showed the linear relation. His reward was ridicule; his monument is your circuit board.",
+      "tags": [
+        "Physics",
+        "19th Century",
+        "German"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-dalton",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "John Dalton",
+    "teaser": "Quaker schoolteacher and colorblind meteorologist who, in 1803, proposed that each element is made of atoms of a characteristic weight — the first atomic theory with numbers. His table of atomic weights, though rough, made chemistry quantitative and started a century of debate.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dalton's A New System of Chemical Philosophy (1808), on atomic weights",
+      "durationMinutes": 60,
+      "instruction": "Read how Dalton reasoned that if water is H₂O and gases combine in simple ratios, elements must have fixed relative weights — hydrogen = 1, oxygen = 8, etc. His theory explained the law of multiple proportions. He was also the first to describe color blindness scientifically, from his own experience.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-avogadro",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Amedeo Avogadro",
+    "teaser": "Italian chemist who proposed in 1811 that equal volumes of gases at the same temperature and pressure contain equal numbers of molecules — the key to weighing atoms. His hypothesis was ignored for decades, then became the foundation of physical chemistry. The number of molecules in a mole bears his name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Avogadro's 1811 essay on the relative masses of elementary molecules",
+      "durationMinutes": 60,
+      "instruction": "Read his argument: if equal volumes hold equal particles, then volumes of reacting gases reveal the ratios of their molecules — so hydrogen and chlorine each contain two atoms per molecule (H₂, Cl₂). Cannizzaro revived the idea at the 1860 Karlsruhe Congress, and chemistry finally had consistent atomic weights. Avogadro's number is 6.02 × 10²³.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Italian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-berzelius",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Jöns Jacob Berzelius",
+    "teaser": "Swedish chemist who determined atomic weights for dozens of elements with unprecedented precision, invented chemical symbols and formulas (H₂O, CO₂), and coined the words 'catalysis,' 'isomer,' and 'protein.' He was chemistry's great systematizer of the early 19th century.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Berzelius's atomic weight determinations and his system of notation",
+      "durationMinutes": 60,
+      "instruction": "Read about his analytical work — he analyzed thousands of compounds to fix atomic weights, correcting Dalton's errors — and his letter notation, which is the system we still use. He discovered cerium, selenium, and thorium, and was the first to isolate silicon. Every chemical formula on a bottle is Berzelius's invention.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-liebig",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Justus von Liebig",
+    "teaser": "German chemist who founded the modern teaching laboratory — students did real experiments instead of watching lectures — and transformed agriculture by showing plants need nitrogen, phosphorus, and potassium from the soil. His fertilizer formula fed Europe and made him a celebrity.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Liebig's Organic Chemistry in its Applications to Agriculture and Physiology (1840)",
+      "durationMinutes": 60,
+      "instruction": "Read how Liebig analyzed soils and ashes to work out what crops remove, and prescribed mineral fertilizers — the birth of the fertilizer industry. He also invented a meat extract (Oxo's ancestor), a silvered mirror process, and the 'Liebig condenser' still used in every lab. His Giessen lab trained a generation of chemists.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-kekule",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "August Kekulé",
+    "teaser": "German chemist who, around 1858, realized carbon atoms link to each other in chains — the foundation of organic chemistry. His 1865 insight that benzene is a ring, reportedly from a dream of a snake biting its tail, unlocked the structure of aromatic compounds.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kekulé's 1865 paper on the constitution of aromatic compounds",
+      "durationMinutes": 60,
+      "instruction": "Read how Kekulé, after years of struggling with benzene's six carbons and six hydrogens, proposed a hexagonal ring with alternating double bonds — the snake dream is his own account. The structure explained why benzene doesn't react like an alkene and opened the door to dyes, drugs, and plastics.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-arrhenius",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Svante Arrhenius",
+    "teaser": "Swedish chemist who showed that salts break into charged ions in water — explaining why solutions conduct electricity and why acids and bases react. His 1884 dissertation was barely approved, yet it founded physical chemistry and won him the 1903 Nobel. He also first calculated that CO₂ warms the planet.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Arrhenius's 1884 thesis on the conductivity of electrolytes",
+      "durationMinutes": 60,
+      "instruction": "Read how he explained that dissolved salts dissociate into charged particles — ions — which carry current; the more ions, the more conductive. In 1896 he estimated that doubling atmospheric CO₂ would warm the Earth by about 5°C — the first greenhouse calculation, remarkably close to modern values.",
+      "tags": [
+        "Chemistry",
+        "19th-20th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  }
+]

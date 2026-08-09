@@ -1,0 +1,282 @@
+[
+  {
+    "id": "author-samuel-r-delany",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Samuel R. Delany",
+    "teaser": "A towering experimentalist of science fiction — Dhalgren and the Return to Nevèrÿon series bend narrative structure while exploring language, sexuality, and cities. He is also one of the most rigorous critics of how we read and write.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dhalgren, opening pages",
+      "durationMinutes": 60,
+      "instruction": "Open Dhalgren and sit with its famous first pages — disrupted grammar, an unnamed narrator, a city in twilight. Notice how Delany uses disorientation as a tool. Write what the fragmented opening asks you to do as a reader."
+    },
+    "tags": [
+      "Science Fiction",
+      "Experimental",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-angela-carter",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Angela Carter",
+    "teaser": "The Bloody Chamber rewrote fairy tales as ferocious, sensual stories about power and desire — wolves, brides, and mirrors turned inside out. British literature's most glittering gothic feminist, whose sentences are like ornate machines that bite.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Bloody Chamber, opening story",
+      "durationMinutes": 60,
+      "instruction": "Read the title story of The Bloody Chamber. Track how Carter takes a fairy-tale premise (Bluebeard) and fills it with luxuriant, dangerous detail. Write how she makes the gothic feel both ancient and completely modern."
+    },
+    "tags": [
+      "Gothic",
+      "British",
+      "Feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-elizabeth-bishop",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Elizabeth Bishop",
+    "teaser": "A poet of precise observation — fish, filling stations, and Nova Scotia landscapes rendered with such clarity that the emotion arrives through the detail. She published barely a hundred poems in her life, each one burnished to near-perfection.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Elizabeth Bishop, 'The Fish'",
+      "durationMinutes": "45",
+      "instruction": "Read 'The Fish' slowly, twice. Notice how Bishop builds the poem through accumulated physical detail until the moment of release at the end. Write what the poem's final image does and how the detail made you feel it."
+    },
+    "tags": [
+      "Poetry",
+      "American",
+      "Precision"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-mary-oliver",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Mary Oliver",
+    "teaser": "The most beloved American nature poet of her generation — 'Tell me, what is it you plan to do with your one wild and precious life?' Her poems walk into the woods and return with something about how to live.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mary Oliver, 'Wild Geese'",
+      "durationMinutes": "30",
+      "instruction": "Read 'Wild Geese' aloud. Notice how the poem moves from instruction to invitation — 'You only have to let the soft animal of your body love what it loves.' Write what the poem offers you and how it earns its tenderness."
+    },
+    "tags": [
+      "Poetry",
+      "American",
+      "Nature"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-ted-hughes",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Ted Hughes",
+    "teaser": "British poet laureate whose poems are full of animals, myth, and weather — Crow, his brutal sequence about a creature born from a god's mistake, is his masterpiece. His marriage to Sylvia Plath and the aftermath shadow his biography.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ted Hughes, 'Hawk Roosting'",
+      "durationMinutes": "30",
+      "instruction": "Read 'Hawk Roosting' and notice how Hughes writes from inside the hawk's voice — total, amoral, magnificent. Write how the poem makes the predator's logic feel natural and what it says about power."
+    },
+    "tags": [
+      "Poetry",
+      "British",
+      "Nature"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-wisława-szymborska",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Wisława Szymborska",
+    "teaser": "The Polish poet who won the Nobel for poems of wry wonder — 'I prefer the absurdity of writing poems to the absurdity of not writing poems.' She wrote about onions, museum exhibits, and the ordinary, making the everyday strange and the strange everyday.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Szymborska, 'The Onion' or 'Possibilities'",
+      "durationMinutes": "30",
+      "instruction": "Read two Szymborska poems. Notice how her tone is light but the stakes are huge — death, history, and the limits of knowledge disguised as wit. Write what makes her poems feel both playful and profound."
+    },
+    "tags": [
+      "Poetry",
+      "Polish",
+      "Nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-nadine-gordimer",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Nadine Gordimer",
+    "teaser": "The South African Nobel laureate whose novels and stories dissect apartheid's intimate damage — how a system of separation corrodes every relationship it touches. She never left, and her writing became a record of a nation becoming itself.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nadine Gordimer, 'The Moment Before the Gun Went Off'",
+      "durationMinutes": "45",
+      "instruction": "Read one of Gordimer's apartheid-era stories. Notice how the political lives inside the personal — a handshake, a farm, a moment of violence. Write how the story shows a system working through individual lives."
+    },
+    "tags": [
+      "South African",
+      "Nobel",
+      "Political"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-anthony-burgess",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Anthony Burgess",
+    "teaser": "A Clockwork Orange made him famous and trapped him — a novel about violence and free will written in a teenage slang called Nadsat. Burgess was also a composer, and his books overflow with wordplay, music, and mischief.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Clockwork Orange, first chapter",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of A Clockwork Orange. The challenge is the invented slang — let it wash over you and infer the meaning. Write how the language itself makes you complicit in Alex's world."
+    },
+    "tags": [
+      "British",
+      "Dystopia",
+      "Experimental"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-aldous-huxley",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Aldous Huxley",
+    "teaser": "Brave New World imagined a future of comfortable control — pleasure, conditioning, and the end of sorrow — and it has aged eerily well. Huxley was a wit, a mystic, and an essayist whose reach stretched from science to psychedelics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Brave New World, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the famous opening — the hatchery tour. Notice how Huxley builds a horrifying world in a cheerful tour-guide voice. Write what the novel suggests about happiness versus freedom."
+    },
+    "tags": [
+      "British",
+      "Dystopia",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-philip-k-dick",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Philip K. Dick",
+    "teaser": "Do Androids Dream of Electric Sheep? became Blade Runner, but Dick's real subject was reality itself — is it real, is it yours, are you? His paranoid, compassionate novels ask what it means to be human when everything can be simulated.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Do Androids Dream of Electric Sheep?, opening",
+      "durationMinutes": "45",
+      "instruction": "Read the opening chapter and notice how the question of the electric sheep — empathy, ownership, fakery — is set up immediately. Write how Dick makes the android question also a human question."
+    },
+    "tags": [
+      "Science Fiction",
+      "American",
+      "Philosophy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-william-gibson",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "William Gibson",
+    "teaser": "Neuromancer coined 'cyberspace' and launched cyberpunk — a burnt-out hacker, a sentient AI, and a future of chrome and neon that predicted the internet. Gibson wrote on a manual typewriter and somehow saw the future anyway.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Neuromancer, opening pages",
+      "durationMinutes": "45",
+      "instruction": "Read the famous first line — 'The sky above the port was the color of television, tuned to a dead channel.' Notice how Gibson builds atmosphere through technology. Write how the prose predicts a networked, branded world."
+    },
+    "tags": [
+      "Science Fiction",
+      "Cyberpunk",
+      "Canadian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-neal-stephenson",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Neal Stephenson",
+    "teaser": "Snow Crash gave the metaverse its name; Cryptonomicon made code and math thrilling; Anathem turned philosophy into epic. Stephenson writes doorstop novels stuffed with ideas, digressions, and the occasional ninja.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Snow Crash, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Snow Crash and notice how the metaverse is introduced through a pizza delivery. Write how Stephenson blends satire and speculation, and how the novel predicted online worlds."
+    },
+    "tags": [
+      "Science Fiction",
+      "American",
+      "Cyberpunk"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-annie-proulx",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Annie Proulx",
+    "teaser": "The Shipping News and Brokeback Mountain show Proulx's gift: hard landscapes, broken people, and sentences as weather-beaten as her settings. She writes about place so precisely that the land becomes a character.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Annie Proulx, 'Brokeback Mountain'",
+      "durationMinutes": "60",
+      "instruction": "Read the short story 'Brokeback Mountain.' Notice how the Wyoming landscape shapes everything — the silence, the work, the love. Write how Proulx uses place to carry what the characters cannot say."
+    },
+    "tags": [
+      "American",
+      "Short Story",
+      "Landscape"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-wendell-berry",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Wendell Berry",
+    "teaser": "The conscience of the American countryside — farmer, poet, novelist, and essayist who has spent a lifetime asking what it means to stay and care for a place. His Port William stories are a quiet masterpiece of community.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wendell Berry, 'How to Be a Poet' or a Port William story",
+      "durationMinutes": "45",
+      "instruction": "Read Berry's poem 'How to Be a Poet' or a Port William story. Notice how his values — place, work, belonging — shape the language. Write what Berry thinks we lose when we stop caring for the ground we stand on."
+    },
+    "tags": [
+      "American",
+      "Rural",
+      "Essay"
+    ],
+    "tier": 2
+  }
+]

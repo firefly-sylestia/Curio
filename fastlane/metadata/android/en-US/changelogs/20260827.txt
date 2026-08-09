@@ -1,0 +1,1 @@
+• PNG import got an eyedropper upgrade: after picking an image you can tap it (or its quick-pick swatches) to fill the four custom palette slots with the image's own colors — then import keeps them instead of flattening everything to the 13 default colors.

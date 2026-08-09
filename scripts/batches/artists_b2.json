@@ -1,0 +1,786 @@
+[
+  {
+    "id": "artist-xxx-tentacion",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "XXXTentacion",
+    "teaser": "A Florida rapper who blended emo, rap, and rage into raw confessionals — 'Sad!' became a global hit months after he was killed at 20, leaving a generation mourning a very complicated figure.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "XXXTentacion — 'Sad!' (2018)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the shift — verses that sound like shouting through pain, a chorus that is almost a lullaby. He recorded across multiple personas, from the screamed punk of his SoundCloud era to the acoustic 'Jocelyn Flores.' The voice is always the same one: hurt, loud, unpolished."
+    },
+    "tags": ["Hip-Hop", "Emo Rap", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-juice-wrld",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Juice WRLD",
+    "teaser": "The freestyle king — a Chicago teen who could improvise entire songs in one take, turning heartbreak and anxiety into melodies. 'Lucid Dreams' made him a star; he died at 21.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Juice WRLD — 'Lucid Dreams' (2018)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the sample — Sting's 'Shape of My Heart' guitar — under the emo-rap melody. Juice recorded the song in one take on a studio laptop in 2017, improvising the verses. His talent for spontaneous, full-song freestyles was legendary; he reportedly wrote 2,000 songs."
+    },
+    "tags": ["Hip-Hop", "Emo Rap", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-pop-smoke",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Pop Smoke",
+    "teaser": "The voice of Brooklyn drill — a 20-year-old whose deep, gravelly 'woo' and drill beats from London defined New York rap for a generation before he was murdered in 2020.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Pop Smoke — 'Welcome to the Party' (2019)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the voice first — a bass so deep it sounds like a subwoofer. Pop Smoke took UK drill's sparse beats and filled them with New York bravado. His debut mixtape, Meet the Woo, came out months before his death; his posthumous album Shoot for the Stars became the year's biggest."
+    },
+    "tags": ["Hip-Hop", "Drill", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-chance-the-rapper",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Chance the Rapper",
+    "teaser": "The independent miracle — a Chicago artist who stayed unsigned, released mixtapes free, and won a Grammy with 'Coloring Book,' proving you could build a career without a label.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Chance the Rapper — 'Blessings' (2016)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the gospel choir under the trap drums — Chance mixed Chicago gospel, free mixtapes, and a joyful voice into something entirely his own. 'Coloring Book' was the first streaming-only album to win a Grammy. Then hear him rap about his hometown on 'Angels.'"
+    },
+    "tags": ["Hip-Hop", "Chicago", "Gospel"],
+    "tier": 2
+  },
+  {
+    "id": "artist-kid-cudi",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Kid Cudi",
+    "teaser": "The lonely stoner who made sadness cool — a Cleveland artist whose humming, melodic raps about isolation gave Kanye's 808s its heart and gave a whole generation permission to feel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Kid Cudi — 'Pursuit of Happiness' (2009)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the hum — Cudi sings the melody with his voice as an instrument, not just rapping. The song became an anthem for night drives and anxiety alike. His debut Man on the Moon: The End of Day was a concept album about insomnia, and it reshaped hip-hop's emotional range."
+    },
+    "tags": ["Hip-Hop", "Alternative", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-big-boi",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Big Boi",
+    "teaser": "The other half of Outkast — the Atlanta rapper whose rapid-fire, playful flow balanced Andre 3000's weirdness, and whose solo album Sir Lucious Left Foot proved he could carry a whole world alone.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Big Boi — 'Shutterbugg' (2010)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the bounce — Big Boi's flow rides the beat like a dancer, full of double-time runs and Atlanta slang. He was the most technically precise rapper in Outkast, and his solo work kept the funk alive. Then hear him trade verses with Andre on 'The Way You Move.'"
+    },
+    "tags": ["Hip-Hop", "Atlanta", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-missy-elliott",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Missy Elliott",
+    "teaser": "The architect of futuristic R&B — a Virginia producer and rapper who bent voices, beats, and videos into shapes nobody had heard, from 'The Rain' to 'Work It,' for three decades.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Missy Elliott — 'The Rain (Supa Dupa Fly)' (1997)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the beat — produced with Timbaland, it pitched her voice down into a monster growl over a rubbery groove. The video, with her in a giant inflatable suit, announced a new era. Elliott wrote and produced for Aaliyah, Beyoncé, and Ciara while building her own empire."
+    },
+    "tags": ["R&B", "Hip-Hop", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-jack-harlow",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Jack Harlow",
+    "teaser": "The Kentucky smooth-talker — a white rapper from Louisville who earned respect with charisma and wordplay, then went global with 'Industry Baby' and 'First Class.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Jack Harlow — 'First Class' (2022)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the sample — Fergie's 'Glamorous' flipped into a laid-back anthem. Harlow's whole appeal is the ease: he raps like he's already won. His freestyles and interviews made him a star before the hits; the hits just confirmed it."
+    },
+    "tags": ["Hip-Hop", "American", "2020s"],
+    "tier": 3
+  },
+  {
+    "id": "artist-solange",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Solange",
+    "teaser": "Beyoncé's sister who built her own universe — a Houston artist whose album A Seat at the Table is a soft, furious meditation on Blackness, family, and self-respect, entirely unlike anything her sister makes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Solange — 'Cranes in the Sky' (2016)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the restraint — the song is built from a few chords and a voice that floats. Solange wrote it about the many ways we try to fix pain — drinking, moving, buying — and the fact that sometimes nothing works. The album was made in New Orleans and it sounds like a slow Sunday."
+    },
+    "tags": ["R&B", "Neo-Soul", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-summer-walker",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Summer Walker",
+    "teaser": "The shy voice of modern R&B — an Atlanta singer whose whispered, diary-like songs about messy relationships made her the biggest new R&B voice of her generation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Summer Walker — 'Playing Games' (2019)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the intimacy — she sings like she's confessing to a friend, almost speaking the verses. Her debut Over It sampled SWV's 'Weak' and became the most-streamed R&B debut by a woman. She battles social anxiety and performs masked; the music is the honest part."
+    },
+    "tags": ["R&B", "American", "2010s"],
+    "tier": 2
+  },
+  {
+    "id": "artist-giveon",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Giveon",
+    "teaser": "The baritone of heartbreak — a Long Beach singer whose deep, velvet voice turned breakup ballads into events, from 'Heartbreak Anniversary' to the chorus of Drake's 'Chicago Freestyle.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Giveon — 'Heartbreak Anniversary' (2020)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the range — his voice drops into a bass you feel in your chest, then floats up into falsetto. He started singing in his grandmother's church choir, and the gospel control is everywhere in his phrasing. The song became a global hit during the pandemic."
+    },
+    "tags": ["R&B", "American", "2020s"],
+    "tier": 3
+  },
+  {
+    "id": "artist-h-e-r",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "H.E.R.",
+    "teaser": "The mystery voice of R&B — a California singer who performed in shadow and sunglasses for years, letting the music speak first, then revealed herself as a four-time Grammy winner.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "H.E.R. — 'Best Part' with Daniel Caesar (2017)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the harmonies — two voices trading verses and melting together in the chorus. H.E.R. played guitar and piano from childhood, and her songs are built like careful conversations. She won Song of the Year for 'I Can't Breathe,' a protest ballad written during 2020."
+    },
+    "tags": ["R&B", "American", "2010s"],
+    "tier": 2
+  },
+  {
+    "id": "artist-daniel-caesar",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Daniel Caesar",
+    "teaser": "The Canadian gospel-soul whisperer — a Scarborough choir kid whose gentle falsetto and 'Get You' made him R&B's most romantic new voice of the late 2010s.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Daniel Caesar — 'Get You' (2017)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the softness — no drums, just guitar, bass, and a voice that never pushes. Caesar grew up singing in his church and busking in Toronto; his debut album Freudian is a meditation on love, faith, and doubt. The choir on his later records is his church coming home."
+    },
+    "tags": ["R&B", "Canadian", "2010s"],
+    "tier": 2
+  },
+  {
+    "id": "artist-jhene-aiko",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Jhené Aiko",
+    "teaser": "The poet of healing R&B — a Los Angeles singer whose meditative, smoky songs about grief, love, and growth made her the soundtrack to quiet hours.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Jhené Aiko — 'Spotless Mind' (2013)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the tone — half-spoken, half-sung, like a thought being thought out loud. She wrote about her brother's death, her daughter, and the search for peace. Her collaborations with Big Sean produced a whole trilogy of albums about their relationship."
+    },
+    "tags": ["R&B", "American", "2010s"],
+    "tier": 2
+  },
+  {
+    "id": "artist-pete-rock",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Pete Rock",
+    "teaser": "The Soul Brother — a New York producer-DJ whose warm, horn-heavy beats defined 1990s boom-bap, from his duo Pete Rock & CL Smooth to the InI and Deda albums he built from his own record crate.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Pete Rock & CL Smooth — 'They Reminisce Over You' (1992)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the beat — a pitched-down saxophone loop and a bassline that walks like a memory. 'T.R.O.Y.', built to mourn a friend who died young, is often called the greatest hip-hop beat ever made. Then hear Pete Rock's solo work and the dusty soul warmth in every drum."
+    },
+    "tags": ["Hip-Hop", "Producer", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-the-roots",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "The Roots",
+    "teaser": "Hip-hop's greatest live band — a Philadelphia collective led by drummer Questlove that has backed The Tonight Show for over a decade while releasing albums that make other rappers nervous.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "The Roots — 'You Got Me' (1999)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the drums — Questlove plays with the swing of a jazz drummer, and the band is all live instruments: bass, keys, guitar, vibraphone. 'You Got Me' won the Grammy and put them over the top. Then hear 'The Seed (2.0)' and the funk under the politics."
+    },
+    "tags": ["Hip-Hop", "Live Band", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-common",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Common",
+    "teaser": "The poet of Chicago hip-hop — a conscious rapper whose smooth voice and social vision ran from 'I Used to Love H.E.R.' to an Oscar-winning songwriting career.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Common — 'I Used to Love H.E.R.' (1994)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the metaphor — the whole song is a love letter to hip-hop as a woman, and a lament for what it became. Common's flow is relaxed, his references deep. He later won an Oscar for 'Glory' with John Legend, the song from Selma."
+    },
+    "tags": ["Hip-Hop", "Chicago", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-mos-def",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Mos Def",
+    "teaser": "A Brooklyn polymath — rapper, actor, and activist who made Black on Both Sides, one of hip-hop's great concept albums, then kept expanding into film, TV, and the space between genres.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Mos Def — 'Ms. Fat Booty' (1999)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the storytelling — a love story told over a sample of Aretha Franklin's 'One Step Ahead,' with Mos switching voices and timeframes. He raps about science, faith, and Brooklyn with equal ease. Then hear him sing with his later band, Black Jack Johnson, and the soul underneath."
+    },
+    "tags": ["Hip-Hop", "Brooklyn", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-talib-kweli",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Talib Kweli",
+    "teaser": "The conscious rapper's conscience — a Brooklyn lyricist whose dense wordplay and political vision, with Mos Def as Black Star and with Hi-Tek on Reflection Eternal, defined 1990s underground hip-hop.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Black Star — 'Definition' (1998)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the boom-bap — the beat samples a classic Pete Rock loop, and Kweli and Mos Def trade verses about hip-hop's survival. Kweli's lines are layered enough to deserve rewinds. Then hear his solo 'Get By' and the pressure he puts on every syllable."
+    },
+    "tags": ["Hip-Hop", "Underground", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-gang-starr",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Gang Starr",
+    "teaser": "The jazz-rap dynasty — DJ Premier's dusty beats under Guru's calm 'Guru' voice produced the definitive East Coast sound of the 1990s, from 'Mass Appeal' to 'Moment of Truth.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Gang Starr — 'Mass Appeal' (1994)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the beat — Premier's chopped jazz samples and hard snares became the template for a decade of East Coast rap. Guru's flow is unhurried, almost spoken, full of knowledge. The pair made six albums together; Guru died in 2010, ending one of rap's great partnerships."
+    },
+    "tags": ["Hip-Hop", "Jazz Rap", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-method-man",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Method Man",
+    "teaser": "The Wu-Tang Clan's breakout star — a Staten Island MC whose husky voice, weed humor, and charisma made him rap's favorite crossover, from 'Method Man' to his acting career.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Method Man — 'Bring the Pain' (1994)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the voice — a low, commanding growl with a laugh hiding in it. He was the first Wu-Tang member to go solo, and 'Bring the Pain' set the standard. His chemistry with Redman produced a whole comedy-rap franchise, from 'How High' to Method Man & Redman."
+    },
+    "tags": ["Hip-Hop", "Wu-Tang", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-ghostface-killah",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Ghostface Killah",
+    "teaser": "The Wu-Tang Clan's most emotive storyteller — his stream-of-consciousness rhymes about love, street life, and absurd detail made Ironman and Supreme Clientele underground classics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Ghostface Killah — 'Shakey Dog' (2006)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the density — he packs more images into four bars than most rappers fit in a verse, jumping between memory and confession. His solo debut Ironman was recorded with producer RZA at his peak. Then hear him sing-rap on 'All That I Got Is You' with Mary J. Blige."
+    },
+    "tags": ["Hip-Hop", "Wu-Tang", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-raekwon",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Raekwon",
+    "teaser": "The Chef — the Wu-Tang Clan's master of street narrative whose debut Only Built 4 Cuban Linx…, produced entirely by RZA, is one of hip-hop's greatest albums.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Raekwon — 'Criminology' (1995)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the dialogue — the album plays like a mafia film, with skits, guest spots from every Wu member, and Raekwon's precise crime storytelling. 'Criminology' is its thesis. The 'Wu-Gambinos' and 'Ice Cream' tracks showed a softer side; the whole album holds together like a novel."
+    },
+    "tags": ["Hip-Hop", "Wu-Tang", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-rakim",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Rakim",
+    "teaser": "The God MC — half of Eric B. & Rakim, whose 1987 Paid in Full rewrote rapping: internal rhymes, deep voice, and the idea that lyrics could be literature.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Eric B. & Rakim — 'I Know You Got Soul' (1987)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the flow — Rakim rides the beat in a smooth, even cadence that was revolutionary against the nursery-rhyme raps before him. He rapped about intelligence, science, and Allah with the same breath he used for street tales. Every rapper since has studied his timing."
+    },
+    "tags": ["Hip-Hop", "Golden Age", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-pusha-t",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Pusha T",
+    "teaser": "The coke-rap poet — half of Clipse and the president of GOOD Music, whose voice is pure ice and whose verses about the drug trade read like literary noir. DAYTONA proved he could carry an entire album in under 22 minutes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Pusha T — 'If You Know You Know' (2018)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the menace — Kanye's beat is spare, and Pusha's voice fills it with certainty. His drug-dealing narratives are the most detailed in rap history, and his diss track 'The Story of Adidon' is a case study in cold precision. Then hear Clipse's 'Grindin'' and the minimalist beat that made them stars."
+    },
+    "tags": ["Hip-Hop", "Virginia", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-ll-cool-j",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "LL Cool J",
+    "teaser": "Ladies Love Cool James — a Queens rapper who made romance cool in hip-hop with 'I Need Love,' survived the golden age as a hitmaker, and turned himself into an icon of longevity.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "LL Cool J — 'Mama Said Knock You Out' (1990)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the confidence — he opens by mocking the critics who counted him out, then spends the whole song proving them wrong. LL started at 16 with 'I Can't Live Without My Radio' and kept charting for 30 years, from love ballads to hip-hop to NCIS."
+    },
+    "tags": ["Hip-Hop", "Old School", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-beastie-boys",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Beastie Boys",
+    "teaser": "Three Jewish kids from NYC who went punk to rap to instrumentals — Licensed to Ill was the first rap album to top the Billboard chart, and Paul's Boutique is the most sampled album ever made.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Beastie Boys — 'Paul Revere' (1986)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the story — three rappers trading a tall tale over a boogie bass line, with Ad-Rock's 'now let me take a minute to just sit and think.' Then hear 'Shake Your Rump' from Paul's Boutique, built from hundreds of samples, and the leap in ambition between the two albums."
+    },
+    "tags": ["Hip-Hop", "Alternative", "American"],
+    "tier": 1
+  },
+  {
+    "id": "artist-de-la-soul",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "De La Soul",
+    "teaser": "The D.A.I.S.Y. Age — a Long Island trio who proved hip-hop could be playful, colorful, and dense with samples; 3 Feet High and Rising remains the strangest great debut in rap.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "De La Soul — 'Me Myself and I' (1989)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the warmth — the sample of Funkadelic's '(Not Just) Knee Deep' carries the song, and the three MCs trade lines like old friends. Their debut was a game-show-styled concept album full of skits and oddities. They spent decades fighting to own their own masters."
+    },
+    "tags": ["Hip-Hop", "Alternative", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-jungle-brothers",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Jungle Brothers",
+    "teaser": "The Native Tongues founders — a Brooklyn trio whose 1988 Straight Out the Jungle mixed house music and hip-hop, helping birth the Afrocentric, playful sound that defined late-80s alternative rap.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Jungle Brothers — 'Straight Out the Jungle' (1988)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the house influence — the beat breathes like a dance track under the raps. The Jungle Brothers linked up with A Tribe Called Quest and De La Soul into the Native Tongues collective, which rewrote hip-hop's image from street to cosmic."
+    },
+    "tags": ["Hip-Hop", "Alternative", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-madvillain",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Madvillain",
+    "teaser": "The perfect meeting — MF DOOM's cartoon-villain rhymes over Madlib's dusty, collaged beats produced Madvillainy, an album that sounds like a fever dream from a record crate.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Madvillain — 'Accordion' (2004)",
+      "durationMinutes": 2,
+      "instruction": "Listen to the beat — an accordion sample pitched and twisted over a limp drum loop, and DOOM rapping about life as a supervillain in the recording industry. The album was recorded over years, with DOOM recording his verses on the spot. It's the hip-hop record most loved by other musicians."
+    },
+    "tags": ["Hip-Hop", "Underground", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-danger-mouse",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Danger Mouse",
+    "teaser": "The producer-magician — his Grey Album mixed Jay-Z's Black Album with the Beatles' White Album without permission, making him famous and almost sued, then he produced for Gorillaz, Adele, and the Black Keys.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Danger Mouse — '99 Problems' from The Grey Album (2004)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the mashup — Jay-Z rapping over the Beatles' 'Helter Skelter' guitar, two worlds colliding. EMI tried to stop the free release, and the backlash made it famous. Then hear his work with the Black Keys on 'Tighten Up' and the pop polish behind the garage fuzz."
+    },
+    "tags": ["Producer", "Hip-Hop", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-madlib",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Madlib",
+    "teaser": "The crate-digging monk of beatmaking — an LA producer who makes records from anything he can find, releasing dozens of albums under dozens of names, each one a different universe.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Madlib — 'Slim's Return' (2003)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the swing — the drums are slightly off, the samples are strange, and it all feels alive and handmade. Madlib produced the entire album Shades of Blue by reworking Blue Note jazz masters, then Madvillainy, then a jazz album as Yesterdays New Quintet. He treats his record collection like a library of instruments."
+    },
+    "tags": ["Producer", "Instrumental", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-nujabes",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Nujabes",
+    "teaser": "The Japanese beatmaker who united anime and jazz — his warm, dusty instrumentals for Samurai Champloo introduced lo-fi hip-hop to the world before the genre had a name. He died in a traffic accident in 2010 at 36.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Nujabes — 'Feather' (2004)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the serenity — jazz piano, soft drums, and a voice that floats above it all. Nujabes ran a record shop in Tokyo and made music for the anime Samurai Champloo, blending hip-hop with Japanese aesthetics. His work is the root of every lofi-study-beats playlist."
+    },
+    "tags": ["Instrumental", "Lo-Fi", "Japanese"],
+    "tier": 2
+  },
+  {
+    "id": "artist-knxwledge",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Knxwledge",
+    "teaser": "A beatmaker from the LA underground whose choppy, soulful loops powered the 2010s instrumental wave and produced his own cult classics like Hud Dreems.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Knxwledge — 'SFTB' / 'Mek.It' (2015)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the choppiness — vocals and chords cut into tiny fragments and re-sewn over wobbly drums. Knxwledge makes beats that feel like memories being repaired. He produced Anderson Paak's 'Suede' and released dozens of bandcamp projects; his work is the sound of crate-digging as meditation."
+    },
+    "tags": ["Producer", "Instrumental", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-kaytranada",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Kaytranada",
+    "teaser": "The Haitian-Canadian groove wizard — a Montreal producer who wraps hip-hop, house, and funk into the silkiest beats alive, winning a Grammy for Bubba.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Kaytranada — 'Glowed Up' (2016)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the bounce — the drums swing with a swing you can feel in your neck. His debut 99.9% featured Anderson Paak, Little Dragon, and Syd, turning a beat tape into an album of collabs. Then hear '10%' from Bubba and the warmth in every kick."
+    },
+    "tags": ["Electronic", "Funk", "Canadian"],
+    "tier": 2
+  },
+  {
+    "id": "artist-floating-points",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Floating Points",
+    "teaser": "The scientist of electronic music — a UK producer and neuroscientist whose music spans jazz, disco, and classical, capped by Promises, his collaboration with Pharoah Sanders.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Floating Points, Pharoah Sanders & the London Symphony — 'Promises' (2021)",
+      "durationMinutes": 9,
+      "instruction": "Listen to the opening chord — a single repeated progression over which Sanders' saxophone floats and sings. The album is one continuous 46-minute piece, the last great recording by the 80-year-old jazz master. Floating Points studied neuroscience at Cambridge; his music has that kind of precision and wonder."
+    },
+    "tags": ["Electronic", "Jazz", "British"],
+    "tier": 2
+  },
+  {
+    "id": "artist-bonobo",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Bonobo",
+    "teaser": "The smooth operator of electronic music — a Brighton producer whose organic, cinematic beats filled dance floors and headphones alike, from Animal Magic to the orchestral Fragments.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Bonobo — 'Kerala' (2017)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the layers — warm keys, a bass pulse, and vocals that glide in like weather. Bonobo's live band, with real drums and horns, made his shows legendary. Then hear 'We Could Forever' and the gentle melancholy under the groove."
+    },
+    "tags": ["Electronic", "Downtempo", "British"],
+    "tier": 2
+  },
+  {
+    "id": "artist-maribou-state",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Maribou State",
+    "teaser": "The English duo who make electronic music feel like a place — two friends from Hertfordshire whose warm, guitar-tinged house and downtempo have filled festival sunsets for a decade.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Maribou State — 'Turnmills' (2016)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the depth — a groove that builds over minutes, samples and synths interlocking like a conversation. Their album Portraits blended field recordings and guest singers into a coherent world. Then hear 'Nervous Tics' and the restraint that makes the drop hit."
+    },
+    "tags": ["Electronic", "Downtempo", "British"],
+    "tier": 3
+  },
+  {
+    "id": "artist-tycho",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Tycho",
+    "teaser": "The ambient sunset — a San Francisco producer (and visual artist) whose warm, melodic instrumentals sound like California light, from the classic Past Is Prologue to his live band tours.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Tycho — 'Awake' (2014)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the guitar — live, warm, and doubled with synth washes, a sound that sits between chillwave and post-rock. Tycho's records are made with his own artwork; the visuals and the music are one project. Then hear 'Montana' and the build that rewards patience."
+    },
+    "tags": ["Electronic", "Ambient", "American"],
+    "tier": 2
+  },
+  {
+    "id": "artist-emancipator",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Emancipator",
+    "teaser": "The violin-sampling beatmaker — a Portland producer whose 2006 debut Soon It Will Be Cold Enough, made while he was in college, remains a landmark of cinematic instrumental hip-hop.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Emancipator — 'First Snow' (2006)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the strings — a violin melody floating over dusty beats, like a film score for a movie that doesn't exist. Emancipator made the album in his dorm room after a heartbreak, and its sadness and warmth made it a streaming-era classic. Then hear his live band version with real strings."
+    },
+    "tags": ["Electronic", "Instrumental", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-rufus-du-sol",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Rufus Du Sol",
+    "teaser": "The Australian trio who turned house music into stadium rock — live drums, soaring vocals, and melodic drops made 'Innerbloom' the anthem of a generation of festival-goers.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Rufus Du Sol — 'Innerbloom' (2016)",
+      "durationMinutes": 9,
+      "instruction": "Listen to the patience — the song builds for minutes, adding layers one at a time until the melody finally arrives. The band plays live: real drums, real keys, and a vocalist who sounds like he's singing to the whole field. It became the closing song of every festival set."
+    },
+    "tags": ["Electronic", "House", "Australian"],
+    "tier": 2
+  },
+  {
+    "id": "artist-flume",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Flume",
+    "teaser": "The Australian futurist — a Sydney producer who bent pop, trap, and experimental sounds into 'Drop the Game' and 'Never Be Like You,' winning a Grammy at 24.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Flume — 'Never Be Like You' (2016)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the production — the vocal is chopped and glitched, the bass wobbles, and the drop arrives like weather. Flume started making beats in his teens and released his debut at 20. His second album won the Grammy for best electronic album, beating the majors."
+    },
+    "tags": ["Electronic", "Future Bass", "Australian"],
+    "tier": 2
+  },
+  {
+    "id": "artist-madeon",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Madeon",
+    "teaser": "The French pop-machine prodigy — he made his name with a viral live mashup at 16, then built Adventure, a sunny synth-pop album made almost entirely from samples.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Madeon — 'You're On' (2015)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the joy — bright chords and a chorus built to fill a stadium. Madeon's 'Pop Culture' video, a live mashup of 39 songs played on launchpads, made him famous at 16. His album Adventure is a concept record about escapism, and his live show is a video-game world."
+    },
+    "tags": ["Electronic", "Pop", "French"],
+    "tier": 2
+  },
+  {
+    "id": "artist-autechre",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Autechre",
+    "teaser": "The mathematicians of electronic music — a British duo whose abstract, glitchy rhythms sound like machines learning to feel, from Amber's early beauty to the deep code of their later albums.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Autechre — 'Foil' (1994)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the warmth first — 'Foil' is melody over a gentle groove, the most human thing they ever made. Then listen to anything from 2015's elseq and hear how far they went: rhythms so fractured they barely sound like music at first. They are the genre's hardest but most rewarding edge."
+    },
+    "tags": ["Electronic", "IDM", "British"],
+    "tier": 3
+  },
+  {
+    "id": "artist-squarepusher",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Squarepusher",
+    "teaser": "The bass-mad speedster of IDM — a British producer-bassist who plays real bass guitar at drum'n'bass speed, from the chaotic Hard Normal Daddy to his solo bass albums.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Squarepusher — 'Come On My Selector' (1996)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the bass line — played by hand, on a real instrument, at a tempo most drum machines can't hold. Squarepusher is a jazz bassist first; his electronic music is jazz at 200 BPM. Then hear 'My Red Hot Car' and the cartoon energy underneath the technique."
+    },
+    "tags": ["Electronic", "IDM", "British"],
+    "tier": 3
+  },
+  {
+    "id": "artist-oneohtrix-point-never",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Oneohtrix Point Never",
+    "teaser": "The dream-weaver of experimental pop — a Massachusetts artist (Daniel Lopatin) whose synthetic landscapes went from underground drone to the score of Good Time and a collab album with The Weeknd.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Oneohtrix Point Never — 'Replica' (2011)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the source — the album was built from sampled YouTube infomercials and forgotten TV, turned into haunted minimalism. Lopatin's music is memory made audible. Then hear 'Long Road Home' from the Good Time soundtrack and the tension he brings to film."
+    },
+    "tags": ["Electronic", "Experimental", "American"],
+    "tier": 3
+  },
+  {
+    "id": "artist-sophie",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "SOPHIE",
+    "teaser": "The sculptor of hyperpop — a Scottish producer whose album Oil of Every Pearl's Un-Insides turned synthetic textures into emotion, making pop music that sounded like a future crying.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "SOPHIE — 'It's Okay to Cry' (2017)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the texture — the whole track is built from sounds that don't exist in nature, stretched into something tender. SOPHIE produced for Madonna, Vince Staples, and Charli XCX, inventing a whole sound language. She died in 2021 in a fall in Athens, at 34."
+    },
+    "tags": ["Hyperpop", "Experimental", "Scottish"],
+    "tier": 2
+  },
+  {
+    "id": "artist-bat-for-lashes",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Bat for Lashes",
+    "teaser": "The storyteller of dream-pop — a British artist (Natasha Khan) whose albums build fairy-tale worlds of voice, harp, and darkness, from Fur and Gold to The Bride.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Bat for Lashes — 'Daniel' (2009)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the voice — high, clear, and slightly otherworldly, singing over a propulsive beat. Khan wrote 'Daniel' about an astronaut she invented. Her concept album The Bride tells one woman's story across a wedding and a funeral in a single day. Every record is a different world."
+    },
+    "tags": ["Dream Pop", "British", "Indie"],
+    "tier": 3
+  },
+  {
+    "id": "artist-nipsey-hussle",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Nipsey Hussle",
+    "teaser": "The marathon continues — a Los Angeles rapper and businessman who built his Crenshaw empire block by block, investing in his own neighborhood until he was murdered outside his own store in 2019.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Nipsey Hussle — 'Victory Lap' (2018)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the confidence without bragging — the title track of his Grammy-nominated album is a mission statement about discipline and ownership. Nipsey sold his Crenshaw mixtape for $100 a copy, bought back his block, and turned the marathon metaphor into a business model."
+    },
+    "tags": ["Hip-Hop", "Los Angeles", "American"],
+    "tier": 2
+  }
+]

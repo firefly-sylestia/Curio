@@ -1,0 +1,401 @@
+[
+  {
+    "id": "book-animal-farm-orwell",
+    "categoryId": "BOOKS",
+    "subtype": "Novella",
+    "name": "Animal Farm",
+    "teaser": "Orwell's 1945 fable of the animals who overthrow their farmer and watch the pigs become the new tyrants — 'All animals are equal, but some are more equal than others.' The perfect political allegory.",
+    "imageUrl": "",
+    "byline": "George Orwell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The full novella",
+      "durationMinutes": 45,
+      "instruction": "Read the novella from the Rebellion to the final scene where the pigs and men become indistinguishable. Notice how the commandments change with each betrayal. Write what the novel says about revolution, power, and the danger of leaders."
+    },
+    "tags": [
+      "British",
+      "Allegory",
+      "Satire"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-lord-flies-golding",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Lord of the Flies",
+    "teaser": "Golding's 1954 novel of schoolboys marooned on an island — the conch, the beast, and the descent from order to savagery. A chilling fable about the civilization that is only ever skin-deep.",
+    "imageUrl": "",
+    "byline": "William Golding",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the conch and the assembly",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the conch establishes the fragile order. Notice how each object — conch, glasses, beast — marks a stage of decline. Write what the naval officer's arrival at the end suggests about rescue, civilization, and the beast inside."
+    },
+    "tags": [
+      "British",
+      "Nobel",
+      "Allegory"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-catch22-heller",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Catch-22",
+    "teaser": "Heller's 1961 novel of Yossarian and the bombardiers of Pianosa — the logic trap that keeps men flying missions forever. The funniest and most furious anti-war novel ever written.",
+    "imageUrl": "",
+    "byline": "Joseph Heller",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Yossarian in the hospital",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the hospital ward introduces the novel's looping logic. Notice how Heller circles the same events from new angles. Write what Catch-22 names about bureaucracy and war — and why the joke is still so sharp."
+    },
+    "tags": [
+      "American",
+      "Satire",
+      "War"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-1984-alternate",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Man in the High Castle",
+    "teaser": "Philip K. Dick's 1962 alternate history of a world where the Axis won the war — divided America under Japanese and Nazi rule, and a novel within the novel that imagines the Allies winning. The book that made counterfactual history a genre.",
+    "imageUrl": "",
+    "byline": "Philip K. Dick",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the occupied Pacific states",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the Japanese-occupied San Francisco is rendered in ordinary detail. Notice how Dick's realism makes the counterfactual world feel lived-in. Write what the novel-within-the-novel suggests about history, fiction, and reality itself."
+    },
+    "tags": [
+      "American",
+      "Alternate History",
+      "Hugo"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-ubik",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Ubik",
+    "teaser": "Dick's 1969 novel of a world where the dead are kept in cold storage and the living are assaulted by a reality that keeps degrading — 'I am Ubik.' One of the strangest and most moving novels of reality in question.",
+    "imageUrl": "",
+    "byline": "Philip K. Dick",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the moon base and the half-life",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the psychic business and the reality degradation begin. Notice how Dick makes the reader distrust every scene. Write what the Ubik ads — time-stamped and increasingly desperate — reveal about the novel's true setting."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Reality"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-flowers-for-algernon",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Flowers for Algernon",
+    "teaser": "Daniel Keyes's 1966 novel of Charlie Gordon, whose IQ is tripled by an experimental surgery — told in his own progress reports as intelligence dawns and then begins to fade. The great novel about what intelligence is for.",
+    "imageUrl": "",
+    "byline": "Daniel Keyes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening progress reports",
+      "durationMinutes": 75,
+      "instruction": "Read the opening reports, where Charlie's misspellings and his devotion to his teacher are established. Notice how the prose itself measures his rise and fall. Write what the novel suggests about the relationship between intelligence and happiness — and about how we treat the people we call simple."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo Nebula"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-stranger-strange-land-heinlein",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Stranger in a Strange Land",
+    "teaser": "Heinlein's 1961 novel of Valentine Michael Smith, raised by Martians and brought to Earth — the counterculture's bible, and the novel that made 'grok' a word. A messiah story that questions everything.",
+    "imageUrl": "",
+    "byline": "Robert A. Heinlein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Mike's arrival",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Mike's Martian worldview collides with Earth. Notice how Heinlein uses the outsider to expose the tribe. Write what 'grok' — understanding so complete it becomes part of you — asks of the reader."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-moon-harsh-mistress",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Moon Is a Harsh Mistress",
+    "teaser": "Heinlein's 1966 novel of the lunar colony's rebellion against Earth — narrated by the one-armed computer technician Manuel, with the wisecracking computer Mike at his side. The novel that made libertarian revolution thrilling.",
+    "imageUrl": "",
+    "byline": "Robert A. Heinlein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the computer and the rebellion",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Mike the computer becomes self-aware and the plan begins. Notice how Heinlein narrates in a clipped lunar slang. Write what the novel suggests about freedom, taxation, and the price of revolution."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-starship-troopers",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Starship Troopers",
+    "teaser": "Heinlein's 1959 novel of Juan Rico's service in the Mobile Infantry — the most argued science-fiction novel ever written, a war story that treats citizenship as something earned. Loved and hated in equal measure.",
+    "imageUrl": "",
+    "byline": "Robert A. Heinlein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the drop and the boot camp",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Rico's enlistment and the first drops are established. Notice how Heinlein alternates battle with political lectures. Write what the novel claims about citizenship, service, and the franchise — and where you disagree with it."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-i-robot",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "I, Robot",
+    "teaser": "Asimov's 1950 story cycle of the Three Laws of Robotics — the laws that robots cannot break, and the paradoxes that prove them. The book that invented the ethics of artificial intelligence.",
+    "imageUrl": "",
+    "byline": "Isaac Asimov",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening stories — Robbie and the laws",
+      "durationMinutes": 60,
+      "instruction": "Read the opening stories. Notice how Asimov's robots follow rules that generate dilemmas. Write how the Three Laws still frame real debates about AI safety — and where the laws themselves break down."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Robots"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-childhood-end-clarke",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Childhood's End",
+    "teaser": "Clarke's 1953 novel of the Overlords, who end war and usher in utopia — and of the next stage of humanity they have come to midwife. A serene, terrifying vision of what evolution might demand.",
+    "imageUrl": "",
+    "byline": "Arthur C. Clarke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the Overlords arrive",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the golden age under the Overlords begins. Notice how Clarke withholds their appearance. Write what the ending suggests about the price of transcendence, and whether childhood's end is a tragedy or a gift."
+    },
+    "tags": [
+      "British",
+      "Science Fiction",
+      "Transcendence"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-timescape",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Timescape",
+    "teaser": "Gregory Benford's 1980 novel of scientists in 1998 sending a message backward through time to 1963 — tachyons, ecology, and the attempt to warn the past. The hard-science novel that won both major awards.",
+    "imageUrl": "",
+    "byline": "Gregory Benford",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the message and the receiver",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the two timelines are established — 1963 Cambridge and 1998's collapsing ecology. Notice how Benford makes the physics and the politics inseparable. Write what the novel suggests about whether the past can be saved — and whether it would listen."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Nebula"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-dune-messiah-herbert",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Dune Messiah",
+    "teaser": "Herbert's 1969 sequel that refuses to let Paul Atreides enjoy his victory — twelve years into his messianic reign, he sees the trap of prophecy closing around him. The anti-chosen-one novel.",
+    "imageUrl": "",
+    "byline": "Frank Herbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the emperor's trap",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Paul's prescience has become a cage. Notice how Herbert makes the reader pity a god. Write what the novel argues about charismatic power — why is Paul's victory also his prison?"
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Messiah"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-hyperion-simmons",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Hyperion",
+    "teaser": "Simmons's 1989 space epic shaped like The Canterbury Tales — seven pilgrims travel to the Time Tombs, each telling why they must meet the Shrike. A cathedral of science fiction, and the most awarded novel of its decade.",
+    "imageUrl": "",
+    "byline": "Dan Simmons",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the pilgrims assemble",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the seven pilgrims gather. Notice how each tale carries its own genre — war, love, horror. Write how the frame structure makes the Shrike more terrifying for being unseen, and which pilgrim's tale haunts you most."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-hitchhiker-adams",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Hitchhiker's Guide to the Galaxy",
+    "teaser": "Adams's 1979 comedy — Arthur Dent's house is demolished, then the Earth, and he hitchhikes through space with Ford Prefect, a towel, and the answer 42. The funniest book in the galaxy.",
+    "imageUrl": "",
+    "byline": "Douglas Adams",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the bulldozers and the Vogons",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the demolition of Arthur's house rhymes with the demolition of Earth. Notice how the footnotes and digressions are half the joke. Write what the Guide's cover line — DON'T PANIC — suggests about Adams's whole worldview."
+    },
+    "tags": [
+      "British",
+      "Comedy",
+      "Science Fiction"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-dirk-gently",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Dirk Gently's Holistic Detective Agency",
+    "teaser": "Adams's 1987 novel of the holistic detective who solves crimes by solving the whole universe — time travel, Coleridge, and a sofa on a staircase. The most Dickensian time-travel comedy ever written.",
+    "imageUrl": "",
+    "byline": "Douglas Adams",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the sofa and the professor",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the sofa on the staircase and the missing professor are established. Notice how Adams ties every absurd thread together. Write what 'holistic detection' means — and how the novel's climax pays off every planted joke."
+    },
+    "tags": [
+      "British",
+      "Comedy",
+      "Time Travel"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-long-dark-tea-time",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Long Dark Tea-Time of the Soul",
+    "teaser": "Adams's 1988 sequel — Dirk Gently investigates a severed head, a Norse god, and a contract that forbids the end of the world. The funniest novel ever written about Norse mythology and airport check-in.",
+    "imageUrl": "",
+    "byline": "Douglas Adams",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the severed head",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the severed head at the airport and the impossible contract are established. Notice how Adams's absurdity always obeys its own logic. Write what the novel's title — the long dark tea-time of the soul — suggests about its real subject."
+    },
+    "tags": [
+      "British",
+      "Comedy",
+      "Norse"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-good-omens-pratchett-gaiman",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Good Omens",
+    "teaser": "Pratchett and Gaiman's 1990 apocalypse comedy — an angel and a demon, both comfortable on Earth, try to stop Armageddon while the Antichrist grows up in an English village. The most fun the end of the world has ever been.",
+    "imageUrl": "",
+    "byline": "Terry Pratchett and Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the birth and the swap",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the infant Antichrist is misplaced by accident. Notice how the two authors' voices blend into one deadpan register. Write what the novel suggests about good, evil, and the small decencies that matter more than either."
+    },
+    "tags": [
+      "British",
+      "Comedy",
+      "Apocalypse"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-neverwhere",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Neverwhere",
+    "teaser": "Gaiman's 1996 novel of Richard Mayhew, who helps a wounded girl and finds himself invisible to London above — and walking the sewers and rooftops of London Below. A dark fairy tale of the city beneath the city.",
+    "imageUrl": "",
+    "byline": "Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the girl and the disappearing life",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Richard helps Door and begins to vanish from his own life. Notice how Gaiman maps London Below onto the real city. Write what the novel suggests about the parts of a city — and of us — that ordinary life refuses to see."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Urban"
+    ],
+    "tier": 1
+  }
+]

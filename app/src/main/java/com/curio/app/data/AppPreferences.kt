@@ -90,6 +90,15 @@ object AppPreferences {
     // boolean key below is read once for migration and then removed.
     private const val KEY_SMART_DENSITY_MODE = "smart_density_mode"
     private const val KEY_LEGACY_SMART_DENSITY_LAYOUT = "smart_density_layout"
+    // v9.1 — Premium Spin landing FX experiment (default OFF). The classic
+    // spin feel stays the shipped default; the master toggle swaps in the
+    // premium landing feel, and each layer (reel / catch / ring / sparkle)
+    // is independently toggleable for A/B tuning.
+    private const val KEY_SPIN_LANDING_FX = "spin_landing_fx"
+    private const val KEY_SPIN_FX_REEL = "spin_fx_reel"
+    private const val KEY_SPIN_FX_CATCH = "spin_fx_catch"
+    private const val KEY_SPIN_FX_RING = "spin_fx_ring"
+    private const val KEY_SPIN_FX_SPARKLE = "spin_fx_sparkle"
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
@@ -102,11 +111,21 @@ object AppPreferences {
     // Experimental voice-to-text/dictation. Default OFF so microphone
     // transcription never appears or starts until the user opts in.
     private const val KEY_VOICE_TO_TEXT_ENABLED = "voice_to_text_enabled"
-    private const val KEY_GUIDE_ENABLED = "guide_enabled"
-    // v8.2 — the quest tour's one-time offer: once the user has taken OR
-    // declined it ("No, thanks" / dismissing the prompt), the offer never
-    // reappears and the first quest navigates normally.
-    private const val KEY_GUIDE_TOUR_OFFERED = "guide_tour_offered"
+    // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
+    // rule-based dialogue + the category passport/discovery features on
+    // Quests and Home. Default ON; a user-facing Appearance toggle gates
+    // the whole companion layer so it can be A/B'd and reverted without a
+    // code change (per the experiment rules, the toggle is removed once the
+    // companion design is decided).
+    private const val KEY_PET_ENABLED = "pet_enabled"
+    private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
+    // v8.43 — the pet's local LEARNING model (CurioPetBrain): the pet
+    // observes real activity and grows its own personality + catchphrases.
+    // Default ON per the user; off falls back to the classic rule-based
+    // lines. Independent of [KEY_PET_ENABLED]: the pet layer can be on
+    // while the learning brain is off.
+    private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
+    private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     private const val KEY_PINNED_TOPICS = "pinned_topics"   // JSON array of PinnedTopic
     private const val KEY_SAVED_QUOTES = "saved_quotes"      // JSON array of SavedQuote
     private const val KEY_TOPIC_SENTIMENTS = "topic_sentiments"  // JSON object: "CATEGORY:topicId" -> "like"/"dislike"
@@ -119,6 +138,21 @@ object AppPreferences {
     // restart and nothing else in the app honored them.
     private const val KEY_HIDDEN_CATEGORIES = "hidden_categories"
     private const val KEY_CATEGORY_ORDER = "category_order"
+    // v8.34 — custom pet design (Pet designer playground): the imported
+    // design's full text (palette + body/curled grids). Always-on when
+    // saved — the pet sprite renders this instead of the default until the
+    // user resets it. Null = default design.
+    private const val KEY_PET_DESIGN = "pet_design"
+    // v8.39 — custom reaction speech is saved with the pet design but stays
+    // opt-in so the built-in Curie dialogue remains the default experience.
+    private const val KEY_CUSTOM_REACTION_LINES = "custom_reaction_lines"
+    // v8.47 — recently-applied palette colors for the pet designer picker.
+    private const val KEY_PET_RECENT_COLORS = "pet_recent_colors"
+    // v8.56 — the two user-saved custom pet slots (Pet studio Pets page).
+    private const val KEY_PET_CUSTOM_1 = "pet_custom_1"
+    private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
+    // v9.3 — custom flower bed design (32×18 pixel rows).
+    private const val KEY_BED_DESIGN = "bed_design_rows"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -252,6 +286,15 @@ object AppPreferences {
     // ships at its natural size; compact sizing is opt-in. Seeded from
     // prefs in [initThemeMode].
     var smartDensityModeState by mutableStateOf(SmartDensityMode.OFF)
+    // v9.1 — Premium Spin landing FX experiment. Master toggle (default
+    // OFF — the classic spin stays the shipped default); the four layers
+    // default ON so enabling the master turns on the full premium feel,
+    // and each layer can be A/B-tuned independently.
+    var spinLandingFxState by mutableStateOf(false)
+    var spinFxReelState by mutableStateOf(true)
+    var spinFxCatchState by mutableStateOf(true)
+    var spinFxRingState by mutableStateOf(true)
+    var spinFxSparkleState by mutableStateOf(true)
     // Explore sessions — the explore-now timer/reminder/done flow. Default
     // ON; off disables the timer notification + reminder + done prompt while
     // Explore-now still opens the browser and records recently-explored.
@@ -286,18 +329,35 @@ object AppPreferences {
         private set
 
     /**
-     * Guided-tour state (v8.0) — the MASTER SWITCH for the one-time quest
-     * tour: when ON (default), the Quests page offers the tap-along tour the
-     * first time the user taps the first quest (see [isGuideTourOffered]).
-     * Toggleable in Settings; the tour is never auto-shown from other
-     * screens (v8.2).
+     * Curio pet companion state (v8.5) — gates the pixel pet sprite, its
+     * rule-based dialogue, and the passport/discovery companion layer on
+     * Quests and Home (spec §10). Default ON. Seeded from prefs in
+     * [initThemeMode]; off hides the pet entirely and restores the plain
+     * quests layout.
      */
-    var guideEnabledState by mutableStateOf(true)
+    var petEnabledState by mutableStateOf(true)
+        private set
+    // v8.8 — whether the pet floats freely on every screen (draggable +
+    // wanders). Independent of [petEnabledState]: the pet layer can be on
+    // while the floating companion is off (the pet then stays in its bed).
+    var floatingPetEnabledState by mutableStateOf(true)
+        private set
+    // v8.43 — whether the pet's learning brain is on (default ON): the pet
+    // builds a personality from the user's real activity and develops its
+    // own catchphrases. Off = classic rule-based lines only.
+    var petBrainEnabledState by mutableStateOf(true)
+        private set
+    // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
+    // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
+    // itself when the deck lands (the tour and pet lines adapt). Turn it
+    // OFF to make the deck land quietly with the front card staying
+    // tappable until the user opens it manually.
+    var autoOpenRevealState by mutableStateOf(true)
         private set
 
-    // v8.2 — whether the one-time tour offer has been shown (taken or
-    // declined). Suppresses the offer on the Quests page so it never nags.
-    var guideTourOfferedState by mutableStateOf(false)
+    // v8.39 — custom reaction lines are an explicit opt-in. The editor can
+    // always be used, but Curie only speaks saved custom lines when enabled.
+    var customReactionLinesState by mutableStateOf(false)
         private set
 
     /**
@@ -344,6 +404,31 @@ object AppPreferences {
     var categoryOrderState by mutableStateOf<List<CategoryId>>(emptyList())
         private set
 
+    /**
+     * Reactive custom-pet-design state (v8.34) — the design's import text,
+     * or null when the pet wears its default look. Updated by
+     * [setPetDesign] / [clearPetDesign] so the pet sprite recomposes
+     * instantly when a design is saved in the designer playground.
+     */
+    var petDesignState by mutableStateOf<String?>(null)
+        private set
+
+    /**
+     * Reactive custom-pet slots (v8.56) — the two user-saved pet designs
+     * (full design text) or null when a slot is empty. Updated by
+     * [setCustomPet] / [clearCustomPet] so the Pet studio's Pets page cards
+     * recompose the moment a pet is saved or removed.
+     */
+    var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
+    /** Legacy custom flower-bed rows; the current home uses a fixed house scene. */
+    var bedDesignRowsState by mutableStateOf<List<String>?>(null)
+    /** v9.5 — evolution path chosen at level 7 (null = baby, no choice yet). */
+    var evoPathState by mutableStateOf<String?>(null)
+        private set
+    /** v9.6 — experimental per-part size and position controls. */
+    var petPartTransformsState by mutableStateOf(false)
+        private set
+
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
         themeStyleState = getThemeStyle(context)
@@ -364,18 +449,31 @@ object AppPreferences {
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
         smartDensityModeState = getSmartDensityMode(context)
+        spinLandingFxState = isSpinLandingFxEnabled(context)
+        spinFxReelState = isSpinFxReelEnabled(context)
+        spinFxCatchState = isSpinFxCatchEnabled(context)
+        spinFxRingState = isSpinFxRingEnabled(context)
+        spinFxSparkleState = isSpinFxSparkleEnabled(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
-        guideEnabledState = isGuideEnabled(context)
-        guideTourOfferedState = isGuideTourOffered(context)
+        petEnabledState = isPetEnabled(context)
+        floatingPetEnabledState = isFloatingPetEnabled(context)
+        petBrainEnabledState = isPetBrainEnabled(context)
+        autoOpenRevealState = isAutoOpenReveal(context)
+        customReactionLinesState = isCustomReactionLinesEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
         savedQuotesState = getSavedQuotes(context)
         topicSentimentsState = getTopicSentiments(context)
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
+        petDesignState = getPetDesign(context)
+        customPetsState = getCustomPets(context)
+        bedDesignRowsState = getBedDesignRows(context)
+        evoPathState = getEvoPath(context)
+        petPartTransformsState = isPetPartTransformsEnabled(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -577,6 +675,51 @@ object AppPreferences {
     fun setSmartDensityMode(context: Context, mode: SmartDensityMode) {
         prefs(context).edit().putString(KEY_SMART_DENSITY_MODE, mode.name).apply()
         smartDensityModeState = mode
+    }
+
+    /** v9.1 — master toggle for the premium Spin landing FX experiment. */
+    fun isSpinLandingFxEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SPIN_LANDING_FX, false)
+
+    fun setSpinLandingFxEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SPIN_LANDING_FX, enabled).apply()
+        spinLandingFxState = enabled
+    }
+
+    /** v9.1 — buttery reel glide (cubic ease-out deceleration on the wheel). */
+    fun isSpinFxReelEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SPIN_FX_REEL, true)
+
+    fun setSpinFxReelEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SPIN_FX_REEL, enabled).apply()
+        spinFxReelState = enabled
+    }
+
+    /** v9.1 — juicy spring catch on landing (replaces the calm settle). */
+    fun isSpinFxCatchEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SPIN_FX_CATCH, true)
+
+    fun setSpinFxCatchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SPIN_FX_CATCH, enabled).apply()
+        spinFxCatchState = enabled
+    }
+
+    /** v9.1 — shockwave ring radiating from the landed card. */
+    fun isSpinFxRingEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SPIN_FX_RING, true)
+
+    fun setSpinFxRingEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SPIN_FX_RING, enabled).apply()
+        spinFxRingState = enabled
+    }
+
+    /** v9.1 — sparkle burst around the landed card. */
+    fun isSpinFxSparkleEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SPIN_FX_SPARKLE, true)
+
+    fun setSpinFxSparkleEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SPIN_FX_SPARKLE, enabled).apply()
+        spinFxSparkleState = enabled
     }
 
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */
@@ -943,26 +1086,69 @@ object AppPreferences {
         categoryOrderState = valid
     }
 
-    // ── Guided tour ──────────────────────────────────────────────────
-    fun isGuideEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GUIDE_ENABLED, true)
+    // ── Curio pet companion (v8.5) ───────────────────────────────────
+    /** Whether the Curio pet companion layer is on (default ON). */
+    fun isPetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_ENABLED, true)
 
-    fun setGuideEnabled(context: Context, enabled: Boolean) {
-        guideEnabledState = enabled
-        prefs(context).edit().putBoolean(KEY_GUIDE_ENABLED, enabled).apply()
+    fun setPetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_ENABLED, enabled).apply()
+        petEnabledState = enabled
     }
 
-    /**
-     * Whether the one-time quest-tour offer has already been shown (taken
-     * or declined). Once true, the Quests page never offers the tour again
-     * and the first quest navigates normally (v8.2).
-     */
-    fun isGuideTourOffered(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GUIDE_TOUR_OFFERED, false)
+    // v8.8 — floating pet toggle (default ON; see the Appearance settings).
+    fun isFloatingPetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_FLOATING_PET_ENABLED, true)
 
-    fun setGuideTourOffered(context: Context, offered: Boolean) {
-        guideTourOfferedState = offered
-        prefs(context).edit().putBoolean(KEY_GUIDE_TOUR_OFFERED, offered).apply()
+    fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
+        floatingPetEnabledState = enabled
+    }
+
+    // v8.43 — the pet's learning brain toggle (default ON; Appearance).
+    fun isPetBrainEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_BRAIN_ENABLED, true)
+
+    fun setPetBrainEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_BRAIN_ENABLED, enabled).apply()
+        petBrainEnabledState = enabled
+    }
+
+    // ── Pet designer recent colors (v8.47 color picker) ────────────────
+    /** Recently-applied palette colors, most recent first (max 12). */
+    fun getPetRecentColors(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_PET_RECENT_COLORS, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { arr.getString(it) }.filter { it.length == 6 }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun setPetRecentColors(context: Context, colors: List<String>) {
+        val arr = JSONArray()
+        colors.take(12).forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_PET_RECENT_COLORS, arr.toString()).apply()
+    }
+
+    // v8.16 — auto-open the landed topic's reveal after a spin. v8.21 —
+    // default ON (the reveal opens as soon as the deck settles).
+    fun isAutoOpenReveal(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_AUTO_OPEN_REVEAL, true)
+
+    fun setAutoOpenReveal(context: Context, enabled: Boolean) {
+        autoOpenRevealState = enabled
+        prefs(context).edit().putBoolean(KEY_AUTO_OPEN_REVEAL, enabled).apply()
+    }
+
+    /** Whether Curie may speak the custom reaction lines saved in the Pet designer. */
+    fun isCustomReactionLinesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CUSTOM_REACTION_LINES, false)
+
+    fun setCustomReactionLinesEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CUSTOM_REACTION_LINES, enabled).apply()
+        customReactionLinesState = enabled
     }
 
     // ── Daily reminder ───────────────────────────────────────────────
@@ -1028,6 +1214,45 @@ object AppPreferences {
         setLastSpinCategory(context, ids.first())
     }
 
+    // ── Custom pet design (v8.34 — Pet designer playground) ──────────
+    /** The saved custom pet-design text, or null for the default look. */
+    fun getPetDesign(context: Context): String? =
+        prefs(context).getString(KEY_PET_DESIGN, null)
+
+    /** Saves a custom pet design (always-on: the pet wears it everywhere). */
+    fun setPetDesign(context: Context, text: String) {
+        prefs(context).edit().putString(KEY_PET_DESIGN, text).apply()
+        petDesignState = text
+    }
+
+    /** Removes the custom design, returning the pet to its default look. */
+    fun clearPetDesign(context: Context) {
+        prefs(context).edit().remove(KEY_PET_DESIGN).apply()
+        petDesignState = null
+    }
+
+    // ── Custom pet slots (v8.56 — Pet studio Pets page) ──────────────
+    /** The two saved custom-pet design texts (null = empty slot). */
+    fun getCustomPets(context: Context): List<String?> = listOf(
+        prefs(context).getString(KEY_PET_CUSTOM_1, null),
+        prefs(context).getString(KEY_PET_CUSTOM_2, null)
+    )
+
+    /** Saves a custom-pet design into one of the two slots (always-on). */
+    fun setCustomPet(context: Context, index: Int, text: String) {
+        val key = if (index == 0) KEY_PET_CUSTOM_1 else KEY_PET_CUSTOM_2
+        prefs(context).edit().putString(key, text).apply()
+        customPetsState = getCustomPets(context)
+    }
+
+    /** Removes one custom-pet slot (returns it to the empty state). */
+    fun clearCustomPet(context: Context, index: Int) {
+        val key = if (index == 0) KEY_PET_CUSTOM_1 else KEY_PET_CUSTOM_2
+        prefs(context).edit().remove(key).apply()
+        customPetsState = getCustomPets(context)
+    }
+
+
     // ── Landed Spin topic (per category) — persisted so the landed card ──
     //    survives ANY navigation. rememberSaveable alone dies when the
     //    Spin back-stack entry is popped (e.g. top-bar back arrow to
@@ -1040,6 +1265,49 @@ object AppPreferences {
         prefs(context).edit()
             .putString(KEY_LANDED_TOPIC_PREFIX + categoryId.name, topicName)
             .apply()
+    }
+
+    // ── Legacy flower-bed design compatibility ───────────────────────
+    /** Returns old saved bed rows for migration compatibility; no UI writes them. */
+    fun getBedDesignRows(context: Context): List<String>? =
+        prefs(context).getString(KEY_BED_DESIGN, null)
+            ?.split("\n")
+            ?.takeIf { it.size == 18 && it.all { row -> row.length == 32 } }
+
+    fun setBedDesignRows(context: Context, rows: List<String>) {
+        prefs(context).edit().putString(KEY_BED_DESIGN, rows.joinToString("\n")).apply()
+        bedDesignRowsState = rows
+    }
+
+    fun clearBedDesignRows(context: Context) {
+        prefs(context).edit().remove(KEY_BED_DESIGN).apply()
+        bedDesignRowsState = null
+    }
+
+    // ── Evolution path (v9.5) ────────────────────────────────────────
+    private const val KEY_EVO_PATH = "evo_path"
+
+    fun getEvoPath(context: Context): String? =
+        prefs(context).getString(KEY_EVO_PATH, null)
+
+    /** Reactive read (no context needed) — returns null when unset. */
+    fun evoPath(): CurioPet.EvoPath? =
+        evoPathState?.let { runCatching { CurioPet.EvoPath.valueOf(it) }.getOrNull() }
+
+    fun setEvoPath(context: Context, path: CurioPet.EvoPath) {
+        prefs(context).edit().putString(KEY_EVO_PATH, path.name).apply()
+        evoPathState = path.name
+    }
+
+    // ── Pet editor experiments (v9.6) ────────────────────────────────
+    private const val KEY_PET_PART_TRANSFORMS = "pet_part_transforms"
+
+    fun isPetPartTransformsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_PART_TRANSFORMS, false)
+
+    fun setPetPartTransformsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_PART_TRANSFORMS, enabled).apply()
+        petPartTransformsState = enabled
     }
 
     // ── Internal ─────────────────────────────────────────────────────

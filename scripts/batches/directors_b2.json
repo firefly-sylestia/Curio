@@ -1,0 +1,597 @@
+[
+  {
+    "id": "director-michael-powell",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Michael Powell",
+    "teaser": "Powell's Peeping Tom was so reviled on release that it ended his career — decades later it was re-examined as a masterpiece of British horror.",
+    "imageUrl": "",
+    "byline": "Director · Michael Powell",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Red Shoes (1948), the ballet sequence",
+      "durationMinutes": 20,
+      "instruction": "Watch the 15-minute ballet — Powell cuts between reality and the stage world so seamlessly that you stop being able to tell them apart. That confusion is the point: art consumes the dancer."
+    },
+    "tags": ["UK", "1940s", "Fantasy"],
+    "tier": 1
+  },
+  {
+    "id": "director-vittorio-de-sica",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Vittorio De Sica",
+    "teaser": "De Sica cast a real unemployed man and his real son for Bicycle Thieves — they'd never acted before, and the film's authenticity rewrote world cinema.",
+    "imageUrl": "",
+    "byline": "Director · Vittorio De Sica",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bicycle Thieves (1948), the final 15 minutes",
+      "durationMinutes": 15,
+      "instruction": "Watch the ending on the street — the father's breakdown in front of his son. De Sica refused to film it in a studio: the crowd is real, and their stares become the film's final verdict."
+    },
+    "tags": ["Italy", "Neorealism", "1940s"],
+    "tier": 1
+  },
+  {
+    "id": "director-robert-bresson",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Robert Bresson",
+    "teaser": "Bresson famously forbade his actors from acting — he called them 'models' and shot take after take until every trace of performance was gone.",
+    "imageUrl": "",
+    "byline": "Director · Robert Bresson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pickpocket (1959), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch how Bresson films hands instead of faces — the pickpocketing is shown as pure gesture. Notice how the emotion lives in what's NOT acted: stillness, silence, hands."
+    },
+    "tags": ["France", "Minimalism", "1950s"],
+    "tier": 1
+  },
+  {
+    "id": "director-yasujiro-ozu",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Yasujirō Ozu",
+    "teaser": "Ozu placed his camera at tatami-mat height — about three feet off the ground — for his entire career, and never once moved it during a scene. His films are the cinema of sitting down.",
+    "imageUrl": "",
+    "byline": "Director · Yasujirō Ozu",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tokyo Story (1953), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the elderly couple packing for Tokyo. Ozu cuts straight from face to face with no camera movement and no reaction shots. Notice how the stillness makes every word land harder."
+    },
+    "tags": ["Japan", "1950s", "Family Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-luis-bunuel",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Luis Buñuel",
+    "teaser": "Buñuel's first film, Un Chien Andalou, opens with an eye being slit — he made it to shock the bourgeoisie, and he never really stopped.",
+    "imageUrl": "",
+    "byline": "Director · Luis Buñuel",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Discreet Charm of the Bourgeoisie (1972), the first dinner scene",
+      "durationMinutes": 20,
+      "instruction": "Watch the first dinner party that never quite happens. Buñuel's joke is that the guests can't eat, and neither can we — the film keeps interrupting itself exactly when satisfaction should arrive."
+    },
+    "tags": ["Surreal", "Spain", "1970s"],
+    "tier": 1
+  },
+  {
+    "id": "director-victor-fleming",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Victor Fleming",
+    "teaser": "Fleming was the third director on Gone with the Wind — the first two were fired, and he took over mid-production, shooting the film's most famous scenes under impossible pressure.",
+    "imageUrl": "",
+    "byline": "Director · Victor Fleming",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Gone with the Wind (1939), the Atlanta fire sequence",
+      "durationMinutes": 18,
+      "instruction": "Watch the burning of Atlanta — the fire was real, shot with a dozen cameras and hundreds of extras. Fleming staged the studio's biggest set ever and burned it to the ground in one take."
+    },
+    "tags": ["Hollywood", "Classic", "1930s"],
+    "tier": 1
+  },
+  {
+    "id": "director-frank-capra",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Frank Capra",
+    "teaser": "Capra's It's a Wonderful Life flopped on release and only became a Christmas classic after the studio's copyright lapsed and TV stations played it for free.",
+    "imageUrl": "",
+    "byline": "Director · Frank Capra",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "It's a Wonderful Life (1946), the final 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the ending — George Bailey running through Bedford Falls, discovering he's 'the richest man in town.' Capra's most radical idea: the film's hero is a man who never left his hometown."
+    },
+    "tags": ["Hollywood", "Classic", "1940s"],
+    "tier": 1
+  },
+  {
+    "id": "director-howard-hawks",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Howard Hawks",
+    "teaser": "Hawks worked in every genre — westerns, comedies, noir, war — and said a good movie is 'three great scenes and no bad ones.' He made about 40 of them.",
+    "imageUrl": "",
+    "byline": "Director · Howard Hawks",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "His Girl Friday (1940), the first 15 minutes",
+      "durationMinutes": 15,
+      "instruction": "Watch the overlapping dialogue — Hawks had actors talk over each other, a novelty in 1940. The movie moves at the speed of a newsroom; notice how much plot arrives in the first ten minutes."
+    },
+    "tags": ["Hollywood", "Comedy", "1940s"],
+    "tier": 1
+  },
+  {
+    "id": "director-michael-curtiz",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Michael Curtiz",
+    "teaser": "Curtiz directed Casablanca while the studio was churning out war films — he treated it as just another assignment, and it became one of the most quoted movies ever made.",
+    "imageUrl": "",
+    "byline": "Director · Michael Curtiz",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Casablanca (1942), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — the refugees, the passport chase, the arrival of Rick. Curtiz establishes an entire world of desperation before his hero says a word. Notice how every character is introduced by their relationship to escape."
+    },
+    "tags": ["Hollywood", "Classic", "1940s"],
+    "tier": 1
+  },
+  {
+    "id": "director-elia-kazan",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Elia Kazan",
+    "teaser": "Kazan directed Streetcar and On the Waterfront, both with Marlon Brando, and trained most of the Method actors who defined 1950s Hollywood.",
+    "imageUrl": "",
+    "byline": "Director · Elia Kazan",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "On the Waterfront (1954), the taxi scene",
+      "durationMinutes": 12,
+      "instruction": "Watch the famous taxi confession — 'I coulda been a contender.' Kazan's camera stays on Brando's face; the scene is a masterclass in Method acting and the reason the film survives its own politics."
+    },
+    "tags": ["Hollywood", "1950s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-nicholas-ray",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Nicholas Ray",
+    "teaser": "Ray's Rebel Without a Cause gave teenage alienation its visual language — James Dean's red jacket and the knife fight are pure Ray.",
+    "imageUrl": "",
+    "byline": "Director · Nicholas Ray",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Rebel Without a Cause (1955), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — Jim Stark drunk in the street, the toy monkey, the family. Ray shot in WarnerColor and widescreen, making teenage angst look operatic. Notice the red jacket: Ray's color code."
+    },
+    "tags": ["Hollywood", "1950s", "Teen Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-alain-resnais",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alain Resnais",
+    "teaser": "Resnais's Hiroshima mon amour opened with documentary footage of the bombing, then dissolved into a love story — memory and history tangled in the same frame.",
+    "imageUrl": "",
+    "byline": "Director · Alain Resnais",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hiroshima mon amour (1959), the first 15 minutes",
+      "durationMinutes": 15,
+      "instruction": "Watch the opening lovers' exchange over documentary footage. Resnais refuses to show the bomb — only its aftermath, repeated like a memory loop. Notice how the voiceover argues with the images."
+    },
+    "tags": ["France", "New Wave", "1950s"],
+    "tier": 1
+  },
+  {
+    "id": "director-michelangelo-antonioni",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Michelangelo Antonioni",
+    "teaser": "Antonioni's L'Avventura booed at Cannes in 1960 — the audience hated that a woman disappears and the film never explains it. It's now a landmark of modernist cinema.",
+    "imageUrl": "",
+    "byline": "Director · Michelangelo Antonioni",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "L'Avventura (1960), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the island sequence where Anna vanishes. Antonioni's radical move: the mystery is never solved, and the film doesn't care. Notice how the landscape shots outlast the characters."
+    },
+    "tags": ["Italy", "1960s", "Modernist"],
+    "tier": 1
+  },
+  {
+    "id": "director-pier-paolo-pasolini",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Pier Paolo Pasolini",
+    "teaser": "Pasolini was a poet, novelist, and Marxist before he was a director — his Gospel According to St. Matthew cast a real bricklayer as Jesus.",
+    "imageUrl": "",
+    "byline": "Director · Pier Paolo Pasolini",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Gospel According to St. Matthew (1964), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Pasolini shot the gospel in real Italian villages with real faces. The camera is often hand-held and the faces are untrained; it reads like a documentary of a miracle."
+    },
+    "tags": ["Italy", "1960s", "Religious"],
+    "tier": 1
+  },
+  {
+    "id": "director-bernardo-bertolucci",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Bernardo Bertolucci",
+    "teaser": "Bertolucci was Pasolini's assistant on Accattone — he was 20 when he directed his first feature, and 31 when Last Tango in Paris scandalized the world.",
+    "imageUrl": "",
+    "byline": "Director · Bernardo Bertolucci",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Conformist (1970), the opening 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — Vittorio's flashback in fascist Rome. Bertolucci's camera glides through rooms and memory with a style that inspired a generation of cinematographers. Notice the shadows and the Mussolini-era architecture."
+    },
+    "tags": ["Italy", "1970s", "Political"],
+    "tier": 1
+  },
+  {
+    "id": "director-kenji-mizoguchi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Kenji Mizoguchi",
+    "teaser": "Mizoguchi's films are almost all about women suffering under male power — his sister was sold into geisha service when he was a child, and he never stopped filming that wound.",
+    "imageUrl": "",
+    "byline": "Director · Kenji Mizoguchi",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ugetsu (1953), the ending",
+      "durationMinutes": 20,
+      "instruction": "Watch the final shot — a long take of the widow at her husband's grave. Mizoguchi held his camera motionless for minutes at a time; the stillness becomes grief you can stand in."
+    },
+    "tags": ["Japan", "1950s", "Fantasy"],
+    "tier": 1
+  },
+  {
+    "id": "director-mira-nair",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mira Nair",
+    "teaser": "Nair made Salaam Bombay! with street kids she found in Bombay's red-light district — several of her young actors were real children living on those streets.",
+    "imageUrl": "",
+    "byline": "Director · Mira Nair",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Salaam Bombay! (1988), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Krishna's arrival in the city. Nair shot with non-actors and a documentary crew's patience. Notice how the camera treats the street kids as people, not scenery."
+    },
+    "tags": ["India", "1980s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-hou-hsiao-hsien",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Hou Hsiao-hsien",
+    "teaser": "Hou's films are famous for long takes where almost nothing happens — a train passing, a family at dinner — and audiences either walk out or never leave.",
+    "imageUrl": "",
+    "byline": "Director · Hou Hsiao-hsien",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "A City of Sadness (1989), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening dinner scenes — Hou stages whole conversations in long shots with the camera far away. Notice how you learn the family's history through posture and silence, not close-ups."
+    },
+    "tags": ["Taiwan", "1980s", "Historical"],
+    "tier": 1
+  },
+  {
+    "id": "director-edward-yang",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Edward Yang",
+    "teaser": "Yang's Yi Yi is a three-hour film about a Taiwanese family that somehow feels like your own — it won him the Best Director prize at Cannes in 2000.",
+    "imageUrl": "",
+    "byline": "Director · Edward Yang",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Yi Yi (2000), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the wedding that opens the film and notice how Yang introduces his whole family through it. The film's famous line — 'we can't know the other half' — is planted in the first half hour."
+    },
+    "tags": ["Taiwan", "2000s", "Family Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-abbas-kiarostami",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Abbas Kiarostami",
+    "teaser": "Kiarostami made Taste of Cherry about a man driving around Tehran looking for someone to bury him — the film ends with behind-the-scenes footage of the crew, blurring documentary and fiction.",
+    "imageUrl": "",
+    "byline": "Director · Abbas Kiarostami",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Taste of Cherry (1997), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a man driving, asking strangers for a favor he won't name. Kiarostami keeps the camera inside the car the whole time. Notice how the landscape becomes a character through the windshield."
+    },
+    "tags": ["Iran", "1990s", "Minimalist"],
+    "tier": 1
+  },
+  {
+    "id": "director-emir-kusturica",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Emir Kusturica",
+    "teaser": "Kusturica's Underground won the Palme d'Or by telling Yugoslavia's collapse as a wild, drunken circus — his films move at the speed of a brass band falling downstairs.",
+    "imageUrl": "",
+    "byline": "Director · Emir Kusturica",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Underground (1995), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the brass band, the tank, the wedding. Kusturica stages chaos as choreography. Notice how every scene is built on music and movement, not dialogue."
+    },
+    "tags": ["Serbia", "1990s", "Satire"],
+    "tier": 1
+  },
+  {
+    "id": "director-krzysztof-kieslowski",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Krzysztof Kieślowski",
+    "teaser": "Kieślowski made a film about love, Blue, that barely shows the lovers — he claimed he was done with cinema after the Three Colors trilogy, and he was telling the truth.",
+    "imageUrl": "",
+    "byline": "Director · Krzysztof Kieślowski",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Three Colors: Blue (1993), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — the car crash that Julie survives. Kieślowski drains the world of color then floods it back, blue by blue. Notice how the camera keeps finding her without her moving."
+    },
+    "tags": ["Poland", "1990s", "Art House"],
+    "tier": 1
+  },
+  {
+    "id": "director-pedro-almodovar",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Pedro Almodóvar",
+    "teaser": "Almodóvar grew up in a poor La Mancha village and moved to Madrid with no money — his films celebrate the outsiders, the loud, the melodramatic, in colors that refuse to be subtle.",
+    "imageUrl": "",
+    "byline": "Director · Pedro Almodóvar",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "All About My Mother (1999), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the mother's loss, then her flight to Barcelona. Almodóvar builds a family of strangers. Notice how red appears everywhere: his color code for love and grief."
+    },
+    "tags": ["Spain", "1990s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-guillermo-del-toro",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Guillermo del Toro",
+    "teaser": "Del Toro keeps a 'bleak house' of his own monster memorabilia and admits he makes 'melodramas in monster costumes' — Pan's Labyrinth is a war film wearing a fairy tale.",
+    "imageUrl": "",
+    "byline": "Director · Guillermo del Toro",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pan's Labyrinth (2006), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — Ofelia bleeding into the labyrinth, then the fantasy world. Del Toro cuts between the fairy tale and Franco's Spain; notice how the monster and the soldier speak the same language."
+    },
+    "tags": ["Mexico", "Fantasy", "2000s"],
+    "tier": 1
+  },
+  {
+    "id": "director-alfonso-cuaron",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alfonso Cuarón",
+    "teaser": "Cuarón shot Children of Men with a series of long, unbroken takes that required a camera rig built into a car — the film's 4-minute car ambush scene took weeks to rehearse.",
+    "imageUrl": "",
+    "byline": "Director · Alfonso Cuarón",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Children of Men (2006), the car ambush scene",
+      "durationMinutes": 12,
+      "instruction": "Watch the continuous car ambush take. Cuarón's camera never cuts, so the violence unfolds in real time. Notice how the chaos is choreographed — every bullet has a plan."
+    },
+    "tags": ["Mexico", "Sci-Fi", "2000s"],
+    "tier": 1
+  },
+  {
+    "id": "director-alejandro-gonzalez-inarritu",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alejandro González Iñárritu",
+    "teaser": "Iñárritu's Birdman looks like one continuous shot — it was actually stitched from dozens of takes with hidden cuts, and the illusion made him the first Mexican director to win Best Picture.",
+    "imageUrl": "",
+    "byline": "Director · Alejandro González Iñárritu",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Birdman (2014), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening and try to spot where the hidden cuts are. Iñárritu's fake single-take makes the theater's cramped hallways feel like a fever dream. Notice how the drum score never stops."
+    },
+    "tags": ["Mexico", "2010s", "Comedy-Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-park-chan-wook",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Park Chan-wook",
+    "teaser": "Park's Oldboy won the Grand Prix at Cannes and made Korean vengeance cinema famous — its corridor fight is one long side-scrolling shot that took three days to shoot.",
+    "imageUrl": "",
+    "byline": "Director · Park Chan-wook",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Oldboy (2003), the corridor fight",
+      "durationMinutes": 10,
+      "instruction": "Watch the hammer fight in the corridor — one horizontal tracking shot, no cuts. Park blocked it like a video game level. Notice how the hero's exhaustion is part of the choreography."
+    },
+    "tags": ["South Korea", "2000s", "Vengeance"],
+    "tier": 1
+  },
+  {
+    "id": "director-takashi-miike",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Takashi Miike",
+    "teaser": "Miike has directed over a hundred films across every genre — including a children's film and the most notorious horror films ever made — often shooting several a year.",
+    "imageUrl": "",
+    "byline": "Director · Takashi Miike",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Audition (1999), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the first half — a gentle romance, then the bag, then the phone call. Miike's most famous trick is the tonal turn: notice the exact moment the film stops being kind."
+    },
+    "tags": ["Japan", "Horror", "1990s"],
+    "tier": 1
+  },
+  {
+    "id": "director-jia-zhangke",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jia Zhangke",
+    "teaser": "Jia films the places China's economic boom left behind — his movies are a documentary record of a country demolishing itself into the future.",
+    "imageUrl": "",
+    "byline": "Director · Jia Zhangke",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Platform (2000), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — a state dance troupe in the 1980s practicing in a shabby hall. Jia tracks how clothes, music, and dance change as China changes. Notice the haircuts: that's the timeline."
+    },
+    "tags": ["China", "2000s", "Slow Cinema"],
+    "tier": 1
+  },
+  {
+    "id": "director-apichatpong-weerasethakul",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Apichatpong Weerasethakul",
+    "teaser": "Apichatpong's films mix documentary, memory, and ghosts — Uncle Boonmee, which won the Palme d'Or, features a talking catfish and a dead wife who returns as a glowing ape.",
+    "imageUrl": "",
+    "byline": "Director · Apichatpong Weerasethakul",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Uncle Boonmee Who Can Recall His Past Lives (2010), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening dinner — the dead wife arrives calmly, and no one screams. Apichatpong treats ghosts as neighbors. Notice how the forest sounds do the storytelling."
+    },
+    "tags": ["Thailand", "2010s", "Slow Cinema"],
+    "tier": 1
+  },
+  {
+    "id": "director-ryusuke-hamaguchi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ryusuke Hamaguchi",
+    "teaser": "Hamaguchi's Drive My Car won an Oscar for Best International Feature and runs three hours — most of it two people talking in a car. Audiences found it riveting.",
+    "imageUrl": "",
+    "byline": "Director · Ryusuke Hamaguchi",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Drive My Car (2021), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — the prologue before the title card. Hamaguchi builds grief through small gestures and theater rehearsal. Notice how the car becomes a confessional."
+    },
+    "tags": ["Japan", "2020s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-chloe-zhao",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Chloé Zhao",
+    "teaser": "Zhao cast real nomads — not actors — in Nomadland, and lived among them while filming in a van she bought herself.",
+    "imageUrl": "",
+    "byline": "Director · Chloé Zhao",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nomadland (2020), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Fern packing her storage unit into a van. Zhao mixes scripted scenes with real nomads telling their own stories. Notice how the landscape shots give Fern room to breathe."
+    },
+    "tags": ["USA", "2020s", "Neo-western"],
+    "tier": 1
+  },
+  {
+    "id": "director-agnes-varda",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Agnès Varda",
+    "teaser": "Varda called herself the 'grandmother of the New Wave' — she was filming La Pointe Courte a year before Godard and Truffaut, and she never stopped experimenting until she was 90.",
+    "imageUrl": "",
+    "byline": "Director · Agnès Varda",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cléo from 5 to 7 (1962), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Cléo waiting for medical results, followed in real time. Varda films her in mirrors and shop windows; notice how the city becomes a clock counting down."
+    },
+    "tags": ["France", "1960s", "New Wave"],
+    "tier": 1
+  },
+  {
+    "id": "director-chantal-akerman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Chantal Akerman",
+    "teaser": "Akerman's Jeanne Dielman is a 3.5-hour film about a woman peeling potatoes and making beds — in 2022, Sight & Sound ranked it the greatest film ever made.",
+    "imageUrl": "",
+    "byline": "Director · Chantal Akerman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Jeanne Dielman (1975), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the first half hour — household chores in real time, shot head-on. Akerman's radical claim: domestic labor is worthy of cinema's full attention. Notice when the routine breaks."
+    },
+    "tags": ["Belgium", "1970s", "Slow Cinema"],
+    "tier": 1
+  },
+  {
+    "id": "director-jane-campion",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jane Campion",
+    "teaser": "Campion was the first woman to win the Palme d'Or — for The Piano — and the second to be nominated twice for Best Director, for The Power of the Dog.",
+    "imageUrl": "",
+    "byline": "Director · Jane Campion",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Piano (1993), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — Ada's fingers, the piano on the beach, the storm. Campion tells you her heroine's whole world in the first scene: she is married to her instrument. Notice the mud."
+    },
+    "tags": ["New Zealand", "1990s", "Romance"],
+    "tier": 1
+  }
+]

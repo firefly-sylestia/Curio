@@ -1,0 +1,354 @@
+[
+  {
+    "id": "wildcard-royal-roads",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Inca Road System",
+    "teaser": "The Incas built 40,000 kilometers of roads across the Andes — over mountains, through deserts, across suspension bridges — with no wheels, no horses, and no iron. Runners carried messages the length of the empire in days, and the roads still survive in places.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "The Inca road network",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Inca road network linked an empire from Colombia to Chile, and how chasqui runners relayed messages. Write how the roads were built, how bridges crossed canyons, and why much of it still exists."
+    },
+    "tags": ["History", "Inca", "Roads"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-appian-way",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Appian Way",
+    "teaser": "'The queen of roads' — Rome's first great highway, begun in 312 BC and still walkable today, with basalt slabs worn smooth by 2,300 years of feet, hooves, and wheels. The Romans built roads so well that some are still in use.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "The Appian Way today",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Appian Way was built in layers — foundation, rubble, concrete, and basalt slabs — and how it connected Rome to the south. Write why Roman roads were so durable and how the Appian Way is preserved today."
+    },
+    "tags": ["History", "Rome", "Roads"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-camel-trains",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Silk Road Camel Caravans",
+    "teaser": "For 1,500 years, caravans of camels carried silk, spices, ideas, and religions across deserts from China to the Mediterranean. A single caravan could stretch a kilometer, and its camels could go weeks without water, carrying a quarter-ton each.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Caravan",
+      "targetName": "Silk Road trade",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Silk Road networks worked — oasis cities, camel physiology, and the goods that moved. Write what traveled besides silk (ideas, diseases, religions) and why the routes faded after the Age of Sail."
+    },
+    "tags": ["History", "Trade", "Silk Road"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-trans-saharan",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "Trans-Saharan Trade",
+    "teaser": "Gold, salt, and slaves crossed the Sahara in caravans that could number thousands of camels — making West African kingdoms like Ghana and Mali fabulously rich. Salt was traded literally for its weight in gold in some markets.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cross",
+      "targetName": "Trans-Saharan caravans",
+      "durationMinutes": 45,
+      "instruction": "Learn how the salt-gold trade crossed the Sahara and how Timbuktu and Gao grew wealthy. Write why salt was so valuable, how caravans navigated by stars, and how Mansa Musa's hajj displayed Mali's gold."
+    },
+    "tags": ["History", "Trade", "Africa"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-spice-routes",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Spice Trade",
+    "teaser": "Pepper, cloves, and nutmeg were worth more than gold — and the search for them sent Europeans across oceans, sparked colonialism, and rewrote world history. A single nutmeg in 17th-century Europe could cost more than a cow.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Season",
+      "targetName": "The spice trade's impact",
+      "durationMinutes": 45,
+      "instruction": "Learn why spices were so precious — preservation, medicine, and status — and how Europeans sought them by sea. Write how the spice monopoly shaped the Dutch and Portuguese empires and what it cost the islands that grew them."
+    },
+    "tags": ["History", "Trade", "Spices"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-kelp-highway",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Kelp Highway",
+    "teaser": "A theory that the first Americans arrived not by land bridge but by boat, hopping down the Pacific coast along a 'kelp highway' rich in seafood. Kelp forests, the idea goes, fed and guided early migrants 16,000 years ago.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Coast",
+      "targetName": "The kelp highway hypothesis",
+      "durationMinutes": 30,
+      "instruction": "Learn the kelp highway hypothesis and the evidence — coastal sites, genetics, and the kelp's range. Write how it challenges the Clovis-first story and what underwater archaeology has found."
+    },
+    "tags": ["History", "Archaeology", "Migration"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-bronze-collapse",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Bronze Age Collapse",
+    "teaser": "Around 1177 BC, the great civilizations of the eastern Mediterranean — Mycenae, Hittites, Egypt — collapsed in a few decades. Sea peoples, drought, earthquakes, and systems failure have all been blamed, and the mystery still fascinates historians.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Collapse",
+      "targetName": "The Bronze Age collapse",
+      "durationMinutes": 45,
+      "instruction": "Learn what happened in the 12th century BC and the leading theories — invasions, climate, and trade network failure. Write how interconnected the Bronze Age world was and how quickly it fell."
+    },
+    "tags": ["History", "Collapse", "Ancient"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-dark-ages-myth",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The 'Dark Ages' Myth",
+    "teaser": "Historians have fought the label 'Dark Ages' for a century — the centuries after Rome's fall were not a void but a time of change, with new kingdoms, monasteries copying books, and the seeds of Europe. The darkness is mostly a story we told.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Revisit",
+      "targetName": "The early Middle Ages",
+      "durationMinutes": 45,
+      "instruction": "Learn why the term 'Dark Ages' is misleading and what actually happened — innovation in farming, law, and monasteries. Write what was lost and what was built, and how historians now periodize the era."
+    },
+    "tags": ["History", "Middle Ages", "Myth"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-charlemagne",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "Charlemagne's Renaissance",
+    "teaser": "Three centuries before the Italian Renaissance, Charlemagne sparked a revival of learning in 800 AD — standardizing Latin, copying books, and founding schools. It was a small renaissance, but it saved much of classical culture for Europe.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Revive",
+      "targetName": "The Carolingian renaissance",
+      "durationMinutes": 30,
+      "instruction": "Learn how Charlemagne recruited scholars like Alcuin, promoted the Carolingian minuscule script, and copied classical texts. Write what the revival preserved and how it set the stage for later learning."
+    },
+    "tags": ["History", "Learning", "Medieval"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-naming-places",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Toponymy: How Places Get Names",
+    "teaser": "Every place name is a fossil — London comes from a Celtic word for a river, America from a mapmaker's name, and thousands of towns from words for rivers, hills, and saints. Reading place names is reading history from the map.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Trace",
+      "targetName": "Place name origins",
+      "durationMinutes": 45,
+      "instruction": "Learn the layers of your local place names — which language named your town and what the word meant. Write the origins of three nearby places and how names preserve vanished languages and peoples."
+    },
+    "tags": ["Concept", "Language", "History"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-currency-history",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The History of Money",
+    "teaser": "Money began as cattle, salt, and cowrie shells; became coins struck by kings; paper backed by gold; and now digits on screens. Each form solved a problem — and created new ones — from the Lydian first coins to Bitcoin.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Spend",
+      "targetName": "Money's evolution",
+      "durationMinutes": 45,
+      "instruction": "Learn how barter gave way to commodity money, coins, and paper, and how trust underpins it all. Write what each step solved — portability, divisibility, durability — and what digital money changes."
+    },
+    "tags": ["History", "Money", "Economy"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-paper-origins",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "How Paper Changed the World",
+    "teaser": "Invented in China around 105 AD, paper took a thousand years to reach Europe — moving through the Islamic world, where scholars wrote on it while Europe still used parchment. When paper arrived with the printing press, knowledge exploded.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Write",
+      "targetName": "Paper's journey west",
+      "durationMinutes": 30,
+      "instruction": "Learn how paper was made from plant fibers and how the technology spread from China through Samarkand and Spain. Write why paper was cheaper than parchment and how it enabled mass literacy and print."
+    },
+    "tags": ["History", "Invention", "Knowledge"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-numeral-systems",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "The Zero and Place Value",
+    "teaser": "No number system changed the world like the one with zero and place value — developed in India, passed through the Arab world, and adopted by Europe. Without zero, modern mathematics, computing, and science would be unthinkable.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Count",
+      "targetName": "The history of zero",
+      "durationMinutes": 30,
+      "instruction": "Learn how the concept of zero emerged in India, how it traveled with Arabic numerals, and why Europe resisted it. Write how place value makes arithmetic easy and why Roman numerals could not do long division."
+    },
+    "tags": ["History", "Math", "Zero"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-timezones-rail",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "When Time Zones Were Invented",
+    "teaser": "Until the 1880s, every town kept its own time — noon when the sun was highest. Railways forced the world to agree: clocks moved from local sun time to standardized zones, and the railroad companies led the way.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Set",
+      "targetName": "The invention of time zones",
+      "durationMinutes": 30,
+      "instruction": "Learn how railroads and telegraphs made local time chaotic and how the 1883 'day of two noons' standardized American time. Write how the system spread globally and how time zones work at the poles."
+    },
+    "tags": ["History", "Time", "Railways"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-leap-second",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Leap Seconds",
+    "teaser": "Earth's rotation wobbles, so atomic clocks and the spinning planet drift apart — and since 1972, the world occasionally adds a 'leap second' at the end of June or December. It wreaks havoc on software, and the world is now planning to retire it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Tick",
+      "targetName": "Leap second history",
+      "durationMinutes": 30,
+      "instruction": "Learn why leap seconds are added, how they caused outages like the 2012 Reddit and Qantas glitches, and why the world voted to stop adding them by 2035. Write the difference between leap seconds and leap days."
+    },
+    "tags": ["Concept", "Time", "Science"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-year-zero",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Why There Is No Year Zero",
+    "teaser": "The year 1 BC is followed directly by AD 1 — no year zero — because the monk Dionysius, who invented the AD system in the 6th century, did not use zero, which had not reached Europe yet. Historians and astronomers still bicker about it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Number",
+      "targetName": "The missing year zero",
+      "durationMinutes": 30,
+      "instruction": "Learn how the BC/AD system was devised and why it has no year zero, and how astronomers use a different system (astronomical year numbering) that does. Write how this affects calculations and computer systems."
+    },
+    "tags": ["Concept", "History", "Calendar"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-calendar-reform",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "Calendar Reforms",
+    "teaser": "Humanity has reformed the calendar again and again — the Julian, the Gregorian, the French Revolutionary — and each reform erased days from history. When Britain adopted the Gregorian calendar in 1752, September 2 was followed directly by September 14, and people rioted.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Reform",
+      "targetName": "Calendar history",
+      "durationMinutes": 30,
+      "instruction": "Learn why the Julian calendar drifted, how the Gregorian reform fixed it, and how different countries adopted it at different times. Write what the 'lost days' meant and how dates before the reform are handled."
+    },
+    "tags": ["History", "Calendar", "Time"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-railway-time",
+    "categoryId": "WILDCARD",
+    "subtype": "History",
+    "name": "Railway Time",
+    "teaser": "The train timetable demanded precision the world had never needed — before railways, 'quarter past' could be a guess. Railways adopted standard time before governments did, and the whole modern clock culture descends from their schedules.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Arrive",
+      "targetName": "Railways and standard time",
+      "durationMinutes": 30,
+      "instruction": "Learn how collisions between trains running on local time forced standard time, and how the telegraph synced the clocks. Write how 'railway time' became national time and how punctuality became a virtue."
+    },
+    "tags": ["History", "Railways", "Time"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ocean-currents",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Ocean Conveyor Belt",
+    "teaser": "A global system of currents circulates water through all the oceans — warm water north, cold water south, taking centuries to complete a loop. It moves heat around the planet and may be slowing as ice melts. Its driver: salt and temperature.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Circulate",
+      "targetName": "Thermohaline circulation",
+      "durationMinutes": 45,
+      "instruction": "Learn how density differences from temperature and salt drive the great ocean conveyor, and how it warms Europe. Write how deep water forms in the North Atlantic and why researchers worry it could weaken."
+    },
+    "tags": ["Phenomenon", "Ocean", "Climate"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-weather-balloons",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Weather Balloons",
+    "teaser": "Twice a day, weather balloons rise from hundreds of stations worldwide, radioing back temperature, humidity, and wind as they climb 30 kilometers. This global network of balloons is why your five-day forecast exists — and it has run for decades.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Launch",
+      "targetName": "The radiosonde network",
+      "durationMinutes": 30,
+      "instruction": "Learn how radiosondes measure the atmosphere and how the twice-daily global balloon network feeds forecast models. Write what the balloon measures on the way up and why it bursts and falls back by parachute."
+    },
+    "tags": ["Phenomenon", "Weather", "Science"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-aurora-science",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Science of the Aurora",
+    "teaser": "The northern lights are the Sun's breath: charged particles ride the solar wind, get funneled by Earth's magnetic field to the poles, and collide with oxygen and nitrogen to paint the sky. Green is oxygen; red is rare oxygen at height; purple is nitrogen.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Glow",
+      "targetName": "Aurora physics",
+      "durationMinutes": 30,
+      "instruction": "Learn how solar wind and Earth's magnetic field create the aurora and why colors vary with altitude and gas. Write the steps from a solar flare to a sky full of light, and why auroras come in cycles."
+    },
+    "tags": ["Phenomenon", "Aurora", "Physics"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-trees-talk",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "How Trees Talk",
+    "teaser": "Trees send chemical signals through the air and share water and nutrients through fungal networks underground. When a tree is attacked by insects, it warns its neighbors, which raise their defenses. Forests, it turns out, are communities.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Tree communication research",
+      "durationMinutes": 45,
+      "instruction": "Learn how volatile chemicals, mycorrhizal networks, and root grafts let trees communicate. Write what the studies by Suzanne Simard found, the debate about how much trees 'talk,' and what it means for forestry."
+    },
+    "tags": ["Nature", "Trees", "Communication"],
+    "tier": 1
+  }
+]

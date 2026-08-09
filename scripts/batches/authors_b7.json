@@ -1,0 +1,370 @@
+[
+  {
+    "id": "author-henrik-ibsen",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Henrik Ibsen",
+    "teaser": "The Norwegian playwright who made the modern drama — A Doll's House, Hedda Gabler, and Ghosts ripped open the respectable home and let the 19th century's lies out. Every argument play owes him a debt.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Doll's House, Act One",
+      "durationMinutes": "60",
+      "instruction": "Read the first act of A Doll's House. Notice how Nora performs her little-bird role while secretly managing a huge debt. Write how Ibsen plants the crisis in the first scene, and what the 'doll's house' metaphor contains."
+    },
+    "tags": ["Norwegian", "Drama", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-hans-christian-andersen",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Hans Christian Andersen",
+    "teaser": "The Danish storyteller whose fairy tales — The Little Mermaid, The Ugly Duckling, The Snow Queen — are darker, stranger, and more honest than their Disney versions. He wrote about longing and being an outsider.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Little Mermaid, the original tale",
+      "durationMinutes": "45",
+      "instruction": "Read the original Little Mermaid. Notice how different it is from the cartoon — pain, sacrifice, and an ending about souls rather than weddings. Write what the tale really says about love, transformation, and loss."
+    },
+    "tags": ["Danish", "Fairy Tale", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-karen-blixen",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Karen Blixen",
+    "teaser": "The Danish baroness who wrote as Isak Dinesen — author of Out of Africa and Seven Gothic Tales. Her ornate, ironic, storytelling-rich prose made her one of the 20th century's most distinctive voices.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Babette's Feast",
+      "durationMinutes": "75",
+      "instruction": "Read Babette's Feast. Notice how Blixen builds a whole theology of generosity around a French cook and a puritan village. Write what the dinner means as a work of art — and what the story says about giving everything."
+    },
+    "tags": ["Danish", "Storytelling", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-sigrid-undset",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Sigrid Undset",
+    "teaser": "The Norwegian Nobel laureate whose medieval epic Kristin Lavransdatter follows one woman's fierce life across marriage, faith, and motherhood in 14th-century Norway. Few novels render a soul so completely.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kristin Lavransdatter, The Wreath, opening",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Wreath. Notice how Undset immerses you in medieval Norwegian domestic life — food, cloth, weather — without costume-pageant decoration. Write how the historical setting deepens rather than decorates the love story."
+    },
+    "tags": ["Norwegian", "Nobel", "Historical"],
+    "tier": 2
+  },
+  {
+    "id": "author-tarjei-vesaas",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Tarjei Vesaas",
+    "teaser": "The Norwegian master of the spare, the elemental. The Ice Palace is a short novel about two girls and an ice formation that is one of the most haunting books ever written in any language.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Ice Palace, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Ice Palace. Notice how Vesaas writes in short, precise sentences that feel translated from snow and silence. Write how the frozen waterfall becomes both a real place and a state of feeling."
+    },
+    "tags": ["Norwegian", "Nordic", "Modernism"],
+    "tier": 2
+  },
+  {
+    "id": "author-karl-ove-knausgaard",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Karl Ove Knausgård",
+    "teaser": "The Norwegian writer whose six-volume My Struggle became a literary event — a memoir-novel of radical honesty that turns washing dishes and remembering a father into gripping, ordinary revelation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "My Struggle, Book One, opening",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of My Struggle. Notice how Knausgård's attention to the mundane becomes hypnotic. Write what total candor costs and gives a writer — and why the smallest details can carry the largest grief."
+    },
+    "tags": ["Norwegian", "Memoir", "Contemporary"],
+    "tier": 1
+  },
+  {
+    "id": "author-henning-mankell",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Henning Mankell",
+    "teaser": "The Swedish crime writer who made the police procedural literary. His Kurt Wallander novels map the underside of Swedish welfare society — melancholy, migration, and a detective who feels the cold of the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Faceless Killers, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Faceless Killers. Notice how the crime arrives inside a landscape of isolation — snow, dawn, an empty farmhouse. Write how Mankell uses the mystery to ask what a society hides from itself."
+    },
+    "tags": ["Swedish", "Crime", "Nordic Noir"],
+    "tier": 1
+  },
+  {
+    "id": "author-stieg-larsson",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Stieg Larsson",
+    "teaser": "The Swedish journalist whose Millennium trilogy — The Girl with the Dragon Tattoo and its sequels — became a global phenomenon. Lisbeth Salander is modern crime fiction's most iconic outsider.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Girl with the Dragon Tattoo, prologue",
+      "durationMinutes": "45",
+      "instruction": "Read the prologue, set in the 1960s. Notice how Larsson builds a cold, corporate world where power hides abuse. Write how the novel's twin heroes — journalist and hacker — approach the same corruption from opposite sides."
+    },
+    "tags": ["Swedish", "Crime", "Thriller"],
+    "tier": 1
+  },
+  {
+    "id": "author-fredrik-backman",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Fredrik Backman",
+    "teaser": "The Swedish author of A Man Called Ove and Anxious People — warm, funny novels about grumpy people and the communities that insist on loving them. Best-sellers that smuggle in real grief.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Man Called Ove, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of A Man Called Ove. Notice how Backman makes a rigid, complaining man immediately endearing. Write how comedy and tenderness share the same sentences, and what the novel says about grief and routine."
+    },
+    "tags": ["Swedish", "Comedy", "Contemporary"],
+    "tier": 1
+  },
+  {
+    "id": "author-par-lagerkvist",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Pär Lagerkvist",
+    "teaser": "The Swedish Nobel laureate who asked the big questions in small, stark books. Barabbas retells the crucifixion from the released murderer's bewildered point of view — faith as absence, doubt as presence.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Barabbas, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Barabbas. Notice how Lagerkvist keeps the style bare and biblical. Write what it means to be the man who lived instead of Christ — how does the novel make doubt itself a form of searching?"
+    },
+    "tags": ["Swedish", "Nobel", "Philosophical"],
+    "tier": 2
+  },
+  {
+    "id": "author-astrid-lindgren",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Astrid Lindgren",
+    "teaser": "The Swedish children's author who redefined childhood on the page — Pippi Longstocking, the Children of Noisy Village, and the fierce brothers of the Lionheart. She trusted children with grief and freedom.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pippi Longstocking, first chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Pippi Longstocking. Notice how Pippi breaks every rule of the polite village without malice. Write how Lindgren's anarchic heroine made room for children's power, imagination, and kindness on their own terms."
+    },
+    "tags": ["Swedish", "Children", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-tove-jansson",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Tove Jansson",
+    "teaser": "The Finnish-Swedish artist who created the Moomins — and wrote adult fiction of equal subtlety. Her Moominvalley books are philosophical comfort objects, and her later stories are sharp, quiet masterpieces.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Summer Book, a chapter",
+      "durationMinutes": "60",
+      "instruction": "Read a chapter of The Summer Book, about a grandmother and granddaughter on a Finnish island. Notice how Jansson renders the natural world with precise, unshowy detail. Write what the island teaches about attention and letting go."
+    },
+    "tags": ["Finnish", "Children", "Nordic"],
+    "tier": 1
+  },
+  {
+    "id": "author-mika-waltari",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Mika Waltari",
+    "teaser": "The Finnish novelist of The Egyptian — one of the best-selling historical novels ever, a court physician's confession set in the Egypt of the pharaohs, full of immortality, plague, and human weakness.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Egyptian, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Egyptian. Notice how Waltari frames the tale as a memoir written by a man who has lost everything. Write how the ancient setting lets him discuss timeless questions of ambition, love, and death."
+    },
+    "tags": ["Finnish", "Historical", "Classic"],
+    "tier": 2
+  },
+  {
+    "id": "author-arto-paasilinna",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Arto Paasilinna",
+    "teaser": "The Finnish novelist of deadpan absurdity. The Year of the Hare follows a journalist who chucks it all to chase a hare across Finland — a comic ode to escape, wilderness, and saying no to everything.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Year of the Hare, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Year of the Hare. Notice how Paasilinna keeps a straight face through increasingly surreal events. Write how the hare functions as a living excuse for freedom, and what the novel says about modern life."
+    },
+    "tags": ["Finnish", "Comedy", "Nature"],
+    "tier": 1
+  },
+  {
+    "id": "author-halldor-laxness",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Halldór Laxness",
+    "teaser": "The Icelandic Nobel laureate who wrote Independent People — the story of Bjartur of Summerhouses, a sheep farmer who would rather starve than owe anyone, in one of the greatest novels about stubbornness.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Independent People, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Independent People. Notice how Laxness treats Bjartur's epic pride with both comedy and awe. Write what 'independence' costs the man who insists on it — and what it buys him."
+    },
+    "tags": ["Icelandic", "Nobel", "Epic"],
+    "tier": 1
+  },
+  {
+    "id": "author-jon-kalman-stefansson",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jón Kalman Stefánsson",
+    "teaser": "The Icelandic novelist of sea, snow, and story — Summer Light, and Then Comes the Night and his trilogy about a boy who carries a book into the cold. His prose is both brutal and tender.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Summer Light, and Then Comes the Night, opening",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of the novel, which begins with a village and its restless residents. Notice how Stefánsson moves between voices and moods like weather. Write how the small town becomes a whole cosmos of longing."
+    },
+    "tags": ["Icelandic", "Contemporary", "Nordic"],
+    "tier": 2
+  },
+  {
+    "id": "author-peter-hoeg",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Peter Høeg",
+    "teaser": "The Danish novelist of Smilla's Sense of Snow — an arctic thriller about a woman who knows snow the way others know faces, and uses that knowledge to solve a murder the authorities would rather bury.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Smilla's Sense of Snow, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Smilla's Sense of Snow. Notice how Smilla's expertise — snow, ice, footprints — becomes the engine of the plot. Write how a special form of attention becomes both identity and method of truth."
+    },
+    "tags": ["Danish", "Thriller", "Arctic"],
+    "tier": 1
+  },
+  {
+    "id": "author-sigrid-combuchen",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Sigrid Combüchen",
+    "teaser": "The Swedish-German novelist and essayist whose books — like The White Lie and About Beauty — are intricate, witty examinations of art, biography, and how stories get told and mistold.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The White Lie, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The White Lie. Notice how Combüchen frames her narrator's unreliable memory as the subject itself. Write how the novel questions what we allow ourselves to believe about our own lives and art."
+    },
+    "tags": ["Swedish", "Literary", "Contemporary"],
+    "tier": 3
+  },
+  {
+    "id": "author-lars-saabye-christensen",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Lars Saabye Christensen",
+    "teaser": "The Norwegian novelist of The Half Brother — a sprawling, funny, painful family saga set in Oslo after the war. His Beatles follows four boys growing up with the band and a changing Norway.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beatles, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Beatles. Notice how Christensen catches the texture of a 1960s Oslo childhood — music, nicknames, small rebellions. Write how a pop band becomes the soundtrack and measure of growing up."
+    },
+    "tags": ["Norwegian", "Coming of Age", "Contemporary"],
+    "tier": 2
+  },
+  {
+    "id": "author-jonas-lie",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jonas Lie",
+    "teaser": "One of the four great figures of 19th-century Norwegian literature, alongside Ibsen, Bjørnson, and Kielland. His novels of seafaring families, like The Pilot and His Wife, made the coastal world feel mythic.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Pilot and His Wife, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Pilot and His Wife. Notice how Lie makes the sea, the fjord, and the ship feel like extensions of his characters' inner lives. Write how the coastal setting shapes ambition and love in the novel."
+    },
+    "tags": ["Norwegian", "Sea", "Classic"],
+    "tier": 2
+  },
+  {
+    "id": "author-jens-peter-jacobsen",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jens Peter Jacobsen",
+    "teaser": "The Danish novelist and poet whose Niels Lyhne was a Bible for the European fin-de-siècle — a portrait of an atheist, a dreamer, and a failure that Rilke and others could not stop reading.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Niels Lyhne, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Niels Lyhne. Notice how Jacobsen's prose is lyrical and precise at once, and how his hero drifts between aspiration and passivity. Write how the novel made 'a life without illusions' feel both noble and sad."
+    },
+    "tags": ["Danish", "Classic", "Realism"],
+    "tier": 3
+  },
+  {
+    "id": "author-vilhelm-moberg",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Vilhelm Moberg",
+    "teaser": "The Swedish novelist of The Emigrants series — the four-volume epic of a family leaving Småland for America in the 1850s. A people's history of emigration, written with immense warmth and plain grandeur.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Emigrants, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Emigrants. Notice how Moberg grounds the decision to leave in the soil, the harvest, and the potato patch. Write how the novel makes you feel both the weight of home and the terror of departure."
+    },
+    "tags": ["Swedish", "Historical", "Epic"],
+    "tier": 2
+  },
+  {
+    "id": "author-inger-edelfeldt",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Inger Edelfeldt",
+    "teaser": "The Swedish novelist and translator, a boundary-crossing figure of Nordic letters whose fiction and essays have probed identity, migration, and the art of living between cultures and languages.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Inger Edelfeldt, a short story or essay",
+      "durationMinutes": "45",
+      "instruction": "Read one of Edelfeldt's shorter works. Notice how identity is never settled in her fiction. Write how living between languages or cultures shapes a writer's sense of self, and how her work makes that visible."
+    },
+    "tags": ["Swedish", "Identity", "Contemporary"],
+    "tier": 3
+  }
+]

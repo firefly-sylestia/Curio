@@ -1,0 +1,386 @@
+[
+  {
+    "id": "wildcard-rainbow-eucalyptus",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Rainbow Eucalyptus",
+    "teaser": "A tree with bark that peels in ribbons to reveal stripes of green, blue, purple, orange, and maroon — like a living paint swatch. The colors come from the bark shedding at different times, exposing fresh layers as they age.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Strip",
+      "targetName": "Rainbow eucalyptus bark",
+      "durationMinutes": 30,
+      "instruction": "Learn why the rainbow eucalyptus's bark peels in patches and how each color marks a stage of aging. Write where it grows, how the peeling works, and why the effect looks painted."
+    },
+    "tags": ["Botany", "Trees", "Color"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-saguaro-bloom",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Saguaro Cactus",
+    "teaser": "The towering cactus of the American Southwest — it can live 200 years, grow arms only after decades, and weigh more than a car. In spring it blooms white flowers for a single night, opening at dusk and closing forever by the next afternoon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Bloom",
+      "targetName": "Saguaro life cycle",
+      "durationMinutes": 30,
+      "instruction": "Learn how saguaros grow, store water, and develop arms over decades, and how their night blooms are pollinated. Write how long they live, why they are protected, and what the flowers mean to the Tohono O'odham people."
+    },
+    "tags": ["Botany", "Desert", "Cactus"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-welwitschia",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Welwitschia",
+    "teaser": "A plant that looks like a pile of tangled straps on the Namib desert floor — and is one of the strangest living things on Earth. It has only two true leaves, which grow continuously for up to 2,000 years, splitting and curling as the desert shreds them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Age",
+      "targetName": "Welwitschia's two leaves",
+      "durationMinutes": 30,
+      "instruction": "Learn how welwitschia survives on coastal fog with just two ever-growing leaves, and how radiocarbon dating found individuals over a millennium old. Write how its leaf tips die while the base keeps growing, and where it lives."
+    },
+    "tags": ["Botany", "Desert", "Ancient"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-victoria-amazonica",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Victoria Amazonica Lily",
+    "teaser": "The giant water lily of the Amazon — leaves up to 3 meters across with upturned rims, strong enough to hold a small child. It grows from a single seed into a raft of living geometry in weeks, and its night-blooming flowers change color as they open.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Float",
+      "targetName": "Victoria amazonica",
+      "durationMinutes": 30,
+      "instruction": "Learn how the lily's ribbed underside supports enormous weight and how its flowers warm themselves to attract beetles for pollination. Write the stages of its growth and why it was named for Queen Victoria."
+    },
+    "tags": ["Botany", "Amazon", "Lily"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-lobster-molt",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Lobster's Molt",
+    "teaser": "A lobster outgrows its shell and sheds it entirely — soft, vulnerable, and growing. It eats its old shell for calcium, hides for weeks, and may do this 25 times before adulthood. Lobsters never stop growing, and never stop molting.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Molt",
+      "targetName": "Lobster molting",
+      "durationMinutes": 30,
+      "instruction": "Learn how a lobster softens, splits, and wriggles out of its shell, and why it eats the cast-off. Write why molting is dangerous, how often it happens, and how scientists age lobsters."
+    },
+    "tags": ["Animal", "Lobster", "Growth"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-cicada-17-year",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Periodical Cicadas",
+    "teaser": "Billions of cicadas that spend 17 years underground, then emerge in the same few weeks — in numbers so vast the air rings and the ground craters. No one fully explains why they wait in prime-numbered cycles, but the strategy confounds predators.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Emerge",
+      "targetName": "Periodical cicada broods",
+      "durationMinutes": 30,
+      "instruction": "Learn how Magicicada broods synchronize after 13 or 17 years and why prime-number cycles may have evolved. Write the full emergence — nymphs, shells, mating songs — and why the ground fills with holes."
+    },
+    "tags": ["Animal", "Cicadas", "Cycles"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-leaf-nosed-bat",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Bats and Echolocation",
+    "teaser": "Bats 'see' with sound — emitting clicks too high for us to hear and reading the echoes to hunt moths mid-flight, in total darkness. Their calls can reach 140 decibels, and their brains map the world in audio in real time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Echo",
+      "targetName": "Bat echolocation",
+      "durationMinutes": 30,
+      "instruction": "Learn how bats produce and hear ultrasonic pulses, and how they distinguish a moth from a leaf. Write the physics of echolocation, how moths fight back with jamming, and how bats inspire sonar."
+    },
+    "tags": ["Animal", "Bats", "Sound"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-electric-eel",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Electric Eel",
+    "teaser": "Not actually an eel but a knifefish that can discharge 600 volts — enough to stun a horse — from three organs packed with thousands of electricity-making cells. It uses low-voltage pulses as radar and high-voltage blasts as weapons.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Shock",
+      "targetName": "Electric eel anatomy",
+      "durationMinutes": 30,
+      "instruction": "Learn how the electric eel's electrocytes stack up to generate high voltage, and how it uses electricity for sensing and hunting. Write why it evolved such power and how scientists study its discharges."
+    },
+    "tags": ["Animal", "Electricity", "Amazon"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-box-jellyfish",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Box Jellyfish",
+    "teaser": "The most venomous animal known — a transparent box with tentacles up to 3 meters long, carrying millions of stinging cells. It also has 24 eyes and can swim, unlike most jellyfish, and it hunts rather than drifts.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Avoid",
+      "targetName": "Box jellyfish biology",
+      "durationMinutes": 30,
+      "instruction": "Learn how box jellyfish venom works, where they live, and why they can swim and see. Write what the 24 eyes are for, how their stingers fire, and why they are feared in Australian waters."
+    },
+    "tags": ["Animal", "Jellyfish", "Venom"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-king-cobra",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The King Cobra",
+    "teaser": "The world's longest venomous snake — up to 5.5 meters — and the only snake that builds a nest for its eggs. It can raise a third of its body and 'stand' to look a person in the eye, and its venom can kill an elephant.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Rise",
+      "targetName": "King cobra behavior",
+      "durationMinutes": 30,
+      "instruction": "Learn how king cobras hunt other snakes, build leaf nests, and guard their eggs. Write why they usually avoid people, how the female's nest works, and what its 'hood' display is for."
+    },
+    "tags": ["Animal", "Snake", "Venom"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-whooping-crane",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Whooping Crane's Comeback",
+    "teaser": "In 1941, only 21 whooping cranes survived on Earth. Through captive breeding, wetland protection, and even ultralight aircraft teaching young cranes to migrate, the species clawed back to over 800 — one of conservation's greatest stories.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Return",
+      "targetName": "Whooping crane recovery",
+      "durationMinutes": 45,
+      "instruction": "Learn how whooping cranes were pushed to the brink and the strategies that saved them — including costume-rearing and migration training. Write the milestones of the recovery and the threats that remain."
+    },
+    "tags": ["Animal", "Conservation", "Birds"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-condor-revival",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The California Condor",
+    "teaser": "A bird with a 3-meter wingspan that nearly vanished — only 22 existed in 1982, all captured for breeding. Hand-raised by puppets and released into the wild, condors now soar over the West again, a species brought back from zero.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Soar",
+      "targetName": "California condor recovery",
+      "durationMinutes": 45,
+      "instruction": "Learn how condors were saved by captive breeding with puppets to prevent imprinting, and how lead poisoning still threatens them. Write the story of their release and what it takes to keep them wild."
+    },
+    "tags": ["Animal", "Conservation", "Birds"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-prairie-restoration",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Prairie Restoration",
+    "teaser": "Tallgrass prairie once covered a third of North America; less than 4% survives. Restoring it means planting deep-rooted grasses that store carbon and hold soil, and burning it to mimic the fires that shaped it — rebuilding an ecosystem seed by seed.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Restore",
+      "targetName": "Prairie restoration ecology",
+      "durationMinutes": 45,
+      "instruction": "Learn how prairies are restored — seed mixes, prescribed burns, and grazing — and why their root systems matter. Write what was lost when prairies became farmland and how restoration brings back wildlife."
+    },
+    "tags": ["Nature", "Restoration", "Ecology"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-coral-restoration",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Coral Reef Restoration",
+    "teaser": "Divers now farm coral in underwater nurseries, growing fragments on frames and replanting them on damaged reefs. Some teams even breed heat-tolerant corals, hoping to outpace the bleaching that threatens the world's reefs.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Replant",
+      "targetName": "Coral nurseries",
+      "durationMinutes": 45,
+      "instruction": "Learn how coral fragments are grown in nurseries and transplanted, and how researchers select for resilience to warm water. Write what causes bleaching and why restoration alone cannot save reefs without climate action."
+    },
+    "tags": ["Nature", "Ocean", "Restoration"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-mangrove-forests",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Mangrove Forests",
+    "teaser": "Trees that grow with their roots in seawater, breathing through aerial roots and dropping their seeds as floating pods. Mangroves are the nurseries of the sea, the storm shields of coasts, and among the most carbon-rich ecosystems on Earth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Wade",
+      "targetName": "Mangrove ecosystems",
+      "durationMinutes": 30,
+      "instruction": "Learn how mangroves survive saltwater, how their roots trap sediment and shelter fish, and how they store carbon. Write why they protect coasts from storms and why their loss is so costly."
+    },
+    "tags": ["Nature", "Coast", "Ecosystem"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-kelp-forests",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Kelp Forests",
+    "teaser": "Underwater forests of giant kelp that grow up to half a meter a day — some of the fastest-growing organisms on Earth. They sway in the current like trees in wind, sheltering sea otters, fish, and the whole coast.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dive",
+      "targetName": "Kelp forest ecology",
+      "durationMinutes": 30,
+      "instruction": "Learn how kelp anchors to the seafloor with holdfasts and grows to the surface with gas bladders. Write how kelp forests support biodiversity, how sea otters keep them healthy, and why they are in decline."
+    },
+    "tags": ["Nature", "Ocean", "Forest"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-sargasso-sea",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Sargasso Sea",
+    "teaser": "The only sea without coasts — a vast expanse of the Atlantic defined by circling currents and filled with floating mats of sargassum seaweed. Eels swim thousands of kilometers to spawn in it, and sailors once feared its still, weedy waters.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drift",
+      "targetName": "The Sargasso Sea",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Sargasso's currents trap floating seaweed and how the mats support a unique ecosystem. Write why eels cross the ocean to spawn there and why the sea is called a floating rainforest."
+    },
+    "tags": ["Nature", "Ocean", "Seaweed"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-tidal-bore",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Tidal Bores",
+    "teaser": "In certain river mouths, the incoming tide forms a wave that travels upstream — a wall of water that surfers ride for kilometers. The Qiantang River bore in China can be 9 meters high, moving faster than a person can run.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Surf",
+      "targetName": "Tidal bore waves",
+      "durationMinutes": 30,
+      "instruction": "Learn how tides, funneling estuaries, and river flow combine to create bores. Write how the Qiantang bore forms and how surfers ride the Amazon's pororoca and the Severn bore."
+    },
+    "tags": ["Phenomenon", "Ocean", "Waves"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-hydraulic-jump",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Hydraulic Jumps",
+    "teaser": "When fast shallow water meets slow deep water, it leaps upward in a churning step — the hydraulic jump. You have seen one in every kitchen sink, where the stream flattens into a still pool surrounded by a little standing wave.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Hydraulic jumps at home",
+      "durationMinutes": 30,
+      "instruction": "Turn on a kitchen tap and watch the jump where the fast stream meets the sink bottom. Learn the physics — momentum change at the Froude number — and where engineers use jumps to dissipate dam energy."
+    },
+    "tags": ["Phenomenon", "Water", "Physics"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-spiral-sinkholes",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Sinkholes",
+    "teaser": "The ground can swallow cars, houses, and whole city blocks — when water dissolves limestone underground, the roof of a cave collapses without warning. Some sinkholes open overnight; others yawn open over years, and geologists are still poor at predicting them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Collapse",
+      "targetName": "Sinkhole formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how soluble rock, water, and voids create sinkholes, and the difference between cover-collapse and cover-subsidence types. Write how they are mapped and why some regions are more prone to them."
+    },
+    "tags": ["Phenomenon", "Geology", "Risk"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-blue-holes",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Blue Holes",
+    "teaser": "Underwater caves that open as perfect blue circles in shallow seas — ancient sinkholes flooded when sea levels rose. The Great Blue Hole of Belize is over 300 meters across, and below its depths lie layers where no oxygen and no life remain.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dive",
+      "targetName": "Blue hole exploration",
+      "durationMinutes": 30,
+      "instruction": "Learn how blue holes formed during ice ages and flooded later, and what divers and submersibles found in the Great Blue Hole. Write what the oxygen-free layers reveal about ancient climate."
+    },
+    "tags": ["Phenomenon", "Ocean", "Caves"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-river-turning",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "River Meanders and Oxbows",
+    "teaser": "Rivers never flow straight for long — they bend, and each bend makes the next. Over centuries a meander can pinch off into an oxbow lake, leaving the river to find a new path. The landscape is a river's autobiography.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Trace",
+      "targetName": "Meander formation",
+      "durationMinutes": 30,
+      "instruction": "Learn why erosion on the outside of a bend and deposition on the inside make rivers curve more and more. Write how oxbow lakes form and find one on a map — then look for the old channel."
+    },
+    "tags": ["Phenomenon", "River", "Geology"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-drainage-basin",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Watersheds",
+    "teaser": "Every raindrop belongs to a watershed — the whole region that drains into one river system. From a gutter to the Gulf, water follows the shape of the land, and what happens upstream shapes everything downstream.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Follow",
+      "targetName": "Your local watershed",
+      "durationMinutes": 30,
+      "instruction": "Find which watershed you live in and trace a drop of rain from your roof to the ocean. Learn how watersheds divide at ridges and why protecting upstream land protects the whole river."
+    },
+    "tags": ["Phenomenon", "Water", "Geography"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-cave-formation",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "How Caves Form",
+    "teaser": "Most caves are carved by water — acid rain seeping through limestone, dissolving it drop by drop over millions of years. Stalactites grow down, stalagmites grow up, and when they meet, a column is born. A cave is time made visible.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Form",
+      "targetName": "Cave and speleothem formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how carbonic acid dissolves limestone and how dripstone grows a few millimeters per century. Write the difference between stalactites and stalagmites, and how cave systems connect underground."
+    },
+    "tags": ["Phenomenon", "Caves", "Geology"],
+    "tier": 1
+  }
+]

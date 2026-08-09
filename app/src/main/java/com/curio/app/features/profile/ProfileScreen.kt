@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -85,6 +84,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioSettingsCard
@@ -99,6 +99,8 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.toHsl
@@ -610,19 +612,28 @@ private fun ProfileHero(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clip(CircleShape)
-                                .background(fill)
-                                .border(BorderStroke(1.dp, ink.copy(alpha = 0.30f)), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                initial,
-                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                color = ink
-                            )
+                        // v8.16 — the avatar is a FUN pet landmark: the pet
+                        // sometimes dashes over and boops it (the avatar just
+                        // pulses — no layout change).
+                        PetLandmark(
+                            id = "avatar",
+                            kind = PetLandmarks.Kind.FUN,
+                            screen = "profile"
+                        ) { m ->
+                            Box(
+                                modifier = m
+                                    .size(72.dp)
+                                    .clip(CircleShape)
+                                    .background(fill)
+                                    .border(BorderStroke(1.dp, ink.copy(alpha = 0.30f)), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    initial,
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = ink
+                                )
+                            }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -933,7 +944,7 @@ private fun ProgressAndAchievementsCard(
             trackColor = CurioColors.CoralBlush.copy(alpha = 0.14f)
         )
         Text(
-            text = if (isMaxLevel) "Maximum level reached — keep exploring for more XP."
+            text = if (isMaxLevel) "Maximum level reached. Keep exploring for more XP."
             else "${(nextThreshold - xp).coerceAtLeast(0)} XP to the next level",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -969,7 +980,7 @@ private fun ProgressAndAchievementsCard(
                     )
                     Text(
                         currentQuest?.let { "Next: ${it.title}" }
-                            ?: "Journey complete — every badge is open",
+                            ?: "Journey complete. Every badge is open",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -996,49 +1007,18 @@ private fun ProgressAndAchievementsCard(
             color = CurioColors.Sage,
             trackColor = CurioColors.Sage.copy(alpha = 0.14f)
         )
-        if (unlocked.isNotEmpty()) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                maxItemsInEachRow = 3
-            ) {
-                unlocked.take(3).forEach { stage ->
-                    val stageGlyph = CurioQuests.Chains.firstOrNull { chain ->
-                        chain.stages.any { it.id == stage.id }
-                    }?.glyph ?: CurioIcons.EmojiEvents
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = CurioColors.Sage.copy(alpha = 0.13f),
-                        border = BorderStroke(1.dp, CurioColors.Sage.copy(alpha = 0.28f)),
-                        modifier = Modifier.weight(1f, fill = false)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            CurioIcon(stageGlyph, null, tint = CurioColors.Sage, size = 14.dp)
-                            Text(
-                                stage.title,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            Text(
-                currentQuest?.let { "Next: ${it.title}" } ?: "Keep exploring to unlock your first badge.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        // v8.27 — the PINNED badge strip: earned medals first (up to five),
+        // a "+N" tile when there are more, then locked silhouettes for
+        // aspiration. Tapping the strip opens the full badge shelf on the
+        // Quests page (spec §4.1 — earned first, locked as silhouettes).
+        CurioBadgeStrip(
+            earnedLimit = 5,
+            lockedPreview = 2,
+            medalSize = 46.dp,
+            onViewAll = onOpenQuests,
+            emptyText = currentQuest?.let { "Next: ${it.title}" }
+                ?: "Keep exploring to unlock your first badge."
+        )
     }
 }
 

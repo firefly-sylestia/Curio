@@ -1,0 +1,495 @@
+[
+  {
+    "id": "discovery-gobekli-tepe",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Göbekli Tepe Excavated (1994)",
+    "teaser": "Klaus Schmidt, walking across a hilltop in southeastern Turkey, found carved T-shaped stones poking from the ground — the tops of enormous megalithic pillars, the oldest monumental architecture ever found, built around 9,500 BCE. The site rewrote history: hunter-gatherers built temples, and agriculture may have followed worship.",
+    "imageUrl": "",
+    "byline": "Klaus Schmidt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The excavations at Göbekli Tepe (1994–present)",
+      "durationMinutes": 20,
+      "instruction": "Read how the site, dating to 11,500 years ago — 6,000 years before Stonehenge — was deliberately buried, its pillars carved with foxes, vultures, and boars. Schmidt's hypothesis: the temple came first, and feeding the people who gathered to build it drove the invention of farming. The standard story of civilization was turned on its head.",
+      "tags": ["Archaeology", "21st Century", "Turkish"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-heracleion",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Sunken City of Heracleion (2001)",
+    "teaser": "Franck Goddio, searching for French warships in Abu Qir Bay off Egypt, used sonar and found a city instead: Heracleion (Thonis), a wealthy port that traded with Greece, sunk by earthquakes and rising seas 1,200 years ago. Giant statues, gold, and a temple complex rose from the seabed — an Egyptian Pompeii under water.",
+    "imageUrl": "",
+    "byline": "Franck Goddio",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 2001 discovery of the sunken city of Thonis-Heracleion",
+      "durationMinutes": 20,
+      "instruction": "The city was known from ancient texts — Helen and Paris supposedly stopped there before Troy — but its location was a mystery. Read how divers recovered a 5.4-meter statue of Hapi, hundreds of anchors, and inscriptions, and how the city's role as the gateway to Egypt was reconstructed. Rising sea and a geological shift drowned it, and mud preserved it.",
+      "tags": ["Archaeology", "21st Century", "French"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-oseberg-ship",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Oseberg Viking Ship (1904)",
+    "teaser": "Farmers digging in a burial mound in Norway found a 21-meter Viking ship, intact after 1,200 years, carrying the remains of two women, a wagon, sledges, and tapestries. The Oseberg ship is the finest Viking vessel ever found, and its burial is a window into the lives — and deaths — of the Viking elite.",
+    "imageUrl": "",
+    "byline": "Gabriel Gustafson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1904 excavation of the Oseberg ship burial",
+      "durationMinutes": 20,
+      "instruction": "The blue clay of the mound had sealed the oak ship from air, preserving its carved animal-head posts and textiles. Read how one of the women, possibly a queen or a priestess, was buried with grave goods fit for a journey, and how the ship's reconstruction now stands in Oslo. The Oseberg ship shows the Vikings were as much artists as raiders.",
+      "tags": ["Archaeology", "20th Century", "Norwegian"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-sutton-hoo",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Sutton Hoo Ship Burial (1939)",
+    "teaser": "A housewife's garden in Suffolk hid one of the greatest archaeological finds in British history: an 88-foot ship, its timbers rotted away but its shape stamped in the sand, laden with gold, silver, and a helmet fit for a king. Sutton Hoo rewrote the story of 'dark age' England — it was neither dark nor backward.",
+    "imageUrl": "",
+    "byline": "Basil Brown",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1939 Sutton Hoo ship burial excavation",
+      "durationMinutes": 20,
+      "instruction": "Read how local archaeologist Basil Brown uncovered the ghost of a ship — every rivet in place, the wood gone — and the treasure within: a warrior's helmet, a great gold buckle, silver bowls from Byzantium, and coins dating the burial to around 625 CE. The site is likely the tomb of an East Anglian king, perhaps Raedwald, and it transformed our view of Anglo-Saxon England.",
+      "tags": ["Archaeology", "20th Century", "British"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-ishtar-gate",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Ishtar Gate Excavated (1902)",
+    "teaser": "Robert Koldewey, digging Babylon for the German Oriental Society, found the Ishtar Gate — a processional gateway faced with blue-glazed bricks and rows of striding lions, dragons, and bulls. Erected by Nebuchadnezzar II around 575 BCE, it was the city's magnificent front door, now partly rebuilt in Berlin's Pergamon Museum.",
+    "imageUrl": "",
+    "byline": "Robert Koldewey",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Koldewey's excavation of the Ishtar Gate (1902–1914)",
+      "durationMinutes": 20,
+      "instruction": "Koldewey spent 18 years excavating Babylon and found the gate in fragments; its bricks were shipped to Berlin and reassembled. Read how the gate's glazed animals — lions for Ishtar, dragons for Marduk — lined the processional way, and how the gate's blue bricks were made with cobalt. Part of the excavation's story involves tensions over Germany keeping the finds.",
+      "tags": ["Archaeology", "20th Century", "German"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-ashurbanipal-library",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Library of Ashurbanipal (1853)",
+    "teaser": "Layered under the ruins of Nineveh lay a royal library of over 30,000 clay tablets — the collected knowledge of Assyria, including the flood story and the Epic of Gilgamesh. When Austen Henry Layard and his assistant Hormuzd Rassam excavated it in the 1850s, they found a civilization's complete library, preserved by a palace fire that baked the clay.",
+    "imageUrl": "",
+    "byline": "Layard & Rassam",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of Ashurbanipal's library at Nineveh (1849–53)",
+      "durationMinutes": 20,
+      "instruction": "Read how the tablets — dictionaries, astronomy, medicine, law, literature — were copied from originals across Mesopotamia by order of the king, who boasted of his own literacy, and how the fire that destroyed Nineveh in 612 BCE hardened them for 2,500 years. The library's discovery founded Assyriology and gave the modern world the Gilgamesh epic.",
+      "tags": ["Archaeology", "19th Century", "British"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-behistun",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Behistun Inscription Deciphered (1835)",
+    "teaser": "High on a cliff in Iran, Darius the Great carved his victory story in three languages: Old Persian, Elamite, and Babylonian. Henry Rawlinson, an English officer, risked his life to copy the 1,200-line inscription — and it became the Rosetta Stone of cuneiform, unlocking the writing of ancient Mesopotamia.",
+    "imageUrl": "",
+    "byline": "Henry Rawlinson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rawlinson's 1835–46 work on the Behistun inscription",
+      "durationMinutes": 20,
+      "instruction": "Read how Rawlinson scaled the cliff on ladders and ropes to copy the trilingual text, and how he cracked Old Persian first, then used it as a key to Babylonian — the same script family that wrote Gilgamesh and the laws of Hammurabi. The decipherment gave Assyriology its alphabet and made 5,000 years of written history readable.",
+      "tags": ["Archaeology", "19th Century", "British"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-hieroglyphs",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Hieroglyphs Deciphered (1822)",
+    "teaser": "Jean-François Champollion, who had mastered a dozen ancient languages by age 20, used the Rosetta Stone and the cartouche of Ptolemy to crack the code that had baffled Europe for 1,500 years: Egyptian hieroglyphs. On September 27, 1822, he announced the decipherment — and Egypt's ancient voice was restored.",
+    "imageUrl": "",
+    "byline": "Jean-François Champollion",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Champollion's 1822 Lettre à M. Dacier",
+      "durationMinutes": 20,
+      "instruction": "The breakthrough came when Champollion realized hieroglyphs were not pure symbols — they encoded sounds, and the Greek names of the Ptolemies appeared phonetically. Read how he tested his system against the names of Cleopatra and Ramesses and how his grammar of ancient Egyptian followed in 1836. The hieroglyphs, silent for over a millennium, spoke again.",
+      "tags": ["Archaeology", "19th Century", "French"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-linear-b",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Linear B Deciphered (1952)",
+    "teaser": "Michael Ventris, an architect who treated the Bronze Age script as a hobby, cracked Linear B — the writing of the Minoan and Mycenaean palaces — in 1952. His shock: the language was Greek, 600 years older than Homer. The 'Greek miracle' suddenly had written records, and Mycenaean palaces became literate kingdoms.",
+    "imageUrl": "",
+    "byline": "Michael Ventris",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ventris's 1952 decipherment of Linear B",
+      "durationMinutes": 20,
+      "instruction": "Ventris, working from the clay tablets found at Knossos and Pylos, treated the script like a code — tabulating sign frequencies and testing languages until Greek fit. Read how the tablets turned out to be palace inventories: chariots, wheat, and offerings to gods named in Greek. The decipherment, confirmed by John Chadwick, rewrote Aegean prehistory.",
+      "tags": ["Archaeology", "20th Century", "British"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-piri-reis",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Piri Reis Map (1929)",
+    "teaser": "In 1929, curators restoring the Topkapı Palace library in Istanbul unrolled a gazelle-skin map drawn in 1513 by the Ottoman admiral Piri Reis — a chart that shows the coasts of Europe, Africa, and, puzzlingly, a landmass that looks like South America and, some claim, Antarctica. It is one of the most studied and argued maps ever made.",
+    "imageUrl": "",
+    "byline": "The Topkapı Palace discovery",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1929 rediscovery of the Piri Reis map",
+      "durationMinutes": 20,
+      "instruction": "Read how Piri Reis wrote that he compiled the map from about 20 charts, including one drawn by Columbus. The southern portion — an icy coast labeled with South American rivers — has fueled claims of pre-Columbian Antarctic knowledge, which most scholars reject. The map's real value is its glimpse of the lost mapmaking traditions of the age of exploration.",
+      "tags": ["Cartography", "20th Century", "Turkish"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-turin-papyrus",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Turin Papyrus Map (1824)",
+    "teaser": "Among the papyri brought to Turin's museum in the 1820s was the world's oldest surviving geological map — drawn by an Egyptian scribe around 1150 BCE for a mining expedition. It shows wadis, hills, gold mines, and even the rocks' colors, making it a 3,000-year-old ancestor of the modern survey map.",
+    "imageUrl": "",
+    "byline": "The Egyptian Museum of Turin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Turin papyrus map of the gold mining region",
+      "durationMinutes": 20,
+      "instruction": "Read how the fragmentary papyrus, bought in Egypt in the 1820s, depicts the road to the gold mines of the Wadi Hammamat, with buildings, wells, and geological annotations. It's the earliest known map to show not just routes but the nature of the terrain — the beginning of geology as a visual science.",
+      "tags": ["Archaeology", "19th Century", "Italian"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-olmec-heads",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Olmec Colossal Heads (1862)",
+    "teaser": "Farmers in the Mexican jungle of Veracruz found enormous stone heads buried in the earth — colossal portraits up to 3 meters tall and 40 tons, carved from basalt hauled from volcanoes 80 kilometers away. They belonged to the Olmec, Mesoamerica's 'mother culture,' and the heads are its greatest monuments.",
+    "imageUrl": "",
+    "byline": "José María Melgar y Serrano",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of the Olmec colossal heads (1862–present)",
+      "durationMinutes": 20,
+      "instruction": "Read how the first head, found at Tres Zapotes, was dismissed as a relic of Africans or giants before archaeology proved it Olmec, 3,000 years old. Seventeen heads are now known, each a portrait with a distinct helmet, likely of rulers. The Olmec invented the ball game, the calendar, and writing in Mesoamerica, and the heads guard their legacy.",
+      "tags": ["Archaeology", "19th-20th Century", "Mexican"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-cueva-de-las-manos",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Cueva de las Manos (1941)",
+    "teaser": "In a remote canyon in Patagonia, explorers found a cave whose walls are covered in hundreds of stenciled hands — red, black, and ochre — pressed against the rock and sprayed with paint 9,000 years ago. The Cueva de las Manos, the Cave of Hands, is one of the oldest and most haunting art galleries in the Americas.",
+    "imageUrl": "",
+    "byline": "The 1941 expedition of Carlos Gradin's predecessors",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery and study of the Cueva de las Manos",
+      "durationMinutes": 20,
+      "instruction": "Read how the artists blew pigment through hollow bones over their hands to make the stencils — mostly left hands, some tiny, a few missing fingers. The cave also holds hunting scenes of guanacos chased with bolas. Radiocarbon dating of the paints places the earliest hands around 7,300 BCE, making them among the oldest art in the New World.",
+      "tags": ["Archaeology", "20th Century", "Argentine"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-blombos-ochre",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Blombos Ochre (2002)",
+    "teaser": "In a cave on South Africa's coast, archaeologists found blocks of red ochre engraved with geometric cross-hatch patterns — deliberately made by humans 100,000 years ago. The Blombos engravings pushed the origins of symbolic thought back deep into the Stone Age, suggesting our ancestors thought in symbols long before they painted caves.",
+    "imageUrl": "",
+    "byline": "Christopher Henshilwood",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 2002 Blombos Cave ochre engravings",
+      "durationMinutes": 20,
+      "instruction": "Read how the engraved ochre blocks were found alongside shell beads and bone tools in layers dated to about 77,000 years ago, and how the careful, repeated patterns are too deliberate to be accidental. The finds challenge the idea that 'modern' cognition arrived suddenly in Europe 40,000 years ago — it emerged in Africa, far earlier.",
+      "tags": ["Archaeology", "21st Century", "South African"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-altamira",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Altamira Cave Paintings (1879)",
+    "teaser": "While her father excavated the floor of the Altamira cave in Spain, nine-year-old María Sanz de Sautuola looked up and cried, 'Papa, look! Bulls!' The ceiling was covered with painted bison and deer — the first Ice Age art recognized by science. Scholars initially accused the girl's father of forgery.",
+    "imageUrl": "",
+    "byline": "Marcelino Sanz de Sautuola & María",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1879 discovery of the Altamira paintings",
+      "durationMinutes": 20,
+      "instruction": "Read how the vivid, polychrome bison — painted 14,000 years ago on a low ceiling by artists working by lamplight — were dismissed as fakes until similar caves were found in France in 1895. The artist's use of the rock's natural bumps to give the animals volume is a masterpiece of illusion. Today the cave is closed to the public; a replica welcomes visitors.",
+      "tags": ["Archaeology", "19th Century", "Spanish"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-chauvet",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Chauvet Cave (1994)",
+    "teaser": "Three French speleologists, crawling through a draught of air behind a rockfall in the Ardèche, entered a cave sealed for 20,000 years — and found the oldest and most sophisticated cave art ever seen: charging rhinos, lions, and horses, charcoal-dated to 36,000 years ago, drawn with a skill that rivals the Renaissance.",
+    "imageUrl": "",
+    "byline": "Jean-Marie Chauvet & team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1994 discovery of the Chauvet cave",
+      "durationMinutes": 20,
+      "instruction": "Read how the discoverers spent a weekend photographing what they found before reporting it, and how dating showed the art is twice as old as Lascaux. The artists used perspective, shading, and the cave walls' shapes to make animals leap from the rock. Chauvet's art rewrote the story of human creativity: our ancestors were masters far earlier than anyone believed.",
+      "tags": ["Archaeology", "20th Century", "French"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-venus-willendorf",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Venus of Willendorf (1908)",
+    "teaser": "Workmen digging a railway in Austria unearthed an 11-centimeter limestone figurine of a full-bodied woman, carved about 30,000 years ago — the Venus of Willendorf, one of the oldest and most famous sculptures in the world. She is so old that she predates pottery, farming, and writing.",
+    "imageUrl": "",
+    "byline": "Josef Szombathy's team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1908 discovery of the Venus of Willendorf",
+      "durationMinutes": 20,
+      "instruction": "Read how the figurine, found near the Danube in Austria, was named after the Roman goddess of love — a name scholars admit says more about the finders than the maker. Her exaggerated curves may celebrate fertility, abundance, or simply a woman's form as seen by an Ice Age artist. Analysis shows the limestone came from 1,000 kilometers away — she was a traveler.",
+      "tags": ["Archaeology", "20th Century", "Austrian"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-lion-man",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Lion-Man of Hohlenstein-Stadel (1939)",
+    "teaser": "Excavators in a German cave found fragments of carved ivory that were shelved and forgotten for 30 years — until someone realized they fit together into a 31-centimeter figure with a human body and a lion's head. The Lion-Man, carved 40,000 years ago, is the oldest known depiction of a being that is not fully human: the first evidence of imagination.",
+    "imageUrl": "",
+    "byline": "Robert Wetzel & Otto Völzing",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery and reconstruction of the Lion-Man figurine",
+      "durationMinutes": 20,
+      "instruction": "Read how the pieces were found in 1939, then ignored until reassembled in 1969 — and re-reassembled in 2013 with 700 additional fragments found in the backdirt. The figure may represent a shaman, a spirit, or a myth: proof that 40,000 years ago, humans were already imagining beings beyond the natural world. The earliest art of the mind.",
+      "tags": ["Archaeology", "20th Century", "German"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-nebra-sky-disc",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Nebra Sky Disc (1999)",
+    "teaser": "Treasure hunters using a metal detector dug up a bronze disc in eastern Germany — inlaid with gold: the sun, a crescent moon, and 32 stars, including the Pleiades. Made around 1600 BCE, the Nebra Sky Disc is the oldest known realistic depiction of the cosmos, a Bronze Age astronomer's sky map.",
+    "imageUrl": "",
+    "byline": "Hilde & Harald Burmester (recovered by authorities)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The recovery and study of the Nebra Sky Disc (1999–2002)",
+      "durationMinutes": 20, 
+      "instruction": "The looters tried to sell the disc; it was seized in a sting in Basel in 2002, along with the swords and axes buried with it. Read how the disc's gold stars — including a cluster of seven for the Pleiades — may encode the solstices and farming calendar, and how its copper came from the Alps and its gold from Cornwall: a Bronze Age European network.",
+      "tags": ["Archaeology", "21st Century", "German"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-uluburun",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Uluburun Shipwreck (1982)",
+    "teaser": "A sponge diver off Turkey's coast spotted 'metal biscuits with ears' on the seabed — copper ingots from a Bronze Age merchant ship that sank 3,300 years ago. The Uluburun wreck carried ten tons of copper and tin, ivory, glass, and a golden scarab of Nefertiti: the richest ancient shipwreck ever found, a snapshot of an international trade network.",
+    "imageUrl": "",
+    "byline": "Mehmet Çakır & the INA excavation team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1982–94 excavation of the Uluburun shipwreck",
+      "durationMinutes": 20,
+      "instruction": "Read how the Institute of Nautical Archaeology excavated the wreck over 11 seasons at depths of 50 meters, recovering 18,000 artifacts. The cargo — Cypriot copper, Afghan tin, Baltic amber, Egyptian glass, African ebony — proves that 1,300 BCE saw a globalized Mediterranean. The ship likely sank on the voyage that would have become the Bronze Age's largest exchange.",
+      "tags": ["Archaeology", "20th Century", "Turkish"],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-terracotta-army",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Terracotta Army (1974)",
+    "teaser": "Farmers digging a well near Xi'an, China, struck terracotta fragments — the first of 8,000 life-sized clay soldiers buried with the first emperor, Qin Shi Huang, in 210 BCE. Each soldier has a unique face, and the army stood guard for 2,200 years over a tomb that has never been opened. The find is one of the greatest archaeological discoveries ever made.",
+    "imageUrl": "",
+    "byline": "Local farmers & the Shaanxi archaeologists",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1974 discovery of the Terracotta Army",
+      "durationMinutes": 20,
+      "instruction": "Read how the life-sized army — infantry, archers, cavalry, and generals, each individually modeled and once painted — was built to accompany the emperor in death, along with bronze chariots and weapons that still hold a sharp edge. The emperor's tomb mound itself remains unexcavated, possibly ringed by rivers of mercury as the histories describe.",
+      "tags": ["Archaeology", "20th Century", "Chinese"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-dead-sea-scrolls",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Dead Sea Scrolls (1947)",
+    "teaser": "A Bedouin shepherd chasing a goat into a cave near the Dead Sea found clay jars holding leather scrolls — manuscripts hidden for 2,000 years. The Dead Sea Scrolls include the oldest known copies of the Hebrew Bible and the library of a desert sect, and they rewrote the history of Judaism and early Christianity.",
+    "imageUrl": "",
+    "byline": "The Bedouin shepherds of Qumran",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1947 discovery of the Dead Sea Scrolls",
+      "durationMinutes": 20,
+      "instruction": "Read how the scrolls, written between 250 BCE and 70 CE, were found in eleven caves near the settlement of Qumran, and how scholars have spent 70 years piecing together their fragments. They include the Isaiah scroll — a millennium older than any previous biblical manuscript — and the Community Rule of the sect that may have written them.",
+      "tags": ["Archaeology", "20th Century", "Palestinian"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-rosetta-stone",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Rosetta Stone (1799)",
+    "teaser": "A French soldier repairing a fort near Rosetta, Egypt, found a slab of black basalt inscribed with the same decree in three scripts: hieroglyphs, demotic, and Greek. The Rosetta Stone gave scholars the key to Egyptian writing — and the word 'Rosetta' has meant 'decoding key' ever since.",
+    "imageUrl": "",
+    "byline": "Pierre-François Bouchard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1799 discovery of the Rosetta Stone",
+      "durationMinutes": 20,
+      "instruction": "Read how the stone, dated 196 BCE, honors Ptolemy V, and how its three scripts let scholars compare known Greek with unknown hieroglyphs. The stone was seized by the British in 1801 and has stood in the British Museum since — a cause of continued Egyptian requests for its return. It has been the most-visited object in the museum.",
+      "tags": ["Archaeology", "18th-19th Century", "Egyptian-French"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-antikythera",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Antikythera Mechanism (1901)",
+    "teaser": "Sponge divers off the Greek island of Antikythera found a corroded lump of bronze in a shipwreck — which X-rays revealed to be a machine of 30 gears built around 100 BCE: a computer of the ancient world that predicted eclipses and tracked the planets. Nothing this sophisticated was known to exist again for over a thousand years.",
+    "imageUrl": "",
+    "byline": "The Antikythera sponge divers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery and reconstruction of the Antikythera Mechanism",
+      "durationMinutes": 20,
+      "instruction": "Read how the device, found among statues in a Roman-era shipwreck, was studied for a century before CT scans revealed its gears, dials, and inscriptions. It computed the positions of the sun and moon, predicted eclipses, and tracked the Olympic games. Its existence proves that the ancients' engineering ran far deeper than the written record shows.",
+      "tags": ["Archaeology", "20th Century", "Greek"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-lascaux",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Lascaux Cave Paintings (1940)",
+    "teaser": "Four teenagers and their dog followed a rabbit down a hole near Montignac, France — and found themselves in a cave whose walls blazed with painted horses, stags, and aurochs, drawn 17,000 years ago. Lascaux, 'the Sistine Chapel of prehistory,' is the most famous cave art in the world.",
+    "imageUrl": "",
+    "byline": "Marcel Ravidat & friends",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1940 discovery of the Lascaux cave",
+      "durationMinutes": 20,
+      "instruction": "Read how the teenagers explored the painted halls with a homemade lamp, and how the cave, opened to the public after WWII, drew a million visitors a year until its paintings began growing mold — it was closed in 1963. The 'Hall of the Bulls' features a 17-meter frieze of animals that remains a pinnacle of human art. A faithful replica now receives the crowds.",
+      "tags": ["Archaeology", "20th Century", "French"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-otzi",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Ötzi the Iceman (1991)",
+    "teaser": "Two hikers in the Alps found a body melting out of a glacier — not a lost climber but a man who died 5,300 years ago, preserved in ice with his clothes, tools, and last meal intact. Ötzi the Iceman is the oldest mummy ever found complete, and he has told scientists more about Copper Age life than any other single find.",
+    "imageUrl": "",
+    "byline": "Erika & Helmut Simon",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1991 discovery of Ötzi the Iceman",
+      "durationMinutes": 20,
+      "instruction": "Read how Ötzi — killed by an arrow in the back, as CT scans showed 10 years later — carried a copper axe, a bow, and medicinal birch fungus, and wore goat-leather leggings and a bearskin cap. His gut holds the pollen of a spring day, his teeth record his childhood valley, and his DNA shows he had brown eyes and was lactose intolerant. A man, frozen in time.",
+      "tags": ["Archaeology", "20th Century", "Italian"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-tutankhamun",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Tomb of Tutankhamun (1922)",
+    "teaser": "After years of digging in the Valley of the Kings with no result, Howard Carter found a step cut into the rock — and behind a sealed door, the only royal tomb ever found nearly intact: Tutankhamun's, stuffed with gold, thrones, chariots, and a solid-gold coffin. The boy king, obscure in life, became the most famous pharaoh of all.",
+    "imageUrl": "",
+    "byline": "Howard Carter",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carter's 1922 opening of Tutankhamun's tomb",
+      "durationMinutes": 20,
+      "instruction": "Read how Carter wired Lord Carnarvon: 'At last have made wonderful discovery in Valley.' The tomb's 5,000 artifacts — including the golden death mask — filled 1,700 crate numbers. The 'curse of the pharaohs' legend grew from Carnarvon's death months later, though most of the team lived to old age. The discovery made Tutankhamun a symbol of ancient Egypt forever.",
+      "tags": ["Archaeology", "20th Century", "British"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-pompeii",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Rediscovery of Pompeii (1748)",
+    "teaser": "Workmen digging a canal for the King of Naples struck ancient walls — the buried city of Pompeii, entombed by Vesuvius in 79 CE. The excavations that followed were the first in history: a Roman city preserved whole — streets, bakeries, frescoes, and the haunting plaster casts of its last citizens — came back to life.",
+    "imageUrl": "",
+    "byline": "Rocque Joaquin de Alcubierre",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1748 rediscovery and excavation of Pompeii",
+      "durationMinutes": 20,
+      "instruction": "Read how the ash that killed Pompeii's people also preserved them — filling cavities left by their bodies, which excavators cast in plaster in the 1860s. The city's graffiti, election posters, and fast-food counters show Roman daily life in startling detail. Pompeii became the great classroom of classical archaeology and still yields new finds today.",
+      "tags": ["Archaeology", "18th Century", "Italian"],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-vergina-tombs",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Tombs of Vergina (1977)",
+    "teaser": "Manolis Andronikos, digging in northern Greece, found an unplundered royal tomb beneath a mound — and inside, a gold larnax bearing the sixteen-pointed star of Macedon. He identified it as the tomb of Philip II, father of Alexander the Great, who was assassinated in 336 BCE. It was the richest Greek tomb ever found.",
+    "imageUrl": "",
+    "byline": "Manolis Andronikos",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Andronikos's 1977 excavation of the royal tombs at Vergina",
+      "durationMinutes": 20,
+      "instruction": "Read how Andronikos, after 40 years of searching for the capital of Macedon, found the royal cemetery at Aegae (Vergina) with armor, gold, and the bones of a man with a healed leg wound — matching Philip, who had been speared in the leg. The identification is still debated, but the treasure is beyond dispute.",
+      "tags": ["Archaeology", "20th Century", "Greek"],
+      "tier": 2
+    }
+  }
+]

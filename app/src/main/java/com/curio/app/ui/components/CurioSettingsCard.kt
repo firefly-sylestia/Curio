@@ -37,6 +37,7 @@ import com.curio.app.ui.theme.CurioIcon
 @Composable
 fun CurioSettingsCard(
     border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f)),
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
@@ -45,7 +46,7 @@ fun CurioSettingsCard(
         tonalElevation = 3.dp,
         shadowElevation = 0.dp,
         border = border,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 

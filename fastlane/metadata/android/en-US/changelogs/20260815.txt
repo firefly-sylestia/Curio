@@ -1,0 +1,3 @@
+• Five daily quests now: three core quests with bigger XP rewards, plus two bonus quests that unlock once the trio is done. A full day pays much more XP.
+• Claiming feels fun: completed quests animate away, bonus quests pop in gold, an XP chip floats up on claim, and level-ups rain confetti.
+• Badges are pinned everywhere: earned medal badges now sit right on the Quests page and on your Profile, with locked ones as silhouettes, plus a badge-unlock toast.

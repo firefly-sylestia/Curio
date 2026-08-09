@@ -1,0 +1,338 @@
+[
+  {
+    "id": "book-dark-forest",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Dark Forest",
+    "teaser": "Liu Cixin's 2008 second volume of the Remembrance of Earth's Past trilogy — humanity prepares for an alien invasion centuries away, and a man must decide whether the universe is a forest of hunters.",
+    "imageUrl": "",
+    "byline": "Liu Cixin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the wallfacers",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the wallfacers are chosen to deceive the enemy by deceiving everyone. Notice how Liu Cixin thinks at the scale of centuries. Write what the 'dark forest' theory claims about contact between civilizations."
+    },
+    "tags": [
+      "Chinese",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-ball-lightning",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Ball Lightning",
+    "teaser": "Liu Cixin's 2004 novel of a scientist obsessed with the mystery his parents were killed by — ball lightning — and the weapon it can become. Hard SF about the strange marriage of weather and war.",
+    "imageUrl": "",
+    "byline": "Liu Cixin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the storm and the obsession",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Chen's parents vanish in a lightning strike and his life's question is set. Notice how Liu Cixin grounds cosmic speculation in precise physics. Write how the novel uses an unexplained phenomenon to explore obsession and sacrifice."
+    },
+    "tags": [
+      "Chinese",
+      "Science Fiction",
+      "Hard SF"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-solaris",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Solaris",
+    "teaser": "Stanisław Lem's 1961 novel of a scientist sent to a station above the ocean planet Solaris — where the ocean's contact takes the shape of your deepest guilt. The great novel of unknowable otherness.",
+    "imageUrl": "",
+    "byline": "Stanisław Lem",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Kelvin's arrival",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Kelvin arrives at the station and the strange visitors are already there. Notice how Lem refuses to explain the ocean away. Write what the novel suggests about the limits of understanding — and whether contact is possible at all."
+    },
+    "tags": [
+      "Polish",
+      "Science Fiction",
+      "Philosophy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-dispossessed",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Dispossessed",
+    "teaser": "Le Guin's 1974 novel of Shevek, a physicist from the anarchist moon Anarres who travels to the capitalist planet Urras — 'an ambiguous utopia' that questions both worlds. The novel that made 'anarchist' a literary ideal.",
+    "imageUrl": "",
+    "byline": "Ursula K. Le Guin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Anarres and the wall",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Shevek's departure from Anarres is narrated against memories of his utopia. Notice how Le Guin structures the novel in alternating worlds. Write what the novel says about freedom, solidarity, and the walls we build."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Utopia"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-martian-chronicles",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "The Martian Chronicles",
+    "teaser": "Bradbury's 1950 linked story cycle of the colonization of Mars — a bittersweet mirror held up to Earth, where the Martians die of chicken pox and the humans bring their own doom. The prose is pure poetry.",
+    "imageUrl": "",
+    "byline": "Ray Bradbury",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening stories — the rockets and the Martians",
+      "durationMinutes": 60,
+      "instruction": "Read the opening stories, from the rockets to the Martians' last telepathic moments. Notice how Bradbury treats Mars as a state of mind. Write how the collection uses the frontier to comment on Earth's own history."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Story Cycle"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-rendezvous-with-rama",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Rendezvous with Rama",
+    "teaser": "Clarke's 1973 novel of an alien cylinder entering the solar system — a first-contact story with no contact, a mystery with no answer. Hard SF's most elegant demonstration of wonder without explanation.",
+    "imageUrl": "",
+    "byline": "Arthur C. Clarke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the detection of Rama",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where humanity watches Rama's approach with growing awe. Notice how Clarke makes the reader feel the scale of the artifact. Write what the novel gains by never explaining who built Rama or why."
+    },
+    "tags": [
+      "British",
+      "Science Fiction",
+      "Hugo Nebula"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-brave-new-world-revisited",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Brave New World Revisited",
+    "teaser": "Huxley's 1958 nonfiction sequel — written thirty years after his novel, he examines the actual techniques of control: propaganda, drugs, and the 'managed democracy' he feared more than Orwell's totalitarian state.",
+    "imageUrl": "",
+    "byline": "Aldous Huxley",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the prophecy and its tools",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Huxley compares his own predictions with the world of 1958. Notice how he updates his fictional warnings with real politics and psychology. Write which of his control techniques you see most clearly in your own media diet."
+    },
+    "tags": [
+      "British",
+      "Nonfiction",
+      "Politics"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-going-postal",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Going Postal",
+    "teaser": "Terry Pratchett's 2004 Discworld novel of Moist von Lipwig, a con man given a choice — run the post office or die — who discovers that running a failing institution is the greatest con of all.",
+    "imageUrl": "",
+    "byline": "Terry Pratchett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the hanging and the offer",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Moist's 'execution' becomes a job offer. Notice how Pratchett builds comedy out of institutional absurdity. Write what the novel says about bureaucracy, communication, and the art of making things work."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Comedy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-small-gods",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Small Gods",
+    "teaser": "Pratchett's 1992 Discworld novel of Brutha, the only believer left in the god Om — who has been reduced to a tortoise. A novel about faith, institutions, and what happens when belief becomes bureaucracy.",
+    "imageUrl": "",
+    "byline": "Terry Pratchett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the tortoise and the novice",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Om the tortoise and Brutha the simple novice meet. Notice how Pratchett uses the size of the god as a joke with theology inside it. Write what the novel says about the difference between religion and belief."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Religion"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-norse-mythology",
+    "categoryId": "BOOKS",
+    "subtype": "Mythology",
+    "name": "Norse Mythology",
+    "teaser": "Neil Gaiman's 2017 retelling of the Norse myths — Odin, Thor, and Loki from the creation to Ragnarök, told in a storyteller's voice that makes the old gods feel like old friends.",
+    "imageUrl": "",
+    "byline": "Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the creation and the mead",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, from the void Ginnungagap to the building of Asgard. Notice how Gaiman keeps the myths episodic and wry. Write what the Norse gods' flaws — Loki's tricks, Thor's temper — reveal about what these myths were for."
+    },
+    "tags": [
+      "British",
+      "Mythology",
+      "Retelling"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-ocean-at-the-end-of-the-lane",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Ocean at the End of the Lane",
+    "teaser": "Gaiman's 2013 novella of a man who returns to his childhood home and remembers the girl at the end of the lane, the monsters, and the ocean that was really there. Memory as the deepest fantasy.",
+    "imageUrl": "",
+    "byline": "Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the return and the lane",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the narrator's return unlocks the past. Notice how Gaiman keeps the adult and child narrators in the same breath. Write what the ocean at the end of the lane is, and what the book says about childhood's magic."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Novella"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-graveyard-book",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Graveyard Book",
+    "teaser": "Gaiman's 2008 Newbery-winning novel of Nobody Owens, raised by the dead in a graveyard after his family is murdered — a coming-of-age story where the ghosts are the best parents. The Jungle Book with tombstones.",
+    "imageUrl": "",
+    "byline": "Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Nobody and the man Jack",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the toddler escapes the murderer and is adopted by the graveyard. Notice how Gaiman makes the dead warm and the living threatening. Write how the book uses the graveyard's lessons — history, silence, mortality — to raise a child."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Newbery"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-pratchett-hogfather",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Hogfather",
+    "teaser": "Pratchett's 1996 Discworld novel — with the Hogfather missing, Death must take his place and deliver the toys, while Susan tries to save the sun from being switched off. A novel about belief, from the most beloved of fantasy satirists.",
+    "imageUrl": "",
+    "byline": "Terry Pratchett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the assassins and the list",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the plot to kill the Hogfather is set in motion. Notice how Pratchett wraps serious questions about belief in slapstick. Write what the book's famous lines — about how humans need fantasy to stay human — mean to you."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Belief"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-far-seer",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Assassin's Apprentice",
+    "teaser": "Robin Hobb's 1995 first novel of the Realm of the Elderlings — Fitz, a royal bastard trained as an assassin and bonded to a wolf, in a kingdom of scheming courtiers. The fantasy of quiet, painful intimacy.",
+    "imageUrl": "",
+    "byline": "Robin Hobb",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the boy left at the keep",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the six-year-old Fitz is abandoned at Buckkeep. Notice how Hobb narrates from inside Fitz's wounded, watchful perspective. Write how the novel builds its magic — the Skill and the Wit — around loneliness and loyalty."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Epic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-gideon-the-ninth",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Gideon the Ninth",
+    "teaser": "Tamsyn Muir's 2019 novel of necromancers, a locked-tomb trial, and Gideon Nav — a swordswoman who would rather be anywhere else. Lesbian necromancers in space, with a voice like a meme and a heart like a gothic novel.",
+    "imageUrl": "",
+    "byline": "Tamsyn Muir",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the Ninth House and the invitation",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Gideon's escape plans keep failing and the Emperor's summons arrives. Notice how Muir balances snark and gothic grandeur. Write how the novel's outrageous premise becomes genuinely moving by the end."
+    },
+    "tags": [
+      "New Zealand",
+      "Science Fiction",
+      "Fantasy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-murderbot",
+    "categoryId": "BOOKS",
+    "subtype": "Novella",
+    "name": "All Systems Red",
+    "teaser": "Martha Wells's 2017 first Murderbot novella — a self-hacking security android that would rather watch media than protect its clients, until it decides to anyway. The most beloved robot in modern science fiction.",
+    "imageUrl": "",
+    "byline": "Martha Wells",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the survey team and the murderbot",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where Murderbot's deadpan narration introduces its media habit and its job. Notice how Wells makes the reader care about a character who insists it doesn't care. Write what Murderbot's name — and its refusal to be called a 'SecUnit' — reveals."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo Nebula"
+    ],
+    "tier": 1
+  }
+]

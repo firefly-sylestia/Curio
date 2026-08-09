@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureRepository
 import com.curio.app.data.CurioDatabase
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
@@ -67,6 +68,9 @@ class MainActivity : ComponentActivity() {
         // Load the persisted quests/levels state (XP, journey, daily quests,
         // achievements) before any screen reads it.
         CurioQuests.seed(this)
+        // v8.14 — the pet wakes on its own in the morning (and stays tucked
+        // in at night); afternoon/evening launches keep asleep-until-tapped.
+        CurioPet.wakeForMorning()
         if (AppPreferences.isReminderEnabled(this)) {
             com.curio.app.data.DailyReminderScheduler.schedule(
                 this,

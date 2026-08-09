@@ -1,0 +1,226 @@
+[
+  {
+    "id": "scientist-james-chadwick",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "James Chadwick",
+    "teaser": "The English physicist who discovered the neutron in 1932, the uncharged particle that finally balanced the atom and made nuclear fission possible. He was interned in Germany during World War I but returned to win the Nobel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Detect",
+      "targetName": "Chadwick's neutron",
+      "instruction": "Learn how Chadwick identified the neutron by firing particles at beryllium. Write why the neutron's lack of charge let it penetrate nuclei, making both fission and nuclear weapons possible.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-glenn-seaborg",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Glenn Seaborg",
+    "teaser": "The American chemist who discovered ten elements — plutonium, americium, curium, and more — and won the 1951 Nobel while still in his 30s. Element 106, seaborgium, was named after him while he was still alive.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Transmute",
+      "targetName": "Seaborg's transuranium elements",
+      "instruction": "Learn how Seaborg produced plutonium in a cyclotron and how transuranium elements are made by neutron capture. Write about his actinide concept and why he has a living element named for him.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-melvin-calvin",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Melvin Calvin",
+    "teaser": "The American biochemist who traced the path carbon takes from the air into sugar — the Calvin cycle, the engine of all photosynthesis. He followed radioactive carbon through algae to map the dark reactions that feed the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Trace",
+      "targetName": "The Calvin cycle",
+      "instruction": "Learn the stages of the Calvin cycle: carbon fixation, reduction, and regeneration. Write how carbon-14 tracing let Calvin follow the path and why the cycle powers nearly all life.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-erwin-chargaff",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Erwin Chargaff",
+    "teaser": "The Austrian-American biochemist whose 'Chargaff's rules' — that A pairs with T and G pairs with C in equal amounts — were the crucial clue Watson and Crick needed. He later grumbled that his data had been 'stolen' by the double helix.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Pair",
+      "targetName": "Chargaff's rules",
+      "instruction": "Learn Chargaff's discovery that in any DNA, adenine equals thymine and guanine equals cytosine. Write how these ratios pointed Watson and Crick to base pairing and the double helix.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-maurice-wilkins",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Maurice Wilkins",
+    "teaser": "The New Zealand-born biophysicist whose X-ray diffraction images of DNA, made with Rosalind Franklin, revealed the molecule's elegant X-pattern. He shared the 1962 Nobel for the double helix — one of science's most contested prizes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Diffract",
+      "targetName": "Wilkins' DNA X-rays",
+      "instruction": "Learn how X-ray crystallography images of DNA revealed its helical structure. Write what the X-shaped diffraction pattern shows and why the 1962 Nobel remains controversial.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-carl-woese",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Carl Woese",
+    "teaser": "The American microbiologist who read the RNA of cells and discovered a third branch of life — archaea — that thrives in boiling springs and acid. He redrew the tree of life, adding a whole new domain beside bacteria and eukaryotes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Branch",
+      "targetName": "Woese's archaea",
+      "instruction": "Learn how Woese's comparison of ribosomal RNA revealed archaea as a separate domain of life. Write one extreme environment where archaea live and why this changed the tree of life.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-sydney-brenner",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Sydney Brenner",
+    "teaser": "The South African biologist who chose a tiny transparent worm, C. elegans, and mapped the fate of every one of its 959 cells — founding modern developmental biology. He shared the 2002 Nobel for finding the genes that control organ growth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Map",
+      "targetName": "Brenner's C. elegans",
+      "instruction": "Learn why Brenner chose C. elegans and how his team traced every cell's fate and the first animal nervous system. Write how this tiny worm became a model for understanding human development and disease.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-max-delbruck",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Max Delbrück",
+    "teaser": "The German-American physicist who turned to biology and made viruses the probe of heredity. His phage group showed that genes are simple enough to be studied — and helped found molecular biology as we know it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Infect",
+      "targetName": "The phage group",
+      "instruction": "Learn how Delbrück and Salvador Luria's fluctuation test showed mutations arise randomly, not in response to challenge. Write how studying bacteriophages revealed the nature of genes.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-lev-landau",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Lev Landau",
+    "teaser": "The Soviet physicist who mastered almost every branch of theoretical physics, from superfluidity to the theory of stars. He kept a famous 'Landau list' ranking physicists, putting himself at 2.5 — and Einstein alone at 0.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Rank",
+      "targetName": "Landau's physics ladder",
+      "instruction": "Learn how Landau explained superfluidity in liquid helium and why he ranked physicists on a logarithmic scale. Write what superfluidity is and one more of his contributions, like the Landau levels.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-abdus-salam",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Abdus Salam",
+    "teaser": "The Pakistani physicist who united the weak nuclear force and electromagnetism into one 'electroweak' theory, earning the 1979 Nobel. A devout Muslim, he built an international physics center in Trieste to help scientists from poor countries.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Unite",
+      "targetName": "Salam's electroweak theory",
+      "instruction": "Learn how Salam, Glashow, and Weinberg unified two of nature's four forces. Write what the W and Z bosons proved and how Salam's ICTP helped scientists from developing nations.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-steven-weinberg",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Steven Weinberg",
+    "teaser": "The American physicist who co-created the electroweak theory, then wrote The First Three Minutes about the universe's fiery birth. His dream of a final 'theory of everything' defined an era of particle physics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cool",
+      "targetName": "The first three minutes",
+      "instruction": "Read about Weinberg's account of the universe's first three minutes, from quark soup to the formation of nuclei. Write the sequence of events and why the cosmic microwave background confirms it.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-alan-guth",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Alan Guth",
+    "teaser": "The American physicist who proposed inflation — that the newborn universe ballooned faster than light in a fraction of a second. His idea explains why the cosmos looks so smooth, flat, and vast.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Inflate",
+      "targetName": "Guth's cosmic inflation",
+      "instruction": "Learn how inflation solves the flatness and horizon problems of the early universe. Write what 'cosmic inflation' means and how it explains the seeds of galaxies in the cosmic microwave background.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-andrei-sakharov",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Andrei Sakharov",
+    "teaser": "The Soviet physicist who built the hydrogen bomb, then devoted his life to warning about its dangers and fighting for human rights. He won the Nobel Peace Prize while exiled in Gorky — a scientist who outgrew his own weapon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Warn",
+      "targetName": "Sakharov's dissent",
+      "instruction": "Learn how Sakharov moved from designing the Soviet H-bomb to opposing nuclear testing and defending human rights. Write why he is called the conscience of the nuclear age.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-ignaz-semmelweis",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ignaz Semmelweis",
+    "teaser": "The Hungarian physician who ordered doctors to wash their hands and slashed deaths from childbed fever in his ward. He was mocked, broken, and died in an asylum — decades before germs were accepted.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Wash",
+      "targetName": "Semmelweis' handwashing",
+      "instruction": "Learn how Semmelweis noticed that doctors who dissected corpses then delivered babies spread childbed fever. Write why his chlorine handwash worked and why his colleagues rejected him.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-paul-ehrlich",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Paul Ehrlich",
+    "teaser": "The German physician who imagined 'magic bullets' — chemicals that kill pathogens but spare the patient — and found Salvarsan, the first cure for syphilis. He founded immunology and chemotherapy with a stubborn, systematic search.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Aim",
+      "targetName": "Ehrlich's magic bullet",
+      "instruction": "Learn how Ehrlich screened hundreds of compounds to find Salvarsan, compound 606. Write what the 'magic bullet' idea means and how it led to modern targeted chemotherapy.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-john-snow",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "John Snow",
+    "teaser": "The English physician who mapped cholera deaths around a London water pump and ended an outbreak by removing its handle — before anyone knew germs existed. His map is the founding legend of epidemiology.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Map",
+      "targetName": "Snow's cholera map",
+      "instruction": "Learn how Snow plotted the 1854 Broad Street cholera cases and traced them to one pump. Write how his map, dot by dot, proved waterborne transmission and founded epidemiology.",
+      "durationMinutes": 20
+    }
+  }
+]

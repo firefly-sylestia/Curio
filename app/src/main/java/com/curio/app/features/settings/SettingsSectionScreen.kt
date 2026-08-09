@@ -182,9 +182,58 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-guide") {
-            CompactSwitchRow("Guided tour", "One-time tap-along tour, offered on the Quests page", AppPreferences.guideEnabledState) {
-                AppPreferences.setGuideEnabled(context, it)
+        // v8.5 — the Curio pet companion (spec §10): pixel pet + rule-based
+        // dialogue + passport/discovery on Quests and Home. Default ON.
+        SettingsRowPulse(highlightKey == "appearance-pet") {
+            CompactSwitchRow("Curie", "Pixel companion that grows with your XP", AppPreferences.petEnabledState) {
+                AppPreferences.setPetEnabled(context, it)
+            }
+        }
+        // v8.8 — the floating pet companion: wanders on every screen, can be
+        // dragged anywhere, and naps back into its flower bed. Default ON;
+        // turning it off keeps the pet at home in the bed.
+        SettingsRowPulse(highlightKey == "appearance-floating-pet") {
+            CompactSwitchRow(
+                "Floating pet",
+                "Wanders, follows your finger, naps in its flower bed",
+                AppPreferences.floatingPetEnabledState
+            ) {
+                AppPreferences.setFloatingPetEnabled(context, it)
+            }
+        }
+        // v8.43 — the pet's learning brain (CurioPetBrain): observes real
+        // activity, builds a personality, and develops its own catchphrases
+        // over time. Default ON; off = classic rule-based lines only.
+        SettingsRowPulse(highlightKey == "appearance-pet-brain") {
+            CompactSwitchRow(
+                "Pet brain",
+                "The pet learns your habits and grows its own personality",
+                AppPreferences.petBrainEnabledState
+            ) {
+                AppPreferences.setPetBrainEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        // v8.16 — whether a landed topic's reveal opens itself as soon as
+        // the deck settles. Default OFF: the deck just lands and the front
+        // card stays tappable (no reveal page, no open-it prompt).
+        SettingsRowPulse(highlightKey == "appearance-auto-open") {
+            CompactSwitchRow(
+                "Auto-open landed topic",
+                "Open the topic reveal as soon as the deck lands",
+                AppPreferences.autoOpenRevealState
+            ) {
+                AppPreferences.setAutoOpenReveal(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "appearance-reaction-lines") {
+            CompactSwitchRow(
+                "Custom reaction lines",
+                "Let Curie speak your saved lines for each event",
+                AppPreferences.customReactionLinesState
+            ) {
+                AppPreferences.setCustomReactionLinesEnabled(context, it)
             }
         }
     }
@@ -330,7 +379,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
         SettingsRowPulse(highlightKey == "notif-overlay") {
             CompactSwitchRow(
                 "Display over other apps",
-                if (overlayUsable) "Granted — the bubble can float over other apps"
+                if (overlayUsable) "Granted. The bubble can float over other apps"
                 else "System permission for the floating bubble",
                 overlayUsable
             ) { enabled ->

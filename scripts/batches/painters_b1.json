@@ -1,0 +1,402 @@
+[
+  {
+    "id": "painter-sandro-botticelli",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Sandro Botticelli",
+    "teaser": "Florentine master of the Medici era whose Birth of Venus and Primavera turned pagan mythology into the most graceful paintings of the Renaissance — then fell out of fashion for 300 years until the Pre-Raphaelites rediscovered him.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Birth of Venus (Uffizi, Florence) — stand close, then step far back",
+      "durationMinutes": 30,
+      "instruction": "Start close: notice Venus's elongated neck and the impossible floating pose — Botticelli cared about grace, not anatomy. Step back and see how the whole painting rides on a few curving lines. Count the winds, the flowers, the shells."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-titian",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Titian",
+    "teaser": "The Venetian giant who painted for popes, emperors, and doges for 70 years — a career so long he defined three generations of European art. His late works dissolve the figure into pure brushstroke and color, predicting modern painting by 400 years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Bacchus and Ariadne (National Gallery, London) and his late Pietà",
+      "durationMinutes": 30,
+      "instruction": "Start with Bacchus and Ariadne: look at how Titian froze a moment mid-motion — Bacchus leaping from his chariot. Then find a late self-portrait or the Pietà. Compare the tight early detail with the loose, glowing late strokes."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "16th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-diego-velazquez",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Diego Velázquez",
+    "teaser": "The quiet genius of the Spanish court who painted the king, the dwarfs, and the dogs of Madrid with such truthfulness that 200 years later Manet called him 'the painter of painters.' Las Meninas is still argued about like a puzzle box.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Las Meninas (Prado, Madrid) — spend 15 minutes on the composition",
+      "durationMinutes": 30,
+      "instruction": "Stand before Las Meninas and figure out who is looking at whom: the painter at his canvas, the princess, the dwarfs, the mirror in the back, the man in the doorway. Notice how Velázquez's own self-portrait wears the red cross he earned after painting it."
+    },
+    "tags": [
+      "Baroque",
+      "Spanish",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-peter-paul-rubens",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Peter Paul Rubens",
+    "teaser": "The Flemish powerhouse who painted like he was in a hurry to live — fleshy, swirling, operatic scenes that made him Europe's most sought-after artist and a diplomat besides. His studio was a factory; his sketches are still unmatched.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Descent from the Cross (Antwerp Cathedral) — the central panel",
+      "durationMinutes": 30,
+      "instruction": "Follow the diagonal: the body of Christ descends along a white sheet from upper left to lower right, a path of light through darkness. Notice how every arm, every cloth, every face pushes your eye down that diagonal — Rubens choreographs with mass."
+    },
+    "tags": [
+      "Baroque",
+      "Flemish",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jacques-louis-david",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jacques-Louis David",
+    "teaser": "The French painter who documented a revolution and then painted its emperor — neoclassicism's enforcer, who turned Roman history into propaganda for liberty, and then for Napoleon. His Death of Socrates made martyrdom look like a dinner party.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Death of Socrates (Met, New York) — the gestures",
+      "durationMinutes": 30,
+      "instruction": "Look at the hands first: Socrates pointing upward, the man on the left turned away weeping, the jailer handing the cup. Every gesture is a sentence. Then notice the light — cold, theatrical, focused entirely on the philosopher's upright body."
+    },
+    "tags": [
+      "Neoclassicism",
+      "French",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jean-auguste-dominique-ingres",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jean-Auguste-Dominique Ingres",
+    "teaser": "The perfectionist who made the human body look impossible — a French neoclassicist whose portraits are razor-sharp and whose nudes (like the Grande Odalisque) deliberately bend anatomy into elegance. Picasso studied him like scripture.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Grand Odalisque (Louvre) — count the vertebrae",
+      "durationMinutes": 20,
+      "instruction": "The famous trick: the odalisque's back is too long — she has extra vertebrae, and her left leg attaches impossibly high. Ingres did it on purpose for beauty over truth. Look at the fabric, the skin, the hookah; every surface is a different texture."
+    },
+    "tags": [
+      "Neoclassicism",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-anthony-van-dyck",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Anthony van Dyck",
+    "teaser": "Rubens's star pupil who became the court painter of King Charles I of England — inventing the aristocratic portrait look (elegant pose, silken fabrics, that famous soft sheen) that rulers imitated for 200 years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Charles I in Three Positions (Royal Collection) — the triple portrait",
+      "durationMinutes": 20,
+      "instruction": "This painting was made so Bernini could sculpt the king without meeting him: three views, one man, three moods. Look at how van Dyck makes silk, lace, and even the king's tiredness look regal. He invented the modern image of kingship."
+    },
+    "tags": [
+      "Baroque",
+      "Flemish",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-frans-hals",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Frans Hals",
+    "teaser": "The Dutch painter who made people laugh — his portraits catch subjects mid-grin, mid-drink, mid-brag, with fast, visible brushwork that feels like jazz. Nobody painted a good time like Frans Hals, and nobody was poorer for it at the end.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Laughing Cavalier (Wallace Collection, London) — the smirk",
+      "durationMinutes": 20,
+      "instruction": "Look at the mouth: it's not quite a smile, not quite a sneer — and it's painted in just a few strokes. Then zoom into the lace collar and the embroidered sleeves. Hals painted speed itself; stand close and you can see the brush flying."
+    },
+    "tags": [
+      "Baroque",
+      "Dutch",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-andrea-mantegna",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Andrea Mantegna",
+    "teaser": "The Paduan painter who loved Roman ruins and impossible angles — his dead Christ seen from the feet is one of the boldest perspectives in art history. He painted stone so well his figures look carved.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Lamentation of Christ (Brera, Milan) — the perspective trick",
+      "durationMinutes": 20,
+      "instruction": "Stand dead center. The body of Christ is foreshortened so drastically it looks like it's in your face — the feet are huge, the head tiny. Mantegna knew the anatomy is slightly wrong, and he did it anyway for drama. Notice the wound on the hand, the tears."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-domenico-ghirlandaio",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Domenico Ghirlandaio",
+    "teaser": "Florence's favorite fresco painter of the 1480s, who packed biblical scenes with portraits of the city's bankers and brides. He ran the workshop where a teenage Michelangelo learned to paint — and reportedly told the boy he'd never match him.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Sassetti Chapel frescoes (Santa Trinita, Florence)",
+      "durationMinutes": 30,
+      "instruction": "Look at the fresco cycle of the life of St. Francis: the biblical story in front, real Florentine citizens — the Sassetti family, their friends, even the street — behind. Ghirlandaio turned church walls into city portraits. Spot the details of 1480s Florence."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-filippo-lippi",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Filippo Lippi",
+    "teaser": "A Carmelite friar with a scandalous love life who painted the most tender Madonnas of the early Renaissance — delicate, human, sweet-faced. He eloped with a nun, Lucrezia, who modeled for his most famous altarpieces.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Madonna and Child with Two Angels (Uffizi, Florence)",
+      "durationMinutes": 20,
+      "instruction": "Look at the baby Jesus: he's not a miniature adult, he's a real baby with a chubby face — a revolution for the 1450s. Notice the little angel peeking over his shoulder, grinning. Lippi made holiness feel like family life."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-giovanni-bellini",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Giovanni Bellini",
+    "teaser": "The patriarch of Venetian painting who taught Giorgione and Titian, and who discovered that oil paint could glow. His landscapes and light made Venice the color capital of Europe — he was still getting better at 80.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "St. Francis in the Desert (Frick Collection, New York) — the light",
+      "durationMinutes": 30,
+      "instruction": "This is one of the first paintings where landscape is the real subject. Look at the light: it rakes across the rocks, the donkey, the saint's face, as if the painting is lit from within. Bellini made air visible. Notice the tiny details — the skull, the lizard, the cities far behind."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-nicolas-poussin",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Nicolas Poussin",
+    "teaser": "The French painter who lived in Rome and turned painting into philosophy — calm, ordered, classical scenes where every figure is placed like a chess piece. Cézanne spent his life trying to 'do Poussin over again from nature.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Et in Arcadia ego (Louvre) — the inscription",
+      "durationMinutes": 20,
+      "instruction": "Four shepherds read a tombstone carved with the words 'Even in Arcadia, I [death] am here.' Look at how each figure reacts differently. Then step back: the landscape is a stage, the figures are in a perfect geometric arrangement. Order over feeling — that's Poussin."
+    },
+    "tags": [
+      "Baroque",
+      "French",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-claude-lorrain",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Claude Lorrain",
+    "teaser": "The French landscape painter who invented the golden-hour view — ports, temples, and shepherds bathed in low light so beautiful that English gentlemen rearranged their gardens to look like his paintings.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Seaport at Sunset (Louvre) — watch the light for 10 minutes",
+      "durationMinutes": 20,
+      "instruction": "Notice where your eye goes first: the sun, low on the horizon, pulling the whole composition toward it. Everything — ships, towers, crowds — is a silhouette against that glow. Claude painted light as the main character and nature as its stage."
+    },
+    "tags": [
+      "Baroque",
+      "French",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-bartolome-esteban-murillo",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Bartolomé Esteban Murillo",
+    "teaser": "Seville's beloved painter of soft Virgins and street children — his warm, sentimental style made him Spain's most popular artist for centuries, even as critics later sneered at his sweetness. His beggar boys are among the most human paintings of the Baroque.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Young Beggar (Louvre) — the details",
+      "durationMinutes": 20,
+      "instruction": "A grimy boy sits eating, his bare foot resting on the floor, a bowl and an apple beside him. Look at the dirt under the nails, the mended clothes, the small joys — Murillo found dignity in the gutter. Then compare his glowing Virgins: same tenderness, different subject."
+    },
+    "tags": [
+      "Baroque",
+      "Spanish",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-francisco-de-zurbaran",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Francisco de Zurbarán",
+    "teaser": "The Spanish painter of monastic stillness — his saints stand in dark rooms lit by a single shaft of light, their robes carved in astonishing folds. He made silence visible; Velázquez called him the master of still life.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Agnus Dei (Prado, Madrid) — the lamb",
+      "durationMinutes": 20,
+      "instruction": "A lamb lies bound on a dark table, its legs tied, its head raised — painted with such fur-by-fur detail you could count the wool. No drama, no background, just the sacrifice rendered in perfect stillness. Zurbarán's faith was in the texture of things."
+    },
+    "tags": [
+      "Baroque",
+      "Spanish",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-tintoretto",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Tintoretto",
+    "teaser": "The 'little dyer' who challenged Titian for Venice's crown and painted with lightning speed and theatrical darkness — vast canvases of miracles and battles where bodies tumble through space like acrobats. His Paradise in the Doge's Palace is among the largest paintings on earth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Miracle of the Slave (Accademia, Venice) — the diagonal",
+      "durationMinutes": 20,
+      "instruction": "Follow the tumbling body: a slave, about to be executed, saved by a saint who swoops down from above. Tintoretto arranges everything on violent diagonals — the saint, the broken ropes, the crowd's pointing hands. It's theater, adrenaline, and light."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "16th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-paolo-veronese",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Paolo Veronese",
+    "teaser": "The Venetian painter of feasts and crowds who packed biblical suppers with dogs, dwarfs, drunks, and Turks — until the Inquisition asked why. His answer ('we painters take the same liberties as poets') became a legend of artistic freedom.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Wedding at Cana (Louvre) — find the extras",
+      "durationMinutes": 30,
+      "instruction": "This Last Supper disguised as a wedding feast is 32 feet wide and crammed with 130 figures. Play spot-the-anachronism: musicians, servants, a dog under the table, even a man picking his teeth. Veronese was hauled before the Inquisition for the irreverence — and refused to repaint it."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "16th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-luca-signorelli",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Luca Signorelli",
+    "teaser": "The Italian painter who filled the Orvieto cathedral with naked, muscular bodies rising from the dead — a terrifying and thrilling vision of the end of the world that Michelangelo studied before painting the Sistine ceiling.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Resurrection of the Flesh (Orvieto Cathedral) — the bodies",
+      "durationMinutes": 30,
+      "instruction": "Skeletons crawl out of the ground and slowly put themselves back together — skin, muscle, bone, breath. Look at the variety of poses; Signorelli was obsessed with the human body in every contortion. Michelangelo borrowed these figures wholesale a decade later."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-piero-di-cosimo",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Piero di Cosimo",
+    "teaser": "The strangest Florentine of the Renaissance — a painter who lived on boiled eggs (50 at a time), worked only when the mood struck, and painted wild mythological scenes of primitive humans discovering fire, hunting, and love.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Forest Fire (Ashmolean, Oxford) — the chaos",
+      "durationMinutes": 20,
+      "instruction": "A forest burns while birds flee, deer leap, and centaurs and satyrs panic — a study of nature in crisis, painted with a naturalist's eye and a fantasist's imagination. Notice the individual species: Piero painted each animal accurately, then set them all on fire."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "15th Century"
+    ],
+    "tier": 1
+  }
+]

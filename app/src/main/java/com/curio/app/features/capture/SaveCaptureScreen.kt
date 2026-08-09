@@ -67,6 +67,8 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
+import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
@@ -89,6 +91,8 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.EmberBurst
 import com.curio.app.ui.components.formatGlyph
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -310,6 +314,11 @@ fun SaveCaptureScreen(
                             // existing keepsake, not a new discovery.
                             if (editEntryId == null) {
                                 CurioQuests.onSave(context, entry.format)
+                                // Feed the category passport — a saved capture
+                                // masters the lane's stamp (spec §6.1).
+                                CurioPassport.noteSave(context, entry.topic.categoryId)
+                                // The pet celebrates a new keepsake (spec §10.6).
+                                CurioPet.reactTo(CurioPet.Event.SAVE)
                             }
                             // Saved — the autosaved draft is now redundant. Null the
                             // snapshot too, so a debounced write that re-fires when
@@ -322,11 +331,11 @@ fun SaveCaptureScreen(
                         }
                         .onFailure { error ->
                             Log.e("SaveCaptureScreen", "Failed to save capture ${entry.id}", error)
-                            saveError = "Couldn't save this entry. Your recording is still here — try again."
+                            saveError = "Couldn't save this entry. Your recording is still here. Try again."
                         }
                 } catch (error: Exception) {
                     Log.e("SaveCaptureScreen", "Failed to prepare capture", error)
-                    saveError = "Couldn't save this entry. Your recording is still here — try again."
+                    saveError = "Couldn't save this entry. Your recording is still here. Try again."
                 } finally {
                     saveInProgress = false
                 }
@@ -545,44 +554,52 @@ fun SaveCaptureScreen(
                     // The save button wears the category TINT with ink content
                     // when the tint setting is on; with it off it reverts to
                     // the plain accent fill + white content as before.
-                    Button(
-                        onClick = performSave,
-                        enabled = canSave && !saveInProgress,
-                        shape = RoundedCornerShape(32.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (tintWash) cat.tint else cat.themedAccent(),
-                            contentColor = if (tintWash) cat.categoryInk() else cat.onAccent(),
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        contentPadding = PaddingValues(vertical = 18.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .scale(if (saveInProgress) 0.97f else 1f)
-                    ) {
-                        if (saveInProgress) {
-                            CircularProgressIndicator(
-                                color = if (tintWash) cat.categoryInk() else cat.onAccent(),
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(Modifier.width(10.dp))
-                            Text(
-                                text = "Saving…",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                        } else {
-                            CurioIcon(
-                                name = CurioIcons.Check,
-                                contentDescription = null,
-                                tint = if (tintWash) cat.categoryInk() else cat.onAccent(),
-                                size = 20.dp
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = if (editEntryId != null) "Save changes" else "Save entry",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-                            )
+                    // v8.18 — the Save CTA is a FUN pet landmark: the pet
+                    // sometimes dashes over and boops it while you write.
+                    PetLandmark(
+                        id = "save",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "capture"
+                    ) { m ->
+                        Button(
+                            onClick = performSave,
+                            enabled = canSave && !saveInProgress,
+                            shape = RoundedCornerShape(32.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (tintWash) cat.tint else cat.themedAccent(),
+                                contentColor = if (tintWash) cat.categoryInk() else cat.onAccent(),
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            contentPadding = PaddingValues(vertical = 18.dp),
+                            modifier = m
+                                .fillMaxWidth()
+                                .scale(if (saveInProgress) 0.97f else 1f)
+                        ) {
+                            if (saveInProgress) {
+                                CircularProgressIndicator(
+                                    color = if (tintWash) cat.categoryInk() else cat.onAccent(),
+                                    strokeWidth = 2.dp,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    text = "Saving…",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                                )
+                            } else {
+                                CurioIcon(
+                                    name = CurioIcons.Check,
+                                    contentDescription = null,
+                                    tint = if (tintWash) cat.categoryInk() else cat.onAccent(),
+                                    size = 20.dp
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = if (editEntryId != null) "Save changes" else "Save entry",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                                )
+                            }
                         }
                     }
                 }

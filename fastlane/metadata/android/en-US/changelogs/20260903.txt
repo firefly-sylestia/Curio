@@ -1,0 +1,1 @@
+Improved the saved-entry detail view so category names, entry titles, and long descriptions stay separated and readable. Long metadata now wraps cleanly instead of overlapping adjacent content.

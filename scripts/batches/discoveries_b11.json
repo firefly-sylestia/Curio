@@ -1,0 +1,380 @@
+[
+  {
+    "id": "discovery-niobium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Niobium Discovered (1801)",
+    "teaser": "Charles Hatchett, analyzing a mineral in the British Museum's collection, found an unknown element and named it columbium, after Columbia. Europeans later renamed it niobium — and the two names fought for 150 years until chemists settled on niobium, the symbol Nb.",
+    "imageUrl": "",
+    "byline": "Charles Hatchett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hatchett's 1801 analysis of columbite",
+      "durationMinutes": 20,
+      "instruction": "Read how Hatchett's new element was so like tantalum that many chemists thought they were one, until the German chemist Heinrich Rose distinguished them in 1844. Niobium's superconductivity and strength make it key to particle accelerators and high-performance alloys.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-palladium-rhodium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Palladium & Rhodium (1803)",
+    "teaser": "William Hyde Wollaston, the shy English chemist, dissolved crude platinum ore and quietly isolated two new metals: palladium, named after the asteroid Pallas, and rhodium, whose salts blush rose pink. He sold samples anonymously, then revealed the metals in 1804.",
+    "imageUrl": "",
+    "byline": "William Hyde Wollaston",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wollaston's 1803–04 isolation of palladium and rhodium",
+      "durationMinutes": 20,
+      "instruction": "Wollaston's process used mercury to separate platinum group metals — delicate, secret chemistry. Read how he announced palladium through an anonymous ad offering it for sale, which provoked a public challenge, and how rhodium got its name from rhodon, 'rose.' Both are now catalytic converters' workhorses.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-osmium-iridium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Osmium & Iridium (1803)",
+    "teaser": "Smithson Tennant, working on the black residue left when platinum ore dissolves, found two new metals at once: iridium, whose salts shimmer in every color, and osmium, named for the foul smell of its oxide — the densest element on Earth.",
+    "imageUrl": "",
+    "byline": "Smithson Tennant",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tennant's 1803 discovery of osmium and iridium",
+      "durationMinutes": 20,
+      "instruction": "Read how the two metals were hidden in the insoluble residue of platinum refining. Osmium is the densest known element; iridium's hardness and corrosion resistance made it the tip of fountain pens and the standard metre bar. The iridium layer in rock is now the fingerprint of the asteroid that killed the dinosaurs.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-sodium-potassium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Sodium & Potassium Isolated (1807)",
+    "teaser": "Humphry Davy passed an electric current through molten caustic soda and potash, and watched gleaming metallic globules form — the first time electricity had isolated an element. He named them sodium and potassium, and stunned chemistry by showing alkalis hide shiny metals.",
+    "imageUrl": "",
+    "byline": "Humphry Davy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Davy's 1807 Bakerian Lecture on the decomposition of the fixed alkalis",
+      "durationMinutes": 20,
+      "instruction": "Davy used a powerful voltaic battery — a gift of the king — to split compounds that resisted every chemical attack. Read his own astonished description of the globules of metal bursting into flame on water. The lecture is one of the great performances of science: two new elements, live on stage.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-fluorine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Fluorine Isolated (1886)",
+    "teaser": "Fluorine is the most reactive element — so violent that it attacked every chemist who tried to isolate it, blinding and even killing several. Henri Moissan finally captured the yellow gas in 1886 using a platinum apparatus chilled to -50°C, and won the 1906 Nobel for it.",
+    "imageUrl": "",
+    "byline": "Henri Moissan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Moissan's 1886 isolation of fluorine",
+      "durationMinutes": 20,
+      "instruction": "Read how Lavoisier predicted an element in hydrofluoric acid, and how Davy, Gay-Lussac, and Thénard all suffered poisoning trying to isolate it. Moissan's trick was electrolysis of potassium fluoride in anhydrous HF, with platinum electrodes. Fluorine now makes Teflon, refrigerants, and the fluoride in toothpaste.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-argon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Argon Discovered (1894)",
+    "teaser": "Lord Rayleigh found that nitrogen extracted from air weighed a little more than nitrogen from chemicals — a difference so small most scientists dismissed it. He and William Ramsay chased it down and found a whole new unreactive gas. They named it argon, 'the lazy one.'",
+    "imageUrl": "",
+    "byline": "Rayleigh & Ramsay",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rayleigh & Ramsay's 1894 discovery of argon",
+      "durationMinutes": 20,
+      "instruction": "The discrepancy was just 5 milligrams per liter, but Rayleigh was a precision measurer. Read how they removed every known gas from air and were left with 1% that would not react with anything. The discovery opened the door to the whole noble gas family and won Rayleigh the 1904 Nobel.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-neon-krypton-xenon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Neon, Krypton & Xenon (1898)",
+    "teaser": "William Ramsay and Morris Travers, boiling away liquid air after finding argon, distilled three more new gases in six weeks: krypton ('hidden'), neon ('new'), and xenon ('stranger'). Ramsay named them so fast that the world's first neon sign followed within a decade.",
+    "imageUrl": "",
+    "byline": "William Ramsay",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ramsay & Travers's 1898 isolation of the noble gases from liquid air",
+      "durationMinutes": 20,
+      "instruction": "Read how the team liquefied air and carefully boiled it off, fraction by fraction, testing each fraction's spectrum. Each new gas glowed with a different color — krypton green, neon red, xenon blue-violet. Neon's red glow would light up city streets for a century.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-technetium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Technetium, the First Synthetic Element (1937)",
+    "teaser": "Mendeleev predicted an element below manganese and named it eka-manganese; nobody could find it because it doesn't exist naturally in useful amounts. Carlo Perrier and Emilio Segrè finally made it in a cyclotron — the first element manufactured by humans, named technetium, 'artificial.'",
+    "imageUrl": "",
+    "byline": "Perrier & Segrè",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Perrier & Segrè's 1937 creation of technetium",
+      "durationMinutes": 20,
+      "instruction": "Segrè noticed a mysterious activity in a molybdenum strip bombarded in the Berkeley cyclotron; he took it to Palermo and proved it was element 43. Read how every isotope of technetium is radioactive, and how its medical isotope, technetium-99m, is used in tens of millions of scans a year.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "Italian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-francium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Francium Discovered (1939)",
+    "teaser": "Marguerite Perey, a technician at the Curie Institute, found element 87 in actinium's decay products — the last naturally occurring element discovered, and the most unstable: its longest-lived isotope lasts just 22 minutes. She named it francium for her homeland.",
+    "imageUrl": "",
+    "byline": "Marguerite Perey",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Perey's 1939 discovery of francium",
+      "durationMinutes": 20,
+      "instruction": "Read how Perey, working under Marie Curie's protégée Irène Joliot-Curie, noticed a strange beta-decay in actinium samples that could not be explained. The entire planet holds less than an ounce of francium at any moment. It was the last element to be found in nature, though it 'exists' mainly as fleeting atoms.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-plutonium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Plutonium Discovered (1940)",
+    "teaser": "Glenn Seaborg's team, firing deuterons at uranium in Berkeley's cyclotron, produced element 94 — plutonium, named after Pluto, planet of the underworld. It powered the first atomic bomb tested and the Nagasaki bomb, and later fueled spacecraft visiting the outer planets.",
+    "imageUrl": "",
+    "byline": "Glenn Seaborg's team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seaborg's 1940–41 production of plutonium at Berkeley",
+      "durationMinutes": 20,
+      "instruction": "Read how the discovery was kept secret until after World War II, and how the Manhattan Project scaled plutonium production from microscopic traces to kilograms in two years. Plutonium-238's decay heat still powers Voyager and Curiosity, which are too far from the sun for solar panels.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-first-enzyme",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Enzyme (1833)",
+    "teaser": "Anselme Payen, a French chemist, extracted a substance from malt that rapidly broke starch into sugar — and showed it acted in tiny amounts without being used up. He called it diastase. It was the first enzyme ever isolated, though the word 'enzyme' wouldn't exist for another 45 years.",
+    "imageUrl": "",
+    "byline": "Anselme Payen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Payen's 1833 paper on diastase from malt",
+      "durationMinutes": 20,
+      "instruction": "Read how Payen and Jean-François Persoz precipitated the active agent with alcohol and found a little went a long way — the signature of a catalyst. The name diastase survives in the 'diastatic' power of brewing malt. It took Pasteur and Buchner to show enzymes work even outside living cells.",
+      "tags": [
+        "Biochemistry",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-cell-free-fermentation",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Cell-Free Fermentation (1897)",
+    "teaser": "Eduard Buchner, trying to make an extract for medicine, ground yeast cells with sand and squeezed out a juice that fermented sugar — no living cells anywhere. Life's chemistry had been reproduced in a bottle, founding biochemistry and earning him the 1907 Nobel.",
+    "imageUrl": "",
+    "byline": "Eduard Buchner",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Buchner's 1897 paper on alcoholic fermentation without yeast cells",
+      "durationMinutes": 20,
+      "instruction": "Pasteur had insisted fermentation required living yeast; Buchner's 'zymase' showed the enzymes alone could do it. Read how the discovery was nearly accidental — the extract was meant as a medicine — and how it shattered the boundary between chemistry and biology.",
+      "tags": [
+        "Biochemistry",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-secretin",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Hormone (1902)",
+    "teaser": "Ernest Starling and William Bayliss were studying how the pancreas knows to release digestive juice. They cut every nerve to it — and it still responded. Something chemical in the blood was doing the signaling. They named it secretin, and coined the word 'hormone' for the whole class.",
+    "imageUrl": "",
+    "byline": "Bayliss & Starling",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bayliss & Starling's 1902 secretin experiments",
+      "durationMinutes": 20,
+      "instruction": "The experiment was brutal and beautiful: anesthetized dogs, all pancreatic nerves severed, acid squirted into the intestine — and the pancreas still secreted. Read how they extracted the messenger from intestinal lining and injected it into the bloodstream to prove it traveled by blood, not nerve. Endocrine science began here.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-adrenaline",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Adrenaline Isolated (1901)",
+    "teaser": "Jokichi Takamine, a Japanese chemist working in New York, extracted the pure active principle of the adrenal gland — the first hormone ever crystallized. Named adrenaline, it became the first hormone sold as a drug, and the model for the entire pharmaceutical industry.",
+    "imageUrl": "",
+    "byline": "Jokichi Takamine",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Takamine's 1901 isolation of adrenaline",
+      "durationMinutes": 20,
+      "instruction": "Read how a German chemist, von Fürth, had only crude extracts; Takamine's purer product won the patent and the fame. The word 'adrenaline' now means any surge of energy — because the molecule floods your bloodstream in a fight. Its discovery showed that glands make chemicals, not just vague 'influences.'",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "Japanese-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-acetylcholine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Neurotransmitter (1921)",
+    "teaser": "Otto Loewi dreamed the experiment: take two beating frog hearts, stimulate one with electricity, and let its fluid bathe the other — which slows down too. Something chemical passed between them. He named it vagusstoff, later identified as acetylcholine: the first neurotransmitter.",
+    "imageUrl": "",
+    "byline": "Otto Loewi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Loewi's 1921 'Versuch über den humoralen Zusammenhang' (frog heart experiments)",
+      "durationMinutes": 20,
+      "instruction": "Loewi wrote later that the experiment came to him in a dream, twice — the second time he got up and did it. Read how a chemical released by the vagus nerve slowed a second heart, proving nerves talk chemically, not just electrically. The work won the 1936 Nobel and founded the field of neurotransmitters.",
+      "tags": [
+        "Neuroscience",
+        "20th Century",
+        "Austrian-German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-citric-acid-cycle",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Citric Acid Cycle (1937)",
+    "teaser": "Hans Krebs, a German-Jewish biochemist exiled to England, pieced together how cells burn food: a circular chain of reactions, each step named after an acid, that extracts energy and rebuilds its starting material. It became known as the Krebs cycle, the engine of metabolism in every cell you have.",
+    "imageUrl": "",
+    "byline": "Hans Krebs",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Krebs's 1937 paper on the citric acid cycle in pigeon breast muscle",
+      "durationMinutes": 20,
+      "instruction": "Krebs used pigeon breast muscle slices and measured oxygen consumption as he added each suspected intermediate. Read how the cycle's elegance — a wheel, not a line — explained why cells need oxygen to burn food, and won him the 1953 Nobel shared with Fritz Lipmann.",
+      "tags": [
+        "Biochemistry",
+        "20th Century",
+        "German-British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-calvin-cycle",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Calvin Cycle (1950s)",
+    "teaser": "Melvin Calvin's team fed algae radioactive carbon dioxide and, by stopping the reaction at precise moments and tracking the radioactive carbon, mapped the entire pathway plants use to turn CO₂ into sugar — the dark reactions of photosynthesis, now the Calvin cycle.",
+    "imageUrl": "",
+    "byline": "Melvin Calvin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Calvin's radioactive tracer studies of photosynthesis (1940s–50s)",
+      "durationMinutes": 20,
+      "instruction": "The trick was the 'lollipop' apparatus — algae in a thin glass disc, lights on, radioactive CO₂ in, and at the chosen moment the whole culture dumped into boiling alcohol to freeze chemistry. Read how paper chromatography revealed each labeled molecule in turn, and how the cycle won the 1961 Nobel.",
+      "tags": [
+        "Biochemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-lac-operon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Lac Operon (1961)",
+    "teaser": "How does a bacterium know to make lactose-digesting enzymes only when lactose is around? François Jacob and Jacques Monod found the switch: a cluster of genes with a control region, the first gene regulation system understood. It is the founding model of how genes get turned on and off.",
+    "imageUrl": "",
+    "byline": "François Jacob & Jacques Monod",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jacob & Monod's 1961 paper on genetic regulatory mechanisms",
+      "durationMinutes": 20,
+      "instruction": "Read how the pair deduced a repressor that sits on DNA and blocks the lactose genes, and how the sugar itself dislodges it. The idea of a 'switch' in DNA changed biology's picture of the genome from a static book to a dynamic machine, and won the 1965 Nobel.",
+      "tags": [
+        "Genetics",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  }
+]

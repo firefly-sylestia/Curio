@@ -1,0 +1,420 @@
+[
+  {
+    "id": "discovery-vitamins",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Vitamins (1912)",
+    "teaser": "Polish biochemist Casimir Funk coined the word 'vitamine' while trying to cure beriberi — he thought the missing factors in rice were 'vital amines.' He was half wrong on the chemistry and entirely right on the idea: diseases could be caused by missing nutrients, not just poisons or germs.",
+    "imageUrl": "",
+    "byline": "Casimir Funk",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Funk's 1912 paper on deficiency diseases",
+      "durationMinutes": 25,
+      "instruction": "Funk's paper tied scurvy, beriberi, rickets, and pellagra together under one theory: they were all deficiency diseases. Read how he reasoned from rice polishing to a general principle — a beautiful example of seeing one pattern across many symptoms."
+    },
+    "tags": [
+      "Biochemistry",
+      "Nutrition",
+      "Medicine",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-insulin",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Insulin (1921)",
+    "teaser": "Frederick Banting and Charles Best isolated insulin in a Toronto lab and tested it on a dying 14-year-old boy named Leonard Thompson — who survived. The patent was sold to the University of Toronto for $1, on the condition that no one profit from it. It's the origin of modern diabetes care.",
+    "imageUrl": "",
+    "byline": "Banting, Best, Collip & Macleod",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1922 insulin case report on Leonard Thompson",
+      "durationMinutes": 25,
+      "instruction": "Read the clinical report of the first insulin injection: the boy was in a coma, and the extract brought him back. Then think about the $1 patent — Banting said 'Insulin does not belong to me, it belongs to the world.' That decision shaped a century of medicine."
+    },
+    "tags": [
+      "Medicine",
+      "Endocrinology",
+      "1920s",
+      "Canadian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-antibiotics-sulfa",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Sulfa Drugs (1935)",
+    "teaser": "Before penicillin was mass-producible, sulfa drugs were the first antibiotics — discovered when a German dye called Prontosil, tested by Gerhard Domagk, cured infections in mice. His own daughter was saved by it after a needle prick turned septic. Sulfa saved millions before the penicillin era.",
+    "imageUrl": "",
+    "byline": "Gerhard Domagk",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Prontosil story and its 1930s clinical trials",
+      "durationMinutes": 25,
+      "instruction": "The twist: Prontosil only worked in the body — the active antibacterial was sulfanilamide, produced when the dye was broken down. Read how Domagk's daughter's near-fatal infection proved it in the most personal way possible."
+    },
+    "tags": [
+      "Medicine",
+      "Antibiotics",
+      "1930s",
+      "German"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-blood-types",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Blood Types (1900)",
+    "teaser": "Karl Landsteiner noticed that blood from one person sometimes clumped when mixed with another's — and sometimes didn't. He mapped the A, B, and O groups, and suddenly blood transfusion, previously a deadly lottery, became a science. He won the Nobel 30 years later.",
+    "imageUrl": "",
+    "byline": "Karl Landsteiner",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Landsteiner's 1900 paper on blood groups",
+      "durationMinutes": 25,
+      "instruction": "Read how Landsteiner tested serum from six colleagues against their own red cells and sorted the reactions into groups. It's a tiny, elegant experiment — test tubes, patience, and one crucial idea — that turned transfusion from gamble to standard care."
+    },
+    "tags": [
+      "Medicine",
+      "Immunology",
+      "1900s",
+      "Austrian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-vaccination-smallpox",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Smallpox Eradication (1980)",
+    "teaser": "The only disease ever wiped from the face of the Earth — a global campaign that began with Edward Jenner's cowpox experiment in 1796 and ended when the last natural case was declared in Somalia in 1977. Three years later the world officially announced: smallpox is gone.",
+    "imageUrl": "",
+    "byline": "WHO Global Campaign",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of the last smallpox case, Ali Maow Maalin",
+      "durationMinutes": 25,
+      "instruction": "Read about Maalin, a Somali cook who caught the last natural smallpox in 1977 — his case sparked a door-to-door hunt that ended the disease. Then think about what it took: billions of vaccinations, cold chains, and cooperation across the Cold War divide."
+    },
+    "tags": [
+      "Medicine",
+      "Public Health",
+      "1980s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-antibiotics-resistance",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Antibiotic Resistance (1940s)",
+    "teaser": "Bacteria learned to defeat penicillin almost as soon as it shipped — the first resistant strains appeared within a few years, and the arms race has never stopped. The discovery that evolution fights back, discovered inside hospitals, is the reason doctors plead with us to finish our prescriptions.",
+    "imageUrl": "",
+    "byline": "Multiple researchers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The history of penicillin resistance and MRSA",
+      "durationMinutes": 25,
+      "instruction": "Trace the timeline: penicillin arrives in 1944, resistant staph within a few years, then methicillin, then MRSA. Each new drug bought time, and evolution spent it. Understanding this race is the best argument for careful antibiotic use you'll ever read."
+    },
+    "tags": [
+      "Medicine",
+      "Microbiology",
+      "1940s",
+      "Ongoing"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-quantum-entanglement",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Quantum Entanglement (1935)",
+    "teaser": "Einstein called it 'spooky action at a distance' — the discovery that two particles can be linked so that measuring one instantly determines the other, no matter how far apart. Einstein thought it proved quantum mechanics was wrong. He was wrong; the spookiness is real.",
+    "imageUrl": "",
+    "byline": "Einstein, Podolsky & Rosen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The EPR paper (1935) and Bell's theorem (1964)",
+      "durationMinutes": 30,
+      "instruction": "Read the EPR paper's argument: if quantum mechanics is right, information must travel faster than light — impossible, they said. Then read about Bell's theorem and Alain Aspect's 1982 experiment: the impossible is true. Entanglement now powers quantum computing research."
+    },
+    "tags": [
+      "Physics",
+      "Quantum",
+      "1930s",
+      "Foundational"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-photoelectric-effect",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Photoelectric Effect (1905)",
+    "teaser": "The discovery that won Einstein his only Nobel — light hitting a metal knocks out electrons, but the energy of those electrons depends on the light's color, not its intensity. Einstein's answer: light comes in packets, photons. It was the opening shot of quantum theory.",
+    "imageUrl": "",
+    "byline": "Albert Einstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Einstein's 1905 photoelectric paper",
+      "durationMinutes": 25,
+      "instruction": "The paper is short and written with beautiful clarity. The key move: treat light as particles of energy E = hf. It explained the stubborn experimental results that wave theory couldn't touch. Every solar panel and camera sensor runs on this idea."
+    },
+    "tags": [
+      "Physics",
+      "Quantum",
+      "1900s",
+      "German"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-neutrino",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Neutrino (1956)",
+    "teaser": "A ghost particle predicted by Wolfgang Pauli in 1930, who apologized for predicting 'a particle that cannot be detected.' It took 26 years and a nuclear reactor to catch it: in 1956, Cowan and Reines announced they'd finally detected the nearly massless, nearly invisible neutrino.",
+    "imageUrl": "",
+    "byline": "Clyde Cowan & Frederick Reines",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Cowan-Reines neutrino experiment story",
+      "durationMinutes": 25,
+      "instruction": "Read how they built a detector next to a reactor, watching for the faint flash of a neutrino hitting a proton. Trillions of neutrinos pass through you every second; they caught a handful. Reines won the Nobel for it in 1995 — nearly 40 years later."
+    },
+    "tags": [
+      "Physics",
+      "Particle Physics",
+      "1950s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-antimatter",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Antimatter (1932)",
+    "teaser": "Paul Dirac's 1928 equation predicted a mirror universe of particles — and four years later Carl Anderson found one in a cloud chamber photograph: a positron, the electron's identical twin with opposite charge. Dirac later wondered if there could be whole anti-worlds, and whether we'd know a mirror person if we met one.",
+    "imageUrl": "",
+    "byline": "Paul Dirac & Carl Anderson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Anderson's 1932 paper on the positron",
+      "durationMinutes": 25,
+      "instruction": "Anderson's photograph showed a particle curving the wrong way in a magnetic field — the only evidence he needed. Read how he named it 'positron' and how Dirac's pure mathematics had predicted it years earlier. A case of the equations getting there first."
+    },
+    "tags": [
+      "Physics",
+      "Particle Physics",
+      "1930s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-black-hole-first",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "First Black Hole Image (2019)",
+    "teaser": "In April 2019, a planet-sized array of radio telescopes — the Event Horizon Telescope — released the first photograph of a black hole: the orange ring around darkness at the heart of galaxy M87. The image that looked like a fire donut was seen by half of humanity in a day.",
+    "imageUrl": "",
+    "byline": "Event Horizon Telescope Collaboration",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The EHT's 2019 paper and the imaging process",
+      "durationMinutes": 30,
+      "instruction": "Read how the EHT combined telescopes on four continents into an Earth-sized virtual dish, and how the image had to be assembled from petabytes of data. The ring is the shadow of the event horizon, lit by gas falling in. You're looking at the edge of forever."
+    },
+    "tags": [
+      "Astronomy",
+      "Black Holes",
+      "2010s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-james-webb",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "James Webb Deep Field (2022)",
+    "teaser": "In July 2022, the James Webb Space Telescope released its first deep field — thousands of galaxies in a patch of sky the size of a grain of sand held at arm's length. Some of those points of light are galaxies that formed 13 billion years ago, seen as they were near the beginning.",
+    "imageUrl": "",
+    "byline": "NASA/ESA/CSA",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Webb's first deep field and the redshift science",
+      "durationMinutes": 25,
+      "instruction": "Read how Webb sees in infrared to catch the oldest light, redshifted out of visible range over billions of years. The famous deep field photo took about 12 hours of exposure — the Hubble equivalent took weeks. The universe, suddenly, in focus."
+    },
+    "tags": [
+      "Astronomy",
+      "Space Telescopes",
+      "2020s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-voyager-heliopause",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Voyager Leaves the Solar System (2012)",
+    "teaser": "In 2012, after 35 years and 18 billion kilometers, Voyager 1 crossed the heliopause — the invisible boundary where the Sun's wind gives way to interstellar space. It became the first human-made object to leave the solar system, carrying a golden record of Earth's sounds and images.",
+    "imageUrl": "",
+    "byline": "NASA Voyager Team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The announcement of Voyager 1's interstellar arrival",
+      "durationMinutes": 25,
+      "instruction": "Read how scientists confirmed the crossing: a sudden change in plasma density told them Voyager had left the Sun's bubble. Then read about the Golden Record — greetings in 55 languages, whale song, Chuck Berry. Humanity's message in a bottle, now in the space between stars."
+    },
+    "tags": [
+      "Space",
+      "Exploration",
+      "2010s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-kepler-planets",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Kepler's Exoplanet Haul (2010s)",
+    "teaser": "The Kepler telescope stared at one patch of sky for years, watching for stars that dim — the transit of a planet passing in front. It found thousands of exoplanets, and proved that planets are common: most stars have them, and many have rocky worlds in the habitable zone.",
+    "imageUrl": "",
+    "byline": "NASA Kepler Mission",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Kepler mission results and the exoplanet census",
+      "durationMinutes": 25,
+      "instruction": "Read how Kepler's transit method works: a 1% dip in starlight, repeated at regular intervals. Then the statistical result — extrapolating from Kepler's patch, there are likely billions of Earth-sized planets in the Milky Way alone. The night sky got crowded in 2013."
+    },
+    "tags": [
+      "Astronomy",
+      "Exoplanets",
+      "2010s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ozone-protocol",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Ozone Hole Discovery (1985)",
+    "teaser": "British scientists in Antarctica found that the ozone layer was thinning to a hole — caused by CFCs in spray cans and refrigerators. The world responded with the Montreal Protocol in 1987, the fastest and most successful environmental treaty ever. The hole is now healing, a rare good news story.",
+    "imageUrl": "",
+    "byline": "Farman, Gardiner & Shanklin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1985 Nature paper on the Antarctic ozone hole",
+      "durationMinutes": 25,
+      "instruction": "Read how the team's ground instruments contradicted the satellite data (which was programmed to discard 'impossible' readings). Then the Montreal Protocol story: nations agreed to ban CFCs within a decade. A rare case of humanity seeing the problem and fixing it — mostly."
+    },
+    "tags": [
+      "Atmospheric Science",
+      "Environment",
+      "1980s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-plastic-degradation",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Plastic-Eating Enzymes (2016)",
+    "teaser": "Scientists at a Japanese recycling plant found a bacterium, Ideonella sakaiensis, that eats PET plastic — the stuff of bottles — using two enzymes that break the polymer down. It was the first organism ever found that can digest plastic as its food source, and it opened a whole research field.",
+    "imageUrl": "",
+    "byline": "Kohei Oda et al.",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 2016 Science paper on Ideonella sakaiensis",
+      "durationMinutes": 25,
+      "instruction": "Read how the bacterium was discovered in samples taken from outside a bottle-recycling plant — evolution had already started solving our plastic problem. Researchers have since engineered 'super enzymes' that work faster. Nature finds a way; the question is whether we can keep up."
+    },
+    "tags": [
+      "Microbiology",
+      "Environment",
+      "2010s",
+      "Japanese"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-microplastics",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Microplastics Everywhere (2004)",
+    "teaser": "In 2004, Richard Thompson coined the term 'microplastics' for the fragments found in oceans and beaches. Two decades later, they've been found in Arctic ice, mountain rain, human blood, and placentas. The discovery that plastic doesn't go away — it just gets smaller — keeps expanding.",
+    "imageUrl": "",
+    "byline": "Richard Thompson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 2004 paper that named microplastics",
+      "durationMinutes": 25,
+      "instruction": "Read how Thompson found plastic fragments in decades-old plankton samples from British shores — and realized the fragments were everywhere, in all sizes. Then follow the trail to today's findings in rain, snow, and bodies. One naming decision, a decade of discovery."
+    },
+    "tags": [
+      "Oceanography",
+      "Environment",
+      "2000s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-great-barrier-bleaching",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Coral Bleaching (1998)",
+    "teaser": "The first global mass bleaching event in 1998 showed the world what heat does to reefs: stressed corals expel their algae and turn bone-white. Half the Great Barrier Reef's shallow corals died in the 2016–17 events. The discovery is a warning written in color — white means sick.",
+    "imageUrl": "",
+    "byline": "Coral reef researchers worldwide",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1998 bleaching event and reef recovery science",
+      "durationMinutes": 25,
+      "instruction": "Read how bleaching works: corals live in partnership with algae; a couple of degrees of extra heat breaks the partnership. Some reefs recover; repeated events don't leave them time. It's the clearest visible symptom of ocean warming, measured from space and from the water."
+    },
+    "tags": [
+      "Marine Biology",
+      "Climate",
+      "1990s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-immune-checkpoint",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Cancer Immunotherapy Checkpoints (2010s)",
+    "teaser": "James Allison and Tasuku Honjo discovered that cancers switch off the immune system's brakes — proteins called checkpoints — and that blocking them lets T-cells attack tumors. Their work led to checkpoint inhibitor drugs that have saved hundreds of thousands of lives. They shared the 2018 Nobel.",
+    "imageUrl": "",
+    "byline": "James Allison & Tasuku Honjo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of CTLA-4 and PD-1 checkpoint inhibitors",
+      "durationMinutes": 25,
+      "instruction": "Read how Allison's team blocked CTLA-4 in mice with tumors and watched them recover — a result so good colleagues didn't believe it. Then Honjo's PD-1 story. Together they turned the immune system, long ignored by oncology, into the front line against cancer."
+    },
+    "tags": [
+      "Immunology",
+      "Cancer",
+      "2010s",
+      "American"
+    ],
+    "tier": 1
+  }
+]

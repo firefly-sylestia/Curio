@@ -1,0 +1,1 @@
+• Cleaned up the app's copy app-wide: onboarding slides, quest descriptions, badges, dialogs, notifications, empty states, accessibility labels and the pet's dialogue now use commas, colons and periods instead of em dashes for a smoother, more consistent read.

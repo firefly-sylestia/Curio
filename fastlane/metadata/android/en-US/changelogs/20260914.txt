@@ -1,0 +1,1 @@
+• The Pet Studio got a full makeover — a bottom navigation bar (Pets · Editor · Settings), a pet library where you can save up to two of your own custom pets, and an editor that shows one thing at a time so it's always clear what you're editing. Animations now open a full-screen player, and every animation can be frame-edited.

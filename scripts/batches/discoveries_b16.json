@@ -1,0 +1,422 @@
+[
+  {
+    "id": "discovery-mauveine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Perkin's Mauve (1856)",
+    "teaser": "William Henry Perkin, an 18-year-old chemistry student trying to make quinine, accidentally produced a purple sludge instead. He realized it dyed silk brilliantly — mauveine, the first synthetic dye, and the start of the entire synthetic chemical industry. Purple, once the color of emperors, became cheap overnight.",
+    "imageUrl": "",
+    "byline": "William Henry Perkin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Perkin's 1856 discovery of mauveine",
+      "durationMinutes": 20,
+      "instruction": "Read how Perkin oxidized aniline, a coal-tar byproduct, and got a black precipitate that stained fabric purple — a color that had been made from snails or rare lichens for millennia. His factory in London's Greenford changed fashion, and the coal-tar chemistry it spawned produced aspirin, saccharin, and explosives.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-bakelite-plastic",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Bakelite, the First Plastic (1907)",
+    "teaser": "Leo Baekeland, a Belgian chemist who made a fortune inventing photographic paper, mixed phenol and formaldehyde under heat and pressure and got a hard, moldable, heat-resistant material that never melted again. He called it Bakelite — the first fully synthetic plastic, the material of the 20th century's radios, telephones, and jewelry.",
+    "imageUrl": "",
+    "byline": "Leo Baekeland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baekeland's 1907 development of Bakelite",
+      "durationMinutes": 20,
+      "instruction": "Read how Baekeland, working in his home lab in Yonkers, tamed the messy phenol-formaldehyde resin that had frustrated chemists for years, by controlling heat and pressure in his 'Bakelizer.' The material could be molded like metal and wouldn't burn or melt. It launched the age of plastics and made Baekeland, fittingly, the cover of Time in 1924.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "Belgian-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-teflon-ptfe",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Teflon Discovered (1938)",
+    "teaser": "Roy Plunkett, a DuPont chemist, opened a canister of tetrafluoroethylene gas and found it had polymerized into a waxy white solid — slippery beyond belief, inert to nearly everything. Named Teflon, it ended up on frying pans, spacecraft, and artificial hearts, discovered entirely by accident.",
+    "imageUrl": "",
+    "byline": "Roy Plunkett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plunkett's 1938 accidental discovery of PTFE",
+      "durationMinutes": 20,
+      "instruction": "The canister seemed empty — no gas pressure — but weighed the same, and the inside was coated with white powder. Read how Plunkett tested the solid's astonishing properties and how DuPont commercialized it as Teflon in 1946. Its non-stick fame began with a French engineer's pan in 1954, and its cousin is used in the heat shields of spacecraft.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-nylon-fiber",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Nylon Invented (1935)",
+    "teaser": "Wallace Carothers, the brilliant and tormented chemist DuPont hired to do pure research, created the first synthetic fiber from coal, water, and air — nylon. Stronger than silk, cheaper than silk, it debuted in 1938 as toothbrush bristles and in 1940 as stockings, which sold four million pairs in four days.",
+    "imageUrl": "",
+    "byline": "Wallace Carothers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carothers's 1935 synthesis of nylon-66",
+      "durationMinutes": 20,
+      "instruction": "Read how Carothers's team discovered that certain polymers could be drawn into strong fibers, and how '66' in nylon-66 refers to the six carbon atoms in each of its two building blocks. Nylon stockings caused riots at stores; in WWII they became parachutes and ropes. Carothers, plagued by depression, died by suicide in 1937 before seeing nylon's triumph.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-polyethylene",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Polyethylene Discovered (1933)",
+    "teaser": "Eric Fawcett and Reginald Gibson, chemists at ICI, pressurized ethylene gas and found a waxy solid clinging to the vessel — polyethylene, the world's most common plastic. It was a lucky accident: oxygen had leaked into the reaction and triggered polymerization. Today it's the plastic of grocery bags, milk jugs, and bulletproof vests.",
+    "imageUrl": "",
+    "byline": "Fawcett & Gibson, ICI",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1933 discovery of polyethylene at ICI",
+      "durationMinutes": 20,
+      "instruction": "The first experiments failed to repeat for years until the role of trace oxygen was understood. Read how the material's superb electrical insulation made it the coating for radar cables in WWII — Britain kept it secret — and how it quietly became the most-produced plastic on Earth, and one of the most persistent pollutants.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-kevlar-fiber",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Kevlar Invented (1965)",
+    "teaser": "Stephanie Kwolek, a DuPont chemist, was trying to make a lighter fiber for tires when she dissolved a liquid crystalline polymer that spun into fibers five times stronger than steel by weight. Named Kevlar, it now stops bullets, braces bridges, and lines spacecraft. She never patented it in her own name.",
+    "imageUrl": "",
+    "byline": "Stephanie Kwolek",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kwolek's 1965 discovery of poly-paraphenylene terephthalamide",
+      "durationMinutes": 20,
+      "instruction": "Read how Kwolek's cloudy, oddly fluid solution was nearly thrown away by the technician who spun it, and how the resulting fiber proved unbreakable in tests. Kevlar vests have saved tens of thousands of lives. Kwolek, who had planned to be a doctor, won the National Medal of Technology and said she just 'wanted to help mankind.'",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-superglue",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Superglue Invented (1942)",
+    "teaser": "Harry Coover, hunting for clear plastics for gun sights in WWII, kept making a compound that stuck everything together — including the expensive optical equipment. He shelved it, then revived it in 1951 as Eastman 910, marketed as Super Glue. It now seals wounds in war zones and glues model planes in bedrooms.",
+    "imageUrl": "",
+    "byline": "Harry Coover",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Coover's 1942 discovery of cyanoacrylate adhesives",
+      "durationMinutes": 20,
+      "instruction": "Read how cyanoacrylate cures in seconds when it meets moisture — which is why it sticks to skin instantly and why it bonds almost anything. In Vietnam, medics used it to close wounds; surgeons still use medical variants today. The original 1942 samples were so sticky they ruined the equipment they touched.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-first-photograph",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Photograph (1826)",
+    "teaser": "Nicéphore Niépce, a French inventor, pointed a camera obscura out his window at his estate in Le Gras and exposed a pewter plate coated with bitumen for eight hours — capturing the view of the barn and courtyard. The result, the 'View from the Window at Le Gras,' is the oldest surviving photograph.",
+    "imageUrl": "",
+    "byline": "Nicéphore Niépce",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Niépce's 1826 heliograph from Le Gras",
+      "durationMinutes": 20,
+      "instruction": "Niépce called his process heliography, 'sun writing': light hardens bitumen, and unexposed areas wash away. Read how the plate, lost for decades and rediscovered in 1952, shows both sides of the courtyard because of the sun's movement during the eight-hour exposure. Photography's birth certificate is a picture of a barn roof.",
+      "tags": [
+        "Technology",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-first-sound-recording",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Sound Recording (1877)",
+    "teaser": "Thomas Edison, sketching in his lab, conceived a machine that could record sound and play it back: a cylinder wrapped in foil, a diaphragm, a needle. He shouted 'Mary had a little lamb' into it and played it back — and sound, for the first time in history, had been captured. The phonograph made him 'the Wizard of Menlo Park.'",
+    "imageUrl": "",
+    "byline": "Thomas Edison",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Edison's 1877 phonograph",
+      "durationMinutes": 20,
+      "instruction": "Read how Edison combined the telephone's diaphragm with the telegraph's paper-feed mechanism, and how the tin-foil cylinder recorded the vibrations of his voice as indentations. The device was so unexpected that people suspected a ventriloquist. Edison's patent list grew to over a thousand; the phonograph was his favorite.",
+      "tags": [
+        "Technology",
+        "19th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-xerography",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Xerography (1938)",
+    "teaser": "Chester Carlson, a patent clerk who was tired of copying documents by hand, invented a dry copying process in his apartment kitchen: charge a plate, project an image to discharge it selectively, dust with powder, and fuse. He called it xerography, 'dry writing.' Big companies ignored him for years — until Haloid bet on it and became Xerox.",
+    "imageUrl": "",
+    "byline": "Chester Carlson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carlson's 1938 demonstration of electrophotography",
+      "durationMinutes": 20,
+      "instruction": "The first 'copy' — '10-22-38 Astoria' — was made with a zinc plate, a sulfur coating, and lycopodium powder in Carlson's kitchen, with his assistant Otto Kornei. Read how 20 companies rejected the idea before Haloid took a chance, and how the photocopier became the office machine that made 'Xerox' a verb.",
+      "tags": [
+        "Technology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-synthetic-rubber",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Synthetic Rubber (1909)",
+    "teaser": "Fritz Hofmann, working for Bayer, polymerized isoprene and produced the first synthetic rubber — though it was inferior and too expensive to matter. When World War II cut off natural rubber from Asia, synthetic rubber became a national-security obsession, and today most rubber in tires is synthetic.",
+    "imageUrl": "",
+    "byline": "Fritz Hofmann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hofmann's 1909 synthesis of rubber from isoprene",
+      "durationMinutes": 20,
+      "instruction": "Natural rubber is a polymer of isoprene; Hofmann managed to polymerize it synthetically but poorly. Read how the US built an entire synthetic rubber industry from scratch in two years during WWII after Japan seized the plantations, and how today's tires, hoses, and gaskets rely on synthetic rubbers like neoprene and SBR.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-rayon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Rayon, the First Artificial Fiber (1894)",
+    "teaser": "Count Hilaire de Chardonnet, a French aristocrat who studied under Pasteur, extruded dissolved nitrocellulose through tiny holes to make silklike threads — 'Chardonnet silk,' the first artificial fiber. His rayon factory made him the father of the artificial textile industry, though his fiber was dangerously flammable at first.",
+    "imageUrl": "",
+    "byline": "Hilaire de Chardonnet",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chardonnet's 1884–94 development of artificial silk",
+      "durationMinutes": 20,
+      "instruction": "Silk was so precious that moths were raised in palaces; Chardonnet's insight was to imitate the silkworm mechanically. Read how his 'artificial silk' — renamed rayon — was first made from wood pulp via the viscose process, and how it democratized stockings and lingerie. The word 'rayon' came later, from 'ray,' because the fibers shone.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-aspirin-acetylsalicylic",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Aspirin Synthesized (1897)",
+    "teaser": "Felix Hoffmann, a chemist at Bayer, was searching for a less stomach-irritating version of salicylic acid — the willow-bark painkiller — and acetylated it to make acetylsalicylic acid. Bayer named it aspirin and sold it as a powder in 1899. It became the most consumed drug in history, and its heart-protective powers are still being discovered.",
+    "imageUrl": "",
+    "byline": "Felix Hoffmann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hoffmann's 1897 synthesis of acetylsalicylic acid at Bayer",
+      "durationMinutes": 20,
+      "instruction": "Willow bark had relieved pain since Hippocrates, and salicylic acid worked but wrecked stomachs. Read how acetylation fixed that, and how the name 'aspirin' comes from 'a' (acetyl) + 'spir' (spiraea, the plant) + 'in.' Aspirin's blood-thinning effect — understood a century later — is why millions take a low dose daily. Hoffmann reportedly never profited from it.",
+      "tags": [
+        "Medicine",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-lsd",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "LSD Synthesized (1938)",
+    "teaser": "Albert Hofmann, searching for a circulatory stimulant, synthesized lysergic acid diethylamide from ergot fungus — and shelved it. Five years later, some of it touched his fingers, and he rode a bicycle home through a dreamlike world. LSD-25, the most potent psychedelic known, had announced itself by accident.",
+    "imageUrl": "",
+    "byline": "Albert Hofmann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hofmann's 1938 synthesis and 1943 self-experiment with LSD",
+      "durationMinutes": 20,
+      "instruction": "On April 19, 1943, Hofmann deliberately took 250 micrograms — a huge dose — and cycled home, writing that 'everything glistened and sparkled in a fresh light.' Read how LSD was researched for decades as a psychiatric tool, became a counterculture symbol, and was banned; scientists now study it again for therapy.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "Swiss"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-prontosil",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Prontosil, the First Sulfa Drug (1935)",
+    "teaser": "Gerhard Domagk, a German pathologist, tested a red dye called Prontosil on mice infected with deadly streptococci — they survived. It was the first drug that cured bacterial infections, and it worked only in the body, where it split into the active sulfanilamide. Domagk won the 1939 Nobel, and the sulfa drugs opened the era of chemotherapy.",
+    "imageUrl": "",
+    "byline": "Gerhard Domagk",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Domagk's 1935 announcement of Prontosil's antibacterial action",
+      "durationMinutes": 20,
+      "instruction": "The story is famous: Domagk's own daughter was dying of a strep infection from a needle prick, and he gave her Prontosil — she recovered. Read how the dye's activity in vivo but not in the test tube led to the discovery of sulfanilamide, the first of thousands of sulfa drugs, which saved countless lives in WWII before penicillin's mass production.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-veronal",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Veronal, the First Barbiturate (1903)",
+    "teaser": "Emil Fischer and Joseph von Mering synthesized diethylbarbituric acid and found it put dogs to sleep — the first barbiturate, named Veronal after the Italian city where Mering was resting. Sleep aids had been alcohol and opium; Veronal was the first true sleeping pill, and it spawned a whole family of sedatives.",
+    "imageUrl": "",
+    "byline": "Emil Fischer & Joseph von Mering",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fischer & von Mering's 1903 synthesis of Veronal",
+      "durationMinutes": 20,
+      "instruction": "Read how barbiturates act on the brain's GABA system, calming activity, and how they became both the era's most prescribed sedative and a notorious means of suicide and overdose — Marilyn Monroe died of barbiturates. Fischer, one of the great organic chemists, won the 1902 Nobel for sugar and purine work.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-nitroglycerin",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Nitroglycerin Discovered (1847)",
+    "teaser": "Ascanio Sobrero, an Italian chemist, dripped glycerin into a mixture of nitric and sulfuric acid and got an oily liquid that exploded with terrifying force. He warned everyone away from it — 'the substance is of terrible power.' Alfred Nobel later tamed it into dynamite, and, ironically, it became a medicine for heart pain.",
+    "imageUrl": "",
+    "byline": "Ascanio Sobrero",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sobrero's 1847 synthesis of nitroglycerin",
+      "durationMinutes": 20,
+      "instruction": "Sobrero's own experiments nearly killed him, and he refused to commercialize the compound. Read how Nobel's insight — absorbing the liquid into diatomaceous earth to make dynamite — made it safe enough to build tunnels and railroads, and how doctors found that tiny doses relieve angina by widening blood vessels. Sobrero died before the medical use emerged.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Italian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-dynamite",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Dynamite Invented (1867)",
+    "teaser": "Alfred Nobel, whose factories kept exploding, solved the problem of unstable nitroglycerin by soaking it into a porous clay called kieselguhr — the result could be rolled, shipped, and detonated on command. He called it dynamite, and it made him rich, guilty, and, through his will, the founder of the Nobel Prizes.",
+    "imageUrl": "",
+    "byline": "Alfred Nobel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nobel's 1867 invention of dynamite",
+      "durationMinutes": 20,
+      "instruction": "Read how the death of Nobel's brother Emil in an 1864 nitroglycerin explosion drove him to find a safer form, and how the 1867 patent — 'blasting powder' — changed mining and construction worldwide. Nobel, horrified that his invention aided war, left his fortune to fund prizes including Peace. The Nobel Peace Prize is dynamite's strange legacy.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-synthetic-quinine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Synthetic Quinine (1944)",
+    "teaser": "Robert Burns Woodward and William Doering achieved what Perkin had failed at 90 years earlier: a total synthesis of quinine from simple chemicals. Their 1944 synthesis was crude and impractical, but it proved organic chemists could build the world's most complex natural medicines from scratch, launching modern organic synthesis.",
+    "imageUrl": "",
+    "byline": "Woodward & Doering",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Woodward & Doering's 1944 synthesis of quinine",
+      "durationMinutes": 20,
+      "instruction": "Quinine, the malaria cure, had defied synthesis since Perkin's 1856 attempt that produced mauve instead. Read how the young Woodward, later a legend of organic chemistry, and his student Doering published the total synthesis while the world was desperate for quinine in WWII. The route was long and the yield tiny, but the barrier was broken.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-vacuum-tube",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Vacuum Tube (1904)",
+    "teaser": "John Ambrose Fleming, adviser to the Marconi Company, needed to detect radio waves and remembered Edison's discovery that current flows one way across a hot filament in a vacuum. He built the 'Fleming valve' — the first vacuum tube, the ancestor of every radio, computer, and television of the first half of the 20th century.",
+    "imageUrl": "",
+    "byline": "John Ambrose Fleming",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fleming's 1904 invention of the thermionic valve",
+      "durationMinutes": 20,
+      "instruction": "The tube was a lightbulb with an extra electrode: heated filament emits electrons, and the plate collects them — rectifying radio's alternating signal into a usable current. Read how de Forest's audion added a grid to make amplification possible, and how the vacuum tube ruled electronics until the transistor replaced it after 1947.",
+      "tags": [
+        "Technology",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  }
+]

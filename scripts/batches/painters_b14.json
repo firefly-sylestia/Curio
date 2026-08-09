@@ -1,0 +1,402 @@
+[
+  {
+    "id": "painter-albert-ryder",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Albert Pinkham Ryder",
+    "teaser": "The American mystic of moonlit seas — a reclusive New York painter who repainted the same small canvases for decades until they glowed from within. His ships, ghosts, and toilers under big moons are among the strangest and most loved works of American art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Toilers of the Sea or The Flying Dutchman — the moon",
+      "durationMinutes": 20,
+      "instruction": "Look at the moonlight: Ryder painted layer upon layer until the surface glows like enamel, a small boat against a huge silver sea. He was called 'the last of the romantics' — he worked alone, in a filthy studio, on masterpieces that took decades. Compare him to the poet Blake: both saw visions and both insisted on painting them."
+    },
+    "tags": [
+      "Romanticism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ralph-blakelock",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ralph Albert Blakelock",
+    "teaser": "The American painter of moonlit Indians and forests — his dark, glimmering scenes were among the most expensive American paintings of their day, then he was committed to an asylum where he painted on cigar boxes. His moonlight is still unmatched.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Moonlight or the Indian encampment scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the moon through the trees: Blakelock layered varnish and pigment so the light seems to come from inside the canvas. He sold masterpieces for pennies and died in the asylum after years of neglect — then his prices exploded. A tragedy, painted in silver."
+    },
+    "tags": [
+      "Romanticism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-martin-johnson-heade",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Martin Johnson Heade",
+    "teaser": "The American painter of hummingbirds and salt marshes — he went to Brazil to paint the smallest birds in the world with scientific precision, and his New England meadows glow with a strange, humid light. He was rediscovered a century after his death.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The salt marsh scenes or the hummingbird paintings",
+      "durationMinutes": 20,
+      "instruction": "Look at the haystacks and meadows: Heade painted the low tide of New England with a stillness that feels like holding your breath. Then his hummingbirds — iridescent, airborne, jewel-like. He was a naturalist first; his art is observation raised to devotion."
+    },
+    "tags": [
+      "Luminism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-fitz-henry-lane",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Fitz Henry Lane",
+    "teaser": "The American luminist of harbors — his Gloucester and Boston scenes are studies in stillness: glassy water, pale skies, and ships held in perfect balance. He painted light itself, and his work feels like a held note.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Boston Harbor scenes — the water",
+      "durationMinutes": 20,
+      "instruction": "Look at the water: Lane painted it so flat and luminous it reads as glass, with ships mirrored exactly. No wind, no waves, no hurry. His paintings are about the light between things — the moment before anything happens."
+    },
+    "tags": [
+      "Luminism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-george-inness",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "George Inness",
+    "teaser": "The American landscape painter who dissolved the world into light — his late paintings of New Jersey fields and Italian hills are soft, golden, and almost abstract, painted to express 'the reality of the unseen.' He is the American Corot.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Delaware Water Gap or the late golden landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Inness blurs: hills, trees, and sky melt into each other, edges disappearing into golden haze. He said he painted not places but 'moods of nature.' Stand back and the painting assembles itself — like a memory of a place, not the place."
+    },
+    "tags": [
+      "Luminism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-william-merritt-chase",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "William Merritt Chase",
+    "teaser": "The American impressionist of elegant interiors — his sunlit studios, park scenes, and portraits of women in white are the most polished works of American Impressionism. He was also America's most influential art teacher, with pupils from Georgia O'Keeffe to Edward Hopper.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "In the Studio or the park scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Chase handles white: a woman's dress against a bright window becomes a study of light itself. His studio paintings — rugs, screens, and bric-a-brac — are little palaces. He taught hundreds of students the secret: 'the brush is a feather, not a broom.'"
+    },
+    "tags": [
+      "Impressionism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-childe-hassam",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Childe Hassam",
+    "teaser": "The most American of the American Impressionists — his Fifth Avenue under rain and flag, his Gloucester docks, and his gardens at East Hampton are painted with a bright, confident brush. He was everywhere and painted everything.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Avenue in the Rain (1917) — the flags",
+      "durationMinutes": 20,
+      "instruction": "Fifth Avenue on a rainy day, lined with American flags — painted during WWI as a patriotic statement. Look at the wet pavement, the blurred flags, the quick strokes. Hassam painted the American city the way Monet painted London: in weather and light."
+    },
+    "tags": [
+      "Impressionism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-john-henry-twachtman",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "John Henry Twachtman",
+    "teaser": "The quietest of the American Impressionists — his winter scenes, waterfalls, and gardens are painted in pale greys and whites with a Japanese sense of emptiness. He said he loved 'the beauty of the commonplace.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The White Bridge or the winter landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at the snow: Twachtman painted winter as a study in white — white on white, barely differentiated, the world hushed. His bridge at his Connecticut farm is a poem of solitude. He was the most Japanese of the American impressionists; his emptiness is full."
+    },
+    "tags": [
+      "Impressionism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-j-aldem-weir",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "J. Alden Weir",
+    "teaser": "The American Impressionist who converted late and painted his farm at Branchville, Connecticut, forever — haystacks, barns, and fields in a soft, personal light. He once called Impressionism 'the work of the devil'; then he fell in love with it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Red Bridge or the Branchville landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at the red bridge over the river: Weir painted his own property dozens of times, finding new beauty each season. He was a late, reluctant convert to Impressionism — his hesitation shows in the tender way he handles color. He painted his own land like a love letter."
+    },
+    "tags": [
+      "Impressionism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-william-mcgregor-paxton",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "William McGregor Paxton",
+    "teaser": "The American painter of porcelain women and polished interiors — his portraits and domestic scenes are painted with a lens-like precision that made him the favorite of Boston's elite. The New Vermeer, his famous painting of a model as Vermeer's wife, is a tribute to his hero.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The New Vermeer — the details",
+      "durationMinutes": 20,
+      "instruction": "Look at the fabric, the pearl earring, the light through the window: Paxton staged his own Vermeer with a Boston model. He painted every fold and highlight with almost obsessive accuracy. His rooms are the calm, ordered worlds of old New England money."
+    },
+    "tags": [
+      "Academicism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-thomas-wilmer-dewing",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Thomas Wilmer Dewing",
+    "teaser": "The American tonalist of silent women — his pale, elegant figures sit in shadowed rooms or landscapes, hardly moving, painted in muted greys and golds. His art is about what is not said.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Recitation or the women in interiors",
+      "durationMinutes": 20,
+      "instruction": "Look at the palette: Dewing used a narrow range of greys, ochres, and soft whites, so his women seem to emerge from fog. They sit, read, or play music in rooms without walls. He said he wanted to paint 'the ideal woman as the expression of beauty.' Silence, made visible."
+    },
+    "tags": [
+      "Tonalism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-abbott-thayer",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Abbott Handerson Thayer",
+    "teaser": "The American painter of angel-winged women — his Virgin and his angels, painted with his daughter as model, made him famous. But he was also a scientist who discovered protective coloration in animals, and his paranoid genius ran hot and cold.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Virgin (Freer Gallery) or the Angel series",
+      "durationMinutes": 20,
+      "instruction": "Look at the wings: Thayer painted his models with real feather wings, and the results hover between Madonna and angel. He believed women were 'the supreme form of beauty' and painted them as such. His angel with his daughter Mary is both tender and strange — a father's ideal, made permanent."
+    },
+    "tags": [
+      "Tonalism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-dwight-tryon",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Dwight William Tryon",
+    "teaser": "The American tonalist of misty autumns — his landscapes of Connecticut and Devon are painted in greys, golds, and soft blues, like music played quietly. He was known as 'the poet of the dawn.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The autumn landscapes or the seascapes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Tryon builds a mist: layer on layer of soft color until the distance dissolves. His paintings are the color of October afternoons and early mornings. He said art should give 'a sensation of peace' — and it does, reliably, across every canvas."
+    },
+    "tags": [
+      "Tonalism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-henry-ossawa-tanner",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Henry Ossawa Tanner",
+    "teaser": "The first African American painter to achieve international fame — his biblical scenes are lit by mysterious glows, and his Nicodemus and Annunciation are among the great religious paintings of the era. He lived in Paris, where the color of his skin mattered less.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Annunciation (Philadelphia Museum) — the light",
+      "durationMinutes": 20,
+      "instruction": "A young woman in a peasant room sits as a column of golden light streams toward her — the angel is pure light, not a winged figure. Look at the mood: intimate, humble, holy. Tanner studied with Thomas Eakins, then left America for Paris where he could be an artist, not a curiosity."
+    },
+    "tags": [
+      "Realism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-william-harnett",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "William Harnett",
+    "teaser": "The American master of trompe-l'oeil — his paintings of pipes, letters, and hung violins are so realistic that viewers tried to remove the objects from the canvas. He painted the masculine world of 1880s America in meticulous still lifes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "After the Hunt or The Old Violin — the illusion",
+      "durationMinutes": 20,
+      "instruction": "Walk close and inspect: the postage stamp is a painted stamp, the frayed newspaper is paint, the hanging violin casts a painted shadow. Harnett's still lifes fooled people for a century. The Old Violin hung in a bar and patrons swore it was real. That was the whole point."
+    },
+    "tags": [
+      "Trompe-l'Oeil",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-john-frederick-peto",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "John Frederick Peto",
+    "teaser": "The quieter brother of Harnett — his trompe-l'oeil doors, letter racks, and office doors have a melancholy that Harnett's never did. He was forgotten for decades and is now ranked with the best American painters.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The letter rack paintings — the details",
+      "durationMinutes": 20,
+      "instruction": "Look at the letter racks: envelopes, cards, and scraps pinned to a board — painted with such accuracy you reach for them. But the mood is different from Harnett: the letters are old, the colors are faded, everything is worn. Peto painted memory itself, pinned to a wall."
+    },
+    "tags": [
+      "Trompe-l'Oeil",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-joaquin-sorolla",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Joaquín Sorolla",
+    "teaser": "The Spanish painter of Mediterranean light — his beach scenes of children, fishermen, and white dresses under a blinding sun made him the most famous painter in Spain before Picasso. He painted light so bright it hurts, in the best way.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Walk on the Beach or the children on the shore scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the sun: Sorolla painted the Valencian shore at high noon, when shadows vanish and everything glows. The water is a smear of blue, the sand is white heat, the children are motion. He called himself 'a painter of light' — and he was the best in the world at it."
+    },
+    "tags": [
+      "Luminism",
+      "Spanish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ignacio-zuloaga",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ignacio Zuloaga",
+    "teaser": "The Spanish painter of the old soul — his bullfighters, gypsies, and Castilian towns are dark, proud, and theatrical, a counterweight to Sorolla's brightness. He painted Spain as a stage of fierce tradition.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The bullfighters or the Castilian views",
+      "durationMinutes": 20,
+      "instruction": "Look at the black and red: Zuloaga painted bullfighters with the gravity of history paintings, their capes and faces lit against dark towns. He was the painter of 'la España negra' — the black, proud, traditional Spain. His work is drama, painted with love and distance."
+    },
+    "tags": [
+      "Realism",
+      "Spanish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ramon-casas",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ramon Casas",
+    "teaser": "The Catalan painter of modern Barcelona — his portraits of artists, politicians, and café society, and his vivid posters, defined the look of the city's modernist era. He painted his friends and his city with a sharp, affectionate eye.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The portrait of Santiago Rusiñol or the café scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Casas paints his friend the painter Rusiñol: informal, confident, the bohemian at ease. His portraits made everyone in Barcelona want to be painted by him. Then his posters — bold, flat, modern — that advertised the city's cabarets and festivals. Barcelona's golden age, framed."
+    },
+    "tags": [
+      "Modernism",
+      "Spanish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-santiago-rusinol",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Santiago Rusiñol",
+    "teaser": "The Catalan artist who made gardens his subject — his paintings of the Alhambra's courtyards, the Gardens of Aranjuez, and his own garden at Sitges are quiet, green, and full of nostalgia. He was also a playwright and one of Barcelona's great bohemians.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The gardens of the Alhambra or the Sitges scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the green: Rusiñol painted gardens as places of memory — fountains, cypresses, and long shadows, with a small figure reading or dreaming. He bought a house in Sitges and turned it into a shrine to his own melancholy. A painter of beautiful sadness."
+    },
+    "tags": [
+      "Modernism",
+      "Spanish",
+      "19th Century"
+    ],
+    "tier": 1
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "scientist-rudolf-virchow",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Rudolf Virchow",
+    "teaser": "The German physician who declared 'all cells arise from other cells' and founded cellular pathology. He showed disease begins in the body's own cells, turning medicine from superstition toward science.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cellular",
+      "targetName": "Virchow's cellular pathology",
+      "instruction": "Learn Virchow's principle that every cell comes from another cell and his founding of cellular pathology. Write how this idea changed the understanding of cancer and disease.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-sewall-wright",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Sewall Wright",
+    "teaser": "The American geneticist who helped found population genetics, showing how chance — genetic drift — shapes evolution in small populations. His inbreeding coefficients are still used to study animal pedigrees.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drift",
+      "targetName": "Wright's genetic drift",
+      "instruction": "Learn how genetic drift randomly changes allele frequencies in small populations. Write how drift differs from natural selection and give one real example, such as the cheetah's low genetic diversity.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-ronald-fisher",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ronald Fisher",
+    "teaser": "The British statistician who invented modern experimental design, ANOVA, and maximum likelihood — and united Darwin's selection with Mendel's genetics. He also showed why a cup of tea can be a scientific experiment.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Design",
+      "targetName": "Fisher's experimental design",
+      "instruction": "Learn Fisher's principles of randomization and replication from his famous tea-tasting experiment. Write why controlled experiments need randomization and how his methods underpin modern clinical trials.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-jbs-haldane",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "J. B. S. Haldane",
+    "teaser": "The British biologist who tested evolution's math on himself and quipped that God has an inordinate fondness for beetles. He worked out how genes spread and why life on Mars might breathe ammonia.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Compute",
+      "targetName": "Haldane's evolutionary math",
+      "instruction": "Learn how Haldane calculated the cost of natural selection and the rate of gene spread. Write one of his famous essays, like 'On Being the Right Size,' and why his wit made science popular.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-theodosius-dobzhansky",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Theodosius Dobzhansky",
+    "teaser": "The Ukrainian-American geneticist who fused laboratory fruit flies with field observations, writing Genetics and the Origin of Species. His line 'nothing in biology makes sense except in the light of evolution' endures.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fuse",
+      "targetName": "Dobzhansky's modern synthesis",
+      "instruction": "Learn how Dobzhansky's work on fruit fly populations helped create the modern evolutionary synthesis. Write how he showed that mutations and natural selection together drive speciation.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-ernst-haeckel",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ernst Haeckel",
+    "teaser": "The German biologist and artist who coined 'ecology' and drew radiant illustrations of radiolarians and jellyfish that still amaze. He popularized Darwin in Germany and coined the phrase 'ontogeny recapitulates phylogeny.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Draw",
+      "targetName": "Haeckel's Kunstformen der Natur",
+      "instruction": "Look through Haeckel's Art Forms in Nature illustrations and pick one plate, like a radiolarian or medusa. Write what the creature is and why his scientific art helped spread evolutionary ideas.",
+      "durationMinutes": 20
+    }
+  }
+]

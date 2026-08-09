@@ -1,0 +1,386 @@
+[
+  {
+    "id": "wildcard-shakuhachi",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Shakuhachi",
+    "teaser": "A bamboo flute with only five holes, used by Zen monks as a tool for meditation — 'blowing zen.' Its breathy, bending notes can sound like wind, birds, or a human voice, and some pieces are meant to be performed alone in the dark.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Blow",
+      "targetName": "Shakuhachi music",
+      "durationMinutes": 30,
+      "instruction": "Listen to a shakuhachi piece and learn how its five holes and angled mouthpiece create its airy tone. Write how it was used in Zen practice, how honkyoku pieces work, and why the flute is hard to master."
+    },
+    "tags": ["Music", "Japan", "Zen"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-gamelan-tuning",
+    "categoryId": "WILDCARD",
+    "subtype": "Music",
+    "name": "Gamelan's Scales",
+    "teaser": "Indonesian orchestras of bronze gongs, metallophones, and drums play in scales that do not match Western tuning — deliberately, with instruments tuned slightly apart so they shimmer and beat against each other. The sound is at once ancient and otherworldly.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Strike",
+      "targetName": "Gamelan orchestras",
+      "durationMinutes": 30,
+      "instruction": "Learn how gamelan instruments are tuned in pairs that vibrate against each other and how the scales differ from Western music. Write about the role of the gong ageng and how gamelan music is taught without written notes."
+    },
+    "tags": ["Music", "Indonesia", "Orchestra"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-overtones-throat",
+    "categoryId": "WILDCARD",
+    "subtype": "Music",
+    "name": "Overtone Singing",
+    "teaser": "Singers in Tuva, Mongolia, and beyond can produce two notes at once — a drone plus a whistling melody made of overtones, shaped by the mouth. Some styles imitate horses and wind, and the technique reveals the physics hidden in every voice.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Hum",
+      "targetName": "Overtone singing styles",
+      "durationMinutes": 30,
+      "instruction": "Learn how overtone singing amplifies harmonics of a drone by changing mouth shape. Write the difference between kargyraa, sygyt, and khoomei, and how the technique works physically."
+    },
+    "tags": ["Music", "Voice", "Physics"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-gregorian-chant",
+    "categoryId": "WILDCARD",
+    "subtype": "Music",
+    "name": "Gregorian Chant",
+    "teaser": "A thousand years of monks singing in unison without instruments — a single flowing melody line that medieval Europeans believed opened a door to the divine. Its plainchant is still sung today and its 'one voice' sound has influenced modern music.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Chant",
+      "targetName": "Gregorian chant tradition",
+      "durationMinutes": 30,
+      "instruction": "Learn how Gregorian chant developed, how it was notated (the ancestor of modern notation), and how modes give it its ancient feel. Write what makes it monophonic and how it is still performed."
+    },
+    "tags": ["Music", "History", "Chant"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-fugue",
+    "categoryId": "WILDCARD",
+    "subtype": "Music",
+    "name": "The Fugue",
+    "teaser": "A musical form where a single melody chases itself — one voice states a theme, another answers, and they weave in ever-changing combinations. Bach's fugues are considered the pinnacle of counterpoint, a mathematical dance of sound.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Weave",
+      "targetName": "Bach's fugues",
+      "durationMinutes": 30,
+      "instruction": "Learn how a fugue works — subject, answer, and episodes — and listen to one, following the voices. Write how Bach's fugues demonstrate counterpoint and why they are called musical architecture."
+    },
+    "tags": ["Music", "Bach", "Form"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-call-and-response",
+    "categoryId": "WILDCARD",
+    "subtype": "Music",
+    "name": "Call and Response",
+    "teaser": "A leader sings a line, and the crowd answers — a musical conversation found in African villages, gospel churches, work songs, and every hip-hop chorus. It turns listeners into performers and makes music a shared act.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Answer",
+      "targetName": "Call and response in music",
+      "durationMinutes": 30,
+      "instruction": "Learn how call and response works in African music, gospel, blues, and rap. Write how it builds community, how it survives in modern songs, and try creating a simple call and response with a friend."
+    },
+    "tags": ["Music", "Tradition", "Community"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-lomography",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Lomography",
+    "teaser": "A movement that celebrates flawed photos — blur, vignettes, double exposures — born from cheap Soviet Lomo cameras. The motto: 'Don't think, just shoot.' It turned camera imperfection into an art form.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Shoot",
+      "targetName": "Lomography aesthetics",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Lomo LC-A's quirks became a cult and how the Lomography movement spread worldwide. Write what makes a lomo shot — saturated color, soft focus, vignettes — and how to try it with any camera."
+    },
+    "tags": ["Craft", "Photography", "Art"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-hypnagogia-art",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Surrealism's Methods",
+    "teaser": "Surrealists hunted the unconscious with strange techniques — automatic writing, exquisite corpses, and dream journals. They believed the mind's unexpected combinations, freed from reason, were the truest art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dream",
+      "targetName": "Surrealist techniques",
+      "durationMinutes": 45,
+      "instruction": "Learn how Breton, Dalí, and the surrealists tapped the unconscious — automatic drawing, exquisite corpse, frottage. Write about one technique and try it, then reflect on what surprise emerged."
+    },
+    "tags": ["Craft", "Art", "Surrealism"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-ekphrasis",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Ekphrasis",
+    "teaser": "Writing that describes a work of art — a poem about a painting, a story about a statue. Keats's 'Ode on a Grecian Urn' and Auden's 'Musée des Beaux Arts' are ekphrasis: art made from art, across centuries.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Describe",
+      "targetName": "Famous ekphrastic works",
+      "durationMinutes": 30,
+      "instruction": "Read Keats's ode to the Grecian urn or Auden's poem about Bruegel's painting. Write what the poet adds to the artwork and try your own short ekphrastic piece about a favorite image."
+    },
+    "tags": ["Craft", "Poetry", "Art"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-flaneur",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "The Flâneur",
+    "teaser": "The art of wandering city streets with no goal, observing everything — a figure born in 19th-century Paris and championed by Baudelaire and Walter Benjamin. The flâneur turns the city into a theater and walking into reading.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Wander",
+      "targetName": "Flânerie in the city",
+      "durationMinutes": 45,
+      "instruction": "Learn how the flâneur emerged in Paris arcades and what Benjamin saw in the figure. Write what slow, aimless observation reveals that rushing hides, and go on your own deliberate wander without a destination."
+    },
+    "tags": ["Concept", "City", "Walking"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-shou-sugi-ban",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Shou Sugi Ban",
+    "teaser": "A Japanese technique of charring cedar boards until their surface is black, then brushing off the ash — the burnt layer preserves the wood from rot, insects, and fire for decades. Burnt wood as conservation: the older it looks, the longer it lasts.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Burn",
+      "targetName": "Shou sugi ban process",
+      "durationMinutes": 30,
+      "instruction": "Learn how yakisugi wood is charred and finished, and why charring protects it. Write how the technique spread to Western architecture and how the char layer actually works as a sealant."
+    },
+    "tags": ["Craft", "Japan", "Wood"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-kanzashi",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Kanzashi",
+    "teaser": "Elaborate hair ornaments made from folded silk squares — flowers with dozens of petals, worn with kimono. Each flower can take hours of precise folding, and some kanzashi indicate seasons, rank, and occasion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fold",
+      "targetName": "Kanzashi flower making",
+      "durationMinutes": 30,
+      "instruction": "Learn how tsumami kanzashi are folded from silk and how the flowers symbolize seasons. Write what each flower means, how they are worn with kimono, and try folding a simple petal shape."
+    },
+    "tags": ["Craft", "Japan", "Fabric"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-paper-quilling",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Paper Quilling",
+    "teaser": "Art made by rolling thin strips of paper into coils and arranging them into filigree — a craft that once occupied European nuns, who rolled paper around goose quills. A roll of paper becomes a peacock, a rose, or a galaxy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Roll",
+      "targetName": "Quilling techniques",
+      "durationMinutes": 30,
+      "instruction": "Learn the basic quilling shapes — tight coils, teardrops, scrolls — and how they combine into art. Write the history of quilling in convents and try making one simple quilled shape."
+    },
+    "tags": ["Craft", "Paper", "Art"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-ebru",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Ebru (Marbling)",
+    "teaser": "Turkish paper marbling — paints are dropped onto a bath of thickened water, combed into patterns, and transferred onto paper in a single touch. No two sheets are alike, and the technique has decorated books for five centuries.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Marble",
+      "targetName": "Ebru marbling",
+      "durationMinutes": 30,
+      "instruction": "Learn how ebru artists float and comb paint on a viscous bath and lift it onto paper. Write the history of the craft, the tools used, and why each print is unique."
+    },
+    "tags": ["Craft", "Turkey", "Paper"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ikats",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Ikat Weaving",
+    "teaser": "A fabric where the threads are tie-dyed before weaving, so the pattern appears softly blurred where the dyed yarns meet. Ikat exists from Indonesia to Uzbekistan to Japan, each culture with its own motifs and rituals.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Weave",
+      "targetName": "Ikat traditions",
+      "durationMinutes": 30,
+      "instruction": "Learn how warp and weft ikat are made — binding and dyeing yarns before weaving — and why the edges blur. Write how different cultures use ikat and why it is so labor-intensive."
+    },
+    "tags": ["Craft", "Textile", "Weaving"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-loom-basket",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Basket Weaving",
+    "teaser": "One of humanity's oldest crafts — baskets older than pottery, woven from reeds, bark, and roots. Every culture wove its own baskets, and some are so tight they hold water. A basket is a whole family tree of technique.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Weave",
+      "targetName": "Basket weaving traditions",
+      "durationMinutes": 30,
+      "instruction": "Learn the basics of basket weaving — twining, coiling, plaiting — and how materials are prepared. Write how baskets were used across cultures and why the craft is seeing a revival."
+    },
+    "tags": ["Craft", "Ancient", "Weaving"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-felting",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Felting",
+    "teaser": "Wool that becomes fabric without weaving or knitting — just friction, moisture, and the scales on each fiber tangling together. Nomadic peoples of Central Asia built entire homes, the yurt, from felt.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Tangle",
+      "targetName": "Felting techniques",
+      "durationMinutes": 30,
+      "instruction": "Learn how wool's scales lock together when agitated in water and how felt was used for yurts, hats, and clothing. Write the difference between wet felting and needle felting, and why felt is so warm."
+    },
+    "tags": ["Craft", "Wool", "Ancient"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-kintsugi-now",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Kintsugi and Repair Culture",
+    "teaser": "The Japanese art of repairing broken pottery with gold — making the cracks the most beautiful part of the object. Kintsugi has become a global philosophy of repair: the damage is not hidden, it is honored.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Repair",
+      "targetName": "Kintsugi philosophy",
+      "durationMinutes": 30,
+      "instruction": "Learn how kintsugi repairs ceramics with urushi lacquer and gold, and what it symbolizes. Write how the practice has inspired repair movements, from mending clothes to fixing electronics, and what it says about imperfection."
+    },
+    "tags": ["Craft", "Japan", "Repair"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-visible-mending",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Visible Mending",
+    "teaser": "A modern craft that makes repairs beautiful instead of invisible — patching jeans with bright thread, darning socks in rainbows. It started as a sustainability movement and grew into a celebration of wear, mending, and time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Mend",
+      "targetName": "Visible mending styles",
+      "durationMinutes": 30,
+      "instruction": "Learn the stitches of visible mending — sashiko, darning, patching — and how the movement frames repair as creativity. Write what it says about fast fashion and try mending one small tear."
+    },
+    "tags": ["Craft", "Sustainability", "Fabric"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-foraging",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Foraging",
+    "teaser": "Eating from the wild — mushrooms, berries, greens, and nuts — a skill our ancestors had and we lost. Foraging is returning as a movement, but it comes with a rule: never eat anything you cannot identify with certainty.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Harvest",
+      "targetName": "Foraging basics",
+      "durationMinutes": 45,
+      "instruction": "Learn how to identify a few easy, safe wild foods like dandelion, blackberries, or wild garlic, and the rules of responsible foraging. Write why identification matters, how to harvest sustainably, and what a 'golden rule' is."
+    },
+    "tags": ["Craft", "Food", "Nature"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-pickling",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Pickling and Fermenting",
+    "teaser": "The ancient art of making vegetables last through winter — in vinegar, salt, or living brine. Kimchi, sauerkraut, and pickles are fermented by the same lactobacillus that keeps your gut happy, and every culture has its own jar.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Jar",
+      "targetName": "Fermentation and pickling",
+      "durationMinutes": 45,
+      "instruction": "Learn the difference between vinegar pickling and lacto-fermentation, and how salt and time transform vegetables. Write how kimchi and sauerkraut are made and why fermented foods are valued."
+    },
+    "tags": ["Craft", "Food", "Preservation"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-curing-meat",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Curing Meat at Home",
+    "teaser": "Salt, time, and patience turn raw pork into prosciutto — hung in cellars where temperature and humidity do the work. Curing is chemistry: salt draws out water, microbes create flavor, and mold rinds protect the meat.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cure",
+      "targetName": "The curing process",
+      "durationMinutes": 30,
+      "instruction": "Learn how salt, nitrites, and drying preserve meat and create flavor, and the safety rules of home curing. Write what 'water activity' means and why temperature and humidity control matter."
+    },
+    "tags": ["Craft", "Food", "Meat"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-cheese-aging",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Cheese Aging",
+    "teaser": "Milk becomes cheese in hours, but cheese becomes great in months — a living rind of molds, bacteria, and mites that a cheesemaker tends like a garden. Each cave, each wash, each flip changes the wheel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Age",
+      "targetName": "Cheese caves and aging",
+      "durationMinutes": 30,
+      "instruction": "Learn how cheese is made and how aging develops flavor through enzymes, molds, and washing. Write the difference between washed-rind, bloomy-rind, and natural-rind cheeses and what a cheese cave does."
+    },
+    "tags": ["Craft", "Food", "Cheese"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-beekeeping-hives",
+    "categoryId": "WILDCARD",
+    "subtype": "Craft",
+    "name": "Beekeeping",
+    "teaser": "Opening a hive is stepping into a society of 50,000 — a queen, workers, and drones, all cooperating with chemical signals. Beekeepers learn to read the hive's mood from its buzz and its behavior, and to handle the bees without fear.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Hive",
+      "targetName": "Beekeeping basics",
+      "durationMinutes": 45,
+      "instruction": "Learn how a hive is organized, how the queen's pheromones hold it together, and what beekeepers check on inspection. Write why bees matter for pollination and how modern hives work."
+    },
+    "tags": ["Craft", "Bees", "Nature"],
+    "tier": 1
+  }
+]

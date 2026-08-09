@@ -1,0 +1,631 @@
+[
+  {
+    "id": "director-john-huston",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "John Huston",
+    "teaser": "Huston directed The Maltese Falcon as his first feature — he was also a screenwriter, and he gambled his way through life like one of his own characters.",
+    "imageUrl": "",
+    "byline": "Director · John Huston",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Maltese Falcon (1941), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the statue, the lies, the fog. Huston adapted Dashiell Hammett's novel almost word for word. Notice how the dialogue does the acting: nobody moves much, but everything shifts."
+    },
+    "tags": ["Noir", "1940s", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "director-otto-preminger",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Otto Preminger",
+    "teaser": "Preminger defied the Hollywood censors by making The Moon Is Blue, which was released without the approval seal — his defiance helped kill the censorship code.",
+    "imageUrl": "",
+    "byline": "Director · Otto Preminger",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Laura (1944), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the murder investigation of a woman seen only in a portrait. Preminger's camera keeps returning to Laura's painted face. Notice how the film is a love story about a ghost."
+    },
+    "tags": ["Noir", "1940s", "Mystery"],
+    "tier": 1
+  },
+  {
+    "id": "director-george-stevens",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "George Stevens",
+    "teaser": "Stevens shot World War II combat footage at Normandy — the experience darkened his comedies into the introspective dramas of Giant and Shane.",
+    "imageUrl": "",
+    "byline": "Director · George Stevens",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Giant (1956), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — the Texas ranch, the Eastern bride, the land that swallows people. Stevens films Texas as a force of nature. Notice how the film ages its characters across decades of oil and dust."
+    },
+    "tags": ["Hollywood", "1950s", "Epic"],
+    "tier": 1
+  },
+  {
+    "id": "director-fred-zinnemann",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Fred Zinnemann",
+    "teaser": "Zinnemann made High Noon in 85 days and nearly in real time — the film's clock-ticking structure made it an instant classic and a political lightning rod.",
+    "imageUrl": "",
+    "byline": "Director · Fred Zinnemann",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "High Noon (1952), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the wedding, the telegram, the clock. Zinnemann keeps the running time of the film equal to the time left before the train. Notice how the empty street becomes the hero's real enemy."
+    },
+    "tags": ["Western", "1950s", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "director-william-wyler",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "William Wyler",
+    "teaser": "Wyler was famous for demanding dozens of takes — Bette Davis called him 'the director who eats takes for breakfast' — but his Ben-Hur chariot race still thrills.",
+    "imageUrl": "",
+    "byline": "Director · William Wyler",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ben-Hur (1959), the chariot race",
+      "durationMinutes": 18,
+      "instruction": "Watch the chariot race — nine minutes of practical stunt work with real horses and real danger. Wyler shot with 50 cameras. Notice how the race is edited to make you feel every near-miss."
+    },
+    "tags": ["Hollywood", "1950s", "Epic"],
+    "tier": 1
+  },
+  {
+    "id": "director-joseph-l-mankiewicz",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Joseph L. Mankiewicz",
+    "teaser": "Mankiewicz wrote and directed All About Eve — the film about theatrical ambition won a record six Academy Awards and its dialogue is still quoted backstage.",
+    "imageUrl": "",
+    "byline": "Director · Joseph L. Mankiewicz",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "All About Eve (1950), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the award ceremony, the flashback, the young fan. Mankiewicz's dialogue is a scalpel. Notice how Eve's smile never changes while the film's opinion of her does."
+    },
+    "tags": ["Hollywood", "1950s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-preston-sturges",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Preston Sturges",
+    "teaser": "Sturges was the first writer to be paid enough to direct his own scripts — Sullivan's Travels is his comedy about a director who wants to make 'a film with a message.'",
+    "imageUrl": "",
+    "byline": "Director · Preston Sturges",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sullivan's Travels (1941), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the studio, the arguments, the tramp disguise. Sturges's point is that laughter is the message. Notice how the film's comedy and its darkness are the same coin."
+    },
+    "tags": ["Hollywood", "1940s", "Screwball"],
+    "tier": 1
+  },
+  {
+    "id": "director-ernst-lubitsch",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ernst Lubitsch",
+    "teaser": "'The Lubitsch Touch' was Hollywood's shorthand for elegant, knowing comedy — even Billy Wilder kept a sign on his wall reading 'How would Lubitsch do it?'",
+    "imageUrl": "",
+    "byline": "Director · Ernst Lubitsch",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Shop Around the Corner (1940), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the Budapest shop, the bickering clerks, the pen-pal letters. Lubitsch's comedy is about the gap between what people say and what they mean. Notice how the romance hides in plain sight."
+    },
+    "tags": ["Hollywood", "1940s", "Screwball"],
+    "tier": 1
+  },
+  {
+    "id": "director-fritz-lang",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Fritz Lang",
+    "teaser": "Lang fled Nazi Germany after Goebbels offered him a job — he left the same night, and his films about power and paranoia carried the scar for decades.",
+    "imageUrl": "",
+    "byline": "Director · Fritz Lang",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "M (1931), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the children's song, the missing girl, the balloon. Lang films a city hunting a monster. Notice how you never see the murder — only the aftermath — and how that restraint makes it worse."
+    },
+    "tags": ["Germany", "1930s", "Noir"],
+    "tier": 1
+  },
+  {
+    "id": "director-fw-murnau",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "F. W. Murnau",
+    "teaser": "Murnau's Nosferatu was an unauthorized Dracula adaptation — the studio tried to destroy every copy, and one survived to become a horror masterpiece.",
+    "imageUrl": "",
+    "byline": "Director · F. W. Murnau",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nosferatu (1922), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the estate, the contract, the carriage ride. Murnau used real locations and real shadows, years before horror had rules. Notice how the vampire's first appearance is pure silhouette."
+    },
+    "tags": ["Germany", "1920s", "Silent Horror"],
+    "tier": 1
+  },
+  {
+    "id": "director-carl-theodor-dreyer",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Carl Theodor Dreyer",
+    "teaser": "Dreyer shot The Passion of Joan of Arc almost entirely in extreme close-up — the film's faces are its entire geography, and it remains a pinnacle of silent cinema.",
+    "imageUrl": "",
+    "byline": "Director · Carl Theodor Dreyer",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Passion of Joan of Arc (1928), the trial scene",
+      "durationMinutes": 20,
+      "instruction": "Watch the trial — faces, eyes, and tears fill the frame for an hour. Dreyer filmed actress Renée Falconetti's real weeping. Notice how the film needs almost no sets: the pain is the set."
+    },
+    "tags": ["Denmark", "1920s", "Silent"],
+    "tier": 1
+  },
+  {
+    "id": "director-sergei-eisenstein",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sergei Eisenstein",
+    "teaser": "Eisenstein invented modern editing — his theory of montage claimed that two images in collision create a third idea in the viewer's mind.",
+    "imageUrl": "",
+    "byline": "Director · Sergei Eisenstein",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Battleship Potemkin (1925), the Odessa Steps sequence",
+      "durationMinutes": 10,
+      "instruction": "Watch the Odessa Steps massacre — Eisenstein cuts the same action from different angles to stretch time. The baby carriage rolling down the steps is cinema's most copied image. Notice how each cut is a collision."
+    },
+    "tags": ["USSR", "1920s", "Silent"],
+    "tier": 1
+  },
+  {
+    "id": "director-dziga-vertov",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Dziga Vertov",
+    "teaser": "Vertov's Man with a Movie Camera is a documentary about a city shot with no script, no actors, and no sets — just a cameraman and a city waking up.",
+    "imageUrl": "",
+    "byline": "Director · Dziga Vertov",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Man with a Movie Camera (1929), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the theater, the camera, the city streets. Vertov's film is pure rhythm: editing as music. Notice how he films the machine of the city as a living thing."
+    },
+    "tags": ["USSR", "1920s", "Documentary"],
+    "tier": 1
+  },
+  {
+    "id": "director-lev-kuleshov",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Lev Kuleshov",
+    "teaser": "Kuleshov proved that meaning comes from editing: he cut the same actor's neutral face against soup, a coffin, and a child — and audiences praised his 'acting' each time.",
+    "imageUrl": "",
+    "byline": "Director · Lev Kuleshov",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Kuleshov Experiment (1918–21, any reconstruction)",
+      "durationMinutes": 10,
+      "instruction": "Watch a reconstruction of the Kuleshov effect — the same expressionless face cut against different objects. The experiment showed that cinema's power is in the cut, not the actor. Notice how your brain supplies the emotion."
+    },
+    "tags": ["USSR", "1920s", "Theory"],
+    "tier": 1
+  },
+  {
+    "id": "director-vsevolod-pudovkin",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Vsevolod Pudovkin",
+    "teaser": "Pudovkin was Eisenstein's rival in montage theory — his Mother is a quieter, more emotional school of Soviet editing, built around a mother's grief.",
+    "imageUrl": "",
+    "byline": "Director · Vsevolod Pudovkin",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mother (1926), the final sequence",
+      "durationMinutes": 15,
+      "instruction": "Watch the finale — the mother following her son's release, the crowd, the ice breaking. Pudovkin cuts between human emotion and nature's thaw. Notice how the ice becomes a character in the story."
+    },
+    "tags": ["USSR", "1920s", "Silent"],
+    "tier": 1
+  },
+  {
+    "id": "director-alexander-dovzhenko",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alexander Dovzhenko",
+    "teaser": "Dovzhenko's Earth is a silent film about a tractor arriving in a Ukrainian village — its lyricism made the Soviet avant-garde weep and the censors nervous.",
+    "imageUrl": "",
+    "byline": "Director · Alexander Dovzhenko",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Earth (1930), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the wheat, the sunflowers, the harvest. Dovzhenko films agriculture as ecstasy. Notice how the film's famous sequence — the dying man's hand on a sunflower — turns politics into poetry."
+    },
+    "tags": ["USSR", "1930s", "Silent"],
+    "tier": 1
+  },
+  {
+    "id": "director-andrzej-wajda",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Andrzej Wajda",
+    "teaser": "Wajda was Poland's conscience — his Ashes and Diamonds turned a political assassination into a national elegy, made while Poland was still under Stalinist rule.",
+    "imageUrl": "",
+    "byline": "Director · Andrzej Wajda",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ashes and Diamonds (1958), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the assassination, the church, the wrong victim. Wajda films the moral chaos of liberation. Notice the white horse and the burning vodka: symbols that refuse to stay symbolic."
+    },
+    "tags": ["Poland", "1950s", "Political"],
+    "tier": 1
+  },
+  {
+    "id": "director-roman-polanski",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Roman Polanski",
+    "teaser": "Polanski survived the Kraków ghetto as a child — Chinatown's paranoia and The Pianist's horror both come from that childhood, filtered through film noir.",
+    "imageUrl": "",
+    "byline": "Director · Roman Polanski",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Chinatown (1974), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the office, the adulterer's trap, the city water wars. Polanski's Los Angeles is baked, cynical, and perfect. Notice how the ending's famous line — 'Forget it, Jake' — was the last thing anyone expected."
+    },
+    "tags": ["Neo-Noir", "1970s", "Mystery"],
+    "tier": 1
+  },
+  {
+    "id": "director-jerzy-skolimowski",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jerzy Skolimowski",
+    "teaser": "Skolimowski wrote the screenplay for Knife in the Water — Roman Polanski's debut — then directed his own wild, confrontational films, including Deep End.",
+    "imageUrl": "",
+    "byline": "Director · Jerzy Skolimowski",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Deep End (1970), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the Munich swimming pool, the teenage attendant, the older coworker. Skolimowski films desire as a fever. Notice the surreal touches that keep breaking the realism."
+    },
+    "tags": ["Poland", "1970s", "Cult"],
+    "tier": 1
+  },
+  {
+    "id": "director-pawel-pawlikowski",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Paweł Pawlikowski",
+    "teaser": "Pawlikowski's Ida won the Oscar for Best Foreign Film — the film's square frame and grainy black-and-white make 1960s Poland look like a photograph from inside history.",
+    "imageUrl": "",
+    "byline": "Director · Paweł Pawlikowski",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ida (2013), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the convent, the novice, the aunt's apartment. Pawlikowski frames every shot in the dead center of the frame, like a portrait. Notice how the film's silence is a form of speech."
+    },
+    "tags": ["Poland", "2010s", "Art House"],
+    "tier": 1
+  },
+  {
+    "id": "director-jan-svankmajer",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jan Švankmajer",
+    "teaser": "Švankmajer animates meat, clay, and household objects with stop-motion — his Alice turns Wonderland into a nightmare of taxidermy and drawers.",
+    "imageUrl": "",
+    "byline": "Director · Jan Švankmajer",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Alice (1988), the first 20 minutes",
+      "durationMinutes": 20,
+      "instruction": "Watch the opening — the stuffed rabbit coming to life, the sawdust spilling. Švankmajer's Alice is a girl in a real room where everything is dangerous. Notice how the objects move with deliberate, creepy care."
+    },
+    "tags": ["Czech", "1980s", "Animation"],
+    "tier": 1
+  },
+  {
+    "id": "director-vera-chytilova",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Věra Chytilová",
+    "teaser": "Chytilová's Daisies was banned in Czechoslovakia for 'wasting food' — its two heroines deliberately consume, destroy, and misbehave, and the film is now a feminist classic.",
+    "imageUrl": "",
+    "byline": "Director · Věra Chytilová",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Daisies (1966), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the two Maries, the chaos of eating, the collage of destruction. Chytilová films anarchy as celebration. Notice the color: the film switches between black-and-white and full-color film stock mid-scene."
+    },
+    "tags": ["Czech", "1960s", "Avant-garde"],
+    "tier": 1
+  },
+  {
+    "id": "director-milos-forman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Miloš Forman",
+    "teaser": "Forman fled Czechoslovakia after the Soviet invasion and made One Flew Over the Cuckoo's Nest in America — it won the Big Five Oscars, only the second film ever to do so.",
+    "imageUrl": "",
+    "byline": "Director · Miloš Forman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "One Flew Over the Cuckoo's Nest (1975), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — McMurphy's arrival at the asylum. Forman shot in a real former asylum. Notice how the film's politics — authority vs. the individual — is already visible in the first group therapy scene."
+    },
+    "tags": ["Czech", "1970s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-jiri-menzel",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jiří Menzel",
+    "teaser": "Menzel's Closely Watched Trains won the Oscar for Best Foreign Film — a comic tragedy about a young stationmaster under Nazi occupation.",
+    "imageUrl": "",
+    "byline": "Director · Jiří Menzel",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Closely Watched Trains (1966), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the small station, the stammering hero, the sex-obsessed clerks. Menzel's comedy is gentle and the ending is not. Notice how the trains keep passing like time itself."
+    },
+    "tags": ["Czech", "1960s", "Comedy-Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-rainer-werner-fassbinder",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Rainer Werner Fassbinder",
+    "teaser": "Fassbinder made over 40 films before he died at 37 — his Ali: Fear Eats the Soul is a 93-minute romance between a German widow and a Moroccan guest worker.",
+    "imageUrl": "",
+    "byline": "Director · Rainer Werner Fassbinder",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ali: Fear Eats the Soul (1974), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the bar, the age difference, the instant decision to marry. Fassbinder frames the couple like strangers in a portrait. Notice how the neighbors' cruelty arrives quietly, one look at a time."
+    },
+    "tags": ["Germany", "1970s", "Melodrama"],
+    "tier": 1
+  },
+  {
+    "id": "director-wim-wenders",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Wim Wenders",
+    "teaser": "Wenders's Paris, Texas won the Palme d'Or and made the American desert speak German — it's a road movie about a man who can't say where he's been.",
+    "imageUrl": "",
+    "byline": "Director · Wim Wenders",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Paris, Texas (1984), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a man walking out of the desert in a suit, a brother's search. Wenders films the American West as an alien landscape. Notice the colors: the reds and teals are Wenders's emotional code."
+    },
+    "tags": ["Germany", "1980s", "Road Movie"],
+    "tier": 1
+  },
+  {
+    "id": "director-werner-herzog",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Werner Herzog",
+    "teaser": "Herzog filmed Aguirre in the Amazon with a cast and crew he nearly lost to the river — Klaus Kinski played the mad conquistador, and the two fought constantly on set.",
+    "imageUrl": "",
+    "byline": "Director · Werner Herzog",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Aguirre, the Wrath of God (1972), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the raft expedition, the jungle, the madness growing. Herzog shot in real jungle with real danger and no safety. Notice how the film's ending — Aguirre alone on a raft of monkeys — is the whole thesis."
+    },
+    "tags": ["Germany", "1970s", "Adventure"],
+    "tier": 1
+  },
+  {
+    "id": "director-volker-schlondorff",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Volker Schlöndorff",
+    "teaser": "Schlöndorff's The Tin Drum — about a boy who refuses to grow up under Nazism — won the Palme d'Or and the Oscar for Best Foreign Film.",
+    "imageUrl": "",
+    "byline": "Director · Volker Schlöndorff",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Tin Drum (1979), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the grandmother's skirts, the birth, the decision to stop growing. Schlöndorff adapts Günter Grass's novel with grotesque, magical precision. Notice how the drum becomes a weapon of protest."
+    },
+    "tags": ["Germany", "1970s", "Magical Realism"],
+    "tier": 1
+  },
+  {
+    "id": "director-margarethe-von-trotta",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Margarethe von Trotta",
+    "teaser": "von Trotta was Fassbinder's collaborator and became the chronicler of women's lives in German cinema — her Rosa Luxemburg stars Barbara Sukowa as the revolutionary.",
+    "imageUrl": "",
+    "byline": "Director · Margarethe von Trotta",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Rosa Luxemburg (1986), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Luxemburg in prison, her letters, her politics. von Trotta films history through a woman's mind. Notice how the film refuses to separate the thinker from the woman."
+    },
+    "tags": ["Germany", "1980s", "Biopic"],
+    "tier": 1
+  },
+  {
+    "id": "director-john-cassavetes",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "John Cassavetes",
+    "teaser": "Cassavetes invented American independent cinema — he mortgaged his house to finance Faces and shot A Woman Under the Influence with his wife Gena Rowlands in the lead.",
+    "imageUrl": "",
+    "byline": "Director · John Cassavetes",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "A Woman Under the Influence (1974), the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opening — Mabel's chaos, her husband's confusion, the party that isn't. Cassavetes's camera follows actors instead of plot. Notice how the film's love is as messy as its cinematography."
+    },
+    "tags": ["Indie", "1970s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-john-schlesinger",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "John Schlesinger",
+    "teaser": "Schlesinger's Midnight Cowboy won Best Picture with an X rating — the first and last X-rated film to do so — and made Ratso Rizzo a movie legend.",
+    "imageUrl": "",
+    "byline": "Director · John Schlesinger",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Midnight Cowboy (1969), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Joe Buck leaving Texas, the bus, the dreams of New York. Schlesinger films the city as a dream and a nightmare. Notice how the film's friendship becomes its tenderness."
+    },
+    "tags": ["UK", "1960s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-ken-russell",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ken Russell",
+    "teaser": "Russell's The Devils was so shocking it's still difficult to see in full — he made biopics of composers as psychedelic nightmares, and the BBC never forgave him.",
+    "imageUrl": "",
+    "byline": "Director · Ken Russell",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Devils (1971), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the plague, the possessed nuns, the church's corruption. Russell's baroque excess is deliberate: he films religious hysteria as spectacle. Notice how the imagery keeps escalating past taste."
+    },
+    "tags": ["UK", "1970s", "Provocative"],
+    "tier": 1
+  },
+  {
+    "id": "director-nicolas-roeg",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Nicolas Roeg",
+    "teaser": "Roeg was a cinematographer before directing — his Don't Look Now cuts the past and future into the present so the whole film feels like memory and premonition.",
+    "imageUrl": "",
+    "byline": "Director · Nicolas Roeg",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Don't Look Now (1973), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the child's drowning, the red coat, the Venetian canals. Roeg edits time out of order: the future leaks into the present. Notice how the red coat appears before you know what it means."
+    },
+    "tags": ["UK", "1970s", "Horror"],
+    "tier": 1
+  },
+  {
+    "id": "director-peter-greenaway",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Peter Greenaway",
+    "teaser": "Greenaway was a painter and studied at art school before cinema — his films like The Cook, the Thief are composed like Renaissance paintings and are just as bloodthirsty.",
+    "imageUrl": "",
+    "byline": "Director · Peter Greenaway",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Cook, the Thief, His Wife & Her Lover (1989), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the restaurant's color-coded rooms, the grotesque table. Greenaway's world is allegory: the kitchen, the dining room, the debt. Notice how each room has its own color and its own morality."
+    },
+    "tags": ["UK", "1980s", "Art House"],
+    "tier": 1
+  },
+  {
+    "id": "director-sally-potter",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sally Potter",
+    "teaser": "Potter's Orlando — adapted from Virginia Woolf — follows its hero across 400 years as he changes gender, with Tilda Swinton in the title role.",
+    "imageUrl": "",
+    "byline": "Director · Sally Potter",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Orlando (1992), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the Elizabethan court, the portrait that changes, the gender shift. Potter films history as costume and costume as identity. Notice how the film's tone stays playful even as its ideas deepen."
+    },
+    "tags": ["UK", "1990s", "Adaptation"],
+    "tier": 1
+  },
+  {
+    "id": "director-derek-jarman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Derek Jarman",
+    "teaser": "Jarman made Caravaggio and Blue — the latter a feature-length film of nothing but a blue screen and audio, made as his eyesight failed from AIDS.",
+    "imageUrl": "",
+    "byline": "Director · Derek Jarman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Caravaggio (1986), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the painter's studio reimagined as a 1980s art world. Jarman casts real punk-era figures and films the 17th century as a punk tableau. Notice how the candlelight is both real and theatrical."
+    },
+    "tags": ["UK", "1980s", "Art House"],
+    "tier": 1
+  },
+  {
+    "id": "director-paolo-sorrentino",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Paolo Sorrentino",
+    "teaser": "Sorrentino's The Great Beauty won the Oscar for Best Foreign Film — a Fellini-esque tour of Rome's decadence that asks what beauty is worth after youth.",
+    "imageUrl": "",
+    "byline": "Director · Paolo Sorrentino",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Great Beauty (2013), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the party, the ruins, the writer at 65. Sorrentino's Rome is a fever dream of beauty and emptiness. Notice how the camera moves like it's dancing with the city."
+    },
+    "tags": ["Italy", "2010s", "Art House"],
+    "tier": 1
+  }
+]

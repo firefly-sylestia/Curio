@@ -153,7 +153,7 @@ object TopicCatalog {
                 )
                 CaptureFormat.Marginalia -> CaptureData.Marginalia(
                     journalText = "Spent some time reflecting on ${topic.name} today. There's so much depth here.",
-                    quotes = listOf("\"Every moment is a fresh beginning.\" — T.S. Eliot")
+                    quotes = listOf("\"Every moment is a fresh beginning.\", T.S. Eliot")
                 )
                 CaptureFormat.GalleryWall -> CaptureData.GalleryWall(
                     imageCount = 3,

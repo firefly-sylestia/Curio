@@ -172,7 +172,7 @@ fun BugReportScreen(navController: NavController) {
                 )
             }
             Text(
-                text = "Opens GitHub Issues with your report pre-filled — just tap Submit. The report is also copied to your clipboard.",
+                text = "Opens GitHub Issues with your report pre-filled. Just tap Submit. The report is also copied to your clipboard.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 8.dp)

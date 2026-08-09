@@ -1,0 +1,401 @@
+[
+  {
+    "id": "discovery-blood-transfusion",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Human Blood Transfusion (1818)",
+    "teaser": "James Blundell, an obstetrician, had watched women bleed to death in childbirth and devised a way to transfuse blood from a healthy donor into a dying patient using a syringe and tubing. His first success in 1818, and his careful case reports, made blood transfusion a real medical procedure.",
+    "imageUrl": "",
+    "byline": "James Blundell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Blundell's 1818–1829 blood transfusion cases",
+      "durationMinutes": 20,
+      "instruction": "Read how Blundell built a funnel-and-syringe apparatus to move blood directly from donor to patient, and how he faced ridicule — and the problem of blood types, then unknown, which killed many early attempts. Transfusion only became safe after Landsteiner's blood groups in 1900 and, later, citrate anticoagulants in WWI.",
+      "tags": [
+        "Medicine",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-kidney-dialysis",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Kidney Dialysis (1945)",
+    "teaser": "Willem Kolff, a young Dutch doctor working in a hospital during the Nazi occupation, built the first artificial kidney from sausage casing, an enamel tub, and a wooden paddle — parts scrounged from a factory. In 1945 he saved the first patient, and dialysis became the machine that kept failing kidneys alive.",
+    "imageUrl": "",
+    "byline": "Willem Kolff",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kolff's 1943–45 rotating drum artificial kidney",
+      "durationMinutes": 20,
+      "instruction": "Kolff's machine rotated a tube of cellophane through a bath of salt solution, washing waste out of the patient's blood. Read how the first 15 patients died and he nearly gave up — then patient 16 survived. Dialysis, and later kidney transplants, became the lifesavers of millions. Kolff went on to build the first artificial heart.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "Dutch"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-pacemaker",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Pacemaker (1958)",
+    "teaser": "Åke Senning and Rune Elmqvist built a tiny device that could restart a failing heart with electric pulses — and in 1958 implanted it in Arne Larsson, whose heart stopped repeatedly. The first unit lasted hours; Larsson lived 43 years and received 26 pacemakers. Millions now carry them.",
+    "imageUrl": "",
+    "byline": "Åke Senning & Rune Elmqvist",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1958 implantation of the first pacemaker in Stockholm",
+      "durationMinutes": 20,
+      "instruction": "Read how the rechargeable device, the size of a hockey puck, was built in a few weeks, and how the first model failed within a day before a spare was implanted. The modern pacemaker is a marvel of miniaturization — sensing the heart's own rhythm and pacing only when needed, powering itself for a decade on a lithium cell.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-defibrillator",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Defibrillator (1947)",
+    "teaser": "Claude Beck, a Cleveland surgeon, shocked a 14-year-old boy's fibrillating heart back to a normal rhythm during open-chest surgery in 1947 — the first successful human defibrillation. Beck called it 'the kiss of life.' Today, portable defibrillators in airports and malls restart thousands of hearts a year.",
+    "imageUrl": "",
+    "byline": "Claude Beck",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beck's 1947 defibrillation of a patient's heart",
+      "durationMinutes": 20,
+      "instruction": "The boy's heart was in ventricular fibrillation — quivering uselessly — and Beck massaged it, then applied electric shocks directly. Read how the technique moved from the operating room to the emergency room, and how the modern AED, designed to be used by untrained bystanders, automated Beck's idea. Every minute in fibrillation cuts survival odds by 10%.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-heart-transplant-barnard",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Heart Transplant (1967)",
+    "teaser": "Christiaan Barnard, a South African surgeon trained in part by Norman Shumway, transplanted the heart of a car-crash victim into Louis Washkansky in Cape Town on December 3, 1967. The patient lived 18 days before dying of pneumonia — but the era of transplant medicine had begun, and Barnard became the world's most famous surgeon overnight.",
+    "imageUrl": "",
+    "byline": "Christiaan Barnard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Barnard's 1967 first human heart transplant",
+      "durationMinutes": 20,
+      "instruction": "Read how the operation took hours and how Washkansky, a grocer dying of heart failure, woke up with a working heart — and how immunosuppression, still primitive, cost him his life to infection. Barnard's second patient, Philip Blaiberg, lived 19 months, and heart transplants have now saved hundreds of thousands of lives.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "South African"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-ivf-louise-brown",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First IVF Baby (1978)",
+    "teaser": "After a decade of failures, Patrick Steptoe and Robert Edwards fertilized an egg outside the body and transferred it into Lesley Brown, who gave birth to Louise Brown on July 25, 1978 — the world's first 'test-tube baby.' IVF has since helped over ten million people become parents.",
+    "imageUrl": "",
+    "byline": "Steptoe & Edwards",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1978 birth of Louise Brown",
+      "durationMinutes": 20,
+      "instruction": "Read how Edwards studied egg maturation and Steptoe pioneered laparoscopy to retrieve eggs, and how the pair endured years of ridicule and ethical attack. The birth was announced by worldwide headlines. Edwards won the 2010 Nobel — Steptoe, who died in 1988, was not eligible. IVF also made preimplantation genetic testing possible.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-coronary-bypass",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Coronary Bypass (1960)",
+    "teaser": "Robert Goetz and colleagues, building on decades of experiments, performed the first successful coronary artery bypass in 1960, using a vein to route blood around a blocked artery. Refined by René Favaloro in 1967, the bypass graft became one of the most common and lifesaving operations in medicine.",
+    "imageUrl": "",
+    "byline": "Robert Goetz / René Favaloro",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The development of coronary artery bypass surgery",
+      "durationMinutes": 20,
+      "instruction": "Read how heart surgeons learned to stop the heart, keep it alive with a bypass machine, and sew a segment of the patient's own vein or artery around the blockage. Favaloro standardized the technique at the Cleveland Clinic, and it has been performed on millions of patients since. Angioplasty and stents later offered less invasive alternatives.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-angioplasty",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Angioplasty (1977)",
+    "teaser": "Andreas Gruentzig, a German radiologist, inflated a tiny balloon inside a blocked coronary artery to crush the plaque and restore blood flow — with the patient awake and watching his own ECG. The first angioplasty, in 1977, launched interventional cardiology, and balloon-then-stent procedures now treat millions yearly.",
+    "imageUrl": "",
+    "byline": "Andreas Gruentzig",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gruentzig's 1977 first coronary balloon angioplasty",
+      "durationMinutes": 20,
+      "instruction": "Gruentzig had tested his balloon catheter on dogs and cadavers, and on himself, before risking a patient. Read how the procedure — threading a wire through the artery and inflating a balloon at the blockage — avoids open-heart surgery entirely. The first patient, a 37-year-old man, lived 30 more years.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-cochlear-implant",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Cochlear Implant (1957)",
+    "teaser": "André Djourno and Charles Eyriès placed a wire electrode on the auditory nerve of a deaf patient and delivered current from a small device — the patient heard sounds. In 1957, the cochlear implant was born, and by the 1980s it became a routine miracle: thousands of deaf children and adults now hear through electronics.",
+    "imageUrl": "",
+    "byline": "Djourno & Eyriès",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1957 first cochlear implant",
+      "durationMinutes": 20,
+      "instruction": "Read how the early implant bypassed the damaged ear and stimulated the auditory nerve directly, and how Graeme Clark's multi-channel implant in 1978 mapped sound frequencies across the cochlea. Modern implants, with an external microphone and internal electrode array, can restore enough hearing for telephone conversation.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-blood-groups",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Blood Groups Identified (1900)",
+    "teaser": "Karl Landsteiner mixed blood samples from his colleagues and watched some clump together, some not — and realized people have different blood types: A, B, AB, and O. The discovery explained why transfusions often killed, made them safe, and won him the 1930 Nobel. His simple test has saved more lives than almost any other.",
+    "imageUrl": "",
+    "byline": "Karl Landsteiner",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Landsteiner's 1900–01 papers on blood groups",
+      "durationMinutes": 20,
+      "instruction": "Read how Landsteiner found that serum from one person clumps the red cells of another — the agglutination reaction — and how the A-B-O system explained fatal transfusion reactions. Type O donors became universal, type AB universal recipients. Blood typing, and matching, turned transfusion from gamble to routine. Landsteiner also co-discovered the Rh factor.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "Austrian"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-measles-vaccine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Measles Vaccine (1963)",
+    "teaser": "Measles killed millions of children a year before John Enders's team — the same lab that grew the polio virus — isolated a weakened strain and turned it into the first measles vaccine in 1963. By the 1970s mass vaccination had cut measles deaths globally by 99%, though the disease still kills when vaccination lapses.",
+    "imageUrl": "",
+    "byline": "John Enders & team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Enders's development of the measles vaccine",
+      "durationMinutes": 20,
+      "instruction": "Read how Enders and Thomas Peebles isolated the measles virus in 1954 from a schoolboy named David Edmonston — the strain is still called the Edmonston strain — and how passaging it through chick embryos weakened it. The vaccine was licensed in 1963. Measles is so contagious that 95% vaccination is needed to stop it.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-mumps-vaccine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Mumps Vaccine (1967)",
+    "teaser": "Maurice Hilleman, perhaps the most prolific vaccine developer in history, grew a weakened mumps virus in chick embryos and licensed the first mumps vaccine in 1967 — developed, touchingly, from the virus that infected his own daughter Jeryl Lynn. Her strain, called Jeryl Lynn, is still used in the MMR vaccine today.",
+    "imageUrl": "",
+    "byline": "Maurice Hilleman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hilleman's 1967 mumps vaccine",
+      "durationMinutes": 20,
+      "instruction": "Read how Hilleman, who developed vaccines for measles, mumps, rubella, hepatitis B, and more — saving more lives than any other scientist of his era — swabbed his daughter's throat, isolated the virus, and attenuated it in eggs. The Jeryl Lynn strain remains the world standard, now combined into MMR, which prevents millions of cases a year.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-rubella-vaccine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Rubella Vaccine (1969)",
+    "teaser": "Rubella is mild in children but devastating in pregnancy — causing deafness, blindness, and heart defects in babies. After the 1964–65 epidemic left 20,000 American babies damaged, researchers raced to develop a vaccine, licensed in 1969. It made congenital rubella nearly vanish from vaccinated countries.",
+    "imageUrl": "",
+    "byline": "Parkman & Meyer / Plotkin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The development of the rubella vaccine (1962–69)",
+      "durationMinutes": 20,
+      "instruction": "Read how Stanley Plotkin used cells from an aborted fetus to grow the virus — the WI-38 cell line that also made many other vaccines — and how his RA 27/3 strain became the global standard. The vaccine, usually given as MMR, protects unborn babies who cannot be vaccinated themselves. Rubella was declared eliminated in the Americas in 2015.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-hpv-vaccine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The HPV Vaccine (2006)",
+    "teaser": "Harald zur Hausen proved that certain papillomaviruses cause cervical cancer — the first cancer shown to be caused by a virus in humans — and his work led to vaccines that prevent it. The first HPV vaccine was licensed in 2006, and it is now preventing hundreds of thousands of cancers a year.",
+    "imageUrl": "",
+    "byline": "Harald zur Hausen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "zur Hausen's discovery of HPV's role in cervical cancer and the 2006 vaccine",
+      "durationMinutes": 20,
+      "instruction": "Read how zur Hausen spent a decade hunting for viral DNA in cervical tumors, against the skepticism of his field, and how the virus-like particle vaccine built from a single viral protein trains immunity. He won the 2008 Nobel. Countries that vaccinate teenage girls are already seeing cervical cancer cases plunge.",
+      "tags": [
+        "Medicine",
+        "21st Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-smallpox-eradication",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Smallpox Eradicated (1980)",
+    "teaser": "Smallpox, which had killed more humans than any other disease, was declared eradicated on May 8, 1980 — the first and only disease ever eliminated by human effort. A global vaccination campaign, run by the WHO with the Soviet Union's and America's cooperation during the Cold War, cornered the virus to its last case in Somalia in 1977.",
+    "imageUrl": "",
+    "byline": "The WHO eradication campaign",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The global smallpox eradication program (1967–1980)",
+      "durationMinutes": 20,
+      "instruction": "Read how the strategy of surveillance and containment — finding cases and vaccinating everyone around them — beat mass vaccination alone, and how a cook named Ali Maow Maalin in Somalia was the last natural case. The campaign proved that human cooperation can end a disease, and it remains the model for polio and other eradication efforts.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "International"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-monoclonal-antibodies",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Monoclonal Antibodies (1975)",
+    "teaser": "Georges Köhler and César Milstein fused an antibody-making cell with a cancer cell and got an immortal hybrid that produced a single, perfectly specific antibody forever. Monoclonal antibodies became the 'magic bullets' of modern medicine — used in pregnancy tests, cancer therapy, and COVID treatments.",
+    "imageUrl": "",
+    "byline": "Köhler & Milstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Köhler & Milstein's 1975 hybridoma technique",
+      "durationMinutes": 20,
+      "instruction": "The trick: a myeloma cell (immortal) plus a spleen cell (makes one specific antibody) yields a hybridoma that both grows forever and secretes the exact antibody. Read how the pair developed it almost casually in a few months at the MRC lab in Cambridge, and how the technique won the 1984 Nobel. Antibody drugs now treat cancer, arthritis, and autoimmune disease.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "German-Argentine"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-oral-rehydration",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Oral Rehydration Therapy (1968)",
+    "teaser": "Cholera kills by dehydration — patients can lose a gallon of fluid a day. Researchers in Calcutta and Dhaka found that a simple solution of salt, sugar, and water is absorbed even during severe diarrhea. Oral rehydration therapy, cheap as a pinch of salt, has saved tens of millions of lives and was called 'the most important medical discovery of the 20th century.'",
+    "imageUrl": "",
+    "byline": "The cholera research teams of Dhaka & Calcutta",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The development of oral rehydration therapy (1960s)",
+      "durationMinutes": 20,
+      "instruction": "Read how studies in the 1960s showed glucose makes the gut absorb sodium and water even in cholera, and how the treatment — one liter of water, six teaspoons of sugar, half a teaspoon of salt — was tested first in refugee camps. The Lancet called it potentially the century's most important medical advance. It now guides emergency medicine worldwide.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "Bangladeshi-Indian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-cancer-chemotherapy",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Cancer Chemotherapy (1942)",
+    "teaser": "During WWII, sailors exposed to the poison gas nitrogen mustard were found to have damaged bone marrow — and that gave doctors an idea. In 1942, Yale researchers gave a mustard compound to a dying lymphoma patient, and his tumors shrank dramatically. The first chemotherapy, born from a chemical weapon, launched medical oncology.",
+    "imageUrl": "",
+    "byline": "Gilman, Goodman & colleagues, Yale",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1942 nitrogen mustard treatment at Yale",
+      "durationMinutes": 20,
+      "instruction": "Read how the classified wartime work on mustard gas led Goodman and Gilman to try it on cancer in mice, then in a patient — the response was remarkable, though temporary. The principle — kill fast-dividing cells — became the basis of chemotherapy, and combination regimens later cured childhood leukemias and testicular cancer.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-cardiac-catheterization",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Cardiac Catheterization (1929)",
+    "teaser": "Werner Forssmann, a young German doctor, pushed a catheter up a vein in his own arm and into his own heart, then walked upstairs to the X-ray room to prove it. He was fired for the stunt, but his self-experiment proved the heart could be reached safely — and became the foundation of all cardiac diagnosis and intervention.",
+    "imageUrl": "",
+    "byline": "Werner Forssmann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Forssmann's 1929 self-catheterization",
+      "durationMinutes": 20,
+      "instruction": "Read how Forssmann, with a nurse's reluctant help, threaded a urethral catheter from his arm into his right heart and documented it with an X-ray — the first image ever taken of a catheter inside a living human heart. Ridiculed and punished, he was vindicated when Cournand and Richards developed cardiac catheterization clinically; all three shared the 1956 Nobel.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "scientist-charles-kao-fiber",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Rudolf Schoenheimer",
+    "teaser": "The German-American biochemist who used isotopes to show that the body's molecules are in constant flux — always being broken down and rebuilt — overturning the idea of a static body. His dynamic body concept reshaped metabolism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Flux",
+      "targetName": "Schoenheimer's dynamic body",
+      "instruction": "Learn how Schoenheimer's heavy-isotope feeding experiments revealed constant molecular turnover. Write what 'the dynamic state of body constituents' means and why it changed nutrition and medicine.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-fritz-lipmann",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Fritz Lipmann",
+    "teaser": "The German-American biochemist who discovered coenzyme A and explained ATP's role as the cell's energy currency, sharing the 1953 Nobel. His idea of ATP as a universal energy carrier underwrites all of biochemistry.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Energy",
+      "targetName": "Lipmann's ATP",
+      "instruction": "Learn how Lipmann identified coenzyme A and recognized ATP as the cell's reusable energy store. Write how ATP transfers energy between reactions and why he called it the 'energy currency' of the cell.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-hans-krebs",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Hans Krebs",
+    "teaser": "The German-British biochemist who worked out the citric acid cycle — the circular engine that burns food inside every cell — and shared the 1953 Nobel. His discovery came from pure pencil-and-paper reasoning over test results.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cycle",
+      "targetName": "Krebs's citric acid cycle",
+      "instruction": "Learn the steps of the Krebs cycle and why it is the crossroads of metabolism. Write how acetyl-CoA enters the cycle and what the cycle produces for the cell's energy supply.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-albert-szent-gyorgyi",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Albert Szent-Györgyi",
+    "teaser": "The Hungarian biochemist who isolated vitamin C from paprika and studied muscle contraction and tissue respiration. He won the 1937 Nobel, then spent his later years exploring what he called the 'electronic biology' of life.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Vitamin",
+      "targetName": "Szent-Györgyi's vitamin C",
+      "instruction": "Learn how Szent-Györgyi purified ascorbic acid, using Hungarian peppers as his source. Write what vitamin C does in the body and how his muscle research connected to cell energy.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-severo-ochoa",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Severo Ochoa",
+    "teaser": "The Spanish-American biochemist who discovered an enzyme that builds RNA and shared the 1959 Nobel. His enzyme helped crack the genetic code, showing how nucleotide sequences translate into proteins.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Synthesize",
+      "targetName": "Ochoa's RNA polymerase",
+      "instruction": "Learn how Ochoa's polynucleotide phosphorylase made RNA in the test tube, helping scientists decode the genetic code. Write how RNA is built from a DNA template and why the code matters.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-arthur-kornberg-synth",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Arthur Kornberg",
+    "teaser": "The American biochemist who discovered DNA polymerase, the enzyme that copies DNA, and built the first DNA in a test tube — sharing the 1959 Nobel with Ochoa. He called DNA replication the 'most awesome' event in life.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Copy",
+      "targetName": "Kornberg's DNA polymerase",
+      "instruction": "Learn how Kornberg isolated DNA polymerase I and synthesized DNA outside a cell. Write how polymerases copy DNA with high fidelity and why his work underpins PCR and genetic engineering.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-marshall-nirenberg",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Marshall Nirenberg",
+    "teaser": "The American biochemist who cracked the first codon of the genetic code — UUU makes phenylalanine — by reading artificial RNA in the test tube. He and his colleagues decoded all 64 codons and shared the 1968 Nobel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Decode",
+      "targetName": "Nirenberg's genetic code",
+      "instruction": "Learn how Nirenberg used synthetic RNA messages to decode codons into amino acids. Write how the 64 codons map to 20 amino acids and why the code is called nearly universal.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-h-g-khorana",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Har Gobind Khorana",
+    "teaser": "The Indian-American biochemist who built synthetic genes and helped decode the genetic code, sharing the 1968 Nobel with Nirenberg and Holley. He later synthesized the first artificial gene that could function in a cell.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Synthesize",
+      "targetName": "Khorana's gene synthesis",
+      "instruction": "Learn how Khorana assembled nucleotide chains to confirm codons and built a working artificial gene. Write how gene synthesis works today and how it powers modern biotechnology.",
+      "durationMinutes": 20
+    }
+  }
+]

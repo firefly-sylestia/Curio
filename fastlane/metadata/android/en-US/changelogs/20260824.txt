@@ -1,0 +1,4 @@
+• Meet Curie — your pet has a name! Draw on a bigger canvas (24x24 or 32x32, convertible), paint with brush, fill, eraser or eyedropper (drag to paint), and tune colors with HSL sliders.
+• Export Curie as a pixel-perfect PNG image (or import one — it snaps to your palette).
+• Customize Curie's face per mood — eyes, mouth, blush, sparkles — and choose how it reacts to each moment: which animation, which face.
+• Curie now types along on a tiny keyboard while you type, plays peek-a-boo behind buttons, wanders smarter (staying off your buttons), and answers pettings with more motion and fewer words.

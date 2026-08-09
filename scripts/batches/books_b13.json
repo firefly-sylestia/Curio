@@ -1,0 +1,422 @@
+[
+  {
+    "id": "book-bell-jar",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Bell Jar",
+    "teaser": "Sylvia Plath's 1963 autobiographical novel of Esther Greenwood's summer in New York and her descent into breakdown — the fig tree, the bell jar, and the woman who must choose which self to be. The great novel of the gifted girl's suffocation.",
+    "imageUrl": "",
+    "byline": "Sylvia Plath",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the summer and the fig tree",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Esther's internship and her paralysis before the fig tree are established. Notice how Plath keeps the voice witty even at the edge. Write what the bell jar represents, and what lifting it requires."
+    },
+    "tags": [
+      "American",
+      "Confessional",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-ariel",
+    "categoryId": "BOOKS",
+    "subtype": "Poetry",
+    "name": "Ariel",
+    "teaser": "Plath's 1965 collection, assembled after her death — Lady Lazarus, Daddy, and the poems that made her a myth. A book of fury, transformation, and language pushed to its breaking point.",
+    "imageUrl": "",
+    "byline": "Sylvia Plath",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lady Lazarus and Daddy",
+      "durationMinutes": 45,
+      "instruction": "Read Lady Lazarus and Daddy aloud. Notice how Plath's rhymes and repetitions build unbearable pressure. Write what the poems do with anger — how does the speaker transform herself on the page, and what does the myth-making cost?"
+    },
+    "tags": [
+      "American",
+      "Poetry",
+      "Confessional"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-collected-poems-of-robert-frost",
+    "categoryId": "BOOKS",
+    "subtype": "Poetry",
+    "name": "The Poetry of Robert Frost",
+    "teaser": "Frost's New England poems — The Road Not Taken, Mending Wall, Stopping by Woods on a Snowy Evening — plain speech with terrible depths beneath. America's most beloved, and least simple, poet.",
+    "imageUrl": "",
+    "byline": "Robert Frost",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A selection of poems, including Stopping by Woods and Design",
+      "durationMinutes": 45,
+      "instruction": "Read the famous poems, then a darker one like Design or Out, Out—. Notice how Frost's folksy voice turns suddenly strange. Write what the woods in the snow are really about, and why the speaker has 'miles to go before I sleep.'"
+    },
+    "tags": [
+      "American",
+      "Poetry",
+      "New England"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-four-quartets",
+    "categoryId": "BOOKS",
+    "subtype": "Poetry",
+    "name": "Four Quartets",
+    "teaser": "Eliot's 1943 sequence of four meditations — Burnt Norton, East Coker, The Dry Salvages, Little Gidding — on time, memory, and the still point of the turning world. The summit of Eliot's poetry.",
+    "imageUrl": "",
+    "byline": "T. S. Eliot",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Burnt Norton, the opening section",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Burnt Norton, where the rose garden and the passage of time are established. Notice how Eliot returns to the same images with different music. Write what 'the still point of the turning world' means, and how the poem circles toward it."
+    },
+    "tags": [
+      "American",
+      "Poetry",
+      "Nobel"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-cantos",
+    "categoryId": "BOOKS",
+    "subtype": "Poetry",
+    "name": "The Cantos",
+    "teaser": "Ezra Pound's lifelong epic poem, published in fragments from 1917 to 1969 — a collage of history, economics, Chinese ideograms, and personal fury, 'a poem including history.' Monumental and maddening.",
+    "imageUrl": "",
+    "byline": "Ezra Pound",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening cantos",
+      "durationMinutes": 45,
+      "instruction": "Read the opening cantos, where the descent into the underworld and the voyage are established. Notice how Pound cuts between voices, languages, and eras. Write how the poem's fragments enact its argument about civilization's decline."
+    },
+    "tags": [
+      "American",
+      "Poetry",
+      "Modernism"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "book-walden",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Walden",
+    "teaser": "Thoreau's 1854 account of two years in a cabin at Walden Pond — economy, solitude, and the deliberate life. The founding book of American nature writing and of every project of voluntary simplicity.",
+    "imageUrl": "",
+    "byline": "Henry David Thoreau",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Economy and Where I Lived",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Thoreau itemizes his costs and his reasons. Notice how his ledger-keeping is a philosophy. Write what 'the mass of men lead lives of quiet desperation' means, and whether the cabin experiment still speaks to you."
+    },
+    "tags": [
+      "American",
+      "Nature",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-civil-disobedience",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "Civil Disobedience",
+    "teaser": "Thoreau's 1849 essay born of a night in jail for refusing to pay a poll tax — on the duty of the individual against the state. The text that Gandhi and King carried into their movements.",
+    "imageUrl": "",
+    "byline": "Henry David Thoreau",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The full essay",
+      "durationMinutes": 45,
+      "instruction": "Read the essay, from the jail anecdote to the closing appeals. Notice how Thoreau's wit carries his radical claims. Write what he means by 'that government is best which governs least' — and how his standard of conscience applies to a citizen today."
+    },
+    "tags": [
+      "American",
+      "Essay",
+      "Political"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-self-reliance",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "Self-Reliance",
+    "teaser": "Emerson's 1841 essay, the sermon of American individualism — 'trust thyself,' the nonconformist, and the wholeness of each soul. The text that every American rebel, from Whitman to the counterculture, was raised on.",
+    "imageUrl": "",
+    "byline": "Ralph Waldo Emerson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The full essay",
+      "durationMinutes": 45,
+      "instruction": "Read the essay, noticing how Emerson's aphorisms accumulate into a worldview. Write what he means by the 'aboriginal self' and by 'whoso would be a man must be a nonconformist.' Where do you agree — and where does the doctrine of self-trust need correction?"
+    },
+    "tags": [
+      "American",
+      "Essay",
+      "Transcendentalism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-nature",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "Nature",
+    "teaser": "Emerson's 1836 manifesto that launched Transcendentalism — the transparent eyeball, the unity of the soul with nature, and the call to an original relation to the universe. American philosophy begins here.",
+    "imageUrl": "",
+    "byline": "Ralph Waldo Emerson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where Emerson describes the woods and the 'transparent eyeball.' Notice how he treats nature as both commodity and teacher. Write what the essay means by 'an original relation to the universe' — and whether we still need one."
+    },
+    "tags": [
+      "American",
+      "Essay",
+      "Transcendentalism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-essays-of-montaigne",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "The Essays of Michel de Montaigne",
+    "teaser": "Montaigne's 1580 invention of the essay — 'I am myself the matter of my book' — three volumes of digression, skepticism, and self-knowledge that taught Europe how to think in prose. The most companionable book ever written.",
+    "imageUrl": "",
+    "byline": "Michel de Montaigne",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Of Cannibals and Of the Education of Children",
+      "durationMinutes": 60,
+      "instruction": "Read two essays. Notice how Montaigne wanders from his title and returns by instinct. Write what 'que sais-je?' — what do I know? — asks of the reader, and why his self-portrait still feels like a mirror."
+    },
+    "tags": [
+      "French",
+      "Essay",
+      "Renaissance"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-meditations",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "Meditations",
+    "teaser": "Marcus Aurelius's private notebooks, written in Greek while emperor of Rome — the Stoic manual of self-discipline, mortality, and the duty of the moment. A ruler talking to himself, and to us.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Book One — the debts — and a later book",
+      "durationMinutes": 60,
+      "instruction": "Read Book One, where Marcus lists what he owes his teachers and family, then a later book of maxims. Notice how the notebook form lets the philosophy breathe. Write which single precept you would carry into a difficult day, and why."
+    },
+    "tags": [
+      "Roman",
+      "Stoicism",
+      "Philosophy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-republic",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "The Republic",
+    "teaser": "Plato's dialogue on justice, the city, and the soul — the allegory of the cave, the philosopher king, and the question of why be just. The book that founded political philosophy.",
+    "imageUrl": "",
+    "byline": "Plato",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Book One and the allegory of the cave in Book Seven",
+      "durationMinutes": 75,
+      "instruction": "Read Book One, where the argument about justice begins, then the cave allegory. Notice how the dialogue keeps the reader arguing. Write what the cave's prisoners and the returning philosopher represent — and whether the philosopher should go back down."
+    },
+    "tags": [
+      "Greek",
+      "Philosophy",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-nicomachean-ethics",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "Nicomachean Ethics",
+    "teaser": "Aristotle's lectures on the good life — virtue as a mean, friendship as necessity, and happiness as activity of the soul. The most practical book of philosophy ever written, and the most humane.",
+    "imageUrl": "",
+    "byline": "Aristotle",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Book One — happiness — and Book Two — virtue",
+      "durationMinutes": 60,
+      "instruction": "Read the opening books. Notice how Aristotle reasons from what we actually do. Write what his doctrine of the mean — courage between cowardice and recklessness — looks like applied to a real choice you face."
+    },
+    "tags": [
+      "Greek",
+      "Philosophy",
+      "Ethics"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-confessions-of-st-augustine",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Confessions",
+    "teaser": "Augustine's 400 AD spiritual autobiography — the pear theft, the tears, and 'late have I loved thee' — the first great memoir, and the model for every confession since, sacred or secular.",
+    "imageUrl": "",
+    "byline": "Augustine of Hippo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Book One and Book Eight — the conversion",
+      "durationMinutes": 75,
+      "instruction": "Read the opening books, where Augustine examines his infancy and his youth, then the garden scene of his conversion. Notice how the memoir turns memory into prayer. Write what the structure — confessing to God rather than to an audience — does to the story."
+    },
+    "tags": [
+      "Roman",
+      "Memoir",
+      "Theology"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-summa-theologica",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "Summa Theologica",
+    "teaser": "Thomas Aquinas's 13th-century summa of Christian philosophy — questions, objections, and replies arranged with architectural patience. The great synthesis of faith and reason, still argued with today.",
+    "imageUrl": "",
+    "byline": "Thomas Aquinas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A question on the existence of God",
+      "durationMinutes": 45,
+      "instruction": "Read one question, like the five ways. Notice the method: objections first, then the reply, then replies to each objection. Write how the format itself models honest argument, and assess the strength of one of the 'ways.'"
+    },
+    "tags": [
+      "Italian",
+      "Theology",
+      "Medieval"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "book-leviathan",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "Leviathan",
+    "teaser": "Hobbes's 1651 argument for the social contract — the state of nature as a war of all against all, and the sovereign needed to keep the peace. The book that made the modern state thinkable.",
+    "imageUrl": "",
+    "byline": "Thomas Hobbes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the state of nature",
+      "durationMinutes": 60,
+      "instruction": "Read the chapters where Hobbes describes the state of nature and its 'nasty, brutish, and short' life. Notice how rigorously he derives authority from fear. Write what the theory assumes about human nature, and where his premises need testing."
+    },
+    "tags": [
+      "British",
+      "Philosophy",
+      "Politics"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-second-treatise",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "Two Treatises of Government",
+    "teaser": "Locke's 1689 argument for natural rights, property, and the consent of the governed — the philosophical foundation of the American and French revolutions, and of every liberal constitution since.",
+    "imageUrl": "",
+    "byline": "John Locke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The second treatise, on civil government",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on the state of nature and property. Notice how Locke grounds government in consent rather than conquest. Write how his account of labor and property still shapes arguments about ownership and justice."
+    },
+    "tags": [
+      "British",
+      "Philosophy",
+      "Liberalism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-social-contract",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "The Social Contract",
+    "teaser": "Rousseau's 1762 tract that begins 'Man is born free, and everywhere he is in chains' — the general will, the legislator, and the theory of legitimate authority that both inspired and haunted revolutions.",
+    "imageUrl": "",
+    "byline": "Jean-Jacques Rousseau",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Book One, the opening chapters",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where Rousseau dissolves and rebuilds the foundations of society. Notice how compressed and prophetic his sentences are. Write what 'the general will' means, and why the concept has been used for both freedom and tyranny."
+    },
+    "tags": [
+      "French",
+      "Philosophy",
+      "Revolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-common-sense",
+    "categoryId": "BOOKS",
+    "subtype": "Pamphlet",
+    "name": "Common Sense",
+    "teaser": "Thomas Paine's 1776 pamphlet that turned colonial grievance into the case for independence — written in a style 'calculated for the common reader.' The best-selling American book of its century.",
+    "imageUrl": "",
+    "byline": "Thomas Paine",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where Paine argues from 'simple facts, plain arguments, and common sense.' Notice how he speaks to the reader as an equal. Write what made the pamphlet so persuasive in 1776 — and whether its style still works."
+    },
+    "tags": [
+      "American",
+      "Revolution",
+      "Pamphlet"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-rights-of-man",
+    "categoryId": "BOOKS",
+    "subtype": "Pamphlet",
+    "name": "Rights of Man",
+    "teaser": "Paine's 1791 reply to Burke's attack on the French Revolution — a defense of natural rights, republicanism, and the poor, written with a fury that got him tried for treason in England.",
+    "imageUrl": "",
+    "byline": "Thomas Paine",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where Paine answers Burke's defense of inherited privilege. Notice how he treats government as an instrument of the people rather than a mystery. Write what 'the rights of man' meant then, and how far those rights now extend."
+    },
+    "tags": [
+      "American",
+      "Revolution",
+      "Pamphlet"
+    ],
+    "tier": 2
+  }
+]

@@ -1,0 +1,376 @@
+[
+  {
+    "id": "discovery-big-oil",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Oil Refining (1850s)",
+    "teaser": "In the 1850s, 'rock oil' was a nuisance seeping into Pennsylvania wells — until chemists learned to distill it into kerosene, which burned cleanly in lamps. The refinery process — cracking crude into fractions — created an industry that now runs the world. The first oil refinery opened in 1856; the modern age of petroleum followed.",
+    "imageUrl": "",
+    "byline": "Benjamin Silliman & others",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The history of petroleum refining",
+      "durationMinutes": 25,
+      "instruction": "Read how Silliman's report on rock oil convinced investors, and how simple distillation gave way to cracking — breaking big molecules into gasoline. Then the scale: a barrel of crude becomes gasoline, diesel, plastics, and asphalt, each fraction from the same original brew. The chemistry that moved the world."
+    },
+    "tags": ["Chemistry", "Industry", "1850s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-bessemer",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Bessemer Process (1856)",
+    "teaser": "Henry Bessemer blew air through molten iron, burning out the impurities — and turned iron into cheap, strong steel in minutes instead of weeks. Steel prices fell by 80% within two decades. The process built railroads, skyscrapers, and bridges — the skeleton of the industrial world.",
+    "imageUrl": "",
+    "byline": "Henry Bessemer",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Bessemer process and the steel age",
+      "durationMinutes": 25,
+      "instruction": "Read how Bessemer's 'converter' — a pear-shaped vessel with air blown through the bottom — oxidized carbon out of iron. The trick had been discovered by William Kelly in the US but Bessemer patented and marketed it. Steel, once precious as silver, became the world's building block in a single decade."
+    },
+    "tags": ["Engineering", "Industry", "1850s", "British"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-aluminium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Aluminium Smelting (1886)",
+    "teaser": "Aluminium was once more precious than gold — Napoleon III served his best guests on aluminium plates. Then two 22-year-olds, Charles Hall and Paul Héroult, independently discovered how to smelt it with electricity in 1886. The metal of airships, aircraft, and cans became cheap overnight. The young men never met, but their process is still the only way to make aluminium.",
+    "imageUrl": "",
+    "byline": "Hall & Héroult",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Hall-Héroult process",
+      "durationMinutes": 25,
+      "instruction": "Read how dissolving alumina in molten cryolite and passing a current through it splits the metal out — the discovery made simultaneously on opposite sides of the Atlantic by two teenagers. Hall fought for years to raise money; today his process makes 60 million tonnes of aluminium a year. From royal dinnerware to soda cans."
+    },
+    "tags": ["Chemistry", "Industry", "1880s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-haber",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Haber Process (1909)",
+    "teaser": "Fritz Haber found a way to pull nitrogen from the air and turn it into ammonia — fertilizer for the world. Half the nitrogen in your body came from his process. He won the 1918 Nobel, and his discovery fed billions — while his other work, poison gas, killed thousands. The most consequential and most morally complicated invention in chemistry.",
+    "imageUrl": "",
+    "byline": "Fritz Haber & Carl Bosch",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Haber-Bosch process and its history",
+      "durationMinutes": 25,
+      "instruction": "Read how Haber, at high temperature and pressure with an iron catalyst, bound atmospheric nitrogen to hydrogen. Carl Bosch scaled it to industry. The result: cheap ammonia, endless fertilizer, and a population boom. Then the shadow — Haber's gas warfare, and his later flight from the Nazis who used his science. One process, two legacies."
+    },
+    "tags": ["Chemistry", "Agriculture", "1900s", "German"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-nylon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Nylon (1935)",
+    "teaser": "Wallace Carothers at DuPont polymerized molecules into a fiber stronger than silk — nylon. Its 1939 debut, nylon stockings, caused riots at department stores; WWII turned the material to parachutes and ropes. Carothers, a depressive genius, died by suicide weeks before his discovery changed the world. The first fully synthetic fiber.",
+    "imageUrl": "",
+    "byline": "Wallace Carothers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The invention of nylon at DuPont",
+      "durationMinutes": 25,
+      "instruction": "Read how Carothers' fundamental research on polymers — condensation reactions — yielded a fiber with silk's strength at half the price, and how DuPont's 1939 'Nylon Week' became a retail frenzy. The material is everywhere now: toothbrushes, ropes, carpets, and the 'stocking wars' that started it all."
+    },
+    "tags": ["Chemistry", "Materials", "1930s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-teflon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Teflon (1938)",
+    "teaser": "Roy Plunkett found a white powder inside a supposedly empty canister of refrigerant — a substance that resisted every chemical and solvent. Polytetrafluoroethylene, or Teflon, was almost impossibly slippery. It went to war first (seals for the Manhattan Project), then to kitchens as non-stick pans. The accidental polymer with no enemies.",
+    "imageUrl": "",
+    "byline": "Roy Plunkett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The accidental discovery of Teflon",
+      "durationMinutes": 20,
+      "instruction": "Read how Plunkett's tetrafluoroethylene gas had polymerized inside the cylinder under pressure, forming a waxy solid that nothing could stick to. Teflon's first big job: gaskets for the atomic bomb's uranium enrichment. Then the kitchen revolution of the 1960s. (And the later PFAS concerns — the same stability that made it useful makes it persistent.)"
+    },
+    "tags": ["Chemistry", "Materials", "1930s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-silicone",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Silicones (1930s-40s)",
+    "teaser": "Chemists at Corning and Dow tried to make a glass that wouldn't crack in heat — and found silicones, polymers with silicon instead of carbon backbones. They resist heat, cold, water, and electricity like nothing organic. Silicone went from wartime sealants to breast implants, bakeware, and the chips inside your phone.",
+    "imageUrl": "",
+    "byline": "Corning Glass & Dow Corning",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery and rise of silicones",
+      "durationMinutes": 25,
+      "instruction": "Read how Eugene Rochow's direct process made silicone synthesis practical in 1940, and how the material's indifference to heat made it ideal for aircraft engines in WWII. Then the spread: cookware, medical devices, electronics. A material with the strength of a rock and the flexibility of a rubber band."
+    },
+    "tags": ["Chemistry", "Materials", "1930s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-kevlar",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Kevlar (1965)",
+    "teaser": "Stephanie Kwolek, a chemist at DuPont, was trying to make a lightweight fiber for tires when she produced a cloudy solution that her colleagues wanted to discard. She insisted they spin it — and it was five times stronger than steel by weight. Kevlar now stops bullets in vests worn by millions. The woman who saved countless lives, from a cloudy liquid nobody wanted.",
+    "imageUrl": "",
+    "byline": "Stephanie Kwolek",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of Kevlar",
+      "durationMinutes": 25,
+      "instruction": "Read how Kwolek's 'liquid crystalline' solution — thought to be contaminated — spun into a fiber of extraordinary strength, and how DuPont spent a decade perfecting it. Kevlar's first fame came from the police vest; it now reinforces tires, ropes, and spacecraft. Kwolek received the National Medal of Technology in 1996."
+    },
+    "tags": ["Chemistry", "Materials", "1960s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-bakelite",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Bakelite (1907)",
+    "teaser": "Leo Baekeland, a Belgian chemist who'd made a fortune in photography, set out to make a synthetic shellac and instead invented the first fully synthetic plastic — Bakelite. It could be molded, machined, and mass-produced, and it powered the early electrical age. 'The material of a thousand uses' launched the Plastic Age.",
+    "imageUrl": "",
+    "byline": "Leo Baekeland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The invention of Bakelite",
+      "durationMinutes": 25,
+      "instruction": "Read how Baekeland, working in his home lab, condensed phenol and formaldehyde into a hard, heat-proof resin, and named it after himself. Bakelite made cheap radios, telephones, and switchboards possible — and the 'Bakelite' jewelry and radios are now collectible antiques. The first plastic, and still the one that started everything."
+    },
+    "tags": ["Chemistry", "Materials", "1900s", "Belgian-American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ammonia-industrial",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Industrial Ammonia (1913)",
+    "teaser": "Carl Bosch scaled Fritz Haber's lab reaction into a factory the size of a city — the first industrial Haber process plant at Oppau, Germany. Within a year it was producing ammonia that became both fertilizer and explosives. The marriage of science and industry, for better and worse. Bosch's plant is the ancestor of every chemical factory.",
+    "imageUrl": "",
+    "byline": "Carl Bosch",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "BASF's Oppau plant and the scaling of Haber-Bosch",
+      "durationMinutes": 25,
+      "instruction": "Read how Bosch solved the engineering nightmares — steel that embrittled under hydrogen pressure, seals that failed, catalysts that died — to make Haber's process industrial. The plant's first ammonia went to explosives for WWI; a generation later the same chemistry fed the world's farms. One reactor, both war and bread."
+    },
+    "tags": ["Chemistry", "Industry", "1910s", "German"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-radioactivity-uses",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Radiotherapy (1896-1901)",
+    "teaser": "Within months of X-rays and radioactivity being discovered, doctors tried them on tumors — the first radiotherapy was delivered in 1896, a year after Röntgen. Marie Curie drove mobile X-ray vans ('petites Curies') to the WWI front, and radium therapy became a craze before its dangers were understood. Radiation medicine was born from the very first glow.",
+    "imageUrl": "",
+    "byline": "Curie, Röntgen & early radiologists",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The early history of radiation therapy",
+      "durationMinutes": 25,
+      "instruction": "Read how early doctors treated tumors with radium and X-rays — sometimes successfully, often dangerously, as they learned dosage by trial and error. Then Curie's war work: the mobile X-ray units that examined a million soldiers. The same rays that can cause cancer, aimed with increasing precision to cure it."
+    },
+    "tags": ["Medicine", "Physics", "1890s", "Polish-French"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-xray-crystallography",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "X-ray Crystallography (1912)",
+    "teaser": "Max von Laue fired X-rays through a crystal and got a pattern of dots — proving crystals are regular lattices and giving science a way to see atoms. The Braggs (father and son) turned it into a technique, and crystallography later solved DNA, penicillin, and countless protein structures. The microscope that sees the invisible.",
+    "imageUrl": "",
+    "byline": "Max von Laue; the Braggs",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of X-ray diffraction",
+      "durationMinutes": 25,
+      "instruction": "Read how von Laue's student experiment — X-rays through copper sulfate — produced the interference pattern that revealed the atomic lattice, and how the Braggs' law (nλ = 2d sinθ) made the technique practical. Then the payoff: Franklin's Photo 51 led to DNA's structure. Crystals, X-rays, and the shape of life itself."
+    },
+    "tags": ["Physics", "Chemistry", "1910s", "German"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-spectroscopy",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Spectroscopy (1859)",
+    "teaser": "Bunsen and Kirchhoff passed light through a prism and realized each element has a fingerprint of bright lines — and that the dark lines in sunlight matched the elements' fingerprints. They'd invented spectroscopy, and discovered helium in the Sun before it was found on Earth. The technique that reads the chemistry of stars from 93 million miles away.",
+    "imageUrl": "",
+    "byline": "Bunsen & Kirchhoff",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of spectral analysis",
+      "durationMinutes": 25,
+      "instruction": "Read how Kirchhoff showed that each element emits and absorbs specific wavelengths — and that the Sun's dark Fraunhofer lines are absorption fingerprints. They found sodium, then in 1868 Janssen and Lockyer saw a bright yellow line that turned out to be a new element: helium, from helios, the Sun. Chemistry reached the stars."
+    },
+    "tags": ["Physics", "Chemistry", "1850s", "German"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-chromatography",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Chromatography (1900-1952)",
+    "teaser": "Mikhail Tsvet separated plant pigments by pouring them through a chalk column — the colored bands gave the method its name (chroma = color). A century of refinement — paper, gas, and liquid chromatography — made it the workhorse of chemistry and biology. Every drug test, every protein purification, every lab runs on Tsvet's idea.",
+    "imageUrl": "",
+    "byline": "Mikhail Tsvet",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of chromatography",
+      "durationMinutes": 25,
+      "instruction": "Read how Tsvet, a Russian botanist, separated leaf pigments into distinct bands on a chalk column in 1901. The technique was ignored for decades, revived by Martin and Synge's paper chromatography in the 1940s (Nobel 1952). Now it separates everything from blood samples to perfume. One column of chalk, the world's lab filter."
+    },
+    "tags": ["Chemistry", "Biology", "1900s", "Russian"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-mass-spectrometry",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Mass Spectrometry (1912)",
+    "teaser": "J.J. Thomson bent beams of charged atoms in magnetic fields and found they separated by weight — the mass spectrograph. Francis Aston used it to discover isotopes, showing that even 'pure' elements are mixtures. Mass specs now sniff luggage for explosives, date ancient bones, and weigh the proteins inside your cells. The scale of atoms, made practical.",
+    "imageUrl": "",
+    "byline": "Thomson & Aston",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The invention of the mass spectrograph",
+      "durationMinutes": 25,
+      "instruction": "Read how Thomson's parabola method and Aston's refined instrument revealed that neon came in two weights — isotopes — a shock to the atomic theory of the day. Aston won the 1922 Nobel. Today's mass spectrometers can weigh a single protein and spot a molecule of explosive in airport air. The balance for the invisible."
+    },
+    "tags": ["Chemistry", "Physics", "1910s", "British"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-sterilization",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Autoclave Sterilization (1879)",
+    "teaser": "Charles Chamberland, Pasteur's assistant, built a pressure cooker that killed every microbe — the autoclave. Combined with Lister's antiseptic surgery, it made hospitals places that cured instead of killed. The humble autoclave still sterilizes surgical instruments, laboratory media, and tattoo needles. A pressure cooker that saves more lives than any scalpel.",
+    "imageUrl": "",
+    "byline": "Charles Chamberland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The invention of the autoclave",
+      "durationMinutes": 20,
+      "instruction": "Read how Chamberland's 1879 'digestor' — superheated steam under pressure — killed even heat-resistant spores, and how it became standard in labs and hospitals. The principle is unchanged 140 years later: 121°C, 15 psi, 15 minutes. Sterility, manufactured by pressure and steam."
+    },
+    "tags": ["Medicine", "Engineering", "1870s", "French"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-vitamin-c",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Vitamin C Isolated (1932)",
+    "teaser": "Albert Szent-Györgyi isolated the molecule that cures scurvy from paprika — of all sources — and called it 'hexuronic acid' before it was renamed ascorbic acid (anti-scurvy). He won the 1932 Nobel for it. The discovery completed a 400-year story from Lind's limes to a pure molecule you can swallow.",
+    "imageUrl": "",
+    "byline": "Albert Szent-Györgyi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Szent-Györgyi's isolation of ascorbic acid",
+      "durationMinutes": 25,
+      "instruction": "Read how Szent-Györgyi, working in Szeged, Hungary, found vitamin C in paprika when his usual sources (adrenal glands) ran short — and the local vegetable happened to be loaded with it. The 1932 paper identified it as the anti-scurvy factor. He later won a second Nobel nomination and fled Hungary, carrying his work in a suitcase."
+    },
+    "tags": ["Biochemistry", "Nutrition", "1930s", "Hungarian"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-thiamine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Thiamine (Vitamin B1) (1926)",
+    "teaser": "The first vitamin isolated — thiamine, the anti-beriberi factor — was crystallized by Dutch scientists Jansen and Donath in 1926 after grinding a ton of rice polishings. It took 300 kilograms of rice husks to get 100 milligrams of pure vitamin. Eijkman had shown the disease was dietary in 1897; thiamine made it a chemistry.",
+    "imageUrl": "",
+    "byline": "Jansen & Donath",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The isolation of thiamine from rice polishings",
+      "durationMinutes": 25,
+      "instruction": "Read how the Dutch team, following Eijkman's chicken clue, extracted thiamine from the very rice bran that prevents beriberi — and how hard it was: tons of material, vanishingly small yields. Robert Williams later determined its structure and synthesized it in 1936. Enriched flour has included it ever since. The first vitamin, out of the husks."
+    },
+    "tags": ["Biochemistry", "Nutrition", "1920s", "Dutch"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-niacin",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Niacin and Pellagra (1937)",
+    "teaser": "Pellagra — 'the disease of the four Ds' (dermatitis, diarrhea, dementia, death) — ravaged the American South for decades before Conrad Elvehjem showed it was niacin deficiency. His 'black tongue' dog experiments in 1937 cracked it within a year of the effort beginning. The discovery that a corn-based diet could cause madness and death — and that one vitamin could end it.",
+    "imageUrl": "",
+    "byline": "Conrad Elvehjem",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery that niacin cures pellagra",
+      "durationMinutes": 25,
+      "instruction": "Read how Joseph Goldberger's earlier work proved pellagra wasn't infectious (he even ate patient blood to prove it), and how Elvehjem's identification of niacin finished the job. States added niacin to flour, and the 'four Ds' vanished. A disease that mimicked insanity, cured by a vitamin in bread."
+    },
+    "tags": ["Biochemistry", "Nutrition", "1930s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-b12",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Vitamin B12 (1948)",
+    "teaser": "Pernicious anemia was a death sentence until George Minot and William Murphy discovered in 1926 that eating pounds of raw liver cured it. Twenty years later, a massive Merck effort isolated the active molecule — vitamin B12 — from liver, the most complex vitamin of all. Minot and Murphy shared the 1934 Nobel; the molecule they chased contains a cobalt atom at its heart.",
+    "imageUrl": "",
+    "byline": "Minot, Murphy & Merck team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The liver diet cure and the isolation of B12",
+      "durationMinutes": 25, 
+      "instruction": "Read how Minot's liver-heavy diet — a half-pound a day — revived dying patients within weeks, and how the hunt for the active factor ended with B12's isolation in 1948. It's the only vitamin with a metal atom (cobalt) at its core. Modern supplements manufacture it from bacteria, not beef. The raw liver diet, made obsolete by chemistry."
+    },
+    "tags": ["Biochemistry", "Medicine", "1920s", "American"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-cysteine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Sanger's Insulin Sequence (1951-55)",
+    "teaser": "Frederick Sanger spent a decade working out the exact order of amino acids in insulin — the first protein ever sequenced — proving proteins have precise, determined structures. The 1958 Nobel followed. His methods made the entire field of protein science possible, and he later won a second Nobel for DNA sequencing. The man who read life's alphabet, twice.",
+    "imageUrl": "",
+    "byline": "Frederick Sanger",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sanger's determination of the insulin sequence",
+      "durationMinutes": 25,
+      "instruction": "Read how Sanger chopped insulin into fragments with acids and enzymes, labeled the ends, and pieced the puzzle back together — 51 amino acids, two chains, three disulfide bridges. The work took years of painstaking chemistry. When he announced the sequence, the idea that proteins had exact structures became fact. One molecule, one method, one new science."
+    },
+    "tags": ["Biochemistry", "Proteins", "1950s", "British"],
+    "tier": 1
+  },
+  {
+    "id": "discovery-protein-fold",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Protein Folding Predicted (2020)",
+    "teaser": "For 50 years, the 'protein folding problem' — predicting a protein's 3D shape from its amino acid sequence — resisted biology's best minds. In 2020, DeepMind's AlphaFold solved it for most proteins, with accuracy rivaling lab experiments. It was called the biggest advance in biology since the genome. A half-century of science, compressed into a neural network.",
+    "imageUrl": "",
+    "byline": "DeepMind AlphaFold team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The AlphaFold breakthrough of 2020",
+      "durationMinutes": 25,
+      "instruction": "Read how AlphaFold used the evolutionary history of proteins — millions of sequences co-varying — to predict 3D structure, beating every lab method at the CASP14 competition. The database it produced holds 200 million predicted structures. Drug design, enzyme engineering, and disease research all moved years forward overnight. The shape of life, computed."
+    },
+    "tags": ["Biology", "AI", "2020s", "British"],
+    "tier": 1
+  }
+]

@@ -1,0 +1,1 @@
+Curie’s Pet designer is more expressive: draw separate tail, accessory, effect, and antenna layers with brush, fill, erase, and eyedropper tools. Toggle generated details individually, export layered artwork to PNG, and try richer Robot and Ghost presets with custom asleep poses.

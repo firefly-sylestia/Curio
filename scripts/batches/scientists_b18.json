@@ -1,0 +1,268 @@
+[
+  {
+    "id": "scientist-james-hutton",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "James Hutton",
+    "teaser": "The Scottish farmer and physician who stared at rock strata and saw 'no vestige of a beginning, no prospect of an end.' His deep time — the Earth as immensely old and ever-changing — founded modern geology.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Strata",
+      "targetName": "Hutton's unconformity at Siccar Point",
+      "instruction": "Learn about Siccar Point, where Hutton saw tilted ancient rocks capped by younger horizontal layers. Write what an unconformity proves and how 'deep time' changed our sense of Earth's age.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-charles-lyell",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Charles Lyell",
+    "teaser": "The Scottish geologist whose Principles of Geology argued that slow, everyday forces — erosion, uplift, deposition — built the Earth's features. Darwin carried Lyell's book on the Beagle and built evolution on its slow ticking.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Slow",
+      "targetName": "Lyell's uniformitarianism",
+      "instruction": "Learn Lyell's principle that 'the present is the key to the past.' Write one landscape feature, like a river valley, explained by slow forces and why Lyell's deep time made evolution plausible.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-alfred-wegener",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Alfred Wegener",
+    "teaser": "The German meteorologist who noticed that Africa and South America fit like puzzle pieces and proposed continental drift. He was ridiculed for decades and died on a Greenland expedition — vindicated only after plate tectonics was proven.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drift",
+      "targetName": "Wegener's supercontinent Pangaea",
+      "instruction": "Learn the evidence Wegener marshaled: matching coastlines, fossils, and glacial striations. Write why geologists rejected his mechanism and how seafloor spreading finally proved him right.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-marie-tharp",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Marie Tharp",
+    "teaser": "The American cartographer who mapped the ocean floor by hand and discovered the mid-Atlantic ridge's central rift — the smoking gun for seafloor spreading. For years her male colleague refused to believe a woman's discovery.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Map",
+      "targetName": "Tharp's ocean floor maps",
+      "instruction": "Learn how Tharp turned echo-sounder depth data into the first maps of the seafloor. Write how the rift valley down the mid-Atlantic ridge revealed where new crust is born.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-inge-lehmann",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Inge Lehmann",
+    "teaser": "The Danish seismologist who studied earthquake waves and discovered Earth's solid inner core, sitting like a hidden pearl at the center of the molten outer core. Her 1936 paper overturned the Earth models of her time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Seismic",
+      "targetName": "Lehmann's inner core",
+      "instruction": "Learn how Lehmann used earthquake P-wave shadows to deduce a solid inner core. Write the evidence — waves that should not arrive but did — and how her discovery revised the Earth's structure.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-harry-hess",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Harry Hess",
+    "teaser": "The American geologist who commanded a Navy transport in WWII and used its sonar to sound the Pacific floor. His 'seafloor spreading' hypothesis — new crust rises at ridges and sinks at trenches — made Wegener's drift work.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Spread",
+      "targetName": "Hess's seafloor spreading",
+      "instruction": "Learn how Hess realized the ocean floor is young, spreading outward from mid-ocean ridges. Write how magnetic stripes on the seafloor, added later, confirmed his hypothesis and dated the spreading.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-john-tuzo-wilson",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "John Tuzo Wilson",
+    "teaser": "The Canadian geophysicist who named the moving slabs 'plates' and described transform faults and hot spots like Hawaii. He turned scattered seafloor evidence into the unifying theory of plate tectonics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Tectonic",
+      "targetName": "Wilson's plate tectonics",
+      "instruction": "Learn how Wilson combined continental drift and seafloor spreading into plate tectonics. Write what a transform fault is and how the Hawaiian hot spot reveals a plate moving over a fixed plume.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-milutin-milankovic",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Milutin Milanković",
+    "teaser": "The Serbian mathematician who calculated how Earth's wobbles, tilt, and orbit shape its climate over tens of thousands of years. His cycles explain the coming and going of ice ages — confirmed by deep-sea cores decades later.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cycle",
+      "targetName": "Milanković cycles",
+      "instruction": "Learn the three Milanković cycles: eccentricity, obliquity, and precession, and how they alter sunlight. Write how these cycles pace ice ages and how ocean sediments confirmed them.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-edward-lorenz",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Edward Lorenz",
+    "teaser": "The MIT meteorologist who rounded off a number in a weather simulation and watched the forecast diverge wildly — discovering chaos. A butterfly flapping in Brazil could set off a tornado in Texas, and long-range weather prediction has hard limits.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Chaos",
+      "targetName": "Lorenz's butterfly effect",
+      "instruction": "Learn how Lorenz found sensitive dependence on initial conditions in his weather model. Write what the butterfly effect means, why forecasts degrade after about ten days, and how chaos differs from randomness.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-wilhelm-wundt",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Wilhelm Wundt",
+    "teaser": "The German physician who opened the first psychology laboratory in 1879, measuring reaction times and consciousness with careful experiments. He split psychology from philosophy and made it a science of measurement.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Measure",
+      "targetName": "Wundt's first lab",
+      "instruction": "Learn about Wundt's Leipzig laboratory and his method of introspection. Write one experiment he ran, like reaction time or attention, and why the lab marks psychology's birthday.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-william-james",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "William James",
+    "teaser": "The American philosopher-psychologist whose Principles of Psychology asked what the mind is for, not just what it is. He gave us 'stream of consciousness,' habit, and a pragmatist's view of truth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Stream",
+      "targetName": "James's stream of consciousness",
+      "instruction": "Read a chapter of James's Principles of Psychology on habit or the stream of thought. Write his argument about habit as 'the enormous flywheel of society' and why he matters to modern psychology.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-ivan-pavlov",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ivan Pavlov",
+    "teaser": "The Russian physiologist who won a Nobel for digestion research and stumbled onto something bigger: dogs salivating at the sound of a bell. His conditioned reflexes became the foundation of behaviorism and learning science.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Condition",
+      "targetName": "Pavlov's dogs",
+      "instruction": "Learn how Pavlov paired a bell with food until the bell alone made dogs salivate. Write the steps of classical conditioning and give one modern example, from ads to alarms.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-elizabeth-loftus",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Elizabeth Loftus",
+    "teaser": "The American psychologist who showed that memory is not a recording but a reconstruction — easily edited by misleading questions. Her research on false memories has reshaped how courts treat eyewitness testimony.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Recall",
+      "targetName": "Loftus's false memory research",
+      "instruction": "Learn Loftus's experiments with the 'lost in the mall' technique and misleading post-event information. Write how eyewitness memory can be distorted and what courts now do about it.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-abraham-maslow",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Abraham Maslow",
+    "teaser": "The American psychologist who arranged human needs in a pyramid — from food and safety up to belonging, esteem, and self-actualization. His hierarchy remains the most famous map of motivation, even if the order is fuzzier than the diagram.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Climb",
+      "targetName": "Maslow's hierarchy of needs",
+      "instruction": "Learn the five levels of Maslow's hierarchy and the idea of self-actualization. Write how each level builds on the last and find one real-world critique of the strict pyramid order.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-charles-babbage",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Charles Babbage",
+    "teaser": "The British mathematician who designed the Analytical Engine — a programmable mechanical computer with a memory and a processor — a century before electronics. He died frustrated; his 'Difference Engine' was only built in the 1990s.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Engine",
+      "targetName": "Babbage's Analytical Engine",
+      "instruction": "Learn how the Analytical Engine separated memory from the 'mill' (CPU) and was programmed with punched cards. Write how Ada Lovelace imagined it could compose music, and why it was never built.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-konrad-zuse",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Konrad Zuse",
+    "teaser": "The German engineer who built the Z3 in 1941 — the world's first working programmable computer, made of telephone relays in his parents' living room. His wartime work was ignored, and he rebuilt his machines from memory after the war.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Relay",
+      "targetName": "Zuse's Z3",
+      "instruction": "Learn how Zuse built the Z3 from relays and punched tape, performing floating-point arithmetic automatically. Write why it counts as the first programmable computer and how wartime secrecy buried it.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-john-mccarthy",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "John McCarthy",
+    "teaser": "The American computer scientist who coined 'artificial intelligence' in 1956, invented the Lisp programming language, and championed logic as the language of thought. His Dartmouth workshop gave the field its name and its agenda.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Think",
+      "targetName": "McCarthy's Dartmouth workshop",
+      "instruction": "Learn about the 1956 Dartmouth Summer Research Project that launched AI. Write what the founders hoped machines could do and how Lisp, which McCarthy created, shaped AI research for decades.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-edsger-dijkstra",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Edsger Dijkstra",
+    "teaser": "The Dutch computer scientist who wrote the shortest-path algorithm every map app uses, invented structured programming, and warned that debugging is harder than writing code. 'Simplicity is a great virtue,' he insisted, 'but it requires hard work.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Route",
+      "targetName": "Dijkstra's algorithm",
+      "instruction": "Learn Dijkstra's algorithm for finding the shortest path in a graph. Write how it works step by step on a small map and why his 'Go To Statement Considered Harmful' letter changed programming.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-barbara-liskov",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Barbara Liskov",
+    "teaser": "The American computer scientist who created the Liskov substitution principle — the rule that keeps object-oriented programs reliable — and led the design of CLU, a language that introduced abstract data types. She won the Turing Award in 2008.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Substitute",
+      "targetName": "Liskov's substitution principle",
+      "instruction": "Learn the Liskov substitution principle: a subclass should stand in for its parent without breaking behavior. Write a small example of when substituting breaks a program and why she earned the Turing Award.",
+      "durationMinutes": 20
+    }
+  }
+]

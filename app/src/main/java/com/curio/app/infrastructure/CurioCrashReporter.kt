@@ -90,7 +90,7 @@ object CurioCrashReporter {
     }
 
     fun testCrash() {
-        throw RuntimeException("Test crash from Curio — this is intentional.")
+        throw RuntimeException("Test crash from Curio. This is intentional.")
     }
 
     fun buildCrashLog(thread: Thread, throwable: Throwable): String = buildString {
@@ -99,7 +99,7 @@ object CurioCrashReporter {
         appendLine("Time: ${fmt.format(Date())}")
         appendLine("Thread: ${thread.name}")
         appendLine("Exception: ${throwable::class.java.name}")
-        appendLine("Message: ${throwable.message ?: "—"}")
+        appendLine("Message: ${throwable.message ?: "no message"}")
         runCatching {
             val ctx = appContext ?: return@runCatching
             val pi = ctx.packageManager.getPackageInfo(ctx.packageName, 0)

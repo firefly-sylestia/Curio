@@ -1,6 +1,8 @@
 package com.curio.app.data
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -547,6 +549,30 @@ private fun ExploreSession.toJson(): JSONObject = JSONObject()
     .put("pausedAtMillis", pausedAtMillis ?: JSONObject.NULL)
     .put("accumulatedPausedMillis", accumulatedPausedMillis)
     .put("pillHidden", pillHidden)
+
+/**
+ * Opens the topic's explore search page WITHOUT recording quest progress —
+ * no quest chains, no dailies, no pet events, no recents, no done-mark and
+ * no timer (v8.12). Used by the silent "Explore" buttons on the Topic
+ * Database and the browse-mode reveal: browsing around must never inflate
+ * the user's progress, so it is a pure out-of-app search.
+ *
+ * v8.13 — it feeds the CATEGORY PASSPORT's engagement counter
+ * ([CurioPassport.noteExplore]) and awards the tiny exploration XP
+ * ([CurioQuests.awardXpOnly]) — the user asked for XP on these too — but
+ * NOTHING else: the pet and the discovery quests stop suggesting a lane the
+ * user already tried, while chains, dailies, recents and the done-mark stay
+ * untouched.
+ */
+fun openSilentExplore(context: Context, topic: CurioTopic) {
+    CurioPassport.noteExplore(context, topic.categoryId)
+    // A silent browse still counts as exploration XP (same as a real
+    // explore) without any of the quest tracking.
+    CurioQuests.awardXpOnly(context, 5)
+    runCatching {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(buildExploreSearchUrl(topic))))
+    }
+}
 
 /**
  * Formats elapsed explore time as a friendly reading — "34s", "12m 5s",

@@ -1,0 +1,482 @@
+[
+  {
+    "id": "wildcard-fingals-cave",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Fingal's Cave",
+    "teaser": "A sea cave on a Scottish isle whose walls are thousands of hexagonal basalt columns — nature's own cathedral, with waves for an organ. Its acoustics inspired Mendelssohn's Hebrides overture, and no one knows why the columns are so perfect.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Enter",
+      "targetName": "Fingal's Cave, Staffa, Scotland",
+      "durationMinutes": 60,
+      "instruction": "Take a boat to Staffa and enter the cave's cathedral-like mouth. Run your hand along the hexagonal columns and read how they formed as lava cooled and cracked in perfect symmetry. Listen to the waves echo — Mendelssohn did, in 1829."
+    },
+    "tags": [
+      "Place",
+      "Scotland",
+      "Geology"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-giant-causeway",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Giant's Causeway",
+    "teaser": "Forty thousand interlocking basalt columns step into the Irish Sea like a bridge built by giants. Legend says a giant built it to fight a rival in Scotland; geology says a lava lake cooled and cracked into perfect hexagons 60 million years ago.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Step",
+      "targetName": "The Giant's Causeway, County Antrim",
+      "durationMinutes": 90,
+      "instruction": "Walk down onto the columns and check their shapes: mostly hexagonal, with a few pentagons and heptagons. Read how slow, even cooling made the cracks meet at 120° angles, and how the same rock continues underwater to Staffa in Scotland."
+    },
+    "tags": [
+      "Place",
+      "Ireland",
+      "Geology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-ayers-rock-uluru",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Uluru",
+    "teaser": "A single sandstone monolith rises 348 meters above the red Australian desert, sacred to the Anangu people, who ask visitors not to climb it. At sunrise and sunset it glows like a burning ember — and it is only the tip of a rock that continues far underground.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Uluru at sunrise",
+      "durationMinutes": 60,
+      "instruction": "Watch the light move across Uluru at sunrise or sunset and note how its color shifts from ochre to deep red to violet. Read the Anangu creation stories for the rock, and why the climb was closed out of respect in 2019."
+    },
+    "tags": [
+      "Place",
+      "Australia",
+      "Sacred"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-kata-tjuta",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Kata Tjuta",
+    "teaser": "Thirty-six red domes rise near Uluru, so old they were already ancient when Uluru formed. The Anangu call them 'many heads'; early explorers called them the Olgas. Their valleys are quiet corridors of red rock, spinifex, and sky.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "The Valley of the Winds, Kata Tjuta",
+      "durationMinutes": 90,
+      "instruction": "Walk the Valley of the Winds trail between the domes. Note the different rock — conglomerate, a cemented pudding of boulders — and the desert oaks in the gullies. Reflect on how this place, older than the rock beside it, shaped Anangu culture."
+    },
+    "tags": [
+      "Place",
+      "Australia",
+      "Desert"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-james-bond-island-koh-tap",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Koh Panyee",
+    "teaser": "A whole fishing village — mosques, school, football pitch — built on stilts over the Andaman Sea off Thailand's coast, founded by sea gypsies in the 1940s. Its floating football team once built a pitch from scrap wood and became national legends.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Visit",
+      "targetName": "Koh Panyee stilt village, Phang Nga Bay",
+      "durationMinutes": 60,
+      "instruction": "Learn how the village grew from a family of boat dwellers to a town on stilts. Watch the story of its floating football pitch, built by boys who loved the game but had no land — and reflect on what people build when the land runs out."
+    },
+    "tags": [
+      "Place",
+      "Thailand",
+      "Floating Village"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-venice-canals",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Venice",
+    "teaser": "A city of 118 islands linked by 400 bridges, built on millions of wooden piles driven into mud — an engineering gamble that has lasted a thousand years. It is slowly sinking while the sea rises, and every flood reminds the world it is borrowed time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drift",
+      "targetName": "Venice by vaporetto and foot",
+      "durationMinutes": 90,
+      "instruction": "Take a vaporetto along the Grand Canal and watch the palazzos lean on their piles. Read how Venice was founded by refugees on a lagoon, how the piles petrified underwater, and how the MOSE flood barriers now try to hold back the sea."
+    },
+    "tags": [
+      "Place",
+      "Italy",
+      "Canals"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-cliffs-moher",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Cliffs of Moher",
+    "teaser": "The Atlantic slams against 214-meter cliffs on Ireland's west coast — the highest sea cliffs in Europe, home to tens of thousands of puffins and guillemots. On a clear day you can see the Aran Islands and the mountains of Connemara.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Cliffs of Moher, County Clare",
+      "durationMinutes": 60,
+      "instruction": "Walk the cliff path and watch the seabirds ride the updrafts below you. Read how the cliffs are layered sandstone and shale from a river delta 320 million years ago, and how the Atlantic is still cutting them back."
+    },
+    "tags": [
+      "Place",
+      "Ireland",
+      "Coast"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-dunhuang-caves",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Mogao Caves, Dunhuang",
+    "teaser": "In the Gobi Desert, 735 caves hold a thousand years of Buddhist art — murals and statues painted by Silk Road pilgrims from the 4th to the 14th century. Called the Caves of the Thousand Buddhas, they are the largest treasure house of Buddhist art on Earth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Enter",
+      "targetName": "The Mogao grottoes at Dunhuang",
+      "durationMinutes": 60,
+      "instruction": "Read how Dunhuang's oasis made it a crossroads where monks carved caves for 1,000 years. Study a mural's details — flying apsaras, musicians, travelers — and how the Library Cave's 50,000 manuscripts revealed Silk Road history."
+    },
+    "tags": [
+      "Place",
+      "China",
+      "Silk Road"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-leshan-buddha",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Leshan Giant Buddha",
+    "teaser": "A 71-meter stone Buddha carved into a cliff where three rivers meet in Sichuan, begun in 713 AD to calm the waters and finished 90 years later. Its shoulders are as wide as a football field, and its toenails could seat a family.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Leshan Giant Buddha",
+      "durationMinutes": 60,
+      "instruction": "Descend the cliff stairs to stand at the Buddha's feet and look up. Read how monks carved the statue to pacify the river's currents, and how a hidden drainage system in the rock has kept the colossus dry for 1,300 years."
+    },
+    "tags": [
+      "Place",
+      "China",
+      "Statue"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-meteora-monasteries",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Meteora",
+    "teaser": "Monasteries perch on sandstone pillars that rise 400 meters from the Greek plains — built by monks who hauled stones up ropes and baskets. 'Meteora' means 'suspended in air,' and for centuries the only way up was a ladder you could pull up behind you.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Climb",
+      "targetName": "Meteora's rock monasteries, Greece",
+      "durationMinutes": 90,
+      "instruction": "Visit one of the six remaining monasteries and read how 24 once stood. Learn how the monks used windlasses and rope ladders, and how the pillars themselves formed from an ancient sea's sand and gravel deposits."
+    },
+    "tags": [
+      "Place",
+      "Greece",
+      "Monasteries"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-plitvice-lakes",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Plitvice Lakes",
+    "teaser": "Sixteen terraced lakes in Croatia cascade into each other over a staircase of travertine dams, built not by stone but by living algae and moss that trap minerals. The water is so clear you can see every fish — and the lakes are still growing, year by year.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "Plitvice Lakes National Park",
+      "durationMinutes": 120,
+      "instruction": "Walk the boardwalks between the lakes and note the turquoise color — from minerals and sunlight in the shallow travertine basins. Read how moss and algae build the dams over decades, making the landscape itself an organism."
+    },
+    "tags": [
+      "Place",
+      "Croatia",
+      "Lakes"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-danakil-depression",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Danakil Depression",
+    "teaser": "One of the hottest, lowest, most alien places on Earth: an Ethiopian basin 100 meters below sea level where salt pans glow yellow and green and acid pools bubble beside molten lava. It is the closest thing on our planet to the surface of another world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Danakil Depression, Ethiopia",
+      "durationMinutes": 60,
+      "instruction": "Read how the Danakil sits on the rift where Africa splits apart, with hydrothermal pools of acid and salt flats that miners still cut by hand. Reflect on the extremophile microbes found here — life that hints at what could exist on other planets."
+    },
+    "tags": [
+      "Place",
+      "Ethiopia",
+      "Extreme"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-wulingyuan-pillars",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Wulingyuan Pillars",
+    "teaser": "Thousands of quartz-sandstone towers rise out of the mist in China's Hunan province like the backdrop of a wuxia film — which they were, in Avatar. The pillars are 300 meters tall, carved by erosion over 300 million years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Rise",
+      "targetName": "Zhangjiajie's sandstone pillars",
+      "durationMinutes": 60,
+      "instruction": "Read how the pillars formed from ancient seabed sandstone cut by rivers and weather. Note the vegetation clinging to the sheer faces and the 'Hallelujah Mountain' that inspired Avatar — then reflect on how erosion creates drama."
+    },
+    "tags": [
+      "Place",
+      "China",
+      "Landscape"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-halong-bay",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Ha Long Bay",
+    "teaser": "Nearly 2,000 limestone islands rise from the emerald waters of northern Vietnam, each a forested tower carved by the sea. Legend says a dragon descended and thrashed its tail, carving the bay and scattering jewels — the islands — as it went.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Sail",
+      "targetName": "Ha Long Bay, Vietnam",
+      "durationMinutes": 90,
+      "instruction": "Sail among the towers at dawn when the mist makes them float. Read how the limestone karsts formed in a tropical sea and were sculpted by weather, and how the bay's caves — like Sung Sot — hold their own hidden worlds."
+    },
+    "tags": [
+      "Place",
+      "Vietnam",
+      "Karst"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-jeju-island",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Jeju Island",
+    "teaser": "A volcanic island off South Korea born from a single eruption, crowned by Mount Hallasan and laced with 160 lava tubes — including one 8 kilometers long, the world's longest. Jeju has stone statues, tangerines, and its own language of the wind.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Descend",
+      "targetName": "Manjanggul lava tube, Jeju",
+      "durationMinutes": 60,
+      "instruction": "Walk into Manjanggul and look at the lava stalactites and the 'lava raft' floor. Read how Jeju formed from successive eruptions, how the haenyeo women divers harvest the sea, and why the island's stone grandfather statues guard its gates."
+    },
+    "tags": [
+      "Place",
+      "South Korea",
+      "Volcanic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-salar-uyuni-stars",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Salar de Uyuni Reflections",
+    "teaser": "The world's largest salt flat becomes a perfect mirror after rain — sky and ground fuse into one seamless blue, and walking on it feels like walking into the clouds. At night, the Milky Way reflects beneath your feet: two universes, one horizon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Reflect",
+      "targetName": "Salar de Uyuni in the wet season",
+      "durationMinutes": 90,
+      "instruction": "Visit the flat in the wet season when a thin sheet of water turns it into a mirror. Walk out and watch the horizon vanish; at night, find the Milky Way reflected underfoot. Read how the flat holds more than half the world's lithium."
+    },
+    "tags": [
+      "Place",
+      "Bolivia",
+      "Salt Flat"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-antelope-canyon-light",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Antelope Canyon Light Beams",
+    "teaser": "In the narrow sandstone slot of Antelope Canyon, beams of sunlight fall like solid gold pillars at midday — dust in the air making the light visible. The Navajo call it 'the place where water runs through rocks,' and the walls glow in impossible oranges and purples.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Enter",
+      "targetName": "Antelope Canyon, Arizona",
+      "durationMinutes": 60,
+      "instruction": "Enter the slot canyon and watch how the light changes with the hour. Read how flash floods carved the smooth curves and why the beams appear only when the sun is high. Reflect on the Navajo guides who steward this place."
+    },
+    "tags": [
+      "Place",
+      "USA",
+      "Canyon"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-horseshoe-bend",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Horseshoe Bend",
+    "teaser": "The Colorado River has carved a perfect 270° meander 300 meters deep into Arizona sandstone — a natural horseshoe so vast that the river below looks like a ribbon of green thread. Geologists watch it, because someday it will cut through and leave an oxbow lake.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Overlook",
+      "targetName": "Horseshoe Bend, Page, Arizona",
+      "durationMinutes": 45,
+      "instruction": "Stand at the rim and trace the meander's full loop. Read how entrenched meanders form when a river keeps its bends while cutting downward, and estimate how long before the neck erodes through. Note the kayakers below for scale."
+    },
+    "tags": [
+      "Place",
+      "USA",
+      "River"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-mesa-arch",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Delicate Arch",
+    "teaser": "A freestanding arch of sandstone, 16 meters tall, balancing on the edge of a slickrock bowl in Utah — Utah's most photographed rock, lit orange at sunset. It is the last remnant of a fin that erosion has almost finished removing.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Hike",
+      "targetName": "Delicate Arch, Arches National Park",
+      "durationMinutes": 90,
+      "instruction": "Hike the slickrock trail and arrive as the sun drops, when the arch glows like lit ember. Read how arches form: fins of sandstone with a weak band at their base, gradually hollowed until only the arch remains — a temporary monument."
+    },
+    "tags": [
+      "Place",
+      "USA",
+      "Arch"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-crater-lake",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Crater Lake",
+    "teaser": "A volcano in Oregon collapsed into itself 7,700 years ago, and rain and snow filled the caldera with the deepest, clearest lake in America — 594 meters deep, so blue it seems painted. There are no rivers feeding it; the lake is filled only by sky.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Crater Lake from Rim Drive",
+      "durationMinutes": 60,
+      "instruction": "Drive the rim and look down at the impossible blue. Read how Mount Mazama's eruption collapsed the peak, how Wizard Island grew as a later cone, and why the water is so clear: no incoming streams mean no sediment, only snowmelt and rain."
+    },
+    "tags": [
+      "Place",
+      "USA",
+      "Lake"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-mono-lake-tufa",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Mono Lake Tufa Towers",
+    "teaser": "Ghostly white towers rise from California's Mono Lake — calcium carbonate columns built underwater where freshwater springs met the alkaline lake. They appeared when the lake was drained by diversions, revealing a petrified underwater city.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "The South Tufa towers, Mono Lake",
+      "durationMinutes": 45,
+      "instruction": "Walk among the tufa towers at the South Tufa reserve. Read how they formed underwater over decades and how water diversions lowered the lake, exposing them — and how the fight to protect Mono Lake became a landmark of conservation law."
+    },
+    "tags": [
+      "Place",
+      "USA",
+      "Lake"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-cenote-ik-kil",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Cenotes of Yucatán",
+    "teaser": "Across Mexico's Yucatán, collapsed limestone caves open into turquoise pools fed by underground rivers — the cenotes the Maya used as wells, offerings, and gates to the underworld. One, at Chichén Itzá, was sacred to the rain god Chaac.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Swim",
+      "targetName": "A cenote in the Yucatán",
+      "durationMinutes": 60,
+      "instruction": "Swim in a cenote and look up at the roots hanging from the jungle roof. Read how the peninsula's limestone is a sponge of underground rivers, and how cenotes form when cave roofs collapse — creating windows to a drowned world."
+    },
+    "tags": [
+      "Place",
+      "Mexico",
+      "Cave"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-dead-sea-float",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Floating in the Dead Sea",
+    "teaser": "The lowest place on Earth's land, so salty that nothing can live in it and you cannot sink — the water holds you up like an armchair. It is evaporating a meter a year, and the sinkholes creeping along its shore are growing as the water vanishes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Float",
+      "targetName": "The Dead Sea shore",
+      "durationMinutes": 45,
+      "instruction": "If you visit, wade in carefully and float — but never splash, the salt burns eyes. Read why the sea is 10 times saltier than the ocean, why the Jordan River no longer refills it, and how its minerals have been harvested for millennia."
+    },
+    "tags": [
+      "Place",
+      "Jordan",
+      "Salt Lake"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-great-salt-lake",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Great Salt Lake",
+    "teaser": "A remnant of ancient Lake Bonneville, now a shrunken salty sea in Utah where brine shrimp tint the water pink. It has no outlet — rivers flow in, and only evaporation leaves. It is drying at a pace that scientists call an ecological emergency.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Great Salt Lake's shores",
+      "durationMinutes": 45,
+      "instruction": "Read how the lake is a fragment of the ice-age Lake Bonneville, how its salinity supports only brine shrimp and flies, and how diversions of river water are shrinking it — exposing dust that carries arsenic to the city's air."
+    },
+    "tags": [
+      "Place",
+      "USA",
+      "Salt Lake"
+    ],
+    "tier": 2
+  }
+]

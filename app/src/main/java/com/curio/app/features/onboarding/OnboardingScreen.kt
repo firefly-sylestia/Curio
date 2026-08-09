@@ -45,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +77,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.TourController
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
@@ -133,6 +135,9 @@ fun OnboardingScreen(navController: NavController) {
     // "Want the daily shuffle reminder on?" — only reachable once
     // notifications are granted; applied to prefs the moment it flips.
     var reminderWanted by rememberSaveable { mutableStateOf(false) }
+    val finishOnboardingNow: () -> Unit = {
+        finishOnboarding(context, navController)
+    }
 
     val requestNotifications = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -333,7 +338,7 @@ fun OnboardingScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TextButton(
-                    onClick = { finishOnboarding(context, navController) },
+                    onClick = finishOnboardingNow,
                     contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
                 ) {
                     Text(
@@ -345,7 +350,7 @@ fun OnboardingScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (isLastSlide) {
-                            finishOnboarding(context, navController)
+                            finishOnboardingNow()
                         } else {
                             scope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -366,6 +371,7 @@ fun OnboardingScreen(navController: NavController) {
                 }
             }
         }
+
     }
 }
 
@@ -595,7 +601,7 @@ private fun SetupSlide(
             Spacer(Modifier.height(6.dp))
 
             Text(
-                text = "Grant what you like — you can change it anytime in Settings.",
+                text = "Grant what you like. You can change it anytime in Settings.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center
@@ -800,6 +806,9 @@ private fun PageDot(selected: Boolean, onClick: () -> Unit) {
 
 private fun finishOnboarding(context: Context, navController: NavController) {
     CurioOnboardingState.markComplete(context)
+    // The tour offer belongs on Home so the pet can physically emerge from
+    // its house there; onboarding itself stays focused on setup.
+    TourController.offer()
     navController.navigate(CurioRoutes.HOME) {
         popUpTo(CurioRoutes.ONBOARDING) { inclusive = true }
         // launchSingleTop dedups the replay path: onboarding is pushed on
@@ -826,12 +835,12 @@ private val OnboardingSlides = listOf(
     OnboardingSlideData(
         kicker = "EXPLORE",
         headline = "Explore it your way",
-        subtext = "Listen, read, watch, or scroll. Your time is timed, never rushed — wander wherever curiosity leads."
+        subtext = "Listen, read, watch, or scroll. Your time is timed, never rushed. Wander wherever curiosity leads."
     ),
     OnboardingSlideData(
         kicker = "KEEP",
         headline = "Keep what moves you",
-        subtext = "Voice notes, reviews, moodboards, journal pages — save what stays with you, in the format that fits how you think."
+        subtext = "Voice notes, reviews, moodboards, journal pages: save what stays with you, in the format that fits how you think."
     )
 )
 
@@ -884,7 +893,7 @@ private fun ThemeSlide() {
             Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
 
             Text(
-                text = "Light, dark, or follow your phone — and keep Curio's soft pastel colors?",
+                text = "Light, dark, or follow your phone, and keep Curio's soft pastel colors?",
                 style = MaterialTheme.typography.bodyLarge,
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center

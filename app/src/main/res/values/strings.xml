@@ -29,7 +29,7 @@
     <string name="home_hero_subtitle_with_category">Spin for %1$s</string>
     <string name="home_pick_category">Pick a category</string>
     <string name="home_recently_explored">Recently explored</string>
-    <string name="home_empty_recent">Nothing here yet — give the wheel a spin!</string>
+    <string name="home_empty_recent">Nothing here yet. Give the wheel a spin!</string>
 
     <!-- Splash -->
     <string name="splash_app_name">Curio</string>

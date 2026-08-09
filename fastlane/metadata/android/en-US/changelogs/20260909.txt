@@ -1,0 +1,1 @@
+• Pet designer Phase 7: create your own custom pet actions — pick a trigger (tap, long-press, app open, topic reveal, save, level up, a set hour, or idle) and an animation, and add your own lines. Your pet plays them live in the app.

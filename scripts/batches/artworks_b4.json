@@ -1,0 +1,821 @@
+[
+  {
+    "id": "artw-the-burial-at-ornans-201",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Burial at Ornans (1850)",
+    "teaser": "Courbet's ten-foot canvas of a village funeral — the priest, the gravedigger, the mourners in black, and a dog, all painted life-size without any of the nobility painting usually demanded. Realism was declared a movement.",
+    "imageUrl": "",
+    "byline": "Gustave Courbet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Burial at Ornans (1850) by Courbet, Musée d'Orsay",
+      "durationMinutes": 15,
+      "instruction": "Count the mourners and watch how their faces are ordinary, tired, individual. Courbet painted his own hometown funeral — the people are real, the grief is real, and no one is posed like a saint. The critics called it ugly. That was the point."
+    },
+    "tags": [
+      "Realism",
+      "French",
+      "1850s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-card-players-203",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Card Players (1893)",
+    "teaser": "Cézanne's two Provençal peasants face each other over a card table — a bottle, two pipes, and the whole weight of concentration. He painted the series over five years, reducing life to its essentials.",
+    "imageUrl": "",
+    "byline": "Paul Cézanne",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Card Players (1893) by Cézanne, Courtauld Gallery",
+      "durationMinutes": 12,
+      "instruction": "There is no story — just two men, a table, and attention. Look at how the tabletop tilts toward you while the men stay vertical; Cézanne compressed space on purpose. The bottle is the third player, standing perfectly still in the center."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "French",
+      "1890s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-hay-wain-copy-204",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Valley of the Shadow of Death (1855)",
+    "teaser": "Roger Fenton's photograph of a Crimean War road littered with cannonballs — the first great war photograph. It shows what the battlefield looks like after everyone has gone home.",
+    "imageUrl": "",
+    "byline": "Roger Fenton",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Valley of the Shadow of Death (1855) by Fenton",
+      "durationMinutes": 12,
+      "instruction": "Look at the road: it curves away, empty, its edges dense with round black cannonballs. Fenton hauled a wagon of glass plates to the Crimea and made this after the battle, when the valley was quiet. It is war photographed as aftermath — no hero, no enemy, only objects."
+    },
+    "tags": [
+      "Photography",
+      "British",
+      "1850s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-two-sisters-courbet-205",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Sleepers (1866)",
+    "teaser": "Courbet's two women tangled in sleep on a bed — painted for a collector of erotica, and still the most openly sensual painting of two women in the nineteenth century. It was hidden from public view for decades.",
+    "imageUrl": "",
+    "byline": "Gustave Courbet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Sleepers (1866) by Courbet, Petit Palais",
+      "durationMinutes": 12,
+      "instruction": "The two bodies make one shape — dark hair against red, the sheet draping like a wave. Courbet painted skin with the same weight he painted stone. The pearls on the table are a classical hint; the painting itself needed no hint at all."
+    },
+    "tags": [
+      "Realism",
+      "French",
+      "1860s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-horse-fair-206",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Horse Fair (1855)",
+    "teaser": "Rosa Bonheur's enormous painting of horses surging from a Paris fair — she attended in men's clothes to sketch freely, a woman who had to fight for the right to paint at all.",
+    "imageUrl": "",
+    "byline": "Rosa Bonheur",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Horse Fair (1855) by Bonheur, Metropolitan Museum",
+      "durationMinutes": 15,
+      "instruction": "The horses pour diagonally across the canvas — whites, blacks, bays — their riders leaning in. Bonheur studied anatomy at slaughterhouses to get the muscles right. It was her most famous work, toured across two continents, and made her rich."
+    },
+    "tags": [
+      "Realism",
+      "French",
+      "1850s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-four-times-of-day-208",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Gates of Hell (1917)",
+    "teaser": "Rodin's unfinished masterpiece — a doorway crowded with 180 figures of love and torment, from The Thinker brooding at the top to Paolo and Francesca embracing below. He worked on it for 37 years and never finished.",
+    "imageUrl": "",
+    "byline": "Auguste Rodin",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Gates of Hell (1917) by Rodin, Musée Rodin",
+      "durationMinutes": 20,
+      "instruction": "Start at the top: The Thinker sits above the door — not a philosopher but Dante, or Rodin himself, watching the crowd below. Work your way down through the couples, the fallen, the reaching hands. Many of Rodin's most famous sculptures were pulled from this doorway as fragments."
+    },
+    "tags": [
+      "Sculpture",
+      "French",
+      "1900s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-roe-deer-209",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Moose in the Gaspé (1937)",
+    "teaser": "Clarence Gagnon's snowy moose in the Quebec woods — the painter who illustrated Louis Hémon's Maria Chapdelaine and made the Canadian landscape his lifelong subject.",
+    "imageUrl": "",
+    "byline": "Clarence Gagnon",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Moose in the Gaspé (1937) by Gagnon",
+      "durationMinutes": 10,
+      "instruction": "Look at the blue snow shadows and the moose standing in the clearing — Gagnon's colors are northern and precise. He painted the Quebec that was vanishing around him: the farms, the forests, the animals, the light."
+    },
+    "tags": [
+      "Canadian",
+      "1930s",
+      "Landscape"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-persistence-of-memory-b-210",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Persistence of Memory — the original (1931)",
+    "teaser": "Dalí's melting watches over the Catalonian coast, painted in a few hours after watching Camembert soften in the sun. He refused to explain it; the watches were simply 'the softness of time.'",
+    "imageUrl": "",
+    "byline": "Salvador Dalí",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Persistence of Memory (1931) by Dalí, MoMA — the original",
+      "durationMinutes": 15,
+      "instruction": "Look at the creature with eyelashes in the center — Dalí's own face in profile, melting into the ground. The only hard object is the one watch that has not melted; it lies face-down, crawling with ants, the artist's symbol for decay. The landscape is the real coast of Catalonia."
+    },
+    "tags": [
+      "Surrealism",
+      "Spanish",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-sleeping-venus-211",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Sleeping Venus (1510)",
+    "teaser": "Giorgione's goddess sleeps in a landscape, her hand behind her head — the first large reclining nude in Western painting, and the model for every Venus that followed, from Titian to Manet.",
+    "imageUrl": "",
+    "byline": "Giorgione",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Sleeping Venus (1510) by Giorgione, Gemäldegalerie Alte Meister",
+      "durationMinutes": 12,
+      "instruction": "Her body makes a long diagonal against the hills — the landscape seems to continue her curves. Giorgione died at 32, possibly leaving this unfinished; the landscape may be by Titian. The painting invented a genre: the goddess asleep, watched by the viewer."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1510s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-tempest-212",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Tempest (1508)",
+    "teaser": "Giorgione's soldier and naked woman face each other across a stream while lightning forks behind them — nobody agrees on what is happening. It is the first painting that seems to exist purely for its own mystery.",
+    "imageUrl": "",
+    "byline": "Giorgione",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Tempest (1508) by Giorgione, Accademia Venice",
+      "durationMinutes": 12,
+      "instruction": "The woman nurses a child; the soldier stands apart; the storm arrives. Is it Adam and Eve? A soldier and his wife? A myth? The painting resists every answer. X-rays show Giorgione painted a different woman here originally — he changed his own mystery."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1500s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-lady-with-the-unicorn-213",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Lady with the Unicorn (1506)",
+    "teaser": "Raphael's young woman holds a small unicorn, a symbol of chastity and a wedding gift — the unicorn's horn was later painted over and only restored in the twentieth century.",
+    "imageUrl": "",
+    "byline": "Raphael",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Lady with the Unicorn (1506) by Raphael, Galleria Borghese",
+      "durationMinutes": 12,
+      "instruction": "Look at the unicorn: small, white, resting in her arms. Raphael balanced it against the famous Mona Lisa — the pose, the loggia, the landscape echo Leonardo. The unicorn was added later, covering an earlier dog; the painting is a palimpsest of a wedding."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1500s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-venus-of-urbino-copy-214",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Danaë (1553)",
+    "teaser": "Titian's Danaë receives the golden rain of Zeus — the first version painted for a cardinal, who was so shocked he had it exchanged for a picture of a dog.",
+    "imageUrl": "",
+    "byline": "Titian",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Danaë (1553) by Titian, Prado",
+      "durationMinutes": 12,
+      "instruction": "Danaë lies on white sheets, catching the golden coins with her body — Zeus as money, and the gods reduced to wealth. The old woman behind gathers the coins in her apron. Titian painted sensuality, commerce, and myth in one warm glow."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1550s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-bacchus-and-ariadne-215",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Bacchus and Ariadne (1523)",
+    "teaser": "Titian's Bacchus leaps from his chariot toward Ariadne, abandoned on Naxos — he loves her at first sight, and the whole painting is that leap frozen mid-air.",
+    "imageUrl": "",
+    "byline": "Titian",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Bacchus and Ariadne (1523) by Titian, National Gallery",
+      "durationMinutes": 12,
+      "instruction": "Bacchus is mid-jump, his leopard-skin billowing, a cheetah at his feet; Ariadne's arm is raised in surprise. The sky is ultramarine — the pigment was more expensive than gold. Titian spent two years on the sky alone, and it shows."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1520s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-death-of-actaeon-216",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Death of Actaeon (1559)",
+    "teaser": "Titian's hunter is torn apart by his own dogs after seeing Diana naked — the painting shows the moment the hounds turn on their master, the myth's cruelty made lush.",
+    "imageUrl": "",
+    "byline": "Titian",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Death of Actaeon (1559) by Titian, National Gallery",
+      "durationMinutes": 12,
+      "instruction": "Actaeon falls backward, already part deer — antlers rising from his head — while his own dogs bite. Diana, in the distance, looses the fatal arrow. Titian painted the late 'poesie' series for King Philip II; these are myths painted as fate."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1550s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-self-portrait-rembrandt-217",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Self-Portrait at 63 (1669)",
+    "teaser": "Rembrandt's last self-portrait — an old man with a paintbrush, looking at us with total calm. He painted about 80 self-portraits across his life; this is the final word, made in his year of death.",
+    "imageUrl": "",
+    "byline": "Rembrandt van Rijn",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Self-Portrait at 63 (1669) by Rembrandt, National Gallery",
+      "durationMinutes": 15,
+      "instruction": "The paint is applied in thick slabs and thin glazes — you can see the brush moving, the palette knife scraping. His hands hold the tools of the trade. The face is unsparing: the skin, the eyes, the history. It is not a portrait of an old man; it is a portrait of looking."
+    },
+    "tags": [
+      "Baroque",
+      "Dutch",
+      "1660s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-oath-of-the-horatii-b-219",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Lion Hunt (1616)",
+    "teaser": "Rubens' hunters attack a cornered lion with spears from horseback — the Baroque's most ferocious hunting scene, painted at the peak of his powers and his physical bulk.",
+    "imageUrl": "",
+    "byline": "Peter Paul Rubens",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Lion Hunt (1616) by Rubens, Alte Pinakothek",
+      "durationMinutes": 12,
+      "instruction": "The composition is a whirlwind: horse and lion spiral around each other, spears crossing, manes flying. Rubens kept live lions for study and borrowed them for the studio. The violence is choreographed — every muscle is a dancing line."
+    },
+    "tags": [
+      "Baroque",
+      "Flemish",
+      "1610s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-three-graces-220",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Three Graces (1635)",
+    "teaser": "Rubens' three goddesses in a golden ring, painted when he was nearly sixty and still painting flesh like a young man in love with it. His second wife modeled for the central figure.",
+    "imageUrl": "",
+    "byline": "Peter Paul Rubens",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Three Graces (1635) by Rubens, Prado",
+      "durationMinutes": 12,
+      "instruction": "The three women hold hands in a circle, their bodies painted in pearl-pink and gold. Rubens' women are famously substantial — he loved the weight of flesh. The central Grace is thought to be Hélène Fourment, his wife, who was 30 years younger than him."
+    },
+    "tags": [
+      "Baroque",
+      "Flemish",
+      "1630s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-lamentation-221",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Lamentation of Christ (1604)",
+    "teaser": "Caravaggio's mourners lift Christ's body toward us, Mary's arms spread in silent grief. The slab at the bottom juts into our space — the viewer is standing at the tomb.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Lamentation (1604) by Caravaggio, Vatican Museums",
+      "durationMinutes": 12,
+      "instruction": "Watch how the figures form a diagonal from the reaching Mary down to the slab — the composition pushes the body toward the viewer. Mary's arms are raised like wings, John the Baptist steadies Christ's back. The light is theatrical, the grief is domestic."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-flagellation-christ-222",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Flagellation of Christ — Piero della Francesca (1460)",
+    "teaser": "Piero's tiny panel splits into two scenes: the flagellation in the foreground, three men talking in the background. Scholars have argued for centuries about who the three men are — it may be a political allegory of the fallen Byzantine Empire.",
+    "imageUrl": "",
+    "byline": "Piero della Francesca",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Flagellation of Christ (1460) by Piero della Francesca, Urbino",
+      "durationMinutes": 15,
+      "instruction": "The foreground column is lit by two different light sources — the scene is a mathematical puzzle of perspective, and the geometry is the message. The three men in the background may be a real political event of 1453. Piero painted like an architect who believed God was a geometer."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1460s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-baptism-of-christ-223",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Baptism of Christ (1450)",
+    "teaser": "Piero della Francesca's Christ stands in the Jordan while John pours water and three angels watch — the dove descends, the landscape is pure geometry. Painting as theology and mathematics at once.",
+    "imageUrl": "",
+    "byline": "Piero della Francesca",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Baptism of Christ (1450) by Piero della Francesca, National Gallery",
+      "durationMinutes": 12,
+      "instruction": "Look at the symmetry: Christ is the exact center, the dove above him, John at his side, the three angels in a row like a musical chord. The light is even and eternal — no drama, only certainty. Piero painted the calm at the heart of belief."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "1450s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-crucifixion-of-st-peter-b-224",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Entombment of Atala (1808)",
+    "teaser": "Anne-Louis Girodet's Chateaubriand heroine is lowered into a cave tomb by a missionary and a lover — a Romantic novel painted as a pietà, grief arranged like a stage set.",
+    "imageUrl": "",
+    "byline": "Anne-Louis Girodet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Entombment of Atala (1808) by Girodet, Louvre",
+      "durationMinutes": 12,
+      "instruction": "Atala's body is lit from below like a candle — her white dress glows against the dark cave. The missionary supports her, the lover kisses her hand. Girodet turned a sentimental novel into a religious painting, and the formula made him rich."
+    },
+    "tags": [
+      "Romanticism",
+      "French",
+      "1800s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-raft-of-the-medusa-b-225",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Death of Sardanapalus (1827)",
+    "teaser": "Delacroix's Assyrian king watches from his bed as his treasures, horses, and concubines are destroyed on his orders — an orgy of destruction painted in burning red. Byron's play, painted as the end of the world.",
+    "imageUrl": "",
+    "byline": "Eugène Delacroix",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Death of Sardanapalus (1827) by Delacroix, Louvre",
+      "durationMinutes": 15,
+      "instruction": "The king lies back, detached, while below him bodies fall, a horse rears, an elephant stampedes, and a slave stabs himself. Delacroix fills the frame edge to edge — no escape, no sky. It is the Romantic imagination at maximum temperature."
+    },
+    "tags": [
+      "Romanticism",
+      "French",
+      "1820s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-wanderer-above-copy-227",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Wanderer in the Fog — Caspar David Friedrich variations (1818)",
+    "teaser": "Friedrich's other fog paintings — a man facing a sea of cloud, a lone tree in a field — show the same Romantic creed: the self is small, nature is infinite, and the view is a feeling.",
+    "imageUrl": "",
+    "byline": "Caspar David Friedrich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Friedrich's fog landscapes (1818) — the sea of clouds view",
+      "durationMinutes": 15,
+      "instruction": "The man is seen from behind, so we see what he sees: a sea of fog with mountains rising like islands. Friedrich painted the back of a figure so the viewer could stand in their shoes. It is a painting about the experience of looking, not the view."
+    },
+    "tags": [
+      "Romanticism",
+      "German",
+      "1810s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-oak-tree-229",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Lonely Tree (1822)",
+    "teaser": "Friedrich's single oak in a field at sunset, a shepherd and his flock passing beneath — a tree as a witness to centuries, painted as a portrait of time itself.",
+    "imageUrl": "",
+    "byline": "Caspar David Friedrich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Lonely Tree (1822) by Friedrich, Alte Nationalgalerie",
+      "durationMinutes": 12,
+      "instruction": "The oak bends like an old man, stripped of leaves, its branches like veins against the orange sky. The tiny figures below make the tree enormous. Friedrich painted the tree's stubbornness — it has outlived storms, and it will outlive us."
+    },
+    "tags": [
+      "Romanticism",
+      "German",
+      "1820s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-chalk-cliffs-230",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Chalk Cliffs on Rügen (1818)",
+    "teaser": "Friedrich's white cliffs, a man peering over the edge, a woman pointing at two tiny sailboats below. Painted on his honeymoon — and the edge of the cliff is the real subject.",
+    "imageUrl": "",
+    "byline": "Caspar David Friedrich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Chalk Cliffs on Rügen (1818) by Friedrich, Kunst Museum Winterthur",
+      "durationMinutes": 12,
+      "instruction": "One figure kneels at the edge, one leans, one points — three responses to the drop. The white chalk glows against the blue sea. Friedrich married the painter Caroline Bommer that year; the painting is a honeymoon photograph of the abyss."
+    },
+    "tags": [
+      "Romanticism",
+      "German",
+      "1810s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-two-men-viewing-231",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Two Men Contemplating the Moon (1819)",
+    "teaser": "Friedrich's two men on a rocky path, seen from behind, staring at a crescent moon through a dead tree. The same theme — humans small, sky vast — that he painted his whole life.",
+    "imageUrl": "",
+    "byline": "Caspar David Friedrich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Two Men Contemplating the Moon (1819) by Friedrich",
+      "durationMinutes": 12,
+      "instruction": "The two figures are often read as Friedrich and his friend. They lean together, sharing the view. The moon is a thin crescent; the tree is dead; the path leads nowhere. Friedrich painted companionship inside solitude."
+    },
+    "tags": [
+      "Romanticism",
+      "German",
+      "1810s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-monk-by-the-sea-232",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Monk by the Sea (1809)",
+    "teaser": "Friedrich's tiny monk stands at the edge of a sea that fills three-quarters of the canvas — sky, water, sand, and one small figure. It is the most radical emptiness in painting before the twentieth century.",
+    "imageUrl": "",
+    "byline": "Caspar David Friedrich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Monk by the Sea (1809) by Friedrich, Alte Nationalgalerie",
+      "durationMinutes": 12,
+      "instruction": "The monk is a speck — you may need to search for him. The sky and sea are almost the same tone, a wall of silence. Kleist said looking at it felt like having your eyelids cut off: you are alone with the infinite."
+    },
+    "tags": [
+      "Romanticism",
+      "German",
+      "1800s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-fall-of-icarus-234",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Landscape with the Fall of Icarus (1560)",
+    "teaser": "Bruegel's Icarus splashes into the sea in the corner while a farmer plows, a shepherd stares at the sky, and a ship sails on — nobody stops. It may not even be Bruegel, and it is the most famous depiction of indifference in art.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder (attributed)",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Landscape with the Fall of Icarus (1560) by Bruegel, Musées Royaux Brussels",
+      "durationMinutes": 12,
+      "instruction": "Look for Icarus: just two white legs kicking in the water beside the ship. The plowman works on; the sun shines; the world does not stop for the boy who flew too high. The poem by W.H. Auden — 'About suffering they were never wrong, the Old Masters' — is about this exact painting."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-massacre-of-the-innocents-235",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Massacre of the Innocents (1567)",
+    "teaser": "Bruegel's soldiers enter a Flemish village to seize children from mothers — painted as a biblical scene but read as a Spanish atrocity in the Netherlands. The horror is in the everyday setting.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Massacre of the Innocents (1567) by Bruegel, Kunsthistorisches Museum",
+      "durationMinutes": 12,
+      "instruction": "The soldiers are not monsters — they are soldiers doing a job in a winter village. Mothers struggle, a horse rears, snow falls. Bruegel set a massacre in a place that looks like home, and that is what makes it unbearable."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-blind-leading-236",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Blind Leading the Blind (1568)",
+    "teaser": "Bruegel's line of six blind men follows their leader into a ditch — each already at a different stage of falling. It illustrates a Bible verse and the human condition at once.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Blind Leading the Blind (1568) by Bruegel, Museo di Capodimonte",
+      "durationMinutes": 12,
+      "instruction": "Look at the chain of falls: the first man is already down, the second is mid-fall, the third is stumbling, the last still walking upright. Bruegel painted each stage of disaster. The church steeple in the background is the destination they will never reach."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-threshers-237",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Harvesters (1565)",
+    "teaser": "Bruegel's wheat field at harvest — workers cut the grain, one drinks from a jug, others swim and nap in the shade. It is a summer so real you can almost feel the heat.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Harvesters (1565) by Bruegel, Metropolitan Museum",
+      "durationMinutes": 15,
+      "instruction": "The wheat field makes a diagonal wall of gold, and beyond it the land falls away to the sea. The workers rest, eat, swim — Bruegel painted work and its breaks as equally real. It is one panel of the lost series of the months, and the only one that survived complete."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-babel-tower-copy-238",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Tower of Babel — the small version (1563)",
+    "teaser": "Bruegel painted the Tower twice — a large version in Vienna and this smaller one in Rotterdam. Both show the same ambition: a spiral city climbing toward a god that will not be reached.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Tower of Babel — small version (1563) by Bruegel, Museum Boijmans",
+      "durationMinutes": 12,
+      "instruction": "The tower's spiral ramps wind up into cloud — and the top is unfinished, already collapsing into mud and brick. The arched construction recalls the Colosseum; the message is the same as in the Vienna version: every empire builds its own ruin."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-peasant-dance-239",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Peasant Dance (1568)",
+    "teaser": "Bruegel's village square erupts into dance — a bagpiper, a kissing couple, children, a table of drinkers. Nobody is painted as noble; everybody is painted as real.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Peasant Dance (1568) by Bruegel, Kunsthistorisches Museum",
+      "durationMinutes": 12,
+      "instruction": "The dancers move in a diagonal out of the painting — the piper leads, the couple in the center turns, the table tilts with drink. Bruegel painted the energy of a day off: loud, clumsy, and alive. The church looms behind; the dance is the sermon."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-triumph-of-death-240",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Triumph of Death (1562)",
+    "teaser": "Bruegel's armies of skeletons sweep across a landscape of burning houses, broken carts, and every rank of humanity — a painting of the plague years that still functions as the definitive memento mori.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Triumph of Death (1562) by Bruegel, Prado",
+      "durationMinutes": 15,
+      "instruction": "There is no center — death arrives from every side. A knight falls, a king is dragged from his throne, a musician plays on as the skeletons dance. Bruegel painted this during Europe's plague and war years; it is a mass grave with a frame."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-proverbs-241",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Netherlandish Proverbs (1559)",
+    "teaser": "Bruegel's village is a catalogue of over a hundred Dutch proverbs made literal — someone bangs his head against a brick wall, another sows seeds on the wind, a third has a roof of tiles missing from his head.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Netherlandish Proverbs (1559) by Bruegel, Gemäldegalerie Berlin",
+      "durationMinutes": 15,
+      "instruction": "Treat it like a word-search: try to find 'armed to the teeth' (a man with a knife between his teeth), 'the world turned upside down' (a globe with a cross on top), 'to swim against the stream.' There are more than a hundred sayings hidden in the village."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1550s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-carnival-242",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Fight Between Carnival and Lent (1559)",
+    "teaser": "Bruegel's town square splits down the middle — Carnival's fat man jousts with a kitchen ladle against Lent's thin woman with a baker's peel. Gluttony and fasting face off while the town carries on.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Fight Between Carnival and Lent (1559) by Bruegel, Kunsthistorisches Museum",
+      "durationMinutes": 15,
+      "instruction": "Carnival, on the left, sits on a wine barrel with a roast pig at his feet; Lent, on the right, pulls a cart of fish and pretzels. The town between them is full of people being both. Bruegel painted the calendar as a perpetual argument between appetite and discipline."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1550s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-bride-243",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Wedding Dance in the Open Air (1566)",
+    "teaser": "Bruegel's wedding party dances in a field — couples spinning, a bagpiper, a man trying to kiss a woman who is having none of it. Marriage as a loud, sweaty, joyful fact.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Wedding Dance in the Open Air (1566) by Bruegel, Detroit Institute of Arts",
+      "durationMinutes": 12,
+      "instruction": "Find the couple in the center mid-spin, and the woman in front of them laughing as her partner pulls her. The dancers' feet are off the ground — Bruegel painted motion so well the painting seems to sway. It is a portrait of a community at its most alive."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-return-of-the-herd-244",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Return of the Herd (1565)",
+    "teaser": "Bruegel's cattle come down from the mountains as autumn darkens — the herd's slow descent mirrors the season's end. It is one of the surviving panels of his lost Months cycle.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Return of the Herd (1565) by Bruegel, Kunsthistorisches Museum",
+      "durationMinutes": 12,
+      "instruction": "The cows and oxen file down the slope, their horns silhouetted against a gray October sky. The trees are bare, the people carry wood, the year is closing. Bruegel painted the seasons as a farmer knows them — as work, weather, and time running out."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-gloomy-day-245",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Gloomy Day (1565)",
+    "teaser": "Bruegel's early-spring painting — the sky is heavy, the trees bare, a village floods, and people struggle with the year's first work. Winter is over; so is the relief of winter.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Gloomy Day (1565) by Bruegel, Kunsthistorisches Museum",
+      "durationMinutes": 12,
+      "instruction": "The storm is breaking over the flooded valley while villagers work in the foreground. Bruegel's 'gloomy day' is March — the month of mud and no excuses. The painting is a portrait of a season that refuses to be cheerful."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  }
+]

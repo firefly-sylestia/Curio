@@ -1,0 +1,402 @@
+[
+  {
+    "id": "painter-nikolai-astrup",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Nikolai Astrup",
+    "teaser": "The Norwegian painter of the fjord gardens — he painted the bonfires, birches, and midsummer nights of his home valley with a bold, decorative color that stands apart from Munch's anxiety. He carved his own prints and lived where he painted.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The bonfire scenes or the midsummer nights",
+      "durationMinutes": 20,
+      "instruction": "Look at the fire: Astrup painted midsummer bonfires against deep blue nights with a joy Munch never had. His valley, Jølster, appears in every canvas — birch trees, water, and light. He refused to leave home for fame, and painted his place until it became a world."
+    },
+    "tags": [
+      "Expressionism",
+      "Norwegian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-harald-sohlberg",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Harald Sohlberg",
+    "teaser": "The Norwegian symbolist of snow and silence — his Winter Night in the Mountains, with its deep blue snow and glowing ridges, is the most beloved Norwegian painting of the 20th century. He painted solitude at altitude.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Winter Night in the Mountains (National Museum, Oslo) — the blue",
+      "durationMinutes": 20,
+      "instruction": "Look at the blue: Sohlberg painted the snow in tones of ultramarine that seem to glow from within, the mountain ridges catching the last light. He spent years getting it right, painting from sketches made on the mountain. Silence, cold, and beauty — the Norwegian sublime."
+    },
+    "tags": [
+      "Symbolism",
+      "Norwegian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-halfdan-egedius",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Halfdan Egedius",
+    "teaser": "The Norwegian painter of the farm and the saga — his scenes of harvest, folk tales, and Norwegian history glow with a warm, national light. He died at 21, leaving a small body of work that made him a legend.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The harvest scenes or the folk-tale paintings",
+      "durationMinutes": 20,
+      "instruction": "Look at the light on the fields: Egedius painted Norwegian summers with a golden, dreamlike warmth. He also illustrated the great Norse saga editions. He died of tuberculosis at 21; his few paintings have the confidence of a master twice his age."
+    },
+    "tags": [
+      "Realism",
+      "Norwegian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-christian-krohg",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Christian Krohg",
+    "teaser": "The Norwegian naturalist of the poor and the honest — his paintings of factory girls, sailors' wives, and his famous Sick Girl brought social realism to Norway. He was also a journalist, novelist, and co-founder of the artists' colony at Skagen.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Sick Girl (National Gallery, Oslo) — the light",
+      "durationMinutes": 20,
+      "instruction": "A girl sits by a window, wrapped in blankets, light falling on her face — painted with a tenderness that made it Norway's most loved image. Krohg said art should 'show life as it is.' He showed his own daughter's illness, and the canvas became a national treasure."
+    },
+    "tags": [
+      "Naturalism",
+      "Norwegian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-erik-werenskiold",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Erik Werenskiold",
+    "teaser": "The Norwegian painter who illustrated the Norse sagas — his drawings of Peer Gynt and the old sagas defined how Norwegians imagine their own history. He painted portraits, landscapes, and folk scenes with a gentle, scholarly light.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Peer Gynt illustrations or the saga drawings",
+      "durationMinutes": 20,
+      "instruction": "Look at his Peer Gynt drawings: a wild, funny, sad hero rendered in a few sure lines. Werenskiold gave Norway its picture of Ibsen's wanderer and the saga heroes. His paintings of Norwegian farmers and hills are quieter but equally sure. A national imagination, drawn by one patient hand."
+    },
+    "tags": [
+      "Realism",
+      "Norwegian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-gerhard-munthe",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Gerhard Munthe",
+    "teaser": "The Norwegian painter who turned folk tales into decorative art — his flat, colorful compositions of Norwegian legends inspired tapestries, furniture, and the national romantic style. He made the folk tale modern.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The folk-tale compositions or the tapestry designs",
+      "durationMinutes": 20,
+      "instruction": "Look at the flatness: Munthe reduced fairy tales to bold patterns — a dragon, a princess, a forest — drawn like Viking-era decoration brought to life. He designed the tapestries that made Norwegian applied art famous worldwide. His colors are bold, his forms are ancient, his effect is modern."
+    },
+    "tags": [
+      "National Romanticism",
+      "Norwegian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-anna-ancher",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Anna Ancher",
+    "teaser": "The Skagen painter of rooms and light — she painted the women of the Danish fishing village in interiors full of pale, northern sunlight, and was the only member of the Skagen colony who was actually born there. She is among the greatest Danish painters.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "A Field Sermon or the interiors with women",
+      "durationMinutes": 20,
+      "instruction": "Look at how Ancher paints a room: a woman at a window, light pouring through net curtains, colors reduced to a few luminous tones. She refused the colony's men-only dinners and painted the real life around her. Her rooms are silent, sunlit, and full of presence."
+    },
+    "tags": [
+      "Skagen",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-michael-ancher",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Michael Ancher",
+    "teaser": "The Skagen painter of fishermen and the sea — his heroic paintings of the Danish North Sea fishermen made him the colony's anchor. He married Anna Ancher, and their house is now a museum.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Lifeboat or the fishermen scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the rescue scene: the lifeboat fights the surf, the men straining, the sea grey and huge. Ancher painted the fishermen of Skagen as heroes — which they were. He went out with them, sketched in the storms, and turned their daily risk into monumental art."
+    },
+    "tags": [
+      "Skagen",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ps-kroyer",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "P.S. Krøyer",
+    "teaser": "The star of the Skagen colony — his summer-evening scenes of the beach at Skagen, with their famous blue hour, are among the most loved paintings in Denmark. He painted light so beautiful it looks invented; he also went blind in one eye and painted through it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Summer Evening on Skagen's Southern Beach — the blue",
+      "durationMinutes": 20,
+      "instruction": "Look at the blue hour: the sky, the sea, and the sand all glow in the same pale blue, with two figures strolling in the middle distance. Krøyer painted this scene repeatedly, chasing the exact light. He called it 'the moment when everything is possible.'"
+    },
+    "tags": [
+      "Skagen",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-laurits-tuxen",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Laurits Tuxen",
+    "teaser": "The Skagen painter who also painted royalty — he did official portraits of European courts while his heart stayed with the Skagen colony's beach scenes and his own garden. His flower gardens are among the most joyful Danish paintings.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The gardens of Skagen or the beach scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the flowers: Tuxen painted his Skagen garden in thick, joyful strokes — lupins, poppies, and roses under a big sky. Then find his royal portraits: the same painter, a different universe. He kept both worlds alive, and both were real."
+    },
+    "tags": [
+      "Skagen",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-vilhelm-hammershoi",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Vilhelm Hammershøi",
+    "teaser": "The Danish painter of silence — his interiors of his Copenhagen apartment, with their grey walls, pale light, and a woman seen from behind, are among the most mysterious paintings ever made. He is the poet of emptiness, and he is unforgettable.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Interior with Young Woman Seen from Behind — the room",
+      "durationMinutes": 30,
+      "instruction": "A woman stands at a table in a room of grey and white, seen from behind, the window light flat and cold. Look at how Hammershøi empties the room of everything but mood. He painted his apartment and his wife hundreds of times, and the repetition became a meditation on solitude."
+    },
+    "tags": [
+      "Symbolism",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-j-f-willesen",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "J.F. Willumsen",
+    "teaser": "The Danish modernist who never stayed still — he painted symbolist visions, carved sculptural reliefs, designed ceramics, and ended with wild expressionist canvases. His Great Relief of the wedding couple is a monument of Danish symbolism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Great Relief or the expressionist self-portraits",
+      "durationMinutes": 20,
+      "instruction": "Look at the Great Relief: a carved wooden triptych of a couple, painted in gold and dark colors, full of symbolism — sun, moon, growth, and fate. Then his late self-portraits, painted in blazing color at 80. Willumsen was never satisfied, and his restlessness made him great."
+    },
+    "tags": [
+      "Symbolism",
+      "Danish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-axel-salto",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Axel Salto",
+    "teaser": "The Danish artist of sprouting, organic form — his ceramics of sprouting vases and his 'vegetative' paintings made him the most original Danish ceramist of the century. He believed form should grow like a plant, from its own inner logic.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The sprouting ceramics — the forms",
+      "durationMinutes": 20,
+      "instruction": "Look at how Salto's vases sprout: bud-like protrusions, organic curves, surfaces like bark or skin. He said a vase should grow 'as a plant grows, from the earth to the light.' His glazes — deep greens, oxbloods — are as alive as the forms. Art that seems to keep growing."
+    },
+    "tags": [
+      "Modern",
+      "Danish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-otto-bache",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Otto Bache",
+    "teaser": "The Danish history painter of the nation's turning points — his monumental canvases of the war of 1864, the meeting of the kings, and the king's arrival at the castle are the official images of Danish history. He also painted horses better than almost anyone.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Danish standard-bearers or the war scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the horses: Bache painted cavalry with an accuracy that made him the go-to painter for anything with hooves. Then his history canvases — the 1864 war, the coronations — staged with journalistic clarity. He gave Denmark its picture of itself, and the picture is full of motion."
+    },
+    "tags": [
+      "Academicism",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-christoffer-wilhelm-eckersberg",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Christoffer Wilhelm Eckersberg",
+    "teaser": "The father of Danish Golden Age painting — his views of Copenhagen, the sea, and the naked figure are painted with a clarity that made him the teacher of an entire generation. He is called 'the father of Danish painting.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The views of Copenhagen harbor or the nude studies",
+      "durationMinutes": 20,
+      "instruction": "Look at the clarity: Eckersberg painted the harbor with a light so even and honest it feels like a scientific record — and it is. He made his students paint from life, outdoors, and study the nude seriously. Danish art's love of clear light and truth starts here."
+    },
+    "tags": [
+      "Danish Golden Age",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-christen-kobke",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Christen Købke",
+    "teaser": "The purest painter of the Danish Golden Age — his views of the Citadel in Copenhagen and of summer fields are painted with a fresh, honest light that looks almost modern. He died at 62, forgotten; today he is Denmark's most loved painter.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "View from the Citadel Ramparts — the light",
+      "durationMinutes": 20,
+      "instruction": "Look at the morning light: the ramparts, the lime trees, the distant city — painted so cleanly it feels like the first painting ever made. Købke's colors are pale and true, his compositions quiet. He painted the Copenhagen he loved, and time has made it eternal."
+    },
+    "tags": [
+      "Danish Golden Age",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-constantin-hansen",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Constantin Hansen",
+    "teaser": "The Danish Golden Age painter of the human figure — his frescoes of the Assembly Room at Christiansborg and his studies of Greek light after a long stay in Athens made him the most learned painter of his generation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Assembly Room frescoes (Christiansborg) — the figures",
+      "durationMinutes": 20,
+      "instruction": "Look at how Hansen arranges the nation's founding fathers in classical poses — Danish history staged as Greek relief. He studied in Rome and Athens and brought back the discipline of the antique. His women and children studies glow with a quiet warmth beneath the formality."
+    },
+    "tags": [
+      "Danish Golden Age",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-wilhelm-marstrand",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Wilhelm Marstrand",
+    "teaser": "The Danish painter of Italian street life and Danish history — his Roman carnival scenes are full of laughter and light, while his historical canvases are solemn and grand. He was the Golden Age's most versatile storyteller.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Roman carnival scenes or the Italian osteria paintings",
+      "durationMinutes": 20,
+      "instruction": "Look at the crowd: Marstrand painted Rome's festivals with a zest that makes you hear the noise. Then his history paintings — serious, staged, national. He could do comedy and monument with equal skill. A painter who loved both Rome and Copenhagen, and it shows in every canvas."
+    },
+    "tags": [
+      "Danish Golden Age",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-julius-exner",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Julius Exner",
+    "teaser": "The Danish painter of the peasant interior — his scenes of the old Danish farmhouse, with their spinning wheels, coffins, and Sunday visits, are warm documents of a rural world that was vanishing. He painted folklore with affection.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The old farmhouse interiors — the details",
+      "durationMinutes": 20,
+      "instruction": "Look at the details: the spinning wheel, the pewter, the painted chests, the open coffin in the parlor — Danish peasant life recorded item by item. Exner's scenes are full of ritual and warmth. He painted the old Denmark just before it industrialized, and he made it glow."
+    },
+    "tags": [
+      "Realism",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-frants-henningsen",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Frants Henningsen",
+    "teaser": "The Danish painter of winter and the poor — his scenes of Copenhagen's snowbound streets, mourners, and orphan girls are painted with a social conscience and a masterful handling of grey winter light.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The winter scenes of Copenhagen — the snow",
+      "durationMinutes": 20,
+      "instruction": "Look at the snow: Henningsen painted Copenhagen's winters in tones of grey, white, and blue, with small figures moving through the cold. His paintings of funerals and orphanages are tender without being mawkish. He painted the city's poor the way Krohg painted Norway's."
+    },
+    "tags": [
+      "Realism",
+      "Danish",
+      "19th Century"
+    ],
+    "tier": 1
+  }
+]

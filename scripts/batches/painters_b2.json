@@ -1,0 +1,382 @@
+[
+  {
+    "id": "painter-jan-van-eyck",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jan van Eyck",
+    "teaser": "The Flemish inventor of oil painting as we know it — or at least its most famous early master. His Ghent Altarpiece and Arnolfini Portrait achieve a mirror-like realism in 1434 that still shocks. He signed his paintings, an almost unheard-of act then.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Arnolfini Portrait (National Gallery, London) — the mirror",
+      "durationMinutes": 30,
+      "instruction": "Look at the convex mirror on the back wall: in it you can see the entire room from behind, including two tiny figures — one of them likely van Eyck himself. He painted a reflection of a reflection. Check the dog, the discarded shoes, the chandelier's single candle."
+    },
+    "tags": [
+      "Northern Renaissance",
+      "Flemish",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-roger-van-der-weyden",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Rogier van der Weyden",
+    "teaser": "The most emotionally intense painter of the Northern Renaissance — his Deposition arranges ten grief-stricken figures in a shallow golden box, each face a different shade of sorrow. He was Europe's most famous painter in his lifetime.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Descent from the Cross (Prado, Madrid) — the faces",
+      "durationMinutes": 30,
+      "instruction": "Read the faces one by one: Mary fainting into the arms of St. John, the Magdalen twisting with grief, the man wiping a tear. Every figure's body bends along the same curve as the body of Christ. Weyden composed grief like music."
+    },
+    "tags": [
+      "Northern Renaissance",
+      "Flemish",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-hans-holbein-the-younger",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Hans Holbein the Younger",
+    "teaser": "The German painter who became Henry VIII's court artist and painted the faces of Tudor England with an almost forensic accuracy — down to the threads on a sitter's cuff. His Ambassadors hides a giant skull you can only see from the side.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Ambassadors (National Gallery, London) — the skull trick",
+      "durationMinutes": 30,
+      "instruction": "First walk around to the side of the painting: the grey smear at the bottom snaps into a skull. Then return to the front: two ambassadors, a globe, a lute with a broken string, and an anamorphic memento mori — 'remember you will die.' Holbein hid death inside a status symbol."
+    },
+    "tags": [
+      "Northern Renaissance",
+      "German",
+      "16th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-albrecht-altdorfer",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Albrecht Altdorfer",
+    "teaser": "The German painter who made landscape the hero — his Battle of Alexander at Issus turns a historical battle into a cosmic panorama seen from the moon, with armies clashing below a vast, apocalyptic sky.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Battle of Alexander at Issus (Alte Pinakothek, Munich) — the sky",
+      "durationMinutes": 20,
+      "instruction": "Stand back: the painting is a world — mountains, sea, cities, an army on the march, and a sun and moon blazing in a storm-colored sky. Look at the tiny inscription on a stone that records the battle, then notice how small history looks from up here."
+    },
+    "tags": [
+      "Northern Renaissance",
+      "German",
+      "16th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-george-stubbs",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "George Stubbs",
+    "teaser": "The English painter who dissected horses to paint them perfectly — he spent 18 months on a book of equine anatomy, then painted racing and anatomy scenes with a scientist's accuracy and a portraitist's grace.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Whistlejacket (National Gallery, London) — the bare background",
+      "durationMinutes": 20,
+      "instruction": "A racehorse rears against a completely blank background — no landscape, no rider, just the animal, life-size. Stubbs stripped away everything to make the horse the whole subject. Look at the muscle definition; it comes from actual dissection."
+    },
+    "tags": [
+      "Romanticism",
+      "British",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-john-singer-sargent",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "John Singer Sargent",
+    "teaser": "The American expatriate who painted the rich and beautiful of the Belle Époque with a loose, dazzling brushstroke — Madame X scandalized Paris, Lady Agnew still stops viewers cold. His watercolors are as good as his oils.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Madame X (Met, New York) — the shoulder",
+      "durationMinutes": 20,
+      "instruction": "Look at the pale skin against the black dress — and notice the shoulder strap was originally falling off, causing a scandal so loud Sargent repainted it. The pose is simple, the paint handling electric. Up close you can see the confidence in every stroke."
+    },
+    "tags": [
+      "Realism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-alfred-sisley",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Alfred Sisley",
+    "teaser": "The most single-minded Impressionist — an Englishman who painted almost nothing but rivers, bridges, and sky in the Île-de-France, with a quiet poetry his friends Monet and Renoir never matched. He stayed poor while they got famous.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Bridge at Villeneuve-la-Garenne (Met, New York) — the water",
+      "durationMinutes": 20,
+      "instruction": "Sisley's water is the best in Impressionism: look at how the bridge's reflection breaks and ripples without losing its shape. Notice the sky — he painted weather as mood. It's a modest scene, a weekday scene, made eternal by light."
+    },
+    "tags": [
+      "Impressionism",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-camille-pissarro",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Camille Pissarro",
+    "teaser": "The father figure of Impressionism — the oldest member of the group, the one who organized their exhibitions and mentored Cézanne, Gauguin, and Seurat. He painted villages, markets, and peasants with a warm, honest eye.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Boulevard Montmartre at Night (National Gallery, London) — the city",
+      "durationMinutes": 20,
+      "instruction": "Pissarro painted this boulevard many times from a hotel window, at every hour and season. Look at the night version: the streetlamps are scattered diamonds, the crowds are dashes, the city is a living organism of light. No drama — just observation, at its most loving."
+    },
+    "tags": [
+      "Impressionism",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-gustave-moreau",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Gustave Moreau",
+    "teaser": "The French symbolist who painted Salomé, sphinxes, and unicorns dripping with jewels and mystery — dreamlike, theatrical visions that the Surrealists claimed as grandfather. He taught Matisse and Rouault, who loved him for his freedom.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Salomé Dancing Before Herod (Musée Gustave-Moreau, Paris) — the jewel box",
+      "durationMinutes": 30,
+      "instruction": "The architecture is a palace built of ornament: columns, incense, and a hovering figure of Salomé balanced on one toe, holding a lotus. Look at the painting's edges — thick with gold and pigment, like a reliquary. Moreau's imagination ran on ritual and dream."
+    },
+    "tags": [
+      "Symbolism",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-odilon-redon",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Odilon Redon",
+    "teaser": "The French symbolist who went from black-and-white nightmares (giant eyes, floating flowers, spiders) to radiant pastel gardens — a painter of the inner life who inspired the Surrealists and Nabis with his floating, dreamy imagery.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Cyclops (Kröller-Müller Museum) — the giant eye",
+      "durationMinutes": 20,
+      "instruction": "A giant one-eyed creature peers lovingly over a hillside at a sleeping nymph. Look at the tenderness in the monster's gaze — Redon's monsters aren't scary, they're lonely. Then look at the color: deep greens and rose, lit from within like a night garden."
+    },
+    "tags": [
+      "Symbolism",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-aubrey-beardsley",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Aubrey Beardsley",
+    "teaser": "The scandalous English illustrator of the 1890s who drew sin in black and white — sinuous, wicked, impossibly elegant lines for Oscar Wilde's Salomé that made Victorian England gasp. He died at 25 with tuberculosis, having changed illustration forever.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Salomé illustrations (1894) — the peacock skirt",
+      "durationMinutes": 20,
+      "instruction": "Look at the famous 'Peacock Skirt' drawing: a single flowing line suggests a gown, a feather, a woman's menace. Beardsley worked only in black ink on white paper — no gray, no shading — and made emptiness part of the picture. Provocative, elegant, and 100% line."
+    },
+    "tags": [
+      "Art Nouveau",
+      "British",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-alphonse-mucha",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Alphonse Mucha",
+    "teaser": "The Czech artist who made Art Nouveau a craze — his posters of Sarah Bernhardt, with flowing hair, halos of flowers, and sinuous borders, were pasted across Paris and instantly collected. He saw himself as a painter of Slavic history, not just poster girl.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Gismonda poster (1894) — the halo",
+      "durationMinutes": 20,
+      "instruction": "This poster made Mucha famous overnight when Sarah Bernhardt loved it. Look at the arch behind the actress — a Byzantine halo of mosaic — and how her hair, the flowers, and the border all flow in the same rhythm. Everything is a frame inside a frame."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Czech",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-henri-rousseau",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Henri Rousseau",
+    "teaser": "The toll collector who painted jungles he never saw — a self-taught 'naive' painter whose flat, dreamy, leaf-by-leaf jungles enchanted Picasso and the avant-garde. He claimed to have served in Mexico to explain the tigers; he hadn't.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Dream (MoMA, New York) — the sofa in the jungle",
+      "durationMinutes": 30,
+      "instruction": "A naked woman reclines on a red velvet sofa in the middle of a jungle, while a lion stares and an orange snake slides between flowers. It makes no sense and that's the point: Rousseau painted dreams, flat and perfect, every leaf outlined. Picasso bought one of his portraits and treated it like a treasure."
+    },
+    "tags": [
+      "Naive Art",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ame-deo-modigliani",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Amedeo Modigliani",
+    "teaser": "The Italian painter of swan necks and almond eyes — a handsome, doomed bohemian who painted elongated portraits of his friends in Paris and died of tuberculosis at 35, a day after his pregnant girlfriend jumped from a window. His portraits now sell for $170 million.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Nu couché (1917) — the pose",
+      "durationMinutes": 20,
+      "instruction": "Modigliani's reclining nudes caused a police raid on his one and only Paris exhibition. Look at the elongated body — the neck, the limbs — and how the face keeps his signature almond eyes and little nose. He painted people the way he remembered them in dreams: stretched, elegant, alone."
+    },
+    "tags": [
+      "Modern",
+      "Italian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-umberto-boccioni",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Umberto Boccioni",
+    "teaser": "The dynamo of Italian Futurism who wanted to paint speed itself — his The City Rises and sculpture Unique Forms of Continuity in Space made motion and noise visible. He died at 33, thrown from a horse during cavalry training in WWI.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The City Rises (MoMA, New York) — the motion",
+      "durationMinutes": 20,
+      "instruction": "A giant red horse surges through a crowd of workers and construction, everything smeared and fractured by speed. Boccioni wanted to show not the horse but its energy — the effort, the chaos, the modern city as a muscle. Notice how bodies dissolve into their own momentum."
+    },
+    "tags": [
+      "Futurism",
+      "Italian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-frantisek-kupka",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "František Kupka",
+    "teaser": "The Czech painter who jumped to pure abstraction around 1912 — before Kandinsky, he claimed — turning music, motion, and cosmic forces into disks, planes, and color. His vertical red-and-blue canvases vibrate like signals from another dimension.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Cathedral (1913) — the colors",
+      "durationMinutes": 20,
+      "instruction": "Long vertical bands of red, blue, and violet climb like light through stained glass. Kupka called such works 'fugues' — he wanted painting to work like music, no subject, pure structure. Let your eyes drift up and down; the canvas hums."
+    },
+    "tags": [
+      "Abstract",
+      "Czech",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-robert-delaunay",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Robert Delaunay",
+    "teaser": "The French painter who made color the whole subject — his Eiffel Tower paintings fracture Paris's symbol into dazzling planes, and his 'orphic' abstract disks spin like targets of pure light. Apollinaire coined a word for his art: Orphism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Eiffel Tower (1911) — the fractured tower",
+      "durationMinutes": 20,
+      "instruction": "The tower is shown from several angles at once, split into slices, glazed in pink and blue. Delaunay treated color like a power source: the warmer the red, the closer it feels; the colder the blue, the farther it recedes. He painted the tower until it became pure light."
+    },
+    "tags": [
+      "Orphism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-giorgio-de-chirico",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Giorgio de Chirico",
+    "teaser": "The Greek-Italian painter of empty plazas and long shadows — his 'metaphysical' squares with mannequins, trains, and clocks felt so strange that the Surrealists declared him a prophet. He painted the loneliness of places before people arrive.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Melancholy and Mystery of a Street (1914) — the shadows",
+      "durationMinutes": 30,
+      "instruction": "A sunlit arcade, a little girl rolling a hoop, a shadow that stretches from someone out of frame, a flag hanging dead in still air. De Chirico made time stop. Look at how the architecture recedes toward a tiny figure in the distance — and how uneasy that stillness is."
+    },
+    "tags": [
+      "Metaphysical",
+      "Italian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-max-ernst",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Max Ernst",
+    "teaser": "The Surrealist inventor of frottage and collage who turned the forest into a haunted, tangled dream — a German painter who fought in WWI, fled the Nazis twice, and painted jungles, birds, and a monstrous history with a scientist's patience and a madman's imagery.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Europe After the Rain II (Wadsworth Atheneum) — the wasteland",
+      "durationMinutes": 30,
+      "instruction": "A continent dissolves into dripping biomorphic shapes, columns, and a bird-creature's profile — painted with a grattage technique (scraping pigment over textured surfaces). Ernst made apocalypse look organic, like a wound healing badly. Look for the faces hidden in the rock."
+    },
+    "tags": [
+      "Surrealism",
+      "German",
+      "20th Century"
+    ],
+    "tier": 1
+  }
+]

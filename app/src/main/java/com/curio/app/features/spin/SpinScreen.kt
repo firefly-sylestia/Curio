@@ -24,6 +24,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +80,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -104,6 +107,11 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
+import com.curio.app.data.TourController
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
@@ -643,8 +651,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     LaunchedEffect(pageWash) {
         CurioNavTint.publishSpinWash(pageWash)
     }
-    // Hygiene: clear the handoff when Spin leaves composition so a stale wash
-    // never lingers for a future route that might share the tint.
+    // Keep the last published wash while the shared-element transition leaves
+    // Spin. Clearing it here would make the Scaffold nav bar fall back to the
+    // cream theme surface for one frame before the reveal placeholder takes
+    // over, creating a visible color flash. Non-Spin routes ignore this handoff
+    // and a new Spin composition republishes the current wash immediately.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -656,10 +667,6 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { CurioNavTint.publishSpinWash(null) }
     }
 
     // Category switch resets transient animation state. The landed card is
@@ -677,6 +684,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     LaunchedEffect(shuffleCount) {
         if (shuffleCount == 0 || filteredPool.isEmpty()) return@LaunchedEffect
         shuffling = true
+        // v8.13 — the pet cheers while the deck reels (cleared at the settle).
+        CurioPet.noteSpinning(true)
         landedTopicName = null
         landingAlreadyOpened = false
         isOpening = false
@@ -687,7 +696,6 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             CurioMotion.Durations.SpinMax.toLong() + 1
         )
         val start = System.currentTimeMillis()
-        var tick = 0
         while (true) {
             val elapsed = System.currentTimeMillis() - start
             if (elapsed >= durationMs) break
@@ -696,11 +704,35 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             // the wheel starts at a readable cadence and glides gently to a
             // stop — a graceful slow-down instead of a snappy whip. The
             // ~340ms floor keeps the fastest early ticks readable and sits
-            // ABOVE the ~320ms peek wipe, so every transition completes
-            // before the next tick lands. Intervals ~340ms -> ~520ms.
-            val eased = sin(progress * Math.PI.toFloat() / 2f)
-            val interval = (340L + (180L * eased).toLong()).coerceAtMost(520L)
-            cycleIndex = ++tick
+            // ABOVE the ~310ms staggered peek wave, so every transition
+            // completes before the next tick lands. Intervals ~340ms -> ~520ms.
+            // v9.1 — premium reel: when the Spin landing FX experiment is on
+            // (with its reel layer), the wheel glides on a cubic ease-out —
+            // a confident opening cadence easing through a long, silky tail
+            // so the stop reads like a prize wheel locking in. The classic
+            // sine ease is untouched when the experiment is off.
+            val fxReel = AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState
+            val eased = if (fxReel) {
+                1f - (1f - progress) * (1f - progress) * (1f - progress)
+            } else {
+                sin(progress * Math.PI.toFloat() / 2f)
+            }
+            val interval = if (fxReel) {
+                // v9.2 — the premium reel is noticeably faster and brisker
+                // (140→370ms), so the wheel reads as a quick prize-wheel
+                // spin instead of a gentle shuffle. The classic sine reel
+                // stays the same calm cadence (340→520ms).
+                (140L + (230L * eased).toLong()).coerceAtMost(370L)
+            } else {
+                (340L + (180L * eased).toLong()).coerceAtMost(520L)
+            }
+            // Continue from the hand position the user is currently viewing.
+            // Using a separate tick counter here reset every spin to hand[1],
+            // which made the next swipe appear to pull the wrong visible peek
+            // after the deck had already been cycled manually.
+            if (hand.isNotEmpty()) {
+                cycleIndex = (cycleIndex + 1) % hand.size
+            }
             // Slot-machine ratchet: haptic intensity escalates as the wheel
             // decelerates — a light tick at the brisk opening cadence, a
             // firmer segment tick through the slowdown, and a solid
@@ -719,6 +751,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             if (System.currentTimeMillis() - start >= durationMs) break
         }
         shuffling = false
+        // v8.13 — the reel stopped; the pet settles back to watching.
+        CurioPet.noteSpinning(false)
 
         // Pick a single topic — tier-biased, sentiment-weighted (liked /
         // disliked topics + category affinity), and never an already-
@@ -752,7 +786,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             recentTopicIds = (recentTopicIds + primary.id).toList().takeLast(20).toSet()
             StreakTracker.recordActivity(context)
             // Feed the quests system — spins drive journey + daily + badges.
-            CurioQuests.onSpin(context)
+            // The spun lane is passed so a "New lane" discovery daily aimed
+            // at this category (or Wildcard's surprise deck) completes at the
+            // spin, no topic-open required (spec §6.3).
+            CurioQuests.onSpin(context, activeCategory.id)
+            // Feed the category passport — the spin counts toward the lane's
+            // stamp and drives discovery quests (spec §6).
+            CurioPassport.noteSpin(context, activeCategory.id)
+            // The pet cheers when the wheel lands (spec §10.6 event hook).
+            CurioPet.reactTo(CurioPet.Event.SPIN_LANDED)
             // Final reel clunk — strong confirmation the wheel locked in.
             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
         }
@@ -766,24 +808,34 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // again within that window cancels this effect (keyed on
         // shuffleCount) and no navigation happens.
         if (primary != null) {
-            // Keep the settled ticket visible as the source of the handoff:
-            // its restrained lift/scale and "Opening…" label should be on
-            // screen before the destination hero appears.
-            landingAlreadyOpened = true
-            isOpening = true
-            // v7.x — shortened from 600ms: the settle + confetti still get
-            // their beat, but the reveal arrives before the pause reads as
-            // a stall.
-            delay(450)
-            // Guard against a category switch during the pause: the effect
-            // captured `cat` at launch, so only navigate if it's still the
-            // active category.
-            if (cat.id != activeCategory.id) {
-                isOpening = false
-                return@LaunchedEffect
-            }
-            navController.navigate(CurioRoutes.revealFor(primary.categoryId.routeSlug, primary.name)) {
-                launchSingleTop = true
+            // v8.16 — auto-open is a user preference (Settings → Appearance,
+            // "Auto-open landed topic"), DEFAULT OFF: when disabled, the
+            // deck just lands and the front card stays tappable — no reveal
+            // page, no open-it prompt — until the user taps the card.
+            if (AppPreferences.autoOpenRevealState) {
+                // Keep the settled ticket visible as the source of the
+                // handoff: its restrained lift/scale and "Opening…" label
+                // should be on screen before the destination hero appears.
+                landingAlreadyOpened = true
+                isOpening = true
+                // v7.x — shortened from 600ms: the settle + confetti still
+                // get their beat, but the reveal arrives before the pause
+                // reads as a stall.
+                delay(450)
+                // Guard against a category switch during the pause: the
+                // effect captured `cat` at launch, so only navigate if it's
+                // still the active category.
+                if (cat.id != activeCategory.id) {
+                    isOpening = false
+                    return@LaunchedEffect
+                }
+                // v8.30 — tell the pet this open is the auto-open so it says
+                // "It opened itself!" here and "You picked it!" when the
+                // user taps the card instead.
+                CurioPet.markRevealAuto()
+                navController.navigate(CurioRoutes.revealFor(primary.categoryId.routeSlug, primary.name)) {
+                    launchSingleTop = true
+                }
             }
         }
     }
@@ -805,6 +857,28 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
 
     // ── Deck interaction callbacks — shared by the normal and compact
     //    layout branches (the Carousel call lives in SpinDeckSection) ─
+    // ── Deck swipe — the front card swaps through the visible fan ──
+    // A horizontal swipe nudges cycleIndex ±1, which re-resolves every
+    // fan slot so the whole deck streams one card forward/back through
+    // the cards already visible around the front (v8.31). When a landed
+    // card fronts the deck, the first swipe dismisses it (clears the
+    // pin) and lands on the neighbor that was already visible in the
+    // swiped direction — resolveTopicForSlot's wrap-around makes that
+    // exact card come to the front. The fan never re-deals: hand is
+    // keyed on filteredPool only, so a swipe is a pure rotation.
+    val onDeckCycle: (Int) -> Unit = { delta ->
+        if (!shuffling && filteredPool.isNotEmpty() && !isOpening && hand.isNotEmpty()) {
+            // Cleared unconditionally: the pointerInput block captures this
+            // lambda once, so reading the recomputed `landedTopic` val would
+            // go stale in the captured closure — the MutableState delegate
+            // write is always live. Setting the same value is a no-op recompose
+            // and won't re-fire the persist effect, so it's safe on idle deck.
+            landedTopicName = null
+            val size = hand.size
+            cycleIndex = ((cycleIndex + delta) % size + size) % size
+        }
+    }
+
     val onDeckCardTap: () -> Unit = {
         if (!shuffling && filteredPool.isNotEmpty() && !isOpening) {
             // v7.106 — the front card is ALWAYS openable: the restored
@@ -839,7 +913,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
     }
     val onSpinClick: () -> Unit = {
-        if (!shuffling && filteredPool.isNotEmpty()) shuffleCount++
+        if (TourController.consumeTap("spin")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else if (!shuffling && filteredPool.isNotEmpty()) {
+            shuffleCount++
+        }
     }
 
     // ── Overall layout ─────────────────────────────────────────────────
@@ -968,6 +1048,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         buttonPulse = buttonPulse,
                         fitScale = wideFit,
                         onCardTap = onDeckCardTap,
+                        onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
                     )
                 }
@@ -1038,6 +1119,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     buttonPulse = buttonPulse,
                     fitScale = fitScale,
                     onCardTap = onDeckCardTap,
+                    onCycle = onDeckCycle,
                     onSpinClick = onSpinClick
                 )
             }
@@ -1078,6 +1160,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         buttonPulse = buttonPulse,
                         fitScale = fitScale,
                         onCardTap = onDeckCardTap,
+                        onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
                     )
                 }
@@ -1187,6 +1270,7 @@ private fun ColumnScope.SpinDeckSection(
     buttonPulse: Float,
     fitScale: Float = 1f,
     onCardTap: () -> Unit,
+    onCycle: (Int) -> Unit,
     onSpinClick: () -> Unit
 ) {
     // ── Breathing room before the deck (tighter when the screen is short;
@@ -1205,59 +1289,73 @@ private fun ColumnScope.SpinDeckSection(
 
     // ── Carousel (interactive cards) — fitScale compresses the fan to the
     //    space actually available (see SpinScreen's fit-scale computation).
-    Carousel(
-        cat = cat,
-        deckAccent = deckAccent,
-        deckGradient = deckGradient,
-        isMixed = isMixed,
-        mixSeed = mixSeed,
-        displayPool = displayPool,
-        cycleIndex = cycleIndex,
-        shuffling = shuffling,
-        landedTopic = landedTopic,
-        opening = opening,
-        enabled = enabled,
-        compact = compact,
-        extraCompact = extraCompact,
-        densityExtraCompact = densityExtraCompact,
-        roomy = roomy,
-        fitScale = fitScale,
-        onCardTap = onCardTap,
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    // ── Center spin button — the ONLY shuffle CTA (v6) ──────────────
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                top = when {
-                    densityExtraCompact -> 12.dp
-                    compact && extraCompact -> 12.dp
-                    compact -> 16.dp
-                    roomy -> 40.dp
-                    else -> 32.dp
-                },
-                bottom = when {
-                    densityExtraCompact -> 8.dp
-                    compact && extraCompact -> 8.dp
-                    compact -> 10.dp
-                    roomy -> 18.dp
-                    else -> 12.dp
-                }
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        SpinButton(
-            tint = deckAccent,
-            isShuffling = shuffling,
+    // v8.21 — the deck is a FUN landmark: the pet sometimes dashes over and
+    // boops the whole fan of cards (bounds-only, zero layout impact).
+    PetLandmark(id = "deck", kind = PetLandmarks.Kind.FUN, screen = "spin") { m ->
+        Carousel(
+            cat = cat,
+            deckAccent = deckAccent,
+            deckGradient = deckGradient,
+            isMixed = isMixed,
+            mixSeed = mixSeed,
+            displayPool = displayPool,
+            cycleIndex = cycleIndex,
+            shuffling = shuffling,
             landedTopic = landedTopic,
-            pulseScale = buttonPulse,
+            opening = opening,
             enabled = enabled,
             compact = compact,
+            extraCompact = extraCompact,
+            densityExtraCompact = densityExtraCompact,
+            roomy = roomy,
             fitScale = fitScale,
-            onClick = onSpinClick
+            onCardTap = onCardTap,
+            onCycle = onCycle,
+            modifier = m.fillMaxWidth()
         )
+    }
+
+    // ── Center spin button — the ONLY shuffle CTA (v6) ──────────────
+    // v8.16 — the spin button is a FUN pet landmark: the pet sometimes
+    // dashes over and boops it while the deck waits (it just pulses — no
+    // layout change, and the shared-element morph is untouched).
+    PetLandmark(
+        id = "spin",
+        kind = PetLandmarks.Kind.FUN,
+        screen = "spin"
+    ) { m ->
+        Box(
+            modifier = m
+                .fillMaxWidth()
+                .padding(
+                    top = when {
+                        densityExtraCompact -> 12.dp
+                        compact && extraCompact -> 12.dp
+                        compact -> 16.dp
+                        roomy -> 40.dp
+                        else -> 32.dp
+                    },
+                    bottom = when {
+                        densityExtraCompact -> 8.dp
+                        compact && extraCompact -> 8.dp
+                        compact -> 10.dp
+                        roomy -> 18.dp
+                        else -> 12.dp
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            SpinButton(
+                tint = deckAccent,
+                isShuffling = shuffling,
+                landedTopic = landedTopic,
+                pulseScale = buttonPulse,
+                enabled = enabled,
+                compact = compact,
+                fitScale = fitScale,
+                onClick = onSpinClick
+            )
+        }
     }
 }
 
@@ -1362,6 +1460,11 @@ private fun FilterSheet(
     var draftFilters by remember(initialFilters) { mutableStateOf(initialFilters) }
     var draftSubtypes by remember(initialSubtypes) { mutableStateOf(initialSubtypes) }
     val activeCount = draftFilters.size + draftSubtypes.size
+    // v8.21 — tell the pet a drawer is up so it comes over to peek.
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("spin", false) }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -1406,6 +1509,15 @@ private fun FilterSheet(
                     }
                 }
             }
+
+            // v8.21 — a warm subtitle so the sheet reads friendly, not like
+            // a settings form.
+            Text(
+                text = "Pick what you're in the mood for",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+            )
 
             // ── Active filter summary chips — this is what was missing ─
             if (activeCount > 0) {
@@ -1766,6 +1878,7 @@ private fun Carousel(
     roomy: Boolean = false,
     fitScale: Float = 1f,
     onCardTap: () -> Unit,
+    onCycle: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val poolSize = displayPool.size
@@ -1791,15 +1904,48 @@ private fun Carousel(
         // fan so proportions stay identical; the roomy box grows ~6% to
         // match the up-scaled fan. v7.15 — the whole box also scales by
         // [fitScale] so the fan's layout footprint matches its size.
-        modifier = modifier.height(
-            when {
-                densityExtraCompact -> 325.dp
-                extraCompact -> 350.dp
-                compact -> 390.dp
-                roomy -> 470.dp
-                else -> 444.dp
-            } * fitScale
-        ),
+        // v8.36 — the swipe detector now lives on the WHOLE deck box (not
+        // just the front card), so a horizontal drag anywhere on the fan —
+        // on the peek cards or the hero — rotates the deck. Taps on the
+        // front card still open the topic: tap vs horizontal-drag
+        // disambiguation is handled by the gesture system (a tap never
+        // crosses drag slop, so the card's own clickable wins).
+        modifier = modifier
+            .pointerInput(enabled, shuffling, opening) {
+                if (enabled && !shuffling && !opening) {
+                    val swipeThreshold = 48.dp.toPx()
+                    var totalDrag = 0f
+                    while (true) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { totalDrag = 0f },
+                            onDragCancel = { totalDrag = 0f },
+                            onDragEnd = {
+                                when {
+                                    // Swipe follows the gesture: right → next
+                                    // (+1), left → previous (−1) (v8.41 fix —
+                                    // this was inverted on release).
+                                    totalDrag <= -swipeThreshold -> onCycle(-1)
+                                    totalDrag >= swipeThreshold -> onCycle(1)
+                                }
+                                totalDrag = 0f
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                totalDrag += dragAmount
+                            }
+                        )
+                    }
+                }
+            }
+            .height(
+                when {
+                    densityExtraCompact -> 325.dp
+                    extraCompact -> 350.dp
+                    compact -> 390.dp
+                    roomy -> 470.dp
+                    else -> 444.dp
+                } * fitScale
+            ),
         contentAlignment = Alignment.Center
     ) {
         if (poolSize == 0) {
@@ -1814,23 +1960,31 @@ private fun Carousel(
                     landedTopic = landedTopic
                 )
                 if (slot == 0) {
-                    HeroTicketCard(
-                        accent = deckAccent,
-                        gradient = deckGradient,
-                        isMixed = isMixed,
-                        mixSeed = mixSeed,
-                        scale = deckScale,
-                        topic = topic,
-                        cat = cat,
-                        landed = landedTopic != null,
-                        shuffling = shuffling,
-                        opening = opening,
-                        // The front card can show an idle-deck topic before the
-                        // first shuffle, so its tap target must follow the
-                        // rendered card instead of requiring a landed topic.
-                        enabled = enabled && topic != null,
-                        onTap = onCardTap
-                    )
+                    // v8.36 — the swipe detector was hoisted to the whole deck
+                    // Box above, so the front card only carries its tap-to-open
+                    // (the hero pulse covers the card's per-tick bounce). The
+                    // wrapper's zIndex keeps the hero ABOVE the peek cards (the
+                    // peeks fan at zIndex 2/5 — the old default-0 hero let them
+                    // draw IN FRONT of the main card).
+                    Box(modifier = Modifier.zIndex(10f)) {
+                        HeroTicketCard(
+                            accent = deckAccent,
+                            gradient = deckGradient,
+                            isMixed = isMixed,
+                            mixSeed = mixSeed,
+                            scale = deckScale,
+                            topic = topic,
+                            cat = cat,
+                            landed = landedTopic != null,
+                            shuffling = shuffling,
+                            opening = opening,
+                            // The front card can show an idle-deck topic before the
+                            // first shuffle, so its tap target must follow the
+                            // rendered card instead of requiring a landed topic.
+                            enabled = enabled && topic != null,
+                            onTap = onCardTap
+                        )
+                    }
                 } else {
                     PeekCard(
                         slot = slot,
@@ -1880,7 +2034,7 @@ private fun EmptyPoolHint(cat: CurioCategory) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "This lane is still forming — new topics will appear here as you explore.",
+                    text = "This lane is still forming. New topics will appear here as you explore.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -1994,11 +2148,15 @@ private fun HeroTicketCard(
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
         tickDir = -tickDir
-        // v6.6 — calm breath instead of a kick: the card lifts barely
-        // (1.02) and glides back on a heavily damped, low-stiffness
-        // spring, so each tick reads as a soft pulse, never a slam.
-        tickPulse.snapTo(1.02f)
-        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
+        tickPulse.snapTo(if (AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState) 1.04f else 1.02f)
+        // v9.1 — the premium reel rides a silkier pulse (softer spring) so
+        // every tick glides instead of snapping; the classic pulse is
+        // untouched when the experiment is off.
+        if (AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState) {
+            tickPulse.animateTo(1f, spring(dampingRatio = 0.72f, stiffness = 300f))
+        } else {
+            tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
+        }
     }
 
     // ── Category switch — one welcoming bounce as the deck re-fans to the
@@ -2010,6 +2168,17 @@ private fun HeroTicketCard(
             tickPulse.animateTo(1f, CurioMotion.Springs.Elastic)
         }
     }
+
+    // ── Premium landing FX (v9.1 — experimental, gated) ────────────────
+    // The classic landing feel stays exactly as-is when the master toggle
+    // is off. With it on, the landing plays a spring catch (the settle
+    // branch below), a shockwave ring, a sparkle burst and a brief glow
+    // flash — each an independent A/B layer. All reads are reactive state,
+    // so flipping toggles in Experiments recomposes the hero instantly.
+    val fxOn = AppPreferences.spinLandingFxState
+    val fxCatch = fxOn && AppPreferences.spinFxCatchState
+    val fxRing = fxOn && AppPreferences.spinFxRingState
+    val fxSparkle = fxOn && AppPreferences.spinFxSparkleState
 
     // ── Landing settle — seamless handoff from the shuffle tick pulse to
     //    the elastic rest spring. On landing, snap to wherever the pulse
@@ -2041,12 +2210,50 @@ private fun HeroTicketCard(
                 // controlled Deliberate spring (85% damping, no bounce)
                 // instead of the extreme Elastic overshoot, so the wheel's
                 // stop reads as a confident rest, not a violent bounce.
-                launch { settleScale.animateTo(LandedRestScale, CurioMotion.Springs.Deliberate) }
-                launch { settleY.animateTo(0f, CurioMotion.Springs.Deliberate) }
+                // v9.2 — the premium catch compresses the card to 0.97 and
+                // springs it back to rest (75% damping, visible squish that
+                // reads as a controlled lock-in); the classic settle stays
+                // untouched when the FX is off.
+                val catchSpring = if (fxCatch) {
+                    settleScale.snapTo(0.97f)
+                    spring(dampingRatio = 0.75f, stiffness = 400f)
+                } else CurioMotion.Springs.Deliberate
+                launch { settleScale.animateTo(LandedRestScale, catchSpring) }
+                launch { settleY.animateTo(0f, catchSpring) }
             }
         } else {
             settleScale.snapTo(1f)
             settleY.snapTo(0f)
+        }
+    }
+
+    // ── Premium landing FX layers — ring, sparkle and glow play in
+    //    parallel with the settle spring the moment the wheel lands (never
+    //    on a restored / on-entry landed ticket), and stay fully inert when
+    //    the experiment is off.
+    val ringProgress = remember { Animatable(0f) }
+    val sparkleProgress = remember { Animatable(0f) }
+    val glowAlpha = remember { Animatable(0f) }
+    var sparkleSeed by remember { mutableIntStateOf(0) }
+    LaunchedEffect(landed) {
+        if (!landed || landedOnEntry) {
+            ringProgress.snapTo(0f)
+            sparkleProgress.snapTo(0f)
+            glowAlpha.snapTo(0f)
+        } else {
+            if (fxRing) {
+                ringProgress.snapTo(0f)
+                ringProgress.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
+            } else ringProgress.snapTo(0f)
+            if (fxSparkle) {
+                sparkleSeed++
+                sparkleProgress.snapTo(0f)
+                sparkleProgress.animateTo(1f, tween(850, easing = LinearEasing))
+            } else sparkleProgress.snapTo(0f)
+            if (fxCatch) {
+                glowAlpha.snapTo(0.5f)
+                glowAlpha.animateTo(0f, tween(600, easing = FastOutSlowInEasing))
+            } else glowAlpha.snapTo(0f)
         }
     }
     // When the user taps to open, settle back to EXACT scale 1 before the
@@ -2283,12 +2490,6 @@ private fun HeroTicketCard(
                             targetState = topic,
                             transitionSpec = {
                                 if (shuffling) {
-                                    // v6.10 — same rhythm as the peek wipes
-                                    // (under the 200ms tick floor) with a
-                                    // stronger height/2 rise so the front
-                                    // content visibly glides up as the deck
-                                    // streams. clip=false keeps the title
-                                    // reel from being sliced mid-slide.
                                     (slideInVertically(
                                         animationSpec = tween(300, easing = FastOutSlowInEasing)
                                     ) { height -> height / 2 } +
@@ -2328,14 +2529,15 @@ private fun HeroTicketCard(
                                 color = ink,
                                 maxLines = 3,
                                 overflow = TextOverflow.Ellipsis,
-                                // The title is NOT a shared element anymore:
-                                // text can't morph cleanly in
-                                // SharedTransitionScope (it scales the stable
-                                // layout — the 34sp card title stretched to
-                                // the full-width headline and long names
-                                // warped). The reveal headline fades in on
-                                // its own; the hero card is the only shared
-                                // piece.
+                                // v8.25 — the reveal's topic name now lives
+                                // INSIDE the shared hero card, styled exactly
+                                // like this ticket title (34sp/38sp geom), so
+                                // the whole card — gradient, glyph, pills and
+                                // name — morphs as one unit and the title
+                                // reads as staying put. This text stays plain
+                                // card content (never its own shared
+                                // element), so it never cross-scales against
+                                // a different headline.
                                 modifier = Modifier
                             )
                             if (currentTopic != null && currentTopic.tags.isNotEmpty()) {
@@ -2415,6 +2617,60 @@ private fun HeroTicketCard(
                             }
                         }
                     }
+                }
+            }
+
+            // ── Premium landing FX — shockwave ring, sparkle burst and the
+            //    catch glow, drawn above the card (and expanding past its
+            //    edges). Gated by the experiment (v9.1); fully inert off.
+            if (fxRing && ringProgress.value > 0f) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val p = ringProgress.value
+                    val base = size.minDimension * 0.30f
+                    val radius = base + base * 1.7f * p
+                    val alpha = (1f - p) * 0.85f
+                    val strokeW = 3.dp.toPx() * (1f - p * 0.7f) + 1.dp.toPx()
+                    drawCircle(color = accent.copy(alpha = alpha), radius = radius, center = center, style = Stroke(width = strokeW))
+                    drawCircle(color = Color.White.copy(alpha = alpha * 0.60f), radius = radius * 0.82f, center = center, style = Stroke(width = strokeW * 0.6f))
+                }
+            }
+            if (fxSparkle && sparkleProgress.value > 0f) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val p = sparkleProgress.value
+                    val base = size.minDimension * 0.32f
+                    val fade = (1f - p).coerceIn(0f, 1f)
+                    val piF = Math.PI.toFloat() / 180f
+                    repeat(14) { i ->
+                        val angle = ((i * 36f + sparkleSeed * 11f) % 360f) * piF
+                        val dist = base * (0.9f + p * 1.2f) + (i % 3) * 5f
+                        val x = center.x + cos(angle) * dist
+                        val y = center.y + sin(angle) * dist
+                        val s = (10f - 5f * p) * (0.8f + (i % 4) * 0.15f)
+                        val alpha = fade * 1.0f
+                        rotate(degrees = p * 30f + i * 14f, pivot = Offset(x, y)) {
+                            drawLine(color = accent.copy(alpha = alpha), start = Offset(x - s, y), end = Offset(x + s, y), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                            drawLine(color = accent.copy(alpha = alpha), start = Offset(x, y - s), end = Offset(x, y + s), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                        }
+                        drawCircle(color = Color.White.copy(alpha = alpha * 0.9f), radius = 1.6.dp.toPx() * (1f - p * 0.5f), center = Offset(x, y))
+                    }
+                }
+            }
+            if (fxCatch && glowAlpha.value > 0f) {
+                Canvas(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(30.dp))
+                ) {
+                    val r = size.minDimension * 0.75f
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(accent.copy(alpha = 0.70f * glowAlpha.value), Color.Transparent),
+                            center = center,
+                            radius = r
+                        ),
+                        radius = r,
+                        center = center
+                    )
                 }
             }
         }
@@ -3234,10 +3490,13 @@ private fun CategoryPickerSheet(
     var multiSelectMode by remember { mutableStateOf(false) }
     var selectedSlugs by remember { mutableStateOf(setOf<String>()) }
 
-    // Same full-screen + swipe-down-dismiss pattern as the filter page — a
-    // ModalBottomSheet expanded to full height with a drag handle.
+    // Same full-screen + swipe-down-dismiss pattern as the filter page — a    // ModalBottomSheet expanded to full height with a drag handle.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
+    // v8.21 — tell the pet a drawer is up so it comes over to peek.
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("spin", false) }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

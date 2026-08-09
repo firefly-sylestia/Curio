@@ -1,0 +1,402 @@
+[
+  {
+    "id": "painter-kaii-higashiyama",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kaii Higashiyama",
+    "teaser": "The Japanese nihonga master who painted mist, snow, and silence — his softly glowing landscapes of Mt. Fuji, alpine forests, and moonlit water made him Japan's most beloved 20th-century painter. He decorated the Imperial Palace too.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Way (1975, Tokyo National Museum) — the path",
+      "durationMinutes": 20,
+      "instruction": "A path winds through pale mountains into a mist that becomes the sky. Look at the gradation — no outlines, just color breathing from grey to white. Higashiyama studied Western watercolor but kept Japanese stillness; the result is a landscape you can hear."
+    },
+    "tags": [
+      "Nihonga",
+      "Japanese",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-yokoyama-taikan",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Yokoyama Taikan",
+    "teaser": "The giant of modern nihonga who made traditional Japanese painting face the modern world — his Mt. Chōkai is a heroic vision of a snow peak in golden sky, and his oceans are painted with a brush that feels like wind.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Mt. Chōkai (1915) — the gold",
+      "durationMinutes": 20,
+      "instruction": "A vast golden sky behind a pale blue mountain — flat, bold, and majestic. Look at how Taikan flattened depth into pattern while keeping the mountain's weight. He revived the classical style with modernist boldness; Japan adopted him as a living national treasure."
+    },
+    "tags": [
+      "Nihonga",
+      "Japanese",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-kawase-hasui",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kawase Hasui",
+    "teaser": "The master of the shin-hanga landscape print — his rain-soaked streets, snow-covered shrines, and quiet harbors made him the most collected Japanese printmaker of the 20th century. He walked Japan for decades, sketchbook in hand.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Rain at Shinagawa or Snow at Zojoji — the weather",
+      "durationMinutes": 20,
+      "instruction": "Look at how Hasui prints rain: long white lines slashing through blue-grey air, figures huddled under umbrellas. Then his snow — thick, soft, muffling. He said he wanted to capture 'the beauty of the moment passing.' Weather is his subject, memory his medium."
+    },
+    "tags": [
+      "Shin-hanga",
+      "Japanese",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ito-shinsui",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Itō Shinsui",
+    "teaser": "The shin-hanga master of beautiful women — his bijin-ga prints of women bathing, reading, and dreaming are among the most refined in Japanese art. He modernized the classical genre with new color techniques and a painterly softness.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Before the Mirror or Woman Bathing prints — the skin",
+      "durationMinutes": 20,
+      "instruction": "Look at the skin tones: Shinsui pioneered a printing method that produced gradations of pale flesh no one had managed before. Then look at the pose — a woman arranging her hair, unaware she's watched. Privacy, made beautiful."
+    },
+    "tags": [
+      "Shin-hanga",
+      "Japanese",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ogata-korin",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ogata Kōrin",
+    "teaser": "The Rinpa master who made gold-leaf irises and plum screens the pinnacle of Japanese decorative art — his Irises screens reduce nature to flat, luxurious pattern, and his wave paintings ripple like silk. He is to Japan what Matisse is to France.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Irises (Nezu Museum, Tokyo) — the screens",
+      "durationMinutes": 30,
+      "instruction": "Blue irises rise from an abstract gold-green ground in a rhythm of curves. Look at how Kōrin repeats the flower with tiny variations — a wave of blossoms, not a garden. The composition is so perfect it looks modern, but it's 300 years old."
+    },
+    "tags": [
+      "Rinpa",
+      "Japanese",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-tawaraya-sotatsu",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Tawaraya Sōtatsu",
+    "teaser": "The founder of the Rinpa school who painted wind, waves, and deer with gold and ink so bold it changed Japanese art — his screen of Matsushima islands and his Fujin Raijin (Wind and Thunder Gods) are national treasures.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Wind and Thunder Gods screens (Kenninji, Kyoto) — the gold",
+      "durationMinutes": 20,
+      "instruction": "Two gods on gold-leafed screens: the wind god with his bag, the thunder god with his drums, both outlined in bold ink that feels alive. Look at the gold — it's not background, it's atmosphere. Sōtatsu made emptiness shimmer."
+    },
+    "tags": [
+      "Rinpa",
+      "Japanese",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-maru-yama-okyo",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Maruyama Ōkyo",
+    "teaser": "The Japanese painter who reintroduced realism into Edo art — his sketches of animals, birds, and fish are so exact they look scientific, yet his night scenes and pine screens keep a dreamlike glow. He is the great synthesizer of Japanese painting.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Pine Trees in Snow (Imperial Collection) — the white",
+      "durationMinutes": 20,
+      "instruction": "Pine branches bend under snow on a gold screen — the snow is the unpainted gold, the branches are ink. Look at how Ōkyo uses negative space: the blank gold reads as snow, as light, as cold. It's the most elegant trick in Japanese art."
+    },
+    "tags": [
+      "Edo",
+      "Japanese",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-kitagawa-utamaro",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kitagawa Utamaro",
+    "teaser": "The ukiyo-e master of the female face — his large-head portraits (ōkubi-e) of Edo women are so sensitive they changed printmaking forever. He was jailed for prints of the shogun's concubines, which only increased his fame.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Hour of the Snake or his women of the pleasure quarter prints",
+      "durationMinutes": 20,
+      "instruction": "Look at how Utamaro captures mood in a quarter-profile: a woman half-turned, her eye lowered, her hand at her mouth. He was the first to make the face, not the body or the kimono, the subject. Every expression is a tiny novel."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-toshusai-sharaku",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Tōshūsai Sharaku",
+    "teaser": "The most mysterious artist in Japanese history — he appeared in 1794, published 140 brilliant actor prints in ten months, and vanished forever. No one knows who he was; some say he was a Noh actor himself. His portraits are piercing, exaggerated, unforgettable.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The actor Ōtani Oniji III as Yakko Edobei — the face",
+      "durationMinutes": 20,
+      "instruction": "A kabuki actor pulls a wild face — brows arched, mouth twisted, hands clawed — in a pose no printmaker had dared. Look at the exaggeration: it's a caricature with the power of a portrait. Sharaku's prints are so intense they still look modern 230 years later."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-hishikawa-moronobu",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Hishikawa Moronobu",
+    "teaser": "The artist credited with inventing ukiyo-e — the first printmaker to depict the floating world of Edo's theaters and pleasure quarters in mass-produced woodblock form. His black-and-white prints are the seed of the entire ukiyo-e tradition.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Scenes of the Floating World — the line",
+      "durationMinutes": 20,
+      "instruction": "Look at the confident black line: Moronobu drew kimono patterns, dancing figures, and city scenes with a brushstroke that feels like calligraphy in motion. No color, just ink and paper. Everything Hokusai and Hiroshige did later grows from this seed."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "17th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-suzuki-harunobu",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Suzuki Harunobu",
+    "teaser": "The printmaker who brought full color to Japanese woodblock — his nishiki-e ('brocade pictures') of slender girls, cherry blossoms, and gentle erotica made the 1760s the golden age of the medium. His prints are pastel, delicate, and perfect.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Evening Bell at the Clock or the Lovers in the Snow prints",
+      "durationMinutes": 20,
+      "instruction": "Look at the palette: Harunobu printed multiple woodblocks to achieve six, eight, ten colors — a revolution. His lovers walking in snow are shown from behind, their silhouettes framed by the pale sky. Simplicity, made of the most advanced technology of its day."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-torii-kiyonaga",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Torii Kiyonaga",
+    "teaser": "The ukiyo-e master of tall, graceful women — his diptychs and triptychs of Edo beauties on riverside walks have a monumental calm that later artists called the peak of bijin-ga. His compositions influenced Utamaro and many after.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Lower Kamo River or the Twelve Months series",
+      "durationMinutes": 20,
+      "instruction": "Look at the proportions: Kiyonaga's women are tall and statuesque, arranged in friezes that feel like classical reliefs. His multi-panel compositions let figures flow across sheets like a slow river. Elegance, discipline, and restraint."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-kobayashi-kiyochika",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kobayashi Kiyochika",
+    "teaser": "The ukiyo-e artist who painted Tokyo electrified — his prints of gas lamps, steamships, and railroads in the 1870s captured a city becoming modern, using Western perspective and shadow within Japanese print tradition. He is the chronicler of the Meiji transformation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Ryōgoku Bridge or the Gaslight prints",
+      "durationMinutes": 20,
+      "instruction": "Look at the light: Kiyochika learned Western chiaroscuro and applied it to lanterns, gas lamps, and moonlit construction sites. A rickshaw waits under a lamp; a bridge glows against dark water. Japan's first modern city, seen by its first modern printmaker."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-tsukioka-yoshitoshi",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Tsukioka Yoshitoshi",
+    "teaser": "The last great master of ukiyo-e — his One Hundred Aspects of the Moon and Thirty-Two Aspects of Customs and Manners show beauty and violence with hallucinatory intensity. He battled madness and poverty, and died at 53 after a breakdown.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Lonely House on the Hill or the One Hundred Aspects of the Moon series",
+      "durationMinutes": 20,
+      "instruction": "Look at how Yoshitoshi stages moonlight: a woman in a lonely house, a warrior on a cliff, a courtesan at a window — each print a complete mood. He worked in the dying days of the woodblock era and poured everything into its last light."
+    },
+    "tags": [
+      "Ukiyo-e",
+      "Japanese",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-hiroshi-yoshida",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Hiroshi Yoshida",
+    "teaser": "The shin-hanga master who took Japanese prints to the world — his luminous scenes of the Alps, temples, and foreign cities combine Western watercolor realism with Japanese woodblock craft. He printed his own editions, controlling every layer of color.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Sphinx or the Kiso River prints",
+      "durationMinutes": 20,
+      "instruction": "Look at the light gradients: Yoshida printed dozens of blocks for each image to achieve subtle dawns and sunsets. His Sphinx glows pale rose against a gold sky. He traveled the world, but his best prints are Japan — mist, mountains, and quiet temples."
+    },
+    "tags": [
+      "Shin-hanga",
+      "Japanese",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ohara-koson",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ohara Koson",
+    "teaser": "The shin-hanga master of birds and flowers — his kachō-e prints of herons, crows, and plum blossoms are among the most collected Japanese prints in the West. He painted nature with a naturalist's eye and a calligrapher's brush.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "A heron in snow or the crows at dusk prints",
+      "durationMinutes": 20,
+      "instruction": "Look at the composition: one bird, one branch, a vast quiet background. Koson placed his subjects with the precision of a haiku. The crow prints — black against orange dusk — are especially famous. Stillness, observation, and a perfect sense of where to put things."
+    },
+    "tags": [
+      "Shin-hanga",
+      "Japanese",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-hasegawa-tohaku",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Hasegawa Tōhaku",
+    "teaser": "The painter of the most famous ink painting in Japan — Pine Trees, a six-panel screen of a misty grove in a single grey. It was long attributed to Sesshū; modern scholarship gave it to Tōhaku, a rival of the Kano school who out-emptied them all.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Pine Trees screen (Tokyo National Museum) — the mist",
+      "durationMinutes": 30,
+      "instruction": "Pines rise from fog in layers of grey ink — no outlines, no gold, just atmosphere. Look at the negative space: the mist is the painting. It's barely there, and that's why it's a national treasure. Zen emptiness, painted with absolute control."
+    },
+    "tags": [
+      "Ink Painting",
+      "Japanese",
+      "16th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-sesshu-toyo",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Sesshū Tōyō",
+    "teaser": "The greatest master of Japanese ink painting — a Zen monk who studied in China and returned to paint landscapes of towering cliffs and tiny travelers that define sumi-e. He supposedly tied a mouse to his brush as a boy to practice drawing it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Splashed Ink Landscape (Tokyo National Museum) — the chaos",
+      "durationMinutes": 20,
+      "instruction": "Mountains appear out of flung ink — bold splashes resolved into peaks, a pavilion, a boat. Look at how much is suggested with so little: this is painting as meditation and dare. Sesshū said a painter must 'have mountains and rivers in his heart.'"
+    },
+    "tags": [
+      "Ink Painting",
+      "Japanese",
+      "15th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-kao-ninga",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kao Ninga",
+    "teaser": "The 14th-century Zen monk-painter whose wild, laughing portraits of Bodhidharma broke every rule of sacred art — his ink paintings are so free they look modern, with figures dissolving into a few ecstatic brushstrokes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Portrait of Kensu or the Bodhidharma ink paintings",
+      "durationMinutes": 20,
+      "instruction": "Look at the brushwork: hair and beard become a few explosive strokes, eyes are dots, the body is a robe of ink. Kao Ninga painted enlightenment as a burst of energy. Some historians think he was an amateur; his 'amateurism' became the seed of later Zen ink painting."
+    },
+    "tags": [
+      "Ink Painting",
+      "Japanese",
+      "14th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-kano-eitoku",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kanō Eitoku",
+    "teaser": "The founder of the monumental Kano style — his golden screens of cypress trees, tigers, and castles filled the palaces of warlords with bold, flat, overwhelming decoration. His style defined Japanese official art for 400 years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Cypress Trees screen (Tokyo National Museum) — the gold",
+      "durationMinutes": 20,
+      "instruction": "A massive gnarled cypress against a gold ground, its branches filling the entire screen. Look at the scale and simplicity: Eitoku didn't paint a tree, he painted power. Warlords wanted art that announced dominance; Eitoku invented it in gold and ink."
+    },
+    "tags": [
+      "Kano School",
+      "Japanese",
+      "16th Century"
+    ],
+    "tier": 1
+  }
+]

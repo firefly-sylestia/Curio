@@ -2,7 +2,6 @@ package com.curio.app.data
 
 import android.content.Context
 import java.util.Calendar
-import java.util.concurrent.TimeUnit
 
 /**
  * Manages the daily activity streak via SharedPreferences.
@@ -69,7 +68,17 @@ object StreakTracker {
             .edit().clear().apply()
     }
 
-    /** Epoch day = days since Unix epoch (UTC). Integer division truncates. */
-    private fun todayEpochDay(): Long =
-        TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis())
+    /**
+     * Epoch day = days since Unix epoch. v8.14 — aligned with the quests'
+     * daily rollover at 4 AM (not midnight), so a late-night session keeps
+     * the streak alive instead of breaking it after midnight.
+     */
+    private fun todayEpochDay(): Long {
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.HOUR_OF_DAY, 4)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis / 86_400_000L
+    }
 }

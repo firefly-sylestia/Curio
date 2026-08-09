@@ -1,0 +1,1 @@
+• Pet Studio cleanup: animation gallery, player, frame timeline, and animation-picking controls are temporarily hidden while the underlying animation system stays ready for a future return. The pet editor is now unlocked from the beginning — no level 7 wait.

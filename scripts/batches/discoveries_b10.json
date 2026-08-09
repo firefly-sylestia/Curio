@@ -1,0 +1,422 @@
+[
+  {
+    "id": "discovery-hydrogen",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Hydrogen Isolated (1766)",
+    "teaser": "Henry Cavendish, the reclusive millionaire chemist, collected the 'inflammable air' produced when metals dissolve in acid — and proved it was a distinct substance by burning it and showing the only product was water. It took Lavoisier to name it hydrogen, 'water-former.'",
+    "imageUrl": "",
+    "byline": "Henry Cavendish",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cavendish's 1766 paper on 'factitious airs'",
+      "durationMinutes": 20,
+      "instruction": "Cavendish weighed everything — his papers are models of precision. Read how he generated hydrogen from zinc and acid, collected it over mercury, and measured its density. The insight that burning it makes water was a step toward overthrowing phlogiston and establishing element theory.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-chlorine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Chlorine Isolated (1774)",
+    "teaser": "Carl Wilhelm Scheele, a Swedish apothecary who discovered more elements than anyone before him, dripped acid on a mineral and got a greenish gas with a choking smell. He called it 'dephlogisticated marine acid' — it was chlorine, and its bleaching power soon changed the world.",
+    "imageUrl": "",
+    "byline": "Carl Wilhelm Scheele",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Scheele's 1774 experiments on 'dephlogisticated marine acid'",
+      "durationMinutes": 20,
+      "instruction": "Scheele prepared chlorine from manganese dioxide and hydrochloric acid. Read how he noticed it bleached flowers and leaves, and how this property made chlorine the first industrial disinfectant and bleach. It was not recognized as an element until Humphry Davy proved it in 1810.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-nitrogen",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Nitrogen Recognized (1772)",
+    "teaser": "Daniel Rutherford, a Scottish medical student, removed oxygen from air and found a leftover gas that snuffed out flames and killed mice. He called it 'noxious air.' It was nitrogen — 78% of the air we breathe, unnoticed for all of human history until 1772.",
+    "imageUrl": "",
+    "byline": "Daniel Rutherford",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rutherford's 1772 thesis on 'phlogisticated air'",
+      "durationMinutes": 20,
+      "instruction": "Rutherford burned a candle and phosphorus in a closed jar, removing oxygen, and studied what remained. Read how the gas that was left refused to support life or fire, and how several chemists independently met the same gas around the same time. It was Lavoisier who named it azote, 'no life.'",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "Scottish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-iodine-element",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Iodine Discovered (1811)",
+    "teaser": "Bernard Courtois, a French saltpeter maker, poured sulfuric acid on seaweed ash and saw a magnificent violet vapor condense into shiny crystals. He had discovered iodine — accidentally, while trying to extract more saltpeter for gunpowder in Napoleon's wars.",
+    "imageUrl": "",
+    "byline": "Bernard Courtois",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Courtois's 1811 discovery of iodine from kelp ash",
+      "durationMinutes": 20,
+      "instruction": "Seaweed concentrates iodine from seawater. Read how Courtois noticed the violet vapor corroding his copper kettle, and how the substance got its name from the Greek for violet. Iodine deficiency was later found to cause goiter, and iodized salt became a quiet public-health miracle.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-bromine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Bromine Discovered (1826)",
+    "teaser": "Antoine Balard, a 24-year-old French pharmacy assistant, passed chlorine through seawater salt-marsh residues and got a deep red-brown liquid with an appalling smell. His professors had to convince the great chemist Liebig that Balard had found a new element, not a chlorine compound.",
+    "imageUrl": "",
+    "byline": "Antoine Balard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Balard's 1826 memoir on the new element bromine",
+      "durationMinutes": 20,
+      "instruction": "Bromine, from the Greek for 'stench,' was the third halogen discovered. Read how Balard's careful work won him a place at the Collège de France, and how Liebig, who had held a sample of the same substance and dismissed it, later said Balard's discovery taught him humility. Bromine went into photography and flame retardants.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-lithium-element",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Lithium Discovered (1817)",
+    "teaser": "Johan August Arfwedson, a young Swedish chemist, found that a mineral from a Swedish iron mine contained an unknown element — so light and so reactive it couldn't be isolated by any known method. He named it lithium for 'stone,' because it came from rock, not plants.",
+    "imageUrl": "",
+    "byline": "Johan August Arfwedson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Arfwedson's 1817 analysis of petalite",
+      "durationMinutes": 20,
+      "instruction": "Arfwedson found that petalite's alkali didn't match sodium or potassium, and inferred a new element — though he never isolated it. Read how Berzelius named it, and how electrolysis finally freed the metal in 1855. Two centuries later, lithium powers the batteries in your phone.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-selenium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Selenium Discovered (1817)",
+    "teaser": "Jöns Jacob Berzelius found a red deposit in the lead chambers of a sulfuric acid factory — at first mistaking it for tellurium. It was a new element, which he named selenium after the moon, since tellurium had been named for the earth. His colleague had nearly missed it.",
+    "imageUrl": "",
+    "byline": "Jöns Jacob Berzelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Berzelius's 1817 discovery of selenium",
+      "durationMinutes": 20,
+      "instruction": "Berzelius and his colleague Gottlieb Gahn investigated a foul red sludge in a Swedish sulfuric acid plant. Read how the element's odd photoconductivity — its resistance drops in light — later made selenium the basis of early photoelectric cells and photocopiers. It is also an essential trace nutrient, toxic in excess.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-cadmium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Cadmium Discovered (1817)",
+    "teaser": "German officials trying to ban a suspected arsenic contaminant in zinc oxide found that the yellow pigment was actually a brand-new element. Friedrich Stromeyer isolated it and named it cadmium, from the ancient Greek word for zinc ore — cadmia.",
+    "imageUrl": "",
+    "byline": "Friedrich Stromeyer",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Stromeyer's 1817 discovery of cadmium in zinc compounds",
+      "durationMinutes": 20,
+      "instruction": "The health inspectors' mistake became a discovery: the 'arsenic' that turned zinc oxide yellow was a softer, unknown metal. Read how Stromeyer isolated it and demonstrated its properties, and how cadmium later starred in yellow pigments, nickel–cadmium batteries, and quantum-dot technology.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-aluminium-metal",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Aluminium Isolated (1825)",
+    "teaser": "Aluminium is the most abundant metal in Earth's crust, yet for centuries it was impossible to free from its ores. Hans Christian Ørsted produced the first impure lump in 1825; it was so rare that Napoleon III served his most honored guests on aluminium plates while others used gold.",
+    "imageUrl": "",
+    "byline": "Hans Christian Ørsted",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ørsted's 1825 isolation of aluminium",
+      "durationMinutes": 20,
+      "instruction": "Read how Ørsted heated aluminium chloride with potassium amalgam, and how Friedrich Wöhler soon made a purer, more convincing sample. The metal stayed a luxury until 1886, when Hall and Héroult independently invented electrolytic smelting — making aluminium cheap enough for airplanes, cans, and foil.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Danish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-silicon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Silicon Isolated (1824)",
+    "teaser": "Silicon — the element of sand, glass, and the microchip — was first isolated by Jöns Jacob Berzelius, who heated potassium fluorosilicate with potassium metal and got an amorphous brown powder. He named it silicon, from the Latin for flint.",
+    "imageUrl": "",
+    "byline": "Jöns Jacob Berzelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Berzelius's 1824 isolation of silicon",
+      "durationMinutes": 20,
+      "instruction": "Read how Berzelius recognized that the element in silica, first hinted at by Davy, was a non-metal cousin of carbon. Pure crystalline silicon had to wait until 1854. Today, silicon's semiconducting properties make it the material of the digital age — your computer's brain is carved from sand.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-beryllium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Beryllium Identified (1798)",
+    "teaser": "Louis-Nicolas Vauquelin, analyzing emeralds and beryl, found they shared an unknown earth with a sweet taste. He named it glucine, 'sweet,' but the element became beryllium — light, stiff, and dangerously toxic in dust form. It was isolated only in 1828.",
+    "imageUrl": "",
+    "byline": "Louis-Nicolas Vauquelin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vauquelin's 1798 analysis of beryl and emerald",
+      "durationMinutes": 20,
+      "instruction": "Vauquelin dissolved beryl and found a new oxide distinct from alumina. Read how he confirmed the same earth in emeralds — proving emerald is just beryl colored by chromium. Beryllium later became the metal of spacecraft windows and X-ray tubes because it lets light and X-rays pass through.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-titanium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Titanium Discovered (1791)",
+    "teaser": "William Gregor, an amateur Cornish mineralogist, found black sand on a beach that contained an unknown metal oxide. Martin Klaproth independently found the same element and named it titanium after the Titans of Greek myth. It took a century to produce pure titanium metal.",
+    "imageUrl": "",
+    "byline": "William Gregor",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gregor's 1791 analysis of menachanite sand",
+      "durationMinutes": 20,
+      "instruction": "Gregor called his find 'menachanite'; Klaproth, who read his paper, renamed the element. Read how the sand — now known as ilmenite — resisted every attempt to extract the metal until 1910, when Matthew Hunter produced the first pure titanium. It is now prized for jet engines, implants, and premium bike frames.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-chromium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Chromium Discovered (1797)",
+    "teaser": "Louis-Nicolas Vauquelin, the same chemist who found beryllium, extracted a brilliant red compound from Siberian crocoite ore and reduced it to a hard, silvery metal that colored every compound it touched. He named it chromium, from the Greek for color.",
+    "imageUrl": "",
+    "byline": "Louis-Nicolas Vauquelin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vauquelin's 1797 discovery of chromium",
+      "durationMinutes": 20,
+      "instruction": "Read how Vauquelin's red crystals — lead chromate — gave him a metal whose salts are yellow, green, orange, and red. Chromium became the secret of stainless steel and chrome plating, and its compounds still give paints their strongest colors. It also helped prove emeralds are green because of trace chromium.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-manganese",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Manganese Isolated (1774)",
+    "teaser": "Johan Gottlieb Gahn, a Swedish metallurgist, was the first to isolate manganese metal by reducing pyrolusite with charcoal. The element had been recognized as an earth years earlier, but only a reduction expert could free the metal itself — a black, brittle, reactive substance.",
+    "imageUrl": "",
+    "byline": "Johan Gottlieb Gahn",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gahn's 1774 isolation of manganese",
+      "durationMinutes": 20,
+      "instruction": "Scheele had shown pyrolusite contained an unknown metal; Gahn, his friend, did the smelting. Read how manganese's name comes from magnesia, which it resembles. Manganese later became essential to steelmaking — removing sulfur and oxygen — and is a trace nutrient every cell needs.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-molybdenum",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Molybdenum Isolated (1778)",
+    "teaser": "Carl Wilhelm Scheele proved that molybdenite — long confused with graphite and lead ore — contained a new metal. Peter Jacob Hjelm finally isolated it in 1781, and the element was named molybdenum, from the Greek for lead.",
+    "imageUrl": "",
+    "byline": "Carl Wilhelm Scheele",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Scheele's 1778 analysis of molybdenite",
+      "durationMinutes": 20,
+      "instruction": "Read how Scheele treated molybdenite with nitric acid and got a white earth — molybdic acid — that didn't match lead or graphite. The metal's high melting point later made it vital in high-temperature alloys and in catalysts for making gasoline. It is also essential to nitrogen fixation in living things.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-tungsten",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Tungsten Isolated (1783)",
+    "teaser": "The Elhuyar brothers, Spanish chemists, isolated a metal from wolframite ore and called it wolfram; the Swedes named the same element tungsten, 'heavy stone.' It has the highest melting point of any metal — 3,422°C — which is why lightbulb filaments are made of it.",
+    "imageUrl": "",
+    "byline": "Juan José & Fausto Elhuyar",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Elhuyar brothers' 1783 isolation of tungsten",
+      "durationMinutes": 20,
+      "instruction": "Read how the brothers reduced tungstic acid with charcoal and obtained a heavy gray metal. Two centuries of conflict over the name — tungsten vs. wolfram — are why the element's chemical symbol is W. Tungsten carbide now tips drill bits, armor, and every ballpoint pen.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "Spanish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-uranium-element",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Uranium Discovered (1789)",
+    "teaser": "Martin Heinrich Klaproth dissolved pitchblende in acid and precipitated a yellow powder he took for a new element's oxide, naming it uranium after the planet discovered eight years earlier. It took decades to realize uranium was radioactive — and a century and a half to split it.",
+    "imageUrl": "",
+    "byline": "Martin Heinrich Klaproth",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Klaproth's 1789 discovery of uranium",
+      "durationMinutes": 20,
+      "instruction": "Klaproth's 'uranium' was actually uranium dioxide, but the discovery stands. Read how the heaviest natural element became the fuel of nuclear power and the first atomic weapons, how it fuels the Earth's internal heat, and how its radioactive decay lets geologists date rocks and the oldest Earth materials.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-zirconium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Zirconium Discovered (1789)",
+    "teaser": "Klaproth again — this time analyzing the gemstone zircon from Ceylon, he found a new earth which he named zirconia. It would be 35 years before Berzelius isolated the metal itself, a silver-gray element as strong as steel and far more corrosion-resistant.",
+    "imageUrl": "",
+    "byline": "Martin Heinrich Klaproth",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Klaproth's 1789 analysis of zircon",
+      "durationMinutes": 20,
+      "instruction": "Read how Klaproth separated zirconia from silica and proved it was new. Zirconium's resistance to corrosion and to neutrons made it the cladding of choice for nuclear fuel rods, and zirconium dioxide — cubic zirconia — became one of the most convincing diamond simulants ever made.",
+      "tags": [
+        "Chemistry",
+        "18th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-vanadium",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Vanadium Discovered (1801)",
+    "teaser": "Andrés Manuel del Río, a Spanish-Mexican mineralogist, found a new metal in a Mexican lead ore and named it erythronium for its red salts — then, pressured by doubts, retracted. A Swedish chemist rediscovered it in 1830 and named it vanadium after Vanadis, the Norse goddess of beauty.",
+    "imageUrl": "",
+    "byline": "Andrés Manuel del Río",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "del Río's 1801 discovery of 'erythronium'",
+      "durationMinutes": 20,
+      "instruction": "A visiting French chemist wrongly told del Río his element was just chromium, and del Río withdrew his claim. Read how Nils Sefström's 1830 rediscovery settled it, and how small amounts of vanadium dramatically strengthen steel. Vanadium redox batteries now store renewable energy at grid scale.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Mexican"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-tantalum",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Tantalum Discovered (1802)",
+    "teaser": "Anders Gustaf Ekeberg found an element that resisted every acid, and named it tantalum after Tantalus of Greek myth, who was tormented by food and drink just out of reach — because the element, teased with acids, never dissolved.",
+    "imageUrl": "",
+    "byline": "Anders Gustaf Ekeberg",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ekeberg's 1802 discovery of tantalum",
+      "durationMinutes": 20,
+      "instruction": "Tantalum's twin, niobium, was discovered a year earlier but so similar that for decades chemists confused the pair. Read how the metal's inertness made it the perfect material for surgical implants and the capacitors in every phone. 'Tantalum' also names the mineral tantalite, the ore behind the modern term 'conflict minerals.'",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  }
+]

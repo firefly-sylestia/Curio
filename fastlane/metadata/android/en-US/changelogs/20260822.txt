@@ -1,0 +1,1 @@
+Bonus quests now wear a readable dark gold on light backgrounds (the pale butter was invisible on cream), while dark mode keeps the bright gold. Also smoothed the deck cascade timing internals.

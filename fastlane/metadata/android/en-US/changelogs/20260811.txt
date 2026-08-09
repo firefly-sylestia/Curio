@@ -1,0 +1,2 @@
+• The topic page's title now lives INSIDE the morphing hero card — opening a landed topic grows the name in place with the gradient, glyph and badges, instead of popping a separate headline in below, so the title reads as staying put through the whole card morph.
+• Fixed the bottom strip flashing back to plain cream when the topic page opens — the reserved bottom bar now wears the page's category tint from the very first frame, so the wash carries seamlessly from the deck onto the topic page.

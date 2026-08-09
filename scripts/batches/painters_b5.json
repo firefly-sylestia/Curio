@@ -1,0 +1,342 @@
+[
+  {
+    "id": "painter-thomas-gainsborough",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Thomas Gainsborough",
+    "teaser": "The English portraitist who preferred painting landscapes and said so — his Blue Boy and Mrs. Graham made him the rival of Reynolds, but his heart was in the countryside. He painted with a feathery, improvisational touch that feels like drawing.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Blue Boy (Huntington Library) — the fabric",
+      "durationMinutes": 20,
+      "instruction": "The most famous portrait of an English child, painted to prove blue could carry a full composition. Look at the fabric: the slashed sleeves, the falling lace, the satin that seems to move. Gainsborough painted with long, feathery strokes — up close it's almost abstract."
+    },
+    "tags": [
+      "Rococo",
+      "British",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-joshua-reynolds",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Sir Joshua Reynolds",
+    "teaser": "The first president of the Royal Academy and the ruler of English taste — his portraits of aristocrats, actors, and philosophers dressed them in classical robes and made them immortal. He believed in 'the grand style' and lectured about it endlessly.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Mrs. Siddons as the Tragic Muse (Huntington Library) — the pose",
+      "durationMinutes": 20,
+      "instruction": "The great actress sits like Michelangelo's prophet Isaiah — Reynolds borrowed the pose from the Sistine Chapel and the identity from a vision of the Tragic Muse. Look at how he flatters while he immortalizes. He famously added his own signature to the hem, daring anyone to outdo it."
+    },
+    "tags": [
+      "Neoclassicism",
+      "British",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-william-hogarth",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "William Hogarth",
+    "teaser": "The English painter who invented the moral comic strip — his series A Harlot's Progress and Marriage A-la-Mode tell stories in numbered scenes, dripping with satire, symbolism, and social criticism. He also wrote the law that made engraving copyrightable.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Marriage A-la-Mode series (National Gallery, London) — the details",
+      "durationMinutes": 30,
+      "instruction": "Six scenes, one disastrous arranged marriage. Play detective: the dog, the gout, the nosebleed, the paintings on the walls — every object is a clue about the characters' fates. Hogarth's genius is that his 'progresses' are readable like novels, panel by panel."
+    },
+    "tags": [
+      "Rococo",
+      "British",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-john-everett-millais",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "John Everett Millais",
+    "teaser": "The child prodigy who co-founded the Pre-Raphaelite Brotherhood — his Ophelia, painted with the model lying in a bathtub for months, is one of the most famous images in art. He later abandoned the brotherhood's ideals for popular success.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Ophelia (Tate Britain, London) — the flowers",
+      "durationMinutes": 30,
+      "instruction": "Ophelia floats mid-song, drowning, surrounded by flowers that each carry a meaning from Hamlet: pansies for thought, violets for faithfulness, a nettle for pain. Millais painted the plants from nature, species by species. The model nearly caught pneumonia lying in the cold water."
+    },
+    "tags": [
+      "Pre-Raphaelite",
+      "British",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-dante-gabriel-rossetti",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Dante Gabriel Rossetti",
+    "teaser": "The poet-painter of the Pre-Raphaelites who worshipped a single face — his muse and wife Elizabeth Siddal, and after her death, Jane Morris. His languid, red-haired women are icons of desire and grief, painted with jewel colors and heavy symbolism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Beata Beatrix (Tate Britain) — the dove",
+      "durationMinutes": 20,
+      "instruction": "Painted as a memorial to Elizabeth Siddal, who died of an overdose — Rossetti cast her as Beatrice at the moment of death: a dove drops a white poppy into her hands. Look at the sundial in the background, the misty Florence behind her. Grief, made into gold and blue."
+    },
+    "tags": [
+      "Pre-Raphaelite",
+      "British",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-edward-burne-jones",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Edward Burne-Jones",
+    "teaser": "The dreamiest of the Pre-Raphaelites — his knights, angels, and enchanted maidens inhabit a twilight world of pale skin and medieval longing. The Golden Stairs and The Beguiling of Merlin are his masterpieces; his images fed the Symbolist movement across Europe.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Golden Stairs (Tate Britain) — the descent",
+      "durationMinutes": 20,
+      "instruction": "A line of maidens descends a spiral staircase carrying instruments, going nowhere, meaning nothing — pure mood. Look at the repetition of their robes, their identical profile faces, the emptiness of the setting. Burne-Jones painted the feeling of a dream before you wake."
+    },
+    "tags": [
+      "Pre-Raphaelite",
+      "British",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-james-tissot",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "James Tissot",
+    "teaser": "The French-English painter of Victorian high society — his pictures of fashionable women on rivers, terraces, and railway platforms are so meticulously detailed they read like photographs. Later in life he abandoned fashion for a huge illustrated Bible.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Ball on Shipboard (Tate Britain) — the crowd",
+      "durationMinutes": 20,
+      "instruction": "A deck party frozen mid-dance: silk dresses, champagne, rigging, and a hundred tiny social signals. Look at how Tissot documents every fabric and gesture — he was nicknamed 'the modern Hogarth.' Then notice the one figure looking straight out at you, breaking the fourth wall."
+    },
+    "tags": [
+      "Realism",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-frederic-leighton",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Frederic Leighton",
+    "teaser": "The Victorian painter of marble-white nymphs and classical longing — Flaming June, his sleeping woman in orange, is one of the most reproduced paintings of the 19th century. He was the first painter ever made a lord for his art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Flaming June (Museo de Arte de Ponce, Puerto Rico) — the pose",
+      "durationMinutes": 20,
+      "instruction": "A sleeping woman curls into a near-impossible pose, her dress a waterfall of burning orange. Look at the plant — oleander, which means death — and the sea behind her. Leighton obsessed over the pose for months, painting it from a model who fell asleep. Sleep, beauty, mortality, all in one."
+    },
+    "tags": [
+      "Academicism",
+      "British",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-lawrence-alma-tadema",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Lawrence Alma-Tadema",
+    "teaser": "The Dutch-British painter of ancient Rome who did the archaeology himself — his marble terraces, Roman baths, and toga parties are so accurate that Hollywood later copied them. The Roses of Heliogabalus showers guests in a blizzard of petals.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Roses of Heliogabalus — the petals",
+      "durationMinutes": 20,
+      "instruction": "A Roman emperor suffocates his guests under tons of rose petals — Alma-Tadema had real roses shipped from the Riviera and painted petal by petal for months. Look at the marble, the water, the fruit: everything is archaeological fact except the fantasy. Then ask what the painting means."
+    },
+    "tags": [
+      "Academicism",
+      "British",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-john-singleton-copley",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "John Singleton Copley",
+    "teaser": "The greatest American painter before the Revolution — his portraits of Boston merchants, silversmiths, and Paul Revere are so real you can smell the workshop. He left for England and never returned, but his American portraits remain untouchable.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Paul Revere (Museum of Fine Arts, Boston) — the hands",
+      "durationMinutes": 20,
+      "instruction": "No wig, no pose — just a working silversmith in his shirtsleeves, holding a teapot, his tools on the table. Look at the face: sharp, intelligent, watchful. Copley painted America as it actually was, and this portrait is the definitive image of the man who rode to Lexington."
+    },
+    "tags": [
+      "Colonial",
+      "American",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-gilbert-stuart",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Gilbert Stuart",
+    "teaser": "The painter of the American founding fathers — his portraits of Washington, including the famous unfinished 'Athenaeum' head, became the image of the new nation (you know it from the one-dollar bill). He never finished the Washington portrait, and it made him eternal anyway.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Athenaeum Portrait of George Washington (National Portrait Gallery, DC)",
+      "durationMinutes": 20,
+      "instruction": "Washington sat for Stuart only three times; this head-and-shoulders was meant to be finished later and never was. Look at the skin tones, the alert eyes — a president, not a statue. Stuart made dozens of copies because buyers demanded them; the original stayed unfinished forever."
+    },
+    "tags": [
+      "Colonial",
+      "American",
+      "18th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-thomas-eakins",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Thomas Eakins",
+    "teaser": "The American realist who painted the body as science — his Gross Clinic shows surgeons at work in a blaze of light, his rowers and boxers move with anatomical truth. He was fired from his teaching job for demanding a male model in a female class.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Gross Clinic (Philadelphia Museum of Art) — the light",
+      "durationMinutes": 30,
+      "instruction": "Dr. Gross stands over an operating table, scalpel in hand, in a dark amphitheater lit by a single sky light. Look at the faces: the student who recoils, the woman who can't watch. When it was shown in 1876, Philadelphia called it too brutal to exhibit; now it's a national treasure."
+    },
+    "tags": [
+      "Realism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-winslow-homer",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Winslow Homer",
+    "teaser": "The great American painter of the sea — he moved to a remote Maine coast and painted waves, storms, and fishermen with a brute force no one in America had attempted. The Gulf Stream shows a man adrift with sharks circling; Homer never explained it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Gulf Stream (Met, New York) — the sharks",
+      "durationMinutes": 20,
+      "instruction": "A Black man lies on a broken boat, surrounded by sharks, a waterspout on the horizon. The boat has a mast with a torn sail — a reference to the Middle Passage. Look at the colors: turquoise water, white sharks, blood. Homer called it 'a matter of fact,' and refused to explain further."
+    },
+    "tags": [
+      "Realism",
+      "American",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-george-bellows",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "George Bellows",
+    "teaser": "The Ashcan painter of boxing and the city — his Stag at Sharkey's catches a bloody prizefight in a smoky club with a violence that thrilled America. He also painted the shocking 1913 painting of the execution of Edith Cavell.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Stag at Sharkey's (Cleveland Museum of Art) — the crowd",
+      "durationMinutes": 20,
+      "instruction": "Two boxers tangle mid-swing while a roaring crowd presses in from all sides — you're ringside in 1909. Look at the sweat, the blood, the hats. Bellows painted the raw city with thick, fast strokes. He called the fights 'love in the raw.'"
+    },
+    "tags": [
+      "Ashcan School",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-charles-sheeler",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Charles Sheeler",
+    "teaser": "The American precisionist who painted factories, grain elevators, and steamships as clean, silent cathedrals — he was also a photographer whose images of Ford's River Rouge plant blurred the line between photography and painting.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Classic Landscape (1929) — the factory",
+      "durationMinutes": 20,
+      "instruction": "The River Rouge plant: clean white walls, geometric windows, a freight train — painted with a precision that makes industry look holy. Sheeler worked from his own photographs, cropping and flattening. Notice the absolute stillness: no people, no smoke, just pure American form."
+    },
+    "tags": [
+      "Precisionism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-thomas-hart-benton",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Thomas Hart Benton",
+    "teaser": "The Midwestern muralist of rolling grain and hard labor — his twisting, muscular farmers and steelworkers fill state capitol walls across America. He taught at the Kansas City Art Institute, where a young Jackson Pollock studied and chafed.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "America Today murals (Met, New York) — the figures",
+      "durationMinutes": 30,
+      "instruction": "Ten panels of 1920s America: oil rigs, cotton fields, city jazz, factory floors. Look at the bodies — bent, stretched, and coiled like springs. Benton drew from memory and from a lifetime of riding freight trains. His America is sweaty, big, and alive."
+    },
+    "tags": [
+      "Regionalism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-charles-burchfield",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Charles Burchfield",
+    "teaser": "The American painter who made small-town houses hum with visible energy — his watercolors show vibrating walls, singing trees, and weather as a physical force. Critics rediscovered his late, hallucinatory works as masterpieces of 20th-century mysticism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Insect Chorus or his late sun/moon paintings",
+      "durationMinutes": 20,
+      "instruction": "In Burchfield's late paintings, the sun turns into a blazing disk with rays like thorns, and houses pulse with lines of force. Look at how he made a midsummer afternoon feel loud. He worked from childhood memories and a private system of symbols he never fully explained."
+    },
+    "tags": [
+      "Modern",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  }
+]

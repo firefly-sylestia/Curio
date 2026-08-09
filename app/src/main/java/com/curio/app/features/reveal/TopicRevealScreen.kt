@@ -11,8 +11,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -26,12 +27,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -54,6 +55,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,14 +68,17 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -82,14 +87,23 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioPassport
+import com.curio.app.data.CurioPet
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
+import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.TourController
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildExploreSearchUrl
+import com.curio.app.data.buildGoogleSearchUrl
+import com.curio.app.data.buildYouTubeSearchUrl
 import com.curio.app.data.categoryOpensYouTube
+import com.curio.app.data.openSilentExplore
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -131,20 +145,18 @@ import com.curio.app.ui.theme.themedAccent
  *   24-44 dp   statusBarsPadding()
  *   40 dp      Top bar (close ✕ → Pop back to the Spin deck)
  *    8 dp      gap
- *   ~260 dp    Hero card (gradient ticket: watermark glyph + badges)
- *   24 dp      gap
- *   ~84 dp     Topic name (geom displaySmall, multi-line)
- *    8 dp      gap
+ *   ~260 dp    Hero card (gradient ticket: watermark glyph + badges +
+ *              the topic NAME — the title lives on the card so the
+ *              shared-element morph grows it in place, v8.25)
+ *   20 dp      gap
  *   ~42 dp     Tags chip row
  *   20 dp      gap
  *   ~auto     "One quirky fact to get you curious" card
  *   16 dp      gap
  *   ~auto     "{verb} {target}" action prompt card + "~N min"
- *   24 dp      gap
- *   ~56 dp     Start exploring CTA button
- *    8 dp      gap
- *   ~auto     "Shuffle again instead" text button
- *   24 dp      bottom inset + navigation bars
+ *   24 dp      content breathing room
+ *   bottom     themed action dock (Start exploring + Already …)
+ *   navigation-bar inset is applied inside the dock
  */
 @Composable
 fun TopicRevealScreen(
@@ -154,7 +166,9 @@ fun TopicRevealScreen(
     // Browse-Topics read-only mode (see CurioRoutes.REVEAL): no explore
     // CTA, no like/dislike, no recents recording, and "Already watched"
     // confirms without the write-about-it dialog.
-    browseMode: Boolean = false
+    browseMode: Boolean = false,
+    onBottomBarContentChanged: (@Composable () -> Unit) -> Unit = {},
+    onBottomBarContentCleared: () -> Unit = {}
 ) {
     val cat = remember(categorySlug) {
         CurioCategories.byRouteSlug(categorySlug)
@@ -174,7 +188,6 @@ fun TopicRevealScreen(
     }
 
     val resolved = topic
-    val navInsets = WindowInsets.navigationBars.asPaddingValues()
     val context = LocalContext.current
     // v6.7 — pin for later: the bookmark toggles on/off so the user can save
     // the topic and revisit it from Topic History → "Pinned for later".
@@ -186,11 +199,29 @@ fun TopicRevealScreen(
     // marked state once the topic is done, and the unwatch action appears.
     // Reads doneTopicsState inside composition, so it updates the moment
     // markDone / unmarkDone changes the set.
-    val isDone = resolved != null && ExploreSessionStore.isDone(cat.id, resolved.name)
     // v7 — like/dislike teaches the shuffle: liked topics (and their whole
     // category) get more weight, disliked get less — never fully blocked.
     // Reads the REACTIVE sentiment state so the buttons toggle instantly.
     val sentiment = resolved?.let { AppPreferences.topicSentiment(cat.id, it.id) }
+
+    // v8.5 — Category passport: opening a reveal counts as a "peek" for the
+    // lane's stamp and refreshes its last-explored date (spec §6.1). Fires
+    // once per topic opened; a rotation re-fire is harmless (the stamp
+    // derives from counts > 0, never exact values).
+    // v8.6 — the First Journey tour's "Open the landed topic" step advances
+    // the moment the reveal really opens (spec §7.2 step 5).
+    LaunchedEffect(cat.id, resolved?.id, browseMode) {
+        if (resolved != null && !browseMode) {
+            CurioPassport.noteReveal(context, cat.id)
+            // v8.30 — the pet reacts to the REAL cause: the spin's auto-open
+            // says "it opened itself"; any user tap gets a touch reaction
+            // ("You picked it!") instead of claiming it auto-opened.
+            val auto = CurioPet.consumeRevealAuto()
+            CurioPet.reactTo(
+                if (auto) CurioPet.Event.REVEAL_AUTO else CurioPet.Event.REVEAL_TAPPED
+            )
+        }
+    }
 
     // Explore-session flow — tapping the CTA records the topic as
     // recently-explored the moment it's tapped (even before anything is
@@ -199,10 +230,60 @@ fun TopicRevealScreen(
     // recently-unexplored so Home can offer to resume it.
     var engaged by rememberSaveable { mutableStateOf(false) }
     var showExploreDialog by rememberSaveable { mutableStateOf(false) }
-    // v7.80 — "Already watched/listened/read/explored" — marks the topic
-    // done (never shows in the shuffle again) and asks whether to write
-    // about it now.
-    var showAlreadyDoneDialog by rememberSaveable { mutableStateOf(false) }
+
+    val latestBrowseMode by rememberUpdatedState(browseMode)
+    val latestResolved by rememberUpdatedState(resolved)
+    val latestOnExplore by rememberUpdatedState<() -> Unit> {
+        if (TourController.consumeTap("start-exploring")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else {
+            showExploreDialog = true
+        }
+    }
+    // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
+    // explore: opens the topic's search page without recording quests,
+    // passport, pet events, recents or a timer — browsing must not count.
+    val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
+        if (TourController.consumeTap("start-exploring")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else {
+            latestResolved?.let { topic -> openSilentExplore(context, topic) }
+        }
+    }
+    val latestOnAlready by rememberUpdatedState<() -> Unit> {
+        if (TourController.consumeTap("express-yourself")) {
+            TourController.routeForCurrentStep()?.let { nextRoute ->
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        } else if (!latestBrowseMode) {
+            latestResolved?.let { topic ->
+                engaged = true
+                navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
+    // v8.57 — the reveal no longer owns action buttons at the bottom: Start
+    // exploring / Already … live inline right below the hero card. The
+    // bottomBar slot still registers a static WASH STRIP (no buttons) so the
+    // NavHost's morph reserve stays registered for the WHOLE visit — including
+    // the pop transition, when the exiting screen's strip keeps Scaffold
+    // innerPadding constant (the v8.5/v8.36 freeze rule). The strip wears the
+    // same category wash as the page, so it reads as plain background.
+    val revealBottomBar = remember(cat) {
+        @Composable {
+            RevealWashStrip(cat = cat)
+        }
+    }
+    DisposableEffect(revealBottomBar) {
+        onBottomBarContentChanged(revealBottomBar)
+        onDispose { onBottomBarContentCleared() }
+    }
 
     // Android 13+ needs POST_NOTIFICATIONS before the persistent explore
     // notification can show — requested when the user starts exploring with
@@ -395,7 +476,7 @@ fun TopicRevealScreen(
     }
 
     /** Starts a timed explore session, opens the search page (Google — YouTube for music), back to Home. */
-    fun startExploreSession(topic: CurioTopic) {
+    fun startExploreSession(topic: CurioTopic, searchUrl: String = buildExploreSearchUrl(topic)) {
         engaged = true
         // Engaging for real — record as recently-explored and clear any
         // recently-unexplored entry. recordExplored tags the row "Resumed"
@@ -411,7 +492,7 @@ fun TopicRevealScreen(
             targetName = action.targetName,
             durationMinutes = action.durationMinutes,
             instruction = action.instruction,
-            searchUrl = buildExploreSearchUrl(topic),
+            searchUrl = searchUrl,
             startMillis = System.currentTimeMillis()
         )
         // Starting a new explore while another session is running would
@@ -446,7 +527,14 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            CurioWatermarkBackdrop(activeCat = cat)
+            // v8.57 — the bottom action dock is gone, so the watermark's
+            // glyph band is trimmed by the dock's former height (80dp) at
+            // the bottom: the pattern ends where the old scaffold used to
+            // sit, leaving a calm wash band below it.
+            CurioWatermarkBackdrop(
+                activeCat = cat,
+                modifier = Modifier.padding(bottom = 80.dp)
+            )
         }
 
         Column(
@@ -533,40 +621,36 @@ fun TopicRevealScreen(
                     )
                 }
 
-                // ── 3. Topic name ───────────────────────────────────────────
-                // The headline blooms in with a soft fade + rise right after
-                // the hero morph. The hero is now the ONLY shared element:
-                // the old shared-element title morph stretched the text (a
-                // 34sp card title scaled up to a full-width 40sp headline)
-                // and could land at the wrong spot on back — text can't be
-                // re-wrapped smoothly in SharedTransitionScope, so the name
-                // gets a clean entrance instead. Secondary entry points
-                // (Home/Recents/Browse) get the same treatment.
-                RevealContentEntrance(delayMillis = 80) {
-                    Text(
-                        text = resolved?.name ?: cat.displayName,
-                        style = MaterialTheme.typography.displaySmall.copy(
-                            lineHeight = 40.sp,
-                            letterSpacing = (-0.5).sp
-                        ),
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 20.dp)
+                // ── 2.5 Action row — Start exploring / Already … ───────
+                // v8.57 — the actions moved OUT of the bottom dock to sit
+                // right below the hero card: always visible, no scaffold.
+                RevealContentEntrance(delayMillis = 40) {
+                    RevealActionRow(
+                        cat = cat,
+                        browseMode = latestBrowseMode,
+                        resolved = latestResolved,
+                        onExplore = latestOnExplore,
+                        onAlready = latestOnAlready,
+                        onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null,
+                        modifier = Modifier.padding(top = 16.dp)
                     )
                 }
 
+                // ── 3. Topic name ───────────────────────────────────────────
+                // v8.25 — the topic name now lives INSIDE the hero card
+                // (see HeroCard above), so it morphs with the card instead
+                // of popping in below as a separate headline: opening a
+                // landed topic grows the title in place with the rest of
+                // the card. The tags row below simply follows the hero
+                // directly.
+
                 // ── 4. Tags chip row (genre / era context) ─────────────────
-                RevealContentEntrance(delayMillis = 110) {
+                RevealContentEntrance(delayMillis = 80) {
                     if (!resolved?.tags.isNullOrEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 10.dp),
+                                .padding(top = 20.dp),
                             horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -656,111 +740,11 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // ── 7. Primary CTA — hidden in Browse-Topics mode (read-only:
-                //    no explore sessions, nothing recorded in recents). ──────
-                if (!browseMode) {
-                Button(
-                    onClick = {
-                        val topic = resolved ?: return@Button
-                        // NOTE: engaged is NOT set here — merely tapping the
-                        // CTA isn't engaging. The topic is only recorded as
-                        // recently-explored when the user actually picks
-                        // "Explore now" or "Write about it" (those paths call
-                        // recordExplored + removeUnexplored), so a user who
-                        // dismisses the dialog and backs out still gets the
-                        // topic recorded as recently-UNexplored.
-                        showExploreDialog = true
-                    },
-                    enabled = resolved != null,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = cat.themedAccent(),
-                        contentColor = cat.onAccent(),
-                        disabledContainerColor = cat.themedAccent().copy(alpha = 0.35f),
-                        disabledContentColor = cat.onAccent().copy(alpha = 0.45f)
-                    ),
-                    contentPadding = PaddingValues(horizontal = 28.dp, vertical = 18.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CurioIcon(CurioIcons.AutoAwesome, null, tint = cat.onAccent(), size = 20.dp)
-                        Text(
-                            text = "Start exploring",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                        )
-                    }
-                }
-                }
-
-                // ── 8. "Already …" — full-width pill. Idle: a quiet category-
-                //    surface card with subtle border. Done: accent-filled pill
-                //    that says "Undo" (no check — tapping undoes). Both states
-                //    color-animate smoothly.
-                //    In Browse-Topics mode tapping just confirms (the pill
-                //    flip IS the confirmation); elsewhere it still asks
-                //    whether to write about it now.
-                val pillBg by animateColorAsState(
-                    targetValue = if (isDone) cat.themedAccent()
-                                  else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                    label = "alreadyDoneBg"
-                )
-                val pillInk by animateColorAsState(
-                    targetValue = if (isDone) cat.onAccent()
-                                  else MaterialTheme.colorScheme.onSurfaceVariant,
-                    label = "alreadyDoneInk"
-                )
-                Surface(
-                    onClick = {
-                        val topic = resolved ?: return@Surface
-                        // Marking OR unmarking is engaging — backing out must
-                        // not record the topic as unexplored afterwards.
-                        engaged = true
-                        if (isDone) {
-                            ExploreSessionStore.unmarkDone(context, cat.id, topic.name)
-                        } else {
-                            ExploreSessionStore.markDone(context, cat.id, topic.name)
-                            // Browse mode: the pill flip IS the confirmation.
-                            if (!browseMode) showAlreadyDoneDialog = true
-                        }
-                    },
-                    enabled = resolved != null,
-                    shape = RoundedCornerShape(18.dp),
-                    color = pillBg,
-                    border = if (isDone) BorderStroke(1.dp, cat.onAccent().copy(alpha = 0.25f))
-                             else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                    ) {
-                        CurioIcon(
-                            name = if (isDone) CurioIcons.Close else CurioIcons.History,
-                            contentDescription = null,
-                            tint = pillInk,
-                            size = 18.dp
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = if (isDone) "Undo" else alreadyDoneLabel(cat),
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = pillInk
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(20.dp))
+                // v8.57 — extra clearance so content never hides behind the
+                // 80dp wash strip in the scaffold's bottom bar.
+                Spacer(Modifier.height(80.dp))
             }
 
-            Spacer(Modifier.height(navInsets.calculateBottomPadding()))
         }
     }
 
@@ -789,7 +773,7 @@ fun TopicRevealScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         "Curio can show a small timer bubble that floats over " +
-                        "other apps — even while you're in the browser. It needs " +
+                        "other apps, even while you're in the browser. It needs " +
                         "the \"Display over other apps\" permission."
                     )
                     Text(
@@ -849,35 +833,7 @@ fun TopicRevealScreen(
         )
     }
 
-    // v7.80/v7.92 — "Already …" confirmation: shown right after marking the
-    // topic done; it only asks whether to write about it now. Dismissing
-    // closes the dialog and STAYS on the reveal screen — the button has
-    // already flipped to the marked-done state (tapping it again undoes),
-    // so there's no reason to pop back anymore.
-    if (showAlreadyDoneDialog && resolved != null) {
-        val topic = resolved
-        AlertDialog(
-            onDismissRequest = { showAlreadyDoneDialog = false },
-            title = { Text("${alreadyDoneLabel(cat)}?") },
-            text = {
-                Text(
-                    "${topic.name} is marked as done and won't show up in the " +
-                        "next shuffle. Want to write about it now?"
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showAlreadyDoneDialog = false
-                    navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
-                        launchSingleTop = true
-                    }
-                }) { Text("Write about it") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAlreadyDoneDialog = false }) { Text("Not now") }
-            }
-        )
-    }
+    var showProviderDialog by rememberSaveable { mutableStateOf(false) }
 
     if (showExploreDialog && resolved != null) {
         val topic = resolved
@@ -900,7 +856,7 @@ fun TopicRevealScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Time to ${action.verb.lowercase()} ${action.targetName} — roughly ${action.durationMinutes} min. ${exploreOpenCopy(cat)}",
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. ${exploreOpenCopy(cat)}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
@@ -911,15 +867,15 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { startExploreSession(topic) }) { Text("Explore now") }
+                TextButton(onClick = {
+                    showExploreDialog = false
+                    showProviderDialog = true
+                }) { Text("Explore now") }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         engaged = true
-                        // Writing about it counts as engaging — record as
-                        // recently-explored (clears the unexplored entry,
-                        // tagging "Resumed" if the user came back to it).
                         ExploreSessionStore.recordExplored(context, cat.id, topic.name)
                         ExploreSessionStore.removeUnexplored(context, cat.id, topic.name)
                         showExploreDialog = false
@@ -927,7 +883,31 @@ fun TopicRevealScreen(
                             launchSingleTop = true
                         }
                     }
-                ) { Text("Write about it") }
+                ) { Text("Express yourself") }
+            }
+        )
+    }
+
+    if (showProviderDialog && resolved != null) {
+        val topic = resolved
+        AlertDialog(
+            onDismissRequest = { showProviderDialog = false },
+            title = { Text("Choose where to explore") },
+            text = { Text("Pick a search companion for ${topic.name}.") },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        showProviderDialog = false
+                        startExploreSession(topic, buildGoogleSearchUrl(topic))
+                    }) { Text("Google") }
+                    TextButton(onClick = {
+                        showProviderDialog = false
+                        startExploreSession(topic, buildYouTubeSearchUrl(topic))
+                    }) { Text("YouTube") }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showProviderDialog = false }) { Text("Not now") }
             }
         )
     }
@@ -963,7 +943,7 @@ fun TopicRevealScreen(
                             "Start exploring ${next.topicName} instead?"
                         )
                         Text(
-                            "The current session gets queued — paused with its time banked, " +
+                            "The current session gets queued: paused with its time banked, " +
                             "resumable anytime from Home. Or save this new topic for later " +
                             "and keep going.",
                             style = MaterialTheme.typography.bodySmall,
@@ -1005,9 +985,304 @@ fun TopicRevealScreen(
 
 }
 
+/**
+ * Horizontal size tiers for the reveal action pill: NARROW fits ~320dp
+ * screens (small devices, split-screen) without ellipsizing the labels,
+ * COMPACT covers normal phones, STANDARD keeps the generous tablet look.
+ */
+private enum class RevealDockTier { NARROW, COMPACT, STANDARD }
+
+/**
+ * All pill + button metrics for one [RevealDockTier] and the vertical
+ * [tight] squeeze (less than 48dp of strip — 3-button nav, landscape). One
+ * shared table so the pill and both buttons resize together instead of
+ * squeezing the labels on small screens.
+ */
+private data class RevealDockMetrics(
+    val pillRadius: Dp,
+    val pillPadH: Dp,
+    val pillPadV: Dp,
+    val rowPadH: Dp,
+    val rowPadV: Dp,
+    val rowGap: Dp,
+    val startPadH: Dp,
+    val startPadV: Dp,
+    val alreadyPadH: Dp,
+    val alreadyPadV: Dp,
+    val icon: Dp,
+    val textSp: TextUnit,
+    val gap: Dp,
+    val shadow: Dp
+)
+
+private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockMetrics {
+    val narrow = tier == RevealDockTier.NARROW
+    val compact = tier == RevealDockTier.COMPACT
+    val vPad = if (tight) 7.dp else if (narrow) 8.dp else if (compact) 10.dp else 12.dp
+    return RevealDockMetrics(
+        pillRadius = when {
+            tight -> 18.dp
+            narrow -> 20.dp
+            compact -> 22.dp
+            else -> 26.dp
+        },
+        pillPadH = if (narrow) 10.dp else if (compact) 12.dp else 16.dp,
+        pillPadV = if (tight) 6.dp else 8.dp,
+        rowPadH = if (narrow) 4.dp else if (compact) 6.dp else 10.dp,
+        rowPadV = if (tight) 4.dp else 6.dp,
+        rowGap = if (narrow) 6.dp else 8.dp,
+        startPadH = if (narrow) 8.dp else if (compact) 10.dp else 20.dp,
+        startPadV = vPad,
+        alreadyPadH = if (narrow) 6.dp else if (compact) 8.dp else 16.dp,
+        alreadyPadV = vPad,
+        icon = if (narrow) 16.dp else if (compact) 18.dp else 20.dp,
+        textSp = if (narrow) 13.sp else if (compact) 14.sp else 16.sp,
+        gap = if (narrow) 6.dp else 8.dp,
+        shadow = if (tier == RevealDockTier.STANDARD) 12.dp else 8.dp
+    )
+}
+
+/**
+ * v8.57 — the reveal's bottom-bar slot content: a static WASH STRIP with no
+ * buttons. It keeps the NavHost morph reserve registered (and wearing the
+ * page's category wash) for the whole visit — including the pop transition —
+ * so Scaffold innerPadding never changes mid-morph (the v8.5 freeze rule).
+ * It reads as plain page background; the real actions live inline below the
+ * hero card ([RevealActionRow]).
+ */
+@Composable
+private fun RevealWashStrip(
+    cat: com.curio.app.data.CurioCategory
+) {
+    // v8.57 — invisible spacer: keeps Scaffold innerPadding stable so
+    // content never shifts during the morph transition. Transparent
+    // surface sits at the same z-index as the watermark background.
+    Surface(
+        color = Color.Transparent,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .windowInsetsPadding(WindowInsets.navigationBars)
+    ) {}
+}
+
+/**
+ * v8.57 — Start exploring / Already … — now a theme-aware inline row right
+ * below the hero card (was a floating bottom dock). Reuses the tier metrics
+ * so the pair resizes cleanly on every screen size.
+ */
+@Composable
+private fun RevealActionRow(
+    cat: CurioCategory,
+    browseMode: Boolean,
+    resolved: CurioTopic?,
+    onExplore: () -> Unit,
+    onAlready: () -> Unit,
+    // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
+    onSilentExplore: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val tier = when {
+            maxWidth < 340.dp -> RevealDockTier.NARROW
+            maxWidth < 440.dp -> RevealDockTier.COMPACT
+            else -> RevealDockTier.STANDARD
+        }
+        // The dock's vertical squeeze tier was for the pinned bottom slot;
+        // inline under the hero the width tiers (NARROW/COMPACT/STANDARD)
+        // alone resize the pair cleanly on every screen.
+        val m = revealDockMetrics(tier, tight = false)
+        // v8.57 — the action row sits directly on the category wash, no
+        // floating pill: transparent background so the buttons feel part
+        // of the themed page instead of a disconnected surface card.
+        Surface(
+            shape = RoundedCornerShape(m.pillRadius),
+            color = Color.Transparent,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = m.rowPadH,
+                    vertical = m.rowPadV
+                ),
+                horizontalArrangement = Arrangement.spacedBy(m.rowGap),
+                verticalAlignment = Alignment.CenterVertically
+            ) {                    // Express yourself on the LEFT, Explore on the RIGHT.
+
+                PetLandmark(
+                    id = "express-yourself",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "reveal"
+                ) { lm ->
+                RevealAlreadyButton(
+                    enabled = resolved != null &&
+                        (!browseMode || TourController.currentStep?.landmarkId == "express-yourself"),
+                    cat = cat,
+                    metrics = m,
+                    modifier = lm.weight(1f),
+                    onClick = onAlready
+                )
+                }
+                if (!browseMode) {
+                    // v8.22 — the Start exploring button is a tour landmark:
+                    // the pet-guide highlights its REAL bounds on the tour step.
+                    PetLandmark(
+                        id = "start-exploring",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "reveal"
+                    ) { lm ->
+                        RevealStartButton(
+                            cat = cat,
+                            enabled = resolved != null,
+                            metrics = m,
+                            modifier = lm.weight(1f),
+                            onClick = onExplore
+                        )
+                    }
+                } else if (onSilentExplore != null) {
+                    // Browse mode: Explore opens the search page silently.
+                    PetLandmark(
+                        id = "start-exploring",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "reveal"
+                    ) { lm ->
+                        RevealStartButton(
+                            cat = cat,
+                            enabled = resolved != null,
+                            label = "Explore",
+                            metrics = m,
+                            modifier = lm.weight(1f),
+                            onClick = onSilentExplore
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RevealStartButton(
+    cat: CurioCategory,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    label: String = "Start exploring",
+    metrics: RevealDockMetrics,
+    onClick: () -> Unit
+) {
+    // v8.49 — filled CTA: the actions live on an OPAQUE floating pill (see
+    // RevealActionDock), so this is a proper primary button instead of
+    // transparent-on-wash. The pill carries the vertical room, so phones keep
+    // a comfortable vertical padding — the old 2dp tight tier is gone.
+    // v8.55 — the tier metrics resize the button instead of squeezing the
+    // label on small screens.
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(50),
+        colors = ButtonDefaults.buttonColors(
+            // v8.57 — themed to the category accent so the button wears the
+            // lane's own color instead of the generic theme primary.
+            containerColor = cat.themedAccent(),
+            contentColor = cat.onAccent(),
+            disabledContainerColor = cat.themedAccent().copy(alpha = 0.35f),
+            disabledContentColor = cat.onAccent().copy(alpha = 0.45f)
+        ),
+        contentPadding = PaddingValues(
+            horizontal = metrics.startPadH,
+            vertical = metrics.startPadV
+        ),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(metrics.gap)
+        ) {
+            CurioIcon(
+                CurioIcons.AutoAwesome,
+                null,
+                tint = cat.onAccent(),
+                size = metrics.icon
+            )
+            Text(
+                text = label,
+                // Tier-scaled type: 13sp on ~320dp screens, 14sp on phones,
+                // 16sp on tablets — "Start exploring" stays on one line
+                // instead of ellipsizing (v8.44 review, v8.55 tiers).
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = metrics.textSp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun RevealAlreadyButton(
+    enabled: Boolean,
+    cat: com.curio.app.data.CurioCategory,
+    modifier: Modifier = Modifier,
+    metrics: RevealDockMetrics,
+    onClick: () -> Unit
+) {
+    // v8.49 — text-style writing action on the transparent inline row.
+    // v8.55 — the tier metrics resize it with the pill.
+    val baseInk = MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(18.dp),
+        color = Color.Transparent,
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                // Comfortable vertical padding on the floating pill — the old
+                // 2dp tight tier is gone (see RevealActionDock).
+                Modifier.padding(
+                    horizontal = metrics.alreadyPadH,
+                    vertical = metrics.alreadyPadV
+                )
+            )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CurioIcon(
+                name = CurioIcons.Edit,
+                contentDescription = null,
+                tint = ink,
+                size = metrics.icon
+            )
+            Spacer(Modifier.width(metrics.gap))
+            Text(
+                text = "Express yourself",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = metrics.textSp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Hero card — large category watermark with verb + duration badge
 // ═══════════════════════════════════════════════════════════════════════════
+
+/** The reveal hero's resting height (matches the pre-v8.36 fixed size). */
+private val RevealHeroBaseHeight = 260.dp
 
 @Composable
 private fun HeroCard(
@@ -1042,10 +1317,38 @@ private fun HeroCard(
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
 
+    // v8.36 — auto-growing hero: the title used to be hard-capped at 3
+    // lines, cutting very long topic names. The card now measures how much
+    // of the title spills past the 3-line fold (in px, from the layout
+    // result — so the growth tracks the REAL line height, including
+    // accessibility font scaling) and grows past the 260dp base by exactly
+    // that amount, so long titles show in full. The measurement is latched
+    // only after it has been stable for 420ms — during the shared-element
+    // morph the card resizes every frame and the title reflows, so latching
+    // mid-morph would make the height fight the expansion. The height
+    // change itself is animated so the grow reads as a gentle bloom, not a
+    // snap.
+    // Float state: the overflow is measured in px (size.height minus the
+    // 3rd line's bottom — both floats; Int minus Float yields Float), so
+    // Int state here was a compile error (v8.37 CI fix).
+    var titleOverflowPx by remember(resolved) { mutableStateOf(0f) }
+    var settledOverflowPx by remember(resolved) { mutableStateOf(0f) }
+    LaunchedEffect(titleOverflowPx) {
+        delay(420)
+        settledOverflowPx = titleOverflowPx
+    }
+    val density = LocalDensity.current
+    val heroHeight by animateDpAsState(
+        targetValue = RevealHeroBaseHeight +
+            with(density) { settledOverflowPx.toDp() },
+        animationSpec = tween(240, easing = FastOutSlowInEasing),
+        label = "revealHeroHeight"
+    )
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(260.dp)
+            .height(heroHeight)
             .then(
                 // Shared-element target: bounds animate from the Spin
                 // ticket's position/size to this hero when the topic opens.
@@ -1125,94 +1428,141 @@ private fun HeroCard(
                     .align(Alignment.CenterEnd)
                     .padding(end = 6.dp)
             )
-            // ── Action badge (verb + duration) — white pill on gradient ───
-            if (action != null) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.18f),
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // ── Content column — the topic NAME lives INSIDE the hero so
+            //    the shared-element morph grows it with the card (v8.25):
+            //    opening a landed topic no longer pops a separate headline
+            //    in below the card — the title expands in place with the
+            //    gradient, watermark and pills, so it reads as staying put
+            //    through the whole morph. Same 34sp/38sp geom style and
+            //    left alignment as the Spin ticket's title for a 1:1
+            //    handoff; the card's ink keeps it legible on the gradient.
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+            ) {
+                // ── Top — action badge (verb + duration) ────────────────
+                if (action != null) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = ink.copy(alpha = 0.18f),
+                        shadowElevation = 0.dp
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(ink)
-                        )
-                        Text(
-                            text = "${action.verb} for ~${action.durationMinutes} min",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ink
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(ink)
+                            )
+                            Text(
+                                text = "${action.verb} for ~${action.durationMinutes} min",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = ink
+                            )
+                        }
                     }
                 }
-            }
-            // ── Byline pill (artist / author / director / painter /
-            //    discoverer) — "Artist · The Beatles" — mirrors the subtype
-            //    pill on the opposite corner so the work's creator reads at
-            //    a glance.
-            val byline = resolved?.byline?.takeIf { it.isNotBlank() }
-            val bylineLabel = when (cat.id) {
-                CategoryId.ALBUMS -> "Artist"
-                CategoryId.BOOKS -> "Author"
-                CategoryId.FILMS -> "Director"
-                CategoryId.ARTWORKS -> "Painter"
-                CategoryId.DISCOVERIES -> "Discovered by"
-                else -> null
-            }
-            if (byline != null && bylineLabel != null) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.18f),
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.Person,
-                            contentDescription = null,
-                            tint = ink,
-                            size = 14.dp
-                        )
-                        Text(
-                            text = "$bylineLabel · $byline",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ink,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+
+                // ── Middle — the topic name (auto-grows the card) ──────
+                // Weighted spacers (not SpaceBetween) keep the title centred
+                // between the badge row and the bottom pills whether or not
+                // the badge is present (e.g. while the topic loads). The
+                // measured line count feeds the hero's height so long names
+                // wrap in full instead of being cut at 3 lines (v8.36).
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = resolved?.name ?: cat.displayName,
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontSize = 34.sp,
+                        lineHeight = 38.sp,
+                        letterSpacing = (-0.5).sp
+                    ),
+                    fontWeight = FontWeight.ExtraBold,
+                    color = ink,
+                    // Height of the lines past the 3-line fold (0 when the
+                    // title fits) — feeds the auto-growing hero above.
+                    onTextLayout = { result ->
+                        titleOverflowPx = if (result.lineCount > 3) {
+                            result.size.height - result.getLineBottom(2)
+                        } else 0f
                     }
+                )
+                Spacer(Modifier.weight(1f))
+
+                // ── Bottom — byline + subtype pills, one per corner ─────
+                val byline = resolved?.byline?.takeIf { it.isNotBlank() }
+                val bylineLabel = when (cat.id) {
+                    CategoryId.ALBUMS -> "Artist"
+                    CategoryId.BOOKS -> "Author"
+                    CategoryId.FILMS -> "Director"
+                    CategoryId.ARTWORKS -> "Painter"
+                    CategoryId.DISCOVERIES -> "Discovered by"
+                    else -> null
                 }
-            }
-            // ── Subtype pill ────────────────────
-            if (resolved?.subtype?.isNotBlank() == true) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.18f),
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
+                val subtype = resolved?.subtype?.takeIf { it.isNotBlank() }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = resolved.subtype,
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = ink,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                    )
+                    // Left slot — byline pill (or a blank spacer so a lone
+                    // subtype still pins to the right corner). weight(1f,
+                    // fill = false) bounds the pill to the space left after
+                    // the subtype, so a long byline ellipsizes instead of
+                    // overflowing the row on narrow screens.
+                    if (byline != null && bylineLabel != null) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = ink.copy(alpha = 0.18f),
+                            shadowElevation = 0.dp,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Person,
+                                    contentDescription = null,
+                                    tint = ink,
+                                    size = 14.dp
+                                )
+                                Text(
+                                    text = "$bylineLabel · $byline",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ink,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(Modifier)
+                    }
+                    // Right slot — subtype pill (blank spacer keeps the
+                    // byline on its left corner when there's no subtype).
+                    if (subtype != null) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = ink.copy(alpha = 0.18f),
+                            shadowElevation = 0.dp
+                        ) {
+                            Text(
+                                text = subtype,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = ink,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            )
+                        }
+                    } else {
+                        Spacer(Modifier)
+                    }
                 }
             }
             } // inner background Box
@@ -1266,7 +1616,7 @@ private fun TeaserCard(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ═════════════════���═════════════════════════════════════════════════════════
 // Action prompt card ("{verb} {target}" + instruction)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1375,17 +1725,6 @@ private fun exploreOpenCopy(cat: com.curio.app.data.CurioCategory): String =
     if (categoryOpensYouTube(cat.id)) "We'll open YouTube to get you started."
     else "We'll open a Google search to get you started."
 
-/** The "Already …" label — the category's verb, per category (v7.80).
- *  Films/Directors → watched, Albums/Artists → listened, Books/Authors →
- *  read, Artworks/Painters → seen, everything else → explored. */
-private fun alreadyDoneLabel(cat: com.curio.app.data.CurioCategory): String = when (cat.id) {
-    CategoryId.FILMS, CategoryId.DIRECTORS -> "Already watched"
-    CategoryId.ALBUMS, CategoryId.ARTISTS -> "Already listened"
-    CategoryId.BOOKS, CategoryId.AUTHORS -> "Already read"
-    CategoryId.ARTWORKS -> "Already seen"
-    CategoryId.PAINTERS -> "Already explored"
-    else -> "Already explored"
-}
 
 /** Circular like/dislike toggle — active state fills with the category accent. */
 @Composable
