@@ -1218,8 +1218,8 @@ fun CurioFloatingPet(
             val lifeFrame = routineAnim?.frames?.getOrNull(routineFrame)
             val activeFrame = caFrame ?: lifeFrame
             val activeView = when {
-                caFrame != null -> caFrame.view                lifeFrame != null && lifeFrame.view != com.curio.app.data.PetViewAngle.FRONT
- -> lifeFrame.view
+                caFrame != null -> caFrame.view
+                lifeFrame != null && lifeFrame.view != com.curio.app.data.PetViewAngle.FRONT -> lifeFrame.view
                 else -> routineView
             }
             CurioPetSprite(

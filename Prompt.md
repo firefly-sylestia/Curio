@@ -1,22 +1,23 @@
-# Request — Track Tour speech bubble to exact landmarks
+# Request — Fix CurioFloatingPet CI compile failure
 
-## User request
-- Make the Tour speech bubble track the exact landmark position instead of using the pet's current bubble placement.
-- Continue and fix the CI failure.
+## Reported CI failure
+`CurioFloatingPet.kt:1221` reported unresolved `lifeFrame`, syntax error, condition mismatch, and unsafe nullable access in both debug and release compilation.
 
-## Implemented
-- Tour bubbles in `CurioFloatingPet` now anchor to the registered `PetLandmarks.Landmark.bounds`.
-- Landmark bounds are published in window coordinates; the floating overlay converts them into its own local coordinate space before positioning the bubble.
-- The bubble is horizontally centered on the landmark and placed above it when there is room, otherwise below it, with screen clamping.
-- Actual measured tour bubble dimensions are used for placement; measurement resets when the tour step changes.
-- Overlay-origin changes restart pet-to-landmark movement so rotation/inset/layout changes do not leave stale coordinates.
-- Normal reaction bubbles retain their existing pet-relative placement and sizing.
+## Cause
+The `activeView` `when` branch had been accidentally collapsed into one malformed line:
+`caFrame != null -> caFrame.view lifeFrame != null ...`
 
-## CI/static validation
+## Fix
+Restored the intended multiline Kotlin `when` expression:
+- custom action frame view when present;
+- non-front Pet Life frame view when present;
+- otherwise the routine view.
+
+## Validation
+- `node scripts/check_braces.js` passed.
 - `git diff --check` passed.
-- `node scripts/check_braces.js` passed (125 files).
-- Local Gradle/Android compilation was not run because root DOX explicitly forbids local Gradle builds; CI remains the source of truth.
-- The current branch had no checked-in CI log artifact; the observed failure context was audited through current source/imports.
+- Focused review found no remaining immediate blocker in the active-frame block.
+- Gradle was not run locally per root DOX; CI remains the source of truth.
 
-## Notes
-- The unrelated untracked `pet_brain_emotional_v3.zip` and the previously created untracked Python training package remain untouched and are not part of this UI fix.
+## Next work
+Resume the project-local PyTorch smoke test and toggleable ONNX Runtime Mobile integration after this CI fix is pushed.
