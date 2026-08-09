@@ -68,7 +68,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.0.0"`, `versionCode = 20260906`
+- `versionName = "1.0.0"`, `versionCode = 20260918`
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
@@ -145,6 +145,11 @@ app/src/main/java/com/curio/app/
   runtime playback remain in place for a future re-entry. A slim sticky
   **EditorToolbar** is the ONE place for Save / Undo / Redo / Reset / Import /
   Export (the old pinned footer SaveArea is gone — no duplicate buttons).
+  The Faces editor shows mood face-only previews and a creamy pixel board with
+  an explicit Painting toggle; face zoom is not shown. Details drawing and the
+  entire Actions editor are currently hidden from the studio, while detail,
+  reaction, and custom-action data/runtime behavior remain preserved.
+
   PNG export/import shares via FileProvider `${applicationId}.fileprovider`
   (`res/xml/file_paths.xml` cache/share).
 

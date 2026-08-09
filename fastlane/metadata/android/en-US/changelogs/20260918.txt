@@ -1,0 +1,1 @@
+Pet Studio is cleaner and easier to use: choose mood faces from face-only previews, paint on a warm creamy pixel board with a clear Painting toggle, and switch between moods quickly. Detail visibility switches remain available while the detail drawing and Actions editors stay tucked away for future refinement.
