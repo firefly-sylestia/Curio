@@ -711,7 +711,8 @@ fun PetDesignerScreen(navController: NavController) {
                     CurioPetSprite(
                         stage = CurioPet.currentStage(),
                         mood = previewMood,
-                        spriteSize = 110.dp,
+                        // v9.4 — grows with the pet's stage.
+                        spriteSize = 110.dp * CurioPet.currentStage().sizeScale,
                         design = design,
                         peeking = previewPeek
                     )

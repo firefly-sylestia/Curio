@@ -1082,7 +1082,9 @@ fun CurioFloatingPet(
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
                 mood = CurioPet.mood(context, CurioQuests.categoriesState, screenHint),
-                spriteSize = FLOAT_SIZE * 0.92f,
+                // v9.4 — the pet grows with its stage: hatchling sits
+                // small (~62%), sage fills the box proudly (~112%).
+                spriteSize = FLOAT_SIZE * 0.92f * CurioPet.currentStage().sizeScale,
                 celebrateKey = celebrateKey,
                 squishKey = squishKey,
                 playKey = playKey,

@@ -39,13 +39,13 @@ object CurioPet {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     // ── Growth stages (spec §10.4) ─────────────────────────────────────
-    enum class Stage(val displayName: String, val unlockHint: String) {
-        HATCHLING("Hatchling Spark", "Level 3 to grow"),
-        SPROUT("Curious Sprout", "Explore 3 lanes to grow"),
-        TRAIL_BUDDY("Trail Buddy", "Save 10 discoveries to grow"),
-        ARCHIVE_PAL("Archive Pal", "Explore every lane to grow"),
-        LANE_GUARDIAN("Lane Guardian", "Reach Level 25 to grow"),
-        SAGE("Curio Sage", "Fully grown")
+    enum class Stage(val displayName: String, val unlockHint: String, val sizeScale: Float = 1f) {
+        HATCHLING("Hatchling Spark", "Level 3 to grow", 0.62f),
+        SPROUT("Curious Sprout", "Explore 3 lanes to grow", 0.74f),
+        TRAIL_BUDDY("Trail Buddy", "Save 10 discoveries to grow", 0.84f),
+        ARCHIVE_PAL("Archive Pal", "Explore every lane to grow", 0.93f),
+        LANE_GUARDIAN("Lane Guardian", "Reach Level 25 to grow", 1.05f),
+        SAGE("Curio Sage", "Fully grown", 1.12f)
     }
 
     /**

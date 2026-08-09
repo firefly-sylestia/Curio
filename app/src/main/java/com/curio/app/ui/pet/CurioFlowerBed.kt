@@ -246,7 +246,8 @@ fun CurioFlowerBed(
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
                 mood = mood,
-                spriteSize = bedSize * 0.52f,
+                // v9.4 — the pet grows with stage (hatchling = tiny in the bed).
+                spriteSize = bedSize * 0.52f * CurioPet.currentStage().sizeScale,
                 celebrateKey = celebrateKey,
                 contentDescription = if (sleeping) "Curie asleep in its flower bed. Tap to wake" else null,
                 modifier = Modifier
