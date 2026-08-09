@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.ui.theme.CurioIcon
@@ -67,8 +68,18 @@ fun CurioFlowerBed(
     bedSize: Dp = 76.dp,
     onTap: (() -> Unit)? = null,
     celebrateKey: Int = 0,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    // v9.3 — custom bed rows override the default diorama (home editor).
+    customRows: List<String>? = null
 ) {
+    val context = LocalContext.current
+    // Reactively read the saved bed design; the param wins for explicit
+    // call-site overrides, otherwise fall through to the preference.
+    val bedRows: List<String> = customRows?.takeIf {
+        it.size == BED_GRID_H && it.all { row -> row.length == BED_GRID_W }
+    } ?: AppPreferences.bedDesignRowsState?.takeIf {
+        it.size == BED_GRID_H && it.all { row -> row.length == BED_GRID_W }
+    } ?: BED_ROWS
     val context = LocalContext.current
     val ink = Color(0xFF4A3426)
     val wood = Color(0xFFB98A5E)
@@ -187,7 +198,7 @@ fun CurioFlowerBed(
             }
 
             // The bed itself.
-            BED_ROWS.forEachIndexed { row, line ->
+            bedRows.forEachIndexed { row, line ->
                 line.forEachIndexed { col, ch ->
                     when (ch) {
                         'w' -> drawPx(col, row, wood)
@@ -278,8 +289,8 @@ fun CurioFlowerBed(
 }
 
 // v8.36 — the home grew up: a 32-column detailed diorama (was 16).
-private const val BED_GRID_W = 32
-private const val BED_GRID_H = 18
+internal const val BED_GRID_W = 32
+internal const val BED_GRID_H = 18
 
 /**
  * The bed — a cozy v8.14 diorama: headboard (top), a tiny lamp on the
@@ -289,7 +300,7 @@ private const val BED_GRID_H = 18
  * 'g' gold center, 'k' blanket, 'K' blanket shade, 'G' grass,
  * 'D' grass deep.
  */
-private val BED_ROWS: List<String> = listOf(
+internal val BED_ROWS: List<String> = listOf(
     "............wwwwwwww............",
     "..........wwwwwwwwwwww..........",
     "..........wwwwwlwwlwwlw.........",

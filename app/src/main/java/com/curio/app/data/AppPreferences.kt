@@ -156,6 +156,8 @@ object AppPreferences {
     // v8.56 — the two user-saved custom pet slots (Pet studio Pets page).
     private const val KEY_PET_CUSTOM_1 = "pet_custom_1"
     private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
+    // v9.3 — custom flower bed design (32×18 pixel rows).
+    private const val KEY_BED_DESIGN = "bed_design_rows"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -438,6 +440,8 @@ object AppPreferences {
      * recompose the moment a pet is saved or removed.
      */
     var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
+    /** v9.3 — custom flower bed rows (null = use the default bed). */
+    var bedDesignRowsState by mutableStateOf<List<String>?>(null)
         private set
 
     fun initThemeMode(context: Context) {
@@ -484,6 +488,7 @@ object AppPreferences {
         categoryOrderState = getCategoryOrder(context)
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
+        bedDesignRowsState = getBedDesignRows(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -1297,6 +1302,23 @@ object AppPreferences {
         prefs(context).edit()
             .putString(KEY_LANDED_TOPIC_PREFIX + categoryId.name, topicName)
             .apply()
+    }
+
+    // ── Flower bed design (v9.3 — home editor) ──────────────────────
+    /** Returns the saved bed design rows, or null when the default is used. */
+    fun getBedDesignRows(context: Context): List<String>? =
+        prefs(context).getString(KEY_BED_DESIGN, null)
+            ?.split("\n")
+            ?.takeIf { it.size == 18 && it.all { row -> row.length == 32 } }
+
+    fun setBedDesignRows(context: Context, rows: List<String>) {
+        prefs(context).edit().putString(KEY_BED_DESIGN, rows.joinToString("\n")).apply()
+        bedDesignRowsState = rows
+    }
+
+    fun clearBedDesignRows(context: Context) {
+        prefs(context).edit().remove(KEY_BED_DESIGN).apply()
+        bedDesignRowsState = null
     }
 
     // ── Internal ─────────────────────────────────────────────────────

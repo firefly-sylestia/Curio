@@ -113,6 +113,10 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.pet.BED_GRID_W
+import com.curio.app.ui.pet.BED_GRID_H
+import com.curio.app.ui.pet.BED_ROWS
+import com.curio.app.ui.pet.CurioFlowerBed
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
 import com.curio.app.ui.theme.CurioColors
@@ -272,6 +276,8 @@ fun PetDesignerScreen(navController: NavController) {
     var importMenuOpen by remember { mutableStateOf(false) }
     // v8.52 — the Settings → Accessories dialog.
     var accessoriesOpen by remember { mutableStateOf(false) }
+    // v9.3 — home editor: the flower bed design dialog.
+    var bedEditorOpen by remember { mutableStateOf(false) }
     // v8.56 — which custom-pet slot the working design belongs to (null =
     // the built-in pet). Plain `remember` (NOT saveable) to match the
     // working design's own lifetime: `design` re-parses from the global
@@ -1516,6 +1522,53 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
+            // ── Edit home (Settings, v9.3) — open the flower bed editor ──
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Home",
+                    "Redesign the flower bed — change the blanket, pillow, or wood"
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                        onClick = { bedEditorOpen = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Edit,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                size = 20.dp
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                "Edit flower bed",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Spacer(Modifier.weight(1f))
+                            CurioIcon(
+                                name = CurioIcons.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+                                size = 20.dp
+                            )
+                        }
+                    }
+                    if (AppPreferences.bedDesignRowsState != null) {
+                        Spacer(Modifier.height(8.dp))
+                        SmallAction("Reset to default bed") {
+                            AppPreferences.clearBedDesignRows(context)
+                            toast = "Bed reset to default"
+                        }
+                    }
+                }
+            }
+
             // ── One-tap personality presets (Settings page, v8.52) ───
             item {
                 if (page == PetDesignerPage.SETTINGS) SectionCard(
@@ -1756,6 +1809,16 @@ fun PetDesignerScreen(navController: NavController) {
                         importReview = null
                     },
                     onCancel = { importReview = null }
+                )
+            }
+        }
+
+        // ── Bed editor (v9.3) — flower bed design dialog ────────────
+        if (bedEditorOpen) {
+            DialogScrim(onDismiss = { bedEditorOpen = false }) {
+                BedDesignDialog(
+                    onDismiss = { bedEditorOpen = false },
+                    context = context
                 )
             }
         }
@@ -5870,6 +5933,251 @@ private fun PetLibraryCard(
                     color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v9.3 — Flower bed editor (Settings → Home → Edit flower bed)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Bed palette: paint key → display color (matches CurioFlowerBed's palette). */
+private val BED_PALETTE: Map<Char, Color> = mapOf(
+    '.' to Color.Transparent,
+    'w' to Color(0xFFB98A5E),
+    'l' to Color(0xFF8A5A33),
+    'm' to Color(0xFFFFF6E6),
+    'M' to Color(0xFFF0E4CE),
+    'F' to Color(0xFFF7B8D0),
+    'f' to Color(0xFFE89AB8),
+    'g' to Color(0xFFFFD97D),
+    'k' to Color(0xFFF2A6B3),
+    'K' to Color(0xFFDC8A99),
+    'G' to Color(0xFF9CCB8B),
+    'D' to Color(0xFF7FB56F)
+)
+
+private val BED_PAINT_KEYS = listOf('w', 'l', 'm', 'M', 'F', 'f', 'g', 'k', 'K', 'G', 'D')
+
+/** Preset bed designs the user can pick from. */
+private data class BedPreset(val name: String, val rows: List<String>)
+
+private val COZY_BED_ROWS: List<String> = listOf(
+    "............wwwwwwww............",
+    "..........wwwwwwwwwwww..........",
+    "..........wwwwwllwwllwwl.........",
+    "..........wwwwwllwwllwwl.........",
+    "......wwwwwwwwwwwwwwwwwwwwww....",
+    ".......wmmFgFmkkkkFgFmmFgFmmw...",
+    ".......wmmFfFmKKKKFfFmmFfFmmw...",
+    "......wmmmmmmmmmmmmmmmmmmmmmmw..",
+    "......wmmmmmkkkkkkkKKKkkkkkmw..",
+    "......wmmmmmKKKKKKKkkKKKKKkmw..",
+    "......wmmmmmkkkkkkkKKKkkkkkmw..",
+    "......wmmmmmmmmmmmmmmmmmmmmmmw..",
+    ".....wwwwwwwwwwwwwwwwwwwwww.....",
+    "....wwwwwwwwwwwwwwwwwwwwwwww....",
+    "..GGGGGGGGGGGGGGGGGGGGGGGGGGGG..",
+    "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    ".D.D..DD..D.D..DD..D.D..DD..D.D.",
+    "................................"
+)
+
+private val MINIMAL_BED_ROWS: List<String> = listOf(
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "......wmmmmmmmmmmmmmmmmmmw......",
+    "......wmmmmmmmmmmmmmmmmmmw......",
+    "......wmmmmmmkkkkkkkmmmmmw......",
+    "......wmmmmmmKKKKKKKmmmmmw......",
+    "......wmmmmmmmmmmmmmmmmmmw......",
+    ".....wwwwwwwwwwwwwwwwwwwwww.....",
+    "....wwwwwwwwwwwwwwwwwwwwwwww....",
+    "..GGGGGGGGGGGGGGGGGGGGGGGGGGGG..",
+    "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    ".D.D..DD..D.D..DD..D.D..DD..D.D.",
+    "................................"
+)
+
+private val GARDEN_BED_ROWS: List<String> = listOf(
+    "............wwwwwwww............",
+    "..........wwwwwwwwwwww..........",
+    "..........wwwwwllwwllwwl.........",
+    "..........wwwwwllwwllwwl.........",
+    "......wwwwwwwwwwwwwwwwwwwwww....",
+    ".......wmmFgFmFgFmFgFmmFgFmmw...",
+    ".......wmmFfFmFfFmFfFmmFfFmmw...",
+    "......wmmmmmmmmmmmmmmmmmmmmmmw..",
+    "......wmmmmmkkkkkkkkkkkkkkkkmw..",
+    "......wmmmmmKKKKKKKKKKKKKKKKmw..",
+    "......wmmmmmkkkkkkkkkkkkkkkkmw..",
+    "......wmmmmmmmmmmmmmmmmmmmmmmw..",
+    ".....wwwwwwwwwwwwwwwwwwwwww.....",
+    "....GGGwwwwwwwwwGGGGGGGwwwww....",
+    "..GGGGGGGGGGGGGGGGGGGGGGGGGGGG..",
+    "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    ".D.D..DD..D.D..DD..D.D..DD..D.D.",
+    "................................"
+)
+
+private val BED_PRESETS = listOf(
+    BedPreset("Default", BED_ROWS),
+    BedPreset("Cozy night", COZY_BED_ROWS),
+    BedPreset("Minimal", MINIMAL_BED_ROWS),
+    BedPreset("Garden", GARDEN_BED_ROWS)
+)
+
+@Composable
+private fun BedDesignDialog(onDismiss: () -> Unit, context: android.content.Context) {
+    val savedRows = AppPreferences.bedDesignRowsState
+    var rows by remember(savedRows) { mutableStateOf(savedRows?.toList() ?: BED_ROWS) }
+    var paintKey by rememberSaveable { mutableStateOf('w') }
+    var selectedPreset by rememberSaveable { mutableStateOf("Custom") }
+    val density = LocalDensity.current
+    DialogScrim(onDismiss = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .widthIn(max = 400.dp)
+                .padding(horizontal = 12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    "Edit flower bed",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    "Change the look of Curie's home — pick a preset or paint the 32×18 grid yourself.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                // Preset chips
+                Text("Preset", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    BED_PRESETS.forEach { preset ->
+                        ChoiceChip(
+                            label = preset.name,
+                            selected = selectedPreset == preset.name,
+                            onClick = {
+                                selectedPreset = preset.name
+                                rows = preset.rows.toList()
+                            }
+                        )
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+
+                // Palette swatches
+                Text("Paint color", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    BED_PAINT_KEYS.forEach { key ->
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(BED_PALETTE[key] ?: Color.Transparent)
+                                .then(
+                                    if (paintKey == key) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                    else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                                )
+                                .clickable {
+                                    selectedPreset = "Custom"
+                                    paintKey = key
+                                }
+                        )
+                    }
+                    // Eraser
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .then(
+                                if (paintKey == '.') Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                            )
+                            .clickable { selectedPreset = "Custom"; paintKey = '.' }
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+
+                // Pixel grid (32 × 18, compact cells)
+                Text("Grid (tap to paint)", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
+                Spacer(Modifier.height(6.dp))
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
+                ) {
+                    val cellDp = maxWidth / 32f
+                    Column(modifier = Modifier.width(maxWidth)) {
+                        rows.forEachIndexed { ri, line ->
+                            Row(modifier = Modifier.height(cellDp)) {
+                                line.forEachIndexed { ci, ch ->
+                                    val bg = BED_PALETTE[ch] ?: Color.Transparent
+                                    Box(
+                                        modifier = Modifier
+                                            .width(cellDp)
+                                            .height(cellDp)
+                                            .padding(0.5.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(if (ch == '.') MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f) else bg)
+                                            .clickable {
+                                                selectedPreset = "Custom"
+                                                val newRows = rows.toMutableList()
+                                                val newLine = newRows[ri].toCharArray()
+                                                newLine[ci] = paintKey
+                                                newRows[ri] = String(newLine)
+                                                rows = newRows
+                                            }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(14.dp))
+
+                // Actions
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SmallAction("Cancel", enabled = true) { onDismiss() }
+                    Spacer(Modifier.weight(1f))
+                    SmallAction("Reset", enabled = rows != BED_ROWS) {
+                        AppPreferences.clearBedDesignRows(context)
+                        rows = BED_ROWS.toList()
+                        selectedPreset = "Default"
+                    }
+                    SmallAction("Save", enabled = rows != BED_ROWS || savedRows != null) {
+                        AppPreferences.setBedDesignRows(context, rows)
+                        onDismiss()
+                    }
+                }
             }
         }
     }
