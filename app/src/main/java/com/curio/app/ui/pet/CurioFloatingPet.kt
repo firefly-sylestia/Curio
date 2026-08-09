@@ -50,6 +50,8 @@ import com.curio.app.data.PetActionTrigger
 import com.curio.app.data.PetAnimation
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
+import com.curio.app.data.PetLifeDirector
+import com.curio.app.data.PetLifeRoutine
 import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
@@ -229,6 +231,49 @@ fun CurioFloatingPet(
         var customActionAnim by remember { mutableStateOf<PetAnimation?>(null) }
         var customActionFrame by remember { mutableIntStateOf(0) }
         var customActionKey by remember { mutableIntStateOf(0) }
+        // Pet Life routines are short authored scenes selected from the
+        // current screen + personality. Keep the last few ids out of the
+        // picker so autonomy feels varied instead of random-but-repetitive.
+        var routineAnim by remember { mutableStateOf<PetAnimation?>(null) }
+        var routineFrame by remember { mutableIntStateOf(0) }
+        var routineKey by remember { mutableIntStateOf(0) }
+        var routineView by remember { mutableStateOf(com.curio.app.data.PetViewAngle.FRONT) }
+        var recentRoutineIds by remember { mutableStateOf<List<String>>(emptyList()) }
+
+        /** Starts one contextual Pet Life routine and remembers its id. */
+        fun playPetLifeRoutine(routine: PetLifeRoutine) {
+            // A routine is a complete little scene: let it finish before a
+            // second idle trigger can replace its frames or speech bubble.
+            if (routineAnim != null || customActionAnim != null) return
+            val anim = activeDesign.animations[routine.animationId]
+                ?: animationById(routine.animationId)
+                ?: return
+            if (anim.frames.isEmpty()) return
+            routineAnim = anim
+            routineView = routine.view
+            routineFrame = 0
+            routineKey++
+            recentRoutineIds = (listOf(routine.id) + recentRoutineIds).distinct().take(5)
+            lastTouch = System.currentTimeMillis()
+            routine.line?.let {
+                reaction = it
+                reactionKey++
+            }
+        }
+
+        /**
+         * Steps a Pet Life routine once. Custom user actions still take
+         * priority when both happen at the same time.
+         */
+        LaunchedEffect(routineKey, routineAnim) {
+            val anim = routineAnim ?: return@LaunchedEffect
+            for (i in anim.frames.indices) {
+                routineFrame = i
+                delay(anim.frames[i].durationMs.toLong())
+            }
+            routineAnim = null
+            routineView = com.curio.app.data.PetViewAngle.FRONT
+        }
 
         /**
          * v8.35 — fires a configured reaction: the animation + face from the
@@ -267,6 +312,12 @@ fun CurioFloatingPet(
          * saved line when the action has any.
          */
         fun playCustomAction(action: CustomPetAction) {
+            // Custom authored actions take priority over ambient Pet Life;
+            // cancel the routine so the two scenes never overlap.
+            if (routineAnim != null) {
+                routineAnim = null
+                routineView = com.curio.app.data.PetViewAngle.FRONT
+            }
             val anim = activeDesign.animations[action.animationId]
                 ?: animationById(action.animationId)
                 ?: return
@@ -406,6 +457,14 @@ fun CurioFloatingPet(
                     Random.nextFloat() < 0.45f
                 ) {
                     val target = landmarks.random()
+                    playPetLifeRoutine(
+                        PetLifeDirector.choose(
+                            screen = routePrefix,
+                            landmarkKind = target.kind.name,
+                            persona = CurioPet.persona(context),
+                            recentIds = recentRoutineIds.toSet()
+                        )
+                    )
                     val c = target.bounds.center
                     // Stand BESIDE the thing, never on top of it.
                     val tx = (c.x + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
@@ -421,8 +480,9 @@ fun CurioFloatingPet(
                             PetLandmarks.poke(target.id)
                             squishKey++
                             heartsKey++
-                            reaction = CurioPet.landmarkLine(funThing = true)
-                            reactionKey++
+                            // The selected Pet Life routine owns the speech
+                            // bubble; this avoids replacing its contextual line
+                            // with the old generic landmark phrase.
                             lastTouch = System.currentTimeMillis()
                         }
                         PetLandmarks.Kind.CURIOUS -> {
@@ -433,8 +493,6 @@ fun CurioFloatingPet(
                             thinking = false
                             delay(420)
                             PetLandmarks.poke(target.id)
-                            reaction = CurioPet.landmarkLine(funThing = false)
-                            reactionKey++
                             lastTouch = System.currentTimeMillis()
                         }
                         PetLandmarks.Kind.PLAY -> {
@@ -453,8 +511,6 @@ fun CurioFloatingPet(
                             celebrateKey++
                             spinKey++
                             heartsKey++
-                            reaction = CurioPet.jigLine()
-                            reactionKey++
                             lastTouch = System.currentTimeMillis()
                         }
                     }
@@ -470,6 +526,14 @@ fun CurioFloatingPet(
                 ) {
                     lastPeekAt = System.currentTimeMillis()
                     val target = landmarks.random()
+                    playPetLifeRoutine(
+                        PetLifeDirector.choose(
+                            screen = routePrefix,
+                            landmarkKind = target.kind.name,
+                            persona = CurioPet.persona(context),
+                            recentIds = recentRoutineIds.toSet()
+                        )
+                    )
                     val c = target.bounds.center
                     val side = if (Random.nextFloat() < 0.5f) -1 else 1
                     val tx = (c.x + side * petPx * 1.25f)
@@ -482,8 +546,6 @@ fun CurioFloatingPet(
                     delay(720)
                     peeking = false
                     squishKey++
-                    reaction = "Peekaboo!"
-                    reactionKey++
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
@@ -494,6 +556,14 @@ fun CurioFloatingPet(
                     Random.nextFloat() < 0.12f
                 ) {
                     lastPeekAt = System.currentTimeMillis()
+                    playPetLifeRoutine(
+                        PetLifeDirector.choose(
+                            screen = routePrefix,
+                            landmarkKind = null,
+                            persona = CurioPet.persona(context),
+                            recentIds = recentRoutineIds.toSet()
+                        )
+                    )
                     val edgeY = (maxH - petPx * 0.30f).coerceAtLeast(marginPx)
                     val tx = (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
                     walkTo(Offset(tx, edgeY), stepMs = 24, steps = 40)
@@ -501,8 +571,6 @@ fun CurioFloatingPet(
                     delay(900)
                     peeking = false
                     squishKey++
-                    reaction = "Peekaboo!"
-                    reactionKey++
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
@@ -522,6 +590,14 @@ fun CurioFloatingPet(
                         (maxW - petPx - marginPx).coerceAtLeast(marginPx)
                     )
                     val edgeY = (maxH - petPx - marginPx).coerceAtLeast(marginPx)
+                    playPetLifeRoutine(
+                        PetLifeDirector.choose(
+                            screen = routePrefix,
+                            landmarkKind = null,
+                            persona = CurioPet.persona(context),
+                            recentIds = recentRoutineIds.toSet()
+                        )
+                    )
                     walkTo(Offset(edgeX, edgeY), stepMs = 15, steps = 40)
                     // Peek-hop: bob up and down at the edge a few times,
                     // like it's trying to see over the lip.
@@ -534,8 +610,6 @@ fun CurioFloatingPet(
                     }
                     squishKey++
                     heartsKey++
-                    reaction = CurioPet.drawerLine()
-                    reactionKey++
                     lastPokeAt = System.currentTimeMillis()
                     lastTouch = System.currentTimeMillis()
                     continue
@@ -546,7 +620,18 @@ fun CurioFloatingPet(
                 // (bouncy pets play a lot, sparky ones are shy).
                 if (Random.nextFloat() < CurioPet.playfulBias(context)) {
                     CurioPet.notePlay(context)
-                    fireReaction(PetReactionEvents.PLAY, CurioPet.playInitiation())
+                    playPetLifeRoutine(
+                        PetLifeDirector.choose(
+                            screen = routePrefix,
+                            landmarkKind = PetLandmarks.Kind.PLAY.name,
+                            persona = CurioPet.persona(context),
+                            recentIds = recentRoutineIds.toSet()
+                        )
+                    )
+                    // The Pet Life routine owns this moment's contextual
+                    // speech; retain the legacy PLAY motion without replacing
+                    // the routine bubble.
+                    fireReaction(PetReactionEvents.PLAY, null)
                     val tx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
                     val ty = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
                     walkTo(Offset(tx, ty), stepMs = 16, steps = 44)
@@ -1079,6 +1164,13 @@ fun CurioFloatingPet(
             // custom action is running the frame is null and everything
             // falls back to the normal look.
             val caFrame = customActionAnim?.frames?.getOrNull(customActionFrame)
+            val lifeFrame = routineAnim?.frames?.getOrNull(routineFrame)
+            val activeFrame = caFrame ?: lifeFrame
+            val activeView = when {
+                caFrame != null -> caFrame.view                lifeFrame != null && lifeFrame.view != com.curio.app.data.PetViewAngle.FRONT
+ -> lifeFrame.view
+                else -> routineView
+            }
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
                 mood = CurioPet.mood(context, CurioQuests.categoriesState, screenHint),
@@ -1099,18 +1191,22 @@ fun CurioFloatingPet(
                 dizzy = dizzy || recovering,
                 // v8.35 — the reaction editor's face + the hide-and-peek pose.
                 // v8.53 — a custom action's animation mood wins while playing.
-                faceOverride = customActionAnim?.let { activeDesign.faceFor(it.mood) } ?: reactionFace,
-                // v8.53 — per-frame pixel layers of the custom animation.
-                bodyOverride = caFrame?.bodyRows,
-                curledOverride = caFrame?.curledRows,
-                eyeOverride = caFrame?.eyeGrid,
+                faceOverride = customActionAnim?.let { activeDesign.faceFor(it.mood) }
+                    ?: routineAnim?.let { activeDesign.faceFor(it.mood) }
+                    ?: reactionFace,
+                // Per-frame pixel layers work for custom actions and Pet Life
+                // routines; the custom action wins if both overlap.
+                bodyOverride = activeFrame?.bodyRows,
+                curledOverride = activeFrame?.curledRows,
+                eyeOverride = activeFrame?.eyeGrid,
+                viewAngle = activeView,
                 peeking = peeking,
                 contentDescription = "Curie, your companion pet. Drag it anywhere, tap to say hi",
                 modifier = Modifier.graphicsLayer {
-                    translationY = (caFrame?.offsetY ?: 0f).dp.toPx()
-                    scaleX = caFrame?.scale ?: 1f
-                    scaleY = caFrame?.scale ?: 1f
-                    rotationZ = caFrame?.rotationDegrees ?: 0f
+                    translationY = (activeFrame?.offsetY ?: 0f).dp.toPx()
+                    scaleX = activeFrame?.scale ?: 1f
+                    scaleY = activeFrame?.scale ?: 1f
+                    rotationZ = activeFrame?.rotationDegrees ?: 0f
                 }
             )
         }

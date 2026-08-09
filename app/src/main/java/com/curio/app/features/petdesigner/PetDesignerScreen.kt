@@ -2849,6 +2849,7 @@ private fun AnimatedPetSprite(
         bodyOverride = frame.bodyRows,
         curledOverride = frame.curledRows,
         eyeOverride = frame.eyeGrid,
+        viewAngle = frame.view,
         staticPose = staticPose,
         modifier = Modifier.graphicsLayer {
             translationY = frame.offsetY.dp.toPx()

@@ -556,7 +556,7 @@ data class PetDesign(
             anim.frames.forEachIndexed { index, fr ->
                 val parts = mutableListOf(
                     "i=$index", "d=${fr.durationMs}", "y=${fr.offsetY}",
-                    "s=${fr.scale}", "r=${fr.rotationDegrees}"
+                    "s=${fr.scale}", "r=${fr.rotationDegrees}", "v=${fr.view.name}"
                 )
                 fr.bodyRows?.let { rows ->
                     val encoded = runCatching {
@@ -745,6 +745,7 @@ data class PetDesign(
                     var offsetY = 0f
                     var scale = 1f
                     var rotation = 0f
+                    var view: PetViewAngle? = null
                     var body: List<String>? = null
                     var curled: List<String>? = null
                     var eye: List<String>? = null
@@ -759,6 +760,9 @@ data class PetDesign(
                             "y" -> offsetY = v.toFloatOrNull() ?: 0f
                             "s" -> scale = v.toFloatOrNull() ?: 1f
                             "r" -> rotation = v.toFloatOrNull() ?: 0f
+                            "v" -> view = PetViewAngle.entries.firstOrNull {
+                                it.name.equals(v, ignoreCase = true)
+                            }
                             "b" -> body = runCatching {
                                 java.net.URLDecoder.decode(v, "UTF-8").split("\n")
                             }.getOrNull()
@@ -772,7 +776,17 @@ data class PetDesign(
                     }
                     index?.let { i ->
                         animFrames[animId]?.put(
-                            i, PetAnimationFrame(durationMs, offsetY, scale, rotation, body, curled, eye)
+                            i, PetAnimationFrame(
+                                durationMs = durationMs,
+                                offsetY = offsetY,
+                                scale = scale,
+                                rotationDegrees = rotation,
+                                bodyRows = body,
+                                curledRows = curled,
+                                eyeGrid = eye,
+                                view = view ?: animationById(animId)?.frames?.getOrNull(i)?.view
+                                    ?: PetViewAngle.FRONT
+                            )
                         )
                     }
                 }
@@ -1553,7 +1567,9 @@ data class PetAnimationFrame(
      * the mood's procedural eyes while this frame plays, so eyes can blink,
      * wink or glance frame by frame. `null` keeps the procedural style.
      */
-    val eyeGrid: List<String>? = null
+    val eyeGrid: List<String>? = null,
+    /** Authored viewpoint for this frame; FRONT preserves legacy designs. */
+    val view: PetViewAngle = PetViewAngle.FRONT
 ) {
     /** v8.52 — returns a copy with a custom body pose for this frame. */
     fun withBodyGrid(rows: List<String>): PetAnimationFrame = copy(bodyRows = rows)
@@ -1654,6 +1670,56 @@ val BUILTIN_ANIMATIONS: List<PetAnimation> = listOf(
         PetAnimationFrame(140, -4f, 1.05f, 4f),
         PetAnimationFrame(140, -8f, 1.12f, -2f),
         PetAnimationFrame(220, 0f, 1f, 0f)
+    )),
+    // Pet Life routines — authored viewpoints make each moment feel like a
+    // tiny scene rather than another copy of the default hop.
+    PetAnimation("glance", "Look around", "CURIOUS", listOf(
+        PetAnimationFrame(220, 0f, 1f, -2f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(260, -1f, 1.02f, 2f, view = PetViewAngle.SIDE),
+        PetAnimationFrame(220, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("wave", "Little wave", "HAPPY", listOf(
+        PetAnimationFrame(180, -2f, 1f, -3f, view = PetViewAngle.SIDE),
+        PetAnimationFrame(180, -4f, 1.03f, 3f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(180, -2f, 1f, -2f, view = PetViewAngle.SIDE),
+        PetAnimationFrame(220, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("stretch", "Stretch", "FOCUSED", listOf(
+        PetAnimationFrame(260, 3f, 1.02f, 0f, view = PetViewAngle.LOOKING_DOWN),
+        PetAnimationFrame(320, 6f, 1.06f, -2f, view = PetViewAngle.LOOKING_DOWN),
+        PetAnimationFrame(260, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("sidepeek", "Side peek", "CURIOUS", listOf(
+        PetAnimationFrame(220, 1f, 0.96f, -5f, view = PetViewAngle.SIDE),
+        PetAnimationFrame(300, -1f, 1f, 5f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(220, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("stumble", "Tiny stumble", "SHY", listOf(
+        PetAnimationFrame(120, 0f, 0.98f, -8f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(150, 2f, 0.94f, 10f, view = PetViewAngle.SIDE),
+        PetAnimationFrame(240, -2f, 1.02f, -2f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(180, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("look_up", "Look up", "EXCITED", listOf(
+        PetAnimationFrame(260, -2f, 1f, 0f, view = PetViewAngle.LOOKING_UP),
+        PetAnimationFrame(300, -4f, 1.03f, 0f, view = PetViewAngle.LOOKING_UP),
+        PetAnimationFrame(220, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("backturn", "Turn around", "CURIOUS", listOf(
+        PetAnimationFrame(220, 0f, 1f, 6f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(300, 0f, 0.98f, 12f, view = PetViewAngle.BACK),
+        PetAnimationFrame(220, 0f, 1f, -4f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(180, 0f, 1f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("victory", "Victory pose", "PROUD", listOf(
+        PetAnimationFrame(160, -5f, 1.06f, -3f, view = PetViewAngle.THREE_QUARTER),
+        PetAnimationFrame(300, -8f, 1.1f, 3f, view = PetViewAngle.LOOKING_UP),
+        PetAnimationFrame(220, -2f, 1.02f, 0f, view = PetViewAngle.FRONT)
+    )),
+    PetAnimation("inspect", "Inspect", "FOCUSED", listOf(
+        PetAnimationFrame(260, 2f, 1f, -4f, view = PetViewAngle.LOOKING_DOWN),
+        PetAnimationFrame(320, 3f, 1.01f, 4f, view = PetViewAngle.SIDE),
+        PetAnimationFrame(220, 0f, 1f, 0f, view = PetViewAngle.FRONT)
     ))
 )
 

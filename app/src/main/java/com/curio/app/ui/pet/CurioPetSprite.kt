@@ -36,6 +36,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.DetailTransform
 import com.curio.app.data.EyeStyle
+import com.curio.app.data.PetViewAngle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
@@ -186,8 +187,11 @@ fun CurioPetSprite(
      */
     bodyOverride: List<String>? = null,
     curledOverride: List<String>? = null,
+    /** Authored viewpoint for a Pet Life frame; FRONT preserves old behavior. */
+    viewAngle: PetViewAngle = PetViewAngle.FRONT,
     /**
-     * v8.52 — per-frame EYE layer from the animation timeline editor: a
+      * v8.52 — per-frame EYE layer from the animation timeline editor: a
+
      * fixed 16×16 grid drawn instead of the mood's procedural eyes while
      * this frame plays. `null` keeps the procedural style.
      */
@@ -433,6 +437,26 @@ fun CurioPetSprite(
     val watchingNow = watching && !sleeping && !dragged && !moving
     val idleTilt = (if (thinkingNow) facing * 7f else 0f) +
         (if (watchingNow) facing * 2.5f else 0f)
+    // Pet Life angles are deliberate pose cues, not a global 3D rotation:
+    // authored side/back moments use a restrained turn and eye placement so
+    // the sprite stays readable while still presenting a different view.
+    val angleTilt = when (viewAngle) {
+        PetViewAngle.FRONT -> 0f
+        PetViewAngle.THREE_QUARTER -> facing * 7f
+        PetViewAngle.SIDE -> facing * 14f
+        PetViewAngle.BACK -> facing * 18f
+        PetViewAngle.LOOKING_UP -> facing * 2f
+        PetViewAngle.LOOKING_DOWN -> facing * -3f
+        PetViewAngle.CURLED -> 0f
+    }
+    val angleFaceShift = when (viewAngle) {
+        PetViewAngle.FRONT -> 0
+        PetViewAngle.THREE_QUARTER -> if (facing > 0f) -1 else 1
+        PetViewAngle.SIDE, PetViewAngle.BACK -> if (facing > 0f) -2 else 2
+        PetViewAngle.LOOKING_UP -> 0
+        PetViewAngle.LOOKING_DOWN -> 0
+        PetViewAngle.CURLED -> 0
+    }
 
     // ── Face state ─────────────────────────────────────────────────────
     // v8.35 — faces are configurable: the base face for the ambient mood
@@ -513,7 +537,7 @@ fun CurioPetSprite(
                     scaleY = ((breatheScale - squash) * dragLiftY * squishScale *
                         (1f - spinPulse) * (1f - startleSquash))
                         .coerceAtLeast(0.4f)
-                    rotationZ = wiggle + walkLean + tilt + idleTilt + spinAngle.value + dizzyWobble
+                    rotationZ = wiggle + walkLean + tilt + idleTilt + angleTilt + spinAngle.value + dizzyWobble
                 }
                 .then(
                     if (auraOn) {
@@ -616,6 +640,23 @@ fun CurioPetSprite(
                             if (hex != null) drawGridPx(col, row, petDesignColor(hex))
                         }
                     }
+                    // A turned-back view gets its own silhouette cues: no
+                    // face, a centered spine stripe, and a scarf knot at the
+                    // nape. It remains compatible with every saved body grid.
+                    if (!sleeping && viewAngle == PetViewAngle.BACK) {
+                        drawRoundRect(
+                            color = bodyShade.copy(alpha = 0.72f),
+                            topLeft = Offset(7.2f * opx, 5.5f * opx),
+                            size = Size(1.6f * opx, 7.5f * opx),
+                            cornerRadius = CornerRadius(0.7f * opx)
+                        )
+                        drawRoundRect(
+                            color = accent,
+                            topLeft = Offset(6f * opx, 10.5f * opx),
+                            size = Size(4f * opx, 1.8f * opx),
+                            cornerRadius = CornerRadius(0.6f * opx)
+                        )
+                    }
 
                     if (sleeping) {
                         // ── Curled sleep pose (v8.14) ──────────────────────
@@ -686,9 +727,13 @@ fun CurioPetSprite(
                         // stay put. v8.13 — the eyes sit one row HIGHER
                         // (rows 6-8 instead of 7-9) so there is a clear gap
                         // between them and the mouth — never joined.
-                        if (activeCustomGrid == null) translate(
-                            left = glanceShift * opx,
-                            top = if (watchingNow) -opx else 0f
+                        if (viewAngle != PetViewAngle.BACK && activeCustomGrid == null) translate(
+                            left = (glanceShift + angleFaceShift) * opx,
+                            top = when (viewAngle) {
+                                PetViewAngle.LOOKING_UP -> -2f * opx
+                                PetViewAngle.LOOKING_DOWN -> opx
+                                else -> if (watchingNow) -opx else 0f
+                            }
                         ) {
                             if (eyeOverride != null) {
                                 // v8.52 — per-frame eye layer: palette-aware
@@ -716,7 +761,7 @@ fun CurioPetSprite(
                         // Cheeks — only when the pet is happy/excited/proud/
                         // bouncy or mid-play/spin (v8.13: not a permanent
                         // feature, and the row-10 pair is gone).
-                        if (activeCustomGrid == null && blushing) {
+                        if (viewAngle != PetViewAngle.BACK && activeCustomGrid == null && blushing) {
                             drawPx(2, 9, blush, 0.5f)
                             drawPx(3, 9, blush, 0.5f)
                             drawPx(12, 9, blush, 0.5f)
@@ -726,7 +771,7 @@ fun CurioPetSprite(
                         // Mouth. v8.10 — the smile was drawn upside down (a
                         // frown); flipped: corners UP (row 10), middle DOWN
                         // (row 11) = a proper happy smile.
-                        if (activeCustomGrid == null) when (mouth) {
+                        if (viewAngle != PetViewAngle.BACK && activeCustomGrid == null) when (mouth) {
                             MouthStyle.SMILE -> {
                                 drawPx(6, 10, ink); drawPx(9, 10, ink)
                                 drawPx(7, 11, ink); drawPx(8, 11, ink)

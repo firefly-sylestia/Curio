@@ -126,8 +126,12 @@ app/src/main/java/com/curio/app/
   overrides. Evolved path ornaments live in the toggleable `accessories` layer.
   Animations (`PetAnimation`) are transform
   keyframes plus v8.52 per-frame pixel layers (`PetAnimationFrame.bodyRows` /
-  `curledRows`) so each frame can be a fully different pose; `CurioPetSprite`
-  accepts `bodyOverride`/`curledOverride` to render them. Missing
+  `curledRows`) and backward-compatible `PetViewAngle` metadata, so each
+  frame can be a fully different pose/view; `CurioPetSprite` accepts
+  `bodyOverride`/`curledOverride`/`viewAngle` to render them. The always-on
+  Pet Life director (`data/PetLife.kt`) chooses screen-aware, personality-
+  weighted routines and keeps a recent-id cooldown so autonomous behavior
+  does not immediately repeat. Missing
   detail/toggle fields preserve the prior procedural behavior for older saved
   designs. The text format (palette lines + grids + `detail=` / `procedural=`
   / `face=` / `react=` / `size=` / `anim=` / `frame=` / `customAction=`
