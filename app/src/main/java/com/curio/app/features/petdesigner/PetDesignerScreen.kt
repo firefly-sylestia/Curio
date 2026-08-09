@@ -99,6 +99,7 @@ import com.curio.app.data.animationById
 import com.curio.app.data.definition
 import com.curio.app.data.petAnimationName
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
@@ -2803,14 +2804,20 @@ private fun PetAnimationPreview(
     )
 }
 
-/** v8.48 — renders the pet at one animation frame (transform + ghost alpha). */
+/**
+ * v8.48 — renders the pet at one animation frame (transform + ghost alpha).
+ * v8.54 — [staticPose] freezes the sprite's idle animation so the timeline
+ * editor previews each frame exactly as authored (no blinking eyes / bobbing
+ * body masking the frame's zoom + rotate while editing).
+ */
 @Composable
 private fun AnimatedPetSprite(
     animation: PetAnimation,
     frame: PetAnimationFrame,
     design: PetDesign,
     spriteSize: Dp,
-    ghost: Boolean
+    ghost: Boolean,
+    staticPose: Boolean = false
 ) {
     CurioPetSprite(
         stage = CurioPet.currentStage(),
@@ -2822,6 +2829,7 @@ private fun AnimatedPetSprite(
         bodyOverride = frame.bodyRows,
         curledOverride = frame.curledRows,
         eyeOverride = frame.eyeGrid,
+        staticPose = staticPose,
         modifier = Modifier.graphicsLayer {
             translationY = frame.offsetY.dp.toPx()
             scaleX = frame.scale
@@ -2878,7 +2886,10 @@ private fun AnimationTimelineEditor(
     onEditColor: (Char) -> Unit = {}
 ) {
     val base = animationById(animationId) ?: return
-    var playing by rememberSaveable(animationId) { mutableStateOf(true) }
+    // v8.54 — the timeline OPENS PAUSED so the first thing you see is the
+    // selected frame standing still (zoom + rotate visible), not an animation
+    // racing under you while you try to edit. Press Play to preview motion.
+    var playing by rememberSaveable(animationId) { mutableStateOf(false) }
     var selectedFrame by rememberSaveable(animationId) { mutableStateOf(0) }
     var onionSkin by rememberSaveable { mutableStateOf(false) }
     // v8.52 — per-frame drawing state: which grid ("body"/"curled"), the
@@ -2968,7 +2979,8 @@ private fun AnimationTimelineEditor(
                     frame = frames.getOrNull(selectedFrame - 1) ?: PetAnimationFrame(),
                     design = design,
                     spriteSize = previewSize,
-                    ghost = true
+                    ghost = true,
+                    staticPose = !playing
                 )
             }
             AnimatedPetSprite(
@@ -2976,7 +2988,8 @@ private fun AnimationTimelineEditor(
                 frame = shown,
                 design = design,
                 spriteSize = previewSize,
-                ghost = false
+                ghost = false,
+                staticPose = !playing
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -3010,6 +3023,34 @@ private fun AnimationTimelineEditor(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
+        // v8.54 — the frame's zoom/rotate/lift readout. With the preview now
+        // static while paused, these values are exactly what you see applied.
+        val transformNote = buildString {
+            if (shown.scale != 1f) {
+                if (isNotEmpty()) append(" · ")
+                append("zoom ${(shown.scale * 100).roundToInt()}%")
+            }
+            if (shown.rotationDegrees != 0f) {
+                if (isNotEmpty()) append(" · ")
+                append("rotate ${shown.rotationDegrees.roundToInt()}°")
+            }
+            if (shown.offsetY != 0f) {
+                if (isNotEmpty()) append(" · ")
+                append("lift ${shown.offsetY.roundToInt()}px")
+            }
+        }
+        if (transformNote.isNotEmpty()) {
+            Text(
+                transformNote,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+        } else {
+            Spacer(Modifier.height(12.dp))
+        }
         Spacer(Modifier.height(12.dp))
         Row(
             modifier = Modifier
@@ -3058,9 +3099,9 @@ private fun AnimationTimelineEditor(
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            GridTab("Body", frameGrid == "body") { frameGrid = "body" }
-            GridTab("Asleep", frameGrid == "curled") { frameGrid = "curled" }
-            GridTab("Eyes", frameGrid == "eyes") { frameGrid = "eyes" }
+            GridTab("Body", frameGrid == "body") { frameGrid = "body"; playing = false }
+            GridTab("Asleep", frameGrid == "curled") { frameGrid = "curled"; playing = false }
+            GridTab("Eyes", frameGrid == "eyes") { frameGrid = "eyes"; playing = false }
         }
         Spacer(Modifier.height(10.dp))
         CanvasStatus(activeTool = frameTool)
@@ -3071,11 +3112,15 @@ private fun AnimationTimelineEditor(
             onSelect = {
                 framePaintKey = it
                 frameTool = PaintTool.BRUSH
+                playing = false
             },
             onEdit = onEditColor
         )
         Spacer(Modifier.height(12.dp))
         val paintHandler: (Int, Int, Boolean) -> Unit = { row, col, continuous ->
+            // v8.54 — painting a frame pauses playback so the preview and the
+            // grid both stay on the frame you're editing.
+            playing = false
             val tool = frameTool
             val mutating = tool == PaintTool.BRUSH || tool == PaintTool.FILL || tool == PaintTool.ERASER
             if (mutating && !continuous) onPushUndo()
@@ -3112,12 +3157,15 @@ private fun AnimationTimelineEditor(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
+                // v8.54 — static while editing the eyes so your drawing is
+                // never masked by a blinking pet.
                 AnimatedPetSprite(
                     animation = base,
                     frame = shown,
                     design = design,
                     spriteSize = 96.dp,
-                    ghost = false
+                    ghost = false,
+                    staticPose = true
                 )
             }
             Spacer(Modifier.height(10.dp))
@@ -3142,7 +3190,7 @@ private fun AnimationTimelineEditor(
         Spacer(Modifier.height(10.dp))
         ToolTray(
             activeTool = frameTool,
-            onSelect = { frameTool = it }
+            onSelect = { frameTool = it; playing = false }
         )
         Spacer(Modifier.height(12.dp))
         val resetLabel = if (frameGrid == "eyes") "eyes" else "pose"
@@ -3276,7 +3324,14 @@ private fun FrameThumb(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AnimatedPetSprite(animation = animation, frame = frame, design = design, spriteSize = 34.dp, ghost = false)
+            AnimatedPetSprite(
+                animation = animation,
+                frame = frame,
+                design = design,
+                spriteSize = 34.dp,
+                ghost = false,
+                staticPose = true
+            )
             Spacer(Modifier.height(4.dp))
             Text(
                 "${index + 1}",

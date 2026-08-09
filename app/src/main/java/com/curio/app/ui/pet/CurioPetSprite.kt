@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -192,7 +191,14 @@ fun CurioPetSprite(
      * fixed 16×16 grid drawn instead of the mood's procedural eyes while
      * this frame plays. `null` keeps the procedural style.
      */
-    eyeOverride: List<String>? = null
+    eyeOverride: List<String>? = null,
+    /**
+     * v8.54 — render the pet as a STILL pose: disables the idle animation
+     * (bob, blink, breathing, glance, ear flick, sleep startle) so a single
+     * animation frame previews exactly as drawn — no moving eyes or body.
+     * Used by the timeline editor while editing a frame.
+     */
+    staticPose: Boolean = false
 ) {
     val density = LocalDensity.current
     // v8.34 — resolve the active design: the explicit working copy wins;
@@ -249,34 +255,54 @@ fun CurioPetSprite(
     val flickSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(5200), RepeatMode.Restart)
     }
-    val idle = rememberInfiniteTransition(label = "petIdle")
-    val bobPhase by idle.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = bobSpec,
-        label = "petBob"
-    )
-    val blinkPhase by idle.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = blinkSpec,
-        label = "petBlink"
-    )
-    val breathePhase by idle.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = breatheSpec,
-        label = "petBreathe"
-    )
+    // v8.54 — static-pose freeze (timeline editor): when staticPose is true
+    // the pet renders EXACTLY one frame — no idle bob, blink, breathing,
+    // glance or ear flick — so per-frame edits (especially the eyes grid)
+    // preview a still pose instead of a moving pet. The infinite transitions
+    // aren't even created, so the frozen preview never re-triggers on them.
+    val idle = if (staticPose) null else rememberInfiniteTransition(label = "petIdle")
+    val bobPhase: Float = if (idle != null) {
+        val p = idle.animateFloat(
+            initialValue = 0f, targetValue = 1f,
+            animationSpec = bobSpec,
+            label = "petBob"
+        )
+        p.value
+    } else 0f
+    val blinkPhase: Float = if (idle != null) {
+        val p = idle.animateFloat(
+            initialValue = 0f, targetValue = 1f,
+            animationSpec = blinkSpec,
+            label = "petBlink"
+        )
+        p.value
+    } else 0f
+    val breathePhase: Float = if (idle != null) {
+        val p = idle.animateFloat(
+            initialValue = 0f, targetValue = 1f,
+            animationSpec = breatheSpec,
+            label = "petBreathe"
+        )
+        p.value
+    } else 0f
     // Slow glance — the eyes drift to one side for a moment every ~7s.
-    val glancePhase by idle.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = glanceSpec,
-        label = "petGlance"
-    )
+    val glancePhase: Float = if (idle != null) {
+        val p = idle.animateFloat(
+            initialValue = 0f, targetValue = 1f,
+            animationSpec = glanceSpec,
+            label = "petGlance"
+        )
+        p.value
+    } else 0f
     // Ear flick — a quick ear perk every ~5s.
-    val flickPhase by idle.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = flickSpec,
-        label = "petFlick"
-    )
+    val flickPhase: Float = if (idle != null) {
+        val p = idle.animateFloat(
+            initialValue = 0f, targetValue = 1f,
+            animationSpec = flickSpec,
+            label = "petFlick"
+        )
+        p.value
+    } else 0f
     // One-shot celebration hop — keyed so the Quests/Home screens can fire
     // it on quest claims and level-ups.
     val hop = remember { Animatable(0f) }
@@ -335,8 +361,8 @@ fun CurioPetSprite(
     // then it settles right back (the "almost woke up" moment). Runs only
     // while asleep, on a random 9-22s beat.
     val startle = remember { Animatable(0f) }
-    LaunchedEffect(sleeping) {
-        if (!sleeping) return@LaunchedEffect
+    LaunchedEffect(sleeping, staticPose) {
+        if (!sleeping || staticPose) return@LaunchedEffect
         while (true) {
             delay(Random.nextLong(9_000, 22_000))
             if (!sleeping) return@LaunchedEffect
