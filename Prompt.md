@@ -1,29 +1,30 @@
-# Request — Polish Spin landing motion and stabilize pet Faces/reveal layout
+# Request — Restore Express Yourself and clarify Explore providers
 
 ## User request
-Smooth the bottom navigation color transition, keep the premium Spin landing treatment but remove the circular shockwave animation and its setting, fade deck peek cards after the reel midpoint, improve shuffle/dot glow visibility, fix the Topic Reveal morph shift after removing its bottom placeholder, and address the Faces editor crash/OOM when opening evolved 64×64 pets.
+Re-enable the Express Yourself action in Topic Browser, make the Topic Reveal Express Yourself button wider and easier to tap, change the Explore dialog actions to explicit Google and YouTube choices for every category, and reduce the pet's sustained idle animation work because the app was heating.
 
 ## Analysis and plan
-- Remove only the Spin premium shockwave ring and its user-facing experiment preference; preserve the other landing layers.
-- Thread reel progress through the deck so peek cards fade after 50% of the shuffle.
-- Keep the existing nav and dot/glow behavior while smoothing the nav container color transition.
-- Preserve the removed Topic Reveal bottom UI while restoring its former invisible transition geometry locally to the Reveal route.
-- Keep the interactive face-painting board at the design’s full resolution, but downsample decorative mood previews to bound memory on 256MB devices.
+- Add a tracked Express Yourself action to each Topic Browser row while preserving the existing silent Explore action.
+- Use explicit Google and YouTube search actions in the Topic Reveal dialog rather than category-dependent or duplicate provider wording.
+- Keep both provider buttons available for every category.
+- Give the Topic Reveal writing action a full weighted half-row and a 52dp touch target.
+- Reduce always-running idle animation channels without removing the pet or its visible idle/bink/interaction behavior.
+- Do not run Gradle locally; Android builds are forbidden by the project DOX contract and CI remains authoritative.
 
 ## Completed changes
-- Removed the Spin shockwave ring rendering path and removed its obsolete AppPreferences/Experiments setting plumbing.
-- Added `shuffleProgress` through `SpinDeckSection` → `Carousel` → `PeekCard`; peek cards remain visible through the first half and fade out during the second half.
-- Smoothed `CurioBottomBar`/rail container color changes with a 420ms `animateColorAsState` transition.
-- Kept the Topic Reveal bottom action UI and placeholder removed; added an invisible 80dp Reveal-only clearance in `CurioNavHost` so the shared hero keeps the same morph viewport geometry without showing a bottom scaffold.
-- Converted the Faces editor to a Canvas path and downsampled non-interactive mood picker previews to at most 16×16. The active painting board remains full-resolution and saved designs are unchanged.
-- Cleaned Spin parameter formatting after threading `shuffleProgress`.
+- Topic Browser rows now expose both Explore and Express yourself actions. Express Yourself records the explored topic consistently and navigates to the capture screen; Explore remains silent and opens the search page without recording.
+- Topic Reveal's provider dialog now presents Explore in Google, Explore in YouTube, and Not now directly, for every category.
+- Topic Reveal's Express yourself control is a full weighted action area with a 52dp height and centered label/icon, improving its hit target.
+- Pet idle rendering now uses two animated channels (body bob and blink); breathing, glance, and ear-flick phases share the bob phase instead of running three additional independent infinite animations. Removed stale animation specs.
+- Removed stale Reveal action metrics and fixed the Reveal action-button parameter mismatch found during audit.
 
 ## Validation
 - `node scripts/check_braces.js` passed: 125 files checked.
 - `git diff --check` passed.
-- Focused symbol audit found no stale Spin ring preference/rendering references. The remaining `ringProgress` in `CurioConfetti.kt` belongs to the unrelated confetti effect and was intentionally left unchanged.
+- Stale-symbol audit passed: no old provider dialog state, obsolete Reveal padding fields, or removed pet animation specs remain.
+- Focused review found no critical compile or interaction blocker.
 - Gradle compile/build/lint/test commands were not run because local Android builds are forbidden by the repository contract; CI remains the compile source of truth.
-- Code review reported no critical blocker in the current patch.
+- Device thermal behavior cannot be measured in this environment; the idle-channel reduction is a conservative mitigation, not a claim of measured thermal resolution.
 
 ## Status
-Changes are intentionally still uncommitted. Per the user’s instruction, stop here and ask for approval before commit/push.
+This second patch is intentionally uncommitted and unpushed. Ask the user for approval before commit/push.

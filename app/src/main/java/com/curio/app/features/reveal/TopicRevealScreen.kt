@@ -806,8 +806,6 @@ fun TopicRevealScreen(
         )
     }
 
-    var showProviderDialog by rememberSaveable { mutableStateOf(false) }
-
     if (showExploreDialog && resolved != null) {
         val topic = resolved
         val action = topic.exploreAction
@@ -829,7 +827,7 @@ fun TopicRevealScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. ${exploreOpenCopy(cat)}",
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Choose Google or YouTube to begin.",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
@@ -841,46 +839,23 @@ fun TopicRevealScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
+                    engaged = true
                     showExploreDialog = false
-                    showProviderDialog = true
-                }) { Text("Explore now") }
+                    startExploreSession(topic, buildGoogleSearchUrl(topic))
+                }) { Text("Explore in Google") }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        engaged = true
-                        ExploreSessionStore.recordExplored(context, cat.id, topic.name)
-                        ExploreSessionStore.removeUnexplored(context, cat.id, topic.name)
-                        showExploreDialog = false
-                        navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
-                            launchSingleTop = true
-                        }
-                    }
-                ) { Text("Express yourself") }
-            }
-        )
-    }
-
-    if (showProviderDialog && resolved != null) {
-        val topic = resolved
-        AlertDialog(
-            onDismissRequest = { showProviderDialog = false },
-            title = { Text("Choose where to explore") },
-            text = { Text("Pick a search companion for ${topic.name}.") },
-            confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = {
-                        showProviderDialog = false
-                        startExploreSession(topic, buildGoogleSearchUrl(topic))
-                    }) { Text("Google") }
-                    TextButton(onClick = {
-                        showProviderDialog = false
+                        engaged = true
+                        showExploreDialog = false
                         startExploreSession(topic, buildYouTubeSearchUrl(topic))
-                    }) { Text("YouTube") }
+                    }) { Text("Explore in YouTube") }
+                    TextButton(onClick = {
+                        showExploreDialog = false
+                        ExploreSessionStore.recordUnexplored(context, cat.id, topic.name)
+                    }) { Text("Not now") }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showProviderDialog = false }) { Text("Not now") }
             }
         )
     }
@@ -980,8 +955,6 @@ private data class RevealDockMetrics(
     val rowGap: Dp,
     val startPadH: Dp,
     val startPadV: Dp,
-    val alreadyPadH: Dp,
-    val alreadyPadV: Dp,
     val icon: Dp,
     val textSp: TextUnit,
     val gap: Dp,
@@ -1006,8 +979,6 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
         rowGap = if (narrow) 6.dp else 8.dp,
         startPadH = if (narrow) 8.dp else if (compact) 10.dp else 20.dp,
         startPadV = vPad,
-        alreadyPadH = if (narrow) 6.dp else if (compact) 8.dp else 16.dp,
-        alreadyPadV = vPad,
         icon = if (narrow) 16.dp else if (compact) 18.dp else 20.dp,
         textSp = if (narrow) 13.sp else if (compact) 14.sp else 16.sp,
         gap = if (narrow) 6.dp else 8.dp,
@@ -1067,7 +1038,6 @@ private fun RevealActionRow(
                 RevealAlreadyButton(
                     enabled = resolved != null &&
                         (!browseMode || TourController.currentStep?.landmarkId == "express-yourself"),
-                    cat = cat,
                     metrics = m,
                     modifier = lm.weight(1f),
                     onClick = onAlready
@@ -1173,7 +1143,6 @@ private fun RevealStartButton(
 @Composable
 private fun RevealAlreadyButton(
     enabled: Boolean,
-    cat: com.curio.app.data.CurioCategory,
     modifier: Modifier = Modifier,
     metrics: RevealDockMetrics,
     onClick: () -> Unit
@@ -1188,17 +1157,13 @@ private fun RevealAlreadyButton(
         shape = RoundedCornerShape(18.dp),
         color = Color.Transparent,
         modifier = modifier
-            .fillMaxWidth()
-            .then(
-                // Comfortable vertical padding on the floating pill — the old
-                // 2dp tight tier is gone (see RevealActionDock).
-                Modifier.padding(
-                    horizontal = metrics.alreadyPadH,
-                    vertical = metrics.alreadyPadV
-                )
-            )
+            // Give the writing action a real, forgiving tap target across its
+            // entire weighted half of the row. The old inner padding made the
+            // visible label look wider than the actual touchable surface.
+            .height(52.dp)
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

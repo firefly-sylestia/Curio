@@ -482,6 +482,28 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 // quest progress, but the pet knows you were
                                 // there).
                                 onExplore = { openSilentExplore(context, row.topic) },
+                                // Writing from the browser is the explicit,
+                                // tracked path: it opens the same capture
+                                // screen as Topic Reveal's Express yourself
+                                // action instead of silently exploring.
+                                onExpress = {
+                                    ExploreSessionStore.recordExplored(
+                                        context,
+                                        row.topic.categoryId,
+                                        row.topic.name
+                                    )
+                                    ExploreSessionStore.removeUnexplored(
+                                        context,
+                                        row.topic.categoryId,
+                                        row.topic.name
+                                    )
+                                    navController.navigate(
+                                        CurioRoutes.captureFor(
+                                            row.topic.categoryId.routeSlug,
+                                            row.topic.name
+                                        )
+                                    ) { launchSingleTop = true }
+                                },
                                 onClick = {
                                     // Browse-Topics mode: the reveal opens
                                     // read-only (no explore, no recents
@@ -665,7 +687,8 @@ private fun DatabaseTopicRow(
     topic: CurioTopic,
     done: Boolean,
     onClick: () -> Unit,
-    onExplore: (() -> Unit)? = null
+    onExplore: (() -> Unit)? = null,
+    onExpress: (() -> Unit)? = null
 ) {
     Surface(
         onClick = onClick,
@@ -748,32 +771,72 @@ private fun DatabaseTopicRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-            // v8.12 — silent explore chip: open the topic's search page with
-            // no tracking. Nested inside the clickable row, so its own tap
-            // consumes the event instead of opening the read-only reveal.
-            if (onExplore != null) {
-                Surface(
-                    onClick = onExplore,
-                    shape = RoundedCornerShape(50),
-                    color = cat.accent.copy(alpha = 0.14f),
-                    modifier = Modifier.padding(start = 6.dp)
-                ) {
+                // Keep both browser actions inside the content column so the
+                // topic title/meta never get squeezed by trailing controls on
+                // narrow phones. Nested surfaces consume their own taps and
+                // leave the rest of the row available for opening the reveal.
+                if (onExplore != null || onExpress != null) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 7.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CurioIcon(
-                            CurioIcons.AutoAwesome, null,
-                            tint = cat.accent,
-                            size = 14.dp
-                        )
-                        Text(
-                            text = "Explore",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = cat.accent
-                        )
+                        if (onExplore != null) {
+                            Surface(
+                                onClick = onExplore,
+                                shape = RoundedCornerShape(50),
+                                color = cat.accent.copy(alpha = 0.14f)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    CurioIcon(
+                                        CurioIcons.AutoAwesome, null,
+                                        tint = cat.accent,
+                                        size = 14.dp
+                                    )
+                                    Text(
+                                        text = "Explore",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        color = cat.accent,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                        if (onExpress != null) {
+                            Surface(
+                                onClick = onExpress,
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    CurioIcon(
+                                        CurioIcons.Edit, null,
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        size = 14.dp
+                                    )
+                                    Text(
+                                        text = "Express yourself",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

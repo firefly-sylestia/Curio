@@ -261,63 +261,38 @@ fun CurioPetSprite(
     val blinkSpec: InfiniteRepeatableSpec<Float> = remember {
         infiniteRepeatable(tween(3800), RepeatMode.Restart)
     }
-    val breatheSpec: InfiniteRepeatableSpec<Float> = remember {
-        infiniteRepeatable(tween(2200, easing = LinearEasing))
-    }
-    val glanceSpec: InfiniteRepeatableSpec<Float> = remember {
-        infiniteRepeatable(tween(7000), RepeatMode.Restart)
-    }
-    val flickSpec: InfiniteRepeatableSpec<Float> = remember {
-        infiniteRepeatable(tween(5200), RepeatMode.Restart)
-    }
     // v8.54 — static-pose freeze (timeline editor): when staticPose is true
     // the pet renders EXACTLY one frame — no idle bob, blink, breathing,
     // glance or ear flick — so per-frame edits (especially the eyes grid)
     // preview a still pose instead of a moving pet. The infinite transitions
     // aren't even created, so the frozen preview never re-triggers on them.
     val idle = if (staticPose) null else rememberInfiniteTransition(label = "petIdle")
-    val bobPhase: Float = if (idle != null) {
-        val p = idle.animateFloat(
+    // Keep the two user-visible essentials (body motion + blink), but derive
+    // the slower ambient flourishes from the same motion phase. This avoids
+    // five independent per-frame state channels for every visible pet while
+    // preserving the idle bob, blink, glance, breathing, and ear-flick cues.
+    val bobPhase: Float
+    val blinkPhase: Float
+    if (idle != null) {
+        bobPhase = idle.animateFloat(
             initialValue = 0f, targetValue = 1f,
             animationSpec = bobSpec,
             label = "petBob"
-        )
-        p.value
-    } else 0f
-    val blinkPhase: Float = if (idle != null) {
-        val p = idle.animateFloat(
+        ).value
+        blinkPhase = idle.animateFloat(
             initialValue = 0f, targetValue = 1f,
             animationSpec = blinkSpec,
             label = "petBlink"
-        )
-        p.value
-    } else 0f
-    val breathePhase: Float = if (idle != null) {
-        val p = idle.animateFloat(
-            initialValue = 0f, targetValue = 1f,
-            animationSpec = breatheSpec,
-            label = "petBreathe"
-        )
-        p.value
-    } else 0f
-    // Slow glance — the eyes drift to one side for a moment every ~7s.
-    val glancePhase: Float = if (idle != null) {
-        val p = idle.animateFloat(
-            initialValue = 0f, targetValue = 1f,
-            animationSpec = glanceSpec,
-            label = "petGlance"
-        )
-        p.value
-    } else 0f
-    // Ear flick — a quick ear perk every ~5s.
-    val flickPhase: Float = if (idle != null) {
-        val p = idle.animateFloat(
-            initialValue = 0f, targetValue = 1f,
-            animationSpec = flickSpec,
-            label = "petFlick"
-        )
-        p.value
-    } else 0f
+        ).value
+    } else {
+        bobPhase = 0f
+        blinkPhase = 0f
+    }
+    val breathePhase = bobPhase
+    // Slow glance and ear flick share the low-cost ambient phase. Their
+    // existing guards still prevent them during movement, sleep, or thinking.
+    val glancePhase = bobPhase
+    val flickPhase = bobPhase
     // One-shot celebration hop — keyed so the Quests/Home screens can fire
     // it on quest claims and level-ups.
     val hop = remember { Animatable(0f) }
