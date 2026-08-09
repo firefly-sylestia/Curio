@@ -172,7 +172,7 @@ fun CurioPetHeroCard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    CurioFlowerBed(
+                    CurioPetHome(
                         petInside = !CurioPet.awake ||
                             CurioPet.atHome ||
                             !AppPreferences.floatingPetEnabledState,

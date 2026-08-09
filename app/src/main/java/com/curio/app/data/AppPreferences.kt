@@ -440,7 +440,7 @@ object AppPreferences {
      * recompose the moment a pet is saved or removed.
      */
     var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
-    /** v9.3 — custom flower bed rows (null = use the default bed). */
+    /** Legacy custom flower-bed rows; the current home uses a fixed house scene. */
     var bedDesignRowsState by mutableStateOf<List<String>?>(null)
     /** v9.5 — evolution path chosen at level 7 (null = baby, no choice yet). */
     var evoPathState by mutableStateOf<String?>(null)
@@ -1311,8 +1311,8 @@ object AppPreferences {
             .apply()
     }
 
-    // ── Flower bed design (v9.3 — home editor) ──────────────────────
-    /** Returns the saved bed design rows, or null when the default is used. */
+    // ── Legacy flower-bed design compatibility ───────────────────────
+    /** Returns old saved bed rows for migration compatibility; no UI writes them. */
     fun getBedDesignRows(context: Context): List<String>? =
         prefs(context).getString(KEY_BED_DESIGN, null)
             ?.split("\n")

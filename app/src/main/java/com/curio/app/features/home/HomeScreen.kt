@@ -104,7 +104,7 @@ import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
-import com.curio.app.ui.pet.CurioFlowerBed
+import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
@@ -212,7 +212,7 @@ fun HomeScreen(navController: NavController) {
                 kind = PetLandmarks.Kind.PLAY,
                 screen = "home"
             ) { m ->
-                CurioFlowerBed(
+                CurioPetHome(
                     petInside = !CurioPet.awake || CurioPet.atHome ||
                         !AppPreferences.floatingPetEnabledState,
                     sleeping = !CurioPet.awake,

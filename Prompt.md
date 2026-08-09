@@ -1,9 +1,24 @@
-# Request — Remove the Pet Studio detail editor; keep Accessories visibility toggles
+# Request — Reimagine evolved pets, move evolved art to 64×64, redesign home, remove home editor
 
-- User asked to remove the detail editor and keep only the ability to turn generated details on or off.
-- Removed the dormant detail drawing card from `PetDesignerScreen.kt`, including detail-layer painting, blueprint, placement, canvas zoom, and clear-layer controls.
-- Removed the Details picker category/cards and `PetEditorTarget.DetailLayer`, plus detail-editor-only state, reset plumbing, and tool branches.
-- Kept Settings → Accessories as the only detail-facing UI. Its switches still call `PetDesign.withProceduralEnabled(...)` and remain connected to the runtime sprite.
-- Preserved `PetDesign` detail layers, procedural visibility data, serialization, transforms, `CurioPetSprite` detail rendering, and Accessories thumbnails for runtime/data compatibility.
-- Static validation pending: `node scripts/check_braces.js`, `git diff --check`, and stale-reference audit. Gradle compile/build/lint/test commands are forbidden in this environment; CI remains the compile gate.
-- After validation/review: commit and push the follow-up change.
+## User request
+- Keep the baby pet version as-is.
+- Redesign the evolved forms because the current evolved forms are not good.
+- Upgrade evolved pet art/editor resolution to 64×64 for more detail.
+- Give each evolved path its own accessories.
+- Redesign the pet's home because the current home does not look good.
+- Remove the home editor.
+
+## Completed
+- Preserved the baby form and its original 16×16 body/curl art.
+- Evolved default forms now use a detailed 64×64 body/curl canvas, while older saved 16×16, 24×24, and 32×32 designs remain readable and are not silently resized.
+- Fire, Water, and Nature evolved paths now receive distinct accessory pixel layers; final evolution adds its crown treatment. The existing Accessories visibility control hides authored and generated accessory art consistently.
+- Replaced the editable flower-bed presentation with a fixed layered house/home sprite scene used from Home and the companion area.
+- Removed the Home section, bed editor entry, dialog, and helper UI from Pet Studio. Existing persisted bed rows remain dormant compatibility data rather than being deleted.
+- Kept animation/detail/action models and runtime behavior available for future UI re-entry while the related editors remain hidden.
+
+## Validation
+- `node scripts/check_braces.js` passed: 125 files checked.
+- `git diff --check` passed.
+- Static audits found no stale home-editor symbols or removed home-editor imports in app source.
+- Local Gradle compile/build/lint/test commands were not run per repository rules; CI remains the Kotlin/Android compile gate.
+- Code review found no remaining blocker.

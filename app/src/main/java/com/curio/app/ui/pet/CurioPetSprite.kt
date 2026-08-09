@@ -55,7 +55,7 @@ private fun petDesignColor(hex: String): Color =
  * antenna, little ear nubs, feet, a waggy tail, and a scarf in the active
  * category accent.
  *
- * No bitmap assets: the body is a 16×16 pixel grid drawn as rects on a
+ * No bitmap assets: the body is a pixel grid drawn as rects on a
  * Canvas, so it is crisp at any size. v8.8 — ONE fixed look in every theme
  * (cream body + warm ink outline); it no longer flips to a light twin in
  * dark mode. The face (eyes + mouth + cheeks) is drawn as overlays so moods
@@ -211,13 +211,14 @@ fun CurioPetSprite(
     val activeDesign = remember(savedText, design, stage) {
         val base = design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
         val resolved = base ?: PetDesign.DEFAULT
-        // v9.5 — baby stage always uses the hardcoded 16×16 baby design;
-        // evolved stages use the user's saved/custom design (palette is
-        // editable after evolution, body stays 32×32).
-        if (stage == CurioPet.Stage.BABY) {
-            PetDesign.evolutionDesign(CurioPet.Stage.BABY, null)
-        } else {
-            resolved
+        // Baby remains the original hand-tuned 16×16 form. A fresh evolved
+        // pet gets the new path-specific 64×64 guardian design; an existing
+        // saved/custom design keeps its legacy canvas size unchanged.
+        when {
+            stage == CurioPet.Stage.BABY -> PetDesign.evolutionDesign(CurioPet.Stage.BABY, null)
+            design == null && savedText == null ->
+                PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
+            else -> resolved
         }
     }
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
@@ -542,13 +543,17 @@ fun CurioPetSprite(
                     .graphicsLayer { scaleX = facing }
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    // v8.35 — the canvas adapts to the design's grid size.
+                    // v10 — the canvas adapts from the baby 16-grid through
+                    // legacy custom sizes to the evolved 64-grid.
                     // Design cells (drawGridPx) use one cell = px; the
                     // procedural face art (drawPx) is authored in a 16-grid
                     // space and scaled to the canvas (opx), so the face
                     // keeps its proportions on any grid.
                     val grid = activeDesign.gridSize
                     val px = size.width / grid
+                    // Procedural face/motion art keeps its legacy 16-space
+                    // proportions; detailed evolved accessories use the
+                    // design grid through drawGridPx instead.
                     val opx = size.width / 16f
                     fun drawGridPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
                         if (col !in 0 until grid || row !in 0 until grid) return
@@ -563,7 +568,7 @@ fun CurioPetSprite(
                             cornerRadius = CornerRadius(px * 0.16f)
                         )
                     }
-                    // Procedural overlay cell — the 16-grid authoring space.
+                    // Procedural overlay cell — the legacy 16-grid authoring space.
                     // NOTE: Int params — Kotlin has no implicit Int→Float
                     // conversion, and the face art passes integer coords.
                     // (Int * opx yields Float, so scaling works.)
@@ -578,6 +583,9 @@ fun CurioPetSprite(
 
                     /** Draws one authored detail layer with its saved body-relative transform. */
                     fun drawDetailLayer(layer: String) {
+                        // Keep authored path accessories in the same on/off contract
+                        // as the generated accessory art and the Accessories dialog.
+                        if (layer == "accessories" && !activeDesign.isProceduralEnabled("accessories")) return
                         val rows = activeDesign.details[layer] ?: return
                         val transform = if (AppPreferences.petPartTransformsState) {
                             activeDesign.detailTransform(layer)

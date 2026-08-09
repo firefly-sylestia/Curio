@@ -6,15 +6,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * The Curie pet's custom look — a pixel design (16, 24 or 32 grid) with its
+ * The Curie pet's custom look — a pixel design (16, 24, 32, or 64 grid) with its
  * own palette, face expressions and reaction rules, serialized as a
  * plain-text file the Pet designer playground can import and export.
  *
- * v8.35 — grid sizes: the designer ships a 24×24 and a 32×32 canvas and can
- * convert a design between them ([withSize], dominant-key resample). The
- * default look is 24×24 (upscaled from the original 16×16 art, so it keeps
- * its proportions). Designs saved at any size keep rendering — the sprite
- * adapts to the grid.
+ * v8.35/v10 — grid sizes remain backward-compatible at 16/24/32 and the
+ * evolved default now uses a 64×64 canvas. Designs saved at any legacy size
+ * keep rendering; new evolved art uses a finer canvas for path silhouettes
+ * and accessories.
  *
  * ## Import format (plain text, hex colors)
  *
@@ -51,7 +50,7 @@ data class PetDesign(
     val palette: Map<Char, String>,
     val bodyRows: List<String>,
     val curledRows: List<String>,
-    /** The canvas size: 16, 24 or 32. */
+    /** The canvas size: 16, 24, 32, or 64. */
     val gridSize: Int = DEFAULT_GRID_SIZE,
     /**
      * Per-mood face customization (key = mood name, e.g. "HAPPY"). An
@@ -93,11 +92,11 @@ data class PetDesign(
     companion object {
         val KEYS = listOf('b', 'B', 'o', 's', 'S', 'G', 'g', 'c', 'C', 'd', 'D', 'r', 'y')
 
-        // v9.2 — the default look ships at a detailed 32×32 (ears, fluffy
-        // tail, hands and all); the 16/24 art stays for size conversion.
-        const val DEFAULT_GRID_SIZE = 32
+        // v10 — evolved defaults use a detailed 64×64 canvas. Legacy 16/24/32
+        // saved designs remain valid and are never silently resized.
+        const val DEFAULT_GRID_SIZE = 64
         const val MIN_GRID_SIZE = 16
-        val SUPPORTED_SIZES = listOf(24, 32)
+        val SUPPORTED_SIZES = listOf(16, 24, 32, 64)
 
         /** Drawable detail layers exposed by the compact Details editor. */
         val DETAIL_KEYS = listOf("tail", "belly", "accessories", "effects", "antenna")
@@ -241,11 +240,61 @@ data class PetDesign(
             "................................"
         )
 
-        /** The default 32×32 body (v9.2 — ships at the detailed size). */
-        val DEFAULT_BODY: List<String> = DEFAULT_BODY_32
+        /**
+         * Builds the 64×64 evolved silhouette from the polished 32×32 source.
+         * Path-specific ornaments are kept in the separate `accessories`
+         * detail layer so the Accessories switch can hide them cleanly.
+         * The baby never calls this path and remains the original 16×16 art.
+         */
+        private fun evolvedBody64(curled: Boolean): List<String> =
+            resizeGrid(if (curled) DEFAULT_CURLED_32 else DEFAULT_BODY_32, 32, 64)
 
-        /** The default 32×32 curled pose (v9.2). */
-        val DEFAULT_CURLED: List<String> = DEFAULT_CURLED_32
+        /** The neutral 64×64 evolved body, built from the polished 32×32 source. */
+        val DEFAULT_BODY_64: List<String> = evolvedBody64(curled = false)
+
+        /** The neutral 64×64 evolved curled pose. */
+        val DEFAULT_CURLED_64: List<String> = evolvedBody64(curled = true)
+
+        /** Detached accessory pixels unique to each elemental guardian path. */
+        private fun evolvedAccessories(path: CurioPet.EvoPath?, isFinal: Boolean): Map<String, List<String>> {
+            val rows = MutableList(64) { CharArray(64) { '.' } }
+            fun paint(col: Int, row: Int, key: Char) {
+                if (row in rows.indices && col in rows[row].indices) rows[row][col] = key
+            }
+            when (path) {
+                CurioPet.EvoPath.FIRE -> {
+                    for (i in 0..7) {
+                        paint(9 + i, 43 - i / 2, if (i % 2 == 0) 's' else 'S')
+                        paint(54 - i, 43 - i / 2, if (i % 2 == 0) 's' else 'S')
+                    }
+                }
+                CurioPet.EvoPath.WATER -> {
+                    for (i in 0..5) {
+                        paint(4 + i, 29 + i, if (i < 3) 'C' else 'c')
+                        paint(59 - i, 29 + i, if (i < 3) 'C' else 'c')
+                    }
+                }
+                CurioPet.EvoPath.NATURE -> {
+                    for (i in 0..6) {
+                        paint(8 + i, 47 - i, if (i % 2 == 0) 'd' else 'D')
+                        paint(55 - i, 47 - i, if (i % 2 == 0) 'd' else 'D')
+                    }
+                }
+                null -> Unit
+            }
+            if (isFinal) {
+                for (col in 24..39) paint(col, 4, if (col % 3 == 0) 'G' else 'g')
+            }
+            return if (rows.any { row -> row.any { it != '.' } }) {
+                mapOf("accessories" to rows.map { String(it) })
+            } else emptyMap()
+        }
+
+        /** The default evolved body now ships at the detailed size. */
+        val DEFAULT_BODY: List<String> = DEFAULT_BODY_64
+
+        /** The default evolved curled pose. */
+        val DEFAULT_CURLED: List<String> = DEFAULT_CURLED_64
 
         // ── Default faces per mood (v8.35) — mirrors the sprite's built-in
         //    faces so an untouched design looks exactly as before.
@@ -340,14 +389,18 @@ data class PetDesign(
 
         /**
          * Returns the appropriate body rows for the given [stage] + [path].
-         * Baby uses the tiny 16×16 art; evolutions use the full 32×32.
+         * Baby keeps its original 16×16 art; each evolved path gets its own
+         * 64×64 silhouette treatment and the final tier adds a larger crown.
          */
         fun evolutionBody(
             stage: CurioPet.Stage,
             path: CurioPet.EvoPath?
         ): Pair<List<String>, List<String>> = when (stage) {
             CurioPet.Stage.BABY -> BABY_BODY to BABY_CURLED
-            else -> DEFAULT_BODY to DEFAULT_CURLED
+            CurioPet.Stage.FIRST_EVO ->
+                evolvedBody64(curled = false) to evolvedBody64(curled = true)
+            CurioPet.Stage.FINAL_EVO ->
+                evolvedBody64(curled = false) to evolvedBody64(curled = true)
         }
 
         /** Full PetDesign for a given evolution stage + path. */
@@ -363,10 +416,15 @@ data class PetDesign(
                 else -> BABY_PALETTE
             }
             val (body, curled) = evolutionBody(stage, path)
-            val gridSize = if (stage == CurioPet.Stage.BABY) 16 else DEFAULT_GRID_SIZE
+            val gridSize = if (stage == CurioPet.Stage.BABY) 16 else 64
             return PetDesign(
-                palette = palette, bodyRows = body, curledRows = curled,
-                gridSize = gridSize, faces = DEFAULT_FACES, reactions = DEFAULT_REACTIONS
+                palette = palette,
+                bodyRows = body,
+                curledRows = curled,
+                gridSize = gridSize,
+                faces = DEFAULT_FACES,
+                reactions = DEFAULT_REACTIONS,
+                details = if (stage == CurioPet.Stage.BABY) emptyMap() else evolvedAccessories(path, isFinal = stage == CurioPet.Stage.FINAL_EVO)
             )
         }
 
@@ -729,8 +787,9 @@ data class PetDesign(
             }
         }
         if (rows.size < MIN_GRID_SIZE) return fallback
-        val size = declaredSize?.takeIf { it == 16 || it == 24 || it == 32 }
+        val size = declaredSize?.takeIf { it == 16 || it == 24 || it == 32 || it == 64 }
             ?: when {
+                rows.size >= 128 -> 64
                 rows.size >= 64 -> 32
                 rows.size >= 48 -> 24
                 else -> 16
@@ -914,7 +973,8 @@ data class PetDesign(
     }
 
     /**
-     * Converts the design to another canvas size (24 ↔ 32, or back to 16)
+     * Converts the design to another canvas size (including 64, or back to
+     * a legacy 16/24/32 size)
      * by dominant-key resample — every pixel stays on the palette.
      */
     fun withSize(newSize: Int): PetDesign {

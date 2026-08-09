@@ -117,12 +117,14 @@ app/src/main/java/com/curio/app/
 - **All design-system primitives (the `CurioIcon` composable + `CurioIcons` glyph constants object) live under `ui/theme/`.** Components in `ui/components/` consume them via import — they do not re-export them. Wrong-package imports (e.g. `import com.curio.app.ui.components.CurioIcon`) compile silently against an empty package and only fail in CI's `compileDebugKotlin`. Always import from `ui.theme.*`.
 
 ### Curie pet layer (v8.43)
-- `data/PetDesign.kt` owns the pet look contract: 16/24/32 canvases
-  (convertible via dominant-key resample), a 13-key palette (incl. `r` blush
-  + `y` eye colors), per-mood faces (`PetFace`), per-event reaction rules
-  (`PetReaction`), optional authored reaction lines, four transparent detail
-  layers (`tail`, `accessories`, `effects`, `antenna`), and per-element
-  procedural visibility overrides. Animations (`PetAnimation`) are transform
+- `data/PetDesign.kt` owns the pet look contract: backward-compatible 16/24/32
+  canvases plus the 64×64 evolved default (all convertible via dominant-key
+  resample), a 13-key palette (incl. `r` blush + `y` eye colors), per-mood
+  faces (`PetFace`), per-event reaction rules (`PetReaction`), optional
+  authored reaction lines, four transparent detail layers (`tail`,
+  `accessories`, `effects`, `antenna`), and per-element procedural visibility
+  overrides. Evolved path ornaments live in the toggleable `accessories` layer.
+  Animations (`PetAnimation`) are transform
   keyframes plus v8.52 per-frame pixel layers (`PetAnimationFrame.bodyRows` /
   `curledRows`) so each frame can be a fully different pose; `CurioPetSprite`
   accepts `bodyOverride`/`curledOverride` to render them. Missing
@@ -151,7 +153,9 @@ app/src/main/java/com/curio/app/
   reaction, and custom-action data/runtime behavior remain preserved.
 
   PNG export/import shares via FileProvider `${applicationId}.fileprovider`
-  (`res/xml/file_paths.xml` cache/share).
+  (`res/xml/file_paths.xml` cache/share). The home/house scene is a fixed
+  layered sprite composition; the legacy home editor is removed from the
+  studio UI, while old saved bed rows remain dormant compatibility data.
 
 ### Experimental features (A/B testing)
 - Per root `AGENTS.md`, any experimental/test behavior MUST be gated behind a **user-facing Settings toggle** so it can be A/B-compared against the current behavior and reverted without a code change — never hardcoded as the only path.
