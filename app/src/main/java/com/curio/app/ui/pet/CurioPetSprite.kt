@@ -206,9 +206,18 @@ fun CurioPetSprite(
     // saved in the playground). Parsing is cheap (16+16 rows) and cached
     // per text via remember.
     val savedText = AppPreferences.petDesignState
-    val activeDesign = remember(savedText, design) {
-        design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
-    } ?: PetDesign.DEFAULT
+    val activeDesign = remember(savedText, design, stage) {
+        val base = design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
+        val resolved = base ?: PetDesign.DEFAULT
+        // v9.5 — baby stage always uses the hardcoded 16×16 baby design;
+        // evolved stages use the user's saved/custom design (palette is
+        // editable after evolution, body stays 32×32).
+        if (stage == CurioPet.Stage.BABY) {
+            PetDesign.evolutionDesign(CurioPet.Stage.BABY, null)
+        } else {
+            resolved
+        }
+    }
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
     // v8.10 — the scarf/aura accent is hardcoded to the Curio light-theme
     // brand coral: one theme, one color, on every device (never the
@@ -489,8 +498,8 @@ fun CurioPetSprite(
         // One motion layer carries the aura, the bob/hop/wiggle/lean and the
         // breathing + squish scales so the glow always moves with the sprite.
         val auraOn = activeDesign.isProceduralEnabled("effects") &&
-            (stage == CurioPet.Stage.LANE_GUARDIAN || stage == CurioPet.Stage.SAGE)
-        val auraColor = if (stage == CurioPet.Stage.SAGE) gold else accent
+            (stage == CurioPet.Stage.FIRST_EVO || stage == CurioPet.Stage.FINAL_EVO)
+        val auraColor = if (stage == CurioPet.Stage.FINAL_EVO) gold else accent
         Box(
             modifier = Modifier
                 .size(spriteSize * 0.92f)
@@ -733,22 +742,23 @@ fun CurioPetSprite(
 
                         // Growth accessories (spec §10.4).
                         if (activeDesign.isProceduralEnabled("accessories")) when (stage) {
-                            CurioPet.Stage.SPROUT -> {
+                            CurioPet.Stage.BABY -> {
+                                // Baby: tiny leaf sprout on head.
                                 drawPx(4, 2, leaf); drawPx(5, 1, leaf); drawPx(5, 2, leaf); drawPx(5, 3, leaf)
                             }
-                            CurioPet.Stage.TRAIL_BUDDY -> {
-                                // Satchel on the right hip.
-                                drawPx(13, 10, ink); drawPx(14, 10, accent); drawPx(15, 10, accent)
-                                drawPx(13, 11, ink); drawPx(14, 11, accent); drawPx(15, 11, accent)
+                            CurioPet.Stage.FIRST_EVO -> {
+                                // Evo: element badge on chest.
+                                val evoColor = when (CurioPet.currentEvoPath()) {
+                                    CurioPet.EvoPath.FIRE -> Color(0xFFFF6B4A)
+                                    CurioPet.EvoPath.WATER -> Color(0xFF4A9BFF)
+                                    CurioPet.EvoPath.NATURE -> Color(0xFF6BBF59)
+                                    null -> accent
+                                }
+                                drawPx(6, 9, evoColor); drawPx(7, 9, evoColor); drawPx(8, 9, evoColor); drawPx(9, 9, evoColor)
+                                drawPx(7, 10, evoColor); drawPx(8, 10, evoColor)
                             }
-                            CurioPet.Stage.ARCHIVE_PAL -> {
-                                // Tiny book beside the right foot.
-                                drawPx(14, 13, bookCover); drawPx(15, 13, bookCover)
-                                drawPx(14, 14, bookCover); drawPx(15, 14, bookCover)
-                                drawPx(15, 13, white); drawPx(15, 14, white)
-                            }
-                            CurioPet.Stage.SAGE -> {
-                                // Gold halo above the antenna star.
+                            CurioPet.Stage.FINAL_EVO -> {
+                                // Final: gold halo + element aura.
                                 drawPx(4, 0, gold); drawPx(8, 0, gold)
                                 drawPx(6, 1, goldDeep)
                             }

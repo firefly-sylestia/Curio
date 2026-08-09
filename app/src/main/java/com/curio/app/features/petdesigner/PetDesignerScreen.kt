@@ -103,6 +103,9 @@ import com.curio.app.data.PetAnimationFrame
 import com.curio.app.data.PetDefinition
 import com.curio.app.data.PetRegistry
 import com.curio.app.data.ReactionAnim
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import com.curio.app.data.animationById
 import com.curio.app.data.definition
 import com.curio.app.data.petAnimationName
@@ -280,6 +283,18 @@ fun PetDesignerScreen(navController: NavController) {
     var accessoriesOpen by remember { mutableStateOf(false) }
     // v9.3 — home editor: the flower bed design dialog.
     var bedEditorOpen by remember { mutableStateOf(false) }
+    // v9.5 — evolution: the 3-choice path picker dialog (shown at level 7).
+    var evoDialogOpen by remember { mutableStateOf(false) }
+    var evoAnimating by remember { mutableStateOf(false) }
+
+    // v9.5 — auto-trigger the evolution dialog when the pet is ready to evolve.
+    LaunchedEffect(Unit) {
+        val level = CurioQuests.levelForXp(CurioQuests.xpState)
+        val path = AppPreferences.evoPathState
+        if (CurioPet.canEvolve(level, path?.let { runCatching { CurioPet.EvoPath.valueOf(it) }.getOrNull() })) {
+            evoDialogOpen = true
+        }
+    }
     // v8.56 — which custom-pet slot the working design belongs to (null =
     // the built-in pet). Plain `remember` (NOT saveable) to match the
     // working design's own lifetime: `design` re-parses from the global
@@ -607,15 +622,27 @@ fun PetDesignerScreen(navController: NavController) {
             //    only chooser, and after that ONLY the chosen editor renders.
             item {
                 if (page == PetDesignerPage.EDITOR) {
-                    // Local val so the nullable target smart-casts cleanly.
-                    val currentTarget = target
-                    if (currentTarget == null) {
-                        EditorPickPrompt(onOpenPicker = { pickerCategory = "body" })
+                    // v9.5 — baby pets can't edit; the editor unlocks after evolution.
+                    val stage = CurioPet.currentStage()
+                    if (stage == CurioPet.Stage.BABY) {
+                        SectionCard("🔒 Editor locked", "Your pet is still a baby! Reach level 7, evolve it, and the editor will unlock.") {
+                            Text(
+                                "Evolve at level 7 to unlock custom colors, faces, and accessories.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     } else {
-                        EditorTargetHeader(
-                            target = currentTarget,
-                            onChange = { pickerCategory = "body" }
-                        )
+                        // Local val so the nullable target smart-casts cleanly.
+                        val currentTarget = target
+                        if (currentTarget == null) {
+                            EditorPickPrompt(onOpenPicker = { pickerCategory = "body" })
+                        } else {
+                            EditorTargetHeader(
+                                target = currentTarget,
+                                onChange = { pickerCategory = "body" }
+                            )
+                        }
                     }
                 }
             }
@@ -1816,6 +1843,27 @@ fun PetDesignerScreen(navController: NavController) {
             }
         }
 
+        // ── Evolution choice (v9.5) — shown at level 7 ──────────────
+        if (evoDialogOpen) {
+            DialogScrim(onDismiss = { /* must pick a path */ }) {
+                EvolutionChoiceDialog(
+                    onPathChosen = { path ->
+                        AppPreferences.setEvoPath(context, path)
+                        evoDialogOpen = false
+                        evoAnimating = true
+                    },
+                    context = context
+                )
+            }
+        }
+
+        // ── Evolution animation overlay (v9.5) ───────────────────────
+        if (evoAnimating) {
+            EvolutionAnimation(
+                onComplete = { evoAnimating = false }
+            )
+        }
+
         // ── Bed editor (v9.3) — flower bed design dialog ────────────
         if (bedEditorOpen) {
             DialogScrim(onDismiss = { bedEditorOpen = false }) {
@@ -2299,20 +2347,22 @@ private fun exportPngUri(
     }
     if (grid != "curled" && design.isProceduralEnabled("accessories")) {
         when (stage) {
-            CurioPet.Stage.SPROUT -> {
+            CurioPet.Stage.BABY -> {
                 paintProceduralCell(4, 2, "9CCB8B"); paintProceduralCell(5, 1, "9CCB8B")
                 paintProceduralCell(5, 2, "9CCB8B"); paintProceduralCell(5, 3, "9CCB8B")
             }
-            CurioPet.Stage.TRAIL_BUDDY -> {
-                paintProceduralCell(13, 10, inkHex); paintProceduralCell(14, 10, accentHex)
-                paintProceduralCell(15, 10, accentHex); paintProceduralCell(13, 11, inkHex)
-                paintProceduralCell(14, 11, accentHex); paintProceduralCell(15, 11, accentHex)
+            CurioPet.Stage.FIRST_EVO -> {
+                val evoHex = when (CurioPet.currentEvoPath()) {
+                    CurioPet.EvoPath.FIRE -> "FF6B4A"
+                    CurioPet.EvoPath.WATER -> "4A9BFF"
+                    CurioPet.EvoPath.NATURE -> "6BBF59"
+                    null -> accentHex
+                }
+                paintProceduralCell(6, 9, evoHex); paintProceduralCell(7, 9, evoHex)
+                paintProceduralCell(8, 9, evoHex); paintProceduralCell(9, 9, evoHex)
+                paintProceduralCell(7, 10, evoHex); paintProceduralCell(8, 10, evoHex)
             }
-            CurioPet.Stage.ARCHIVE_PAL -> {
-                paintProceduralCell(14, 13, "D98BA0"); paintProceduralCell(15, 13, "D98BA0")
-                paintProceduralCell(14, 14, "D98BA0"); paintProceduralCell(15, 14, "FFFFFF")
-            }
-            CurioPet.Stage.SAGE -> {
+            CurioPet.Stage.FINAL_EVO -> {
                 paintProceduralCell(4, 0, goldHex); paintProceduralCell(8, 0, goldHex)
                 paintProceduralCell(6, 1, goldDeepHex)
             }
@@ -6184,3 +6234,139 @@ private fun BedDesignDialog(onDismiss: () -> Unit, context: android.content.Cont
         }
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v9.5 — Evolution choice dialog (Fire / Water / Nature picker)
+// ═══════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun EvolutionChoiceDialog(
+    onPathChosen: (CurioPet.EvoPath) -> Unit,
+    context: android.content.Context
+) {
+    val paths = listOf(
+        Triple(CurioPet.EvoPath.FIRE, "Blaze", "🔥", "A fiery spirit — warm, passionate, and bold. Flames dance in its eyes."),
+        Triple(CurioPet.EvoPath.WATER, "Tide", "🌊", "A calm current — fluid, deep, and wise. Ripples follow its every move."),
+        Triple(CurioPet.EvoPath.NATURE, "Bloom", "🌿", "A gentle bloom — vibrant, nurturing, and free. Leaves rustle where it walks.")
+    )
+    var selected by remember { mutableStateOf<CurioPet.EvoPath?>(null) }
+    Column(
+        modifier = Modifier
+            .padding(24.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "🌟 Your pet is ready to evolve!",
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Choose an element path. Each one unlocks a unique look and personality.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(20.dp))
+        paths.forEach { (path, name, emoji, desc) ->
+            val isSelected = selected == path
+            Card(
+                onClick = { selected = path },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant
+                ),
+                border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(emoji, style = MaterialTheme.typography.headlineMedium)
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(name, style = MaterialTheme.typography.titleMedium)
+                        Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (isSelected) {
+                        Text("✓", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(20.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            TextButton(onClick = { /* dismiss handled externally */ }) {
+                Text("Cancel")
+            }
+            Button(onClick = { selected?.let(onPathChosen) }, enabled = selected != null) {
+                Text("Evolve! ✨")
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v9.5 — Evolution animation (scale + confetti at evolution moment)
+// ═══════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun EvolutionAnimation(onComplete: () -> Unit) {
+    val scale = remember { Animatable(0.6f) }
+    val alpha = remember { Animatable(1f) }
+    LaunchedEffect(Unit) {
+        scale.animateTo(1.3f, animationSpec = tween(400, easing = FastOutSlowInEasing))
+        scale.animateTo(1.0f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+        alpha.animateTo(0f, animationSpec = tween(500))
+        onComplete()
+    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .graphicsLayer(scaleX = scale.value, scaleY = scale.value, alpha = alpha.value)
+                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(60.dp))
+        ) {
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.Mood.EXCITED,
+                spriteSize = 120.dp,
+                celebrateKey = 1
+            )
+        }
+        // Confetti dots
+        repeat(20) { i ->
+            val angle = (i * 18f + (scale.value - 1f) * 360f) % 360f
+            val dist = 60.dp * scale.value
+            val cx = cos(angle * Math.PI.toFloat() / 180f) * dist.value
+            val cy = sin(angle * Math.PI.toFloat() / 180f) * dist.value
+            Box(
+                modifier = Modifier
+                    .offset(cx.dp, cy.dp)
+                    .size(6.dp)
+                    .background(
+                        listOf(
+                            Color(0xFFFFD97D), Color(0xFFFF6F61),
+                            Color(0xFF9CCB8B), Color(0xFF4A9BFF), Color(0xFFF7B8D0)
+                        )[i % 5],
+                        RoundedCornerShape(3.dp)
+                    )
+                    .graphicsLayer(alpha = alpha.value)
+            )
+        }
+    }
+}
+
+// Helpers
+private fun cos(rad: Float): Float = kotlin.math.cos(rad)
+private fun sin(rad: Float): Float = kotlin.math.sin(rad)

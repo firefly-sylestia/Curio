@@ -39,39 +39,79 @@ object CurioPet {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     // ── Growth stages (spec §10.4) ─────────────────────────────────────
-    enum class Stage(val displayName: String, val unlockHint: String, val sizeScale: Float = 1f) {
-        HATCHLING("Hatchling Spark", "Level 3 to grow", 0.62f),
-        SPROUT("Curious Sprout", "Explore 3 lanes to grow", 0.74f),
-        TRAIL_BUDDY("Trail Buddy", "Save 10 discoveries to grow", 0.84f),
-        ARCHIVE_PAL("Archive Pal", "Explore every lane to grow", 0.93f),
-        LANE_GUARDIAN("Lane Guardian", "Reach Level 25 to grow", 1.05f),
-        SAGE("Curio Sage", "Fully grown", 1.12f)
+    // ═══════════════════════════════════════════════════════════════════
+    // v9.5 — Evolution system: three tiers (Baby → 1st Evo → Final Evo)
+    // with three element paths (Fire / Water / Nature). The baby form is
+    // universal; at level 7 the user chooses a path; at level 25 the pet
+    // reaches its final form. Each evolution plays an animation.
+    // ═══════════════════════════════════════════════════════════════════
+
+    /** Evolution path — the elemental affinity chosen at level 7. */
+    enum class EvoPath(val displayName: String, val element: String) {
+        FIRE("Blaze", "Fire"),
+        WATER("Tide", "Water"),
+        NATURE("Bloom", "Nature")
     }
 
-    /**
-     * The highest growth stage the user's stats satisfy. Checks the top
-     * stages first so a late-stage user never "shrinks" back down.
-     */
-    fun stageFor(xp: Int, saves: Int, lanes: Set<String>, allLaneCount: Int): Stage {
-        val level = CurioQuests.levelForXp(xp)
-        return when {
-            level >= 25 -> Stage.SAGE
-            allLaneCount > 0 && lanes.size >= allLaneCount -> Stage.LANE_GUARDIAN
-            saves >= 10 -> Stage.ARCHIVE_PAL
-            lanes.size >= 3 -> Stage.TRAIL_BUDDY
-            level >= 3 -> Stage.SPROUT
-            else -> Stage.HATCHLING
+    /** The pet's current growth tier. */
+    enum class Stage(val displayName: String, val sizeScale: Float) {
+        BABY("Baby Spark", 0.55f),
+        FIRST_EVO("Evolved", 0.88f),
+        FINAL_EVO("Fully Grown", 1.08f);
+
+        /** Human-readable label for this tier, including the element path. */
+        fun label(path: EvoPath?): String = when (this) {
+            BABY -> "Baby Spark"
+            FIRST_EVO -> "${path?.displayName ?: "Evolved"} ($level 7)"
+            FINAL_EVO -> "${path?.displayName ?: "Grown"} ($level 25)"
         }
     }
 
-    /** Current stage from live [CurioQuests] state. */
-    fun currentStage(): Stage =
-        stageFor(
-            xp = CurioQuests.xpState,
-            saves = CurioQuests.lifetimeState.saves,
-            lanes = CurioQuests.categoriesState,
-            allLaneCount = CurioCategories.visible.size
-        )
+    /** Computes the evolution tier + path from level and the saved choice. */
+    fun evolutionStage(level: Int, path: EvoPath?): Pair<Stage, EvoPath?> {
+        return when {
+            level >= 25 && path != null -> Stage.FINAL_EVO to path
+            level >= 7 && path != null -> Stage.FIRST_EVO to path
+            else -> Stage.BABY to null
+        }
+    }
+
+    /** True when the pet is ready to evolve (level >= 7, no path yet). */
+    fun canEvolve(level: Int, path: EvoPath?): Boolean =
+        level >= 7 && path == null
+
+    /** True when the final evolution is unlocked (level >= 25). */
+    fun canFinalEvolve(level: Int, path: EvoPath?): Boolean =
+        level >= 25 && path != null
+
+    /**
+     * The highest growth stage the user's stats satisfy. Kept for
+     * backward compat with the old Stage-based APIs — maps directly to
+     * the new evolution system.
+     */
+    fun stageFor(xp: Int, saves: Int, lanes: Set<String>, allLaneCount: Int): Stage {
+        val level = CurioQuests.levelForXp(xp)
+        val path = AppPreferences.evoPath()
+        return when {
+            level >= 25 && path != null -> Stage.FINAL_EVO
+            level >= 7 && path != null -> Stage.FIRST_EVO
+            else -> Stage.BABY
+        }
+    }
+
+    /** Current stage from live [CurioQuests] state + saved evolution path. */
+    fun currentStage(): Stage {
+        val level = CurioQuests.levelForXp(CurioQuests.xpState)
+        val path = AppPreferences.evoPath()
+        return when {
+            level >= 25 && path != null -> Stage.FINAL_EVO
+            level >= 7 && path != null -> Stage.FIRST_EVO
+            else -> Stage.BABY
+        }
+    }
+
+    /** Current evolution path (null before first evolution). */
+    fun currentEvoPath(): EvoPath? = AppPreferences.evoPath()
 
     /** The next stage up (null when fully grown). */
     fun nextStage(current: Stage): Stage? {
@@ -84,11 +124,8 @@ object CurioPet {
     fun nextStageHint(stage: Stage): String {
         val next = nextStage(stage) ?: return "Fully grown. Every lane is yours."
         return when (next) {
-            Stage.SPROUT -> "Reach Level 3 to grow."
-            Stage.TRAIL_BUDDY -> "Explore ${(3 - CurioQuests.categoriesState.size).coerceAtLeast(0)} more lane(s) to grow."
-            Stage.ARCHIVE_PAL -> "Save ${(10 - CurioQuests.lifetimeState.saves).coerceAtLeast(0)} more discovery(ies) to grow."
-            Stage.LANE_GUARDIAN -> "Explore every lane to grow."
-            Stage.SAGE -> "Reach Level 25 to grow."
+            Stage.FIRST_EVO -> "Reach Level 7 to evolve."
+            Stage.FINAL_EVO -> "Reach Level 25 for the final evolution."
             else -> next.unlockHint
         }
     }

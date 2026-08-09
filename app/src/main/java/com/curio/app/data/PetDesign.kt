@@ -269,6 +269,97 @@ data class PetDesign(
 
         val DEFAULT = PetDesign(DEFAULT_PALETTE, DEFAULT_BODY, DEFAULT_CURLED, DEFAULT_GRID_SIZE, DEFAULT_FACES, DEFAULT_REACTIONS)
 
+        // ═══════════════════════════════════════════════════════════════
+        // v9.5 — Evolution palettes: one per element path. Baby uses the
+        // 16×16 body with a soft pastel palette; first evo forms use the
+        // 32×32 body with a path-themed palette; final evo uses the user's
+        // saved custom palette (or the default).
+        // ═══════════════════════════════════════════════════════════════
+
+        /** Soft pastel palette for the baby form (tiny and cute). */
+        val BABY_PALETTE: Map<Char, String> = mapOf(
+            'b' to "FFF8F0", 'B' to "F0E8D8",
+            'o' to "5C4033", 's' to "FFB6C1", 'S' to "E898A8",
+            'G' to "FFE4B5", 'g' to "E0C080",
+            'c' to "FFD1DC", 'C' to "D1DCFF",
+            'd' to "DCF0C8", 'D' to "FFF0C8",
+            'r' to "FAC8C8", 'y' to "6B4226"
+        )
+
+        /** Warm palette for the Fire (Blaze) evolution. */
+        val FIRE_PALETTE: Map<Char, String> = mapOf(
+            'b' to "FFE8D0", 'B' to "F0CEA0",
+            'o' to "4A1A0A", 's' to "FF6B4A", 'S' to "D94A30",
+            'G' to "FFB347", 'g' to "E09030",
+            'c' to "FFC8A0", 'C' to "FFD700",
+            'd' to "FF8C69", 'D' to "FFE4B5",
+            'r' to "FF9E9E", 'y' to "7A2E0E"
+        )
+
+        /** Cool palette for the Water (Tide) evolution. */
+        val WATER_PALETTE: Map<Char, String> = mapOf(
+            'b' to "E0F0FF", 'B' to "C0D8F0",
+            'o' to "1A2A4A", 's' to "4A9BFF", 'S' to "3070D9",
+            'G' to "80D0FF", 'g' to "4080C0",
+            'c' to "A0D8FF", 'C' to "C0E8FF",
+            'd' to "60B0E0", 'D' to "E0F0FF",
+            'r' to "A0C8F0", 'y' to "1E4070"
+        )
+
+        /** Earthy palette for the Nature (Bloom) evolution. */
+        val NATURE_PALETTE: Map<Char, String> = mapOf(
+            'b' to "F0F0D8", 'B' to "D8D8B0",
+            'o' to "2A3A0A", 's' to "6BBF59", 'S' to "408030",
+            'G' to "A0D080", 'g' to "609040",
+            'c' to "C8E8A0", 'C' to "E8F0C0",
+            'd' to "80C060", 'D' to "F0F0C0",
+            'r' to "B0D8A0", 'y' to "3A5020"
+        )
+
+        /** Returns the evolution-appropriate palette for [path] (baby gets BABY_PALETTE). */
+        fun evolutionPalette(path: CurioPet.EvoPath?): Map<Char, String> = when (path) {
+            CurioPet.EvoPath.FIRE -> FIRE_PALETTE
+            CurioPet.EvoPath.WATER -> WATER_PALETTE
+            CurioPet.EvoPath.NATURE -> NATURE_PALETTE
+            null -> BABY_PALETTE
+        }
+
+        /** Baby body: 16×16 (scaled up), cute and tiny. */
+        val BABY_BODY: List<String> = DEFAULT_BODY_16
+        val BABY_CURLED: List<String> = DEFAULT_CURLED_16
+
+        /**
+         * Returns the appropriate body rows for the given [stage] + [path].
+         * Baby uses the tiny 16×16 art; evolutions use the full 32×32.
+         */
+        fun evolutionBody(
+            stage: CurioPet.Stage,
+            path: CurioPet.EvoPath?
+        ): Pair<List<String>, List<String>> = when (stage) {
+            CurioPet.Stage.BABY -> BABY_BODY to BABY_CURLED
+            else -> DEFAULT_BODY to DEFAULT_CURLED
+        }
+
+        /** Full PetDesign for a given evolution stage + path. */
+        fun evolutionDesign(
+            stage: CurioPet.Stage,
+            path: CurioPet.EvoPath?,
+            userPalette: Map<Char, String>? = null
+        ): PetDesign {
+            val palette = when {
+                stage == CurioPet.Stage.FINAL_EVO && userPalette != null -> userPalette
+                stage == CurioPet.Stage.FINAL_EVO -> DEFAULT_PALETTE
+                stage == CurioPet.Stage.FIRST_EVO -> evolutionPalette(path)
+                else -> BABY_PALETTE
+            }
+            val (body, curled) = evolutionBody(stage, path)
+            val gridSize = if (stage == CurioPet.Stage.BABY) 16 else DEFAULT_GRID_SIZE
+            return PetDesign(
+                palette = palette, bodyRows = body, curledRows = curled,
+                gridSize = gridSize, faces = DEFAULT_FACES, reactions = DEFAULT_REACTIONS
+            )
+        }
+
         /**
          * The same design [curled] shows while asleep. When the user paints
          * the BODY grid they usually want the sleep pose to follow, so the

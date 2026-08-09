@@ -442,6 +442,8 @@ object AppPreferences {
     var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
     /** v9.3 — custom flower bed rows (null = use the default bed). */
     var bedDesignRowsState by mutableStateOf<List<String>?>(null)
+    /** v9.5 — evolution path chosen at level 7 (null = baby, no choice yet). */
+    var evoPathState by mutableStateOf<String?>(null)
         private set
 
     fun initThemeMode(context: Context) {
@@ -489,6 +491,7 @@ object AppPreferences {
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
+        evoPathState = getEvoPath(context)
     }
 
     // ── Theme ────────────────────────────────────────────────────────
@@ -1319,6 +1322,21 @@ object AppPreferences {
     fun clearBedDesignRows(context: Context) {
         prefs(context).edit().remove(KEY_BED_DESIGN).apply()
         bedDesignRowsState = null
+    }
+
+    // ── Evolution path (v9.5) ────────────────────────────────────────
+    private const val KEY_EVO_PATH = "evo_path"
+
+    fun getEvoPath(context: Context): String? =
+        prefs(context).getString(KEY_EVO_PATH, null)
+
+    /** Reactive read (no context needed) — returns null when unset. */
+    fun evoPath(): CurioPet.EvoPath? =
+        evoPathState?.let { runCatching { CurioPet.EvoPath.valueOf(it) }.getOrNull() }
+
+    fun setEvoPath(context: Context, path: CurioPet.EvoPath) {
+        prefs(context).edit().putString(KEY_EVO_PATH, path.name).apply()
+        evoPathState = path.name
     }
 
     // ── Internal ─────────────────────────────────────────────────────
