@@ -172,9 +172,9 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  *
  * All routes are flat. The bottom nav is rendered by a [Scaffold] wrapper
  * and is conditionally visible based on the current route (see
- * [CurioRoutes.bottomNavRoutes]). When the user is on a non-bottom-nav
- * route (push destinations like Picker/Reveal/Capture/Detail/Settings/
- * ManageCategories/TopicHistory/Lightbox), the bottom bar is omitted.
+ * [CurioRoutes.bottomNavRoutes]). Reveal keeps the bar visible so its shared
+ * hero morph has the same content height as the Spin deck; other push
+ * destinations like Picker/Capture/Detail/Settings/Lightbox omit it.
  *
  * Each tab uses the standard Compose Navigation pattern when navigated to:
  *   navigate(route) { popUpTo(startDestination) { saveState = true }; ... }
@@ -204,9 +204,8 @@ fun CurioNavHost(
         currentRoute?.substringBefore("/")
     }
     val showBottomBar = routePrefix in CurioRoutes.bottomNavRoutePrefixes
-    // Topic Reveal no longer reserves a hidden Scaffold slot. The screen is
-    // edge-to-edge and the regular bottom bar returns immediately when the
-    // user navigates back to a tab.
+    // Topic Reveal keeps the same Scaffold content height as the Spin deck;
+    // the normal bottom bar remains visible while the shared hero morphs.
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }

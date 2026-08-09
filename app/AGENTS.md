@@ -95,7 +95,7 @@ app/src/main/java/com/curio/app/
 - Don't add per-screen responsive hacks; read the size class from the shared helper so every screen follows one breakpoint story.
 
 ### Navigation
-- Single NavHost with flat routes (see `CurioRoutes.kt`). Bottom nav visibility is gated by the `CurioRoutes.bottomNavRoutes` set (`HOME`, `SPIN`, `CABINET`).
+- Single NavHost with flat routes (see `CurioRoutes.kt`). Bottom nav visibility is gated by the `CurioRoutes.bottomNavRoutes` set (`HOME`, `SPIN`, `CABINET`, and `REVEAL`; Reveal keeps the bar for shared-morph height stability).
 - **Tab switching MUST use `NavController.navigateToTab(route)`** (defined in `CurioRoutes.kt`), which anchors `popUpTo(HOME) { saveState = true }` + `launchSingleTop = true` + `restoreState = true`. Do NOT anchor to `graph.findStartDestination()`: the NavHost's declared start destination is `SPLASH`, which SplashScreen pops inclusively on launch — so the anchor is gone from the stack and `popUpTo` silently no-ops, piling up duplicate back-stack entries (back walks through the same screens repeatedly). HOME is the persistent root that always remains after Splash/Onboarding/Crash land.
 - Every plain `navigate()` to a push destination (Profile, Settings, Picker, Entry Detail, Lightbox, Manage Categories, Onboarding replay, etc.) MUST set `launchSingleTop = true` so re-opening a previously-opened screen never stacks a copy.
 - Tab routes also accept a `categorySlug` argument so the same `Spin` screen renders both as a tab target (`categorySlug = null`) and as a pushed destination (`categorySlug = "music"` etc.).
@@ -150,11 +150,12 @@ app/src/main/java/com/curio/app/
   hidden from the studio UI while their models, serializers, renderers, and
   runtime playback remain in place for a future re-entry. A slim sticky
   **EditorToolbar** is the ONE place for Save / Undo / Redo / Reset / Import /
-  Export (the old pinned footer SaveArea is gone — no duplicate buttons).
-  The Faces editor shows mood face-only previews and a creamy pixel board with
-  an explicit Painting toggle; face zoom is not shown. Details drawing and the
-  entire Actions editor are currently hidden from the studio, while detail,
-  reaction, and custom-action data/runtime behavior remain preserved.
+  Export (the old pinned footer SaveArea is gone — no duplicate buttons).  The Faces editor and its picker option are removed from the studio UI. Face
+  data, presets, serializers, and sprite/runtime rendering remain preserved
+  for compatibility. Details drawing and the entire Actions editor are
+  currently hidden from the studio, while detail, reaction, and custom-action
+  data/runtime behavior remain preserved.
+
 
   PNG export/import shares via FileProvider `${applicationId}.fileprovider`
   (`res/xml/file_paths.xml` cache/share). The home/house scene is a fixed

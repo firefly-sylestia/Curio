@@ -93,13 +93,11 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
-import com.curio.app.data.EyeStyle
-import com.curio.app.data.MouthStyle
 import com.curio.app.data.CustomPetAction
 import com.curio.app.data.PetActionTrigger
 import com.curio.app.data.PetDesign
-import com.curio.app.data.PetFaceMoods
-import com.curio.app.data.PetFacePresets
+import com.curio.app.data.EyeStyle
+import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetReaction
 import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.BUILTIN_ANIMATIONS
@@ -215,8 +213,7 @@ private fun hslToHex(h: Float, s: Float, l: Float): String {
  * copy of the pet's look you can reshape live. Two canvases (24×24 and
  * 32×32, convertible), paint tools (brush / fill bucket / eraser /
  * eyedropper) with drag painting, palette recoloring with hex + HSL
- * sliders, preset shapes, a randomizer, a Face & reactions editor (per-mood
- * eyes/mouth/blush/sparkles + per-event reaction rules), and import/export
+ * sliders, preset shapes, a randomizer, per-event reaction data, and import/export
  * as PNG images or plain text. Saving applies the design EVERYWHERE
  * (always-on — [AppPreferences.setPetDesign]); the pet sprite reads it
  * reactively.
@@ -260,7 +257,7 @@ fun PetDesignerScreen(navController: NavController) {
     var target by rememberSaveable { mutableStateOf<PetEditorTarget?>(null) }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
-    // v8.49 — which preview picker dialog is open (body / faces / details / animations).
+    // v8.49 — which preview picker dialog is open (body / details / animations).
     var pickerCategory by remember { mutableStateOf<String?>(null) }
     // v8.52 — the studio toolbar's import menu (PNG vs paste-text).
     var importMenuOpen by remember { mutableStateOf(false) }
@@ -296,11 +293,6 @@ fun PetDesignerScreen(navController: NavController) {
     var toast by remember { mutableStateOf<String?>(null) }
     // Preview mood so the user can see the design in different poses.
     var previewMood by rememberSaveable { mutableStateOf(CurioPet.Mood.HAPPY) }
-    // v8.35 — the face editor's selected mood.
-    var faceMood by rememberSaveable { mutableStateOf(PetFaceMoods.HAPPY) }
-    // v8.36 — face editor: blueprint ghost + explicit painting mode.
-    var faceBlueprint by rememberSaveable { mutableStateOf(true) }
-    var facePaintingEnabled by rememberSaveable { mutableStateOf(false) }
     // v8.36 — body editor zoom.
     var gridZoom by rememberSaveable { mutableStateOf(1f) }
     // Kept for dormant reaction/custom-action editor implementations.
@@ -394,14 +386,11 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
         }
-    }    // v8.45 — picking a target in the universal editor also syncs the legacy
-    // editor states (grid, face mood, reaction event) so the
-
-    // existing editor bodies keep working unchanged.
+    }    // v8.45 — picking a target in the universal editor syncs the grid and
+    // reaction event state used by the remaining dormant editor code.
     fun selectTarget(newTarget: PetEditorTarget) {
         target = newTarget
         when (newTarget) {
-            is PetEditorTarget.Face -> faceMood = newTarget.mood
             is PetEditorTarget.Reaction -> {
                 reactEvent = newTarget.event
                 reactionLineDraft = design.reactionFor(newTarget.event).lines.joinToString("\n")
@@ -839,332 +828,6 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
-            // ── Face editor (Editor target) ───────────────────────────
-            item {
-                if (page == PetDesignerPage.EDITOR && target is PetEditorTarget.Face) SectionCard(
-                    "Face per mood",
-                    "Customize Curie's face for this mood"
-                ) {
-                    Text(
-                        "Face per mood",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        PetFaceMoods.ALL.forEach { mood ->
-                            FaceMoodPickerCard(
-                                mood = mood,
-                                design = design,
-                                selected = faceMood == mood,
-                                onClick = {
-                                    faceMood = mood
-                                    target = PetEditorTarget.Face(mood)
-                                }
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    val face = design.faceFor(faceMood)
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = CurioColors.SoftCream,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(14.dp)
-                        ) {
-                            FaceOnlyPreview(
-                                mood = faceMood,
-                                design = design,
-                                modifier = Modifier.size(96.dp)
-                            )
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    "${PetFaceMoods.label(faceMood)} face",
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = Color(0xFF4A3426)
-                                )
-                                Text(
-                                    "Eyes: ${face.eyes.name} · Mouth: ${face.mouth.name}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF765D4A)
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(14.dp))
-                    // v8.36 — quick style controls: pick the eyes / mouth the
-                    // face wears without touching a pixel.
-                    Text(
-                        "Eyes",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        EyeStyle.entries.forEach { style ->
-                            ChoiceChip(
-                                label = style.name.lowercase().replaceFirstChar { it.uppercase() },
-                                selected = face.eyes == style,
-                                onClick = {
-                                    pushUndo()
-                                    design = design.withFace(faceMood, face.copy(eyes = style))
-                                }
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        "Mouth",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        MouthStyle.entries.forEach { style ->
-                            ChoiceChip(
-                                label = style.name.lowercase().replaceFirstChar { it.uppercase() },
-                                selected = face.mouth == style,
-                                onClick = {
-                                    pushUndo()
-                                    design = design.withFace(faceMood, face.copy(mouth = style))
-                                }
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    ToggleRow("Blush cheeks", face.blush) {
-                        pushUndo()
-                        design = design.withFace(faceMood, face.copy(blush = it))
-                    }
-                    ToggleRow("Sparkle eyes", face.sparkles) {
-                        pushUndo()
-                        design = design.withFace(faceMood, face.copy(sparkles = it))
-                    }
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        "Paint this face",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Text(
-                        "The blueprint ghost below marks where the default ${PetFaceMoods.label(faceMood).lowercase()} face sits — paint over it and your pixels replace it.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    ToggleRow("Painting", facePaintingEnabled) {
-                        facePaintingEnabled = it
-                        if (!it) activeTool = null
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    ToggleRow("Show face blueprint", faceBlueprint) { faceBlueprint = it }
-                    if (facePaintingEnabled) {
-                        Spacer(Modifier.height(8.dp))
-                        ToolTray(
-                            activeTool = activeTool,
-                            onSelect = { activeTool = it }
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    FaceGridEditor(
-                        design = design,
-                        face = face,
-                        tool = if (facePaintingEnabled) activeTool else null,
-                        blueprintRows = remember(design.gridSize, faceMood, face.eyes, face.mouth, face.blush) {
-                            faceBlueprintRows(design, faceMood)
-                        },
-                        showBlueprint = faceBlueprint,
-                        onPaint = { row, col, continuous ->
-                            if (!(activeTool == PaintTool.FILL && continuous)) {
-                                if (activeTool != PaintTool.EYEDROPPER && !continuous) pushUndo()
-                                val nextFace = when (activeTool) {
-                                    PaintTool.BRUSH -> face.withPixel(row, col, paintKey, design.gridSize)
-                                    PaintTool.ERASER -> face.withPixel(row, col, '.', design.gridSize)
-                                    PaintTool.FILL -> face.withFloodFill(row, col, paintKey, design.gridSize)
-                                    PaintTool.EYEDROPPER -> {
-                                        val picked = face.gridRows.getOrNull(row)?.getOrNull(col) ?: '.'
-                                    if (picked != '.') {
-                                        paintKey = picked
-                                        activeTool = PaintTool.BRUSH
-                                    }
-                                    face
-                                    }
-                                    null -> face
-                                }
-                                design = design.withFace(faceMood, nextFace)
-                            }
-                        }
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Procedural fallback: ${face.eyes.name} eyes · ${face.mouth.name} mouth · blush ${if (face.blush) "on" else "off"}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-
-                }
-            }
-
-            // Action/reaction UI is intentionally not exposed in this studio pass.
-            item {
-                if (false && page == PetDesignerPage.EDITOR && target is PetEditorTarget.Reaction) SectionCard(
-                    "Reaction",
-                    "What Curie does for this moment — and the face it wears while reacting"
-                ) {
-                    Text(
-                        "Reactions",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "Choose what Curie does for each moment — and the face it wears while reacting",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        PetReactionEvents.ALL.forEach { event ->
-                            ChoiceChip(
-                                label = PetReactionEvents.label(event),
-                                selected = reactEvent == event,
-                                onClick = {
-                                    reactEvent = event
-                                    target = PetEditorTarget.Reaction(event)
-                                }
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    val reaction = design.reactionFor(reactEvent)
-                    // The animated action preview is intentionally hidden while
-                    // animation UI is out of the Pet Studio.
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Reaction lines (optional)",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "Write one line per row. When Custom reaction lines is enabled in Settings, Curie picks one of these for this event.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(118.dp)
-                    ) {
-                        Box(modifier = Modifier.padding(12.dp)) {
-                            if (reaction.lines.isEmpty()) {
-                                Text(
-                                    "Boop!\nYou found me!\nWrite up to 8 custom lines…",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
-                                )
-                            }
-                            BasicTextField(
-                                value = reactionLineDraft,
-                                onValueChange = { text ->
-                                    val limitedText = PetReaction.limitDraft(text)
-                                    reactionLineDraft = limitedText
-                                    design = design.withReaction(
-                                        reactEvent,
-                                        design.reactionFor(reactEvent).copy(
-                                            lines = PetReaction.normalizeLines(limitedText)
-                                        )
-                                    )
-                                },
-                                textStyle = MaterialTheme.typography.bodyMedium,
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "${reaction.lines.size}/8 lines · 120 characters per line",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    ToggleRow(
-                        "React to “${PetReactionEvents.label(reactEvent)}”",
-                        reaction.enabled
-                    ) {
-                        pushUndo()
-                        design = design.withReaction(reactEvent, reaction.copy(enabled = it))
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SmallAction(
-                            "Reset action",
-                            enabled = reaction != (PetDesign.DEFAULT_REACTIONS[reactEvent] ?: PetReaction())
-                        ) {
-                            pushUndo()
-                            val def = PetDesign.DEFAULT_REACTIONS[reactEvent] ?: PetReaction()
-                            design = design.withReaction(reactEvent, def)
-                            reactionLineDraft = def.lines.joinToString("\n")
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Draw the reaction face yourself. It overrides the procedural face while this event plays.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    ToolTray(
-                        activeTool = activeTool,
-                        onSelect = { activeTool = it }
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    FaceGridEditor(
-                        design = design,
-                        face = reaction.face,
-                        tool = activeTool,
-                        onPaint = { row, col, continuous ->
-                            if (!(activeTool == PaintTool.FILL && continuous)) {
-                                if (activeTool != PaintTool.EYEDROPPER && !continuous) pushUndo()
-                                val nextFace = when (activeTool) {
-                                    PaintTool.BRUSH -> reaction.face.withPixel(row, col, paintKey, design.gridSize)
-                                    PaintTool.ERASER -> reaction.face.withPixel(row, col, '.', design.gridSize)
-                                    PaintTool.FILL -> reaction.face.withFloodFill(row, col, paintKey, design.gridSize)
-                                    PaintTool.EYEDROPPER -> {
-                                    val picked = reaction.face.gridRows.getOrNull(row)?.getOrNull(col) ?: '.'
-                                    if (picked != '.') {
-                                        paintKey = picked
-                                        activeTool = PaintTool.BRUSH
-                                    }
-                                    reaction.face
-                                }
-                                    null -> reaction.face
-                                }
-                                design = design.withReaction(reactEvent, reaction.copy(face = nextFace))
-                            }
-                        }
-                    )
-                }
-            }
 
             // Custom action UI is intentionally not exposed in this studio pass.
             item {
@@ -1265,32 +928,6 @@ fun PetDesignerScreen(navController: NavController) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-            }
-
-            // ── One-tap personality presets (Settings page, v8.52) ───
-            item {
-                if (page == PetDesignerPage.SETTINGS) SectionCard(
-                    "Personality presets",
-                    "Set every mood face and every reaction with one tap"
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        PetFacePresets.ALL.forEach { preset ->
-                            PresetCard(
-                                name = preset.name,
-                                tagline = preset.tagline,
-                                preview = preset.applyTo(design),
-                                onClick = {
-                                    val nextDesign = preset.applyTo(design)
-                                                                design = nextDesign
-                                    toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
-                                }
-                            )
-                        }
-                    }
                 }
             }
 
@@ -3319,54 +2956,11 @@ private fun normalizeFrameRows(rows: List<String>, gridSize: Int): List<String> 
     else cleaned + List(gridSize - cleaned.size) { ".".repeat(gridSize) }
 }
 
-/**
- * v8.52 — the mood's procedural eye art as 16×16 blueprint rows for the Eyes
- * editor (white glints excluded so only the ink lines guide the drawing).
- */
+/** Supplies the fixed 16×16 eye reference used by the dormant timeline editor. */
 private fun eyeBlueprintRows(design: PetDesign, moodName: String): List<String> {
-    val style = design.faceFor(moodName).eyes
     val rows = Array(16) { CharArray(16) { '.' } }
-    EYE_STYLE_PIXELS[style]?.forEach { (col, row, slot) ->
+    EYE_STYLE_PIXELS[design.faceFor(moodName).eyes]?.forEach { (col, row, slot) ->
         if (slot != "white") rows[row][col] = 'o'
-    }
-    return rows.map { String(it) }
-}
-
-/** Mouth glyphs for the face blueprint (16×16 space, matching the eyes). */
-private val MOUTH_PIXELS: Map<MouthStyle, List<Pair<Int, Int>>> = mapOf(
-    MouthStyle.SMILE to listOf(7 to 10, 8 to 10, 7 to 11, 8 to 11),
-    MouthStyle.WIDE to listOf(
-        6 to 10, 7 to 10, 8 to 10, 9 to 10,
-        6 to 11, 7 to 11, 8 to 11, 9 to 11,
-        7 to 12, 8 to 12
-    ),
-    MouthStyle.O to listOf(6 to 10, 7 to 10, 8 to 10, 9 to 10, 6 to 11, 9 to 11),
-    MouthStyle.NONE to emptyList()
-)
-
-/**
- * v8.36 — the face blueprint: the mood's procedural eyes + mouth + blush
- * projected onto the full canvas, so painting the face always has the
- * default face as a locked reference underneath.
- */
-private fun faceBlueprintRows(design: PetDesign, moodName: String): List<String> {
-    val gridSize = design.gridSize
-    val face = design.faceFor(moodName)
-    val small = Array(16) { CharArray(16) { '.' } }
-    EYE_STYLE_PIXELS[face.eyes]?.forEach { (col, row, slot) ->
-        if (slot != "white") small[row][col] = 'o'
-    }
-    MOUTH_PIXELS[face.mouth]?.forEach { (col, row) -> small[row][col] = 'o' }
-    if (face.blush) listOf(2 to 9, 13 to 9).forEach { (col, row) -> small[row][col] = 'o' }
-    val rows = MutableList(gridSize) { CharArray(gridSize) { '.' } }
-    small.forEachIndexed { r, line ->
-        line.forEachIndexed { c, ch ->
-            if (ch != '.') {
-                val col = ((c + 0.5f) * gridSize / 16f).toInt().coerceIn(0, gridSize - 1)
-                val row = ((r + 0.5f) * gridSize / 16f).toInt().coerceIn(0, gridSize - 1)
-                rows[row][col] = ch
-            }
-        }
     }
     return rows.map { String(it) }
 }
@@ -3443,7 +3037,10 @@ private fun DrawPickerDialog(
     onSelect: (PetEditorTarget) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val visibleCategory = if (category == "faces") "faces" else "body"
+    // Faces and animation editing are intentionally unavailable in this
+    // studio pass; the picker exposes only the retained body/palette/actions
+    // surfaces.
+    val visibleCategory = "body"
     Column(
         modifier = Modifier
             .padding(18.dp)
@@ -3459,7 +3056,6 @@ private fun DrawPickerDialog(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             StripChip("Body & pose", visibleCategory == "body") { onCategoryChange("body") }
-            StripChip("Faces", visibleCategory == "faces") { onCategoryChange("faces") }
         }
         Spacer(Modifier.height(12.dp))
         when (visibleCategory) {
@@ -3519,33 +3115,6 @@ private fun DrawPickerDialog(
                     },
                     onClick = { onSelect(PetEditorTarget.Colors) }
                 )
-            }
-            "faces" -> {
-                PetFaceMoods.ALL.chunked(2).forEach { rowMoods ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        rowMoods.forEach { mood ->
-                            PickerCard(
-                                title = PetFaceMoods.label(mood),
-                                subtitle = "Face",
-                                selected = selected is PetEditorTarget.Face && selected.mood == mood,
-                                modifier = Modifier.weight(1f),
-                                preview = {
-                                    FaceOnlyPreview(
-                                        mood = mood,
-                                        design = design,
-                                        modifier = Modifier.size(64.dp)
-                                    )
-                                },
-                                onClick = { onSelect(PetEditorTarget.Face(mood)) }
-                            )
-                        }
-                        if (rowMoods.size == 1) Spacer(Modifier.weight(1f))
-                    }
-                    Spacer(Modifier.height(10.dp))
-                }
             }
             "actions" -> {
                 Text(
@@ -4163,185 +3732,7 @@ private fun QuickPaletteRow(
             )
         }
     }
-}/** Renders only the selected mood's face on the same warm pixel board used for painting. */
-@Composable
-private fun FaceOnlyPreview(
-    mood: String,
-    design: PetDesign,
-    modifier: Modifier = Modifier
-) {
-    val face = design.faceFor(mood)
-    // Mood cards are decorative previews, not editors. Keep their render
-    // grid capped at 16×16 even when the evolved design is 64×64: the full
-    // resolution is reserved for the one interactive board below. This keeps
-    // the face picker bounded on 256MB devices without changing saved pixels.
-    val previewGridSize = minOf(design.gridSize, 16)
-    val previewFace = remember(face, design.gridSize, previewGridSize) {
-        if (face.gridRows.isEmpty() || design.gridSize == previewGridSize) {
-            face
-        } else {
-            face.copy(
-                gridRows = PetDesign.resizeGrid(face.gridRows, design.gridSize, previewGridSize)
-            )
-        }
-    }
-    val blueprintRows = remember(design.gridSize, previewGridSize, mood, face.eyes, face.mouth, face.blush) {
-        val rows = faceBlueprintRows(design, mood)
-        if (design.gridSize == previewGridSize) rows
-        else PetDesign.resizeGrid(rows, design.gridSize, previewGridSize)
-    }
-    // Preview cards are repeated once per mood. Keep them on the Canvas path
-    // and downsample them so a 64×64 evolved design creates at most 256 cells
-    // per card, not 4096 cells per card (which was the source of the editor's
-    // OOM on open).
-    FaceGridEditor(
-        modifier = modifier,
-        fitToWidth = false,
-        design = design,
-        face = previewFace,
-        faceGridSize = previewGridSize,
-        tool = null,
-        blueprintRows = blueprintRows,
-        showBlueprint = true,
-        interactive = false,
-        onPaint = { _, _, _ -> }
-    )
-}
-
-/** A compact mood card showing the face itself instead of the whole pet sprite. */
-@Composable
-private fun FaceMoodPickerCard(
-    mood: String,
-    design: PetDesign,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = if (selected) CurioColors.SoftCream else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-        ),
-        onClick = onClick,
-        modifier = Modifier.width(92.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            FaceOnlyPreview(
-                mood = mood,
-                design = design,
-                modifier = Modifier.size(68.dp)
-            )
-            Spacer(Modifier.height(5.dp))
-            Text(
-                PetFaceMoods.label(mood),
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                color = if (selected) Color(0xFF4A3426) else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-/** A face overlay canvas uses the same protected draw mode and palette as the body editor. */
-@Composable
-private fun FaceGridEditor(
-    modifier: Modifier = Modifier,
-    fitToWidth: Boolean = true,
-    design: PetDesign,
-    face: com.curio.app.data.PetFace,
-    faceGridSize: Int = design.gridSize,
-    tool: PaintTool?,
-    blueprintRows: List<String>? = null,
-    showBlueprint: Boolean = false,
-    interactive: Boolean = true,
-    onPaint: (Int, Int, Boolean) -> Unit
-) {
-    val gridSize = faceGridSize.coerceIn(1, design.gridSize)
-    val latestOnPaint by rememberUpdatedState(onPaint)
-    val rows = remember(face.gridRows, gridSize) {
-        if (face.gridRows.size == gridSize) face.gridRows
-        else List(gridSize) { ".".repeat(gridSize) }
-    }
-    val blueprint = remember(blueprintRows, gridSize) {
-        when {
-            !showBlueprint || blueprintRows == null -> null
-            blueprintRows.size == gridSize -> blueprintRows
-            else -> PetDesign.resizeGrid(blueprintRows, blueprintRows.size, gridSize)
-        }
-    }
-    val borderColor = if (tool != null) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-    } else {
-        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-    }
-
-    // A 64×64 face used to create one Compose node per cell, repeated across
-    // every mood preview card. Render the board as one Canvas instead; this
-    // keeps the editor creamy and interactive while making opening Faces
-    // bounded in memory on 256MB devices.
-    Box(
-        modifier = modifier
-            .then(if (fitToWidth) Modifier.fillMaxWidth() else Modifier)
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
-            .background(CurioColors.SoftCream)
-            .border(if (tool != null) 2.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
-    ) {
-        val gestureModifier = if (interactive && tool != null) {
-            Modifier
-                .pointerInput(gridSize, tool) {
-                    detectTapGestures { offset ->
-                        val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                        latestOnPaint(row, col, false)
-                    }
-                }
-                .pointerInput(gridSize, tool) {
-                    detectDragGestures(
-                        onDragStart = { offset ->
-                            val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                            latestOnPaint(row, col, false)
-                        },
-                        onDrag = { change, _ ->
-                            change.consume()
-                            val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
-                            latestOnPaint(row, col, true)
-                        }
-                    )
-                }
-        } else {
-            Modifier
-        }
-        Canvas(modifier = Modifier.fillMaxSize().then(gestureModifier)) {
-            drawRect(CurioColors.SoftCream)
-            val cellWidth = size.width / gridSize.toFloat()
-            val cellHeight = size.height / gridSize.toFloat()
-            rows.forEachIndexed { rowIndex, line ->
-                line.forEachIndexed { colIndex, ch ->
-                    val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
-                    val color = when {
-                        ch != '.' -> hexColor(design.colorOf(ch))
-                        blueprintKey != null && blueprintKey != '.' ->
-                            lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
-                        else -> CurioColors.SoftCream.copy(alpha = 0.18f)
-                    }
-                    drawRect(
-                        color = color,
-                        topLeft = Offset(colIndex * cellWidth, rowIndex * cellHeight),
-                        size = Size(cellWidth + 0.5f, cellHeight + 0.5f)
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
+}/**
  * v8.36 — shifts a detail layer's pixels by (dr, dc); pixels pushed past
  * the edge are dropped, transparent cells fill the gaps.
  */
@@ -5314,7 +4705,6 @@ private fun EditorTargetHeader(
 private fun targetIcon(target: PetEditorTarget): String = when (target) {
     is PetEditorTarget.Body, is PetEditorTarget.CurledPose -> CurioIcons.Brush
     is PetEditorTarget.Colors -> CurioIcons.Palette
-    is PetEditorTarget.Face -> CurioIcons.Star
     is PetEditorTarget.Reaction -> CurioIcons.AutoAwesome
     is PetEditorTarget.CustomAction -> CurioIcons.Add
     is PetEditorTarget.Animation -> CurioIcons.PlayArrow
