@@ -11,6 +11,7 @@
 - **Full-screen animation player** (`AnimationPlayerDialog`): fixes the dead-tap bug (gallery used to set a hidden target on the wrong page) — tap an animation → dark full-screen player (big looping preview, play/pause, frame-step, "Edit frames" → Editor page with that animation open).
 - **Version bump** 20260913 → 20260914 + store changelog 20260914.txt.
 - Verified: braces clean (125 files), `git diff --check` clean, stale refs gone (PetDesignerNavbar/DrawPickerStrip/CurioSectionLabel), code-reviewed. CI is the compile gate.
+- **Follow-up (same v8.56)**: Pets page cards now play the pet's looping IDLE animation instead of a static sprite — `PetLibraryCard` (Curie, animated with the real saved look via `initialDesign`) + filled `CustomPetCard`s both render `PetAnimationPreview(PET_CARD_ANIMATION)`, which resolves custom frames automatically. Pushed with the studio commit.
 
 # Request — CI compile fix (Topic Database sort) + reveal action dock small-screen/theme fix (DONE)
 

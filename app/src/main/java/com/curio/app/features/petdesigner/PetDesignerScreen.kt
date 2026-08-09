@@ -153,6 +153,10 @@ private val QUICK_HEX = listOf(
     "FFD97D", "E0B050", "B8860B", "C0A040", "D9C060", "F0C060"
 )
 
+/** v8.56 — the gentle looping animation pet cards play (idle, safe fallback). */
+private val PET_CARD_ANIMATION: PetAnimation =
+    animationById("idle") ?: BUILTIN_ANIMATIONS.first()
+
 /** Hex parse with the same tolerance as [PetDesign]. */
 private fun parseHex(text: String): String? {
     val clean = text.filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }.uppercase()
@@ -615,6 +619,8 @@ fun PetDesignerScreen(navController: NavController) {
                         PetRegistry.all.forEach { pet ->
                             PetLibraryCard(
                                 pet = pet,
+                                // The card animates the pet's real saved look.
+                                design = initialDesign,
                                 current = activeCustomSlot == null,
                                 onClick = { selectPet(pet) },
                                 modifier = Modifier.weight(1f)
@@ -5190,11 +5196,13 @@ private fun CustomPetCard(
                     .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CurioPetSprite(
-                    stage = CurioPet.currentStage(),
-                    mood = CurioPet.Mood.HAPPY,
-                    spriteSize = 56.dp,
-                    design = parsed
+                // v8.56 follow-up — the card plays the pet's idle animation
+                // on loop instead of a static sprite (PetAnimationPreview
+                // resolves the design's custom frames automatically).
+                PetAnimationPreview(
+                    animation = PET_CARD_ANIMATION,
+                    design = parsed,
+                    spriteSize = 56.dp
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -5515,6 +5523,9 @@ private fun AnimationPlayerDialog(
 @Composable
 private fun PetLibraryCard(
     pet: PetDefinition,
+    // v8.56 follow-up — the design to animate (the card shows the pet's
+    // real current look, not a static default).
+    design: PetDesign = pet.defaultDesign,
     current: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -5534,11 +5545,12 @@ private fun PetLibraryCard(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CurioPetSprite(
-                stage = CurioPet.currentStage(),
-                mood = CurioPet.Mood.HAPPY,
-                spriteSize = 56.dp,
-                design = pet.defaultDesign
+            // v8.56 follow-up — the card plays the pet's idle animation on
+            // loop instead of a static sprite.
+            PetAnimationPreview(
+                animation = PET_CARD_ANIMATION,
+                design = design,
+                spriteSize = 56.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
