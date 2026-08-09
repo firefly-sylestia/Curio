@@ -44,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +72,6 @@ import com.curio.app.data.CurioQuests.QuestChain
 import com.curio.app.data.CurioQuests.QuestStage
 import com.curio.app.data.CurioQuests.WeeklyQuest
 import com.curio.app.data.PromoMode
-import com.curio.app.data.QuestGuide
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -184,17 +182,8 @@ fun QuestsScreen(navController: NavController) {
     // The pet's accent — the least-engaged lane's tint, or the page coral
     // when every lane is already explored. (themedAccent is @Composable, so
     // only the prefs read is remembered.)
-    // v8.2 — the tour is offered ONCE and only from a tap on this page: the
-    // first quest shows a prompt with a "No, thanks" option; a taken or
-    // declined offer is never shown again, and the "Guided tour" Settings
-    // toggle is the master switch. Any other quest (or a settled offer)
-    // just navigates to the quest's screen.
-    var showTourOffer by rememberSaveable { mutableStateOf(false) }
-    val offerTour = current?.id == QuestGuide.firstQuestId &&
-        AppPreferences.guideEnabledState && !AppPreferences.guideTourOfferedState
     val onQuestNavigate: (String) -> Unit = { route ->
-        if (offerTour) showTourOffer = true
-        else navController.navigateToQuestRoute(route)
+        navController.navigateToQuestRoute(route)
     }
 
     Box(
@@ -300,7 +289,6 @@ fun QuestsScreen(navController: NavController) {
                         ) { m ->
                             CurrentQuestCard(
                                 stage = current,
-                                showTourCta = offerTour,
                                 onNavigate = onQuestNavigate,
                                 modifier = m
                             )
@@ -429,39 +417,6 @@ fun QuestsScreen(navController: NavController) {
         }
     }
 
-    // ── One-time tour offer (v8.2) — the first time the user taps the
-    //    first quest, ask before launching the walkthrough. "Take the tour"
-    //    starts it; "No, thanks" (or dismissing) marks the offer as seen so
-    //    it never reappears — the first quest navigates normally afterwards.
-    if (showTourOffer) {
-        AlertDialog(
-            onDismissRequest = {
-                showTourOffer = false
-                AppPreferences.setGuideTourOffered(context, true)
-            },
-            title = { Text("Take a quick tour?") },
-            text = {
-                Text(
-                    "A small guide can walk you through every screen: Home, " +
-                        "Spin, the Cabinet, Profile, Quests and Settings. " +
-                        "It takes about a minute."
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showTourOffer = false
-                    AppPreferences.setGuideTourOffered(context, true)
-                    QuestGuide.start()
-                }) { Text("Take the tour") }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showTourOffer = false
-                    AppPreferences.setGuideTourOffered(context, true)
-                }) { Text("No, thanks") }
-            }
-        )
-    }
 }
 
 /** The rank card — big level badge, title, and the XP progress bar. */
@@ -532,7 +487,6 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
 @Composable
 private fun CurrentQuestCard(
     stage: QuestStage,
-    showTourCta: Boolean,
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -590,8 +544,6 @@ private fun CurrentQuestCard(
         Spacer(Modifier.height(8.dp))
         val done = CurioQuests.stageProgress(stage)
         val chain = CurioQuests.Chains.firstOrNull { it.stages.any { s -> s.id == stage.id } }
-        // The very first quest ("First Spin") offers the one-time guided
-        // tour instead of a plain jump — see QuestsScreen.onQuestNavigate.
         Surface(
             onClick = { stage.navRoute?.let(onNavigate) },
             shape = RoundedCornerShape(50),
@@ -600,8 +552,7 @@ private fun CurrentQuestCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                if (showTourCta && stage.navRoute != null) "Take the tour · +${stage.xpReward} XP"
-                else if (stage.navRoute != null) "Start · +${stage.xpReward} XP"
+                if (stage.navRoute != null) "Start · +${stage.xpReward} XP"
                 else "In progress · ${done.coerceAtMost(stage.target)}/${stage.target}",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.White,

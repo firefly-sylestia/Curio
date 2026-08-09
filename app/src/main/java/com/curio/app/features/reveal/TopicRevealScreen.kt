@@ -96,7 +96,6 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
-import com.curio.app.data.QuestGuide
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildExploreSearchUrl
@@ -219,7 +218,6 @@ fun TopicRevealScreen(
             CurioPet.reactTo(
                 if (auto) CurioPet.Event.REVEAL_AUTO else CurioPet.Event.REVEAL_TAPPED
             )
-            QuestGuide.onWait(QuestGuide.Wait.REVEAL)
         }
     }
 

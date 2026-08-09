@@ -27,9 +27,8 @@ import java.util.Calendar
  *    every stage is a badge, every badge lives in a chain.
  *  - **The Tour** — a guided walkthrough chain (Settings → Profile →
  *    pin → quote → daily → badge) with routes to jump straight to each
- *    screen; the in-app guide overlay drives this chain, and tapping the
- *    very first quest launches the full auto-navigating quest tour
- *    (see [QuestGuide]).
+ *    screen. The chain remains available as ordinary quest progress while
+ *    its future tutorial presentation is redesigned.
  *  - **Daily quests** — five quests picked per day from a rotating pool
  *    (seeded by the calendar day, stable all day, resets at 4 AM): three
  *    CORE quests first, then two BONUS quests (higher rewards) that
@@ -605,8 +604,6 @@ object CurioQuests {
         }
         write(context)
         addXp(context, 2)
-        // The tour's Spin step advances the moment the user actually spins.
-        QuestGuide.onWait(QuestGuide.Wait.SPIN)
     }
 
     /** The user started exploring a topic (ExploreSessionStore.recordExplored). */
@@ -633,8 +630,6 @@ object CurioQuests {
         // Feed the category passport — an explore advances the lane's stamp
         // toward EXPLORED and refreshes its last-explored date (spec §6.1).
         CurioPassport.noteExplore(context, categoryId)
-        // The tour's Explore step advances when a topic is explored.
-        QuestGuide.onWait(QuestGuide.Wait.EXPLORE)
     }
 
     /** A capture was saved (SaveCaptureScreen). [format] feeds the Every-Format stage. */
@@ -647,8 +642,6 @@ object CurioQuests {
         bumpWeekly(context, WeeklyKind.SAVE)
         write(context)
         addXp(context, 10)
-        // The tour's Save step advances when a capture is saved.
-        QuestGuide.onWait(QuestGuide.Wait.SAVE)
     }
 
     /** A quote was bookmarked (AppPreferences.saveQuote). */
@@ -710,8 +703,6 @@ object CurioQuests {
         write(context)
         // 0 XP — the call is just a refresh so the tour chain checks run.
         addXp(context, 0)
-        // The tour's Profile step advances when the profile is opened.
-        QuestGuide.onWait(QuestGuide.Wait.PROFILE)
     }
 
     /** Settings opened (SettingsHubScreen) — counts for the tour quest. */
@@ -721,8 +712,6 @@ object CurioQuests {
         write(context)
         // 0 XP — the call is just a refresh so the tour chain checks run.
         addXp(context, 0)
-        // The tour's Settings step advances when Settings is opened.
-        QuestGuide.onWait(QuestGuide.Wait.SETTINGS)
     }
 
     /** Streak advanced (StreakTracker.recordActivity) — feeds streak stages. */

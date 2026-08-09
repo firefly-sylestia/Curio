@@ -1,24 +1,23 @@
-# Request — Reimagine evolved pets, move evolved art to 64×64, redesign home, remove home editor
+# Request — Remove tutorial implementation, keep the Tour quest
 
 ## User request
-- Keep the baby pet version as-is.
-- Redesign the evolved forms because the current evolved forms are not good.
-- Upgrade evolved pet art/editor resolution to 64×64 for more detail.
-- Give each evolved path its own accessories.
-- Redesign the pet's home because the current home does not look good.
-- Remove the home editor.
+- Remove the tutorial/tour implementation entirely for now.
+- Keep the Quest feature.
+- Clarified decision: keep the separate “The Tour” Quest chain, its stages, progress, XP, and badges; remove only the tutorial experience and implementation around it.
 
 ## Completed
-- Preserved the baby form and its original 16×16 body/curl art.
-- Evolved default forms now use a detailed 64×64 body/curl canvas, while older saved 16×16, 24×24, and 32×32 designs remain readable and are not silently resized.
-- Fire, Water, and Nature evolved paths now receive distinct accessory pixel layers; final evolution adds its crown treatment. The existing Accessories visibility control hides authored and generated accessory art consistently.
-- Replaced the editable flower-bed presentation with a fixed layered house/home sprite scene used from Home and the companion area.
-- Removed the Home section, bed editor entry, dialog, and helper UI from Pet Studio. Existing persisted bed rows remain dormant compatibility data rather than being deleted.
-- Kept animation/detail/action models and runtime behavior available for future UI re-entry while the related editors remain hidden.
+- Removed the onboarding “Take a quick tour?” prompt.
+- Removed the Quests-page first-quest tutorial offer and “Take the tour” CTA behavior; quest navigation now opens the selected quest normally.
+- Removed the Guided tour Settings entry and preference state/storage.
+- Removed QuestGuide startup restoration, NavHost auto-navigation runner, navigation lock, overlay rendering, and reveal/action wait hooks.
+- Deleted the standalone `QuestGuide.kt` state machine and `PetGuideOverlay.kt` UI implementation.
+- Removed tutorial-only floating-pet suppression and pointing-paw pose; restored the normal onboarding floating-pet guard.
+- Preserved the separate `CurioQuests` “The Tour” chain and its existing badge IDs/progress mappings.
 
 ## Validation
-- `node scripts/check_braces.js` passed: 125 files checked.
+- `node scripts/check_braces.js` passed: 123 files checked.
 - `git diff --check` passed.
-- Static audits found no stale home-editor symbols or removed home-editor imports in app source.
-- Local Gradle compile/build/lint/test commands were not run per repository rules; CI remains the Kotlin/Android compile gate.
-- Code review found no remaining blocker.
+- Static audits found no tutorial implementation symbols or tutorial UI strings in app source.
+- The “The Tour” Quest chain remains present with all six stages.
+- Local Gradle compile/build/lint/test commands were not run per repository rules; CI remains the Android/Kotlin compile gate.
+- Final code review found and resolved the onboarding floating-pet guard regression.

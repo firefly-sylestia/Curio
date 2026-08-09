@@ -155,8 +155,6 @@ fun CurioPetSprite(
     thinking: Boolean = false,
     watching: Boolean = false,
     spinning: Boolean = false,
-    /** v8.15 — the guided-tour pose: a raised paw pointing "here!". */
-    pointing: Boolean = false,
     /**
      * v8.21 — the pet is dizzy (being dragged around, or recovering right
      * after a drag): swirly eyes, a wobbly sway, and little whoosh marks.
@@ -433,9 +431,6 @@ fun CurioPetSprite(
     val flicking = flickWave > 0.92f && !sleeping && !dragged && !thinking
     val thinkingNow = thinking && !sleeping && !dragged && !moving
     val watchingNow = watching && !sleeping && !dragged && !moving
-    // v8.15 — the tour guide pose: eager wide eyes + a raised pointing paw
-    // on the facing side (mirrored by the flip layer).
-    val pointingNow = pointing && !sleeping && !dragged && !moving
     val idleTilt = (if (thinkingNow) facing * 7f else 0f) +
         (if (watchingNow) facing * 2.5f else 0f)
 
@@ -461,7 +456,6 @@ fun CurioPetSprite(
         playing -> oneShotFace.eyes
         sleeping -> EyeStyle.CLOSED
         peeking -> EyeStyle.WIDE // peeking out from behind a button
-        pointingNow -> EyeStyle.WIDE // "over here!"
         spinningNow -> oneShotFace.eyes // cheering the reel on
         blinkPhase > 0.93f && !excited && !proud && !spinningNow -> EyeStyle.BLINK
         excited -> oneShotFace.eyes
@@ -474,7 +468,6 @@ fun CurioPetSprite(
         playing -> oneShotFace.mouth
         sleeping -> MouthStyle.NONE
         peeking -> MouthStyle.NONE // a quiet peek
-        pointingNow -> MouthStyle.WIDE // "come on, tap it!"
         spinningNow -> oneShotFace.mouth
         excited -> oneShotFace.mouth
         proud -> activeDesign.faceFor(PetFaceMoods.PROUD).mouth
@@ -749,20 +742,6 @@ fun CurioPetSprite(
                                 drawPx(7, 11, ink); drawPx(8, 11, ink)
                             }
                             MouthStyle.NONE -> Unit
-                        }
-
-                        // v8.15 — the raised pointing paw: a little coral
-                        // arm on the facing side that lifts a beat to say
-                        // "here!". The flip layer mirrors it to the other
-                        // side when the pet faces left.
-                        if (pointingNow && activeDesign.isProceduralEnabled("accessories")) {
-                            val pawLift = if (sin(bobPhase * 4f * PI.toFloat()) > 0f) -1 else 0
-                            drawPx(13, 9 + pawLift, accent)
-                            drawPx(14, 9 + pawLift, accent)
-                            drawPx(15, 9 + pawLift, accent)
-                            drawPx(15, 10, accent)
-                            // A tiny ink fingertip so the point reads.
-                            drawPx(15, 9 + pawLift, ink)
                         }
 
                         // Growth accessories (spec §10.4).

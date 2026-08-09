@@ -111,7 +111,6 @@ object AppPreferences {
     // Experimental voice-to-text/dictation. Default OFF so microphone
     // transcription never appears or starts until the user opts in.
     private const val KEY_VOICE_TO_TEXT_ENABLED = "voice_to_text_enabled"
-    private const val KEY_GUIDE_ENABLED = "guide_enabled"
     // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
     // rule-based dialogue + the category passport/discovery features on
     // Quests and Home. Default ON; a user-facing Appearance toggle gates
@@ -127,10 +126,6 @@ object AppPreferences {
     // while the learning brain is off.
     private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
     private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
-    // v8.2 — the quest tour's one-time offer: once the user has taken OR
-    // declined it ("No, thanks" / dismissing the prompt), the offer never
-    // reappears and the first quest navigates normally.
-    private const val KEY_GUIDE_TOUR_OFFERED = "guide_tour_offered"
     private const val KEY_PINNED_TOPICS = "pinned_topics"   // JSON array of PinnedTopic
     private const val KEY_SAVED_QUOTES = "saved_quotes"      // JSON array of SavedQuote
     private const val KEY_TOPIC_SENTIMENTS = "topic_sentiments"  // JSON object: "CATEGORY:topicId" -> "like"/"dislike"
@@ -334,16 +329,6 @@ object AppPreferences {
         private set
 
     /**
-     * Guided-tour state (v8.0) — the MASTER SWITCH for the one-time quest
-     * tour: when ON (default), the Quests page offers the tap-along tour the
-     * first time the user taps the first quest (see [isGuideTourOffered]).
-     * Toggleable in Settings; the tour is never auto-shown from other
-     * screens (v8.2).
-     */
-    var guideEnabledState by mutableStateOf(true)
-        private set
-
-    /**
      * Curio pet companion state (v8.5) — gates the pixel pet sprite, its
      * rule-based dialogue, and the passport/discovery companion layer on
      * Quests and Home (spec §10). Default ON. Seeded from prefs in
@@ -373,11 +358,6 @@ object AppPreferences {
     // v8.39 — custom reaction lines are an explicit opt-in. The editor can
     // always be used, but Curie only speaks saved custom lines when enabled.
     var customReactionLinesState by mutableStateOf(false)
-        private set
-
-    // v8.2 — whether the one-time tour offer has been shown (taken or
-    // declined). Suppresses the offer on the Quests page so it never nags.
-    var guideTourOfferedState by mutableStateOf(false)
         private set
 
     /**
@@ -479,8 +459,6 @@ object AppPreferences {
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
-        guideEnabledState = isGuideEnabled(context)
-        guideTourOfferedState = isGuideTourOffered(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
@@ -1106,28 +1084,6 @@ object AppPreferences {
             .putString(KEY_CATEGORY_ORDER, valid.joinToString(",") { it.name })
             .apply()
         categoryOrderState = valid
-    }
-
-    // ── Guided tour ──────────────────────────────────────────────────
-    fun isGuideEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GUIDE_ENABLED, true)
-
-    fun setGuideEnabled(context: Context, enabled: Boolean) {
-        guideEnabledState = enabled
-        prefs(context).edit().putBoolean(KEY_GUIDE_ENABLED, enabled).apply()
-    }
-
-    /**
-     * Whether the one-time quest-tour offer has already been shown (taken
-     * or declined). Once true, the Quests page never offers the tour again
-     * and the first quest navigates normally (v8.2).
-     */
-    fun isGuideTourOffered(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GUIDE_TOUR_OFFERED, false)
-
-    fun setGuideTourOffered(context: Context, offered: Boolean) {
-        guideTourOfferedState = offered
-        prefs(context).edit().putBoolean(KEY_GUIDE_TOUR_OFFERED, offered).apply()
     }
 
     // ── Curio pet companion (v8.5) ───────────────────────────────────

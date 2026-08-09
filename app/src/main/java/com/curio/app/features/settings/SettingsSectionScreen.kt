@@ -182,12 +182,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-guide") {
-            CompactSwitchRow("Guided tour", "One-time tap-along tour, offered on the Quests page", AppPreferences.guideEnabledState) {
-                AppPreferences.setGuideEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
         // v8.5 — the Curio pet companion (spec §10): pixel pet + rule-based
         // dialogue + passport/discovery on Quests and Home. Default ON.
         SettingsRowPulse(highlightKey == "appearance-pet") {

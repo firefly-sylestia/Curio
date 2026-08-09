@@ -146,21 +146,6 @@ object CurioPet {
     var atHome by mutableStateOf(false)
         private set
 
-    /**
-     * v8.25 — UI-suppression flag: while a modal dialog shows its OWN pet
-     * sprite (the onboarding tour-ask), the floating pet is hidden so the
-     * pet never appears twice (once in the dialog, once wandering behind
-     * it). Set/cleared by the screen that owns the dialog via
-     * [suppressFloating].
-     */
-    var floatingSuppressed by mutableStateOf(false)
-        private set
-
-    /** v8.25 — hide ([value] = true) or restore the floating pet. */
-    fun suppressFloating(value: Boolean) {
-        floatingSuppressed = value
-    }
-
     /** Wake the pet (tap on the bed). The floating companion appears. */
     fun wake() {
         awake = true

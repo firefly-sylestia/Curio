@@ -1,6 +1,5 @@
 package com.curio.app.navigation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -68,7 +67,6 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPet
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
-import com.curio.app.data.QuestGuide
 import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioIcon
@@ -90,7 +88,6 @@ import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.topichistory.TopicHistoryScreen
 import com.curio.app.features.recent.RecentScreen
 import com.curio.app.features.cabinet.CabinetScreen
@@ -112,7 +109,6 @@ import com.curio.app.ui.components.CurioBottomBar
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
-import com.curio.app.ui.pet.PetGuideOverlay
 import com.curio.app.ui.theme.CurioMotion
 
 /**
@@ -328,50 +324,6 @@ fun CurioNavHost(
     // Survives rotation so the startup prompt only fires on a truly fresh
     // process (an active session left behind by a killed app).
     var startupPromptDone by rememberSaveable { mutableStateOf(false) }
-
-    // ── Quest tour (v8.1/v8.2) — the tour overlay + auto-navigating runner
-    //    below. The tour itself is STARTED only from the Quests page (the
-    //    one-time offer on the first quest — see QuestsScreen); the old
-    //    auto-showing "next quest" guide pill was removed in v8.2 so nothing
-    //    pops up from other screens.
-    // ── Quest tour runner — auto-navigate to the current step's screen so
-    //    every overlay tap advances the walkthrough to the next place.
-    //    v8.6 — HOLD steps (First Journey's real-action waits) only guide the
-    //    user back when they're PARKED on a bottom-nav tab and not already on
-    //    the step's route — never yank someone away mid-flow (e.g. off the
-    //    reveal while it auto-opens after a spin); the step advances via
-    //    QuestGuide.onWait when the REAL action happens. Also persists the
-    //    exact tour position so it survives process death (spec §7.3).
-    LaunchedEffect(QuestGuide.active, QuestGuide.index, routePrefix) {
-        if (QuestGuide.active) {
-            val step = QuestGuide.current
-            if (step != null && step.route.isNotEmpty()) {
-                val parkedOnTab = routePrefix != null &&
-                    routePrefix in CurioRoutes.bottomNavRoutePrefixes
-                if (step.hold) {
-                    if (parkedOnTab && routePrefix != step.route) {
-                        navController.navigateToQuestRoute(step.route)
-                    }
-                } else if (routePrefix != step.route) {
-                    navController.navigateToQuestRoute(step.route)
-                }
-            }
-        }
-        QuestGuide.persist(context)
-    }
-    // When the tour ends (Finish / the overlay's X), land the user back on a
-    // stable tab instead of leaving the pushed tour screens stacked.
-    var tourWasActive by remember { mutableStateOf(false) }
-    LaunchedEffect(QuestGuide.active) {
-        val now = QuestGuide.active
-        if (tourWasActive && !now) {
-            val prefix = routePrefix
-            if (prefix != null && prefix !in CurioRoutes.bottomNavRoutePrefixes) {
-                navController.popBackStack(CurioRoutes.HOME, inclusive = false)
-            }
-        }
-        tourWasActive = now
-    }
 
     // Ask "are you done exploring?" whenever the app returns to the
     // foreground while an explore session is active — mid-session, after
@@ -891,83 +843,18 @@ fun CurioNavHost(
         }
     }
     }
-    // v8.29 — the tour LOCKS navigation: the system back button can't wander
-    // off mid-tour (the overlay's X always closes it if the user wants out).
-    BackHandler(enabled = QuestGuide.active) { /* swallow — use the X to leave */ }
-
-    // ── Quest tour overlay — rendered OUTSIDE the Scaffold's padded content
-    //    box (a full-window sibling, like the floating pet) so its coordinate
-    //    space IS the window: landmark bounds are window coordinates, and
-    //    bottom-bar-slot landmarks (the reveal's Start exploring dock) sit
-    //    BELOW the padded content area. An overlay inside that box drew
-    //    those holes off the bottom edge, so the highlight landed in the
-    //    wrong place and the scrim blocked the real button (v8.25).
-    //    v8.15 — the tour overlay is PET-GUIDED: the pet walks to the step's
-    //    target and points at it through a scrim window (see PetGuideOverlay).
-    //    The tour itself is started from the Quests page (v8.2) or the
-    //    first-launch ask (v8.22), never auto-shown elsewhere.
-    if (QuestGuide.active) {
-        QuestGuide.current?.let { step ->
-            // v8.6 — action-wait steps disable the action and relabel it
-            // "Do this to continue": the tour advances the moment the
-            // REAL action happens (spec §7.3), the X always closes it.
-            val waiting = step.waitFor != null
-            PetGuideOverlay(
-                title = step.title,
-                message = step.message,
-                stepIndex = QuestGuide.index + 1,
-                stepCount = QuestGuide.steps.size,
-                actionLabel = when {
-                    QuestGuide.isLast -> "Finish"
-                    waiting -> "Do this to continue"
-                    else -> "Next"
-                },
-                position = step.position,
-                // v8.22 — the guide highlights the step's REAL target
-                // landmark (found on the current screen's registry).
-                screen = routePrefix,
-                targetLandmark = step.targetLandmark,
-                actionEnabled = !waiting,
-                onClick = { if (QuestGuide.isLast) QuestGuide.stop() else QuestGuide.next() },
-                onClose = { QuestGuide.stop() },
-                // v8.12 — wait steps offer "Skip"/"Explore later": the
-                // tour guides but never blocks, so the user can move on
-                // without doing the action.
-                skipLabel = if (waiting) step.skipLabel ?: "Skip" else null,
-                onSkip = { QuestGuide.next() },
-                // TOP steps window the band below the settings hero.
-                heroTopOffset = SettingsHeroTotalHeight
-            )
-        }
-    }
     // v8.8 — the floating Curio pet: a global overlay drawn above the whole
     // Scaffold (over the bottom bar too). Renders only while the pet layer,
     // the floating toggle and the pet's awake state are on; it wanders, can
-    // be dragged anywhere, long-pressed home into its flower bed, and naps
-    // back after a long idle. v8.10 — the sprite wears ONE fixed color (the
-    // Curio light-theme brand coral), so no accent is computed here anymore.
-    // v8.15 — while the guided tour runs, the pet IS the guide (in
-    // PetGuideOverlay), so the floating wanderer hides to avoid a duplicate.
-    // v8.22 — during the boot gates the pet stays AT ITS HOUSE: no floating
-    // pet on the splash or crash screens (it comes out on its own during
-    // onboarding). v8.25 — the pet also hides while a dialog shows its own
-    // pet sprite (the onboarding tour-ask), so it never appears twice.
-    if (!QuestGuide.active &&
-        !CurioPet.floatingSuppressed &&
+    // be dragged anywhere, long-pressed home into its house, and naps back
+    // after a long idle. v10 — it stays out only during splash/crash gates.
+    if (
         routePrefix != CurioRoutes.SPLASH &&
         routePrefix != CurioRoutes.CRASH &&
-        // v8.29 — never during the onboarding intro: the pet introduces
-        // itself in the guided tour instead.
         routePrefix != CurioRoutes.ONBOARDING
     ) {
         CurioFloatingPet(routePrefix = routePrefix)
     }
-
-    // (The v8.0 full-dialog guide and the v8.1 auto-showing "next quest"
-    // overlay were replaced in v8.2: the tour is offered ONCE on the Quests
-    // page when the user taps the first quest and accepts the prompt — see
-    // QuestsScreen. The active-tour overlay is rendered above; the
-    // QuestGuide state lives at the top of this composable.)
 
     // ── Done-exploring prompt (app return while a session is active) ────
     val activeSession = ExploreSessionStore.activeSessionState
