@@ -68,9 +68,15 @@ import kotlinx.coroutines.withContext
  *
  * Opened from the Home drawer ("Browse Topics"). Renders every topic across
  * the ten real categories (wildcard is a merge, so it isn't a separate lane)
- * with a search bar, per-category filter chips, and a small "explored"
- * badge on topics already marked done. Tapping any topic opens its full
- * Topic Reveal page, exactly like spinning it.
+ * with a search bar, per-category filter chips, a small "explored" badge on
+ * topics already marked done, and a sort control (A–Z / newest / oldest by
+ * year). Tapping any topic opens its full Topic Reveal page, exactly like
+ * spinning it.
+ *
+ * Sorting reads each topic's year from its name ("Citizen Kane (1941)"),
+ * its explore target ("Vespertine (2001) end-to-end"), its teaser, or a
+ * decade tag ("1960s" → 1960) — whatever is available first. Topics with no
+ * recoverable year sort last in year order.
  *
  * Sits in the settings family: torn rose hero on a muted watermark
  * backdrop, content scrolling under the ragged tear, ScreenEntrance
@@ -88,6 +94,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // resetting to a fresh blank list every time you come back.
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
+    // v8.54 — sort control: DEFAULT (category file order) / ALPHA (A–Z by
+    // name) / YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so
+    // it survives reveal round-trips, tab switches, and rotation.
+    var sortMode by rememberSaveable { mutableStateOf(DatabaseSortMode.DEFAULT) }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
     // the list first composes with zero rows and a restored LazyListState gets
@@ -128,31 +138,75 @@ fun TopicDatabaseScreen(navController: NavController) {
 
     // Filtered rows — section headers while browsing All, topic rows always.
     // Keyed on the done-set snapshot (structural equality) so badges refresh.
+    // v8.54 — with a non-default sort active the list flattens to one sorted
+    // run (section headers would break a global A–Z / year order).
     val needle = query.trim().lowercase()
-    val rows = remember(catalog, effectiveCat, needle, doneTopics) {
-        buildList {
-            catalog.forEach { (cat, topics) ->
-                if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                val shown = if (needle.isEmpty()) topics else topics.filter { t ->
-                    t.name.lowercase().contains(needle) ||
-                        t.subtype.lowercase().contains(needle) ||
-                        t.byline.lowercase().contains(needle) ||
-                        t.teaser.lowercase().contains(needle) ||
-                        t.tags.any { it.lowercase().contains(needle) }
-                }
-                if (shown.isEmpty()) return@forEach
-                if (effectiveCat == null) {
-                    add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
-                }
-                shown.forEach { t ->
-                    add(
-                        DatabaseRow(
-                            key = t.id,
-                            topic = t,
-                            done = "${cat.id.name}::$t.name" in doneTopics
+    val matches: (CurioTopic) -> Boolean = { t ->
+        needle.isEmpty() ||
+            t.name.lowercase().contains(needle) ||
+            t.subtype.lowercase().contains(needle) ||
+            t.byline.lowercase().contains(needle) ||
+            t.teaser.lowercase().contains(needle) ||
+            t.tags.any { it.lowercase().contains(needle) }
+    }
+    val rows = remember(catalog, effectiveCat, needle, doneTopics, sortMode) {
+        if (sortMode == DatabaseSortMode.DEFAULT) {
+            buildList {
+                catalog.forEach { (cat, topics) ->
+                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                    val shown = topics.filter(matches)
+                    if (shown.isEmpty()) return@forEach
+                    if (effectiveCat == null) {
+                        add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
+                    }
+                    shown.forEach { t ->
+                        add(
+                            DatabaseRow(
+                                key = t.id,
+                                topic = t,
+                                done = "${cat.id.name}::$t.name" in doneTopics
+                            )
                         )
-                    )
+                    }
                 }
+            }
+        } else {
+            val flat = buildList {
+                catalog.forEach { (cat, topics) ->
+                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                    topics.filter(matches).forEach { t ->
+                        add(
+                            DatabaseRow(
+                                key = t.id,
+                                topic = t,
+                                done = "${cat.id.name}::$t.name" in doneTopics
+                            )
+                        )
+                    }
+                }
+            }
+            val topics = flat.mapNotNull { it.topic }
+            val sorted = when (sortMode) {
+                DatabaseSortMode.ALPHA ->
+                    topics.sortedWith(compareBy({ it.name.lowercase() }, { it.id }))
+                DatabaseSortMode.YEAR_NEWEST ->
+                    topics.sortedWith(
+                        compareByDescending({ topicYear(it) ?: Int.MIN_VALUE })
+                            .thenBy { it.name.lowercase() }
+                    )
+                DatabaseSortMode.YEAR_OLDEST ->
+                    topics.sortedWith(
+                        compareBy({ topicYear(it) ?: Int.MAX_VALUE })
+                            .thenBy { it.name.lowercase() }
+                    )
+                DatabaseSortMode.DEFAULT -> topics
+            }
+            sorted.map { t ->
+                DatabaseRow(
+                    key = t.id,
+                    topic = t,
+                    done = "${t.categoryId.name}::$t.name" in doneTopics
+                )
             }
         }
     }
@@ -177,6 +231,16 @@ fun TopicDatabaseScreen(navController: NavController) {
         }.collect { (index, offset) ->
             savedScrollIndex = index
             savedScrollOffset = offset
+        }
+    }
+    // v8.54 — switching the sort reorders the whole list, so land back at
+    // the top instead of keeping a random index into the new ordering.
+    // (The category filter chips keep their pre-existing no-reset behavior.)
+    LaunchedEffect(sortMode) {
+        if (hasRows && listState.firstVisibleItemIndex > 0) {
+            savedScrollIndex = 0
+            savedScrollOffset = 0
+            listState.scrollToItem(0)
         }
     }
 
@@ -282,6 +346,52 @@ fun TopicDatabaseScreen(navController: NavController) {
                                     tint = cat.tint,
                                     selected = effectiveCat == cat.id,
                                     onClick = { selectedCat = cat.id }
+                                )
+                            }
+                        }
+                        // v8.54 — sort control: A–Z / Newest / Oldest (by year).
+                        // Tapping the active chip returns to the default order.
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item("sort-label") {
+                                Text(
+                                    text = "Sort",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(start = 2.dp)
+                                )
+                            }
+                            item("sort-alpha") {
+                                DatabaseSortChip(
+                                    label = "A–Z",
+                                    selected = sortMode == DatabaseSortMode.ALPHA,
+                                    onClick = {
+                                        sortMode = if (sortMode == DatabaseSortMode.ALPHA) DatabaseSortMode.DEFAULT
+                                        else DatabaseSortMode.ALPHA
+                                    }
+                                )
+                            }
+                            item("sort-newest") {
+                                DatabaseSortChip(
+                                    label = "Newest",
+                                    glyph = CurioIcons.ArrowDownward,
+                                    selected = sortMode == DatabaseSortMode.YEAR_NEWEST,
+                                    onClick = {
+                                        sortMode = if (sortMode == DatabaseSortMode.YEAR_NEWEST) DatabaseSortMode.DEFAULT
+                                        else DatabaseSortMode.YEAR_NEWEST
+                                    }
+                                )
+                            }
+                            item("sort-oldest") {
+                                DatabaseSortChip(
+                                    label = "Oldest",
+                                    glyph = CurioIcons.ArrowUpward,
+                                    selected = sortMode == DatabaseSortMode.YEAR_OLDEST,
+                                    onClick = {
+                                        sortMode = if (sortMode == DatabaseSortMode.YEAR_OLDEST) DatabaseSortMode.DEFAULT
+                                        else DatabaseSortMode.YEAR_OLDEST
+                                    }
                                 )
                             }
                         }
@@ -406,6 +516,79 @@ private fun DatabaseFilterChip(
             color = if (selected) selectedInk else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
         )
+    }
+}
+
+/**
+ * How the Topic Database list is ordered. DEFAULT keeps the per-category
+ * file order with section headers; the other modes flatten to one sorted
+ * run (headers are hidden because a global sort breaks grouping).
+ */
+private enum class DatabaseSortMode {
+    DEFAULT, ALPHA, YEAR_NEWEST, YEAR_OLDEST
+}
+
+/**
+ * Best-effort publication/birth year for sorting. Topics have no dedicated
+ * year field, so read it from the first available source: a `(Year)` in the
+ * name ("Citizen Kane (1941)"), a `(Year)` in the explore target
+ * ("Vespertine (2001) end-to-end"), the first 4-digit year in the teaser,
+ * then the explore instruction (boosts people categories like Authors /
+ * Painters where the teaser often omits dates), and finally a decade tag
+ * ("1960s" → 1960). Returns null when nothing is recoverable (unknowns
+ * sort last, alphabetically within that bucket).
+ */
+private fun topicYear(topic: CurioTopic): Int? {
+    val parenthesized = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
+    parenthesized.find(topic.name)?.let { return it.groupValues[1].toInt() }
+    parenthesized.find(topic.exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
+    val bareYear = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
+    bareYear.find(topic.teaser)?.let { return it.value.toInt() }
+    bareYear.find(topic.exploreAction.instruction)?.let { return it.value.toInt() }
+    for (tag in topic.tags) {
+        Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b").find(tag)?.let {
+            return it.groupValues[1].toInt() * 10
+        }
+    }
+    return null
+}
+
+/** Small toggle chip for the sort row — icon + label, mirrors [DatabaseFilterChip]. */
+@Composable
+private fun DatabaseSortChip(
+    label: String,
+    glyph: String? = null,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceContainerLow,
+        border = if (selected) null
+        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
+        ) {
+            if (glyph != null) {
+                CurioIcon(
+                    glyph, null,
+                    tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 14.dp
+                )
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
