@@ -3036,8 +3036,9 @@ private fun AnimationTimelineEditor(
         Text(
             "Draw this frame",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-        )            Text(
-                when (frameGrid) {
+        )
+        Text(
+            when (frameGrid) {
                     "eyes" -> if (base.mood == "SLEEPY") {
                         "Paint this frame's eyes — sleepy (curled) frames keep their own closed-eye look, so the layer applies once the pet stands."
                     } else {
@@ -4622,10 +4623,6 @@ private fun ReactionSpritePreview(
         modifier = modifier
     )
 }
-
-/** v8.50 — one Actions-landing card: looping preview, name, trigger summary,
- *  animation + enabled state, dialogue snippet, and an edited marker. */
-@Composable
 
 /** v8.50 — live action preview inside the reaction editor: the pet plays the
  *  reaction's animation wearing its face, over a speech bubble. Replay
