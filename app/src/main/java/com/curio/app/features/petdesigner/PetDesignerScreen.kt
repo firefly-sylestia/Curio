@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -74,6 +75,7 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -6039,7 +6041,6 @@ private fun BedDesignDialog(onDismiss: () -> Unit, context: android.content.Cont
     var rows by remember(savedRows) { mutableStateOf(savedRows?.toList() ?: BED_ROWS) }
     var paintKey by rememberSaveable { mutableStateOf('w') }
     var selectedPreset by rememberSaveable { mutableStateOf("Custom") }
-    val density = LocalDensity.current
     DialogScrim(onDismiss = onDismiss) {
         Surface(
             shape = RoundedCornerShape(24.dp),
