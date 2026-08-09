@@ -70,7 +70,14 @@ data class PetDesign(
      * Phase 6). Old designs without this field resolve to Curie via
      * [PetRegistry.resolve] — always readable, never crashes.
      */
-    val petSpeciesId: String = PET_CURIE_ID
+    val petSpeciesId: String = PET_CURIE_ID,
+    /**
+     * v8.53 — Phase 7: user-defined custom actions. Each one is a behavior
+     * the pet performs when its trigger fires: a name, a [PetActionTrigger],
+     * an animation to play (built-in or user-drawn via `animations`), and
+     * optional speech lines. Old designs without this field have none.
+     */
+    val customActions: List<CustomPetAction> = emptyList()
 ) {
     /** The palette keys a design may recolor. */
     companion object {
@@ -271,6 +278,26 @@ data class PetDesign(
         DEFAULT_REACTIONS.keys.forEach { event ->
             appendLine("react=$event;${reactions[event]?.toConfig() ?: DEFAULT_REACTIONS[event]?.toConfig() ?: PetReaction().toConfig()}")
         }
+        // v8.53 — custom actions (Phase 7): the whole config is URL-encoded
+        // after `customAction=` so names/lines can safely carry any
+        // characters (old parsers skip the line as an unknown key).
+        customActions.forEach { action ->
+            val encoded = runCatching {
+                java.net.URLEncoder.encode(
+                    listOf(
+                        "id=${action.id}",
+                        "name=${action.name}",
+                        "trigger=${action.trigger.kind}",
+                        "param=${action.trigger.param}",
+                        "anim=${action.animationId}",
+                        "lines=${action.dialogueLines.joinToString("\n")}",
+                        "enabled=${if (action.enabled) 1 else 0}"
+                    ).joinToString(";"),
+                    "UTF-8"
+                )
+            }.getOrDefault("")
+            if (encoded.isNotBlank()) appendLine("customAction=$encoded")
+        }
         // v8.52 — custom animation frames (per-frame pixel layers). Each
         // `anim=id` line starts a section; the `frame=` lines that follow it
         // (until the next `anim=`) carry that animation's frame config plus
@@ -329,6 +356,8 @@ data class PetDesign(
         // parsed per-frame configs (key = frame index).
         var currentAnimId: String? = null
         val animFrames = mutableMapOf<String, MutableMap<Int, PetAnimationFrame>>()
+        // v8.53 — custom actions (Phase 7), parsed in line order.
+        val customActions = mutableListOf<CustomPetAction>()
         text.lineSequence().forEach { raw ->
             val line = raw.trim()
             if (line.isEmpty()) return@forEach
@@ -396,6 +425,47 @@ data class PetDesign(
                     val config = if (separator >= 0) line.substring(separator + 1) else ""
                     if (event.isNotEmpty()) {
                         PetReaction.parse(config)?.let { reactions[event] = it }
+                    }
+                }
+                line.startsWith("customAction=") && eq == 12 -> {
+                    val value = line.substring(13)
+                    runCatching {
+                        val config = java.net.URLDecoder.decode(value, "UTF-8")
+                        var id: String? = null
+                        var name = "Custom action"
+                        var triggerKind = "tap"
+                        var triggerParam = 0
+                        var anim = "happy"
+                        var lines = emptyList<String>()
+                        var enabled = true
+                        config.split(';').forEach { seg ->
+                            val s = seg.indexOf('=')
+                            if (s <= 0) return@forEach
+                            when (seg.substring(0, s)) {
+                                "id" -> id = seg.substring(s + 1)
+                                "name" -> name = seg.substring(s + 1)
+                                "trigger" -> triggerKind = seg.substring(s + 1)
+                                "param" -> triggerParam = seg.substring(s + 1).toIntOrNull() ?: 0
+                                "anim" -> anim = seg.substring(s + 1)
+                                "lines" -> lines = PetReaction.normalizeLines(seg.substring(s + 1))
+                                "enabled" -> enabled = seg.substring(s + 1) == "1" ||
+                                    seg.substring(s + 1).equals("true", ignoreCase = true)
+                            }
+                        }
+                        id?.takeIf { it.isNotBlank() }?.let { actionId ->
+                            if (actionId !in customActions.map { it.id }) {
+                                customActions.add(
+                                    CustomPetAction(
+                                        id = actionId,
+                                        name = name.trim().ifEmpty { "Custom action" },
+                                        trigger = PetActionTrigger(triggerKind, triggerParam),
+                                        animationId = anim,
+                                        dialogueLines = lines,
+                                        enabled = enabled
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
                 line.startsWith("anim=") && eq == 4 -> {
@@ -533,7 +603,8 @@ data class PetDesign(
             },
             procedural = procedural,
             animations = builtAnimations,
-            petSpeciesId = petId ?: fallback.petSpeciesId
+            petSpeciesId = petId ?: fallback.petSpeciesId,
+            customActions = customActions
         )
     }
 
@@ -736,6 +807,24 @@ data class PetDesign(
 
     /** Missing flags intentionally mean enabled for old designs. */
     fun isProceduralEnabled(element: String): Boolean = procedural[element] ?: true
+
+    // ── Custom actions (v8.53, Phase 7) ────────────────────────────────
+
+    /** The custom action with [id], or null. */
+    fun customActionFor(id: String): CustomPetAction? =
+        customActions.firstOrNull { it.id == id }
+
+    /** Adds or replaces [action] (matched by id), preserving list order. */
+    fun withCustomAction(action: CustomPetAction): PetDesign =
+        copy(customActions = customActions.filterNot { it.id == action.id } + action)
+
+    /** Removes the custom action with [id] (no-op when absent). */
+    fun removeCustomAction(id: String): PetDesign =
+        copy(customActions = customActions.filterNot { it.id == id })
+
+    /** The enabled custom actions whose trigger fires for [kind]. */
+    fun customActionsFor(kind: String): List<CustomPetAction> =
+        customActions.filter { it.enabled && it.trigger.kind == kind }
 }
 
 /**
@@ -959,6 +1048,73 @@ object PetReactionEvents {
         LEVEL_UP -> "We leveled up!"
         else -> "Yay!"
     }
+}
+
+/**
+ * v8.53 — when a user-defined custom action fires. Kept as a flat
+ * kind+param pair (not a sealed class) so it serializes trivially inside
+ * the design text and stays forward/backward tolerant: an unknown kind
+ * simply never fires instead of breaking the parse.
+ *
+ * Kinds:
+ * - `tap` / `longpress` — the user touches / long-presses the pet.
+ * - `appopen` — the floating pet appears (once per appearance).
+ * - `reveal` — a topic reveal opens (user tap or spin auto-open).
+ * - `save` — a capture is saved.
+ * - `levelup` — a level-up moment happens.
+ * - `time` — the device clock hits hour [param] (0-23).
+ * - `idle` — the pet has been untouched for [param] seconds.
+ */
+data class PetActionTrigger(
+    val kind: String = "tap",
+    val param: Int = 0
+) {
+    companion object {
+        const val TAP = "tap"
+        const val LONG_PRESS = "longpress"
+        const val APP_OPEN = "appopen"
+        const val REVEAL = "reveal"
+        const val SAVE = "save"
+        const val LEVEL_UP = "levelup"
+        const val TIME = "time"
+        const val IDLE = "idle"
+
+        /** All kinds in editor order (constant so chips render in order). */
+        val ALL = listOf(TAP, LONG_PRESS, APP_OPEN, REVEAL, SAVE, LEVEL_UP, TIME, IDLE)
+
+        /** Short "when does this fire" label for chips and cards. */
+        fun label(kind: String): String = when (kind) {
+            TAP -> "When you tap"
+            LONG_PRESS -> "On long press"
+            APP_OPEN -> "App opens"
+            REVEAL -> "Topic revealed"
+            SAVE -> "Keepsake saved"
+            LEVEL_UP -> "Level up"
+            TIME -> "At a set time"
+            IDLE -> "After idle"
+            else -> kind
+        }
+    }
+}
+
+/**
+ * v8.53 — Phase 7: a user-defined pet behavior. When [trigger] fires, the
+ * pet plays the animation named [animationId] (built-in or drawn in the
+ * designer's `animations` map) wearing that animation's mood face, and
+ * optionally speaks one of [dialogueLines]. [enabled] lets the user pause
+ * an action without deleting it.
+ */
+data class CustomPetAction(
+    val id: String,
+    val name: String,
+    val trigger: PetActionTrigger,
+    val animationId: String = "happy",
+    val dialogueLines: List<String> = emptyList(),
+    val enabled: Boolean = true
+) {
+    /** A short human summary for cards: trigger · animation. */
+    fun summary(): String =
+        "${PetActionTrigger.label(trigger.kind)} · ${petAnimationName(animationId)}"
 }
 
 /** The moods the Face editor exposes (a face per mood). */

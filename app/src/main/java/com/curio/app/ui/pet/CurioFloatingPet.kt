@@ -45,10 +45,15 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.CustomPetAction
+import com.curio.app.data.PetActionTrigger
+import com.curio.app.data.PetAnimation
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
 import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.ReactionAnim
+import com.curio.app.data.animationById
+import java.util.Calendar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -218,6 +223,12 @@ fun CurioFloatingPet(
         var typingReaction by remember { mutableStateOf(false) }
         var lastTypingAt by remember { mutableStateOf(0L) }
         var lastTypingScreen by remember { mutableStateOf<String?>(null) }
+        // v8.53 — Phase 7: a user-defined custom action playing right now.
+        // The animation is stepped once by a LaunchedEffect; its frame drives
+        // the sprite's per-frame pixel layers + transform while it plays.
+        var customActionAnim by remember { mutableStateOf<PetAnimation?>(null) }
+        var customActionFrame by remember { mutableIntStateOf(0) }
+        var customActionKey by remember { mutableIntStateOf(0) }
 
         /**
          * v8.35 — fires a configured reaction: the animation + face from the
@@ -249,10 +260,70 @@ fun CurioFloatingPet(
             }
         }
 
+        /**
+         * v8.53 — plays one user-defined custom action: resolves its
+         * animation (built-in or drawn in the designer), starts the frame
+         * stepper, wears the animation's mood face, and speaks a random
+         * saved line when the action has any.
+         */
+        fun playCustomAction(action: CustomPetAction) {
+            val anim = activeDesign.animations[action.animationId]
+                ?: animationById(action.animationId)
+                ?: return
+            if (anim.frames.isEmpty()) return
+            customActionAnim = anim
+            customActionFrame = 0
+            customActionKey++
+            lastTouch = System.currentTimeMillis()
+            val line = action.dialogueLines.randomOrNull()
+            if (line != null) {
+                reaction = line
+                reactionKey++
+            }
+        }
+
+        /**
+         * v8.53 — fires a random enabled custom action whose trigger kind
+         * matches [kind] (optionally filtered by [param], used by the
+         * time-of-day and idle triggers).
+         */
+        fun fireCustomActions(kind: String, param: Int? = null) {
+            val candidates = activeDesign.customActions.filter {
+                it.enabled && it.trigger.kind == kind &&
+                    (param == null || it.trigger.param == param)
+            }
+            if (candidates.isEmpty()) return
+            playCustomAction(candidates.random())
+        }
+
+        // v8.53 — steps the custom action's animation through its frames
+        // once, then stops (one-shot, exactly like a reaction move).
+        LaunchedEffect(customActionKey, customActionAnim) {
+            val anim = customActionAnim ?: return@LaunchedEffect
+            val frames = anim.frames
+            if (frames.isEmpty()) {
+                customActionAnim = null
+                return@LaunchedEffect
+            }
+            for (i in frames.indices) {
+                customActionFrame = i
+                delay(frames[i].durationMs.toLong())
+            }
+            customActionAnim = null
+        }
+
         // Entrance hop.
         LaunchedEffect(Unit) {
             appear.snapTo(0f)
             appear.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 300f))
+        }
+        // v8.53 — app-open custom actions fire once when the pet appears.
+        val appOpenFired = remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            if (!appOpenFired.value) {
+                appOpenFired.value = true
+                fireCustomActions(PetActionTrigger.APP_OPEN)
+            }
         }
         // Keep the pet in bounds after rotation / resize.
         LaunchedEffect(maxW, maxH) {
@@ -535,6 +606,14 @@ fun CurioFloatingPet(
                 }
                 fireReaction(event, CurioPet.eventLine(latest))
                 if (latest == CurioPet.Event.SAVE) heartsKey++
+                // v8.53 — Phase 7: user-defined actions for app events fire
+                // alongside the built-in reaction.
+                when (latest) {
+                    CurioPet.Event.REVEAL_TAPPED,
+                    CurioPet.Event.REVEAL_AUTO -> fireCustomActions(PetActionTrigger.REVEAL)
+                    CurioPet.Event.SAVE -> fireCustomActions(PetActionTrigger.SAVE)
+                    else -> Unit
+                }
             }
         }
 
@@ -553,6 +632,8 @@ fun CurioFloatingPet(
                             PetReactionEvents.LEVEL_UP,
                             CurioPet.lineFor(context, m, CurioQuests.categoriesState)
                         )
+                        // v8.53 — a user-defined level-up action joins in.
+                        fireCustomActions(PetActionTrigger.LEVEL_UP)
                     }
                 }
             }
@@ -577,6 +658,47 @@ fun CurioFloatingPet(
                     System.currentTimeMillis() - lastTouch > AUTO_NAP_AFTER_MS
                 ) {
                     CurioPet.settleToSleep()
+                }
+            }
+        }
+
+        // ── Time-of-day custom actions (v8.53): a `time` action fires once
+        //    when the clock reaches its hour. Guarded per hour so it never
+        //    spams every check.
+        LaunchedEffect(activeDesign) {
+            var lastFiredHour = -1
+            while (true) {
+                delay(45_000)
+                val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                val timeActions = activeDesign.customActions.filter {
+                    it.enabled && it.trigger.kind == PetActionTrigger.TIME && it.trigger.param == hour
+                }
+                if (timeActions.isNotEmpty() && lastFiredHour != hour) {
+                    lastFiredHour = hour
+                    playCustomAction(timeActions.random())
+                }
+            }
+        }
+
+        // ── Idle custom actions (v8.53): a gentle nudge when the pet has
+        //    been untouched for the action's seconds (checked, then rested
+        //    for a minute so it never loops non-stop).
+        LaunchedEffect(activeDesign) {
+            var lastFiredIdleAt = 0L
+            while (true) {
+                delay(15_000)
+                val idleActions = activeDesign.customActions.filter {
+                    it.enabled && it.trigger.kind == PetActionTrigger.IDLE
+                }
+                if (idleActions.isEmpty()) continue
+                val now = System.currentTimeMillis()
+                val minIdleMs = idleActions.minOf { it.trigger.param.coerceAtLeast(1) } * 1000L
+                if (now - lastTouch > minIdleMs && now - lastFiredIdleAt > 60_000L) {
+                    lastFiredIdleAt = now
+                    val shortest = idleActions.firstOrNull {
+                        it.trigger.param == (minIdleMs / 1000L).toInt()
+                    }
+                    playCustomAction(shortest ?: idleActions.random())
                 }
             }
         }
@@ -912,6 +1034,9 @@ fun CurioFloatingPet(
                                 // only, so a plain boop stays clean.
                                 if (tier >= 2) heartsKey++
                             }
+                            // v8.53 — user-defined tap actions fire after
+                            // the built-in touch reaction.
+                            fireCustomActions(PetActionTrigger.TAP)
                             // The pet dashes to a nearby spot after the
                             // reaction — it wants to play (not in reduced
                             // motion, and not while watching the Spin deck;
@@ -926,6 +1051,9 @@ fun CurioFloatingPet(
                         },
                         onLongPress = {
                             lastTouch = System.currentTimeMillis()
+                            // v8.53 — user-defined long-press actions fire
+                            // before the pet heads home.
+                            fireCustomActions(PetActionTrigger.LONG_PRESS)
                             tapStreak = 0 // a fresh start when it comes home
                             squishKey++
                             heartsKey++
@@ -937,6 +1065,11 @@ fun CurioFloatingPet(
                 },
             contentAlignment = Alignment.Center
         ) {
+            // v8.53 — the custom action's current frame drives the sprite's
+            // per-frame pixel layers + transform while it plays; when no
+            // custom action is running the frame is null and everything
+            // falls back to the normal look.
+            val caFrame = customActionAnim?.frames?.getOrNull(customActionFrame)
             CurioPetSprite(
                 stage = CurioPet.currentStage(),
                 mood = CurioPet.mood(context, CurioQuests.categoriesState, screenHint),
@@ -954,9 +1087,20 @@ fun CurioFloatingPet(
                 // v8.21 — swirls + wobble while flung, and while recovering.
                 dizzy = dizzy || recovering,
                 // v8.35 — the reaction editor's face + the hide-and-peek pose.
-                faceOverride = reactionFace,
+                // v8.53 — a custom action's animation mood wins while playing.
+                faceOverride = customActionAnim?.let { activeDesign.faceFor(it.mood) } ?: reactionFace,
+                // v8.53 — per-frame pixel layers of the custom animation.
+                bodyOverride = caFrame?.bodyRows,
+                curledOverride = caFrame?.curledRows,
+                eyeOverride = caFrame?.eyeGrid,
                 peeking = peeking,
-                contentDescription = "Curie, your companion pet. Drag it anywhere, tap to say hi"
+                contentDescription = "Curie, your companion pet. Drag it anywhere, tap to say hi",
+                modifier = Modifier.graphicsLayer {
+                    translationY = (caFrame?.offsetY ?: 0f).dp.toPx()
+                    scaleX = caFrame?.scale ?: 1f
+                    scaleY = caFrame?.scale ?: 1f
+                    rotationZ = caFrame?.rotationDegrees ?: 0f
+                }
             )
         }
         // v8.13 — hearts rise ABOVE the pet in their own offset sibling

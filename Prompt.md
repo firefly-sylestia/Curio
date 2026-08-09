@@ -498,3 +498,27 @@
 Parts 1-3 committed and pushed (`0db21b7`, `468869a`, `6f6609f`); Part 4 pushed
 (`6389d60`); Part 5 (clip import + KDoc `*/` fix) pushed (`2f7bbaf`); Part 6
 (swipe direction flip) pushed as a new commit.
+
+## Part 7 — Pet designer Phase 7: Custom Actions (DONE)
+
+- `PetDesign.kt` — `CustomPetAction` (id/name/trigger/animationId/dialogueLines/
+  enabled) + flat `PetActionTrigger` (kind+param; TAP/LONG_PRESS/APP_OPEN/
+  REVEAL/SAVE/LEVEL_UP/TIME/IDLE) models; `PetDesign.customActions` field with
+  `customAction=` text serialization (URL-encoded config, tolerant parse,
+  deduped by id); `customActionFor`/`withCustomAction`/`removeCustomAction`/
+  `customActionsFor` helpers. Backward-compatible (absent field = none).
+- `PetDesignerModels.kt` — `PetEditorTarget.CustomAction(actionId)` with a
+  `NEW_CUSTOM_ACTION_ID` sentinel that creates a fresh action.
+- `PetDesignerScreen.kt` — Actions picker gained a "Your custom actions" grid +
+  "＋ New custom action" card; new `CustomActionEditor` (name, trigger chips +
+  hour/idle param chips, animation chips incl. user-drawn ones, live preview
+  with replay + speech bubble, dialogue lines, enabled toggle, duplicate,
+  delete); undo/redo/import refresh the editor drafts; deleted-action guard
+  moved to a LaunchedEffect (no state mutation during composition).
+- `CurioFloatingPet.kt` — runtime: `playCustomAction`/`fireCustomActions`,
+  one-shot frame stepper driving the sprite's per-frame pixel layers +
+  graphicsLayer transform + animation-mood face; triggers wired: tap,
+  long-press, topic reveal, capture save, level up, app open (once), time of
+  day (per-hour guard), idle (per-minute guard).
+- Version bump 20260908 → 20260909 + store changelog. All static checks green;
+  code-reviewed. Committed and pushed on `Alpha`.

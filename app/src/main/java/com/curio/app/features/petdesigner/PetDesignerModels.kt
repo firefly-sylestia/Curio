@@ -60,6 +60,21 @@ internal sealed interface PetEditorTarget : java.io.Serializable {
         override val title = PetReactionEvents.label(event)
     }
 
+    /**
+     * v8.53 — one user-defined custom action (Phase 7). The sentinel id
+     * [NEW_CUSTOM_ACTION_ID] means "create a fresh action" — the screen
+     * replaces it with a real id when the target is selected.
+     */
+    data class CustomAction(val actionId: String) : PetEditorTarget {
+        override val id = "custom:$actionId"
+        override val title = "Custom action"
+    }
+
+    companion object {
+        /** Sentinel id meaning "create a new custom action". */
+        const val NEW_CUSTOM_ACTION_ID = "__new__"
+    }
+
     /** One animation — opens its frame timeline editor (v8.48). */
     data class Animation(val animationId: String) : PetEditorTarget {
         override val id = "animation:$animationId"

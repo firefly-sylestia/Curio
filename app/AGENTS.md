@@ -128,7 +128,8 @@ app/src/main/java/com/curio/app/
   accepts `bodyOverride`/`curledOverride` to render them. Missing
   detail/toggle fields preserve the prior procedural behavior for older saved
   designs. The text format (palette lines + grids + `detail=` / `procedural=`
-  / `face=` / `react=` / `size=` / `anim=` / `frame=` lines) is documented in
+  / `face=` / `react=` / `size=` / `anim=` / `frame=` / `customAction=`
+  lines) is documented in
   that file's KDoc/source implementation.
 - `CurioPetSprite` renders any grid size, preserves existing motion, and draws
   authored detail layers last so the user can replace generated art without

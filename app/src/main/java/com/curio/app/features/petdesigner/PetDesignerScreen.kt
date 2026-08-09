@@ -45,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -81,6 +82,8 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioPet
 import com.curio.app.data.EyeStyle
 import com.curio.app.data.MouthStyle
+import com.curio.app.data.CustomPetAction
+import com.curio.app.data.PetActionTrigger
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFaceMoods
 import com.curio.app.data.PetFacePresets
@@ -94,6 +97,7 @@ import com.curio.app.data.PetRegistry
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
 import com.curio.app.data.definition
+import com.curio.app.data.petAnimationName
 import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.alpha
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -278,6 +282,11 @@ fun PetDesignerScreen(navController: NavController) {
             design.reactionFor(PetReactionEvents.TOUCH).lines.joinToString("\n")
         )
     }
+    // v8.53 — custom action editor drafts (Phase 7): the action's name and
+    // dialogue lines stay in raw text while typing; they are committed to
+    // the design on every change like the reaction lines above.
+    var customActionLineDraft by remember(savedText) { mutableStateOf("") }
+    var customActionNameDraft by remember(savedText) { mutableStateOf("") }
     // v8.35 — preview the hide-and-peek crouch.
     var previewPeek by rememberSaveable { mutableStateOf(false) }
     // v8.35 — which grid a picked PNG should land on (1 = body, 2 = curled).
@@ -313,6 +322,15 @@ fun PetDesignerScreen(navController: NavController) {
         redoStack = emptyList()
     }
 
+    // v8.53 — refreshes the custom-action editor drafts from [design] (used
+    // after undo/redo/import so the fields never show stale text).
+    fun refreshCustomActionDrafts() {
+        val actionTarget = target as? PetEditorTarget.CustomAction
+        val action = actionTarget?.let { design.customActionFor(it.actionId) }
+        customActionNameDraft = action?.name ?: customActionNameDraft
+        customActionLineDraft = action?.dialogueLines?.joinToString("\n") ?: customActionLineDraft
+    }
+
     fun undo() {
         if (undoStack.isEmpty()) return
         redoStack = redoStack + design
@@ -320,6 +338,7 @@ fun PetDesignerScreen(navController: NavController) {
         undoStack = undoStack.dropLast(1)
         resetDetailEditor()
         reactionLineDraft = design.reactionFor(reactEvent).lines.joinToString("\n")
+        refreshCustomActionDrafts()
     }
 
     fun redo() {
@@ -329,6 +348,7 @@ fun PetDesignerScreen(navController: NavController) {
         redoStack = redoStack.dropLast(1)
         resetDetailEditor()
         reactionLineDraft = design.reactionFor(reactEvent).lines.joinToString("\n")
+        refreshCustomActionDrafts()
     }
 
     // v8.35 — applies the active tool at a grid cell. Snapshot is taken once
@@ -381,6 +401,32 @@ fun PetDesignerScreen(navController: NavController) {
             is PetEditorTarget.Reaction -> {
                 reactEvent = newTarget.event
                 reactionLineDraft = design.reactionFor(newTarget.event).lines.joinToString("\n")
+            }
+            // v8.53 — custom actions: the NEW sentinel creates a fresh action
+            // (named uniquely) and selects it; an existing id just syncs the
+            // editor drafts.
+            is PetEditorTarget.CustomAction -> {
+                if (newTarget.actionId == PetEditorTarget.NEW_CUSTOM_ACTION_ID) {
+                    pushUndo()
+                    var n = 1
+                    while (design.customActionFor("custom-$n") != null) n++
+                    val id = "custom-$n"
+                    design = design.withCustomAction(
+                        CustomPetAction(
+                            id = id,
+                            name = "New action",
+                            trigger = PetActionTrigger(PetActionTrigger.TAP),
+                            animationId = "happy"
+                        )
+                    )
+                    target = PetEditorTarget.CustomAction(id)
+                    customActionNameDraft = "New action"
+                    customActionLineDraft = ""
+                } else {
+                    val action = design.customActionFor(newTarget.actionId)
+                    customActionNameDraft = action?.name ?: ""
+                    customActionLineDraft = action?.dialogueLines?.joinToString("\n") ?: ""
+                }
             }
             PetEditorTarget.CurledPose -> editingGrid = "curled"
             PetEditorTarget.Body -> editingGrid = "body"
@@ -1119,6 +1165,64 @@ fun PetDesignerScreen(navController: NavController) {
                             }
                         }
                     )
+                }
+            }
+
+            // ── Custom action editor (Editor target, v8.53 — Phase 7) ──
+            item {
+                val actionTarget = target as? PetEditorTarget.CustomAction
+                if (page == PetDesignerPage.EDITOR && actionTarget != null) {
+                    val action = design.customActionFor(actionTarget.actionId)
+                    // v8.53 — if the action no longer exists (deleted via
+                    // undo/import), drop back to the Actions landing. Done in
+                    // an effect, never by mutating state during composition.
+                    LaunchedEffect(actionTarget.actionId, design.customActions) {
+                        if (design.customActionFor(actionTarget.actionId) == null) target = null
+                    }
+                    if (action != null) {
+                        CustomActionEditor(
+                            action = action,
+                            design = design,
+                            lineDraft = customActionLineDraft,
+                            nameDraft = customActionNameDraft,
+                            onNameChange = { text ->
+                                val limited = text.take(28)
+                                customActionNameDraft = limited
+                                design = design.withCustomAction(action.copy(name = limited))
+                            },
+                            onLineDraftChange = { text ->
+                                val limited = PetReaction.limitDraft(text)
+                                customActionLineDraft = limited
+                                design = design.withCustomAction(
+                                    action.copy(dialogueLines = PetReaction.normalizeLines(limited))
+                                )
+                            },
+                            onUpdate = { updated ->
+                                pushUndo()
+                                design = design.withCustomAction(updated)
+                            },
+                            onDuplicate = {
+                                pushUndo()
+                                var n = 1
+                                while (design.customActionFor("custom-$n") != null) n++
+                                val dup = action.copy(
+                                    id = "custom-$n",
+                                    name = action.name.ifEmpty { "New action" } + " copy"
+                                )
+                                design = design.withCustomAction(dup)
+                                target = PetEditorTarget.CustomAction(dup.id)
+                                customActionNameDraft = dup.name
+                                customActionLineDraft = dup.dialogueLines.joinToString("\n")
+                                toast = "Action duplicated"
+                            },
+                            onDelete = {
+                                pushUndo()
+                                design = design.removeCustomAction(action.id)
+                                target = null
+                                toast = "Action deleted"
+                            }
+                        )
+                    }
                 }
             }
 
@@ -3222,7 +3326,10 @@ private fun DrawPickerStrip(
                 StripChip("Faces", selected is PetEditorTarget.Face) { onOpenPicker("faces") }
                 StripChip("Details", selected is PetEditorTarget.DetailLayer) { onOpenPicker("details") }
                 StripChip("Animations", selected is PetEditorTarget.Animation) { onOpenPicker("animations") }
-                StripChip("Actions", selected is PetEditorTarget.Reaction) { onOpenPicker("actions") }
+                StripChip(
+                    "Actions",
+                    selected is PetEditorTarget.Reaction || selected is PetEditorTarget.CustomAction
+                ) { onOpenPicker("actions") }
             }
             Spacer(Modifier.height(4.dp))
             Text(
@@ -3389,6 +3496,12 @@ private fun DrawPickerDialog(
                 }
             }
             "actions" -> {
+                Text(
+                    "Built-in reactions",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(6.dp))
                 PetReactionEvents.ALL.chunked(2).forEach { rowEvents ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -3414,6 +3527,72 @@ private fun DrawPickerDialog(
                     }
                     Spacer(Modifier.height(10.dp))
                 }
+                // v8.53 — Phase 7: user-defined custom actions.
+                Text(
+                    "Your custom actions",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(6.dp))
+                if (design.customActions.isEmpty()) {
+                    Text(
+                        "None yet — create one below. Custom actions fire on their own trigger (tap, save, a set hour…).",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                } else {
+                    design.customActions.chunked(2).forEach { rowActions ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            rowActions.forEach { action ->
+                                PickerCard(
+                                    title = action.name,
+                                    subtitle = action.summary(),
+                                    selected = selected is PetEditorTarget.CustomAction &&
+                                        selected.actionId == action.id,
+                                    modifier = Modifier.weight(1f),
+                                    preview = {
+                                        val anim = design.animations[action.animationId]
+                                            ?: animationById(action.animationId)
+                                            ?: BUILTIN_ANIMATIONS.first()
+                                        PetAnimationPreview(animation = anim, design = design, spriteSize = 40.dp)
+                                    },
+                                    onClick = { onSelect(PetEditorTarget.CustomAction(action.id)) }
+                                )
+                            }
+                            if (rowActions.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                        Spacer(Modifier.height(10.dp))
+                    }
+                }
+                PickerCard(
+                    title = "＋ New custom action",
+                    subtitle = "Name it, pick a trigger",
+                    selected = selected is PetEditorTarget.CustomAction &&
+                        selected.actionId == PetEditorTarget.NEW_CUSTOM_ACTION_ID,
+                    modifier = Modifier.fillMaxWidth(),
+                    preview = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CurioIcon(
+                                name = CurioIcons.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 22.dp
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            CurioPetSprite(
+                                stage = CurioPet.currentStage(),
+                                mood = CurioPet.Mood.HAPPY,
+                                spriteSize = 34.dp,
+                                design = design
+                            )
+                        }
+                    },
+                    onClick = { onSelect(PetEditorTarget.CustomAction(PetEditorTarget.NEW_CUSTOM_ACTION_ID)) }
+                )
             }
             else -> {
                 BUILTIN_ANIMATIONS.chunked(2).forEach { rowAnims ->
@@ -4512,6 +4691,272 @@ private fun ActionPreview(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+    }
+}
+
+/**
+ * v8.53 — Phase 7: the custom action editor. Name + trigger (+ param for
+ * time/idle triggers) + animation + dialogue lines + enabled, with a live
+ * preview wearing the chosen animation and a speech bubble. Duplicate and
+ * Delete live here too — the only place custom actions are edited.
+ */
+@Composable
+private fun CustomActionEditor(
+    action: CustomPetAction,
+    design: PetDesign,
+    lineDraft: String,
+    nameDraft: String,
+    onNameChange: (String) -> Unit,
+    onLineDraftChange: (String) -> Unit,
+    onUpdate: (CustomPetAction) -> Unit,
+    onDuplicate: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val anim = design.animations[action.animationId]
+        ?: animationById(action.animationId)
+        ?: BUILTIN_ANIMATIONS.first()
+    var replayKey by rememberSaveable(action.id) { mutableStateOf(0) }
+    val bubble = action.dialogueLines.firstOrNull() ?: "${anim.name}!"
+    SectionCard(
+        "Custom action",
+        "A behavior you made — it fires on its own trigger, wherever your pet is"
+    ) {
+        Text(
+            "Action name",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+        )
+        Spacer(Modifier.height(4.dp))
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                if (nameDraft.isEmpty()) {
+                    Text(
+                        "Name this action… e.g. “Victory dance”",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                    )
+                }
+                BasicTextField(
+                    value = nameDraft,
+                    onValueChange = onNameChange,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "When does it fire?",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "The floating pet runs this action when its trigger happens in the app.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            PetActionTrigger.ALL.forEach { kind ->
+                ChoiceChip(
+                    label = PetActionTrigger.label(kind),
+                    selected = action.trigger.kind == kind,
+                    onClick = { onUpdate(action.copy(trigger = PetActionTrigger(kind, action.trigger.param))) }
+                )
+            }
+        }
+        // v8.53 — trigger-specific tuning: which hour for `time`, how long
+        // untouched for `idle`.
+        when (action.trigger.kind) {
+            PetActionTrigger.TIME -> {
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf(7 to "7 AM", 9 to "9 AM", 12 to "12 PM", 15 to "3 PM", 18 to "6 PM", 21 to "9 PM")
+                        .forEach { (hour, label) ->
+                            ChoiceChip(
+                                label = label,
+                                selected = action.trigger.param == hour,
+                                onClick = { onUpdate(action.copy(trigger = PetActionTrigger(PetActionTrigger.TIME, hour))) }
+                            )
+                        }
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Runs when the clock hits the chosen hour — a morning hello or a goodnight.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            PetActionTrigger.IDLE -> {
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf(30 to "30 s", 60 to "1 min", 120 to "2 min", 300 to "5 min")
+                        .forEach { (seconds, label) ->
+                            ChoiceChip(
+                                label = label,
+                                selected = action.trigger.param == seconds,
+                                onClick = { onUpdate(action.copy(trigger = PetActionTrigger(PetActionTrigger.IDLE, seconds))) }
+                            )
+                        }
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Runs when you have not touched the pet for a while — a gentle nudge.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            else -> Unit
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Animation",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Which move the pet does — pick any animation, including ones you drew in the timeline.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+        val animationOptions = BUILTIN_ANIMATIONS.map { it.id to it.name } +
+            design.animations.keys.filter { animationById(it) == null }.map { it to petAnimationName(it) }
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            animationOptions.forEach { (id, name) ->
+                ChoiceChip(
+                    label = name,
+                    selected = action.animationId == id,
+                    onClick = { onUpdate(action.copy(animationId = id)) }
+                )
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        // Live preview — the chosen animation looping with the speech bubble.
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "Live preview",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Text(
+                        "\u201c$bubble\u201d",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                // key(replayKey) remounts the preview so Replay restarts the
+                // loop from frame one (a plain recomposition would not).
+                key(replayKey) {
+                    PetAnimationPreview(
+                        animation = anim,
+                        design = design,
+                        spriteSize = 96.dp,
+                        playing = true
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    SmallAction("Replay", enabled = true) { replayKey++ }
+                    Text(
+                        "${anim.name} · ${PetActionTrigger.label(action.trigger.kind)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "What does it say? (optional)",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "One line per row — the pet says one of these when the action fires. Leave empty to stay quiet and just do the move.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(118.dp)
+        ) {
+            Box(modifier = Modifier.padding(12.dp)) {
+                if (action.dialogueLines.isEmpty()) {
+                    Text(
+                        "Wave, hi!\nOver here!\nTa-da!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                    )
+                }
+                BasicTextField(
+                    value = lineDraft,
+                    onValueChange = onLineDraftChange,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "${action.dialogueLines.size}/8 lines · 120 characters per line",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(10.dp))
+        ToggleRow(
+            "Action enabled",
+            action.enabled
+        ) {
+            onUpdate(action.copy(enabled = it))
+        }
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SmallAction("Duplicate", enabled = true) { onDuplicate() }
+            SmallAction("Delete action", enabled = true) { onDelete() }
         }
     }
 }
