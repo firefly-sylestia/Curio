@@ -28,8 +28,7 @@ import com.curio.app.ui.theme.CurioTheme
  *
  * Installs [TopicJsonLoader] before any Compose code runs so the loader
  * has access to the AssetManager. Topic JSONs are read lazily on first
- * access; SplashScreen additionally calls [TopicJsonLoader.preloadAll]
- * to warm the cache.
+ * access; screens load only the category data they need.
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +80,16 @@ class MainActivity : ComponentActivity() {
             CurioTheme {
                 CurioNavHost()
             }
+        }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        // Topic catalogs are immutable and reloadable. Release the process
+        // cache when Android reports real running-low pressure instead of
+        // retaining every parsed topic object through the next screen.
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            TopicJsonLoader.clearCache()
         }
     }
 

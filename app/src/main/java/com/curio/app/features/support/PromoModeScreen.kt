@@ -48,7 +48,6 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
-import com.curio.app.data.PromoMode
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
@@ -87,12 +86,11 @@ fun PromoModeScreen(navController: NavController) {
     val context = LocalContext.current
     // Reactive — flips the whole page the instant the toggle changes.
     val promoOn = AppPreferences.promoModeState
-    // Real topic total for the poster's stat strip — preloads the pools
-    // first so the number is exact even on a cold open of this page.
-    var topicTotal by remember { mutableIntStateOf(PromoMode.topicTotal()) }
+    // Count the JSON records without parsing and retaining every catalog.
+    // Promo artwork needs the number, not the full topic object graph.
+    var topicTotal by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
-        TopicJsonLoader.preloadAll()
-        topicTotal = PromoMode.topicTotal()
+        topicTotal = TopicJsonLoader.countCanonicalTopics()
     }
     Box(
         modifier = Modifier

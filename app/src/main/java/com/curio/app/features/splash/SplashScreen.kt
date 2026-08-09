@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.curio.app.R
-import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
@@ -116,7 +115,9 @@ fun SplashScreen(navController: NavHostController) {
     }
 
     LaunchedEffect(Unit) {
-        TopicJsonLoader.preloadAll()
+        // Topic catalogs load lazily when a screen needs them. Eagerly parsing
+        // every category here retained the full catalog during startup and
+        // created avoidable heap pressure on 256 MB devices.
         delay(800)
         // Check for pending crash from previous session — also route to the
         // crash screen when the crash-loop guard flipped on safe mode, so the

@@ -45,14 +45,6 @@ object TourController {
             dialogue = "When something sparks a thought, tap Express yourself to write it down.",
             nextHint = "This tour will not open or save a note."
         ),
-        Step(
-            id = "google-youtube",
-            route = CurioRoutes.revealForBrowse("artists", "David Bowie"),
-            routePrefix = CurioRoutes.REVEAL.substringBefore("/"),
-            landmarkId = "start-exploring",
-            dialogue = "For a real deep dive later, Explore now gives you Google or YouTube.",
-            nextHint = "Tap to see the idea — this tour will not open either one."
-        )
     )
 
     var active by mutableStateOf(false)

@@ -13,7 +13,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -45,10 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,7 +67,6 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.categoryBackgroundWash
 import kotlinx.coroutines.delay
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
@@ -200,37 +194,6 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * switches crossfade.
  */
 @Composable
-private fun RevealBottomBarPlaceholder(
-    bottomBarHeightPx: Int,
-    density: androidx.compose.ui.unit.Density,
-    // v8.25 — the reserved strip wears the reveal page's category wash (not
-    // the Scaffold's plain cream surface), so no cream band ever flashes
-    // between the Spin wash and the reveal dock registering.
-    background: Color
-) {
-    val reserve = if (bottomBarHeightPx > 0) {
-        with(density) { bottomBarHeightPx.toDp() }
-    } else null
-    // The fallback (no measured height yet — e.g. a deep link straight into
-    // Reveal) must reserve the SAME 80dp total as the measured bar AND the
-    // reveal dock (which is height(80.dp) with the nav-bar inset consumed
-    // INSIDE), so the placeholder → dock swap never changes Scaffold
-    // innerPadding mid-transition (an innerPadding change re-lays out the
-    // SharedTransitionLayout and freezes the reveal morph — v8.5).
-    Spacer(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(background)
-            .then(
-                if (reserve != null) Modifier.height(reserve)
-                else Modifier
-                    .height(80.dp)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-            )
-    )
-}
-
-@Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
 ) {
@@ -240,84 +203,11 @@ fun CurioNavHost(
         currentRoute?.substringBefore("/")
     }
     val showBottomBar = routePrefix in CurioRoutes.bottomNavRoutePrefixes
-    // Push destinations that host a shared-element morph TARGET whose
-    // source is a bottom-bar tab (the Reveal hero grows out of the Spin
-    // ticket). The bottom chrome must still RESERVE the bottom bar's height
-    // (an invisible placeholder below) so innerPadding never changes the
-    // moment the bar hides — otherwise the exiting Spin screen re-lays-out
-    // mid-transition and the morph source card visibly dips down before
-    // expanding (the "moves down, then animates" artifact), and the reveal
-    // watermark shifts down into the vacated bar strip.
-    // v8.2 — bug fix: this compared the route PREFIX ("reveal"/"detail")
-    // against the FULL route patterns ("reveal/{categorySlug}/{topicName}?
-    // browse={browse}", "detail/{entryId}"), so it was ALWAYS false and the
-    // placeholder never rendered — the bar hid mid-morph, innerPadding grew
-    // by the bar's height, and the watermark visibly shifted down. Compare
-    // the prefixes so the reserve actually engages.
-    // v8.36/v8.37 — the reserve covers the Reveal morph destination in both
-    // directions of travel: while the reveal is on top (route-prefix check),
-    // and while it is EXITING (popping reveal → spin) — detected by the
-    // exiting screen's dock still being registered in revealBottomBarContent
-    // (it only clears when the destination leaves composition, i.e. after
-    // the pop transition finishes). Without the exiting case the real bar
-    // swaps in mid-transition, innerPadding changes, and the
-    // SharedTransitionLayout re-lays out — the nav bar flashed the cream
-    // surface for a moment on reveal close. (v8.37 — this replaced the
-    // backStackEntry.previousBackStackEntry check, which navigation 2.9
-    // removed in the NavBackStackEntry rework.)
-    // v8.38 — Entry Detail no longer reserves the slot: its bottom wash
-    // strip is gone (the page pops up edge-to-edge), so only the reveal
-    // route keeps the reserve.
-    val revealPrefix = CurioRoutes.REVEAL.substringBefore("/")
-    val morphReservePrefixes = setOf(revealPrefix)
-    var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
-    val reserveBarSpace = (routePrefix != null && routePrefix in morphReservePrefixes) ||
-        revealBottomBarContent != null
-    // v8.25 — the reveal page's category, resolved from the reveal route's
-    // categorySlug so the reserved bottom strip below can wear the SAME wash
-    // as the page from the very first frame. The reveal dock (which carries
-    // the wash itself) registers a frame or two after the route switches —
-    // without this the transparent morph placeholder showed the Scaffold's
-    // plain cream surface in that gap (the "bottom nav flashes cream on
-    // open" bug). No exiting-entry resolution is needed: while the reveal
-    // pops back, its own dock is still registered and paints the wash.
-    val revealCat = if (routePrefix == revealPrefix) {
-        CurioCategories.byRouteSlug(
-            backStackEntry?.arguments?.getString("categorySlug").orEmpty()
-        ) ?: CurioCategories.byId(CategoryId.WILDCARD)
-    } else null
-    // The reserved strip's background: the reveal wash while the reveal is
-    // on top, else the surface. (The detail page reserves nothing — it pops
-    // up edge-to-edge with no bottom strip.)
-    val reserveBackground = when {
-        revealCat != null -> revealCat.categoryBackgroundWash()
-        else -> MaterialTheme.colorScheme.surface
-    }
-    // The reveal page paints its own category wash over the whole content
-    // area, and its action dock wears the SAME wash (see RevealActionDock),
-    // so the Scaffold's default background never shows as a strip behind
-    // the transparent dock while the reveal is open — and the Scaffold's
-    // containerColor stays CONSTANT across the whole route transition.
-    // (v8.5 regression fix: painting the Scaffold container with a
-    // dynamically-computed revealWash here restarted/disrupted the
-    // shared-element route transition — the morph froze and the entire
-    // reveal page stayed invisible except the dock, which lives outside
-    // the SharedTransitionLayout. The dock now carries the wash itself.)
-    // The bottom bar's exact measured height (px) — captured from the real
-    // bar so the invisible morph-transition placeholder can reserve IDENTICAL
-    // space. M3's NavigationBar consumes the nav-bar inset inside its 80dp
-    // min height, so a naive "80dp + nav inset" placeholder is TALLER than
-    // the bar by the inset: the moment the bar is swapped for the placeholder
-    // (Spin → Reveal), Scaffold innerPadding changes and the
-    // SharedTransitionLayout resizes mid-morph, re-laying out the exiting
-    // screen — the watermark re-aligns and the shared source bounds shift
-    // (the "morph starts a little down" artifact). Reserving the measured
-    // height keeps innerPadding constant across the whole transition.
-    var bottomBarHeightPx by rememberSaveable { mutableStateOf(0) }
-
+    // Topic Reveal no longer reserves a hidden Scaffold slot. The screen is
+    // edge-to-edge and the regular bottom bar returns immediately when the
+    // user navigates back to a tab.
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val density = LocalDensity.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
     // v7.31 — two-step "Cancel session": the first tap flips the done-now
     // dialog into a confirm step, the second tap actually ends the explore.
@@ -423,28 +313,8 @@ fun CurioNavHost(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
-                // Reserve-first (v8.36): any live shared-element morph — a
-                // reveal or detail destination on top, OR one still exiting
-                // (popping back) — keeps the bottom strip as the screen's
-                // dock / wash spacer or the tinted placeholder, so the real
-                // bar never swaps in mid-transition (innerPadding changes
-                // mid-morph would re-lay out the SharedTransitionLayout and
-                // jolt the animation / flash the cream surface).
-                if (!wide && reserveBarSpace) {
-                    revealBottomBarContent?.invoke()
-                        ?: RevealBottomBarPlaceholder(
-                            bottomBarHeightPx = bottomBarHeightPx,
-                            density = density,
-                            background = reserveBackground
-                        )
-                } else if (!wide && showBottomBar) {
-                    CurioBottomBar(
-                        navController = navController,
-                        // Measure the bar's real height so the morph
-                        // placeholder below can reserve exactly this much
-                        // (see bottomBarHeightPx).
-                        modifier = Modifier.onSizeChanged { bottomBarHeightPx = it.height }
-                    )
+                if (!wide && showBottomBar) {
+                    CurioBottomBar(navController = navController)
                 }
             },
             // Every screen applies its own statusBarsPadding().  This Scaffold
@@ -713,9 +583,7 @@ fun CurioNavHost(
                         topicName    = safeDecode(entry.arguments?.getString("topicName")),
                     navController = navController,
                     // Browse-Topics mode: read-only reveal (see CurioRoutes).
-                    browseMode = entry.arguments?.getString("browse") == "1",
-                    onBottomBarContentChanged = { revealBottomBarContent = it },
-                    onBottomBarContentCleared = { revealBottomBarContent = null }
+                    browseMode = entry.arguments?.getString("browse") == "1"
                 )
                 }
             }

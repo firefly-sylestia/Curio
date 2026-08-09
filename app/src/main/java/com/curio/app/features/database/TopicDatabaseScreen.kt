@@ -121,10 +121,12 @@ fun TopicDatabaseScreen(navController: NavController) {
         AppPreferences.categoryOrderState
     ) {
         value = withContext(Dispatchers.Default) {
-            TopicJsonLoader.preloadAll()
+            // Load only visible canonical categories. The old preloadAll call
+            // parsed every lane, including the derived wildcard pool, before
+            // the database screen could render anything.
             CurioCategories.visible
                 .filter { it.id != CategoryId.WILDCARD }
-                .map { cat -> cat to TopicJsonLoader.cached(cat.id).orEmpty() }
+                .map { cat -> cat to TopicJsonLoader.load(cat.id) }
         }
     }
     val totalTopics = catalog.sumOf { it.second.size }

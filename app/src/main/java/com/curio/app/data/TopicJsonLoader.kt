@@ -6,6 +6,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONObject
 
 /**
@@ -14,9 +15,9 @@ import org.json.JSONObject
  * The JSON schema is intentionally flat (array of topic objects) so a
  * single category file at 1000+ topics stays parseable on cold start.
  *
- * Each file is loaded lazily on first request and cached in memory for
- * the process lifetime. Topics never change at runtime — there is no
- * refresh / hot-reload logic in Phase 0. Phase 4 (Room persistence)
+ * Each file is loaded lazily on first request and cached while memory is
+ * available. Android memory-pressure callbacks may clear the cache; topics
+ * are immutable and reload safely on demand. Phase 4 (Room persistence)
  * will replace the loader with a DB-backed source using the same
  * [CurioTopic] schema.
  *
@@ -58,8 +59,10 @@ object TopicJsonLoader {
     private const val ASSET_DIR = "topics"
 
     /** Per-category caches. Guarded by [cacheMutex] for concurrent first-access safety. */
-    private val cache: MutableMap<CategoryId, List<CurioTopic>> = mutableMapOf()
+    private val cache: MutableMap<CategoryId, List<CurioTopic>> = ConcurrentHashMap()
     private val cacheMutex = Mutex()
+    private val cacheWriteLock = Any()
+    @Volatile private var cacheGeneration: Long = 0L
 
     /**
      * Installs the [android.content.res.AssetManager] used to read
@@ -84,10 +87,13 @@ object TopicJsonLoader {
      * @throws TopicLoadException if the file is missing or malformed,
      *   or if [install] hasn't been called yet.
      */
-    suspend fun load(id: CategoryId): List<CurioTopic> {
-        cacheMutex.withLock {
-            cache[id]?.let { return it }
-        }
+    suspend fun load(id: CategoryId): List<CurioTopic> = cacheMutex.withLock {
+        // Keep the cache check and parse in the same critical section. The
+        // previous check-then-parse sequence allowed concurrent first loads
+        // to parse the same large asset more than once, briefly multiplying
+        // its object graph during navigation or recomposition.
+        cache[id]?.let { return@withLock it }
+        val generation = cacheGeneration
         val parsed = withContext(Dispatchers.IO) {
             if (id == CategoryId.WILDCARD) {
                 // Wildcard = merge ALL categories into one big pool.
@@ -101,7 +107,11 @@ object TopicJsonLoader {
                     .forEach { otherId ->
                         val topics = cache[otherId]
                             ?: parseAsset("$ASSET_DIR/${otherId.routeSlug}.json", otherId)
-                                .also { cache[otherId] = it }
+                                .also {
+                                    synchronized(cacheWriteLock) {
+                                        if (cacheGeneration == generation) cache[otherId] = it
+                                    }
+                                }
                         topics.forEach { t ->
                             if (seenIds.add(t.id)) merged.add(t)
                         }
@@ -120,8 +130,13 @@ object TopicJsonLoader {
                 parseAsset("$ASSET_DIR/${id.routeSlug}.json", id)
             }
         }
-        cacheMutex.withLock { cache[id] = parsed }
-        return parsed
+        // A memory callback can clear the concurrent map while this
+        // suspendable parse is in progress. Never let an old parse refill a
+        // cache that Android has just asked us to release.
+        synchronized(cacheWriteLock) {
+            if (cacheGeneration == generation) cache[id] = parsed
+        }
+        parsed
     }
 
     /**
@@ -133,15 +148,14 @@ object TopicJsonLoader {
     fun cached(id: CategoryId): List<CurioTopic>? = cache[id]
 
     /**
-     * Eagerly loads + caches all 11 category JSON files. Call this
-     * once at app startup (e.g. from the SplashScreen's
-     * LaunchedEffect) so subsequent calls to [load] / [cached] are
-     * zero-cost.
+     * Eagerly loads + caches the ten canonical category JSON files.
+     * The derived WILDCARD pool is intentionally excluded: it duplicates
+     * references to every canonical topic and can be built on demand by
+     * [load] when the wildcard lane is actually used.
      *
-     * With 1000+ topics per category at ~600 bytes each, the total
-     * parsed footprint is ~6 MB in memory. Parsing happens on
-     * [Dispatchers.IO] and takes ~100-300 ms total on a mid-range
-     * device (the AssetManager reads from the APK, which is fast).
+     * Callers should prefer loading only the category they need. This helper
+     * remains for exhaustive tooling and compatibility, but is not used on
+     * the splash path.
      *
      * Returns successfully even if individual categories fail to load
      * — those exceptions are swallowed and logged via the [cache]'s
@@ -149,14 +163,38 @@ object TopicJsonLoader {
      * [load].
      */
     suspend fun preloadAll() {
-        CategoryId.values().forEach { id ->
-            runCatching { load(id) }
-        }
+        CategoryId.values()
+            .filter { it != CategoryId.WILDCARD }
+            .forEach { id -> runCatching { load(id) } }
     }
 
-    /** Clears the cache. Only useful for tests / hot-reload. */
+    /**
+     * Counts canonical topics without constructing or caching CurioTopic
+     * objects. This is used by promotional UI that needs a truthful count
+     * but does not need every catalog resident in the heap.
+     */
+    suspend fun countCanonicalTopics(): Int = withContext(Dispatchers.IO) {
+        val am = assets ?: return@withContext 0
+        CategoryId.values()
+            .filter { it != CategoryId.WILDCARD }
+            .sumOf { id ->
+                runCatching {
+                    am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
+                        JSONArray(it.readText()).length()
+                    }
+                }.getOrDefault(0)
+            }
+    }
+
+    /** Clears the cache. Safe to call from Android memory callbacks. */
     fun clearCache() {
-        cache.clear()
+        // Advance the generation and clear under the same monitor used by
+        // load() insertion. A clear can never land between the generation
+        // check and an old parse being written back into the cache.
+        synchronized(cacheWriteLock) {
+            cacheGeneration += 1L
+            cache.clear()
+        }
     }
 
     // ── Internal ───────────────────────────────────────────────────────────

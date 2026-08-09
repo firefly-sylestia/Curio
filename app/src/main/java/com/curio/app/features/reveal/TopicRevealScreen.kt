@@ -26,13 +26,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -48,7 +45,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -155,8 +151,7 @@ import com.curio.app.ui.theme.themedAccent
  *   16 dp      gap
  *   ~auto     "{verb} {target}" action prompt card + "~N min"
  *   24 dp      content breathing room
- *   bottom     themed action dock (Start exploring + Already …)
- *   navigation-bar inset is applied inside the dock
+ *   below hero  inline actions (Start exploring + Already …)
  */
 @Composable
 fun TopicRevealScreen(
@@ -166,9 +161,7 @@ fun TopicRevealScreen(
     // Browse-Topics read-only mode (see CurioRoutes.REVEAL): no explore
     // CTA, no like/dislike, no recents recording, and "Already watched"
     // confirms without the write-about-it dialog.
-    browseMode: Boolean = false,
-    onBottomBarContentChanged: (@Composable () -> Unit) -> Unit = {},
-    onBottomBarContentCleared: () -> Unit = {}
+    browseMode: Boolean = false
 ) {
     val cat = remember(categorySlug) {
         CurioCategories.byRouteSlug(categorySlug)
@@ -234,10 +227,11 @@ fun TopicRevealScreen(
     val latestBrowseMode by rememberUpdatedState(browseMode)
     val latestResolved by rememberUpdatedState(resolved)
     val latestOnExplore by rememberUpdatedState<() -> Unit> {
-        if (TourController.consumeTap("start-exploring")) {
-            TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
+        // Explore is not a tour stop. During the tour, tapping it only exits
+        // the guide; it must not open a dialog/browser or navigate to a stale
+        // route. Normal taps continue into the real flow.
+        if (TourController.active) {
+            TourController.skip()
         } else {
             showExploreDialog = true
         }
@@ -246,19 +240,19 @@ fun TopicRevealScreen(
     // explore: opens the topic's search page without recording quests,
     // passport, pet events, recents or a timer — browsing must not count.
     val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
-        if (TourController.consumeTap("start-exploring")) {
-            TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
+        // Browse mode has no tour navigation. During a tour, only dismiss the
+        // guide; never launch a browser as a side effect of a demonstrated tap.
+        if (TourController.active) {
+            TourController.skip()
         } else {
             latestResolved?.let { topic -> openSilentExplore(context, topic) }
         }
     }
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
-        if (TourController.consumeTap("express-yourself")) {
-            TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
+        if (TourController.active) {
+            // Tour taps demonstrate controls only. End the tour instead of
+            // opening the capture task or navigating to a stale next route.
+            TourController.skip()
         } else if (!latestBrowseMode) {
             latestResolved?.let { topic ->
                 engaged = true
@@ -268,22 +262,9 @@ fun TopicRevealScreen(
             }
         }
     }
-    // v8.57 — the reveal no longer owns action buttons at the bottom: Start
-    // exploring / Already … live inline right below the hero card. The
-    // bottomBar slot still registers a static WASH STRIP (no buttons) so the
-    // NavHost's morph reserve stays registered for the WHOLE visit — including
-    // the pop transition, when the exiting screen's strip keeps Scaffold
-    // innerPadding constant (the v8.5/v8.36 freeze rule). The strip wears the
-    // same category wash as the page, so it reads as plain background.
-    val revealBottomBar = remember(cat) {
-        @Composable {
-            RevealWashStrip(cat = cat)
-        }
-    }
-    DisposableEffect(revealBottomBar) {
-        onBottomBarContentChanged(revealBottomBar)
-        onDispose { onBottomBarContentCleared() }
-    }
+    // v10 — Topic Reveal owns its content edge-to-edge. The old transparent
+    // bottom Scaffold slot was only a layout reservation and could leave the
+    // screen with stale bottom padding during navigation.
 
     // Android 13+ needs POST_NOTIFICATIONS before the persistent explore
     // notification can show — requested when the user starts exploring with
@@ -527,14 +508,7 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            // v8.57 — the bottom action dock is gone, so the watermark's
-            // glyph band is trimmed by the dock's former height (80dp) at
-            // the bottom: the pattern ends where the old scaffold used to
-            // sit, leaving a calm wash band below it.
-            CurioWatermarkBackdrop(
-                activeCat = cat,
-                modifier = Modifier.padding(bottom = 80.dp)
-            )
+            CurioWatermarkBackdrop(activeCat = cat)
         }
 
         Column(
@@ -740,9 +714,7 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // v8.57 — extra clearance so content never hides behind the
-                // 80dp wash strip in the scaffold's bottom bar.
-                Spacer(Modifier.height(80.dp))
+                Spacer(Modifier.height(24.dp))
             }
 
         }
@@ -1043,34 +1015,8 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
 }
 
 /**
- * v8.57 — the reveal's bottom-bar slot content: a static WASH STRIP with no
- * buttons. It keeps the NavHost morph reserve registered (and wearing the
- * page's category wash) for the whole visit — including the pop transition —
- * so Scaffold innerPadding never changes mid-morph (the v8.5 freeze rule).
- * It reads as plain page background; the real actions live inline below the
- * hero card ([RevealActionRow]).
- */
-@Composable
-private fun RevealWashStrip(
-    cat: com.curio.app.data.CurioCategory
-) {
-    // v8.57 — invisible spacer: keeps Scaffold innerPadding stable so
-    // content never shifts during the morph transition. Transparent
-    // surface sits at the same z-index as the watermark background.
-    Surface(
-        color = Color.Transparent,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .windowInsetsPadding(WindowInsets.navigationBars)
-    ) {}
-}
-
-/**
- * v8.57 — Start exploring / Already … — now a theme-aware inline row right
- * below the hero card (was a floating bottom dock). Reuses the tier metrics
+ * Start exploring / Already … — a theme-aware inline row right below the
+ * hero card. Reuses the tier metrics
  * so the pair resizes cleanly on every screen size.
  */
 @Composable
@@ -1090,9 +1036,8 @@ private fun RevealActionRow(
             maxWidth < 440.dp -> RevealDockTier.COMPACT
             else -> RevealDockTier.STANDARD
         }
-        // The dock's vertical squeeze tier was for the pinned bottom slot;
-        // inline under the hero the width tiers (NARROW/COMPACT/STANDARD)
-        // alone resize the pair cleanly on every screen.
+        // Inline under the hero, the width tiers (NARROW/COMPACT/STANDARD)
+        // resize the pair cleanly on every screen.
         val m = revealDockMetrics(tier, tight = false)
         // v8.57 — the action row sits directly on the category wash, no
         // floating pill: transparent background so the buttons feel part
