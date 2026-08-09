@@ -38,9 +38,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
@@ -144,7 +148,14 @@ fun CurioFloatingPet(
     }
     val autoWander = animatorScale > 0f
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    var overlayOrigin by remember { mutableStateOf(Offset.Zero) }
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .onGloballyPositioned { coordinates ->
+                overlayOrigin = coordinates.positionInWindow()
+            }
+    ) {
         val maxW = with(density) { maxWidth.toPx() }
         val maxH = with(density) { maxHeight.toPx() }
         val petPx = with(density) { FLOAT_SIZE.toPx() }
@@ -207,6 +218,7 @@ fun CurioFloatingPet(
         // the currently registered landmark so Curie can walk beside the real
         // control instead of merely speaking from a random corner.
         val tourStep = TourController.currentStep
+        var tourBubbleSize by remember { mutableStateOf(IntSize.Zero) }
         val tourLandmark = if (tourStep != null && routePrefix == tourStep.routePrefix) {
             PetLandmarks.forScreen(routePrefix).firstOrNull { it.id == tourStep.landmarkId }
         } else null
@@ -393,10 +405,10 @@ fun CurioFloatingPet(
         // During the Tour, move once to the current real landmark and stay
         // there until the user advances. This keeps the guide legible and
         // prevents autonomous pokes from triggering unrelated UI behavior.
-        LaunchedEffect(tourStep?.id, tourLandmark?.bounds, maxW, maxH) {
+        LaunchedEffect(tourStep?.id, tourLandmark?.bounds, overlayOrigin, maxW, maxH) {
             val step = tourStep ?: return@LaunchedEffect
             val landmark = tourLandmark ?: return@LaunchedEffect
-            val center = landmark.bounds.center
+            val center = landmark.bounds.center - overlayOrigin
             val side = if (center.x > maxW / 2f) -1f else 1f
             val target = Offset(
                 (center.x + side * petPx * 0.95f)
@@ -1283,23 +1295,65 @@ fun CurioFloatingPet(
                 .size(TYPING_W, TYPING_H)
         )
 
-        // Tiny reaction bubble floating just above the pet. Drawn as a
-        // separate offset sibling (never inside the pet's touch box) so it
-        // can wrap freely and never eats the pet's taps. The offset box is
-        // lifted by the pet's own height and the bubble bottom-aligns to it,
-        // so its tail touches the pet's head (padding is never used to move
-        // it — that would overlay the face).
+        // Reaction bubbles belong to the pet. Tour guidance is different: it
+        // belongs to the registered control, so it must follow that control's
+        // window bounds rather than the pet's current position. Landmarks are
+        // measured with positionInWindow(), the same coordinate space used by
+        // this full-screen overlay.
         val visibleBubble = tourStep?.dialogue ?: reaction
+        val tourActiveLandmark = tourStep?.let { tourLandmark }
+        val tourBubbleWidthPx = if (tourActiveLandmark != null && tourBubbleSize.width > 0) {
+            tourBubbleSize.width.toFloat()
+        } else {
+            with(density) { 260.dp.toPx() }
+        }
+        val tourBubbleHeightPx = if (tourActiveLandmark != null && tourBubbleSize.height > 0) {
+            tourBubbleSize.height.toFloat()
+        } else {
+            with(density) { FLOAT_SIZE.toPx() }
+        }
+        val tourBubbleGapPx = with(density) { 8.dp.toPx() }
+        val bubbleOffset = tourActiveLandmark?.bounds?.let { bounds ->
+            // Landmark bounds are in window coordinates; convert them to this
+            // overlay's local coordinate space before applying Modifier.offset.
+            val localBounds = Rect(
+                left = bounds.left - overlayOrigin.x,
+                top = bounds.top - overlayOrigin.y,
+                right = bounds.right - overlayOrigin.x,
+                bottom = bounds.bottom - overlayOrigin.y
+            )
+            val x = (localBounds.center.x - tourBubbleWidthPx / 2f)
+                .coerceIn(marginPx, (maxW - tourBubbleWidthPx - marginPx).coerceAtLeast(marginPx))
+            val aboveY = localBounds.top - tourBubbleHeightPx - tourBubbleGapPx
+            val belowY = localBounds.bottom + tourBubbleGapPx
+            val y = if (aboveY >= marginPx) aboveY else belowY
+                .coerceIn(marginPx, (maxH - tourBubbleHeightPx - marginPx).coerceAtLeast(marginPx))
+            IntOffset(x.roundToInt(), y.roundToInt())
+        } ?: IntOffset(
+            pos.x.roundToInt().coerceIn(
+                marginPx.toInt(),
+                (maxW - with(density) { 160.dp.toPx() }).toInt()
+            ),
+            (pos.y - tourBubbleHeightPx).roundToInt()
+        )
+        LaunchedEffect(tourStep?.id) {
+            tourBubbleSize = IntSize.Zero
+        }
         visibleBubble?.let { text ->
             Box(
                 modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            pos.x.roundToInt().coerceIn(marginPx.toInt(), (maxW - with(density) { 160.dp.toPx() }).toInt()),
-                            (pos.y - with(density) { FLOAT_SIZE.toPx() }).roundToInt()
-                        )
-                    }
-                    .height(FLOAT_SIZE)
+                    .offset { bubbleOffset }
+                    .then(
+                        if (tourActiveLandmark != null) {
+                            Modifier.onSizeChanged { measuredSize ->
+                                if (tourBubbleSize != measuredSize) {
+                                    tourBubbleSize = measuredSize
+                                }
+                            }
+                        } else {
+                            Modifier.height(FLOAT_SIZE)
+                        }
+                    )
                     // v8.26 — fade + gentle rise so the bubble glides in and
                     // out instead of snapping (driven by [bubbleAnim]).
                     .graphicsLayer {
@@ -1310,6 +1364,9 @@ fun CurioFloatingPet(
             ) {
                 PetSpeechBubble(
                     text = text,
+                    // The tour bubble is centered over the exact landmark;
+                    // its left tail remains the least surprising orientation
+                    // for controls near either side of the screen.
                     tailOnLeft = false,
                     modifier = Modifier.align(Alignment.BottomStart)
                 )
