@@ -93,7 +93,6 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
-import com.curio.app.data.DetailTransform
 import com.curio.app.data.EyeStyle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.CustomPetAction
@@ -259,21 +258,6 @@ fun PetDesignerScreen(navController: NavController) {
     // Actions-page targets.
     var page by rememberSaveable { mutableStateOf(PetDesignerPage.PETS) }
     var target by rememberSaveable { mutableStateOf<PetEditorTarget?>(null) }
-    // Detail layers share the same protected canvas and palette as body art.
-    var detailLayer by rememberSaveable { mutableStateOf("tail") }
-    // The Details tab starts with the effective current part (including
-    // procedural art) so users can redraw what Curie already wears.
-    var detailEditorDrafts by remember(savedText) {
-        mutableStateOf<Map<String, List<String>>>(emptyMap())
-    }
-    // Compare edits against the part as it looked when this designer opened.
-    var showBlueprint by rememberSaveable { mutableStateOf(false) }
-    var detailEditorRevision by remember { mutableStateOf(0) }
-    fun resetDetailEditor() {
-        detailEditorDrafts = emptyMap()
-        showBlueprint = false
-        detailEditorRevision++
-    }
     // When non-null, the color editor dialog is open for this palette key.
     var editingColorKey by rememberSaveable { mutableStateOf<Char?>(null) }
     // v8.49 — which preview picker dialog is open (body / faces / details / animations).
@@ -368,7 +352,6 @@ fun PetDesignerScreen(navController: NavController) {
         redoStack = redoStack + design
         design = undoStack.last()
         undoStack = undoStack.dropLast(1)
-        resetDetailEditor()
         reactionLineDraft = design.reactionFor(reactEvent).lines.joinToString("\n")
         val action = (target as? PetEditorTarget.CustomAction)?.let { design.customActionFor(it.actionId) }
         customActionNameDraft = action?.name ?: customActionNameDraft
@@ -380,7 +363,6 @@ fun PetDesignerScreen(navController: NavController) {
         undoStack = undoStack + design
         design = redoStack.last()
         redoStack = redoStack.dropLast(1)
-        resetDetailEditor()
         reactionLineDraft = design.reactionFor(reactEvent).lines.joinToString("\n")
         val action = (target as? PetEditorTarget.CustomAction)?.let { design.customActionFor(it.actionId) }
         customActionNameDraft = action?.name ?: customActionNameDraft
@@ -395,26 +377,16 @@ fun PetDesignerScreen(navController: NavController) {
         val grid = targetGrid
         when (tool) {
             PaintTool.BRUSH -> {
-                design = if (grid.startsWith("detail:")) {
-                    design.withDetailPixel(grid.removePrefix("detail:"), row, col, paintKey)
-                } else design.withPixel(grid, row, col, paintKey)
+                design = design.withPixel(grid, row, col, paintKey)
             }
             PaintTool.FILL -> {
-                design = if (grid.startsWith("detail:")) {
-                    design.withDetailFloodFill(grid.removePrefix("detail:"), row, col, paintKey)
-                } else design.withFloodFill(grid, row, col, paintKey)
+                design = design.withFloodFill(grid, row, col, paintKey)
             }
             PaintTool.ERASER -> {
-                design = if (grid.startsWith("detail:")) {
-                    design.withDetailPixel(grid.removePrefix("detail:"), row, col, '.')
-                } else design.withPixel(grid, row, col, '.')
+                design = design.withPixel(grid, row, col, '.')
             }
             PaintTool.EYEDROPPER -> {
-                val rows = when {
-                    grid.startsWith("detail:") -> design.detailFor(grid.removePrefix("detail:"))
-                    grid == "curled" -> design.curledRows
-                    else -> design.bodyRows
-                }
+                val rows = if (grid == "curled") design.curledRows else design.bodyRows
                 val ch = rows.getOrNull(row)?.getOrNull(col) ?: '.'
                 if (ch != '.') {
                     paintKey = ch
@@ -424,15 +396,13 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
         }
-    }
+    }    // v8.45 — picking a target in the universal editor also syncs the legacy
+    // editor states (grid, face mood, reaction event) so the
 
-    // v8.45 — picking a target in the universal editor also syncs the legacy
-    // editor states (grid, detail layer, face mood, reaction event) so the
     // existing editor bodies keep working unchanged.
     fun selectTarget(newTarget: PetEditorTarget) {
         target = newTarget
         when (newTarget) {
-            is PetEditorTarget.DetailLayer -> detailLayer = newTarget.key
             is PetEditorTarget.Face -> faceMood = newTarget.mood
             is PetEditorTarget.Reaction -> {
                 reactEvent = newTarget.event
@@ -484,7 +454,6 @@ fun PetDesignerScreen(navController: NavController) {
             return
         }
         pushUndo()
-        resetDetailEditor()
         activeCustomSlot = null
         design = if (design.isCustom) design.copy(petSpeciesId = pet.id)
         else pet.defaultDesign.copy(petSpeciesId = pet.id)
@@ -500,7 +469,6 @@ fun PetDesignerScreen(navController: NavController) {
         }
         val parsed = PetDesign.DEFAULT.toParsedOr(text, design)
         pushUndo()
-        resetDetailEditor()
         design = parsed
         activeCustomSlot = slot
         toast = "\u201cCustom ${slot + 1}\u201d is now your pet"
@@ -566,8 +534,7 @@ fun PetDesignerScreen(navController: NavController) {
                         onUndo = { undo() },
                         onRedo = { redo() },        onReset = {
             pushUndo()
-            resetDetailEditor()
-            activeCustomSlot = null
+                activeCustomSlot = null
             design = PetDesign.DEFAULT
         },
                         onSave = {
@@ -773,13 +740,11 @@ fun PetDesignerScreen(navController: NavController) {
                         ) {
                             GridTab("24×24", design.gridSize == 24) {
                                 pushUndo()
-                                resetDetailEditor()
-                                design = design.withSize(24)
+                                                        design = design.withSize(24)
                             }
                             GridTab("32×32", design.gridSize == 32) {
                                 pushUndo()
-                                resetDetailEditor()
-                                design = design.withSize(32)
+                                                        design = design.withSize(32)
                             }
                         }
                     }
@@ -837,248 +802,13 @@ fun PetDesignerScreen(navController: NavController) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Copy body → asleep", enabled = editingGrid == "body") {
                             pushUndo()
-                            resetDetailEditor()
-                            design = design.copy(curledRows = PetDesign.bodyAsCurled(design.bodyRows))
+                                                design = design.copy(curledRows = PetDesign.bodyAsCurled(design.bodyRows))
                         }
                         SmallAction("Clear grid", enabled = true) {
                             pushUndo()
-                            resetDetailEditor()
-                            val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
+                                                val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
                             design = design.withGrid(editingGrid, blank)
                         }
-                    }
-                }
-            }
-
-            // Detail drawing UI is intentionally not exposed in this studio pass.
-            item {
-                if (false && page == PetDesignerPage.EDITOR && target is PetEditorTarget.DetailLayer) SectionCard(
-                    "Draw every detail",
-                    "Paint Curie's tail, accessories, effects, or antenna on separate layers"
-                ) {
-                    Text(
-                        "Detail layer",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        PetDesign.DETAIL_KEYS.forEach { layer ->
-                            ChoiceChip(
-                                label = layer.replaceFirstChar { it.uppercase() },
-                                selected = detailLayer == layer,
-                                onClick = { detailLayer = layer }
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Draw mode protects scrolling. The grid starts with the current part in its real placement, so you can redraw it instead of starting from blank pixels.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    CurioPetSprite(
-                        stage = CurioPet.currentStage(),
-                        mood = previewMood,
-                        spriteSize = 150.dp,
-                        design = design,
-                        contentDescription = "Live placement preview for the $detailLayer layer"
-                    )
-                    Text(
-                        "Live placement — this shows where the selected ${detailLayer.replaceFirstChar { it.uppercase() }} appears on Curie. Edit the matching pixels below; blank cells stay transparent.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    ToggleRow(
-                        label = "Show before-edit blueprint",
-                        checked = showBlueprint,
-                        onCheckedChange = { showBlueprint = it }
-                    )
-                    Text(
-                        "The blueprint marks the original current pixels underneath your redraw.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    CanvasStatus(activeTool = activeTool)
-                    Spacer(Modifier.height(10.dp))
-                    QuickPaletteRow(
-                        selectedKey = paintKey,
-                        design = design,
-                        onSelect = {
-                            paintKey = it
-                            activeTool = PaintTool.BRUSH
-                        },
-                        onEdit = { editingColorKey = it }
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    val blueprintRows = remember(detailLayer, design.gridSize, savedText, detailEditorRevision) {
-                        effectiveDetailRows(design, detailLayer)
-                    }
-                    val editorRows = detailEditorDrafts[detailLayer] ?: blueprintRows
-                    PixelGrid(
-                        design = design,
-                        grid = "detail:$detailLayer",
-                        rowsOverride = editorRows,
-                        blueprintRows = blueprintRows,
-                        showBlueprint = showBlueprint,
-                        zoom = gridZoom,
-                        tool = activeTool,
-                        onTool = { row, col, continuous ->
-                            val mutating = activeTool == PaintTool.BRUSH ||
-                                activeTool == PaintTool.FILL || activeTool == PaintTool.ERASER
-                            if (mutating && !continuous) pushUndo()
-                            if (activeTool == PaintTool.FILL || activeTool == PaintTool.EYEDROPPER) {
-                                if (!continuous) {
-                                    val rows = detailEditorDrafts[detailLayer] ?: blueprintRows
-                                    detailEditorDrafts = detailEditorDrafts + (detailLayer to rows)
-                                    design = design
-                                        .withDetailGrid(detailLayer, rows)
-                                        .withProceduralEnabled(detailLayer, false)
-                                    applyTool(row, col, "detail:$detailLayer", snapshot = false)
-                                    detailEditorDrafts = detailEditorDrafts + (detailLayer to design.detailFor(detailLayer))
-                                }
-                            } else {
-                                val rows = detailEditorDrafts[detailLayer] ?: blueprintRows
-                                detailEditorDrafts = detailEditorDrafts + (detailLayer to rows)
-                                design = design
-                                    .withDetailGrid(detailLayer, rows)
-                                    .withProceduralEnabled(detailLayer, false)
-                                applyTool(row, col, "detail:$detailLayer", snapshot = false)
-                                detailEditorDrafts = detailEditorDrafts + (detailLayer to design.detailFor(detailLayer))
-                            }
-                        }
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    ToolTray(
-                        activeTool = activeTool,
-                        onSelect = { activeTool = it }
-                    )
-                    if (AppPreferences.petPartTransformsState) {
-                        var transformUndoPushed by remember(detailLayer) { mutableStateOf(false) }
-                        val transform = design.detailTransform(detailLayer)
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            "Part placement",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                        )
-                        Text(
-                            "Resize and place the ${detailLayer} relative to Curie's body. This does not zoom the drawing canvas.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                "Part size",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.width(88.dp)
-                            )
-                            Slider(
-                                value = transform.scale,
-                                onValueChange = {
-                                    if (!transformUndoPushed) {
-                                        pushUndo()
-                                        transformUndoPushed = true
-                                    }
-                                    design = design.withDetailTransform(detailLayer, transform.copy(scale = it))
-                                },
-                                onValueChangeFinished = { transformUndoPushed = false },
-                                valueRange = 0.5f..2f,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                "${(transform.scale * 100).roundToInt()}%",
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.width(42.dp),
-                                textAlign = TextAlign.End
-                            )
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                "X position",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.width(88.dp)
-                            )
-                            Slider(
-                                value = transform.offsetX.toFloat(),
-                                onValueChange = {
-                                    if (!transformUndoPushed) {
-                                        pushUndo()
-                                        transformUndoPushed = true
-                                    }
-                                    design = design.withDetailTransform(detailLayer, transform.copy(offsetX = it.roundToInt()))
-                                },
-                                onValueChangeFinished = { transformUndoPushed = false },
-                                valueRange = -16f..16f,
-                                steps = 31,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                transform.offsetX.toString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.width(42.dp),
-                                textAlign = TextAlign.End
-                            )
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                "Y position",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.width(88.dp)
-                            )
-                            Slider(
-                                value = transform.offsetY.toFloat(),
-                                onValueChange = {
-                                    if (!transformUndoPushed) {
-                                        pushUndo()
-                                        transformUndoPushed = true
-                                    }
-                                    design = design.withDetailTransform(detailLayer, transform.copy(offsetY = it.roundToInt()))
-                                },
-                                onValueChangeFinished = { transformUndoPushed = false },
-                                valueRange = -16f..16f,
-                                steps = 31,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                transform.offsetY.toString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.width(42.dp),
-                                textAlign = TextAlign.End
-                            )
-                        }
-                        SmallAction("Reset part placement", enabled = transform != DetailTransform()) {
-                            pushUndo()
-                            design = design.withDetailTransform(detailLayer, DetailTransform())
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Drawing zoom",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    SliderRow(label = "Canvas", value = gridZoom, max = 3f) { gridZoom = it }
-                    Spacer(Modifier.height(10.dp))
-                    // v8.52 — the per-element disable toggles moved to Settings →
-                    // Accessories (one place to change/disable every part).
-                    SmallAction("Clear ${detailLayer} layer", enabled = true) {
-                        pushUndo()
-                        val blank = List(design.gridSize) { ".".repeat(design.gridSize) }
-                        detailEditorDrafts = detailEditorDrafts + (detailLayer to blank)
-                        design = design
-                            .withDetailGrid(detailLayer, blank)
-                            .withProceduralEnabled(detailLayer, false)
                     }
                 }
             }
@@ -1596,8 +1326,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 preview = preset.applyTo(design),
                                 onClick = {
                                     val nextDesign = preset.applyTo(design)
-                                    resetDetailEditor()
-                                    design = nextDesign
+                                                                design = nextDesign
                                     toast = "\u201c${preset.name}\u201d applied — every face & reaction set"
                                 }
                             )
@@ -1615,21 +1344,18 @@ fun PetDesignerScreen(navController: NavController) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Default", enabled = true) {
                             pushUndo()
-                            resetDetailEditor()
-                            design = design.withGrid("body", upscalePreset(PetDesign.DEFAULT_BODY_16, design.gridSize))
+                                                design = design.withGrid("body", upscalePreset(PetDesign.DEFAULT_BODY_16, design.gridSize))
                         }
                         SmallAction("Robot", enabled = true) {
                             pushUndo()
-                            resetDetailEditor()
-                            design = design.copy(
+                                                design = design.copy(
                                 bodyRows = upscalePreset(ROBOT_BODY, design.gridSize),
                                 curledRows = upscalePreset(ROBOT_CURLED, design.gridSize)
                             )
                         }
                         SmallAction("Ghost", enabled = true) {
                             pushUndo()
-                            resetDetailEditor()
-                            design = design.copy(
+                                                design = design.copy(
                                 bodyRows = upscalePreset(GHOST_BODY, design.gridSize),
                                 curledRows = upscalePreset(GHOST_CURLED, design.gridSize)
                             )
@@ -1639,12 +1365,10 @@ fun PetDesignerScreen(navController: NavController) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Random palette", enabled = true) {
                             pushUndo()
-                            resetDetailEditor()
-                            design = design.randomize()
+                                                design = design.randomize()
                         }
                         SmallAction("Reset all", enabled = design.isCustom) {
-                            resetDetailEditor()
-                            activeCustomSlot = null
+                                                activeCustomSlot = null
                             design = PetDesign.DEFAULT
                                         }
                     }
@@ -1716,8 +1440,7 @@ fun PetDesignerScreen(navController: NavController) {
                     design = design,
                     onToggleProcedural = { element, enabled ->
                         pushUndo()
-                        resetDetailEditor()
-                        design = design.withProceduralEnabled(element, enabled)
+                                        design = design.withProceduralEnabled(element, enabled)
                     },
                     onDismiss = { accessoriesOpen = false }
                 )
@@ -1762,8 +1485,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 text.contains("=") ||
                                 text.lines().any { it.length >= design.gridSize }
                         if (looksLikeDesign) {
-                            resetDetailEditor()
-                            design = parsed
+                                                design = parsed
                                                 importDraft = null
                             true
                         } else {
@@ -1789,8 +1511,7 @@ fun PetDesignerScreen(navController: NavController) {
                         )
                     },
                     onApply = {
-                        resetDetailEditor()
-                        pushUndo()
+                                        pushUndo()
                         design = applyImport(review, design)
                         toast = if (review.touched.isNotEmpty()) {
                             "Imported — ${review.touched.size} custom color(s) added"
@@ -3875,29 +3596,6 @@ private fun DrawPickerDialog(
                     Spacer(Modifier.height(10.dp))
                 }
             }
-            "details" -> {
-                PetDesign.DETAIL_KEYS.chunked(2).forEach { rowKeys ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        rowKeys.forEach { key ->
-                            PickerCard(
-                                title = key.replaceFirstChar { it.uppercase() },
-                                subtitle = "Drawn layer",
-                                selected = selected is PetEditorTarget.DetailLayer && selected.key == key,
-                                modifier = Modifier.weight(1f),
-                                preview = {
-                                    MiniPixelThumb(rows = effectiveDetailRows(design, key), design = design)
-                                },
-                                onClick = { onSelect(PetEditorTarget.DetailLayer(key)) }
-                            )
-                        }
-                        if (rowKeys.size == 1) Spacer(Modifier.weight(1f))
-                    }
-                    Spacer(Modifier.height(10.dp))
-                }
-            }
             "actions" -> {
                 Text(
                     "Built-in reactions",
@@ -5664,7 +5362,6 @@ private fun EditorTargetHeader(
 private fun targetIcon(target: PetEditorTarget): String = when (target) {
     is PetEditorTarget.Body, is PetEditorTarget.CurledPose -> CurioIcons.Brush
     is PetEditorTarget.Colors -> CurioIcons.Palette
-    is PetEditorTarget.DetailLayer -> CurioIcons.Layers
     is PetEditorTarget.Face -> CurioIcons.Star
     is PetEditorTarget.Reaction -> CurioIcons.AutoAwesome
     is PetEditorTarget.CustomAction -> CurioIcons.Add
