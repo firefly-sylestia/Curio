@@ -64,6 +64,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -504,6 +505,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
 
     // ── Spin state ────────────────────────────────────────────────────
     var shuffling by remember { mutableStateOf(false) }
+    // Visible to the deck so peek cards can quietly fade after the midpoint
+    // of the reel instead of competing with the landing card's final lock-in.
+    var shuffleProgress by remember { mutableFloatStateOf(0f) }
     var shuffleCount by remember { mutableIntStateOf(0) }
     var confettiTrigger by remember { mutableIntStateOf(0) }
     // ── Landed topic — persisted by NAME (v5.6) so closing Reveal without
@@ -684,6 +688,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     LaunchedEffect(shuffleCount) {
         if (shuffleCount == 0 || filteredPool.isEmpty()) return@LaunchedEffect
         shuffling = true
+        shuffleProgress = 0f
         // v8.13 — the pet cheers while the deck reels (cleared at the settle).
         CurioPet.noteSpinning(true)
         landedTopicName = null
@@ -700,6 +705,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             val elapsed = System.currentTimeMillis() - start
             if (elapsed >= durationMs) break
             val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 1f)
+            shuffleProgress = progress
             // Smooth reel deceleration: a plain sine ease (no squaring) so
             // the wheel starts at a readable cadence and glides gently to a
             // stop — a graceful slow-down instead of a snappy whip. The
@@ -750,6 +756,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             delay(interval)
             if (System.currentTimeMillis() - start >= durationMs) break
         }
+        shuffleProgress = 1f
         shuffling = false
         // v8.13 — the reel stopped; the pet settles back to watching.
         CurioPet.noteSpinning(false)
@@ -1042,6 +1049,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         displayPool = hand,
                         cycleIndex = cycleIndex,
                         shuffling = shuffling,
+                        shuffleProgress = shuffleProgress,
                         landedTopic = landedTopic,
                         opening = isOpening,
                         enabled = filteredPool.isNotEmpty() && !shuffling,
@@ -1113,6 +1121,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     displayPool = hand,
                     cycleIndex = cycleIndex,
                     shuffling = shuffling,
+                    shuffleProgress = shuffleProgress,
                     landedTopic = landedTopic,
                     opening = isOpening,
                     enabled = filteredPool.isNotEmpty() && !shuffling,
@@ -1154,6 +1163,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         displayPool = hand,
                         cycleIndex = cycleIndex,
                         shuffling = shuffling,
+                        shuffleProgress = shuffleProgress,
                         landedTopic = landedTopic,
                         opening = isOpening,
                         enabled = filteredPool.isNotEmpty() && !shuffling,
@@ -1264,6 +1274,7 @@ private fun ColumnScope.SpinDeckSection(
     displayPool: List<CurioTopic>,
     cycleIndex: Int,
     shuffling: Boolean,
+    shuffleProgress: Float,
     landedTopic: CurioTopic?,
     opening: Boolean,
     enabled: Boolean,
@@ -1301,6 +1312,7 @@ private fun ColumnScope.SpinDeckSection(
             displayPool = displayPool,
             cycleIndex = cycleIndex,
             shuffling = shuffling,
+            shuffleProgress = shuffleProgress,
             landedTopic = landedTopic,
             opening = opening,
             enabled = enabled,
@@ -1869,6 +1881,7 @@ private fun Carousel(
     displayPool: List<CurioTopic>,
     cycleIndex: Int,
     shuffling: Boolean,
+    shuffleProgress: Float,
     landedTopic: CurioTopic?,
     opening: Boolean,
     enabled: Boolean,
@@ -1993,7 +2006,8 @@ private fun Carousel(
                         gradient = deckGradient,
                         cat = cat,
                         topic = topic,
-                        shuffling = shuffling
+                        shuffling = shuffling,
+                        shuffleProgress = shuffleProgress
                     )
                 }
             }
@@ -2171,13 +2185,11 @@ private fun HeroTicketCard(
 
     // ── Premium landing FX (v9.1 — experimental, gated) ────────────────
     // The classic landing feel stays exactly as-is when the master toggle
-    // is off. With it on, the landing plays a spring catch (the settle
-    // branch below), a shockwave ring, a sparkle burst and a brief glow
-    // flash — each an independent A/B layer. All reads are reactive state,
-    // so flipping toggles in Experiments recomposes the hero instantly.
+    // is off. With it on, the landing keeps the spring catch, sparkle burst
+    // and brief glow flash; the circular shockwave layer is intentionally
+    // omitted so the premium treatment stays focused rather than ring-heavy.
     val fxOn = AppPreferences.spinLandingFxState
     val fxCatch = fxOn && AppPreferences.spinFxCatchState
-    val fxRing = fxOn && AppPreferences.spinFxRingState
     val fxSparkle = fxOn && AppPreferences.spinFxSparkleState
 
     // ── Landing settle — seamless handoff from the shuffle tick pulse to
@@ -2231,20 +2243,14 @@ private fun HeroTicketCard(
     //    parallel with the settle spring the moment the wheel lands (never
     //    on a restored / on-entry landed ticket), and stay fully inert when
     //    the experiment is off.
-    val ringProgress = remember { Animatable(0f) }
     val sparkleProgress = remember { Animatable(0f) }
     val glowAlpha = remember { Animatable(0f) }
     var sparkleSeed by remember { mutableIntStateOf(0) }
     LaunchedEffect(landed) {
         if (!landed || landedOnEntry) {
-            ringProgress.snapTo(0f)
             sparkleProgress.snapTo(0f)
             glowAlpha.snapTo(0f)
         } else {
-            if (fxRing) {
-                ringProgress.snapTo(0f)
-                ringProgress.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
-            } else ringProgress.snapTo(0f)
             if (fxSparkle) {
                 sparkleSeed++
                 sparkleProgress.snapTo(0f)
@@ -2620,20 +2626,8 @@ private fun HeroTicketCard(
                 }
             }
 
-            // ── Premium landing FX — shockwave ring, sparkle burst and the
-            //    catch glow, drawn above the card (and expanding past its
-            //    edges). Gated by the experiment (v9.1); fully inert off.
-            if (fxRing && ringProgress.value > 0f) {
-                Canvas(modifier = Modifier.matchParentSize()) {
-                    val p = ringProgress.value
-                    val base = size.minDimension * 0.30f
-                    val radius = base + base * 1.7f * p
-                    val alpha = (1f - p) * 0.85f
-                    val strokeW = 3.dp.toPx() * (1f - p * 0.7f) + 1.dp.toPx()
-                    drawCircle(color = accent.copy(alpha = alpha), radius = radius, center = center, style = Stroke(width = strokeW))
-                    drawCircle(color = Color.White.copy(alpha = alpha * 0.60f), radius = radius * 0.82f, center = center, style = Stroke(width = strokeW * 0.6f))
-                }
-            }
+            // ── Premium landing FX — sparkle burst and catch glow, drawn
+            //    above the card. The circular shockwave is intentionally gone.
             if (fxSparkle && sparkleProgress.value > 0f) {
                 Canvas(modifier = Modifier.matchParentSize()) {
                     val p = sparkleProgress.value
@@ -2695,7 +2689,8 @@ private fun PeekCard(
     gradient: List<Color>,
     cat: CurioCategory,
     topic: CurioTopic?,
-    shuffling: Boolean
+    shuffling: Boolean,
+    shuffleProgress: Float
 ) {
     val isTop = slot < 0
     val far = kotlin.math.abs(slot) == 2
@@ -2784,6 +2779,13 @@ private fun PeekCard(
     // v7.5 — pastel mode lightens the peek fill, so content flips to a deep
     // ink of the deck color (light mode) / a light tint (dark).
     val ink = pastelFillInk(accent)
+    // Peek cards stay fully present through the first half of the reel, then
+    // dissolve into the background so the final selection has visual focus.
+    val peekAlpha = if (shuffling) {
+        ((1f - shuffleProgress) * 2f).coerceIn(0f, 1f)
+    } else {
+        1f
+    }
 
     // v7.7 — deck card redesign (EXPERIMENTAL, four independent Settings
     // toggles, each OFF by default): the blend gradient is now the BASE
@@ -2864,7 +2866,7 @@ private fun PeekCard(
                 // Fully opaque — translucent layers blend badly with the tilt
                 // and render the card as soft/pixelated. Depth comes from
                 // scale + rotation + zIndex instead of transparency.
-                alpha = 1f
+                alpha = peekAlpha
             }
             .zIndex(if (far) 2f else 5f)
     ) {
@@ -3002,10 +3004,12 @@ private fun SpinButton(
     // shrinks WITH the deck (the orbit ring too), floored at 0.75 so the
     // CTA never gets tiny.
     val sizeScale = fitScale.coerceIn(0.75f, 1f)
+    // Keep the animated orbit/dots at the same radius while making the
+    // actual circular button plate a little tighter and more elegant.
     val buttonSize = (if (compact) {
-        if (landedTopic != null) 96.dp else 112.dp
+        if (landedTopic != null) 90.dp else 102.dp
     } else {
-        if (landedTopic != null) 108.dp else 126.dp
+        if (landedTopic != null) 98.dp else 114.dp
     }) * sizeScale
     Box(
         modifier = Modifier.size((if (compact) 156.dp else 176.dp) * sizeScale),
@@ -3162,14 +3166,21 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
                     // instead of a rigid necklace.
                     val pulse = (sin(rotRad * 1.4f + i * 1.15f) + 1f) / 2f
                     val r = dotR * (0.7f + 0.5f * pulse)
-                    // Soft glow behind the dot.
+                    // Layered bloom: a broad haze, a tighter halo, then a
+                    // bright core. The staggered pulse makes the orbit feel
+                    // like living light instead of identical dots on a track.
                     drawCircle(
-                        color = dotColor.copy(alpha = 0.14f + 0.22f * pulse),
-                        radius = r * 1.9f,
+                        color = dotColor.copy(alpha = 0.06f + 0.10f * pulse),
+                        radius = r * 2.8f,
                         center = center
                     )
                     drawCircle(
-                        color = dotColor.copy(alpha = 0.4f + 0.6f * pulse),
+                        color = dotColor.copy(alpha = 0.16f + 0.24f * pulse),
+                        radius = r * 1.75f,
+                        center = center
+                    )
+                    drawCircle(
+                        color = dotColor.copy(alpha = 0.62f + 0.38f * pulse),
                         radius = r,
                         center = center
                     )

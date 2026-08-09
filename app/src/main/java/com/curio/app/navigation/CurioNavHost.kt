@@ -343,7 +343,19 @@ fun CurioNavHost(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    // Reveal no longer renders the old bottom action slot,
+                    // but its shared hero still needs the same viewport
+                    // geometry as the Spin card during the morph. Keep that
+                    // clearance invisible and local to Reveal so removing the
+                    // button never moves the hero or affects other routes.
+                    .then(
+                        if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+                            Modifier.padding(bottom = 80.dp)
+                        } else {
+                            Modifier
+                        }
+                    ),
                 contentAlignment = Alignment.Center
             ) {
         // Wide windows (tablet / landscape / desktop): ONE continuous
@@ -581,11 +593,11 @@ fun CurioNavHost(
                 ) {
                     TopicRevealScreen(
                         categorySlug = entry.arguments?.getString("categorySlug").orEmpty(),
-                        topicName    = safeDecode(entry.arguments?.getString("topicName")),
-                    navController = navController,
-                    // Browse-Topics mode: read-only reveal (see CurioRoutes).
-                    browseMode = entry.arguments?.getString("browse") == "1"
-                )
+                        topicName = safeDecode(entry.arguments?.getString("topicName")),
+                        navController = navController,
+                        // Browse-Topics mode: read-only reveal (see CurioRoutes).
+                        browseMode = entry.arguments?.getString("browse") == "1"
+                    )
                 }
             }
             composable(

@@ -982,7 +982,9 @@ fun PetDesignerScreen(navController: NavController) {
                         design = design,
                         face = face,
                         tool = if (facePaintingEnabled) activeTool else null,
-                        blueprintRows = faceBlueprintRows(design, faceMood),
+                        blueprintRows = remember(design.gridSize, faceMood, face.eyes, face.mouth, face.blush) {
+                            faceBlueprintRows(design, faceMood)
+                        },
                         showBlueprint = faceBlueprint,
                         onPaint = { row, col, continuous ->
                             if (!(activeTool == PaintTool.FILL && continuous)) {
@@ -4161,23 +4163,47 @@ private fun QuickPaletteRow(
             )
         }
     }
-}
-
-/** Renders only the selected mood's face on the same warm pixel board used for painting. */
+}/** Renders only the selected mood's face on the same warm pixel board used for painting. */
 @Composable
 private fun FaceOnlyPreview(
     mood: String,
     design: PetDesign,
     modifier: Modifier = Modifier
 ) {
+    val face = design.faceFor(mood)
+    // Mood cards are decorative previews, not editors. Keep their render
+    // grid capped at 16×16 even when the evolved design is 64×64: the full
+    // resolution is reserved for the one interactive board below. This keeps
+    // the face picker bounded on 256MB devices without changing saved pixels.
+    val previewGridSize = minOf(design.gridSize, 16)
+    val previewFace = remember(face, design.gridSize, previewGridSize) {
+        if (face.gridRows.isEmpty() || design.gridSize == previewGridSize) {
+            face
+        } else {
+            face.copy(
+                gridRows = PetDesign.resizeGrid(face.gridRows, design.gridSize, previewGridSize)
+            )
+        }
+    }
+    val blueprintRows = remember(design.gridSize, previewGridSize, mood, face.eyes, face.mouth, face.blush) {
+        val rows = faceBlueprintRows(design, mood)
+        if (design.gridSize == previewGridSize) rows
+        else PetDesign.resizeGrid(rows, design.gridSize, previewGridSize)
+    }
+    // Preview cards are repeated once per mood. Keep them on the Canvas path
+    // and downsample them so a 64×64 evolved design creates at most 256 cells
+    // per card, not 4096 cells per card (which was the source of the editor's
+    // OOM on open).
     FaceGridEditor(
         modifier = modifier,
         fitToWidth = false,
         design = design,
-        face = design.faceFor(mood),
+        face = previewFace,
+        faceGridSize = previewGridSize,
         tool = null,
-        blueprintRows = faceBlueprintRows(design, mood),
+        blueprintRows = blueprintRows,
         showBlueprint = true,
+        interactive = false,
         onPaint = { _, _, _ -> }
     )
 }
@@ -4229,111 +4255,87 @@ private fun FaceGridEditor(
     fitToWidth: Boolean = true,
     design: PetDesign,
     face: com.curio.app.data.PetFace,
+    faceGridSize: Int = design.gridSize,
     tool: PaintTool?,
     blueprintRows: List<String>? = null,
     showBlueprint: Boolean = false,
+    interactive: Boolean = true,
     onPaint: (Int, Int, Boolean) -> Unit
 ) {
-    val gridSize = design.gridSize
+    val gridSize = faceGridSize.coerceIn(1, design.gridSize)
     val latestOnPaint by rememberUpdatedState(onPaint)
-    val rows = if (face.gridRows.size == gridSize) face.gridRows
-    else List(gridSize) { ".".repeat(gridSize) }
-    val blueprint = if (showBlueprint) blueprintRows else null
-    BoxWithConstraints(
+    val rows = remember(face.gridRows, gridSize) {
+        if (face.gridRows.size == gridSize) face.gridRows
+        else List(gridSize) { ".".repeat(gridSize) }
+    }
+    val blueprint = remember(blueprintRows, gridSize) {
+        when {
+            !showBlueprint || blueprintRows == null -> null
+            blueprintRows.size == gridSize -> blueprintRows
+            else -> PetDesign.resizeGrid(blueprintRows, blueprintRows.size, gridSize)
+        }
+    }
+    val borderColor = if (tool != null) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+    } else {
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+    }
+
+    // A 64×64 face used to create one Compose node per cell, repeated across
+    // every mood preview card. Render the board as one Canvas instead; this
+    // keeps the editor creamy and interactive while making opening Faces
+    // bounded in memory on 256MB devices.
+    Box(
         modifier = modifier
             .then(if (fitToWidth) Modifier.fillMaxWidth() else Modifier)
+            .aspectRatio(1f)
             .clip(RoundedCornerShape(12.dp))
             .background(CurioColors.SoftCream)
-            .border(
-                width = if (tool != null) 2.dp else 1.dp,
-                color = if (tool != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-                else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                shape = RoundedCornerShape(12.dp)
-            )
+            .border(if (tool != null) 2.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
     ) {
-        // Face board stays at the drawing size; the zoom slider is intentionally
-        // not exposed in this editor.
-        val density = LocalDensity.current
-        val maxWpx = with(density) { maxWidth.toPx() }
-        val cellPx = maxWpx / gridSize
-        val overflows = cellPx * gridSize > maxWpx
-        // v8.36 — same fit-vs-overflow pattern as PixelGrid: concurrent
-        // tap + drag when the grid fits the screen, tap-only when zoomed
-        // past it so horizontal scrolling is never overridden by painting.
-        var gestures: Modifier = Modifier
-        if (tool != null) {
-            if (overflows) {
-                gestures = gestures.pointerInput(gridSize, tool) {
+        val gestureModifier = if (interactive && tool != null) {
+            Modifier
+                .pointerInput(gridSize, tool) {
                     detectTapGestures { offset ->
                         val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
                         latestOnPaint(row, col, false)
                     }
                 }
-            } else {
-                gestures = gestures
-                    .pointerInput(gridSize, tool) {
-                        detectTapGestures { offset ->
+                .pointerInput(gridSize, tool) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
                             val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
                             latestOnPaint(row, col, false)
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
+                            latestOnPaint(row, col, true)
                         }
-                    }
-                    .pointerInput(gridSize, tool) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                val (row, col) = cellAtPosition(offset, size.width, size.height, gridSize)
-                                latestOnPaint(row, col, false)
-                            },
-                            onDrag = { change, _ ->
-                                change.consume()
-                                val (row, col) = cellAtPosition(change.position, size.width, size.height, gridSize)
-                                latestOnPaint(row, col, true)
-                            }
-                        )
-                    }
-            }
-        }
-        val gridContent: @Composable () -> Unit = {
-            Column(
-                modifier = Modifier
-                    .width(with(density) { (cellPx * gridSize).toDp() })
-                    .then(gestures)
-            ) {
-                rows.forEachIndexed { rowIndex, line ->
-                    Row(modifier = Modifier.height(with(density) { cellPx.toDp() })) {
-                        line.forEachIndexed { colIndex, ch ->
-                            val filled = ch != '.'
-                            val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
-                            val blueprintOnly = !filled && blueprintKey != null && blueprintKey != '.'
-                            Box(
-                                modifier = Modifier
-                                    .width(with(density) { cellPx.toDp() })
-                                    .height(with(density) { cellPx.toDp() })
-                                    .padding(0.5.dp)
-                                    .clip(RoundedCornerShape(3.dp))
-                                    .background(
-                                        when {
-                                            filled -> hexColor(design.colorOf(ch))
-                                            blueprintOnly -> lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
-                                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
-                                        }
-                                    )
-                            )
-                        }
-                    }
+                    )
                 }
-            }
-        }
-        if (overflows) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-            ) {
-                gridContent()
-            }
         } else {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                gridContent()
+            Modifier
+        }
+        Canvas(modifier = Modifier.fillMaxSize().then(gestureModifier)) {
+            drawRect(CurioColors.SoftCream)
+            val cellWidth = size.width / gridSize.toFloat()
+            val cellHeight = size.height / gridSize.toFloat()
+            rows.forEachIndexed { rowIndex, line ->
+                line.forEachIndexed { colIndex, ch ->
+                    val blueprintKey = blueprint?.getOrNull(rowIndex)?.getOrNull(colIndex)
+                    val color = when {
+                        ch != '.' -> hexColor(design.colorOf(ch))
+                        blueprintKey != null && blueprintKey != '.' ->
+                            lerp(hexColor(design.colorOf(blueprintKey)), Color.Black, 0.35f).copy(alpha = 0.9f)
+                        else -> CurioColors.SoftCream.copy(alpha = 0.18f)
+                    }
+                    drawRect(
+                        color = color,
+                        topLeft = Offset(colIndex * cellWidth, rowIndex * cellHeight),
+                        size = Size(cellWidth + 0.5f, cellHeight + 0.5f)
+                    )
+                }
             }
         }
     }

@@ -92,12 +92,11 @@ object AppPreferences {
     private const val KEY_LEGACY_SMART_DENSITY_LAYOUT = "smart_density_layout"
     // v9.1 — Premium Spin landing FX experiment (default OFF). The classic
     // spin feel stays the shipped default; the master toggle swaps in the
-    // premium landing feel, and each layer (reel / catch / ring / sparkle)
-    // is independently toggleable for A/B tuning.
+    // premium landing feel, with reel / catch / sparkle layers independently
+    // toggleable for A/B tuning.
     private const val KEY_SPIN_LANDING_FX = "spin_landing_fx"
     private const val KEY_SPIN_FX_REEL = "spin_fx_reel"
     private const val KEY_SPIN_FX_CATCH = "spin_fx_catch"
-    private const val KEY_SPIN_FX_RING = "spin_fx_ring"
     private const val KEY_SPIN_FX_SPARKLE = "spin_fx_sparkle"
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
@@ -293,7 +292,6 @@ object AppPreferences {
     var spinLandingFxState by mutableStateOf(false)
     var spinFxReelState by mutableStateOf(true)
     var spinFxCatchState by mutableStateOf(true)
-    var spinFxRingState by mutableStateOf(true)
     var spinFxSparkleState by mutableStateOf(true)
     // Explore sessions — the explore-now timer/reminder/done flow. Default
     // ON; off disables the timer notification + reminder + done prompt while
@@ -452,7 +450,6 @@ object AppPreferences {
         spinLandingFxState = isSpinLandingFxEnabled(context)
         spinFxReelState = isSpinFxReelEnabled(context)
         spinFxCatchState = isSpinFxCatchEnabled(context)
-        spinFxRingState = isSpinFxRingEnabled(context)
         spinFxSparkleState = isSpinFxSparkleEnabled(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
@@ -702,15 +699,6 @@ object AppPreferences {
     fun setSpinFxCatchEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SPIN_FX_CATCH, enabled).apply()
         spinFxCatchState = enabled
-    }
-
-    /** v9.1 — shockwave ring radiating from the landed card. */
-    fun isSpinFxRingEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_RING, true)
-
-    fun setSpinFxRingEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_RING, enabled).apply()
-        spinFxRingState = enabled
     }
 
     /** v9.1 — sparkle burst around the landed card. */

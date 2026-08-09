@@ -1,5 +1,7 @@
 package com.curio.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -262,8 +264,15 @@ fun CurioNavigationRail(
  * and any route that publishes no wash falls back to the surface too.
  */
 @Composable
-private fun curioNavContainerColor(routePrefix: String?): Color = when (routePrefix) {
-    CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.surface
-    CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
-    else -> MaterialTheme.colorScheme.surface
+private fun curioNavContainerColor(routePrefix: String?): Color {
+    val target = when (routePrefix) {
+        CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.surface
+        CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.surface
+    }
+    return animateColorAsState(
+        targetValue = target,
+        animationSpec = tween(durationMillis = 420),
+        label = "curioNavContainerColor"
+    ).value
 }

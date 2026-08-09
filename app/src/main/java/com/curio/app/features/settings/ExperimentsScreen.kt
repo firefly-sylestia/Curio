@@ -131,7 +131,7 @@ fun ExperimentsScreen(navController: NavController) {
                     CurioCardHeader(CurioIcons.AutoAwesome, "Spin landing FX", "Premium landing feel — in testing")
                     ExperimentSwitchRow(
                         "Premium landing FX",
-                        "Buttery reel, spring catch, ring + sparkles",
+                        "Buttery reel, spring catch, sparkle burst + glow",
                         AppPreferences.spinLandingFxState
                     ) {
                         AppPreferences.setSpinLandingFxEnabled(context, it)
@@ -145,11 +145,6 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Spring catch", "Smooth controlled settle as the wheel locks in", AppPreferences.spinFxCatchState, enabled = fxOn) {
                         AppPreferences.setSpinFxCatchEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Shockwave ring", "Accent ring radiates from the landed card", AppPreferences.spinFxRingState, enabled = fxOn) {
-                        AppPreferences.setSpinFxRingEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
                     ExperimentSwitchRow("Sparkle burst", "Star sparks around the landed card", AppPreferences.spinFxSparkleState, enabled = fxOn) {
                         AppPreferences.setSpinFxSparkleEnabled(context, it)
                     }
