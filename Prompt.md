@@ -1,3 +1,14 @@
+# Request — CI compile fix (Topic Database sort) + reveal action dock small-screen/theme fix (DONE)
+
+## v8.55 — un-squish the reveal dock + fix the sort compile error (pushed)
+
+- User: "fix this" (CI compile errors in TopicDatabaseScreen.kt) "and also fix this in topic reveal screen keep the background scaffold but make the buttons floating with proper adjusting for other screen in small screen as current one gets squished too much. dont incrase the scaffhold heigh just make the button theme aware and make it floating properly resizing".
+- **Compile fix (`TopicDatabaseScreen.kt`)**: the two `compareBy(...).thenBy {...}` chains (YEAR_NEWEST/YEAR_OLDEST sorts, lines 194/199) failed CI with "Cannot infer type for type parameter 'T'" — the chain can't infer T from `sortedWith`'s contravariant comparator. Fixed with explicit type args: `compareByDescending<CurioTopic> { ... }.thenBy { ... }` / `compareBy<CurioTopic> { ... }.thenBy { ... }`.
+- **Reveal dock (`TopicRevealScreen.kt` `RevealActionDock`)**: the 80dp wash scaffold + nav-bar inset stay EXACTLY as before (morph-freeze contract untouched). The floating pill now:
+  - **Theme-aware**: `surfaceContainerHigh` + `tonalElevation 1.dp` instead of plain `surface` — in the AMOLED style `surface` is pure black, so the pill used to vanish against the black wash. Mirrors CurioTopicCard's elevated-surface convention.
+  - **Properly resizing**: new `RevealDockTier` (NARROW <340dp / COMPACT <440dp / STANDARD) + a `tight` vertical tier (`maxHeight < 48.dp` — 3-button nav, landscape), all in one `RevealDockMetrics` table. NARROW drops to 13sp text / 16dp icons / tighter padding so "Start exploring" stops ellipsizing on ~320dp screens; `tight` trims the pill to ~44dp so it floats with a small gap instead of towering over the reserved content padding. Tablet metrics unchanged.
+- Verified: braces clean (125 files), `git diff --check` clean, no stale `compact:` call sites, code-reviewed (no blockers). CI is the compile gate.
+
 # Request — Topic data expansion to 500+ per category (DONE)
 
 ## v8.53 — all 11 categories ≥500 entries, 5,838 topics total (pushed)

@@ -190,13 +190,16 @@ fun TopicDatabaseScreen(navController: NavController) {
                 DatabaseSortMode.ALPHA ->
                     topics.sortedWith(compareBy({ it.name.lowercase() }, { it.id }))
                 DatabaseSortMode.YEAR_NEWEST ->
+                    // Explicit type arg: the compareByDescending(...).thenBy
+                    // chain can't infer T from sortedWith's contravariant
+                    // comparator (CI: "Cannot infer type for type parameter").
                     topics.sortedWith(
-                        compareByDescending({ topicYear(it) ?: Int.MIN_VALUE })
+                        compareByDescending<CurioTopic> { topicYear(it) ?: Int.MIN_VALUE }
                             .thenBy { it.name.lowercase() }
                     )
                 DatabaseSortMode.YEAR_OLDEST ->
                     topics.sortedWith(
-                        compareBy({ topicYear(it) ?: Int.MAX_VALUE })
+                        compareBy<CurioTopic> { topicYear(it) ?: Int.MAX_VALUE }
                             .thenBy { it.name.lowercase() }
                     )
                 DatabaseSortMode.DEFAULT -> topics

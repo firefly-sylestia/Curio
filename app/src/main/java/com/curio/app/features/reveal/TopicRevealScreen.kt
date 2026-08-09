@@ -74,6 +74,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -979,6 +981,63 @@ fun TopicRevealScreen(
 
 }
 
+/**
+ * Horizontal size tiers for the reveal action pill: NARROW fits ~320dp
+ * screens (small devices, split-screen) without ellipsizing the labels,
+ * COMPACT covers normal phones, STANDARD keeps the generous tablet look.
+ */
+private enum class RevealDockTier { NARROW, COMPACT, STANDARD }
+
+/**
+ * All pill + button metrics for one [RevealDockTier] and the vertical
+ * [tight] squeeze (less than 48dp of strip — 3-button nav, landscape). One
+ * shared table so the pill and both buttons resize together instead of
+ * squeezing the labels on small screens.
+ */
+private data class RevealDockMetrics(
+    val pillRadius: Dp,
+    val pillPadH: Dp,
+    val pillPadV: Dp,
+    val rowPadH: Dp,
+    val rowPadV: Dp,
+    val rowGap: Dp,
+    val startPadH: Dp,
+    val startPadV: Dp,
+    val alreadyPadH: Dp,
+    val alreadyPadV: Dp,
+    val icon: Dp,
+    val textSp: TextUnit,
+    val gap: Dp,
+    val shadow: Dp
+)
+
+private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockMetrics {
+    val narrow = tier == RevealDockTier.NARROW
+    val compact = tier == RevealDockTier.COMPACT
+    val vPad = if (tight) 7.dp else if (narrow) 8.dp else if (compact) 10.dp else 12.dp
+    return RevealDockMetrics(
+        pillRadius = when {
+            tight -> 18.dp
+            narrow -> 20.dp
+            compact -> 22.dp
+            else -> 26.dp
+        },
+        pillPadH = if (narrow) 10.dp else if (compact) 12.dp else 16.dp,
+        pillPadV = if (tight) 6.dp else 8.dp,
+        rowPadH = if (narrow) 4.dp else if (compact) 6.dp else 10.dp,
+        rowPadV = if (tight) 4.dp else 6.dp,
+        rowGap = if (narrow) 6.dp else 8.dp,
+        startPadH = if (narrow) 8.dp else if (compact) 10.dp else 20.dp,
+        startPadV = vPad,
+        alreadyPadH = if (narrow) 6.dp else if (compact) 8.dp else 16.dp,
+        alreadyPadV = vPad,
+        icon = if (narrow) 16.dp else if (compact) 18.dp else 20.dp,
+        textSp = if (narrow) 13.sp else if (compact) 14.sp else 16.sp,
+        gap = if (narrow) 6.dp else 8.dp,
+        shadow = if (tier == RevealDockTier.STANDARD) 12.dp else 8.dp
+    )
+}
+
 @Composable
 private fun RevealActionDock(
     cat: com.curio.app.data.CurioCategory,
@@ -1025,23 +1084,41 @@ private fun RevealActionDock(
             .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 440.dp
+            // v8.55 — the dock now adapts on BOTH axes. Horizontal tiers
+            // (narrow < 340dp / compact < 440dp / standard) rescale paddings
+            // and typography so the labels never ellipsize on small screens,
+            // and a vertical `tight` tier (less than 48dp of strip — 3-button
+            // nav, landscape) trims the pill so it floats with a small gap
+            // instead of towering over the reserved content padding. The 80dp
+            // scaffold slot + nav-bar inset stay EXACTLY as before (morph
+            // freeze rule above).
+            val tier = when {
+                maxWidth < 340.dp -> RevealDockTier.NARROW
+                maxWidth < 440.dp -> RevealDockTier.COMPACT
+                else -> RevealDockTier.STANDARD
+            }
+            val m = revealDockMetrics(tier, tight = maxHeight < 48.dp)
             Surface(
-                shape = RoundedCornerShape(if (compact) 22.dp else 26.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 3.dp,
-                shadowElevation = if (compact) 8.dp else 12.dp,
+                shape = RoundedCornerShape(m.pillRadius),
+                // v8.55 — theme-aware pill: surfaceContainerHigh (not plain
+                // surface) so the floating pill stays visible in EVERY theme —
+                // in the AMOLED style `surface` is pure black, which made the
+                // pill vanish against the black wash. Mirrors CurioTopicCard's
+                // elevated-surface convention.
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 1.dp,
+                shadowElevation = m.shadow,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = m.pillPadH, vertical = m.pillPadV)
                     .fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier.padding(
-                        horizontal = if (compact) 6.dp else 10.dp,
-                        vertical = 6.dp
+                        horizontal = m.rowPadH,
+                        vertical = m.rowPadV
                     ),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(m.rowGap),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Already/Undo on the LEFT, Start exploring on the RIGHT.
@@ -1049,7 +1126,7 @@ private fun RevealActionDock(
                         enabled = resolved != null,
                         cat = cat,
                         isDone = isDone,
-                        compact = compact,
+                        metrics = m,
                         modifier = Modifier.weight(1f),
                         onClick = onAlready
                     )
@@ -1060,11 +1137,11 @@ private fun RevealActionDock(
                             id = "start-exploring",
                             kind = PetLandmarks.Kind.FUN,
                             screen = "reveal"
-                        ) { m ->
+                        ) { lm ->
                             RevealStartButton(
                                 enabled = resolved != null,
-                                compact = compact,
-                                modifier = m.weight(1f),
+                                metrics = m,
+                                modifier = lm.weight(1f),
                                 onClick = onExplore
                             )
                         }
@@ -1073,7 +1150,7 @@ private fun RevealActionDock(
                         RevealStartButton(
                             enabled = resolved != null,
                             label = "Explore",
-                            compact = compact,
+                            metrics = m,
                             modifier = Modifier.weight(1f),
                             onClick = onSilentExplore
                         )
@@ -1089,13 +1166,15 @@ private fun RevealStartButton(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     label: String = "Start exploring",
-    compact: Boolean = false,
+    metrics: RevealDockMetrics,
     onClick: () -> Unit
 ) {
-    // v8.49 — filled CTA: the actions now live on an OPAQUE floating pill
-    // (see RevealActionDock), so this is a proper primary button instead of
+    // v8.49 — filled CTA: the actions live on an OPAQUE floating pill (see
+    // RevealActionDock), so this is a proper primary button instead of
     // transparent-on-wash. The pill carries the vertical room, so phones keep
-    // a comfortable 10dp vertical padding — the old 2dp tight tier is gone.
+    // a comfortable vertical padding — the old 2dp tight tier is gone.
+    // v8.55 — the tier metrics resize the button instead of squeezing the
+    // label on small screens.
     Button(
         onClick = onClick,
         enabled = enabled,
@@ -1106,34 +1185,31 @@ private fun RevealStartButton(
             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         ),
-        contentPadding = if (compact) {
-            PaddingValues(horizontal = 10.dp, vertical = 10.dp)
-        } else {
-            PaddingValues(horizontal = 20.dp, vertical = 12.dp)
-        },
+        contentPadding = PaddingValues(
+            horizontal = metrics.startPadH,
+            vertical = metrics.startPadV
+        ),
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(metrics.gap)
         ) {
             CurioIcon(
                 CurioIcons.AutoAwesome,
                 null,
                 tint = MaterialTheme.colorScheme.onPrimary,
-                size = if (compact) 18.dp else 20.dp
+                size = metrics.icon
             )
             Text(
                 text = label,
-                // Phones keep labelLarge (14sp): 16sp titleMedium would push
-                // "Start exploring" past the half-width button on ~360dp
-                // screens and ellipsize (v8.44 review). Tablets keep
-                // titleMedium.
-                style = if (compact) {
-                    MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                } else {
-                    MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                },
+                // Tier-scaled type: 13sp on ~320dp screens, 14sp on phones,
+                // 16sp on tablets — "Start exploring" stays on one line
+                // instead of ellipsizing (v8.44 review, v8.55 tiers).
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = metrics.textSp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1147,12 +1223,13 @@ private fun RevealAlreadyButton(
     cat: com.curio.app.data.CurioCategory,
     isDone: Boolean,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
+    metrics: RevealDockMetrics,
     onClick: () -> Unit
 ) {
     // v8.49 — text-style action on the opaque floating pill (was
     // transparent-on-wash). Done state reads in the category ink; idle in
     // the muted onSurfaceVariant. Disabled fades it like the Start button.
+    // v8.55 — the tier metrics resize it with the pill.
     val baseInk = if (isDone) cat.categoryInk() else MaterialTheme.colorScheme.onSurfaceVariant
     val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
     Surface(
@@ -1165,8 +1242,10 @@ private fun RevealAlreadyButton(
             .then(
                 // Comfortable vertical padding on the floating pill — the old
                 // 2dp tight tier is gone (see RevealActionDock).
-                if (compact) Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
-                else Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                Modifier.padding(
+                    horizontal = metrics.alreadyPadH,
+                    vertical = metrics.alreadyPadV
+                )
             )
     ) {
         Row(
@@ -1177,12 +1256,15 @@ private fun RevealAlreadyButton(
                 name = if (isDone) CurioIcons.Close else CurioIcons.History,
                 contentDescription = null,
                 tint = ink,
-                size = if (compact) 18.dp else 20.dp
+                size = metrics.icon
             )
-            Spacer(Modifier.width(if (compact) 6.dp else 8.dp))
+            Spacer(Modifier.width(metrics.gap))
             Text(
                 text = if (isDone) undoLabel(cat) else alreadyDoneLabel(cat),
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = metrics.textSp,
+                    fontWeight = FontWeight.Bold
+                ),
                 color = ink,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
