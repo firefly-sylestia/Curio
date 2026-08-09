@@ -16,6 +16,7 @@ import androidx.compose.runtime.SideEffect
 import com.curio.app.data.AppPreferences
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat

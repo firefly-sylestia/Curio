@@ -138,10 +138,7 @@ fun CurioCategoryCard(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    // SolidColor (not the Brush.solidColor factory) — the
-                    // factory isn't in the resolved Compose BOM; the class is
-                    // the always-available equivalent for a flat fill.                            if (isSelected) Brush.verticalGradient(gradient)
-
+                    if (isSelected) Brush.verticalGradient(gradient)
                     else SolidColor(idleSurface),
                     RoundedCornerShape(22.dp)
                 )

@@ -343,7 +343,7 @@ fun CurioNavHost(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
         // Wide windows (tablet / landscape / desktop): ONE continuous
@@ -712,6 +712,30 @@ fun CurioNavHost(
             }
         }
     }
+
+    // Keep the tour controls inside the existing root Box. The Row is a
+    // small direct child, not a full-screen transparent hit-test layer.
+    val tourStep = TourController.currentStep
+    if (tourStep != null && routePrefix == tourStep.routePrefix) {
+        fun advanceTourAndNavigate() {
+            TourController.advance()
+            val nextRoute = TourController.routeForCurrentStep()
+            if (nextRoute != null && nextRoute != currentRoute) {
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = 18.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            TextButton(onClick = { TourController.skip() }) { Text("Skip") }
+            TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
+        }
+    }
     }
     // ── Pet-led Tour offer and controls ─────────────────────────────────
     // The offer is intentionally rendered on Home after onboarding; the Tour
@@ -728,32 +752,6 @@ fun CurioNavHost(
                 TextButton(onClick = { TourController.declineOffer() }) { Text("Maybe later") }
             }
         )
-    }
-
-    val tourStep = TourController.currentStep
-    if (tourStep != null && routePrefix == tourStep.routePrefix) {
-        fun advanceTourAndNavigate() {
-            TourController.advance()
-            val nextRoute = TourController.routeForCurrentStep()
-            if (nextRoute != null && nextRoute != currentRoute) {
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
-        }
-        // Keep the controls directly in the root Box. A full-screen transparent
-        // parent can become a hit-test layer in Compose and make the screen
-        // underneath feel covered, even though it draws nothing. The Row is
-        // the only tour layer that participates in touch handling.
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 20.dp)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = 18.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            TextButton(onClick = { TourController.skip() }) { Text("Skip") }
-            TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
-        }
     }
 
     // v8.8 — the floating Curio pet: a global overlay drawn above the whole

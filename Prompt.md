@@ -1,31 +1,20 @@
-# Request — Correct browser and reveal actions; finish the focused animation fix
+# Request — Fix CI Kotlin compilation failures
 
 ## User request
-Remove the Explore and Express Yourself buttons that were mistakenly added to each Topic Database/browser row. Keep the existing Explore action inside Topic Reveal, and re-enable Express Yourself there, including when a topic is opened from the database browser.
+Fix the reported release/debug CI compilation errors in `CurioNavHost.kt`, `CurioCategoryCard.kt`, and `CurioTheme.kt`.
 
-## Completed changes in this turn
-- Topic Database rows no longer receive `onExplore` or `onExpress` callbacks and no longer render nested Explore / Express Yourself chips.
-- Topic Database rows still open the read-only `revealForBrowse` route when the row is tapped.
-- Topic Reveal keeps its Explore action; in browse mode it remains a silent Explore action.
-- Topic Reveal Express Yourself is enabled in browse mode and navigates to the capture screen as the explicit write path.
-- Updated Topic Reveal comments to match the browse-mode behavior.
-
-## Also preserved in the current uncommitted working tree from the prior request
-- Removed the full-screen transparent tour-control wrapper and Reveal-only bottom clearance padding so the underlying content is not covered.
-- Peek cards remain fully opaque during travel; outgoing card content fades only in the tail of its own exit transition.
-- The broader Material/AMOLED theme, hero, catalog cache/sort, and splash warm-up patch remains uncommitted pending user approval to push.
+## Fixes completed
+- `CurioNavHost.kt`: added the missing comma after `.padding(innerPadding)` before `contentAlignment`.
+- `CurioNavHost.kt`: kept the tour controls as a direct child of the existing root `Box`, restoring `Modifier.align(Alignment.BottomCenter)` scope without reintroducing a full-screen transparent wrapper.
+- `CurioCategoryCard.kt`: repaired the malformed `background` conditional so selected cards use `Brush.verticalGradient(gradient)` and idle cards use `SolidColor(idleSurface)`.
+- `CurioTheme.kt`: imported `androidx.compose.ui.graphics.lerp` for the Material surface-tone helper.
 
 ## Validation
-- Static brace check passed: 125 files checked.
+- `node scripts/check_braces.js` passed: 125 files checked.
 - `git diff --check` passed.
-- Browser action symbol audit passed: no `openSilentExplore`, `onExplore`, `onExpress`, or stale `LocalContext` references remain in TopicDatabaseScreen.
-- Gradle compile/build/lint/test commands were not run because local Android builds are forbidden by the repository contract; CI remains authoritative.
-
-## Validation and release status
-- Full repository-safe static validation passed: `node scripts/check_braces.js` checked 125 files and `git diff --check` reported no issues.
-- Focused audits passed: no Topic Database row action callbacks/UI remain; Reveal Express Yourself is enabled and routes to capture; PeekCard no longer uses global alpha; tour controls no longer use a full-screen transparent wrapper; changed call signatures match.
-- Code review found no critical blocker. CI remains required for Kotlin/Compose compilation because local Gradle builds are forbidden by the repository contract.
-- User explicitly authorized full validation followed by commit and push.
+- Focused review found no critical compile or scope issues.
+- The affected symbols now resolve statically: `contentAlignment`, `SolidColor`, `lerp`, and BoxScope `align`.
+- Local Gradle compile/build/lint/test commands were not run because the repository explicitly forbids local Android builds; CI remains authoritative.
 
 ## Status
-Validated and ready to commit/push.
+Compile fix validated and committed/pushed in this turn.
