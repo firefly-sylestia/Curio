@@ -1,3 +1,46 @@
+# Request — Pet screen redesign: Pets/Editor/Settings studio (DONE)
+
+## v8.52 — 3-page studio + per-frame eyes editor (pushed)
+
+- User asked for a full redesign plan + implementation: nav with 3 buttons
+  (pets / editor / settings), pets page with "more pets coming soon" and
+  animations+previews below when a pet is chosen, editor page with tools at
+  top + a dialog to choose what to edit + just the editor below (incl.
+  animation editing), settings with a dialog to change accessories + disable
+  toggles, import & save placed in the editor above in a small way, an eyes
+  editor with frames positioned properly with blueprint behind. Plus: "no
+  duplicate buttons, very UX friendly and advanced and beautiful".
+  Confirmed via ask_user: **eyes per animation frame**, **plan + implement**,
+  always-on.
+- **Plan doc**: `docs/plans/PET_SCREEN_REDESIGN_PLAN.md` (IA, logic,
+  eyes design, UX checklist, implementation order).
+- **Pages**: `PetDesignerPage` → PETS/EDITOR/SETTINGS. PETS = Pet library
+  (`PetRegistry.all` cards + More pets coming soon) with Live preview +
+  Animation gallery below (shared showcase items, one definition). EDITOR =
+  sticky `EditorToolbar` (Save/Undo/Redo/Reset/Share-Export/Download-Import
+  + status line — replaces the pinned footer SaveArea) + "Choose what to
+  edit" strip → `DrawPickerDialog` (new Actions category with
+  `ReactionSpritePreview` cards) → only the chosen editor below. SETTINGS =
+  Accessories dialog (`AccessoriesRow` per element: live thumb, enable
+  switch, Draw it shortcut) + personality presets + shapes; import/export
+  card and pet library removed (no duplicate buttons).
+- **Eyes per animation frame**: `PetAnimationFrame.eyeGrid` (fixed 16×16,
+  `e=` serialized, `norm16` parse); sprite eye art extracted to
+  `EYE_STYLE_PIXELS` data table; new `eyeOverride` param renders the layer
+  in the glance translate (standing pose; sleepy curl keeps its own eyes —
+  noted in the editor). Timeline gains an **Eyes** tab: 16×16 grid via
+  `PixelGrid(design.copy(gridSize = 16))` with the mood's procedural eyes as
+  blueprint behind + live sprite preview; per-frame, per-animation.
+- **Dead code removed**: SaveArea, TargetPicker/TargetChipRow/TargetChip,
+  FooterAction, SaveButton, ActionCard (Actions landing folded into the
+  chooser dialog; presets moved to Settings).
+- Review fixes: fixed a nested-quote string template + a dropped closing
+  brace (brace-checker caught both); toolbar icons switched to Share
+  (export) / Download (import); sleepy-pose note added to the eyes tab.
+- Verified: braces clean (125 files), `git diff --check` clean, import
+  hygiene (FontStyle removed), code-reviewed. versionCode 20260907 →
+  20260908 + changelog 20260908.txt. CI is the compile gate.
+
 # Request — Pet designer: per-frame pixel animation editing (DONE)
 
 ## v8.52 — draw every animation frame + full-size preview (pushed)

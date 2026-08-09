@@ -294,6 +294,12 @@ data class PetDesign(
                     }.getOrDefault("")
                     if (encoded.isNotBlank()) parts += "c=$encoded"
                 }
+                fr.eyeGrid?.let { rows ->
+                    val encoded = runCatching {
+                        java.net.URLEncoder.encode(rows.joinToString("\n"), "UTF-8")
+                    }.getOrDefault("")
+                    if (encoded.isNotBlank()) parts += "e=$encoded"
+                }
                 appendLine("frame=" + parts.joinToString(";"))
             }
         }
@@ -409,6 +415,7 @@ data class PetDesign(
                     var rotation = 0f
                     var body: List<String>? = null
                     var curled: List<String>? = null
+                    var eye: List<String>? = null
                     line.substring(6).split(';').forEach { seg ->
                         val s = seg.indexOf('=')
                         if (s <= 0) return@forEach
@@ -426,11 +433,14 @@ data class PetDesign(
                             "c" -> curled = runCatching {
                                 java.net.URLDecoder.decode(v, "UTF-8").split("\n")
                             }.getOrNull()
+                            "e" -> eye = runCatching {
+                                java.net.URLDecoder.decode(v, "UTF-8").split("\n")
+                            }.getOrNull()
                         }
                     }
                     index?.let { i ->
                         animFrames[animId]?.put(
-                            i, PetAnimationFrame(durationMs, offsetY, scale, rotation, body, curled)
+                            i, PetAnimationFrame(durationMs, offsetY, scale, rotation, body, curled, eye)
                         )
                     }
                 }
@@ -472,6 +482,13 @@ data class PetDesign(
             return if (cleaned.size >= size) cleaned.take(size)
             else cleaned + List(size - cleaned.size) { ".".repeat(size) }
         }
+        // v8.52 — the eye layer is authored in a fixed 16×16 space.
+        fun norm16(rows: List<String>?): List<String>? {
+            if (rows == null) return null
+            val cleaned = rows.map { (it + ".".repeat(16)).take(16) }
+            return if (cleaned.size >= 16) cleaned.take(16)
+            else cleaned + List(16 - cleaned.size) { ".".repeat(16) }
+        }
         // v8.52 — rebuild custom animations from parsed frames. Frames merge
         // over the built-in ones (missing indices keep the base frame); an
         // animation identical to its built-in is dropped so dirty-check and
@@ -483,7 +500,11 @@ data class PetDesign(
             animFrames.mapNotNull { (id, frameMap) ->
                 val base = animationById(id)
                 val normalized = frameMap.mapValues { (_, fr) ->
-                    fr.copy(bodyRows = norm(fr.bodyRows), curledRows = norm(fr.curledRows))
+                    fr.copy(
+                        bodyRows = norm(fr.bodyRows),
+                        curledRows = norm(fr.curledRows),
+                        eyeGrid = norm16(fr.eyeGrid)
+                    )
                 }
                 if (base != null) {
                     val merged = base.frames.mapIndexed { i, f -> normalized[i] ?: f }
@@ -1080,7 +1101,14 @@ data class PetAnimationFrame(
      */
     val bodyRows: List<String>? = null,
     /** v8.52 — same idea for the asleep (curled) pose. */
-    val curledRows: List<String>? = null
+    val curledRows: List<String>? = null,
+    /**
+     * v8.52 — per-frame EYE layer: a fixed 16×16 pixel grid (the same
+     * authoring space the procedural eyes are drawn in) rendered instead of
+     * the mood's procedural eyes while this frame plays, so eyes can blink,
+     * wink or glance frame by frame. `null` keeps the procedural style.
+     */
+    val eyeGrid: List<String>? = null
 ) {
     /** v8.52 — returns a copy with a custom body pose for this frame. */
     fun withBodyGrid(rows: List<String>): PetAnimationFrame = copy(bodyRows = rows)

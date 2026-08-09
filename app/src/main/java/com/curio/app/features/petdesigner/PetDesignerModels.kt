@@ -14,7 +14,10 @@ import com.curio.app.data.petAnimationName
  * this model; each existing editor surface (body canvas, detail layers, mood
  * faces, reactions, palette) is now reached through a target.
  */
-internal enum class PetDesignerPage { ANIMATIONS, ACTIONS, SETTINGS }
+// v8.52 — the three-page studio redesign: Pets (pick your companion + see
+// its animations), Editor (choose a target, then just the editor), Settings
+// (look toggles, accessories, presets, shapes, export).
+internal enum class PetDesignerPage { PETS, EDITOR, SETTINGS }
 
 /**
  * What the universal editor is currently editing. Each target drives the

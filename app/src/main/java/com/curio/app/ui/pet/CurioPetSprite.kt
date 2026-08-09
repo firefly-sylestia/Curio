@@ -73,6 +73,68 @@ private fun petDesignColor(hex: String): Color =
  * the Curio light-theme brand coral ([CurioColors.CategoryCoral]); they no
  * longer react to the category pastel accents or to dark mode.
  */
+
+/**
+ * v8.52 — the procedural eye art as data: one entry per [EyeStyle], each a
+ * list of (col, row, slot) where slot is "ink" | "white" | "star". Shared by
+ * the sprite renderer AND the Eyes editor's blueprint, so the reference the
+ * editor draws always matches what the pet would have worn.
+ */
+internal val EYE_STYLE_PIXELS: Map<EyeStyle, List<Triple<Int, Int, String>>> = mapOf(
+    EyeStyle.OPEN to listOf(
+        Triple(4, 7, "ink"), Triple(5, 7, "ink"),
+        Triple(4, 8, "ink"), Triple(5, 8, "ink"),
+        Triple(10, 7, "ink"), Triple(11, 7, "ink"),
+        Triple(10, 8, "ink"), Triple(11, 8, "ink"),
+        Triple(4, 7, "white"), Triple(10, 7, "white")
+    ),
+    EyeStyle.BLINK to listOf(
+        Triple(4, 7, "ink"), Triple(5, 7, "ink"),
+        Triple(10, 7, "ink"), Triple(11, 7, "ink")
+    ),
+    EyeStyle.CLOSED to listOf(
+        Triple(4, 8, "ink"), Triple(5, 8, "ink"),
+        Triple(10, 8, "ink"), Triple(11, 8, "ink")
+    ),
+    EyeStyle.WIDE to listOf(
+        Triple(4, 6, "ink"), Triple(5, 6, "ink"),
+        Triple(4, 7, "ink"), Triple(5, 7, "ink"),
+        Triple(4, 8, "ink"), Triple(5, 8, "ink"),
+        Triple(10, 6, "ink"), Triple(11, 6, "ink"),
+        Triple(10, 7, "ink"), Triple(11, 7, "ink"),
+        Triple(10, 8, "ink"), Triple(11, 8, "ink"),
+        Triple(4, 7, "white"), Triple(10, 7, "white")
+    ),
+    EyeStyle.STAR to listOf(
+        // Natural warm-brown sparkle eyes with a white glint.
+        Triple(4, 6, "star"), Triple(5, 6, "star"),
+        Triple(3, 7, "star"), Triple(4, 7, "star"), Triple(5, 7, "star"), Triple(6, 7, "star"),
+        Triple(4, 8, "star"), Triple(5, 8, "star"),
+        Triple(4, 7, "white"),
+        Triple(10, 6, "star"), Triple(11, 6, "star"),
+        Triple(9, 7, "star"), Triple(10, 7, "star"), Triple(11, 7, "star"), Triple(12, 7, "star"),
+        Triple(10, 8, "star"), Triple(11, 8, "star"),
+        Triple(10, 7, "white")
+    ),
+    EyeStyle.DIZZY to listOf(
+        // Dizzy pinwheel swirls with diagonal glints.
+        Triple(4, 6, "ink"), Triple(5, 6, "ink"),
+        Triple(4, 7, "ink"), Triple(5, 7, "ink"),
+        Triple(4, 8, "ink"), Triple(5, 8, "ink"),
+        Triple(3, 7, "ink"), Triple(6, 7, "ink"),
+        Triple(4, 7, "white"), Triple(5, 6, "white"),
+        Triple(10, 6, "ink"), Triple(11, 6, "ink"),
+        Triple(10, 7, "ink"), Triple(11, 7, "ink"),
+        Triple(10, 8, "ink"), Triple(11, 8, "ink"),
+        Triple(9, 7, "ink"), Triple(12, 7, "ink"),
+        Triple(10, 7, "white"), Triple(11, 6, "white")
+    ),
+    EyeStyle.HAPPY to listOf(
+        Triple(4, 8, "ink"), Triple(5, 7, "ink"), Triple(5, 8, "ink"),
+        Triple(10, 8, "ink"), Triple(10, 7, "ink"), Triple(11, 8, "ink")
+    )
+)
+
 @Composable
 fun CurioPetSprite(
     stage: CurioPet.Stage,
@@ -124,7 +186,13 @@ fun CurioPetSprite(
      * pose. `null` keeps the base design pose.
      */
     bodyOverride: List<String>? = null,
-    curledOverride: List<String>? = null
+    curledOverride: List<String>? = null,
+    /**
+     * v8.52 — per-frame EYE layer from the animation timeline editor: a
+     * fixed 16×16 grid drawn instead of the mood's procedural eyes while
+     * this frame plays. `null` keeps the procedural style.
+     */
+    eyeOverride: List<String>? = null
 ) {
     val density = LocalDensity.current
     // v8.34 — resolve the active design: the explicit working copy wins;
@@ -569,68 +637,26 @@ fun CurioPetSprite(
                             left = glanceShift * opx,
                             top = if (watchingNow) -opx else 0f
                         ) {
-                            when (eyes) {
-                            EyeStyle.OPEN -> {
-                                drawPx(4, 7, ink); drawPx(5, 7, ink)
-                                drawPx(4, 8, ink); drawPx(5, 8, ink)
-                                drawPx(10, 7, ink); drawPx(11, 7, ink)
-                                drawPx(10, 8, ink); drawPx(11, 8, ink)
-                                drawPx(4, 7, white); drawPx(10, 7, white)
-                            }
-                            EyeStyle.BLINK -> {
-                                drawPx(4, 7, ink); drawPx(5, 7, ink)
-                                drawPx(10, 7, ink); drawPx(11, 7, ink)
-                            }
-                            EyeStyle.CLOSED -> {
-                                drawPx(4, 8, ink); drawPx(5, 8, ink)
-                                drawPx(10, 8, ink); drawPx(11, 8, ink)
-                            }
-                            EyeStyle.WIDE -> {
-                                // Big startled eyes while lifted.
-                                drawPx(4, 6, ink); drawPx(5, 6, ink)
-                                drawPx(4, 7, ink); drawPx(5, 7, ink)
-                                drawPx(4, 8, ink); drawPx(5, 8, ink)
-                                drawPx(10, 6, ink); drawPx(11, 6, ink)
-                                drawPx(10, 7, ink); drawPx(11, 7, ink)
-                                drawPx(10, 8, ink); drawPx(11, 8, ink)
-                                drawPx(4, 7, white); drawPx(10, 7, white)
-                            }
-                            EyeStyle.STAR -> {
-                                // v8.26 — natural warm-brown sparkle eyes
-                                // with a white glint (the old gold read
-                                // orangish on the cream body). Each eye is
-                                // a 4×3 star with a highlight where the
-                                // light catches.
-                                drawPx(4, 6, starEye); drawPx(5, 6, starEye)
-                                drawPx(3, 7, starEye); drawPx(4, 7, starEye); drawPx(5, 7, starEye); drawPx(6, 7, starEye)
-                                drawPx(4, 8, starEye); drawPx(5, 8, starEye)
-                                drawPx(4, 7, white)
-                                drawPx(10, 6, starEye); drawPx(11, 6, starEye)
-                                drawPx(9, 7, starEye); drawPx(10, 7, starEye); drawPx(11, 7, starEye); drawPx(12, 7, starEye)
-                                drawPx(10, 8, starEye); drawPx(11, 8, starEye)
-                                drawPx(10, 7, white)
-                            }
-                            EyeStyle.DIZZY -> {
-                                // v8.21 — dizzy pinwheel swirls: a tall
-                                // core with side arms, and glints that
-                                // alternate diagonally so it reads as
-                                // spinning. Drawn while the pet is flung
-                                // around (dragged) or recovering.
-                                drawPx(4, 6, ink); drawPx(5, 6, ink)
-                                drawPx(4, 7, ink); drawPx(5, 7, ink)
-                                drawPx(4, 8, ink); drawPx(5, 8, ink)
-                                drawPx(3, 7, ink); drawPx(6, 7, ink)
-                                drawPx(4, 7, white); drawPx(5, 6, white)
-                                drawPx(10, 6, ink); drawPx(11, 6, ink)
-                                drawPx(10, 7, ink); drawPx(11, 7, ink)
-                                drawPx(10, 8, ink); drawPx(11, 8, ink)
-                                drawPx(9, 7, ink); drawPx(12, 7, ink)
-                                drawPx(10, 7, white); drawPx(11, 6, white)
-                            }
-                            EyeStyle.HAPPY -> {
-                                drawPx(4, 8, ink); drawPx(5, 7, ink); drawPx(5, 8, ink)
-                                drawPx(10, 8, ink); drawPx(10, 7, ink); drawPx(11, 8, ink)
-                            }
+                            if (eyeOverride != null) {
+                                // v8.52 — per-frame eye layer: palette-aware
+                                // pixels drawn exactly where authored (16-space),
+                                // still drifting with the glance.
+                                eyeOverride.forEachIndexed { row, line ->
+                                    line.forEachIndexed { col, ch ->
+                                        if (ch == '.') return@forEachIndexed
+                                        val hex = activeDesign.colorFor(ch) ?: return@forEachIndexed
+                                        drawPx(col, row, petDesignColor(hex))
+                                    }
+                                }
+                            } else {
+                                EYE_STYLE_PIXELS[eyes]?.forEach { (c, r, slot) ->
+                                    val color = when (slot) {
+                                        "white" -> white
+                                        "star" -> starEye
+                                        else -> ink
+                                    }
+                                    drawPx(c, r, color)
+                                }
                             }
                         }
 

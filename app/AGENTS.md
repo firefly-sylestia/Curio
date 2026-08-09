@@ -134,10 +134,18 @@ app/src/main/java/com/curio/app/
   authored detail layers last so the user can replace generated art without
   changing animation. The procedural antenna extras remain independently
   toggleable; the base antenna pixels are edited in the Body canvas.
-- `PetDesignerScreen` (Settings → Pet designer) is the editor. Preview, Body,
-  Details, Faces, Colors, and Tools tabs share protected Draw mode and the
-  palette. PNG export/import shares via FileProvider
-  `${applicationId}.fileprovider` (`res/xml/file_paths.xml` cache/share).
+- `PetDesignerScreen` (Settings → Pet designer) is a three-page studio
+  (v8.52): **Pets** (pick a species from `PetRegistry`, animations/previews
+  below), **Editor** (choose a target via the preview dialog, then only that
+  editor — incl. the animation timeline with per-frame body/curled/eyes
+  pixel layers), and **Settings** (Accessories dialog, disable toggles,
+  personality presets, shapes). A slim sticky **EditorToolbar** is the ONE
+  place for Save / Undo / Redo / Reset / Import / Export (the old pinned
+  footer SaveArea is gone — no duplicate buttons). Eyes are authored on a
+  fixed 16×16 grid per animation frame (`PetAnimationFrame.eyeGrid`,
+  `EYE_STYLE_PIXELS` blueprint behind). PNG export/import shares via
+  FileProvider `${applicationId}.fileprovider` (`res/xml/file_paths.xml`
+  cache/share).
 
 ### Experimental features (A/B testing)
 - Per root `AGENTS.md`, any experimental/test behavior MUST be gated behind a **user-facing Settings toggle** so it can be A/B-compared against the current behavior and reverted without a code change — never hardcoded as the only path.
