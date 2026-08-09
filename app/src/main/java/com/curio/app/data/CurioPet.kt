@@ -62,8 +62,8 @@ object CurioPet {
         /** Human-readable label for this tier, including the element path. */
         fun label(path: EvoPath?): String = when (this) {
             BABY -> "Baby Spark"
-            FIRST_EVO -> "${path?.displayName ?: "Evolved"} ($level 7)"
-            FINAL_EVO -> "${path?.displayName ?: "Grown"} ($level 25)"
+            FIRST_EVO -> "${path?.displayName ?: "Evolved"} (Level 7)"
+            FINAL_EVO -> "${path?.displayName ?: "Grown"} (Level 25)"
         }
     }
 
@@ -126,7 +126,8 @@ object CurioPet {
         return when (next) {
             Stage.FIRST_EVO -> "Reach Level 7 to evolve."
             Stage.FINAL_EVO -> "Reach Level 25 for the final evolution."
-            else -> next.unlockHint
+            Stage.BABY -> "Start your journey."
+
         }
     }
 

@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -92,6 +93,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioPet
+import com.curio.app.data.CurioQuests
 import com.curio.app.data.EyeStyle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.CustomPetAction
@@ -6243,15 +6245,22 @@ private fun BedDesignDialog(onDismiss: () -> Unit, context: android.content.Cont
 // v9.5 — Evolution choice dialog (Fire / Water / Nature picker)
 // ═══════════════════════════════════════════════════════════════════════════
 
+private data class EvolutionChoice(
+    val path: CurioPet.EvoPath,
+    val name: String,
+    val emoji: String,
+    val description: String
+)
+
 @Composable
 private fun EvolutionChoiceDialog(
     onPathChosen: (CurioPet.EvoPath) -> Unit,
     context: android.content.Context
 ) {
     val paths = listOf(
-        Triple(CurioPet.EvoPath.FIRE, "Blaze", "🔥", "A fiery spirit — warm, passionate, and bold. Flames dance in its eyes."),
-        Triple(CurioPet.EvoPath.WATER, "Tide", "🌊", "A calm current — fluid, deep, and wise. Ripples follow its every move."),
-        Triple(CurioPet.EvoPath.NATURE, "Bloom", "🌿", "A gentle bloom — vibrant, nurturing, and free. Leaves rustle where it walks.")
+        EvolutionChoice(CurioPet.EvoPath.FIRE, "Blaze", "🔥", "A fiery spirit — warm, passionate, and bold. Flames dance in its eyes."),
+        EvolutionChoice(CurioPet.EvoPath.WATER, "Tide", "🌊", "A calm current — fluid, deep, and wise. Ripples follow its every move."),
+        EvolutionChoice(CurioPet.EvoPath.NATURE, "Bloom", "🌿", "A gentle bloom — vibrant, nurturing, and free. Leaves rustle where it walks.")
     )
     var selected by remember { mutableStateOf<CurioPet.EvoPath?>(null) }
     Column(
