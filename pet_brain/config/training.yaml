@@ -1,0 +1,23 @@
+seed: 7
+device: cpu
+model:
+  input_size: 128
+  hidden_size: 1536
+  emotion_size: 24
+  need_size: 16
+  action_size: 64
+  memory_size: 256
+ppo:
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_epsilon: 0.2
+  learning_rate: 0.0003
+  update_epochs: 2
+  entropy_coefficient: 0.01
+  value_coefficient: 0.5
+  prediction_coefficient: 0.05
+  curiosity_coefficient: 0.2
+world:
+  max_steps: 96
+  time_step_hours: 0.25
+checkpoints: pet_brain/checkpoints

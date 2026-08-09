@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.pt
+*.pth
+*.onnx
+*.onnx.data
+checkpoints/
+data/generated/*
+!data/generated/.gitkeep

@@ -169,6 +169,9 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.io.coil.kt.coil.compose)
     implementation(libs.org.jetbrains.kotlinx.coroutines.android)
+    // Optional on-device neural pet inference. The runtime remains inert until
+    // verified `pet_brain.onnx` assets and the Pet brain setting are present.
+    implementation(libs.com.microsoft.onnxruntime.android)
 
     // Room database
     implementation(libs.androidx.room.runtime)

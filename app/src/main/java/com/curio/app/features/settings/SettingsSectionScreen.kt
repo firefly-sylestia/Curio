@@ -201,16 +201,28 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setFloatingPetEnabled(context, it)
             }
         }
-        // v8.43 — the pet's learning brain (CurioPetBrain): observes real
-        // activity, builds a personality, and develops its own catchphrases
-        // over time. Default ON; off = classic rule-based lines only.
+        // v8.43 — the pet's local learning brain (CurioPetBrain): observes
+        // real activity and grows a personality. This is separate from the
+        // experimental ONNX model below and remains enabled by default.
         SettingsRowPulse(highlightKey == "appearance-pet-brain") {
             CompactSwitchRow(
                 "Pet brain",
-                "The pet learns your habits and grows its own personality",
+                "Learns your habits and grows its own personality",
                 AppPreferences.petBrainEnabledState
             ) {
                 AppPreferences.setPetBrainEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        // v9.7 — experimental ONNX neural model. Opt-in only; it remains
+        // unavailable until a verified pet_brain.onnx asset is shipped.
+        SettingsRowPulse(highlightKey == "appearance-neural-pet-brain") {
+            CompactSwitchRow(
+                "Neural pet brain (experimental)",
+                "Run the verified recurrent model on this device",
+                AppPreferences.neuralPetBrainEnabledState
+            ) {
+                AppPreferences.setNeuralPetBrainEnabled(context, it)
             }
         }
         CurioSettingsDivider()

@@ -125,6 +125,10 @@ object AppPreferences {
     // lines. Independent of [KEY_PET_ENABLED]: the pet layer can be on
     // while the learning brain is off.
     private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
+    // v9.7 — separate opt-in for the experimental ONNX neural brain. The
+    // established local learning brain remains independent and enabled by
+    // default; the neural path is OFF until a verified model is shipped.
+    private const val KEY_NEURAL_PET_BRAIN_ENABLED = "neural_pet_brain_enabled"
     private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     private const val KEY_PINNED_TOPICS = "pinned_topics"   // JSON array of PinnedTopic
     private const val KEY_SAVED_QUOTES = "saved_quotes"      // JSON array of SavedQuote
@@ -344,10 +348,13 @@ object AppPreferences {
         private set
     // v8.43 — whether the pet's learning brain is on (default ON): the pet
     // builds a personality from the user's real activity and develops its
-    // own catchphrases. Off = classic rule-based lines only.
-    var petBrainEnabledState by mutableStateOf(true)
+    // own catchphrases. Off = classic rule-based lines only.    var petBrainEnabledState by mutableStateOf(true)
         private set
-    // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
+    /** Experimental ONNX brain opt-in; deliberately OFF by default. */
+    var neuralPetBrainEnabledState by mutableStateOf(false)
+        private set
+    // v8.16 — whether the Spin deck auto-opens the landed topic's reveal
+ the
     // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
     // itself when the deck lands (the tour and pet lines adapt). Turn it
     // OFF to make the deck land quietly with the front card staying
@@ -462,6 +469,7 @@ object AppPreferences {
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
+        neuralPetBrainEnabledState = isNeuralPetBrainEnabled(context)
         autoOpenRevealState = isAutoOpenReveal(context)
         customReactionLinesState = isCustomReactionLinesEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
@@ -1112,6 +1120,16 @@ object AppPreferences {
     fun setPetBrainEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PET_BRAIN_ENABLED, enabled).apply()
         petBrainEnabledState = enabled
+    }
+
+    /** Whether the experimental ONNX neural brain is enabled (default off). */
+    fun isNeuralPetBrainEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_NEURAL_PET_BRAIN_ENABLED, false)
+
+    fun setNeuralPetBrainEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_NEURAL_PET_BRAIN_ENABLED, enabled).apply()
+        neuralPetBrainEnabledState = enabled
+        if (!enabled) NeuralPetBrain.reset(context)
     }
 
     // ── Pet designer recent colors (v8.47 color picker) ────────────────
