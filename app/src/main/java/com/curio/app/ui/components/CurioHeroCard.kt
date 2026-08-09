@@ -64,20 +64,29 @@ fun CurioHeroShuffleCard(
 ) {
     var pressed by remember { mutableStateOf(false) }
     val isWildcard = wildcardSelected || selectedCategory?.id == CategoryId.WILDCARD
-    val activeAccent: Color = when {
-        isWildcard -> CurioColors.CoralBlush
-        selectedCategory != null -> selectedCategory.themedAccent()
+    val themeAccent = when (AppPreferences.themeStyleState) {
+        AppPreferences.THEME_STYLE_MATERIAL,
+        AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.primary
         else -> CurioColors.CoralBlush
     }
+    val activeAccent: Color = when {
+        isWildcard -> themeAccent
+        selectedCategory != null -> selectedCategory.themedAccent()
+        else -> themeAccent
+    }
     val cardGradient = CurioGradients.cardGradient(activeAccent)
-    // v7.5 — pastel mode lightens the gradient, so the content ink flips
-    // from white to the deep accent (or the brand maroon on the coral
-    // wildcard, whose accent is already pastel). Returns White when pastel
-    // mode is off, preserving today's look exactly.
+    // Pair hero content with the same semantic role that owns the fill:
+    // Material uses onPrimary, AMOLED uses onSurface, and Curio category
+    // heroes keep their category-aware onAccent ink. This avoids a fixed
+    // white label becoming low-contrast on a dynamic or AMOLED card.
     val contentInk: Color = when {
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+            MaterialTheme.colorScheme.onSurface
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+            MaterialTheme.colorScheme.onPrimary
         selectedCategory != null -> selectedCategory.onAccent()
         AppPreferences.pastelColorsState -> CurioColors.DeepPlum
-        else -> Color.White
+        else -> MaterialTheme.colorScheme.onPrimary
     }
 
     // ── Press scale animation ─────────────────────────────────────────────

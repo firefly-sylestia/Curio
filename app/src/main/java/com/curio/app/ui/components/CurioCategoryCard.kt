@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.TopicJsonLoader
@@ -42,6 +43,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.cardContentInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
@@ -105,8 +107,20 @@ fun CurioCategoryCard(
     // Idle cards wear the category's tinted surface — the page wash, but a
     // touch stronger — so unselected tiles sit on the washed page as soft
     // tints of their own color instead of shouting in full brightness.
-    val idleSurface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val idleSurface = when (AppPreferences.themeStyleState) {
+        AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surfaceContainer
+        AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainerHigh
+        else -> category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    }
     val idleInk = category.categoryInk()
+    val cardInk = category.cardContentInk()
+    val cardBorder = when (AppPreferences.themeStyleState) {
+        AppPreferences.THEME_STYLE_AMOLED -> BorderStroke(
+            1.dp,
+            category.categoryInk().copy(alpha = if (isSelected) 0.72f else 0.38f)
+        )
+        else -> if (isSelected) BorderStroke(2.dp, cardInk) else category.categoryBorder()
+    }
     val topicCount = remember(category.id) { TopicJsonLoader.cached(category.id)?.size ?: 0 }
 
     Surface(
@@ -114,8 +128,7 @@ fun CurioCategoryCard(
         color = Color.Transparent,
         shadowElevation = 0.dp,
         tonalElevation = 0.dp,
-        border = if (isSelected) BorderStroke(2.dp, category.onAccent())
-                 else category.categoryBorder(),
+        border = cardBorder,
         modifier = modifier
             .fillMaxWidth()
             .height(104.dp)
@@ -127,8 +140,8 @@ fun CurioCategoryCard(
                 .background(
                     // SolidColor (not the Brush.solidColor factory) — the
                     // factory isn't in the resolved Compose BOM; the class is
-                    // the always-available equivalent for a flat fill.
-                    if (isSelected) Brush.verticalGradient(gradient)
+                    // the always-available equivalent for a flat fill.                            if (isSelected) Brush.verticalGradient(gradient)
+
                     else SolidColor(idleSurface),
                     RoundedCornerShape(22.dp)
                 )
@@ -155,7 +168,7 @@ fun CurioCategoryCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            category.onAccent().copy(alpha = 0.14f),
+                            cardInk.copy(alpha = 0.14f),
                             RoundedCornerShape(22.dp)
                         )
                 )
@@ -168,7 +181,7 @@ fun CurioCategoryCard(
             CurioIcon(
                 name = category.iconGlyph,
                 contentDescription = null,
-                tint = if (isSelected) lerp(cardColor, category.onAccent(), 0.55f).copy(alpha = 0.18f)
+                tint = if (isSelected) lerp(cardColor, cardInk, 0.55f).copy(alpha = 0.18f)
                        else idleInk.copy(alpha = 0.16f),
                 size = 64.dp,
                 modifier = Modifier
@@ -189,14 +202,14 @@ fun CurioCategoryCard(
                     Text(
                         text = category.displayName,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = if (isSelected) category.onAccent() else MaterialTheme.colorScheme.onSurface,
+                        color = if (isSelected) cardInk else MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = if (isWildcard) "Surprise mix" else "$topicCount topics",
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (isSelected) category.onAccent().copy(alpha = 0.85f)
+                        color = if (isSelected) cardInk.copy(alpha = 0.85f)
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )

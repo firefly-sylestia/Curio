@@ -192,87 +192,69 @@ fun isCurioDarkThemeForContext(context: Context): Boolean {
  *    Material style reads light and gentle in both modes.
  */
 private fun calmMaterialColorScheme(dynamic: ColorScheme, dark: Boolean): ColorScheme {
-    // Every accent keeps the device hue; only saturation + lightness move.
-    // Saturation is held LOW everywhere (0.08–0.36) so nothing reads
-    // vibrant — the palette stays calm and pastel in every mode.
-    fun hueOf(c: Color): Float = toHsl(c).h
-
-    // Muted pastel fill + deep same-hue ink: light = airy (l 0.80), dark =
-    // soft mid-tone (l 0.62) so buttons/chips read as gentle pastels over
-    // the dark page with crisp deep ink on top.
-    fun fill(c: Color) = fromHsl(hueOf(c), if (dark) 0.34f else 0.30f, if (dark) 0.62f else 0.80f)
-    fun onFill(c: Color) = fromHsl(hueOf(c), if (dark) 0.30f else 0.36f, if (dark) 0.18f else 0.24f)
-    fun container(c: Color) = fromHsl(hueOf(c), if (dark) 0.16f else 0.16f, if (dark) 0.34f else 0.92f)
-    fun onContainer(c: Color) = fromHsl(hueOf(c), if (dark) 0.10f else 0.34f, if (dark) 0.90f else 0.28f)
-
-    val ph = hueOf(dynamic.primary)
-    val sh = hueOf(dynamic.secondary)
-    val th = hueOf(dynamic.tertiary)
-
-    // Surfaces — tinted with the device hue (unique, not stock grey):
-    // light = near-white airy paper, dark = soft pastel-tinted night.
-    val surfaceBg = if (dark) fromHsl(ph, 0.14f, 0.17f) else fromHsl(ph, 0.10f, 0.95f)
-    val surfaceMain = if (dark) fromHsl(ph, 0.13f, 0.19f) else fromHsl(ph, 0.10f, 0.95f)
-    val onSurface = if (dark) fromHsl(ph, 0.08f, 0.92f) else fromHsl(ph, 0.24f, 0.20f)
-    val variant = if (dark) fromHsl(ph, 0.12f, 0.22f) else fromHsl(ph, 0.12f, 0.90f)
-    val onVariant = if (dark) fromHsl(ph, 0.08f, 0.74f) else fromHsl(ph, 0.18f, 0.42f)
+    // Keep the dynamic scheme's semantic foreground/background pairs intact.
+    // Only tint the neutral surface ladder very lightly with dynamic primary,
+    // giving Curio a coherent Material identity without breaking the contrast
+    // guarantees of onPrimary/onSurface/onContainer roles.
+    fun surfaceTone(color: Color, amount: Float): Color =
+        lerp(color, dynamic.primary, amount)
 
     return if (dark) darkColorScheme(
-        primary = fill(dynamic.primary),
-        onPrimary = onFill(dynamic.primary),
-        primaryContainer = container(dynamic.primary),
-        onPrimaryContainer = onContainer(dynamic.primary),
-        secondary = fill(dynamic.secondary),
-        onSecondary = onFill(dynamic.secondary),
-        secondaryContainer = container(dynamic.secondary),
-        onSecondaryContainer = onContainer(dynamic.secondary),
-        tertiary = fill(dynamic.tertiary),
-        onTertiary = onFill(dynamic.tertiary),
-        tertiaryContainer = container(dynamic.tertiary),
-        onTertiaryContainer = onContainer(dynamic.tertiary),
-        background = surfaceBg,
-        onBackground = onSurface,
-        surface = surfaceMain,
-        onSurface = onSurface,
-        surfaceVariant = variant,
-        onSurfaceVariant = onVariant,
-        surfaceContainerLowest = fromHsl(ph, 0.15f, 0.14f),
-        surfaceContainerLow = fromHsl(ph, 0.13f, 0.20f),
-        surfaceContainer = fromHsl(ph, 0.12f, 0.23f),
-        surfaceContainerHigh = fromHsl(ph, 0.11f, 0.27f),
-        surfaceContainerHighest = fromHsl(ph, 0.10f, 0.31f),
-        error = CurioColors.WarmCoralRed,
-        onError = Color.White,
-        outline = fromHsl(ph, 0.10f, 0.50f),
-        outlineVariant = fromHsl(ph, 0.10f, 0.30f)
+        primary = dynamic.primary,
+        onPrimary = dynamic.onPrimary,
+        primaryContainer = dynamic.primaryContainer,
+        onPrimaryContainer = dynamic.onPrimaryContainer,
+        secondary = dynamic.secondary,
+        onSecondary = dynamic.onSecondary,
+        secondaryContainer = dynamic.secondaryContainer,
+        onSecondaryContainer = dynamic.onSecondaryContainer,
+        tertiary = dynamic.tertiary,
+        onTertiary = dynamic.onTertiary,
+        tertiaryContainer = dynamic.tertiaryContainer,
+        onTertiaryContainer = dynamic.onTertiaryContainer,
+        background = surfaceTone(dynamic.background, 0.05f),
+        onBackground = dynamic.onBackground,
+        surface = surfaceTone(dynamic.surface, 0.04f),
+        onSurface = dynamic.onSurface,
+        surfaceVariant = surfaceTone(dynamic.surfaceVariant, 0.05f),
+        onSurfaceVariant = dynamic.onSurfaceVariant,
+        surfaceContainerLowest = surfaceTone(dynamic.surfaceContainerLowest, 0.02f),
+        surfaceContainerLow = surfaceTone(dynamic.surfaceContainerLow, 0.03f),
+        surfaceContainer = surfaceTone(dynamic.surfaceContainer, 0.04f),
+        surfaceContainerHigh = surfaceTone(dynamic.surfaceContainerHigh, 0.05f),
+        surfaceContainerHighest = surfaceTone(dynamic.surfaceContainerHighest, 0.06f),
+        error = dynamic.error,
+        onError = dynamic.onError,
+        outline = dynamic.outline,
+        outlineVariant = dynamic.outlineVariant
     ) else lightColorScheme(
-        primary = fill(dynamic.primary),
-        onPrimary = onFill(dynamic.primary),
-        primaryContainer = container(dynamic.primary),
-        onPrimaryContainer = onContainer(dynamic.primary),
-        secondary = fill(dynamic.secondary),
-        onSecondary = onFill(dynamic.secondary),
-        secondaryContainer = container(dynamic.secondary),
-        onSecondaryContainer = onContainer(dynamic.secondary),
-        tertiary = fill(dynamic.tertiary),
-        onTertiary = onFill(dynamic.tertiary),
-        tertiaryContainer = container(dynamic.tertiary),
-        onTertiaryContainer = onContainer(dynamic.tertiary),
-        background = surfaceBg,
-        onBackground = onSurface,
-        surface = surfaceMain,
-        onSurface = onSurface,
-        surfaceVariant = variant,
-        onSurfaceVariant = onVariant,
-        surfaceContainerLowest = fromHsl(ph, 0.07f, 0.97f),
-        surfaceContainerLow = fromHsl(ph, 0.11f, 0.93f),
-        surfaceContainer = fromHsl(ph, 0.12f, 0.90f),
-        surfaceContainerHigh = fromHsl(ph, 0.13f, 0.87f),
-        surfaceContainerHighest = fromHsl(ph, 0.14f, 0.84f),
-        error = CurioColors.WarmCoralRed,
-        onError = CurioColors.CreamWhite,
-        outline = fromHsl(ph, 0.16f, 0.55f),
-        outlineVariant = fromHsl(ph, 0.12f, 0.80f)
+        primary = dynamic.primary,
+        onPrimary = dynamic.onPrimary,
+        primaryContainer = dynamic.primaryContainer,
+        onPrimaryContainer = dynamic.onPrimaryContainer,
+        secondary = dynamic.secondary,
+        onSecondary = dynamic.onSecondary,
+        secondaryContainer = dynamic.secondaryContainer,
+        onSecondaryContainer = dynamic.onSecondaryContainer,
+        tertiary = dynamic.tertiary,
+        onTertiary = dynamic.onTertiary,
+        tertiaryContainer = dynamic.tertiaryContainer,
+        onTertiaryContainer = dynamic.onTertiaryContainer,
+        background = surfaceTone(dynamic.background, 0.025f),
+        onBackground = dynamic.onBackground,
+        surface = surfaceTone(dynamic.surface, 0.02f),
+        onSurface = dynamic.onSurface,
+        surfaceVariant = surfaceTone(dynamic.surfaceVariant, 0.03f),
+        onSurfaceVariant = dynamic.onSurfaceVariant,
+        surfaceContainerLowest = surfaceTone(dynamic.surfaceContainerLowest, 0.01f),
+        surfaceContainerLow = surfaceTone(dynamic.surfaceContainerLow, 0.02f),
+        surfaceContainer = surfaceTone(dynamic.surfaceContainer, 0.03f),
+        surfaceContainerHigh = surfaceTone(dynamic.surfaceContainerHigh, 0.04f),
+        surfaceContainerHighest = surfaceTone(dynamic.surfaceContainerHighest, 0.05f),
+        error = dynamic.error,
+        onError = dynamic.onError,
+        outline = dynamic.outline,
+        outlineVariant = dynamic.outlineVariant
     )
 }
 

@@ -47,7 +47,12 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCategories
+import com.curio.app.data.TopicJsonLoader
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 /**
  * Splash screen — see Curio splash contract.
@@ -115,9 +120,19 @@ fun SplashScreen(navController: NavHostController) {
     }
 
     LaunchedEffect(Unit) {
-        // Topic catalogs load lazily when a screen needs them. Eagerly parsing
-        // every category here retained the full catalog during startup and
-        // created avoidable heap pressure on 256 MB devices.
+        // Warm the canonical catalog in parallel with the splash animation.
+        // Navigation is not held hostage by parsing; the browser simply gets
+        // whatever portion is ready and continues loading the rest.
+        withContext(Dispatchers.Default) {
+            CurioCategories.visible
+                .filter { it.id != CategoryId.WILDCARD }
+                .forEach { category ->
+                    runCatching { TopicJsonLoader.load(category.id) }
+                }
+        }
+    }
+
+    LaunchedEffect(Unit) {
         delay(800)
         // Check for pending crash from previous session — also route to the
         // crash screen when the crash-loop guard flipped on safe mode, so the

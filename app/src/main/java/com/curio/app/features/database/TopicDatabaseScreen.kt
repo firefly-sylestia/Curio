@@ -47,7 +47,6 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
-import com.curio.app.data.openSilentExplore
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
@@ -59,7 +58,6 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -69,8 +67,8 @@ import kotlinx.coroutines.withContext
  * Opened from the Home drawer ("Browse Topics"). Renders every topic across
  * the ten real categories (wildcard is a merge, so it isn't a separate lane)
  * with a search bar, per-category filter chips, a small "explored" badge on
- * topics already marked done, and a sort control (A–Z / newest / oldest by
- * year). Tapping any topic opens its full Topic Reveal page, exactly like
+ * topics already marked done, and sort controls for A–Z / Z–A / newest /
+ * oldest by year. Tapping any topic opens its full Topic Reveal page, exactly like
  * spinning it.
  *
  * Sorting reads each topic's year from its name ("Citizen Kane (1941)"),
@@ -84,19 +82,15 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun TopicDatabaseScreen(navController: NavController) {
-    // Hoisted (v8.13) — the silent Explore chip needs a Context, but
-    // LocalContext.current is @Composable and cannot be called inside the
-    // row's non-composable onExplore lambda.
-    val context = LocalContext.current
     // v7.97 — SAVEABLE state: the search query, the selected category filter
     // and the scroll position survive leaving the screen (Topic Reveal
     // round-trips, tab switches, rotation, process death) instead of
     // resetting to a fresh blank list every time you come back.
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
-    // v8.54 — sort control: DEFAULT (category file order) / ALPHA (A–Z by
-    // name) / YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so
-    // it survives reveal round-trips, tab switches, and rotation.
+    // v8.54 — sort control: DEFAULT (category file order) / A–Z / Z–A /
+    // YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so it
+    // survives reveal round-trips, tab switches, and rotation.
     var sortMode by rememberSaveable { mutableStateOf(DatabaseSortMode.DEFAULT) }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
@@ -115,8 +109,21 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Load + cache every category pool once; carry the topics alongside so
     // the filtered list stays a pure derivation. v7.94 — keyed on the
     // Manage Categories state so hidden/reordered lanes refresh on revisit.
-    val catalog by produceState<List<Pair<CurioCategory, List<CurioTopic>>>>(
-        initialValue = emptyList(),
+    // Cache-first initialization matters here: returning to the browser should
+    // render the already-parsed catalog immediately instead of flashing the
+    // loading state for one composition frame.
+    val visibleCategories = CurioCategories.visible
+        .filter { it.id != CategoryId.WILDCARD }
+    val cachedCatalog = remember(visibleCategories) {
+        visibleCategories.mapNotNull { cat ->
+            TopicJsonLoader.cached(cat.id)?.let { topics -> cat to topics }
+        }
+    }
+    val catalogState by produceState<CatalogState>(
+        initialValue = CatalogState(
+            entries = cachedCatalog,
+            loading = cachedCatalog.size < visibleCategories.size
+        ),
         AppPreferences.hiddenCategoriesState,
         AppPreferences.categoryOrderState
     ) {
@@ -124,11 +131,14 @@ fun TopicDatabaseScreen(navController: NavController) {
             // Load only visible canonical categories. The old preloadAll call
             // parsed every lane, including the derived wildcard pool, before
             // the database screen could render anything.
-            CurioCategories.visible
-                .filter { it.id != CategoryId.WILDCARD }
-                .map { cat -> cat to TopicJsonLoader.load(cat.id) }
+            CatalogState(
+                entries = visibleCategories.map { cat -> cat to TopicJsonLoader.load(cat.id) },
+                loading = false
+            )
         }
     }
+    val catalog = catalogState.entries
+    val catalogLoading = catalogState.loading
     val totalTopics = catalog.sumOf { it.second.size }
 
     // Build the expensive search/sort fields off the composition thread once
@@ -210,8 +220,13 @@ fun TopicDatabaseScreen(navController: NavController) {
                     (effectiveCat == null || indexed.category.id == effectiveCat) && matches(indexed)
                 }
                 val sorted = when (sortMode) {
-                    DatabaseSortMode.ALPHA ->
+                    DatabaseSortMode.ALPHA_ASC ->
                         filtered.sortedWith(compareBy<IndexedTopic>({ it.nameKey }, { it.topic.id }))
+                    DatabaseSortMode.ALPHA_DESC ->
+                        filtered.sortedWith(
+                            compareByDescending<IndexedTopic> { it.nameKey }
+                                .thenByDescending { it.topic.id }
+                        )
                     DatabaseSortMode.YEAR_NEWEST ->
                         filtered.sortedWith(
                             compareByDescending<IndexedTopic> { it.year ?: Int.MIN_VALUE }
@@ -375,8 +390,8 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 )
                             }
                         }
-                        // v8.54 — sort control: A–Z / Newest / Oldest (by year).
-                        // Tapping the active chip returns to the default order.
+                        // v8.54 — sort control: A–Z / Z–A / Newest / Oldest (by year).
+                        // Direction is explicit so sorting never depends on a hidden toggle state.
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -388,14 +403,20 @@ fun TopicDatabaseScreen(navController: NavController) {
                                     modifier = Modifier.padding(start = 2.dp)
                                 )
                             }
-                            item("sort-alpha") {
+                            item("sort-alpha-asc") {
                                 DatabaseSortChip(
                                     label = "A–Z",
-                                    selected = sortMode == DatabaseSortMode.ALPHA,
-                                    onClick = {
-                                        sortMode = if (sortMode == DatabaseSortMode.ALPHA) DatabaseSortMode.DEFAULT
-                                        else DatabaseSortMode.ALPHA
-                                    }
+                                    glyph = CurioIcons.ArrowUpward,
+                                    selected = sortMode == DatabaseSortMode.ALPHA_ASC,
+                                    onClick = { sortMode = DatabaseSortMode.ALPHA_ASC }
+                                )
+                            }
+                            item("sort-alpha-desc") {
+                                DatabaseSortChip(
+                                    label = "Z–A",
+                                    glyph = CurioIcons.ArrowDownward,
+                                    selected = sortMode == DatabaseSortMode.ALPHA_DESC,
+                                    onClick = { sortMode = DatabaseSortMode.ALPHA_DESC }
                                 )
                             }
                             item("sort-newest") {
@@ -425,10 +446,15 @@ fun TopicDatabaseScreen(navController: NavController) {
                 }
 
                 // ── Loading / empty / list states ──────────────────────────
-                if (catalog.isEmpty()) {
+                // Catalog parsing and indexing are separate background steps.
+                // Keep the loading state through both so the intermediate
+                // empty `rows` value never flashes "No topics match".
+                val browserLoading = catalogLoading ||
+                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0)
+                if (browserLoading) {
                     item("loading") {
                         Text(
-                            "Loading topics…",
+                            if (catalog.isEmpty()) "Loading topics…" else "Preparing topics…",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
@@ -474,36 +500,6 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 cat = CurioCategories.byId(row.topic.categoryId),
                                 topic = row.topic,
                                 done = row.done,
-                                // v8.12/8.13 — a silent Explore chip: opens the
-                                // topic's search page without quest chains,
-                                // dailies, recents or done-marks; it still
-                                // feeds the passport + awards the tiny
-                                // exploration XP (browsing shouldn't inflate
-                                // quest progress, but the pet knows you were
-                                // there).
-                                onExplore = { openSilentExplore(context, row.topic) },
-                                // Writing from the browser is the explicit,
-                                // tracked path: it opens the same capture
-                                // screen as Topic Reveal's Express yourself
-                                // action instead of silently exploring.
-                                onExpress = {
-                                    ExploreSessionStore.recordExplored(
-                                        context,
-                                        row.topic.categoryId,
-                                        row.topic.name
-                                    )
-                                    ExploreSessionStore.removeUnexplored(
-                                        context,
-                                        row.topic.categoryId,
-                                        row.topic.name
-                                    )
-                                    navController.navigate(
-                                        CurioRoutes.captureFor(
-                                            row.topic.categoryId.routeSlug,
-                                            row.topic.name
-                                        )
-                                    ) { launchSingleTop = true }
-                                },
                                 onClick = {
                                     // Browse-Topics mode: the reveal opens
                                     // read-only (no explore, no recents
@@ -544,6 +540,11 @@ private data class IndexedTopic(
 )
 
 /** One row in the database list — a category section header or a topic. */
+private data class CatalogState(
+    val entries: List<Pair<CurioCategory, List<CurioTopic>>>,
+    val loading: Boolean
+)
+
 private data class DatabaseRow(
     val key: String,
     val section: CurioCategory? = null,
@@ -585,7 +586,7 @@ private fun DatabaseFilterChip(
  * run (headers are hidden because a global sort breaks grouping).
  */
 private enum class DatabaseSortMode {
-    DEFAULT, ALPHA, YEAR_NEWEST, YEAR_OLDEST
+    DEFAULT, ALPHA_ASC, ALPHA_DESC, YEAR_NEWEST, YEAR_OLDEST
 }
 
 /**
@@ -685,10 +686,8 @@ private fun DatabaseSectionHeader(cat: CurioCategory, count: Int) {
 private fun DatabaseTopicRow(
     cat: CurioCategory,
     topic: CurioTopic,
-    done: Boolean,
-    onClick: () -> Unit,
-    onExplore: (() -> Unit)? = null,
-    onExpress: (() -> Unit)? = null
+    done: Boolean,                                onClick: () -> Unit
+
 ) {
     Surface(
         onClick = onClick,
@@ -771,74 +770,6 @@ private fun DatabaseTopicRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                // Keep both browser actions inside the content column so the
-                // topic title/meta never get squeezed by trailing controls on
-                // narrow phones. Nested surfaces consume their own taps and
-                // leave the rest of the row available for opening the reveal.
-                if (onExplore != null || onExpress != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 7.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (onExplore != null) {
-                            Surface(
-                                onClick = onExplore,
-                                shape = RoundedCornerShape(50),
-                                color = cat.accent.copy(alpha = 0.14f)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    CurioIcon(
-                                        CurioIcons.AutoAwesome, null,
-                                        tint = cat.accent,
-                                        size = 14.dp
-                                    )
-                                    Text(
-                                        text = "Explore",
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                                        color = cat.accent,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                        if (onExpress != null) {
-                            Surface(
-                                onClick = onExpress,
-                                shape = RoundedCornerShape(50),
-                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    CurioIcon(
-                                        CurioIcons.Edit, null,
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        size = 14.dp
-                                    )
-                                    Text(
-                                        text = "Express yourself",
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
             }
             CurioIcon(
                 CurioIcons.ChevronRight, null,

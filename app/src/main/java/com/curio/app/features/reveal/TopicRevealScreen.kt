@@ -159,9 +159,9 @@ fun TopicRevealScreen(
     categorySlug: String,
     topicName: String,
     navController: NavController,
-    // Browse-Topics read-only mode (see CurioRoutes.REVEAL): no explore
-    // CTA, no like/dislike, no recents recording, and "Already watched"
-    // confirms without the write-about-it dialog.
+    // Browse-Topics mode (see CurioRoutes.REVEAL): Explore is silent and
+    // feedback/recents are disabled, while Express Yourself intentionally
+    // remains available as the explicit write path.
     browseMode: Boolean = false
 ) {
     val cat = remember(categorySlug) {
@@ -238,8 +238,9 @@ fun TopicRevealScreen(
         }
     }
     // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
-    // explore: opens the topic's search page without recording quests,
-    // passport, pet events, recents or a timer — browsing must not count.
+    // Explore action: it opens the topic's search page without recording
+    // quests, passport, pet events, recents or a timer. Express Yourself is
+    // separate and remains the deliberate write-about-it path.
     val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
         // Browse mode has no tour navigation. During a tour, only dismiss the
         // guide; never launch a browser as a side effect of a demonstrated tap.
@@ -254,7 +255,7 @@ fun TopicRevealScreen(
             // Tour taps demonstrate controls only. End the tour instead of
             // opening the capture task or navigating to a stale next route.
             TourController.skip()
-        } else if (!latestBrowseMode) {
+        } else {
             latestResolved?.let { topic ->
                 engaged = true
                 navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
@@ -596,7 +597,7 @@ fun TopicRevealScreen(
                     )
                 }
 
-                // ── 2.5 Action row — Start exploring / Already … ───────
+                            // ── 2.5 Action row — Express yourself / Explore ─────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
                 RevealContentEntrance(delayMillis = 40) {
@@ -1036,8 +1037,9 @@ private fun RevealActionRow(
                     screen = "reveal"
                 ) { lm ->
                 RevealAlreadyButton(
-                    enabled = resolved != null &&
-                        (!browseMode || TourController.currentStep?.landmarkId == "express-yourself"),
+                    // Express Yourself remains available from Topic Reveal,
+                    // including the read-only reveal opened from Topic Database.
+                    enabled = resolved != null,
                     metrics = m,
                     modifier = lm.weight(1f),
                     onClick = onAlready

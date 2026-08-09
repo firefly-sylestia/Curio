@@ -344,18 +344,6 @@ fun CurioNavHost(
                     .weight(1f)
                     .fillMaxHeight()
                     .padding(innerPadding)
-                    // Reveal no longer renders the old bottom action slot,
-                    // but its shared hero still needs the same viewport
-                    // geometry as the Spin card during the morph. Keep that
-                    // clearance invisible and local to Reveal so removing the
-                    // button never moves the hero or affects other routes.
-                    .then(
-                        if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
-                            Modifier.padding(bottom = 80.dp)
-                        } else {
-                            Modifier
-                        }
-                    ),
                 contentAlignment = Alignment.Center
             ) {
         // Wide windows (tablet / landscape / desktop): ONE continuous
@@ -751,21 +739,20 @@ fun CurioNavHost(
                 navController.navigate(nextRoute) { launchSingleTop = true }
             }
         }
-        // A transparent full-screen parent would still participate in pointer
-        // dispatch. Keep only the controls themselves in this layer so the
-        // real screen remains completely tappable with no scrim.
-        Box(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 20.dp)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .padding(bottom = 18.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                TextButton(onClick = { TourController.skip() }) { Text("Skip") }
-                TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
-            }
+        // Keep the controls directly in the root Box. A full-screen transparent
+        // parent can become a hit-test layer in Compose and make the screen
+        // underneath feel covered, even though it draws nothing. The Row is
+        // the only tour layer that participates in touch handling.
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = 18.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            TextButton(onClick = { TourController.skip() }) { Text("Skip") }
+            TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
         }
     }
 

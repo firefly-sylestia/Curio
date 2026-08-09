@@ -91,12 +91,29 @@ fun CurioCategory.readableAccentInk(): Color {
  */
 @Composable
 fun CurioCategory.onAccent(): Color = when {
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+        MaterialTheme.colorScheme.onSurface
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+        MaterialTheme.colorScheme.onPrimaryContainer
     !AppPreferences.pastelColorsState -> Color.White
     isCurioDarkTheme() -> lightAccent
     // The wildcard's accent is ALREADY a pastel pink — a deep hue twin (the
     // brand maroon) reads on it, not the pale accent itself.
     accent.isPale() -> CurioColors.DeepPlum
     else -> accent
+}
+
+/**
+ * Ink for a Material/AMOLED category card's dark tonal treatment. Category
+ * cards use a theme-owned container first and a category accent second, so
+ * their content must pair with the theme surface/primary role rather than
+ * assuming every category fill is white-label safe.
+ */
+@Composable
+fun CurioCategory.cardContentInk(): Color = when (AppPreferences.themeStyleState) {
+    AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.onSurface
+    AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.onPrimary
+    else -> onAccent()
 }
 
 /**

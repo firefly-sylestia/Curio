@@ -505,8 +505,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
 
     // ── Spin state ────────────────────────────────────────────────────
     var shuffling by remember { mutableStateOf(false) }
-    // Visible to the deck so peek cards can quietly fade after the midpoint
-    // of the reel instead of competing with the landing card's final lock-in.
+    // Visible to the deck so peek cards stay present through the reel and
+    // only fade during the final settle beat, not halfway through the spin.
     var shuffleProgress by remember { mutableFloatStateOf(0f) }
     var shuffleCount by remember { mutableIntStateOf(0) }
     var confettiTrigger by remember { mutableIntStateOf(0) }
@@ -2006,8 +2006,7 @@ private fun Carousel(
                         gradient = deckGradient,
                         cat = cat,
                         topic = topic,
-                        shuffling = shuffling,
-                        shuffleProgress = shuffleProgress
+                        shuffling = shuffling
                     )
                 }
             }
@@ -2689,8 +2688,7 @@ private fun PeekCard(
     gradient: List<Color>,
     cat: CurioCategory,
     topic: CurioTopic?,
-    shuffling: Boolean,
-    shuffleProgress: Float
+    shuffling: Boolean
 ) {
     val isTop = slot < 0
     val far = kotlin.math.abs(slot) == 2
@@ -2781,11 +2779,10 @@ private fun PeekCard(
     val ink = pastelFillInk(accent)
     // Peek cards stay fully present through the first half of the reel, then
     // dissolve into the background so the final selection has visual focus.
-    val peekAlpha = if (shuffling) {
-        ((1f - shuffleProgress) * 2f).coerceIn(0f, 1f)
-    } else {
-        1f
-    }
+    // Opacity belongs to the card's own AnimatedContent transition below.
+    // Keeping the outer card fully opaque prevents a global reel clock from
+    // fading every slot at once; each outgoing card now travels first and
+    // dissolves only in the tail of its own exit.
 
     // v7.7 — deck card redesign (EXPERIMENTAL, four independent Settings
     // toggles, each OFF by default): the blend gradient is now the BASE
@@ -2863,10 +2860,11 @@ private fun PeekCard(
                 rotationZ = when (slot) { -2 -> -3.5f; -1 -> -1.4f; 1 -> 1.4f; else -> 3.5f }
                 scaleX = if (far) 0.92f else 0.98f
                 scaleY = if (far) 0.92f else 0.98f
-                // Fully opaque — translucent layers blend badly with the tilt
-                // and render the card as soft/pixelated. Depth comes from
-                // scale + rotation + zIndex instead of transparency.
-                alpha = peekAlpha
+                // Fully opaque while the slot travels. The outgoing
+                // AnimatedContent child applies its own delayed fade after
+                // the movement, so the incoming card never gets faded by a
+                // global shuffle clock.
+                alpha = 1f
             }
             .zIndex(if (far) 2f else 5f)
     ) {
@@ -2892,7 +2890,16 @@ private fun PeekCard(
                     slideOutVertically(
                         animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
+                    // The outgoing card completes its travel first; only its
+                    // final tail dissolves. This prevents the card from
+                    // becoming transparent in the middle of the glide.
+                    fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 90,
+                            delayMillis = PeekWipeOutMs - 90,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) using SizeTransform(clip = false)
                 } else {
                     // Idle re-fan (landing re-deal / category switch) — a
                     // slower, softer pass in the same per-side direction.
@@ -2903,7 +2910,13 @@ private fun PeekCard(
                     slideOutVertically(
                         animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
+                    fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 90,
+                            delayMillis = PeekIdleOutMs - 90,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) using SizeTransform(clip = false)
                 }
             },
             label = "peekSlot_$slot"

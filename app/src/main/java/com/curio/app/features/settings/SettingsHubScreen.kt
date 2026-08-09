@@ -33,6 +33,7 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -130,8 +131,8 @@ fun SettingsHeroHeader(
                     .fillMaxWidth()
                     .height(42.dp)
                     .offset(y = bannerHeight - 18.dp)
-                .clip(sheetShape)
-                .background(CurioColors.CreamWhite)
+                .clip(sheetShape)                    .background(MaterialTheme.colorScheme.surface)
+
         )
         // ── Torn-edge shadow — hairline dark rim under the seam.
         Box(
@@ -139,7 +140,7 @@ fun SettingsHeroHeader(
                 .fillMaxWidth()                .height(bannerHeight)
                 .offset(y = 1.dp)
                 .clip(heroTornShape)
-                .background(Color.Black.copy(alpha = 0.20f))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f))
             )
             // ── Solid rose banner, torn bottom edge ────────────────────────
             Surface(
@@ -237,6 +238,15 @@ private fun BoxScope.SettingsHeroSymbol(
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
+    // Material and AMOLED headers use the active scheme's semantic roles
+    // instead of the legacy rose fill. This keeps hero headers coherent with
+    // dynamic wallpaper colors and preserves a restrained dark AMOLED surface.
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.primary
+    }
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
+    }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
         // Shared dark hero companion used by Settings, Cabinet, and Onboarding.
@@ -252,12 +262,14 @@ fun settingsRoseAccent(): Color {
 /** Readable ink for content sitting on the settings rose banner (Home's
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
-fun settingsReadableInk(fill: Color): Color = if (
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme()
-) {
-    MaterialTheme.colorScheme.onSurface
-} else {
-    pastelFillInk(fill)
+fun settingsReadableInk(fill: Color): Color = when {
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+        MaterialTheme.colorScheme.onPrimary
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+        MaterialTheme.colorScheme.onSurface
+    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+        MaterialTheme.colorScheme.onSurface
+    else -> pastelFillInk(fill)
 }
 
 /** Compact hub for the redesigned settings experience — the Profile-style

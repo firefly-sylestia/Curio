@@ -238,16 +238,20 @@ object CurioGradients {
      * pastel deck read dimmer than it should (especially the shuffle main
      * card). The pastel accent is already soft enough for white-free ink.
      */
-    fun categoryCardFill(accent: Color, dark: Boolean = false): Color =
-        if (AppPreferences.pastelColorsState) {
-            accent
-        } else {
+    fun categoryCardFill(accent: Color, dark: Boolean = false): Color = when {
+        // AMOLED cards are intentionally near-black. The category identity is
+        // carried by a restrained accent trace, not a bright jewel-tone fill.
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+            lerp(Color.Black, accent, 0.12f)
+        AppPreferences.pastelColorsState -> accent
+        else -> {
             // Non-pastel dark heroes need a true jewel-tone depth; the old
             // 10% deepen left coral/sky/amber fills too close to bright raw
             // accents on the midnight surface. Light mode keeps its existing
             // treatment; callers opt into the dark value explicitly.
             lerp(accent, Color.Black, if (dark) 0.28f else 0.10f)
         }
+    }
 
     /**
      * Lightness floor for material stops — see [floorForWhiteInk].
@@ -329,17 +333,28 @@ object CurioGradients {
      */
     @Composable
     fun cardGradient(accent: Color): List<Color> {
+        // AMOLED uses the same near-black card language everywhere: a raised
+        // black surface with only a quiet category-color bloom. This keeps
+        // category cards, heroes, and peek cards power-friendly and coherent.
+        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+            val base = MaterialTheme.colorScheme.surfaceContainerHigh
+            val accentTrace = lerp(base, accent, 0.18f)
+            return listOf(
+                lerp(base, accent, 0.08f),
+                accentTrace
+            )
+        }
         if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
             AppPreferences.materialCardBlendsState
         ) {
             val scheme = MaterialTheme.colorScheme
             val pastel = AppPreferences.pastelColorsState
             val dark = isCurioDarkTheme()
-            // The device anchor — the M3 PRIMARY, the least-pastel of the
-            // Material You trio (secondary/tertiary are the muted pastel
-            // ones). Pastel mode softens it to its pastel twin; otherwise the
-            // raw device color is kept so the card reads as the device's own.
-            val deviceRaw = scheme.primary
+            // Material cards use the semantic primary-container pair as their
+            // readable base, then add a restrained category trace. This keeps
+            // the dynamic wallpaper palette coherent without breaking the
+            // onPrimaryContainer contrast contract.
+            val deviceRaw = scheme.primaryContainer
             // v7.37 — floor the device color's lightness for WHITE card
             // content when it's too pale (dark-mode dynamic palettes are
             // pastel-pale and would wash out white text; light dynamic
@@ -348,8 +363,7 @@ object CurioGradients {
             val device = if (pastel) {
                 pastelAccent(deviceRaw, dark)
             } else {
-                val floored = floorForWhiteInk(deviceRaw)
-                if (dark) lerp(floored, Color.Black, 0.18f) else floored
+                deviceRaw
             }
             // The category "sprinkle" — the single accent presence on the
             // card, slightly deepened (or pastel twin in pastel mode) so it
@@ -368,8 +382,8 @@ object CurioGradients {
             // every category would read as the same device color and the
             // deck/picker would lose its color-coding. The device color
             // still owns ~82-90% of the card.
-            val sprinkleTop = if (dark && !pastel) 0.10f else 0.05f
-            val sprinkleBottom = if (dark && !pastel) 0.18f else 0.10f
+            val sprinkleTop = if (dark && !pastel) 0.12f else 0.07f
+            val sprinkleBottom = if (dark && !pastel) 0.20f else 0.14f
             return listOf(
                 lerp(device, catStop, sprinkleTop),
                 lerp(device, catStop, sprinkleBottom)
