@@ -1,0 +1,128 @@
+[
+  {
+    "id": "artw-garden-of-earthly-delights-001",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Garden of Earthly Delights (1500)",
+    "teaser": "Hieronymus Bosch's triptych begins in Eden, swells into a surreal paradise crowded with naked figures and giant fruit, and ends in a black hell of instruments and torments. Nobody agrees on what it means.",
+    "imageUrl": "",
+    "byline": "Hieronymus Bosch",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Garden of Earthly Delights (1500) by Bosch, center panel",
+      "durationMinutes": 30,
+      "instruction": "Work left to right and resist reading it as a simple warning. Notice the oversized fruit, the glass domes, and the animals acting like people. Every object rewards a second look — the panel is a library of symbols with no index."
+    },
+    "tags": [
+      "Renaissance",
+      "Dutch",
+      "Surreal"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-birth-of-venus-007",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Birth of Venus (1486)",
+    "teaser": "Botticelli's Venus arrives on a shell, blown by wind gods and greeted by a handmaiden with a cloak. It was the first large-scale Renaissance painting of a nude Venus — pagan beauty made respectable by allegory.",
+    "imageUrl": "",
+    "byline": "Sandro Botticelli",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Birth of Venus (1486) by Botticelli, Uffizi",
+      "durationMinutes": 20,
+      "instruction": "Look at Venus's pose — her weight on one leg, hands covering, hair long enough to reach the ground. Her body is idealized, elongated, and impossible: her neck and arms stretch beyond anatomy. That's the point — she is not a woman, she is an idea of beauty."
+    },
+    "tags": [
+      "Renaissance",
+      "Italian",
+      "Mythology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-dogs-playing-poker-014",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Dogs Playing Poker (1903)",
+    "teaser": "Cassius Marcellus Coolidge's series of dogs around a card table became the most famous 'bad art' in America — and secretly a technical triumph of painting nine distinct canine personalities in one scene.",
+    "imageUrl": "",
+    "byline": "Cassius Marcellus Coolidge",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Dogs Playing Poker (1903) by Coolidge — 'A Friend in Need'",
+      "durationMinutes": 10,
+      "instruction": "Look at each dog's face — the one slipping a card under the table, the one smoking a cigar, the one glaring. The jokes work because every dog has a distinct 'tell'. This is the most recognizable poker painting in history for a reason."
+    },
+    "tags": [
+      "American",
+      "1900s",
+      "Humor"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-peacock-dress-024",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Peacock Skirt (1893)",
+    "teaser": "Aubrey Beardsley's sinuous black-and-white drawing of Salome in a peacock-patterned gown — an illustration for Oscar Wilde's play that scandalized Victorian England with its erotic decadence.",
+    "imageUrl": "",
+    "byline": "Aubrey Beardsley",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Peacock Skirt (1893) by Beardsley",
+      "durationMinutes": 10,
+      "instruction": "Look at how much is suggested with so little — the dress's eye-feathers, the figure's elongated neck, the halo-like headdress. Beardsley worked in pure black and white, and every empty space is as deliberate as every line."
+    },
+    "tags": [
+      "Art Nouveau",
+      "British",
+      "1890s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-arrangement-in-grey-027",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Arrangement in Grey and Black No. 1 (1871)",
+    "teaser": "Whistler's portrait of his mother — he called it an 'arrangement', an experiment in color, not a portrait of a person. The Royal Academy hung it as 'Whistler's Mother', a title he hated, and it became one of the most parodied images in art.",
+    "imageUrl": "",
+    "byline": "James McNeill Whistler",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Arrangement in Grey and Black (1871) by Whistler, Musée d'Orsay",
+      "durationMinutes": 12,
+      "instruction": "Notice the composition: the mother is a flat silhouette against a patterned wall, her profile facing left, one foot on a stool. The frame is part of the artwork — Whistler designed it. Her hands, folded, hold a white handkerchief that is the brightest thing in the painting."
+    },
+    "tags": [
+      "Aestheticism",
+      "American",
+      "1870s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-number-5-1948-035",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "No. 5, 1948 (1948)",
+    "teaser": "Jackson Pollock's most famous drip painting — eight feet of tangled black, gray, and brown skeins, the most expensive painting ever sold at the time ($140 million in 2006). Pollock painted it on the floor, from all sides, at the peak of his 'drip period'.",
+    "imageUrl": "",
+    "byline": "Jackson Pollock",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "No. 5, 1948 (1948) by Pollock",
+      "durationMinutes": 15,
+      "instruction": "Don't look for a subject — look for rhythm. Follow one black line through the tangle; it loops, crosses, returns. The painting has a center of gravity near the top, where the paint is thickest. Pollock said he was 'in' the painting while he worked: it is a record of movement, not a picture."
+    },
+    "tags": [
+      "Abstract",
+      "American",
+      "1940s"
+    ],
+    "tier": 2
+  }
+]

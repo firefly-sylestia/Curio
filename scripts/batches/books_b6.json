@@ -1,0 +1,254 @@
+[
+  {
+    "id": "book-on-the-road",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "On the Road",
+    "teaser": "Jack Kerouac's 1957 novel of Sal Paradise and Dean Moriarty crossing America in stolen cars and borrowed time — the Beat generation's declaration of independence, written in one long jazz riff.",
+    "imageUrl": "",
+    "byline": "Jack Kerouac",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the first road trip west",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the road itself becomes the narrator. Notice how Kerouac's prose runs without brakes, sentence after sentence. Write what the book offers that a settled life cannot, and what it costs its characters."
+    },
+    "tags": [
+      "American",
+      "Beat",
+      "Road"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-naked-lunch",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Naked Lunch",
+    "teaser": "William S. Burroughs's 1959 cut-up novel — a hallucinated travelogue of addiction, control, and the Interzone, assembled from fragments and banned in Boston. It made the avant-garde a legal battleground.",
+    "imageUrl": "",
+    "byline": "William S. Burroughs",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening sections — the market and the mugwump",
+      "durationMinutes": 45,
+      "instruction": "Read the opening sections. Notice how Burroughs's prose shifts registers without warning, mixing clinical horror and vaudeville. Write what the book's fragmentary form has to do with its subject — addiction as a control system."
+    },
+    "tags": [
+      "American",
+      "Beat",
+      "Experimental"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-one-flew-over",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "One Flew Over the Cuckoo's Nest",
+    "teaser": "Ken Kesey's 1962 novel of the ward, the Big Nurse, and Randle McMurphy — told by Chief Bromden, who pretends to be deaf. A parable of institutions, conformity, and the men who refuse to be fixed.",
+    "imageUrl": "",
+    "byline": "Ken Kesey",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the fog and the ward",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Bromden's fog and the Big Nurse's machinery are established. Notice how Kesey narrates the ward from inside a mind that has learned to disappear. Write what the Combine — the book's name for control — stands for."
+    },
+    "tags": [
+      "American",
+      "Institution",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-canticle-for-leibowitz",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Canticle for Leibowitz",
+    "teaser": "Walter M. Miller Jr.'s 1959 novel across a thousand years after nuclear war — the monks of the Order of Leibowitz preserve the scraps of the old world, including the blueprint for its destruction. The great Catholic science-fiction novel.",
+    "imageUrl": "",
+    "byline": "Walter M. Miller Jr.",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Brother Francis and the memorabilia",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Brother Francis finds the blessed blueprint. Notice how Miller treats the preservation of knowledge with both reverence and irony. Write what the novel says about whether humanity can learn from its own history."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-last-unicorn",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Last Unicorn",
+    "teaser": "Peter S. Beagle's 1968 novel of the unicorn who leaves her wood to find the others — through Schmendrick the magician and Molly Grue, into the Red Bull's country. The most lyrical fantasy novel ever written.",
+    "imageUrl": "",
+    "byline": "Peter S. Beagle",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the unicorn leaves the wood",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the unicorn's immortality meets her loneliness. Notice how Beagle's prose is precise and sorrowful at once. Write what it means to the unicorn to become human in the course of the quest."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Lyric"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-earths-sea-cycle",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "A Wizard of Earthsea",
+    "teaser": "Ursula K. Le Guin's 1968 first novel of Earthsea — Ged, a goatherd with a gift, is taught at the school of wizardry and looses a shadow he must spend his life hunting. The fantasy of balance.",
+    "imageUrl": "",
+    "byline": "Ursula K. Le Guin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the naming and the shadow",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Ged's true name is given and his pride calls the shadow into the world. Notice how Le Guin's prose is spare and mythic. Write what the novel's central lesson — to know oneself — means for the whole genre."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-lion-witch-wardrobe",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Lion, the Witch and the Wardrobe",
+    "teaser": "C. S. Lewis's 1950 first Narnia book — four children step through a wardrobe into a land of eternal winter, a White Witch, and a lion who is not safe but is good. The most beloved portal fantasy.",
+    "imageUrl": "",
+    "byline": "C. S. Lewis",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Lucy and the wardrobe",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Lucy's discovery of the wardrobe is met with disbelief. Notice how Lewis lets the children's argument play out in the ordinary world first. Write how the novel's Christian allegory works — and how it works for non-Christians too."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-hobbit",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Hobbit",
+    "teaser": "J. R. R. Tolkien's 1937 novel of Bilbo Baggins, thirteen dwarves, and a dragon — a burglar who did not know he was a burglar, written first for Tolkien's own children. The door into Middle-earth.",
+    "imageUrl": "",
+    "byline": "J. R. R. Tolkien",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — An Unexpected Party",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapter, where the dwarves arrive one by one and the adventure begins against Bilbo's will. Notice how Tolkien's narrator keeps breaking in with asides. Write how Bilbo's growth — from comfort to courage — is the book's quiet engine."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-princess-bride",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Princess Bride",
+    "teaser": "William Goldman's 1973 novel of true love, fencing, giants, and ROUSes — presented as the good parts of a classic by 'S. Morgenstern.' The funniest book about storytelling ever written.",
+    "imageUrl": "",
+    "byline": "William Goldman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the grandfather's frame and the princess's birth",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Goldman's invented editor interrupts the story. Notice how the frame makes the reader both child and adult. Write what the novel's claim — that this is only the 'good parts' — reveals about how stories work."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Comedy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-watership-down",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Watership Down",
+    "teaser": "Richard Adams's 1972 novel of rabbits who leave their doomed warren and cross the English downs toward a promised hill — an adventure epic, a survival story, and a meditation on freedom, told with rabbits' own mythology.",
+    "imageUrl": "",
+    "byline": "Richard Adams",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Fiver's vision and the flight",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Fiver's dread and Hazel's courage set the quest in motion. Notice how Adams builds a complete rabbit culture with its own language and legends. Write what the novel says about freedom, leadership, and the courage to leave."
+    },
+    "tags": [
+      "British",
+      "Adventure",
+      "Allegory"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-wizard-of-earthsea-tombs",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Tombs of Atuan",
+    "teaser": "Le Guin's 1971 second Earthsea novel — Tenar, the priestess of the Nameless Ones, guards the tombs in darkness until a wizard comes to steal the ring and offers her a way out. The fantasy of freedom from within.",
+    "imageUrl": "",
+    "byline": "Ursula K. Le Guin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Tenar's consecration and the dark place",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Tenar's life is given to the dark before she understands what she has lost. Notice how Le Guin renders the tombs' horror in the child's own terms. Write what Tenar must choose between, and what freedom costs her."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Newbery"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-farthing-wood",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Faraway Tree and the Folk of the Faraway Tree",
+    "teaser": "Enid Blyton's magical tree that reaches into new lands each week — Moon-Face, Silky, and the Saucepan Man at the top of the ladder. The books that taught generations of children to climb.",
+    "imageUrl": "",
+    "byline": "Enid Blyton",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the discovery of the tree",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where the children find the tree and its peculiar residents. Notice how Blyton keeps the wonder concrete — the lands change weekly, and the food is always at the top. Write what makes a children's fantasy of pure abundance so enduring."
+    },
+    "tags": [
+      "British",
+      "Children",
+      "Fantasy"
+    ],
+    "tier": 2
+  }
+]

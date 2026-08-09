@@ -1,0 +1,222 @@
+[
+  {
+    "id": "author-ben-okri",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Ben Okri",
+    "teaser": "The Famished Road won the Booker Prize — a novel where spirits, hunger, and reality blur in the mind of a Nigerian 'abiku' child. Okri's prose is incantatory, and his subject is poverty and wonder sharing one body.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Famished Road, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Famished Road. Notice how the spirit world and the material world are one continuous texture. Write how Okri makes magical realism feel like testimony rather than decoration."
+    },
+    "tags": [
+      "African",
+      "Nigerian",
+      "Magical"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-alifa-rifaat",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Alifa Rifaat",
+    "teaser": "An Egyptian writer whose short stories open doors that were closed — sexuality, marriage, and faith inside Egyptian women's lives, written with frankness and deep sympathy. Her stories are quiet and quietly radical.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Alifa Rifaat, 'My World of the Unknown' or 'Bahiyya's Eyes'",
+      "durationMinutes": "45",
+      "instruction": "Read a Rifaat story. Notice how she enters her characters' bodies and households with unusual candor. Write what the story reveals about desire, duty, and faith, and how the everyday setting carries the weight."
+    },
+    "tags": [
+      "Arabic",
+      "Egyptian",
+      "Women"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "author-sahar-khalifeh",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Sahar Khalifeh",
+    "teaser": "A Palestinian novelist who writes women's lives against the backdrop of occupation — Wild Thorns and The Inheritance refuse easy heroes. Her characters are fully human in impossible circumstances.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wild Thorns, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Wild Thorns. Notice how Khalifeh keeps the politics inside personal choices — who leaves, who stays, who collaborates. Write how the novel makes you feel the texture of daily life under occupation."
+    },
+    "tags": [
+      "Palestinian",
+      "Modern",
+      "Women"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-ghassan-kanafani",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Ghassan Kanafani",
+    "teaser": "A Palestinian writer and activist whose short novel Men in the Sun follows three refugees seeking a future in a water tanker — and ends in one of literature's most devastating final lines. He was assassinated in 1972, aged 36.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Men in the Sun, entire novella",
+      "durationMinutes": "60",
+      "instruction": "Read Men in the Sun in one sitting. Notice how the heat, the truck, and the silence build to the ending. Write what the final image says about exile, borders, and the price of hope."
+    },
+    "tags": [
+      "Palestinian",
+      "Novella",
+      "Exile"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-elif-shafak",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Elif Shafak",
+    "teaser": "Turkey's most widely read female novelist — The Bastard of Istanbul, The Forty Rules of Love, and 10 Minutes 38 Seconds in This Strange World. Her books bridge East and West, faith and doubt, with warmth and structure.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Bastard of Istanbul, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Bastard of Istanbul. Notice how Shafak juggles multiple narrators and histories. Write how the novel uses family secrets to connect Turkey and the Armenian diaspora."
+    },
+    "tags": [
+      "Turkish",
+      "Modern",
+      "Diaspora"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-bohumil-hrabal",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Bohumil Hrabal",
+    "teaser": "Closely Watched Trains and I Served the King of England — a Czech writer of long, laughing sentences and little people. He wrote some of his best work in a single draft, and his prose runs like talk you cannot stop.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Closely Watched Trains, opening pages",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Closely Watched Trains. Notice the voice — intimate, comic, rambling. Write how Hrabal makes a small station worker's story touch the war and history without ever leaving the station."
+    },
+    "tags": [
+      "Czech",
+      "Comic",
+      "Modern"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-danilo-kis",
+    "categoryId": "WILDCARD",
+    "subtype": "Author",
+    "name": "Danilo Kiš",
+    "teaser": "A Yugoslav writer of austere, haunted fiction — A Tomb for Boris Davidovich and Hourglass confront the century's horrors through documents, fragments, and testimony. His prose is exact and his silence is loud.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Tomb for Boris Davidovich, a story",
+      "durationMinutes": "60",
+      "instruction": "Read one story from A Tomb for Boris Davidovich. Notice how Kiš uses pseudo-documents and testimony. Write how the form makes the historical horror feel both documented and dreamlike."
+    },
+    "tags": [
+      "Yugoslav",
+      "Modern",
+      "Documentary"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "author-witold-gombrowicz",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Witold Gombrowicz",
+    "teaser": "A Polish absurdist who made immaturity a philosophy — Ferdydurke begins with a schoolteacher kidnapping an adult back into boyhood. He spent decades in exile in Argentina, writing books that mock everything including themselves.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ferdydurke, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Ferdydurke. Notice how Gombrowicz makes form itself the joke — the narrator attacked by his own prose. Write how the novel uses absurdity to expose the roles we play."
+    },
+    "tags": [
+      "Polish",
+      "Absurdist",
+      "Modern"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "author-bruno-schulz",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Bruno Schulz",
+    "teaser": "A Polish-Jewish writer who turned his small provincial town into a myth — The Street of Crocodiles and Sanatorium Under the Sign of the Hourglass are dense with metamorphosis, father-gods, and luminous decay. He was killed by the Nazis in 1942.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Street of Crocodiles, a story",
+      "durationMinutes": "60",
+      "instruction": "Read a Schulz story — 'The Street of Crocodiles' or 'Cinnamon Shops.' Notice how his metaphors transform the mundane into the mythic. Write how the prose makes time, memory, and the town feel alive and doomed."
+    },
+    "tags": [
+      "Polish",
+      "Modern",
+      "Mythic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-cesar-aira",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "César Aira",
+    "teaser": "An Argentine writer who publishes several short novels a year — small, strange, improvisatory books that wander into digressions and sudden endings. He has written over a hundred, each a little thought experiment.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "An Episode in the Life of a Landscape Painter",
+      "durationMinutes": "60",
+      "instruction": "Read Aira's short novel about the painter Rugendas struck by lightning. Notice how the story veers between fact and wild invention. Write what Aira's 'flight forward' method does to narrative expectation."
+    },
+    "tags": [
+      "Argentine",
+      "Experimental",
+      "Modern"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-laura-esquivel",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Laura Esquivel",
+    "teaser": "Like Water for Chocolate — a novel where cooking is magic and a woman's desires cook themselves into the food. Esquivel turned the kitchen into a stage for passion, family, and the Mexican Revolution.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Like Water for Chocolate, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Like Water for Chocolate. Notice how recipes structure the chapters and how emotions become ingredients. Write how Esquivel uses food to give a woman a voice her family denies her."
+    },
+    "tags": [
+      "Mexican",
+      "Magical Realism",
+      "Women"
+    ],
+    "tier": 1
+  }
+]

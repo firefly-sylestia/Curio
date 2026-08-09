@@ -1,0 +1,142 @@
+[
+  {
+    "id": "scientist-holmes",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Geologist",
+    "name": "Arthur Holmes",
+    "teaser": "British geologist who used radioactive decay to date the Earth, estimating in 1913 that it was at least 1.6 billion years old — later refined to 4.5 billion — ending the debate that had raged since Kelvin. He also championed continental drift when it was out of fashion and proposed mantle convection as the driving mechanism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Holmes's 1913 book The Age of the Earth",
+      "durationMinutes": 60,
+      "instruction": "Read how Holmes, then a young man at Imperial College, applied the new radioactivity physics to minerals and produced age estimates no one could argue with — the Earth was not young. He later built a table of geological time using uranium-lead dating that is the ancestor of every modern date. His conviction that convection currents in the mantle move continents made him plate tectonics' earliest champion.",
+      "tags": [
+        "Geology",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-tuzo-wilson",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Geophysicist",
+    "name": "J. Tuzo Wilson",
+    "teaser": "Canadian geophysicist who transformed continental drift into plate tectonics by proposing that the Earth's surface is a mosaic of rigid plates moving over a soft mantle — and that the ocean floors recycle on a cycle now named the Wilson cycle. He also predicted transform faults, confirmed by the 1965 earthquake data.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wilson's 1963 and 1965 papers on plate tectonics and transform faults",
+      "durationMinutes": 60,
+      "instruction": "Read how Wilson, a skeptic of Wegener for decades, was converted by the new magnetic and earthquake evidence and synthesized it into the plate model. His prediction that some faults connect ridges to trenches in a new way — transform faults — was confirmed by seismic data within weeks. He also proposed that Hawaii's chain of volcanoes is a plume of hot mantle, a hotspot theory still debated.",
+      "tags": [
+        "Geology",
+        "20th Century",
+        "Canadian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-richter",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Seismologist",
+    "name": "Charles Richter",
+    "teaser": "American seismologist who, with Beno Gutenberg, created the magnitude scale for earthquakes in 1935 — a logarithmic measure based on the amplitude of seismic waves. The Richter scale, later refined into the moment magnitude scale, gave the world a common language for earthquakes. He also co-wrote Seismicity of the Earth, the definitive global catalog.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Richter's 1935 paper on an instrumental magnitude scale",
+      "durationMinutes": 60,
+      "instruction": "Read how Richter, working at Caltech with the Wood-Anderson seismograph, defined magnitude so that a standard earthquake gives a standard number, and each unit increase multiplies wave amplitude by ten (energy by ~32). A magnitude 7 quake is a hundred times the amplitude of a 5. Richter's name became the world's shorthand for quake size, though he disliked the fame and the phrase 'on the Richter scale.'",
+      "tags": [
+        "Seismology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-anning",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Paleontologist",
+    "name": "Mary Anning",
+    "teaser": "English fossil hunter who, from age 11, discovered some of the most important fossils ever found on the Jurassic coast of Lyme Regis — the first complete ichthyosaur, the first plesiosaur, and the first pterosaur found outside Germany. Largely self-taught and barred from scientific societies as a woman, she was nevertheless consulted by the century's greatest geologists.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Anning's discoveries at Lyme Regis (1811–1847)",
+      "durationMinutes": 60,
+      "instruction": "Read how Anning, a poor working-class woman, sold fossils to survive and taught herself anatomy and geology well enough to correct the experts. Her 1823 plesiosaur was dismissed as a fake by Cuvier until he saw it. 'She is perfectly familiar with anatomy' wrote one admirer. A tongue-twister of her day ran: 'She sells sea-shells by the seashore.'",
+      "tags": [
+        "Paleontology",
+        "19th Century",
+        "British"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-cuvier",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Paleontologist",
+    "name": "Georges Cuvier",
+    "teaser": "French naturalist who founded vertebrate paleontology and comparative anatomy — and established that extinction is real. Comparing fossil elephants with living ones, he proved that species have disappeared, and proposed that catastrophes had reshaped the Earth. Darwin's gradual evolution was a direct challenge to his catastrophism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cuvier's 1796 paper on living and fossil elephants",
+      "durationMinutes": 60,
+      "instruction": "Read how Cuvier, comparing the jaw of an Indian elephant, an African elephant, and a mammoth, showed the mammoth was a distinct, extinct species — extinction was real, not just 'forms being transformed.' His principle of correlation of parts — from one bone he could reconstruct an animal — made paleontology scientific. His catastrophism held until Lyell and Darwin.",
+      "tags": [
+        "Paleontology",
+        "18th-19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-agassiz",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Glaciologist",
+    "name": "Louis Agassiz",
+    "teaser": "Swiss-American naturalist who, in 1837, proposed the Ice Age — that much of Europe and North America were once buried under vast glaciers. He traced scratched rocks and transported boulders to their origin and convinced the world that the Earth's climate has been drastically different. He also founded the field of ichthyology, cataloguing thousands of fossil fish.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Agassiz's 1840 book Études sur les glaciers",
+      "durationMinutes": 60,
+      "instruction": "Read how Agassiz, inspired by Alpine glacier studies, recognized that glacial striations, moraines, and erratic boulders scattered across Europe could only be explained by ice sheets. He went on to map the extent of glaciation in North America. Ironically, this champion of deep history rejected Darwin's evolution — he believed species were created, not changed.",
+      "tags": [
+        "Glaciology",
+        "19th Century",
+        "Swiss-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-keeling",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Charles David Keeling",
+    "teaser": "American chemist who began measuring atmospheric CO₂ at Mauna Loa in 1958 and kept measuring — producing the Keeling Curve, the world's most famous climate graph, which shows CO₂ rising relentlessly from 315 to 420 parts per million. He called the rise 'the most important environmental issue of this century,' and he is the reason we have a record at all.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Keeling Curve at Mauna Loa (1958–present)",
+      "durationMinutes": 60,
+      "instruction": "Read how Keeling, needing clean air, chose Mauna Loa's volcanic summit and built a precise infrared analyzer — and then fought for decades to keep the program funded. His curve shows the seasonal breathing of northern forests (the sawtooth) riding on an inexorable rise. When he died in 2005, the program he started was still running; it still runs today, and the curve is now an icon.",
+      "tags": [
+        "Climate",
+        "20th Century",
+        "American"
+      ],
+      "tier": 1
+    }
+  }
+]

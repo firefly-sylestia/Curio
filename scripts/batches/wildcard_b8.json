@@ -1,0 +1,418 @@
+[
+  {
+    "id": "wildcard-humpback-bubble",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Humpback Bubble-Net Feeding",
+    "teaser": "A pod of humpbacks dives beneath a school of fish, spirals upward while blowing a curtain of bubbles, and the fish are funneled into a cylinder of bubbles — then the whales rise through the middle with mouths open. A choreography invented by whales.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bubble-net feeding footage",
+      "durationMinutes": 30,
+      "instruction": "Watch footage of bubble-net feeding and learn how humpbacks coordinate the bubble ring and the feeding lunge. Write the steps of the hunt, how the whales pass the technique to their calves, and where it is observed."
+    },
+    "tags": ["Animal", "Whales", "Hunting"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-whale-song",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Whale Song",
+    "teaser": "Humpback whales sing long, evolving songs — males within a population all sing the same song, and the song changes each year like a hit single spreading across the ocean. The songs travel for thousands of kilometers through the sea.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Humpback whale songs",
+      "durationMinutes": 30,
+      "instruction": "Listen to recordings of humpback song and learn how it is structured in themes and phrases that change over time. Write why males sing, how the song spreads between populations, and what whale song meant to the anti-whaling movement."
+    },
+    "tags": ["Animal", "Whales", "Sound"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-biomimicry",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Biomimicry",
+    "teaser": "Engineers copying nature: bullet trains shaped like kingfisher beaks, wind turbines like humpback fins, and paint inspired by lotus leaves that never get dirty. Nature has had 3.8 billion years of R&D, and we are finally reading its patents.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Copy",
+      "targetName": "Biomimicry inventions",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Shinkansen's redesign after kingfishers, gecko-inspired adhesives, and shark-skin swimsuits came from nature. Write three biomimicry examples and the natural principle each one borrows."
+    },
+    "tags": ["Concept", "Design", "Nature"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-mycelium",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Mycelium Networks",
+    "teaser": "Under every forest floor runs a web of fungal threads that connects trees and trades nutrients — the 'wood wide web.' One honey fungus in Oregon spans over 900 hectares, making it one of the largest organisms on Earth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dig",
+      "targetName": "The wood wide web",
+      "durationMinutes": 45,
+      "instruction": "Learn how mycorrhizal networks connect tree roots and move carbon, water, and warning signals between them. Write how scientists proved the exchanges, how big the Oregon fungus is, and what it means for forests."
+    },
+    "tags": ["Nature", "Fungi", "Forest"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-lichen-symbiosis",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Lichens",
+    "teaser": "Lichens are not one organism but two — a fungus and an alga (sometimes a cyanobacterium too) living as one, able to survive on bare rock, in deserts, and in the Arctic. They are the pioneers that make soil for everything else.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Symbiose",
+      "targetName": "Lichen partnerships",
+      "durationMinutes": 30,
+      "instruction": "Learn how the fungus provides structure and the alga provides food through photosynthesis. Write why lichens can live where nothing else can, how they slowly break rock into soil, and how they are used to monitor air quality."
+    },
+    "tags": ["Nature", "Symbiosis", "Survival"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-plankton-bloom",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Phytoplankton Blooms",
+    "teaser": "Each spring, trillions of microscopic plants bloom across the oceans, turning the sea green and feeding almost everything in it. Seen from space, the blooms trace the currents — the largest migrations of life on Earth are invisible from the shore.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Bloom",
+      "targetName": "Phytoplankton blooms from space",
+      "durationMinutes": 30,
+      "instruction": "Learn why phytoplankton bloom when light and nutrients align, and how they generate half the world's oxygen. Write how satellite images track blooms, what the 'biological pump' is, and why blooms matter for climate."
+    },
+    "tags": ["Nature", "Ocean", "Life"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-bioluminescence-why",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Why Bioluminescence Evolved",
+    "teaser": "Living light evolved independently at least 40 times — for camouflage, luring prey, warning, and mating. Fireflies flash to find love, anglerfish dangle glowing lures, and deep-sea squid shoot glowing ink to blind attackers.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Glow",
+      "targetName": "Bioluminescence in nature",
+      "durationMinutes": 45,
+      "instruction": "Learn the many uses of living light — counter-illumination, lures, alarms, and courtship — and how the chemical reaction (luciferin + luciferase) works. Write three species and what each uses its glow for."
+    },
+    "tags": ["Nature", "Light", "Evolution"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-firefly-sync",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Synchronized Fireflies",
+    "teaser": "In Southeast Asian mangrove forests, thousands of fireflies flash in perfect unison — whole trees blinking on and off like Christmas lights. Scientists still debate exactly how the sync emerges, but it is one of nature's most hypnotic shows.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Blink",
+      "targetName": "Synchronous firefly displays",
+      "durationMinutes": 30,
+      "instruction": "Learn how synchronous fireflies coordinate their flashes and where to see them, from Southeast Asia to the Great Smoky Mountains. Write the theories about how sync emerges and what the flashes are for."
+    },
+    "tags": ["Animal", "Fireflies", "Light"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-frozen-bubbles",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Frozen Methane Bubbles",
+    "teaser": "Beneath some frozen lakes sit ghostly discs of trapped gas — methane released by decomposing plants, frozen mid-rise in the ice. They are beautiful, flammable, and a sign of the carbon locked under northern lakes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Freeze",
+      "targetName": "Methane bubbles in lake ice",
+      "durationMinutes": 30,
+      "instruction": "Learn how methane from lakebed bacteria rises and freezes into bubble layers, and why the bubbles look white. Write the risk they pose (flammable gas), how scientists measure lake methane, and what permafrost thaw means."
+    },
+    "tags": ["Phenomenon", "Ice", "Science"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ice-lily",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Ice Lilies (Frost Flowers)",
+    "teaser": "Delicate white ribbons of ice that bloom overnight from the stems of certain plants — as freezing sap is pulled up and freezes in thin, curling petals. They are rare, ephemeral, and one of winter's strangest works of art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Bloom",
+      "targetName": "Frost flowers formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how frost flowers form when freezing air meets stems still full of sap, extruding ice through fine cracks. Write the conditions required — very cold, moist, windless mornings — and where they are most often found."
+    },
+    "tags": ["Phenomenon", "Ice", "Winter"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-sea-ice-pancakes",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Pancake Ice",
+    "teaser": "Before the ocean freezes solid, it often passes through a stage of rounded white discs that bump into each other like floating pancakes — 'pancake ice.' Each disc gets its raised rim from colliding with its neighbors as waves stir the slush.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Pancake",
+      "targetName": "Pancake ice formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how frazil ice gathers into rounded discs that grow rims by collision. Write the steps from open water to pancake ice to a solid sheet, and where it is commonly seen, like the Southern Ocean."
+    },
+    "tags": ["Phenomenon", "Ice", "Ocean"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-fulgurite",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Fulgurite (Lightning Glass)",
+    "teaser": "When lightning strikes sand, the bolt's heat fuses the grains into branching, glassy tubes called fulgurites — fossilized lightning, sometimes meters long. They are nature's most literal souvenirs of a thunderbolt.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Strike",
+      "targetName": "Fulgurite formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how lightning's ~30,000°C heat melts sand into glass tubes and how they branch like the bolt's path. Write where fulgurites are found, how fast they form, and why they are prized by collectors and scientists."
+    },
+    "tags": ["Phenomenon", "Lightning", "Geology"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-fire-whirl",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Fire Whirls",
+    "teaser": "Wildfires can spin off tornadoes of flame — columns of fire that rise hundreds of meters and race across the landscape. They form when heat and wind create a rotating updraft, and they are among the most terrifying sights in nature.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Spin",
+      "targetName": "Fire whirl formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how fire whirls form from intense heat, wind shear, and rising air, and the difference between a fire whirl and a true fire tornado. Write the conditions that create them and why they make wildfires even more dangerous."
+    },
+    "tags": ["Phenomenon", "Fire", "Weather"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-brinicle",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Brinicle",
+    "teaser": "A 'finger of death' — a tube of super-salty, super-cold brine that sinks from sea ice and freezes everything it touches on the seafloor. Filmed once by BBC crews, a brinicle creeps down like an icicle in reverse, and starfish flee it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Creep",
+      "targetName": "Brinicle formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how salt rejected from freezing sea ice forms dense brine that sinks and freezes the water around it into a growing tube. Write how the brinicle reaches the seafloor and what the footage of it showed."
+    },
+    "tags": ["Phenomenon", "Ice", "Ocean"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-desert-bloom",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Desert Blooms",
+    "teaser": "After rare rains, deserts explode into flowers — seeds that waited years or decades in the soil germinate all at once. The Atacama, the driest desert on Earth, sometimes turns pink for weeks in a bloom so rare it is called the 'desierto florido.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Bloom",
+      "targetName": "Desert flower superblooms",
+      "durationMinutes": 30,
+      "instruction": "Learn how desert seeds time their germination to rain and how superblooms happen. Write how the Atacama's flowers survive such dryness, why blooms are irregular, and what the seeds' waiting strategy is called."
+    },
+    "tags": ["Phenomenon", "Desert", "Flowers"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-fog-capture",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Fog Harvesting",
+    "teaser": "In foggy mountains with almost no rain, nets standing in the mist collect water — millions of droplets coalesce and drip into gutters. From Chile to Morocco, fog catchers supply villages with water from the sky they can't see.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Catch",
+      "targetName": "Fog harvesting nets",
+      "durationMinutes": 30,
+      "instruction": "Learn how fog nets work — fine mesh that captures fog droplets — and how much water they can yield. Write where fog harvesting is used, its limitations, and how insects like the Namib beetle inspired it."
+    },
+    "tags": ["Phenomenon", "Water", "Design"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-dune-music",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Singing Sand Dunes",
+    "teaser": "Some desert dunes roar when sand avalanches down their slopes — a low, booming hum that can last minutes and carry for kilometers. The 'song' comes from grains sliding in sync over a hard layer, and only certain dunes sing.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Booming sand dunes",
+      "durationMinutes": 30,
+      "instruction": "Learn how avalanching sand grains produce a sustained hum and why the sound depends on grain size, dryness, and the dune's inner layers. Write where singing dunes are found, like the Rub' al Khali, and the physics of the boom."
+    },
+    "tags": ["Phenomenon", "Desert", "Sound"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-red-rain",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Red Rain of Kerala",
+    "teaser": "In 2001, red rain fell over parts of Kerala, India, staining streets and laundry — for weeks. Scientists debated whether the color came from desert dust, algae, or something stranger; the most accepted answer is airborne spores.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Rain",
+      "targetName": "The Kerala red rain",
+      "durationMinutes": 30,
+      "instruction": "Learn the 2001 Kerala red rain and the theories behind it — from dust to algal spores to fringe claims. Write the evidence that settled on spores and how colored rain has appeared elsewhere in history."
+    },
+    "tags": ["Phenomenon", "Mystery", "Weather"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-fish-rain",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Raining Animals",
+    "teaser": "Frogs, fish, and even spiders have fallen from the sky in documented events — waterspouts and storms suck them up and drop them inland. Yoro, Honduras, holds an annual 'Festival de la Lluvia de Peces' celebrating the phenomenon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fall",
+      "targetName": "Animal rain events",
+      "durationMinutes": 30,
+      "instruction": "Learn how waterspouts and updrafts can carry small animals for kilometers and drop them as 'rain.' Write the physics, the documented cases, and why Yoro, Honduras, celebrates its fish rain every year."
+    },
+    "tags": ["Phenomenon", "Weather", "Mystery"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ice-storm-glass",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Ice Storms and Freezing Rain",
+    "teaser": "Rain that freezes on contact turns the world to glass — branches, power lines, and cars coated in a glaze that can bring cities down. A single 1998 storm in Quebec broke power lines for weeks, an ice age in miniature.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Glaze",
+      "targetName": "Freezing rain science",
+      "durationMinutes": 30,
+      "instruction": "Learn how freezing rain forms — snow melting into rain that supercools before hitting frozen surfaces — and why it is so damaging. Write the conditions required and how much weight ice can add to a power line."
+    },
+    "tags": ["Phenomenon", "Weather", "Ice"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-morning-glory-cloud",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Morning Glory Clouds",
+    "teaser": "Over northern Australia's Gulf of Carpentaria, a rolling tube of cloud up to 1,000 km long appears at dawn, turning end over end like a giant slow-motion wave. It is rare, unexplained, and eagerly flown through by glider pilots.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Roll",
+      "targetName": "The Morning Glory cloud",
+      "durationMinutes": 30,
+      "instruction": "Learn what the Morning Glory cloud is — a solitary roll cloud that forms when sea breeze and gravity waves collide — and why it is so predictable in that one region. Write the conditions, the theories, and why gliders love it."
+    },
+    "tags": ["Phenomenon", "Cloud", "Australia"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-asperitas",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Asperitas Clouds",
+    "teaser": "A storm sky that looks like the underside of a rough sea — churning, wavy clouds that seem to boil without producing rain. Asperitas was only recognized as an official cloud type in 2017, photographed by storm chasers for years before.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Gaze",
+      "targetName": "Asperitas cloud formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how asperitas clouds form — turbulence and gravity waves in the atmosphere — and why they were only classified recently. Write what makes the underside so wavy and how citizen photographers helped get it recognized."
+    },
+    "tags": ["Phenomenon", "Cloud", "Sky"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-ice-crystal-halo",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Ice Crystal Halos",
+    "teaser": "On cold days, the Sun sometimes wears rings, pillars, and mock suns — all from sunlight bending through millions of hexagonal ice crystals falling in the air. Some halos are common, some so rare they were only photographed recently.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Halo",
+      "targetName": "Ice halo phenomena",
+      "durationMinutes": 30,
+      "instruction": "Learn how plate and column ice crystals create 22° halos, sundogs, and light pillars. Write the geometry of each display and which ones are rare — like the 46° halo or the circumzenithal arc — and how to spot them."
+    },
+    "tags": ["Phenomenon", "Ice", "Sky"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-rainbow-cloud",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Iridescent Clouds",
+    "teaser": "Pale clouds sometimes shimmer with rainbow colors — iridescence caused by sunlight diffracting through droplets of nearly uniform size. Nacreous clouds in polar winters glow like mother-of-pearl, lit from below by the setting sun.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Shimmer",
+      "targetName": "Iridescent and nacreous clouds",
+      "durationMinutes": 30,
+      "instruction": "Learn how diffraction through tiny droplets produces cloud iridescence, and how nacreous clouds form in the stratosphere. Write the difference between the two, when each is visible, and why nacreous clouds signal cold polar air."
+    },
+    "tags": ["Phenomenon", "Cloud", "Light"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-sun-pillar",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Light Pillars",
+    "teaser": "On freezing nights, columns of light rise straight up from streetlamps or the setting sun — ice crystals in the air act like mirrors, stretching the light into glowing shafts. Some pillars look like the northern lights, but they are pure ice.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Pillar",
+      "targetName": "Light pillar formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how plate-shaped ice crystals reflect light upward and downward to form pillars. Write why they appear at night from artificial lights, how they differ from auroras, and the conditions that produce them."
+    },
+    "tags": ["Phenomenon", "Ice", "Light"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-volcanic-lightning",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Volcanic Lightning",
+    "teaser": "Some eruptions produce their own lightning — bolts crackling through the ash cloud, born when charged particles collide in the plume. It is called a 'dirty thunderstorm,' and it turns an already terrifying mountain into a storm god.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Crackle",
+      "targetName": "Volcanic lightning research",
+      "durationMinutes": 30,
+      "instruction": "Learn how ash particles charge through friction and separate into layers that discharge as lightning. Write which eruptions produced famous lightning (like Eyjafjallajökull), how scientists study it, and what it tells us about eruptions."
+    },
+    "tags": ["Phenomenon", "Volcano", "Lightning"],
+    "tier": 2
+  }
+]

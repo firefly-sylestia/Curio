@@ -1,0 +1,442 @@
+[
+  {
+    "id": "discovery-antibiotics-salvarsan",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Salvarsan — First Antimicrobial Drug (1910)",
+    "teaser": "Paul Ehrlich tested 606 compounds against syphilis before finding one that worked — 'compound 606,' marketed as Salvarsan. It was the first synthetic antimicrobial drug, the birth of chemotherapy (his word), and proof that you could hunt for medicines systematically instead of by luck.",
+    "imageUrl": "",
+    "byline": "Paul Ehrlich",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of Ehrlich's magic bullet and compound 606",
+      "durationMinutes": 25,
+      "instruction": "Read how Ehrlich systematically varied arsenic compounds and tested them on infected rabbits — a search he called the 'magic bullet' that would hit the germ but spare the patient. The number 606 became world-famous. It was the first time a disease was cured by a designed chemical."
+    },
+    "tags": [
+      "Medicine",
+      "Pharmacology",
+      "1910s",
+      "German"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-quinine",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Quinine (1820)",
+    "teaser": "The malaria treatment that changed the world — extracted from cinchona bark in 1820 by French chemists Pelletier and Caventou. Quinine let Europeans colonize the tropics, and it remained the only malaria drug until WWII. The Andes' gift to the world, delivered by Jesuit priests and then by chemists.",
+    "imageUrl": "",
+    "byline": "Pelletier & Caventou",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The history of cinchona bark and quinine",
+      "durationMinutes": 25,
+      "instruction": "Read how Andean peoples used cinchona bark, how Jesuits brought it to Europe, and how Pelletier and Caventou isolated the active alkaloid in 1820. Quinine made the malaria zones accessible and rewrote colonial history. It also gave the world tonic water — which still contains a trace of it."
+    },
+    "tags": [
+      "Medicine",
+      "Pharmacology",
+      "1820s",
+      "French"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-vaccines-rabies",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Rabies Vaccine (1885)",
+    "teaser": "Louis Pasteur never actually saw the rabies virus (it was too small for his microscope), but he weakened it in rabbits and used it to treat a boy bitten by a rabid dog — Joseph Meister, 9 years old, who survived. The first human vaccine for a disease with no cure, and the origin of the Pasteur Institute.",
+    "imageUrl": "",
+    "byline": "Louis Pasteur",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of Joseph Meister and Pasteur's rabies treatment",
+      "durationMinutes": 25,
+      "instruction": "Read how Pasteur's team had only tested the vaccine on dogs, and how he agonized over treating a child — then did it, saving Meister. The boy later became the Pasteur Institute's gatekeeper and guarded Pasteur's tomb. The vaccine made Pasteur a global hero."
+    },
+    "tags": [
+      "Medicine",
+      "Vaccines",
+      "1880s",
+      "French"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-cholera",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Cholera Transmission (1854)",
+    "teaser": "John Snow removed the handle of a London water pump during a cholera outbreak and the deaths stopped — the birth of epidemiology. His dot-map of Soho showed the deaths clustered around one pump; the water company was drawing from a sewage-polluted stretch of Thames. He'd never seen the germ; he didn't need to.",
+    "imageUrl": "",
+    "byline": "John Snow",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Snow's 1855 map of the Broad Street cholera outbreak",
+      "durationMinutes": 25,
+      "instruction": "Read how Snow tracked every case and drew the cluster around the Broad Street pump, then persuaded the parish to remove the handle. Modern medicine treats his map as a founding document: pattern-finding, not microscopy, stopped an epidemic. The germ theory confirmed him 30 years later."
+    },
+    "tags": [
+      "Medicine",
+      "Epidemiology",
+      "1850s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-aspirin",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Aspirin (1897)",
+    "teaser": "Felix Hoffmann, a Bayer chemist, acetylated salicylic acid — derived from willow bark, known since ancient times — to make it gentler on the stomach. He was trying to help his rheumatic father. Aspirin became the most consumed drug in history, and its blood-thinning action was discovered 80 years later.",
+    "imageUrl": "",
+    "byline": "Felix Hoffmann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The history of aspirin from willow bark to Bayer",
+      "durationMinutes": 25,
+      "instruction": "Read how Hippocrates knew willow bark relieved pain, how salicin was isolated in the 1820s, and how Hoffmann's 1897 acetylation made it tolerable. Then the 1980s discovery that aspirin prevents heart attacks. One molecule, 2,500 years of medicine."
+    },
+    "tags": [
+      "Medicine",
+      "Pharmacology",
+      "1890s",
+      "German"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-blood-pressure",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Blood Pressure Measurement (1896)",
+    "teaser": "Scipione Riva-Rocci wrapped an inflatable cuff around the arm and listened — the modern sphygmomanometer, refined with the stethoscope by Korotkoff a few years later. Suddenly, the silent killer called hypertension had a number, and medicine could measure the heart's work without cutting anyone open.",
+    "imageUrl": "",
+    "byline": "Riva-Rocci & Korotkoff",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The history of the blood pressure cuff",
+      "durationMinutes": 25,
+      "instruction": "Read how earlier attempts to measure blood pressure required cutting an artery; Riva-Rocci's cuff made it noninvasive, and Korotkoff's sounds made it accurate. A century later, the cuff is the most common medical instrument on Earth — and the silent disease it measures still kills millions."
+    },
+    "tags": [
+      "Medicine",
+      "Cardiology",
+      "1890s",
+      "Italian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ekg",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Electrocardiogram (1903)",
+    "teaser": "Willem Einthoven recorded the heart's electrical rhythm with a string galvanometer — a thread of silvered quartz vibrating in a magnetic field — producing the first ECG, with its familiar P-QRS-T peaks. He won the 1924 Nobel, and his waveform is still printed on every cardiac monitor today.",
+    "imageUrl": "",
+    "byline": "Willem Einthoven",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Einthoven's 1903 string galvanometer paper",
+      "durationMinutes": 25,
+      "instruction": "Read how Einthoven's instrument was so sensitive the patient had to sit with hands and feet in saltwater jars, and the whole machine weighed hundreds of kilograms. He named the waves P, Q, R, S, and T — labels we still use. The heart's electrical signature, captured for the first time."
+    },
+    "tags": [
+      "Medicine",
+      "Cardiology",
+      "1900s",
+      "Dutch"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-dialysis",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Kidney Dialysis (1945)",
+    "teaser": "Willem Kolff built the first artificial kidney from sausage casing, an orange juice can, and a washing machine — literally. During WWII in the occupied Netherlands, he kept patients alive by running their blood through a rotating drum of semipermeable tubing. Modern dialysis machines are his washing machine, refined.",
+    "imageUrl": "",
+    "byline": "Willem Kolff",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kolff's first artificial kidney stories",
+      "durationMinutes": 25,
+      "instruction": "Read how Kolff scrounged materials in a German-occupied hospital and tried the machine on 16 patients before the first success. The 17th survived. He later invented the heart-lung machine and helped develop the first artificial heart. The washing machine that saved millions of lives."
+    },
+    "tags": [
+      "Medicine",
+      "Nephrology",
+      "1940s",
+      "Dutch"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-heart-transplant",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "First Heart Transplant (1967)",
+    "teaser": "Christiaan Barnard transplanted a human heart in Cape Town in December 1967 — the patient, Louis Washkansky, lived 18 days. The operation made Barnard the most famous doctor on Earth overnight and launched a wave of transplants worldwide (mostly unsuccessful until immunosuppressants improved).",
+    "imageUrl": "",
+    "byline": "Christiaan Barnard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of the first human heart transplant",
+      "durationMinutes": 25,
+      "instruction": "Read how Barnard used techniques from experimental surgery and how the team faced a moral storm — Was the donor truly dead? Was it right? Then the follow-up: the second patient, Philip Blaiberg, lived 19 months. The era of organ replacement had begun."
+    },
+    "tags": [
+      "Medicine",
+      "Surgery",
+      "1960s",
+      "South African"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ivf",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "In Vitro Fertilization (1978)",
+    "teaser": "Louise Brown, the first 'test-tube baby,' was born in 1978 after a decade of work by Patrick Steptoe and Robert Edwards. Conception outside the body was called unnatural, immoral, and impossible — then it worked. Over 10 million people alive today were conceived through IVF.",
+    "imageUrl": "",
+    "byline": "Steptoe & Edwards",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of Louise Brown and the first IVF",
+      "durationMinutes": 25,
+      "instruction": "Read how Edwards and Steptoe, an obstetrician and a physiologist, persisted through funding crises, protests, and 12 years of failure. Louise Brown's birth on July 25, 1978 made front pages worldwide. Edwards won the 2010 Nobel; Steptoe had died by then. One clinic visit, ten million lives."
+    },
+    "tags": [
+      "Medicine",
+      "Reproduction",
+      "1970s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ct",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The CAT Scan (1971)",
+    "teaser": "Godfrey Hounsfield, an electrical engineer, used X-rays from every angle and a computer to reconstruct slices of the body — the first CT scan, installed at Atkinson Morley's Hospital in 1971. It revealed the brain's soft tissue as no X-ray could, and won him a Nobel shared with physicist Allan Cormack.",
+    "imageUrl": "",
+    "byline": "Godfrey Hounsfield",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hounsfield's 1973 CT paper and the first brain scan",
+      "durationMinutes": 25,
+      "instruction": "Read how Hounsfield's machine took hours per scan — the patient's head in a water bath, nine days of computing for one image. The first clinical scan found a brain tumor that had eluded everything else. The 'slice' that opened the body to imaging."
+    },
+    "tags": [
+      "Medicine",
+      "Imaging",
+      "1970s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ultrasound",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Medical Ultrasound (1950s)",
+    "teaser": "Built from sonar technology developed for submarine hunting, medical ultrasound let doctors 'see' inside the body with sound. The first images of a baby in the womb appeared in the 1950s. The obstetrician Ian Donald is credited with making it clinical — he was inspired by a shipyard's metal flaw detector.",
+    "imageUrl": "",
+    "byline": "Ian Donald & others",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of ultrasound in medicine",
+      "durationMinutes": 25,
+      "instruction": "Read how Ian Donald, a Glasgow obstetrician, borrowed an industrial flaw detector used to test ship steel and pointed it at tumors — and unborn babies. The first fetal images stunned the world. Ultrasound gave us the first picture of a person before birth, and it's still the safest way to look inside."
+    },
+    "tags": [
+      "Medicine",
+      "Imaging",
+      "1950s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-cpr",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Cardiopulmonary Resuscitation (1960)",
+    "teaser": "The modern CPR protocol — chest compressions plus rescue breaths — was formalized in 1960 after experiments showed that rhythmic chest pressing alone could keep blood moving through a stopped heart. It's now the most practiced medical skill on Earth: hundreds of thousands of lives saved by bystanders who learned ten minutes of compressions.",
+    "imageUrl": "",
+    "byline": "Kouwenhoven, Jude & Knickerbocker",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1960 JAMA paper on closed-chest cardiac massage",
+      "durationMinutes": 25,
+      "instruction": "Read how a Johns Hopkins team discovered that pressing on the chest of an anesthetized dog kept its blood flowing — the 'Kouwenhoven technique.' The paper turned cardiac arrest from a death sentence into a treatable emergency. Modern guidelines now emphasize hands-only CPR: push hard and fast, at 'Stayin' Alive' tempo."
+    },
+    "tags": [
+      "Medicine",
+      "Emergency",
+      "1960s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-magnetic-resonance-1971",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Magnetic Resonance (1971)",
+    "teaser": "Raymond Damadian showed in 1971 that tumors and healthy tissue give different NMR signals — the seed of MRI. Paul Lauterbur and Peter Mansfield turned those signals into images. The result: a machine that photographs the body's soft tissue without radiation, now a fixture of every major hospital.",
+    "imageUrl": "",
+    "byline": "Damadian, Lauterbur & Mansfield",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lauterbur's 1973 Nature paper on NMR imaging",
+      "durationMinutes": 25,
+      "instruction": "Read how Lauterbur added magnetic field gradients to turn the NMR signal into spatial information — his famous 'zeugmatography.' Then the dispute over credit, settled when Lauterbur and Mansfield got the 2003 Nobel and Damadian didn't. The science is clear; the story is human."
+    },
+    "tags": [
+      "Medicine",
+      "Imaging",
+      "1970s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-ebola",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Ebola Virus (1976)",
+    "teaser": "In 1976, a mysterious hemorrhagic fever killed hundreds in Sudan and Zaire — and the virus was named after the Ebola River near the outbreak. Scientists in level-4 suits traced it from person to person, hunting the 'index case.' The 2014 West African epidemic (28,000 cases) made Ebola a global word.",
+    "imageUrl": "",
+    "byline": "Peter Piot & others",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The story of the first Ebola outbreaks and the 2014 epidemic",
+      "durationMinutes": 25,
+      "instruction": "Read how Peter Piot, a young Belgian microbiologist, helped identify the virus from samples flown to Antwerp, and how the response — tracing, isolation, education — stopped the first outbreaks. Then the 2014 catastrophe, when the same methods failed until the world woke up. A virus that lives in bats and kills with mercy."
+    },
+    "tags": [
+      "Medicine",
+      "Virology",
+      "1970s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-hiv",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "HIV Identified (1983)",
+    "teaser": "Luc Montagnier's team at the Pasteur Institute isolated the retrovirus behind a strange new immune disease in 1983 — later named HIV, after the American Robert Gallo claimed credit and the two nations fought a patent war. The discovery turned a mysterious epidemic into a target, and eventually led to drugs that make HIV undetectable.",
+    "imageUrl": "",
+    "byline": "Luc Montagnier & Françoise Barré-Sinoussi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1983 discovery of HIV and the Gallo dispute",
+      "durationMinutes": 25,
+      "instruction": "Read how Montagnier's lab isolated the virus from a patient with swollen lymph nodes, and how the credit battle with Gallo poisoned science diplomacy — until a 1987 agreement. Montagnier and Barré-Sinoussi shared the 2008 Nobel. The virus that defined a generation, now treatable."
+    },
+    "tags": [
+      "Medicine",
+      "Virology",
+      "1980s",
+      "French"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-hepatitis-c",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Hepatitis C (1989)",
+    "teaser": "A mysterious 'non-A, non-B' hepatitis agent was finally identified in 1989 by Michael Houghton's team — a virus that silently infected millions through blood transfusions. Its discovery led to blood screening, and two decades later to curative drugs. The 2020 Nobel went to Houghton and two others who 'found a way to fight a blood-borne virus.'",
+    "imageUrl": "",
+    "byline": "Michael Houghton & others",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1989 identification of hepatitis C",
+      "durationMinutes": 25,
+      "instruction": "Read how Houghton's team cloned the virus from infected chimpanzee blood without ever seeing it — a triumph of molecular detective work. The result: screening tests that stopped thousands of transfusion infections, and the DAAs that now cure over 95% of patients. From mystery to cure in thirty years."
+    },
+    "tags": [
+      "Medicine",
+      "Virology",
+      "1980s",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-helminth-therapy",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Gut Microbiome (2000s)",
+    "teaser": "The Human Microbiome Project revealed that we carry more microbial cells than human ones — trillions of bacteria, archaea, and fungi that digest food, train immunity, and even talk to the brain. The discovery that we are ecosystems, not individuals, is reshaping medicine from allergies to mood.",
+    "imageUrl": "",
+    "byline": "Human Microbiome Project",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Human Microbiome Project results",
+      "durationMinutes": 25,
+      "instruction": "Read how DNA sequencing replaced culture plates and revealed that most of our microbes had never been grown in a lab. The project's 2012 papers mapped 'our other genome.' Then the practical side: probiotics, fecal transplants for C. difficile, and the growing suspicion that the gut talks to the brain."
+    },
+    "tags": [
+      "Microbiology",
+      "Medicine",
+      "2000s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-gut-brain",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Gut-Brain Axis (2010s)",
+    "teaser": "The discovery that the gut's microbes send signals up the vagus nerve to the brain — and that the brain sends signals down — opened the field of the gut-brain axis. Studies link microbiome changes to depression, anxiety, and even Parkinson's. 'Trust your gut' turned out to be literal.",
+    "imageUrl": "",
+    "byline": "Multiple neuroscience labs",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The research connecting gut microbes to brain function",
+      "durationMinutes": 25,
+      "instruction": "Read about the landmark studies: germ-free mice showing altered anxiety and social behavior, and the vagus nerve as the phone line between belly and brain. Then the cautious part — correlation isn't causation, and diet advice outruns the evidence. The field is young and noisy, but the phone line is real."
+    },
+    "tags": [
+      "Neuroscience",
+      "Microbiome",
+      "2010s",
+      "Global"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "discovery-circadian",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Circadian Clock (2017 Nobel)",
+    "teaser": "Jeffrey Hall, Michael Rosbash, and Michael Young decoded the biological clock — the genes and proteins that tick inside nearly every cell, syncing our bodies to the 24-hour day. Their fruit fly work won the 2017 Nobel and explains jet lag, shift work's dangers, and why midnight snacks are a bad idea.",
+    "imageUrl": "",
+    "byline": "Hall, Rosbash & Young",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Nobel-winning work on the circadian clock genes",
+      "durationMinutes": 25,
+      "instruction": "Read how the 'period' gene's protein builds up at night and breaks down by day — a negative feedback loop that ticks like a pendulum. The same clock genes run in flies, mice, and humans. Then the applied side: your liver, heart, and brain all have clocks, and they hate being ignored."
+    },
+    "tags": [
+      "Biology",
+      "Genetics",
+      "2010s",
+      "American"
+    ],
+    "tier": 1
+  }
+]

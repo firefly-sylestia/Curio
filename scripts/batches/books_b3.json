@@ -1,0 +1,359 @@
+[
+  {
+    "id": "book-nausea",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Nausea",
+    "teaser": "Jean-Paul Sartre's 1938 novel in diary form — Roquentin in Bouville feels the world's brute existence rise in his throat. The philosophical novel that announced existentialism.",
+    "imageUrl": "",
+    "byline": "Jean-Paul Sartre",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening entries and the chestnut tree scene",
+      "durationMinutes": 60,
+      "instruction": "Read the opening diary entries, then the famous chestnut tree passage where the root exists. Notice how Sartre turns ordinary perception into crisis. Write what 'existence precedes essence' means as Roquentin experiences it."
+    },
+    "tags": [
+      "French",
+      "Existentialism",
+      "Philosophy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-heart-is-a-lonely-hunter",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Heart Is a Lonely Hunter",
+    "teaser": "Carson McCullers's 1940 debut novel of a deaf-mute man and the four townspeople — a girl, a doctor, a labor organizer, a café owner — who each pour their loneliness into him. She was 23 when she wrote it.",
+    "imageUrl": "",
+    "byline": "Carson McCullers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the cafe and the four listeners",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where each character approaches Mr. Singer with their confessions. Notice how McCullers builds a structure of parallel longings. Write why Singer, who hears nothing, becomes the confidant of a whole town."
+    },
+    "tags": [
+      "American",
+      "Southern",
+      "Loneliness"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-members-of-the-wedding",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Member of the Wedding",
+    "teaser": "Carson McCullers's 1946 novel of Frankie Addams, twelve years old and convinced she will join her brother's wedding and become a 'we.' A perfect portrait of the ache of adolescence.",
+    "imageUrl": "",
+    "byline": "Carson McCullers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Frankie, Berenice, and John Henry",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the kitchen conversations between Frankie and the cook Berenice carry the novel. Notice how McCullers renders the longing to belong. Write what Frankie's idea of becoming 'we' says about growing up."
+    },
+    "tags": [
+      "American",
+      "Coming of Age",
+      "Southern"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-herzog",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Herzog",
+    "teaser": "Saul Bellow's 1964 novel of Moses Herzog, who copes with his collapsing life by writing unsent letters to everyone — philosophers, presidents, his ex-wife. A comic masterpiece of the thinking man's breakdown.",
+    "imageUrl": "",
+    "byline": "Saul Bellow",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the letter-writing begins",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Herzog's letters tumble out. Notice how Bellow's narrator is erudite, funny, and unhinged at once. Write what the letters reveal about the difference between thinking about a life and living it."
+    },
+    "tags": [
+      "American",
+      "Nobel",
+      "Comedy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-confederacy-of-dunces",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Confederacy of Dunces",
+    "teaser": "John Kennedy Toole's 1980 Pulitzer winner, published after his suicide — Ignatius J. Reilly, medieval scholar and slob, wages war on modern New Orleans from a hot-dog cart. One of the funniest novels ever written.",
+    "imageUrl": "",
+    "byline": "John Kennedy Toole",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Ignatius at the department store",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Ignatius is fired for hiding under his desk. Notice how the novel's comedy is built from his furious, erudite narration. Write how the book makes a monstrous personality endearing and even heroic."
+    },
+    "tags": [
+      "American",
+      "Comedy",
+      "Pulitzer"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-night-circus",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Night Circus",
+    "teaser": "Erin Morgenstern's 2011 novel of a circus that appears without warning, open only at night — two young magicians bound in a lifelong duel of creation, played out in black-and-white tents.",
+    "imageUrl": "",
+    "byline": "Erin Morgenstern",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Le Cirque des Rêves arrives",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the circus's black-and-white aesthetic and its dreamlike rules are established. Notice how Morgenstern narrates in the present tense. Write how the circus's beauty and constraint mirror the magicians' competition."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Romance"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-seven-husbands-of-evelyn-hugo",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Seven Husbands of Evelyn Hugo",
+    "teaser": "Taylor Jenkins Reid's 2017 novel — an aging Hollywood icon finally tells her story to an unknown journalist, and the truth about her seven marriages and the great love she hid for decades.",
+    "imageUrl": "",
+    "byline": "Taylor Jenkins Reid",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Evelyn's offer to Monique",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Evelyn Hugo chooses a journalist no one has heard of. Notice how the frame story sets the stakes. Write how the novel uses Hollywood glamour to hide and then reveal a story about queer love."
+    },
+    "tags": [
+      "American",
+      "Contemporary",
+      "Romance"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-snow-crash",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Snow Crash",
+    "teaser": "Neal Stephenson's 1992 cyberpunk satire — Hiro Protagonist, pizza deliveryman and swordsman, hunts a linguistic virus in a hyper-capitalist near future. It coined terms and predicted the metaverse.",
+    "imageUrl": "",
+    "byline": "Neal Stephenson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the Deliverator and the metaverse",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters. Notice how Stephenson mixes computer science, Sumerian myth, and wisecracks. Write what the novel's core idea — that language itself can be a weapon — does to the boundary between mind and machine."
+    },
+    "tags": [
+      "American",
+      "Cyberpunk",
+      "Satire"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-neuromancer",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Neuromancer",
+    "teaser": "William Gibson's 1984 novel that defined cyberpunk — Case, a washed-up console cowboy, is hired for one last job in cyberspace. The book that made 'the matrix' a word and 'cyberspace' a place.",
+    "imageUrl": "",
+    "byline": "William Gibson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the sprawl and the console cowboy",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Gibson's slangy, sensory prose builds the future city. Notice how technology is described like weather and flesh. Write how the novel treats artificial intelligence and whether it earns its famous ending."
+    },
+    "tags": [
+      "American",
+      "Cyberpunk",
+      "Hugo Nebula"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-american-gods",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "American Gods",
+    "teaser": "Neil Gaiman's 2001 novel — Shadow, just out of prison, becomes the bodyguard of the mysterious Mr. Wednesday, who is gathering the old gods of America for a war against the new ones: media, money, technology.",
+    "imageUrl": "",
+    "byline": "Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Shadow leaves prison",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the real America — diners, motels, roadside attractions — becomes mythic. Notice how Gaiman grounds the fantastic in road-trip realism. Write what the novel says about what Americans worship now."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Hugo Nebula"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-anansi-boys",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Anansi Boys",
+    "teaser": "Neil Gaiman's 2005 novel — after his father's funeral, Charlie Nancy discovers he's the son of the spider god Anansi, and that his brother Spider has moved in and is ruining his life with charm.",
+    "imageUrl": "",
+    "byline": "Neil Gaiman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the funeral and the discovery",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Charlie's ordinary life is invaded by myth. Notice how the book alternates comedy and menace. Write how the spider god's legacy — storytelling, trickery, songs — becomes the brothers' inheritance."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Comedy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-guards-guards",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Guards! Guards!",
+    "teaser": "Terry Pratchett's 1989 Discworld novel that introduced Sam Vimes and the City Watch — a secret society summons a dragon to take over Ankh-Morpork, and the Night Watch has to do something about it.",
+    "imageUrl": "",
+    "byline": "Terry Pratchett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the Watch and the summons",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the Night Watch's tiny, hungover numbers are established. Notice how Pratchett builds a fantasy city that is really about policing, class, and civic decay. Write what the dragon's appearance does to the city's politics."
+    },
+    "tags": [
+      "British",
+      "Fantasy",
+      "Comedy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-name-of-the-wind",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Name of the Wind",
+    "teaser": "Patrick Rothfuss's 2007 debut — Kvothe the legendary arcanist tells his own story in three days, beginning with his family of traveling performers and the night everything was taken from him.",
+    "imageUrl": "",
+    "byline": "Patrick Rothfuss",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the inn and the first day",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where the innkeeper Kote is revealed as Kvothe in hiding. Notice how the frame structure promises tragedy before the adventure begins. Write how the story-within-a-story changes the reader's relation to the hero."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Epic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-way-of-kings",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Way of Kings",
+    "teaser": "Brandon Sanderson's 2010 doorstopper, the first of the Stormlight Archive — a shattered world of highstorms and shardblades, told through a surgeon turned slave, a princess, and a captain of the dead.",
+    "imageUrl": "",
+    "byline": "Brandon Sanderson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the storm and Kaladin's fall",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Kaladin's enslavement is established against the world's brutal physics of storms. Notice how Sanderson builds magic systems with engineering rigor. Write how the book makes hope a kind of stubborn technology."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Epic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-mistborn",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Mistborn: The Final Empire",
+    "teaser": "Brandon Sanderson's 2006 debut — Vin, a street urchin, joins a crew of thieves plotting to overthrow an immortal emperor in a world of ash, using the metal-burning magic of allomancy.",
+    "imageUrl": "",
+    "byline": "Brandon Sanderson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the skaa rebellion and Vin's discovery",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Vin's survival instincts and her magical awakening are introduced. Notice how the heist structure organizes the epic. Write how the novel makes the magic system a character in its own right."
+    },
+    "tags": [
+      "American",
+      "Fantasy",
+      "Heist"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-project-hail-mary",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Project Hail Mary",
+    "teaser": "Andy Weir's 2021 novel — Ryland Grace wakes alone on a spaceship with no memory, and must solve the problem that will save Earth, with an unexpected friend he meets along the way. Hard science with a huge heart.",
+    "imageUrl": "",
+    "byline": "Andy Weir",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — waking up with amnesia",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Grace's memory loss becomes a narrative device for discovery. Notice how the mystery unfolds through reverse engineering. Write what the novel's central friendship contributes to a genre often short on warmth."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Hugo"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-android-dream-electric-sheep",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Do Androids Dream of Electric Sheep?",
+    "teaser": "Philip K. Dick's 1968 novel that became Blade Runner — bounty hunter Rick Deckard retires androids in a radioactive San Francisco where owning a real animal is the last sign of humanity.",
+    "imageUrl": "",
+    "byline": "Philip K. Dick",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the sheep and the bounty",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Deckard's electric sheep introduces the novel's central anxiety. Notice how Dick uses the empathy box and the mood organ to satirize emotion. Write how the question 'what is human?' runs through every scene."
+    },
+    "tags": [
+      "American",
+      "Science Fiction",
+      "Androids"
+    ],
+    "tier": 1
+  }
+]

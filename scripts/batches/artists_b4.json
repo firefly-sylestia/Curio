@@ -1,0 +1,257 @@
+[
+  {
+    "id": "artist-el-p",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "El-P",
+    "teaser": "The Brooklyn producer-rapper who ran the Definitive Jux label and made paranoid, metallic rap sound like a sci-fi novel. His solo album I'll Sleep When You're Dead is a dystopian masterpiece that predicted surveillance culture years early.",
+    "imageUrl": "",
+    "byline": "I'll Sleep When You're Dead (2007)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "El-P — The Overly Dramatic Truth and Habeas Corpses from I'll Sleep When You're Dead",
+      "durationMinutes": 12,
+      "instruction": "Start with Habeas Corpses: the drums sound like a machine being built. Then The Overly Dramatic Truth. Notice the production density — every corner of the mix has something crawling. That claustrophobia is the point."
+    },
+    "tags": ["Hip-Hop", "Experimental", "2000s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-phonte",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Phonte",
+    "teaser": "The warm, wise-cracking voice of Little Brother — a North Carolina rapper who turned everyday adult life into some of the most relatable rap ever made. His solo albums and work with the Foreign Exchange showed a soul singer hiding in an MC.",
+    "imageUrl": "",
+    "byline": "The Listening (2003)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Little Brother — The Way You Do It and Phonte's solo Charity Starts at Home",
+      "durationMinutes": 12,
+      "instruction": "Start with The Way You Do It: 9th Wonder's soulful loop under Phonte's effortless flow. Then find his solo track Charity Starts at Home. Notice how he raps about bills, love, and doubt — the small stuff no one else rhymes about."
+    },
+    "tags": ["Hip-Hop", "2000s", "South"],
+    "tier": 1
+  },
+  {
+    "id": "artist-little-brother",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Little Brother",
+    "teaser": "The Durham trio — Phonte, Rapper Big Pooh, and producer 9th Wonder — who made soulful, conversational rap that defined the 2000s 'backpack' era. The Minstrel Show is their concept-album critique of Black entertainment, still painfully relevant.",
+    "imageUrl": "",
+    "byline": "The Minstrel Show (2005)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Little Brother — Lovin' It and Hiding Place from The Minstrel Show",
+      "durationMinutes": 12,
+      "instruction": "Start with Lovin' It: a love song to rap itself, complete with a skit. Then Hiding Place. The album is framed as a fake TV network — listen for the satirical interludes between tracks. 9th Wonder's beats are warm where most were cold."
+    },
+    "tags": ["Hip-Hop", "2000s", "South"],
+    "tier": 1
+  },
+  {
+    "id": "artist-kool-keith",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Kool Keith",
+    "teaser": "Rap's wildest sci-fi alter ego — the Ultramagnetic MC turned alien (Dr. Octagon), sexologist (Dr. Dooom), and cosmic traveler. His music is absurd, filthy, brilliant, and decades ahead of its time; Dr. Octagonecologyst sounds like 2095.",
+    "imageUrl": "",
+    "byline": "Dr. Octagonecologyst (1996)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Kool Keith — Blue Flowers and the Dr. Octagon album opener",
+      "durationMinutes": 12,
+      "instruction": "Start with Blue Flowers: a horn-heavy, unclassifiable track that sounds like a cartoon hospital. Then just let the album run — it's a concept record about an alien gynecologist. Keith rhymes about things that don't exist yet."
+    },
+    "tags": ["Hip-Hop", "Experimental", "1990s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-quasimoto",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Quasimoto",
+    "teaser": "Madlib's chipmunk-voiced alter ego — a cartoonish, weed-obsessed character who exists only on pitch-shifted tapes. The Unseen is a low-fi masterpiece where the voice, the skits, and the dusty loops blur into one stoned dream.",
+    "imageUrl": "",
+    "byline": "The Unseen (2000)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Quasimoto — Come on Feet and the title track from The Unseen",
+      "durationMinutes": 10,
+      "instruction": "Start with Come on Feet: the voice is Madlib sped up past human, rapping over a beat that sounds like a 45 played underwater. Then let the album drift. Listen past the novelty — the rhymes are sharp and the mood is one of a kind."
+    },
+    "tags": ["Hip-Hop", "Experimental", "2000s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-percee-p",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Percee P",
+    "teaser": "The underground legend who waited 20 years for his debut — a Pittsburgh-born rapper whose battle-style delivery is so precise it's often called the sharpest in the game. Perseverance, released in 2007 with Madlib beats, was worth the wait.",
+    "imageUrl": "",
+    "byline": "Perseverance (2007)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Percee P — the title track and Master of Ceremonies from Perseverance",
+      "durationMinutes": 12,
+      "instruction": "Start with Master of Ceremonies: his flow is metronomic — every syllable lands exactly on time, no drift. Then the title track. Notice the breath control; he barely pauses. That's 20 years of practice on one record."
+    },
+    "tags": ["Hip-Hop", "Underground", "2000s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-roc-marciano",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Roc Marciano",
+    "teaser": "The inventor of 'drumless rap' — a Long Island MC who stripped beats down to almost nothing so his dense, noir-ish bars could breathe. His album Marcberg is a landmark: minimal production, maximal storytelling.",
+    "imageUrl": "",
+    "byline": "Marcberg (2010)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Roc Marciano — the title track from Marcberg and Snow",
+      "durationMinutes": 12,
+      "instruction": "Start with the Marcberg title track: the beat is barely there — a loop, some drums, silence — and Roc fills the space with words. Then Snow. Listen for how emptiness creates tension. He proved less is more."
+    },
+    "tags": ["Hip-Hop", "Underground", "2010s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-billy-woods",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "billy woods",
+    "teaser": "The most literary rapper working today — a Brooklyn-based poet (and ex-teacher) whose verses read like short stories by a bitter, brilliant historian. With producer Armand Hammer (his group with ELUCID), he's built a catalog of dense, allusive masterpieces.",
+    "imageUrl": "",
+    "byline": "Aethiopes (2022)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "billy woods — the title track from Aethiopes and Remorseless",
+      "durationMinutes": 14,
+      "instruction": "Start with Remorseless: his delivery is flat, almost exhausted, which makes the violence land harder. Then Aethiopes, a jazz-heavy album about empire and exile. Listen with the lyrics open — every line references something real."
+    },
+    "tags": ["Hip-Hop", "Experimental", "2020s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-armand-hammer",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Armand Hammer",
+    "teaser": "The duo of billy woods and ELUCID — New York experimentalists who make rap that feels like avant-garde fiction set to broken jazz. Haram (with producer The Alchemist) is their most accessible gateway into a very deep catalog.",
+    "imageUrl": "",
+    "byline": "Haram (2021)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Armand Hammer — Sir Benni Miles and Black Sunlight from Haram",
+      "durationMinutes": 12,
+      "instruction": "Start with Sir Benni Miles: The Alchemist's beat is gorgeous and the rapping is dense, allusive, and weary. Then Black Sunlight. Don't chase every reference on the first listen — let the texture wash over you, then go back."
+    },
+    "tags": ["Hip-Hop", "Experimental", "2020s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-boldy-james",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Boldy James",
+    "teaser": "Detroit's deadpan crime reporter — a rapper whose monotone delivery and kitchen-table details make his drug-trade stories feel like depositions. With The Alchemist on The Price of Tea in China, he found the perfect cold-beat match.",
+    "imageUrl": "",
+    "byline": "The Price of Tea in China (2020)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Boldy James — Carruth and Scrape the Bowl from The Price of Tea in China",
+      "durationMinutes": 12,
+      "instruction": "Start with Scrape the Bowl: Alchemist's loop is eerie and slow, and Boldy's flow barely moves — that's the point. Then Carruth. Listen for the specificity: brand names, street corners, amounts. It's reportage, not bragging."
+    },
+    "tags": ["Hip-Hop", "Underground", "2020s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-mach-hommy",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Mach-Hommy",
+    "teaser": "Haitian-American rap's most mysterious figure — a Newark artist who once sold a limited album for $500 and performs with a scarf covering his face. His records are expensive, elusive, and full of jazz, Creole, and inside jokes.",
+    "imageUrl": "",
+    "byline": "HBO (Haitian Body Odor) (2021)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Mach-Hommy — the opening of HBO and his feature on Westside Gunn's 327",
+      "durationMinutes": 12,
+      "instruction": "Start with HBO: it opens with the sound of an answering machine, then drops into the smoothest, strangest rap you'll hear all year. Then find his 327 verse. Listen for the elegance — Mach raps like he's pouring tea."
+    },
+    "tags": ["Hip-Hop", "Underground", "2020s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-robert-glasper",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Robert Glasper",
+    "teaser": "The pianist who erased the line between jazz and hip-hop — a Houston keyboardist whose Black Radio series put Erykah Badu, Mos Def, and Common over live jazz in a way that felt like the future of both genres.",
+    "imageUrl": "",
+    "byline": "Black Radio (2012)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Robert Glasper — Afro Blue with Erykah Badu and the title track from Black Radio",
+      "durationMinutes": 14,
+      "instruction": "Start with Afro Blue: a jazz standard turned into a 9-minute hip-hop prayer with Badu. Then the Black Radio title track. Listen for the piano voicings — Glasper's chords are unmistakable, floating just off the beat."
+    },
+    "tags": ["Jazz", "Hip-Hop", "2010s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-digable-planets",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Digable Planets",
+    "teaser": "The Brooklyn jazz-rap trio who made coolness a political stance — Ishmael, Doodlebug, and Ladybug Mecca won a Grammy for Rebirth of Slick (Cool Like Dat) and turned beatnik affect into hip-hop gold. Blowout Comb is their deeper, stranger masterpiece.",
+    "imageUrl": "",
+    "byline": "Reachin' (1993)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Digable Planets — Rebirth of Slick (Cool Like Dat) and Blowout Comb's first track",
+      "durationMinutes": 12,
+      "instruction": "Start with Rebirth of Slick: three voices trading cool lines over a bassline borrowed from jazz. Then put on Blowout Comb, where the beats get weirder and the politics get sharper. Listen for the record scratches as percussion."
+    },
+    "tags": ["Hip-Hop", "Jazz Rap", "1990s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-noname",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Noname",
+    "teaser": "Chicago's most understated genius — a poet-rapper whose Room 25 album is a 33-minute meditation on gentrification, fame, and loneliness delivered in a half-whisper over jazz and soul loops. She reads books on stage and it makes sense.",
+    "imageUrl": "",
+    "byline": "Room 25 (2018)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Noname — Blaxploitation and Self from Room 25",
+      "durationMinutes": 12,
+      "instruction": "Start with Self: two minutes of self-doubt that say more than most double albums. Then Blaxploitation, where she flips the genre name into a critique. Listen to the volume — Noname barely raises her voice, ever."
+    },
+    "tags": ["Hip-Hop", "Conscious", "2010s"],
+    "tier": 1
+  },
+  {
+    "id": "artist-saul-williams",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Saul Williams",
+    "teaser": "The poet who raps — a New York performance poet whose spoken-word fury translated into some of the most intense hip-hop of the late 90s. Amethyst Rock Star, produced by Rick Rubin, is poetry slam as punk album.",
+    "imageUrl": "",
+    "byline": "Amethyst Rock Star (2001)",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Saul Williams — the title track from Amethyst Rock Star and his poem Coded Language",
+      "durationMinutes": 12,
+      "instruction": "Start with Coded Language, the poem that made his name — 2 minutes of building rage. Then the Amethyst Rock Star title track. Listen to how he uses rhythm the way a preacher uses a pulpit: to rally, not to entertain."
+    },
+    "tags": ["Hip-Hop", "Spoken Word", "2000s"],
+    "tier": 1
+  }
+]

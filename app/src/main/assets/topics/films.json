@@ -996,10 +996,7 @@
     "imageUrl": "",
     "byline": "Stanley Kubrick",
     "exploreAction": {
-      "verb": "Watch",
-      "targetName": "A Clockwork Orange (1971) — the Ludovico technique scene",
-      "durationMinutes": 171,
-      "instruction": ""
+      "verb": "Watch","targetName": "A Clockwork Orange (1971) — the Ludovico technique scene","durationMinutes":171,"instruction": "Watch the conditioning sequence twice: once for the cruelty, once for Kubrick's craft — the camera work, the classical score against the violence, and how Alex's gaze turns the audience into accomplices."
     },
     "tags": [
       "Dystopian",
@@ -3282,10 +3279,7 @@
     "imageUrl": "",
     "byline": "Lee Unkrich",
     "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Coco (2017) — the opening and the Remember Me scene",
-      "durationMinutes": 105,
-      "instruction": ""
+      "verb": "Watch","targetName": "Coco (2017) — the opening and the Remember Me scene","durationMinutes":105,"instruction": "Watch the papel picado prologue, then the final Remember Me performance. Notice how the song's meaning flips completely once you know who really wrote it — and how the marigold bridge is both a visual and an emotional threshold."
     },
     "tags": [
       "Animation",

@@ -1,0 +1,354 @@
+[
+  {
+    "id": "author-kate-chopin",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Kate Chopin",
+    "teaser": "The American writer of The Awakening — the 1899 novel of a woman who walks into the sea rather than live a lie. She was vilified for it and died forgotten; the 20th century made her a landmark.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Awakening, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of The Awakening. Notice how Edna's awakening begins in the sea, in the music, in a summer that loosens every rule. Write what the sea means to Edna — freedom, dissolution, or both — and why the ending is not defeat."
+    },
+    "tags": ["American", "Feminist", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-charlotte-perkins-gilman",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Charlotte Perkins Gilman",
+    "teaser": "The American feminist writer of The Yellow Wallpaper — a horror story of a woman prescribed rest and forbidden to write, based on her own medical abuse. It is one of the most anthologized stories in English.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Yellow Wallpaper, the full story",
+      "durationMinutes": "45",
+      "instruction": "Read The Yellow Wallpaper. Notice how the narrator's diary grows more frantic and more lucid as her 'treatment' proceeds. Write how Gilman turns the wallpaper itself into a system — and what the woman creeping behind it represents."
+    },
+    "tags": ["American", "Feminist", "Gothic"],
+    "tier": 1
+  },
+  {
+    "id": "author-theodore-dreiser",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Theodore Dreiser",
+    "teaser": "The American novelist of Sister Carrie and An American Tragedy — huge, unsparing books about desire, poverty, and the machinery of American success. He wrote with a reporter's eye and a moralist's unease.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sister Carrie, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of Sister Carrie. Notice how Carrie arrives in Chicago with a trunk and a hunger, and how the city begins to educate her. Write what Dreiser suggests about luck, desire, and the price of rising."
+    },
+    "tags": ["American", "Naturalism", "Classic"],
+    "tier": 2
+  },
+  {
+    "id": "author-jack-london",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jack London",
+    "teaser": "The American adventurer of The Call of the Wild and White Fang — a writer who sailed, starved, and mined the Klondike before he wrote about it. His dogs, wolves, and men are all tested by the wilderness.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Call of the Wild, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Call of the Wild. Notice how Buck, the civilized dog, is stripped back to his primitive core by the harsh North. Write what the 'call' is, and whether the novel celebrates or mourns the return to wildness."
+    },
+    "tags": ["American", "Adventure", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-upton-sinclair",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Upton Sinclair",
+    "teaser": "The American muckraker whose The Jungle exposed Chicago's meatpacking horrors and helped pass the Pure Food and Drug Act. He aimed at the workers' hearts and hit the public's stomachs — and changed the law.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Jungle, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Jungle. Notice how the Lithuanian wedding feast gives way to the packinghouse's grinding work. Write how Sinclair makes one immigrant family's collapse into an argument for systemic change."
+    },
+    "tags": ["American", "Muckraking", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-thornton-wilder",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Thornton Wilder",
+    "teaser": "The American playwright and novelist of Our Town and The Bridge of San Luis Rey — quiet masterpieces about ordinary life and the mystery of why we love and die. He won the Pulitzer three times.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Our Town, Act One",
+      "durationMinutes": "60",
+      "instruction": "Read the first act of Our Town. Notice how the Stage Manager breaks the fourth wall and makes a New Hampshire morning feel precious. Write what the play's famous device — showing death at the end — asks us to notice while we live."
+    },
+    "tags": ["American", "Drama", "Pulitzer"],
+    "tier": 1
+  },
+  {
+    "id": "author-arthur-miller",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Arthur Miller",
+    "teaser": "The American playwright of Death of a Salesman and The Crucible — the tragedy of the ordinary man, the witch hunt as allegory, and the American Dream put on trial. He married Marilyn Monroe and outlived the century's judgments.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Death of a Salesman, the opening scene",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Death of a Salesman. Notice how Miller floods Willy Loman's mind with music, memory, and the smell of his house. Write what 'attention must be paid' means in the play, and what Willy sells besides goods."
+    },
+    "tags": ["American", "Drama", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-eugene-oneill",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Eugene O'Neill",
+    "teaser": "The American playwright who made theatre modern — Long Day's Journey into Night and The Iceman Cometh stare into family, drink, and illusion without flinching. He is America's only Nobel dramatist of the first rank.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Long Day's Journey into Night, Act One",
+      "durationMinutes": "75",
+      "instruction": "Read the first act of Long Day's Journey into Night. Notice how a seemingly ordinary morning by the sea carries every family wound. Write how O'Neill builds tragedy from talk — and why the play is dedicated to his own family's ghosts."
+    },
+    "tags": ["American", "Nobel", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "author-dorothy-parker",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Dorothy Parker",
+    "teaser": "The American wit of the Algonquin Round Table — short stories and verses of devastating one-liners that hid real pain. 'Men seldom make passes at girls who wear glasses' is the least of her perfect cruelty.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Telephone Call, and other stories",
+      "durationMinutes": "45",
+      "instruction": "Read A Telephone Call and one other Parker story. Notice how the wit is a surface over need and fear. Write how Parker turns a woman waiting for a call into a whole psychology — and what the jokes are protecting."
+    },
+    "tags": ["American", "Wit", "Short Stories"],
+    "tier": 1
+  },
+  {
+    "id": "author-james-thurber",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "James Thurber",
+    "teaser": "The American humorist of The Secret Life of Walter Mitty and My Life and Hard Times — drawings and stories of men at war with their own households and imaginations. He went blind and kept drawing.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Secret Life of Walter Mitty, the full story",
+      "durationMinutes": "30",
+      "instruction": "Read The Secret Life of Walter Mitty. Notice how Mitty's daydreams give him the power his real life denies. Write how Thurber makes a henpecked man heroic inside his own head — and what that says about modern masculinity."
+    },
+    "tags": ["American", "Humor", "Short Stories"],
+    "tier": 1
+  },
+  {
+    "id": "author-joyce-carol-oates",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Joyce Carol Oates",
+    "teaser": "The American novelist of extraordinary range and output — them, We Were the Mulvaneys, and Blonde. She has published more than a hundred books and made violence and the American family her great subjects.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Where Are You Going, Where Have You Been?",
+      "durationMinutes": "45",
+      "instruction": "Read the story, dedicated to Bob Dylan, about a teenage girl and a stranger named Arnold Friend. Notice how the menace arrives as charm. Write how Oates builds dread from the ordinary — the screen door, the car, the familiar voice."
+    },
+    "tags": ["American", "Contemporary", "Gothic"],
+    "tier": 1
+  },
+  {
+    "id": "author-anne-tyler",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Anne Tyler",
+    "teaser": "The American novelist of ordinary lives — The Accidental Tourist and Breathing Lessons render families, marriages, and Baltimore with such sympathy that readers feel known. She won the Pulitzer twice.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Accidental Tourist, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Accidental Tourist. Notice how Macon's grief is expressed through routines and travel guides. Write how Tyler makes the small, particular details of a life carry the whole story of loss and change."
+    },
+    "tags": ["American", "Pulitzer", "Domestic"],
+    "tier": 1
+  },
+  {
+    "id": "author-amy-tan",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Amy Tan",
+    "teaser": "The Chinese-American novelist of The Joy Luck Club — four mothers, four daughters, and the mahjong table where two cultures argue and forgive. Her debut made her a literary star overnight.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Joy Luck Club, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Joy Luck Club. Notice how each mother's story reframes the daughters' American lives. Write how the novel uses the games and stories of the table to explore what is passed on — and what cannot be."
+    },
+    "tags": ["American", "Diaspora", "Family"],
+    "tier": 1
+  },
+  {
+    "id": "author-maxine-hong-kingston",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Maxine Hong Kingston",
+    "teaser": "The Chinese-American writer of The Woman Warrior — a memoir-novel of ghosts, talk-stories, and growing up between cultures. It changed American literature's sense of what a memoir could be.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Woman Warrior, the opening sections",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Woman Warrior, with its warning: 'You must not tell anyone what I am about to tell you.' Notice how Kingston braids myth and memory. Write how the talk-stories give her a voice the world tried to quiet."
+    },
+    "tags": ["American", "Memoir", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "author-sandra-cisneros",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Sandra Cisneros",
+    "teaser": "The Mexican-American writer of The House on Mango Street — a novel in vignettes about a girl who wants a house of her own. She made the barrio and its girls visible to American literature.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The House on Mango Street, opening vignettes",
+      "durationMinutes": "45",
+      "instruction": "Read the opening vignettes of The House on Mango Street. Notice how each tiny chapter is a complete world in a paragraph. Write how Esperanza's dream of a house is also a dream of writing — and how the two are connected."
+    },
+    "tags": ["American", "Latina", "Coming of Age"],
+    "tier": 1
+  },
+  {
+    "id": "author-julia-alvarez",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Julia Alvarez",
+    "teaser": "The Dominican-American writer of How the García Girls Lost Their Accents and In the Time of the Butterflies — novels of exile, sisterhood, and revolution that made the immigrant girl a literary hero.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the García Girls Lost Their Accents, opening stories",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of How the García Girls Lost Their Accents. Notice how the stories travel backward from adulthood to the Dominican childhood. Write what 'losing their accents' means beyond language — what else do the girls lose?"
+    },
+    "tags": ["American", "Dominican", "Diaspora"],
+    "tier": 1
+  },
+  {
+    "id": "author-jennifer-egan",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jennifer Egan",
+    "teaser": "The American novelist of A Visit from the Goon Squad — a Pulitzer-winning book told in linked stories, PowerPoint slides, and leaps across decades, all circling time, music, and memory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Visit from the Goon Squad, the opening chapter",
+      "durationMinutes": "60",
+      "instruction": "Read the opening chapter, where Sasha steals and Kleinfeld watches. Notice how Egan builds the chapter like a short story with its own complete arc. Write how the novel's fragmentation mirrors its subject — time doing its damage."
+    },
+    "tags": ["American", "Pulitzer", "Experimental"],
+    "tier": 1
+  },
+  {
+    "id": "author-george-saunders",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "George Saunders",
+    "teaser": "The American short-story writer of Tenth of December and the Booker-winning Lincoln in the Bardo — stories of ordinary Americans told with wild compassion and a voice like nobody else's.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tenth of December, the title story",
+      "durationMinutes": "60",
+      "instruction": "Read the title story. Notice how Saunders switches between the boy's and the man's wounded voices. Write how the story earns its redemption without sentimentality — and what the pond and the coat mean by the end."
+    },
+    "tags": ["American", "Short Stories", "Booker"],
+    "tier": 1
+  },
+  {
+    "id": "author-richard-powers",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Richard Powers",
+    "teaser": "The American novelist of The Overstory and The Echo Maker — books that make science and the natural world the heroes. He asks what it means to think in a body, and what we owe the trees and minds around us.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Overstory, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of The Overstory. Notice how Powers gives each human character a tree and a wound. Write how the novel makes the reader feel the timescale of forests — and what it asks us to do with that feeling."
+    },
+    "tags": ["American", "Pulitzer", "Nature"],
+    "tier": 1
+  },
+  {
+    "id": "author-william-saroyan",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "William Saroyan",
+    "teaser": "The Armenian-American writer of The Human Comedy and My Name Is Aram — warm, zany stories of Fresno, family, and the plain miracle of being alive. He won the Pulitzer and the Oscar with the same open heart.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "My Name Is Aram, a few stories",
+      "durationMinutes": "45",
+      "instruction": "Read a couple of stories from My Name Is Aram. Notice how Saroyan's narrator treats family eccentrics as natural wonders. Write how his style — loose, amazed, generous — makes ordinary Fresno feel mythic."
+    },
+    "tags": ["American", "Armenian", "Comedy"],
+    "tier": 2
+  },
+  {
+    "id": "author-peter-carey",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Peter Carey",
+    "teaser": "The Australian novelist of Oscar and Lucinda and True History of the Kelly Gang — two-time Booker winner who writes history as wild, ironic invention. His Australia is never far from a tall tale.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Oscar and Lucinda, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Oscar and Lucinda. Notice how Carey introduces his obsessives — the clergyman who bets and the heiress who builds. Write how the novel turns a wager about a glass church into a meditation on faith and risk."
+    },
+    "tags": ["Australian", "Booker", "Historical"],
+    "tier": 1
+  },
+  {
+    "id": "author-tim-winton",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Tim Winton",
+    "teaser": "The Australian novelist of Cloudstreet and Breath — the coast, the working class, and the sacred ordinary, written in prose of salt and light. He is Australia's most loved serious novelist.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cloudstreet, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Cloudstreet. Notice how the two families land in the big house on the hill and begin to haunt it together. Write how Winton makes a house, a river, and a shared floor a portrait of a nation."
+    },
+    "tags": ["Australian", "Contemporary", "Classic"],
+    "tier": 1
+  }
+]

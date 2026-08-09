@@ -1,0 +1,194 @@
+[
+  {
+    "id": "painter-anthony-van-dyck-2",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jacob Jordaens",
+    "teaser": "The Flemish painter of overflowing life — the third giant of Antwerp after Rubens and van Dyck, who painted feasts, fables, and Flemish families with a rustic gusto all his own. His satyrs and farmers are the most human in Baroque art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The King Drinks or the Satyr and the Peasants",
+      "durationMinutes": 20,
+      "instruction": "Look at The King Drinks: a Twelfth Night feast erupts — laughing faces, raised glasses, a baby on a lap. Jordaens painted peasants without Rubens's polish, and they're all the better for it. His world is full, noisy, and completely alive."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-frans-snyders",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Frans Snyders",
+    "teaser": "The Flemish master of the still life and the hunt — his enormous paintings of game, fruit, fish, and vegetables are the most sumptuous in Baroque art, and he painted the animals in Rubens's hunting scenes. His pantries are cathedrals of abundance.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The game still lifes — the scale",
+      "durationMinutes": 20,
+      "instruction": "Look at the scale: Snyders's canvases are as big as history paintings, and the dead deer, boars, and baskets of fruit fill them like a natural history museum gone wild. Every feather and grape is painted with total attention. Rubens trusted him to paint the animals — that's the highest praise."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-david-teniers-the-younger",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "David Teniers the Younger",
+    "teaser": "The Flemish painter of peasant pleasures — his taverns, alchemists, and village festivals are painted with a miniaturist's skill and a comedian's eye. He was court painter to the Archduke Leopold Wilhelm and also catalogued his art collection.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Alchemist or the village festivals",
+      "durationMinutes": 20,
+      "instruction": "Look at the alchemist's lab: bottles, books, and instruments crammed everywhere, the scholar lost in a mad experiment. Teniers painted the little world of Flemish daily life — smoking rooms, fairs, guardrooms — with an affectionate eye. He made the ordinary endlessly entertaining."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-adriaen-brouwer",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Adriaen Brouwer",
+    "teaser": "The Flemish painter of the ugly truth — his tavern brawls and smoking peasants are painted with a dark, honest intensity that Rubens and Rembrandt collected. He died young, probably of plague, in an Antwerp inn. His little panels are huge in their honesty.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Smokers or the tavern brawls",
+      "durationMinutes": 20,
+      "instruction": "Look at the faces: Brouwer's peasants grimace, cough, and laugh with real, unflattering truth — no idealization at all. His brushwork is fast and sure, like a sketch by a master. Rubens owned several of his paintings. The gutter, painted by a genius who lived in it."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-jan-brueghel-the-elder",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jan Brueghel the Elder",
+    "teaser": "The son of Pieter Bruegel who became the 'Velvet Brueghel' — his flower paintings, landscapes, and allegories are painted with a jewel-like fineness, and he collaborated with Rubens on the great Allegory of Sight and Hearing. He painted paradise, literally.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The flower still lifes or the Paradise landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at the flowers: Brueghel painted bouquets that could never exist — tulips, roses, and irises from different seasons in one vase, each petal precise. He worked with Rubens on The Sense of Sight, painting the flowers and the view while Rubens did the figures. Together they made paradise."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-joos-de-momper",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Joos de Momper",
+    "teaser": "The Flemish landscape painter of the fantastic — his mountain panoramas with their green-blue depth made him the most popular landscape artist of Antwerp. He painted the world from a great height, with villages and travelers tiny below.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The mountain landscapes — the depth",
+      "durationMinutes": 20,
+      "instruction": "Look at the distance: Momper layered his landscapes in bands — brown foreground, green middle, blue distance — a formula for depth that became the standard for a century. His mountains are imaginary and majestic. He painted the view from a tower in his head."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-cornelis-de-vos",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Cornelis de Vos",
+    "teaser": "The Flemish portraitist of family tenderness — while van Dyck painted aristocrats, de Vos painted Antwerp's merchants and their children with a warm, direct charm. His family groups are among the most human portraits of the century.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The family portraits — the children",
+      "durationMinutes": 20,
+      "instruction": "Look at the children: de Vos painted them with real clothes, real faces, and real personalities — no cherubs, no allegory. His portrait of a family with their dog is a snapshot of 1620s Antwerp. He was the painter of the comfortable middle — and he made it unforgettable."
+    },
+    "tags": ["Baroque", "Flemish", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-gerard-dou",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Gerrit Dou",
+    "teaser": "Rembrandt's first pupil, who became the most expensive painter in Europe — his tiny, polished scenes of women at windows, reading, or carving, are painted with a microscopic precision that collectors paid fortunes for. He invented the 'niche' picture.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Night School or the Woman at a Window",
+      "durationMinutes": 20,
+      "instruction": "Look at the details: Dou painted every thread, every candle flame, every wrinkle in the wood — he even used a magnifying glass and brushes with a single hair. His pictures of women at windows invited you in and kept you out at once. The Dutch called his art 'fine painting.' It was, literally, fine."
+    },
+    "tags": ["Baroque", "Dutch", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-frans-van-mieris",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Frans van Mieris the Elder",
+    "teaser": "The Leiden 'fine painter' of silken interiors — his tiny scenes of musicians, doctors, and ladies at their toilet are painted with an enamel-like finish that made him the highest-paid painter of his day. Rembrandt rated him.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Doctor's Visit or the musicians scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the silk: van Mieris painted satin so you can hear it rustle, and his tiny canvases are finished like jewelry. His scenes — a doctor feeling a lady's pulse, a musician tuning a lute — are full of knowing glances. He was the prince of the Leiden fine painters, and he knew it."
+    },
+    "tags": ["Baroque", "Dutch", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-gerard-ter-borch-2",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Caspar Netscher",
+    "teaser": "The Dutch-German painter of elegant domesticity — a pupil of Gerard ter Borch who painted letter-writing ladies, lace makers, and musical evenings with a refined polish. His small scenes are among the most graceful of the late Golden Age.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Letter or the lace-making scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the satin and the faces: Netscher learned from ter Borch how to paint silk and how to paint a woman lost in thought. His women write letters, play lutes, and make lace in rooms of quiet luxury. The Golden Age, winding down in perfect order."
+    },
+    "tags": ["Baroque", "Dutch", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-willem-van-aelst",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Willem van Aelst",
+    "teaser": "The Dutch still-life master of flowers and fruit — his bouquets and breakfast pieces glow with a calm perfection that made him the most refined flower painter of the Dutch Golden Age. He painted with a precision that still seems impossible.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The flower still lifes — the vase",
+      "durationMinutes": 20,
+      "instruction": "Look at the vase: van Aelst painted the reflections on a silver vase, the dew on a petal, the transparency of a grape — each detail an invitation to lean closer. His bouquets are arranged with a designer's eye, and the light is always soft and even. Dutch still life at its most perfect."
+    },
+    "tags": ["Baroque", "Dutch", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "painter-rachel-ruysch-2",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jan Davidsz de Heem",
+    "teaser": "The Dutch still-life master of abundance — his fruit, flowers, and banquet pieces are painted with a richness that made him the most influential still-life painter in Europe. His 'sumptuous' table scenes overflow with grapes, lobsters, and silver, always with a moral hiding in the detail.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The sumptuous still lifes — the detail",
+      "durationMinutes": 20,
+      "instruction": "Look at the abundance: fruit piled on silver, a lobster, a lemon peel curling like ribbon, a fly on a grape — painted so you can almost smell it. Then find the moral: the wilted leaf, the cracked nut, the skull sometimes tucked in the corner. Vanitas in a bowl of fruit. Beauty, and the warning that it ends."
+    },
+    "tags": ["Baroque", "Dutch", "17th Century"],
+    "tier": 1
+  }
+]

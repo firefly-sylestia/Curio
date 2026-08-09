@@ -1,0 +1,462 @@
+[
+  {
+    "id": "author-victor-hugo",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Victor Hugo",
+    "teaser": "France's colossus — Les Misérables and The Hunchback of Notre-Dame are epics of the outcast, the city, and the conscience. He used the novel to move hearts and governments, and spent years in exile defying an emperor.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Les Misérables, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of Les Misérables, from the bishop's kindness to Jean Valjean's theft and redemption. Notice how Hugo piles detail on detail until the ordinary becomes monumental. Write what the candlesticks mean as an emblem of grace."
+    },
+    "tags": [
+      "French",
+      "Epic",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-alexandre-dumas",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Alexandre Dumas",
+    "teaser": "The French master of the adventure novel — The Count of Monte Cristo and The Three Musketeers taught the world about revenge, friendship, and 'all for one.' His books are still read around the planet.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Count of Monte Cristo, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Count of Monte Cristo, where Edmond Dantès is betrayed on the day of his wedding. Notice how quickly Dumas turns hope into nightmare. Write how the novel sets up its engine of patience and revenge."
+    },
+    "tags": [
+      "French",
+      "Adventure",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-honore-de-balzac",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Honoré de Balzac",
+    "teaser": "The tireless French novelist who mapped an entire society in The Human Comedy — hundreds of novels and stories where money, ambition, and desire are the real main characters. Père Goriot is the best door in.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Père Goriot, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of Père Goriot, with its famous description of the boarding house. Notice how Balzac reads a room like a detective. Write how the physical world of the pension prefigures the novel's moral arithmetic."
+    },
+    "tags": [
+      "French",
+      "Realism",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-emile-zola",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Émile Zola",
+    "teaser": "The French naturalist who turned the novel into a laboratory — Germinal descends into the mines, Nana into the stage, and J'accuse became the most famous open letter in history, defending Dreyfus.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Germinal, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of Germinal, where Étienne walks the empty night toward the mine. Notice how Zola makes a landscape of industry feel like a living thing. Write how the novel gives the working class a body and a voice."
+    },
+    "tags": [
+      "French",
+      "Naturalism",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-guy-de-maupassant",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Guy de Maupassant",
+    "teaser": "The French master of the short story — The Necklace, Boule de Suif, and hundreds more with the twist, the sting, and the cold eye on vanity and class. Flaubert's finest student.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Necklace, the full story",
+      "durationMinutes": "30",
+      "instruction": "Read The Necklace. Notice how Maupassant plants the entire tragedy in one vanity and one borrowed diamond. Write how the final reveal rewrites everything you thought about the story — and about Mathilde's fate."
+    },
+    "tags": [
+      "French",
+      "Short Stories",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-andre-gide",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "André Gide",
+    "teaser": "The French moralist and novelist — The Immoralist and The Counterfeiters questioned duty, desire, and the very form of the novel. A Nobel laureate who spent his life testing the rules.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Immoralist, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Immoralist. Notice how Michel's illness in North Africa awakens a new appetite for life. Write how Gide turns a convalescence into a moral experiment — what does it mean to become 'immoral' in his sense?"
+    },
+    "tags": [
+      "French",
+      "Nobel",
+      "Modernism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-antoine-de-saint-exupery",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Antoine de Saint-Exupéry",
+    "teaser": "The French aviator and writer of The Little Prince — a pilot's fable about grown-ups, roses, and what is essential. Also wrote the luminous aviation memoirs Wind, Sand and Stars. Disappeared over the sea in 1944.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Little Prince, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Little Prince, from the boa constrictor drawing to the pilot's meeting in the desert. Notice how the narrator's 'child's drawing' frames the book's whole argument. Write what the book says adults forget, and why."
+    },
+    "tags": [
+      "French",
+      "Fable",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-jules-verne",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jules Verne",
+    "teaser": "The French father of science fiction — Twenty Thousand Leagues Under the Seas, Around the World in Eighty Days, and Journey to the Centre of the Earth. He turned the voyage into a genre and predicted the future.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Around the World in Eighty Days, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Around the World in Eighty Days. Notice how Phileas Fogg's clockwork life is established before the wager shatters it. Write how Verne builds suspense from timetables, and why precision is the story's real hero."
+    },
+    "tags": [
+      "French",
+      "Science Fiction",
+      "Adventure"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-moliere",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Molière",
+    "teaser": "The French playwright who founded modern comedy — Tartuffe, The Misanthrope, and The Imaginary Invalid skewered hypocrisy, pretension, and self-love. He died onstage, playing his own last play.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tartuffe, Act One",
+      "durationMinutes": "60",
+      "instruction": "Read the first act of Tartuffe. Notice how the hypocrite never appears yet dominates every conversation. Write how Molière builds comedy from a family arguing about one man's piety — and what the play says about false faith."
+    },
+    "tags": [
+      "French",
+      "Drama",
+      "Comedy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-voltaire",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Voltaire",
+    "teaser": "The French philosopher of wit and outrage — Candide is the sharpest takedown of optimism ever written, and his battles for tolerance and reason shaped the Enlightenment. He made laughter a weapon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Candide, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Candide. Notice how Pangloss's 'best of all possible worlds' collides with catastrophe after catastrophe. Write how Voltaire uses absurdity to argue against blind optimism, and what he offers instead."
+    },
+    "tags": [
+      "French",
+      "Satire",
+      "Philosophy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-stendhal",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Stendhal",
+    "teaser": "The French novelist of ambition and feeling — The Red and the Black and The Charterhouse of Parma follow brilliant young men who want everything. He wrote for the happy few and outlived his time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Red and the Black, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Red and the Black, where Julien Sorel arrives at the mayor's house with a Latin Bible and a plan. Notice how Stendhal narrates his hero's calculations with cool irony. Write what 'the red and the black' symbolize."
+    },
+    "tags": [
+      "French",
+      "Classic",
+      "Ambition"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-colette",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Colette",
+    "teaser": "The French writer of sensuous, exact prose — Claudine, Chéri, and The Vagabond trace desire, age, and independence. She was scandalous, beloved, and one of France's greatest stylists.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chéri, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Chéri. Notice how Colette renders the aging courtesan Léa and her young lover with both irony and tenderness. Write how the novel watches beauty, time, and love negotiate — and what each side pays."
+    },
+    "tags": [
+      "French",
+      "Classic",
+      "Desire"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-marguerite-duras",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Marguerite Duras",
+    "teaser": "The French novelist and filmmaker of The Lover — a memoir-novel of a girl's affair in colonial Saigon, told in fragments that won the Prix Goncourt and made her an icon of spare, intense prose.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Lover, opening pages",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Lover. Notice how Duras's sentences hesitate, repeat, and circle the memory of the ferry crossing. Write how fragmentation becomes the right form for a memory that is at once painful and cherished."
+    },
+    "tags": [
+      "French",
+      "Modernism",
+      "Memory"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-marguerite-yourcenar",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Marguerite Yourcenar",
+    "teaser": "The first woman elected to the Académie française — Memoirs of Hadrian imagines a dying emperor reviewing his life in prose of classical poise. Her work bridges history, philosophy, and intimate voice.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Memoirs of Hadrian, the opening pages",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Memoirs of Hadrian, where the emperor writes his letter to the young Marcus Aurelius. Notice how Yourcenar's prose carries the gravity of the ancient world. Write what it means to write history from inside a mind."
+    },
+    "tags": [
+      "French",
+      "Historical",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-george-sand",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "George Sand",
+    "teaser": "The French novelist who wore men's clothes and wrote women's truths — Indiana, Consuelo, and her country novels made her one of Europe's most famous writers. She shocked, charmed, and worked without rest.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Indiana, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Indiana. Notice how Sand places her heroine in a loveless marriage and watches her hunger for freedom. Write how the novel's feminism works through plot rather than lecture, and why Sand was so controversial."
+    },
+    "tags": [
+      "French",
+      "Romantic",
+      "Feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-michel-houellebecq",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Michel Houellebecq",
+    "teaser": "The French novelist who makes readers furious and fascinated — Atomised, Platform, and Submission diagnose loneliness, sex, religion, and Europe's exhaustion with clinical, deadpan provocation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Atomised, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Atomised. Notice how Houellebecq narrates the half-brothers' separate declines with scientific detachment. Write how the novel's cold tone is itself the argument — what does it reveal about modern solitude?"
+    },
+    "tags": [
+      "French",
+      "Contemporary",
+      "Provocative"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-marie-ndiaye",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Marie NDiaye",
+    "teaser": "The French novelist and playwright — Three Strong Women and Ladivine fold the fantastic into family life, race, and class with unsettling calm. She won the Prix Goncourt and refuses easy realism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Three Strong Women, the opening section",
+      "durationMinutes": "60",
+      "instruction": "Read the first section of Three Strong Women. Notice how NDiaye's sentences stay serene while the situation grows stranger. Write how her style makes the reader feel the characters' trapped normality — and what 'strength' means here."
+    },
+    "tags": [
+      "French",
+      "Contemporary",
+      "Goncourt"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-leila-slimani",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Leïla Slimani",
+    "teaser": "The Franco-Moroccan novelist of The Perfect Nanny — a thriller about a nanny, a family, and a horror that begins on the first page. Her fiction exposes class, care, and motherhood with ice-cold precision.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Perfect Nanny, the opening pages",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of The Perfect Nanny. Notice how Slimani gives away the tragedy immediately and builds dread from ordinary routines. Write how the novel turns childcare — the most intimate labor — into a portrait of class and resentment."
+    },
+    "tags": [
+      "French",
+      "Thriller",
+      "Contemporary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-amin-maalouf",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Amin Maalouf",
+    "teaser": "The Lebanese-French novelist and essayist — Samarkand, Leo Africanus, and The Crusades Through Arab Eyes build bridges between East and West, memory and history, with a storyteller's ease.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Leo Africanus, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Leo Africanus. Notice how Maalouf gives the famous traveler a voice and a world — Granada, Fez, Cairo, Rome. Write how the novel turns a historical life into a meditation on identity and exile."
+    },
+    "tags": [
+      "French",
+      "Historical",
+      "Cross-cultural"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-edouard-louis",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Édouard Louis",
+    "teaser": "The French writer who turned his own escape from poverty and violence into literature — The End of Eddy is a searing autobiographical novel about growing up gay in working-class Picardy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The End of Eddy, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The End of Eddy. Notice how Louis narrates the cruelties of his childhood in flat, precise sentences. Write how the book balances documentary anger and literary control — and why he says 'the end of Eddy.'"
+    },
+    "tags": [
+      "French",
+      "Autobiography",
+      "Contemporary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-denis-diderot",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Denis Diderot",
+    "teaser": "The French encyclopedist who edited the Enlightenment's great Encyclopedia — and wrote Jacques the Fatalist, a novel that breaks the fourth wall centuries early with digressions and dialogues.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jacques the Fatalist, opening pages",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Jacques the Fatalist. Notice how the narrator argues with the reader from the very first lines. Write how Diderot's playful, philosophical digressions make the novel a conversation about fate and free will."
+    },
+    "tags": [
+      "French",
+      "Enlightenment",
+      "Metafiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-francois-rablais",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "François Rabelais",
+    "teaser": "The Renaissance giant of the grotesque — Gargantua and Pantagruel is a torrent of giants, jokes, bodily functions, and learning. His laughter was a philosophy: 'Laughter is proper to man.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gargantua, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Gargantua, including the famous birth scene. Notice how Rabelais piles erudition onto slapstick. Write how the novel's excess is actually an argument — for the body, for joy, against dogma."
+    },
+    "tags": [
+      "French",
+      "Renaissance",
+      "Comedy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-romain-gary",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Romain Gary",
+    "teaser": "The French diplomat and novelist who won the Prix Goncourt twice — the second time under the pseudonym Émile Ajar for The Life Before Us. A master of humor, exile, and the tenderness of the street.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Life Before Us, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Life Before Us. Notice how the child narrator Momo's broken French carries the story's whole world — an aging ex-prostitute, a Paris basement, a fierce love. Write what the narration style achieves that standard prose cannot."
+    },
+    "tags": [
+      "French",
+      "Goncourt",
+      "Contemporary"
+    ],
+    "tier": 1
+  }
+]

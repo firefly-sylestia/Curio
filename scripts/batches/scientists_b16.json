@@ -1,0 +1,156 @@
+[
+  {
+    "id": "scientist-niels-henrik-abel",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Niels Henrik Abel",
+    "teaser": "The Norwegian mathematician who proved, at 22, that the quintic equation cannot be solved by radicals — ending a 300-year hunt. He died of tuberculosis at 26, two days before a letter offering him a professorship arrived.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Prove",
+      "targetName": "Abel's impossibility theorem",
+      "instruction": "Learn why fifth-degree polynomial equations have no general radical solution, as Abel proved. Write what the quadratic formula does for degree 2 and why degree 5 broke the pattern.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-georg-cantor",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Georg Cantor",
+    "teaser": "The German mathematician who showed that some infinities are bigger than others — the integers, the reals, and beyond. His diagonal argument survives in logic, computing, and the very idea of counting the infinite.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Count",
+      "targetName": "Cantor's infinities",
+      "instruction": "Learn Cantor's diagonal argument that the real numbers outnumber the integers. Write what countable and uncountable infinity mean and how his ideas were rejected before being embraced.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-david-hilbert",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "David Hilbert",
+    "teaser": "The German mathematician who set 23 problems in 1900 that steered a century of research, and declared 'we must know, we will know.' His program to prove all mathematics consistent was undone by Gödel — and the fallout birthed computer science.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Enumerate",
+      "targetName": "Hilbert's 23 problems",
+      "instruction": "List Hilbert's 23 problems and pick one that has been solved, like Fermat's Last Theorem (problem 10 or 9). Write who solved it and what it took.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-henri-poincare",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Henri Poincaré",
+    "teaser": "The French mathematician-physicist who nearly discovered relativity before Einstein, founded algebraic topology, and showed the three-body problem is chaotic. He called mathematics 'the art of giving the same name to different things.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Puzzle",
+      "targetName": "Poincaré's chaos",
+      "instruction": "Learn how Poincaré found chaos in the three-body problem and how his conjecture about spheres was finally proven in 2003. Write what chaos means in his work and how it appears in weather prediction.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-maryam-mirzakhani",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Maryam Mirzakhani",
+    "teaser": "The Iranian mathematician who became the first woman to win the Fields Medal, the 'Nobel of mathematics,' for her work on curved surfaces and their geometric structure. She said math is like finding your way in a dark forest.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fold",
+      "targetName": "Mirzakhani's hyperbolic surfaces",
+      "instruction": "Learn what hyperbolic geometry is and how Mirzakhani counted the ways to slice a surface. Write why her work on 'the moduli space of Riemann surfaces' earned the Fields Medal in 2014.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-blaise-pascal",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Blaise Pascal",
+    "teaser": "The French polymath who built the first mechanical calculator, invented the syringe and hydraulic press, and co-founded probability theory with Fermat. He then abandoned science to defend the faith, leaving notes on a gamble about God.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Calculate",
+      "targetName": "Pascal's calculator and triangle",
+      "instruction": "Learn how Pascal's triangle organizes combinations and probability, and how his Pascaline calculator worked. Write how Pascal and Fermat resolved a dice problem and founded probability theory.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-caroline-herschel",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Caroline Herschel",
+    "teaser": "The sister of William Herschel who became the first woman to discover a comet, found eight in all, and helped catalogue 2,500 nebulae. The king of England paid her a salary — making her the first professional woman astronomer.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Discover",
+      "targetName": "Caroline Herschel's comets",
+      "instruction": "Learn how Caroline Herschel discovered eight comets and was awarded the Gold Medal of the Royal Astronomical Society. Write how she helped her brother build his great telescope and why her work mattered.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-ibn-al-haytham",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ibn al-Haytham",
+    "teaser": "The Arab polymath who invented the camera obscura and proved light travels in straight lines and enters the eye — not the reverse as the ancients believed. His Book of Optics and insistence on experiments make him the first true scientist.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "See",
+      "targetName": "Al-Haytham's optics",
+      "instruction": "Learn how Ibn al-Haytham's experiments with pinholes and dark rooms proved how vision works. Write how his method of hypothesis, experiment, and proof resembles modern science.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-aryabhata",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Aryabhata",
+    "teaser": "The Indian astronomer-mathematician who, around 500 CE, explained eclipses, estimated the Earth's circumference, and used the concept of zero and place value in a table of sines. India's first satellite bears his name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Compute",
+      "targetName": "Aryabhata's astronomy",
+      "instruction": "Learn how Aryabhata calculated the Earth's circumference and the length of the year, and explained lunar and solar eclipses. Write how his place-value system and sine table advanced mathematics.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-zhang-heng",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Zhang Heng",
+    "teaser": "The Han dynasty polymath who built the first seismoscope — a bronze jar that dropped a ball in the direction of an earthquake — and improved the armillary sphere for tracking the heavens. He mapped the sky's stars and wrote on cosmology.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Shake",
+      "targetName": "Zhang Heng's seismoscope",
+      "instruction": "Learn how Zhang Heng's 132 CE seismoscope detected distant earthquakes by dropping a ball from a dragon's mouth. Write how it worked and why it was the first instrument of its kind.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-shen-kuo",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Shen Kuo",
+    "teaser": "The Song dynasty chancellor whose Dream Pool Essays recorded the magnetic compass, movable type, and the discovery that the Earth's magnetic pole drifts. He even reasoned about fossils and landforms — an early geologist.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Note",
+      "targetName": "Shen Kuo's Dream Pool Essays",
+      "instruction": "Learn what Shen Kuo recorded in his Dream Pool Essays, from the compass to erosion and fossil seashells. Write three of his observations and how they anticipated later European discoveries.",
+      "durationMinutes": 20
+    }
+  }
+]

@@ -10997,5 +10997,89 @@
       "2020s"
     ],
     "tier": 1
+  },
+  {
+    "id": "album-radiohead-kid-a",
+    "categoryId": "ALBUMS",
+    "subtype": "Album",
+    "name": "Kid A",
+    "teaser": "Radiohead's 2000 reinvention — they abandoned guitars for synthesisers, sequencers, and a glassy panic, and the world's most anticipated album became a pulse of pure unease that somehow topped the charts.",
+    "imageUrl": "",
+    "byline": "Radiohead",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Kid A (2000) — 'Everything in Its Right Place' and 'How to Disappear Completely'",
+      "durationMinutes": 14,
+      "instruction": "Listen to how the album opens mid-thought — Thom Yorke's voice cut into fragments over a pulsing organ. Then 'How to Disappear Completely', the song he wrote from advice Michael Stipe gave him for coping on stage. Notice how the strings smear the melody rather than support it."
+    },
+    "tags": [
+      "Alternative",
+      "Electronic",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "album-jeff-buckley-grace",
+    "categoryId": "ALBUMS",
+    "subtype": "Album",
+    "name": "Grace",
+    "teaser": "Jeff Buckley's only completed album — a 1994 record that vaults between his father's folk legacy, Led Zeppelin power, and a falsetto that bends gender, ending with a 7-minute cover of Leonard Cohen's 'Hallelujah' that became the definitive version.",
+    "imageUrl": "",
+    "byline": "Jeff Buckley",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Grace (1994) — 'Lilac Wine' then 'Hallelujah'",
+      "durationMinutes": 14,
+      "instruction": "Listen to the arc across the album: the garage-punk 'Eternal Life', the Spanish-sung 'Lilac Wine', the build of 'Hallelujah' from whispered to full-voice. Buckley drowned in 1997 at 30, and Grace became the great what-if of rock."
+    },
+    "tags": [
+      "Rock",
+      "Folk",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "album-pink-floyd-wish-you-were-here",
+    "categoryId": "ALBUMS",
+    "subtype": "Album",
+    "name": "Wish You Were Here",
+    "teaser": "Pink Floyd's 1975 album about absence — a five-song suite that mourns their lost leader Syd Barrett, from the nine-minute 'Shine On You Crazy Diamond' to the title track that has made every stadium sing along for fifty years.",
+    "imageUrl": "",
+    "byline": "Pink Floyd",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Wish You Were Here (1975) — 'Shine On You Crazy Diamond' parts 1-5",
+      "durationMinutes": 13,
+      "instruction": "Listen to the four-note opening theme as it returns in different forms across the song — it's Syd Barrett's goodbye. The band recorded it while Barrett, bald and changed, wandered into the studio unrecognized. The album is built around that ghost."
+    },
+    "tags": [
+      "Rock",
+      "Progressive",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "album-smashing-pumpkins-siamese-dream",
+    "categoryId": "ALBUMS",
+    "subtype": "Album",
+    "name": "Siamese Dream",
+    "teaser": "The Smashing Pumpkins' 1993 album of layered, shoegaze-dense guitars — Billy Corgan reportedly played most of the guitar parts himself, tracking layer after layer until the songs sounded like a dream you couldn't wake from.",
+    "imageUrl": "",
+    "byline": "The Smashing Pumpkins",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Siamese Dream (1993) — 'Cherub Rock' and 'Mayonaise'",
+      "durationMinutes": 13,
+      "instruction": "Listen to the guitar layers — 'Cherub Rock' opens with a solo buried under its own feedback, and 'Mayonaise' floats on a guitar that sounds like it's melting. The album was recorded in a studio with a broken drum kit and a band falling apart; the lushness is armor."
+    },
+    "tags": [
+      "Alternative",
+      "Shoegaze",
+      "1990s"
+    ],
+    "tier": 2
   }
 ]

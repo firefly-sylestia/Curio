@@ -1,0 +1,1162 @@
+[
+  {
+    "id": "artist-taj-mahal",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Taj Mahal",
+    "teaser": "California bluesman who, in the late 1960s, dragged the blues back to its African and Caribbean roots — steel guitar, fife and drum, and a growl that sounds like a hundred years of highways.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Taj Mahal — 'Statesboro Blues' (1968) live version",
+      "durationMinutes": 8,
+      "instruction": "Listen to how he slides between singing and playing — the guitar answers his voice like a second singer. Then find his fife-and-drum version of the same tradition, played with one-note cane flutes, to hear where the blues came from."
+    },
+    "tags": [
+      "Blues",
+      "American",
+      "1960s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-jimmie-rodgers",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Jimmie Rodgers",
+    "teaser": "The Singing Brakeman — a Mississippi railroad worker who in 1927 invented the 'blue yodel' and became country music's first superstar. He recorded 110 songs in six years, then died of tuberculosis at 35.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Jimmie Rodgers — 'Blue Yodel No. 1 (T for Texas)' (1927)",
+      "durationMinutes": 4,
+      "instruction": "Listen for the yodel itself — that flip from chest voice into falsetto on 'T for Texas.' It was a blues structure with a cowboy's cry, and nothing like it existed on record before. Every country singer for fifty years learned the yodel from this one man."
+    },
+    "tags": [
+      "Country",
+      "1920s",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-carter-family",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "The Carter Family",
+    "teaser": "The First Family of Country Music — A.P., Sara, and Maybelle Carter recorded mountain ballads in a Bristol storefront in 1927, inventing the Carter scratch guitar style that country music still runs on.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "The Carter Family — 'Wildwood Flower' (1928)",
+      "durationMinutes": 4,
+      "instruction": "Listen to Maybelle's guitar: she plays the melody on the bass strings with her thumb while the higher strings answer — the 'Carter scratch' that became the default sound of country picking. Then listen to 'Keep On the Sunny Side' and hear the harmony that made families sing together."
+    },
+    "tags": [
+      "Country",
+      "1920s",
+      "Folk"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-doc-watson",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Doc Watson",
+    "teaser": "Blind North Carolina guitarist who turned flatpicking into a sport — he took old fiddle tunes and bluegrass runs and played them on acoustic guitar at impossible speed, influencing every picker who came after.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Doc Watson — 'Black Mountain Rag' (1964)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the flatpick — one pick, crossing strings faster than most people can hear. Watson was playing fiddle tunes on guitar, which was considered technically near-impossible. Then listen to his 'Deep River Blues,' a fingerpicking tune, and hear the other side of his genius."
+    },
+    "tags": [
+      "Folk",
+      "Bluegrass",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-earl-scruggs",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Earl Scruggs",
+    "teaser": "The man who reinvented the banjo — his three-finger 'Scruggs style' turned a comedy instrument into a lead voice, and his roll with Bill Monroe's band in 1945 created bluegrass.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Earl Scruggs — 'Foggy Mountain Breakdown' (1949)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the three-finger roll — thumb, index, middle — that sounds like a machine that is also a bird. The tune became famous again as the chase music in Bonnie and Clyde. Then listen to his version of 'Dueling Banjos' and hear the roll do all the talking."
+    },
+    "tags": [
+      "Bluegrass",
+      "Banjo",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-bill-monroe",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Bill Monroe",
+    "teaser": "The Father of Bluegrass — a Kentucky mandolinist who mixed blues, gospel, and old-time string band music into something faster, higher, and more lonesome than anything before it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Bill Monroe — 'Blue Moon of Kentucky' (1946)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the mandolin chugging like a train and the high, aching tenor vocal. Monroe played the mandolin with a blues player's attack — nobody had heard it that way. This waltz became the official bluegrass anthem and the B-side Elvis covered on his first single."
+    },
+    "tags": [
+      "Bluegrass",
+      "Mandolin",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-ralph-stanley",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Ralph Stanley",
+    "teaser": "The gravel-voiced dean of bluegrass — his high-lonesome singing and clawhammer banjo defined the Clinch Mountain sound, and his 'O Death' gave O Brother Where Art Thou its shiver.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Ralph Stanley — 'O Death' (2000, from O Brother Where Art Thou)",
+      "durationMinutes": 4,
+      "instruction": "Listen to that voice — no melody, almost a chant, older than country music itself. Stanley learned it from the shape-note singing tradition of his Appalachian church. It is the sound of someone singing a conversation with Death directly."
+    },
+    "tags": [
+      "Bluegrass",
+      "Appalachian",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-george-jones",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "George Jones",
+    "teaser": "The Possum — the greatest pure country singer of them all, with a voice that could break your heart in one held note. His 'He Stopped Loving Her Today' was voted the greatest country song ever recorded.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "George Jones — 'He Stopped Loving Her Today' (1980)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the way he lets the story breathe — almost spoken in places, then the voice cracks at the turn. Jones didn't want to record it; he thought it was too sad. It became the song that made people weep in bars for forty years."
+    },
+    "tags": [
+      "Country",
+      "American",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-waylon-jennings",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Waylon Jennings",
+    "teaser": "The outlaw — a Texas renegade who fought Nashville's polish, grew his hair, wore black leather, and with Willie Nelson declared country music's outlaw era.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Waylon Jennings — 'Are You Sure Hank Done It This Way?' (1975)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the roughness — the electric guitars, the roadhouse drums, a voice that sounds like cigarettes and decisions. Jennings was arguing with the Nashville machine in song. Then listen to 'Luckenbach, Texas' and hear the outlaw movement's mission statement."
+    },
+    "tags": [
+      "Country",
+      "Outlaw",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-kris-kristofferson",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Kris Kristofferson",
+    "teaser": "A Rhodes scholar, army captain, and janitor at Columbia Studios who swept floors while writing the songs — 'Me and Bobby McGee,' 'Sunday Mornin' Comin' Down' — that reinvented country songwriting.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Kris Kristofferson — 'Sunday Mornin' Comin' Down' (1970)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the specifics — the taste of the beer, the sound of the highway, the Sunday morning of the title. Kristofferson wrote like a poet with a hangover. He famously landed a helicopter on Johnny Cash's lawn to get him to listen to the song."
+    },
+    "tags": [
+      "Country",
+      "Songwriter",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-tammy-wynette",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Tammy Wynette",
+    "teaser": "The First Lady of Country — her 'Stand By Your Man' became the most covered country song ever written, a feminist lightning rod and a ballad of loyalty wrapped in a steel-guitar ache.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Tammy Wynette — 'Stand By Your Man' (1968)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the quiver in her voice on 'give him two arms to cling to' — recorded in one take after a long session. Wynette went from being a hairdresser mother of three to the voice of a generation's complicated idea of love."
+    },
+    "tags": [
+      "Country",
+      "American",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-hank-williams-jr",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Hank Williams Jr.",
+    "teaser": "Bocephus — the son of Hank Williams who survived a near-fatal mountain fall and a father's impossible shadow to build his own rowdy, southern-rock country empire.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Hank Williams Jr. — 'Family Tradition' (1979)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the swagger — he spends the whole song talking about the drinking, the fighting, and the last name he carries. After the 1975 fall that crushed his face, he rebuilt his sound around guitars and attitude. The song is a confession and a declaration."
+    },
+    "tags": [
+      "Country",
+      "Southern Rock",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-alan-jackson",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Alan Jackson",
+    "teaser": "The last great traditionalist of mainstream country — a Georgia boy who kept singing about pickup trucks, faith, and real feelings while Nashville went pop around him.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Alan Jackson — 'Chattahoochee' (1993)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the fiddle and the steel guitar — the traditional country instruments Nashville was abandoning. The song about growing up on the river became his signature. Then listen to 'Where Were You (When the World Stopped Turning)' and hear him process 9/11 in real time."
+    },
+    "tags": [
+      "Country",
+      "American",
+      "1990s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-reba-mcentire",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Reba McEntire",
+    "teaser": "The Queen of Country — an Oklahoma rodeo kid who turned her voice, her red hair, and a devastating dramatic instinct into the most successful female country career ever.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Reba McEntire — 'Fancy' (1990)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the story — a mother dresses her daughter for a life of survival, and the daughter becomes the woman the mother made. McEntire turns a four-minute song into a one-act play. Her version made 'Fancy' the anthem it is today."
+    },
+    "tags": [
+      "Country",
+      "American",
+      "1990s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-dixie-chicks",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "The Chicks (Dixie Chicks)",
+    "teaser": "The trio that started as a bluegrass act, blew up with 'Wide Open Spaces,' then told a British audience in 2003 they were ashamed the president was from Texas — and watched country radio drop them overnight.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "The Chicks — 'Not Ready to Make Nice' (2006)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the anger — precise, polished, and furious, three-part harmony singing about death threats and blacklists. It won five Grammys. Then listen to 'Wide Open Spaces' from 1998 and hear the same voices before the storm."
+    },
+    "tags": [
+      "Country",
+      "American",
+      "2000s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-emmylou-harris",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Emmylou Harris",
+    "teaser": "The angel of country-rock — a Maryland folkie whose harmony vocals became the gold standard, whether duetting with Gram Parsons, Dolly Parton, or a whole generation of outlaws.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Emmylou Harris — 'Boulder to Birmingham' (1975)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the ache — the song is about Gram Parsons' death, written as a promise to find him on the other side. Her voice floats above the country-rock band like it's already halfway there. Then hear her harmonies on any classic Linda Ronstadt or Dolly Parton record."
+    },
+    "tags": [
+      "Country",
+      "Folk",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-gillian-welch",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Gillian Welch",
+    "teaser": "A Californian who sings like the oldest voice in Appalachia — she and partner David Rawlings built a stripped, timeless sound that sounds like field recordings from a century ago.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Gillian Welch — 'Orphan Girl' (1996)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the spareness — two voices, one guitar, no drums. Welch wrote a song that sounds ancient but is brand new. She and Rawlings recorded it on a single microphone in their Nashville basement; the directness is the whole point."
+    },
+    "tags": [
+      "Folk",
+      "Americana",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-sturgill-simpson",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Sturgill Simpson",
+    "teaser": "A Kentucky ex-Navy man who made outlaw country, then psychedelic soul, then bluegrass versions of his own songs — refusing every genre's expectations and winning a Grammy for it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Sturgill Simpson — 'Turtles All the Way Down' (2014)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the cosmic country — he sings about reincarnation and hallucinogens over pedal steel, a genre Nashville didn't have a category for. The song made him a cult hero. Then hear him cover Nirvana's 'In Bloom' bluegrass-style and hear how elastic country can be."
+    },
+    "tags": [
+      "Country",
+      "Outlaw",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-colter-wall",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Colter Wall",
+    "teaser": "A Saskatchewan rancher in his twenties who sings like a Depression-era cowboy — his baritone and his ballads about horses and harvests sound like they were recorded in 1934, not 2017.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Colter Wall — 'Kate McCannon' (2017)",
+      "durationMinutes": 5,
+      "instruction": "Listen to that voice — a full two octaves lower than most men, singing a murder ballad with total calm. Wall writes songs about the places he actually works cattle. It's traditional country played like folk, with no drums and no apology."
+    },
+    "tags": [
+      "Country",
+      "Folk",
+      "Canadian"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-charley-patton",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Charley Patton",
+    "teaser": "The Father of the Delta Blues — a Mississippi sharecropper's son with a gravel roar who recorded in the 1920s and taught half the bluesmen who came after, including Howlin' Wolf.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Charley Patton — 'Pony Blues' (1929)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the rhythm guitar — a driving, percussive beat played with the whole hand. Patton's voice slides between a shout and a growl. He was a small man with a huge sound, and every Delta guitarist from Muddy Waters to John Lee Hooker studied his records."
+    },
+    "tags": [
+      "Blues",
+      "Delta",
+      "1920s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-son-house",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Son House",
+    "teaser": "The preacher who sold his soul to the blues — a Delta guitarist whose bottleneck slide and haunted moan influenced Robert Johnson, and whose 1960s rediscovery sparked the blues revival.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Son House — 'Death Letter' (1965)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the bottleneck slide crying between the words. House was a preacher who lost his faith and found the blues; you can hear the sermon in the moan. 'Death Letter' is a funeral he sang for forty years, each version more terrifying."
+    },
+    "tags": [
+      "Blues",
+      "Delta",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-mississippi-john-hurt",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Mississippi John Hurt",
+    "teaser": "The gentlest fingerpicker in the Delta — a sharecropper whose light, ragtime blues sounded like birdsong. Rediscovered in 1963 after a 35-year silence, he became the sweetheart of the folk revival.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Mississippi John Hurt — 'Avalon Blues' (1928)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the fingers — every string ringing, the melody and bass woven together so smoothly it sounds like two guitars. Hurt's style is the opposite of the heavy Delta moan: sunny, precise, and endlessly kind. He was found farming in Mississippi, forty years after his records."
+    },
+    "tags": [
+      "Blues",
+      "Fingerpicking",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-elmore-james",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Elmore James",
+    "teaser": "The King of the Slide Guitar — his electrified 'Dust My Broom' riff became the most copied lick in blues history, a train whistle played through an amplifier.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Elmore James — 'Dust My Broom' (1951)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the opening riff — three notes played with a slide that sound like a freight train arriving. James rebuilt that riff for almost every song he recorded. Then listen to 'The Sky Is Crying' and hear the tenderness behind the roar."
+    },
+    "tags": [
+      "Blues",
+      "Slide Guitar",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-albert-king",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Albert King",
+    "teaser": "The left-handed, upside-down-guitar giant whose fat, string-bending style directly shaped Eric Clapton, Stevie Ray Vaughan, and Jimi Hendrix.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Albert King — 'Born Under a Bad Sign' (1967)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the bend — King played a Flying V upside down, so his strings were reversed, and he bent them a full step like no one else could. The riff of 'Born Under a Bad Sign' became the backbone of blues-rock. Then hear him trade licks with Stevie Ray Vaughan on 'In Session.'"
+    },
+    "tags": [
+      "Blues",
+      "Electric",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-freddie-king",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Freddie King",
+    "teaser": "The Texas Cannonball — the fastest picker of the three Kings, whose instrumental 'Hide Away' and burning covers turned the electric blues into rock and roll fuel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Freddie King — 'Hide Away' (1961)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the attack — bright, fast, and rhythmic, the guitar almost talking. Freddie was the bridge between blues and rock; Eric Clapton, Peter Green, and Jeff Beck all learned his licks note for note. Then hear his vocal side, 'Have You Ever Loved a Woman,' with its deep Texas warmth."
+    },
+    "tags": [
+      "Blues",
+      "Electric",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-koko-taylor",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Koko Taylor",
+    "teaser": "The Queen of the Blues — a Memphis truck driver's daughter whose barrel-chested roar on 'Wang Dang Doodle' made her the biggest female star Chicago blues ever produced.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Koko Taylor — 'Wang Dang Doodle' (1965)",
+      "durationMinutes": 3,
+      "instruction": "Listen to that voice — huge, gravelly, and joyful, commanding the band like a general. Taylor started singing in her kitchen, moved to Chicago, and took a Howlin' Wolf song and made it hers. She was still touring and roaring into her seventies."
+    },
+    "tags": [
+      "Blues",
+      "Chicago",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-mahalia-jackson",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Mahalia Jackson",
+    "teaser": "The Queen of Gospel — a New Orleans laundress's daughter whose enormous voice made gospel a mass medium and moved everyone from Martin Luther King Jr. to Aretha Franklin.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Mahalia Jackson — 'How I Got Over' (live at the March on Washington, 1963)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the sermon-like build — she starts conversational and ends in full, soaring glory. Jackson sang this right before Dr. King's 'I Have a Dream' speech, and it was her voice that carried the crowd's spirit into the speech. She refused to sing secular music her whole life."
+    },
+    "tags": [
+      "Gospel",
+      "American",
+      "Soul"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-sam-cooke",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Sam Cooke",
+    "teaser": "The singer who crossed over from gospel to pop and made the smoothest voice in American music — 'A Change Is Gonna Come' became the civil rights movement's anthem, released days before his death at 33.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Sam Cooke — 'A Change Is Gonna Come' (1964)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the strings and the ache — Cooke wrote it after being turned away from a motel for being Black, months after Bob Dylan's 'Blowin' in the Wind.' He recorded it in one take, then died before it charted. It is the sound of hope sung from the bottom of the well."
+    },
+    "tags": [
+      "Soul",
+      "American",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-wilson-pickett",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Wilson Pickett",
+    "teaser": "The Wicked Pickett — a screamer and shouter whose 'In the Midnight Hour' and 'Mustang Sally' defined the muscular, horn-driven sound of 1960s soul.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Wilson Pickett — 'In the Midnight Hour' (1965)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the groove — a two-chord vamp so deep the song is mostly a feeling. Pickett wrote it with Steve Cropper after a request to write a song about 'the midnight hour.' Then hear 'Mustang Sally' and try not to move."
+    },
+    "tags": [
+      "Soul",
+      "American",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-sly-family-stone",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Sly and the Family Stone",
+    "teaser": "The first great integrated band of the rock era — Black and white, men and women, playing funk, rock, and pop as one psychedelic rainbow, from the Woodstock set to the masterpiece There's a Riot Goin' On.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Sly and the Family Stone — 'Everyday People' (1968)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the message and the groove together — the bass is simple, the horns are bright, and the lyric says 'different strokes for different folks.' Then listen to 'Family Affair' from 1971 and hear the same band collapse into darkness — the sixties ending in one track."
+    },
+    "tags": [
+      "Funk",
+      "Psychedelic",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-george-clinton",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "George Clinton",
+    "teaser": "The mad scientist of funk — founder of Parliament and Funkadelic, who turned the P-Funk mothership into a cosmic philosophy and made funk the strangest, most influential music of the 1970s.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Parliament — 'Give Up the Funk (Tear the Roof off the Sucker)' (1976)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the one-chord vamp and the chant — funk as ritual, not song. Clinton built a whole mythology: the mothership, the space children, the funk as a life force. Then listen to Funkadelic's 'Maggot Brain' and hear the ten-minute guitar solo he told Eddie Hazel to play 'like your mother just died.'"
+    },
+    "tags": [
+      "Funk",
+      "Psychedelic",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-bootsy-collins",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Bootsy Collins",
+    "teaser": "The bass player with the star-shaped sunglasses — he learned funk in James Brown's band, then joined George Clinton's Parliament-Funkadelic and made the bass the loudest, strangest instrument in music.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Bootsy Collins — 'I'd Rather Be with You' (1976)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the bass — it slides, pops, and sings like a voice. Bootsy's space-bass style made the instrument a lead voice instead of a rhythm part. Then find his solo record 'Stretchin' Out in Bootsy's Rubber Band' and hear him invent the cartoon version of funk."
+    },
+    "tags": [
+      "Funk",
+      "Bass",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-chaka-khan",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Chaka Khan",
+    "teaser": "The Queen of Funk — a Chicago singer whose wall-shaking voice launched Rufus, delivered 'Ain't Nobody,' and influenced everyone from Prince to Erykah Badu.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Rufus and Chaka Khan — 'Tell Me Something Good' (1974)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the growl — the song was written by Stevie Wonder, and Chaka's delivery turned a simple lyric into pure electricity. Then hear 'Ain't Nobody' from 1983 and count how many singers you can hear trying to sound like her since."
+    },
+    "tags": [
+      "Funk",
+      "Soul",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-rick-james",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Rick James",
+    "teaser": "The punk-funk king — a Buffalo wild child who put rock guitar inside funk, scored with 'Super Freak,' and lived a life so wild it became a biopic comedy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Rick James — 'Super Freak' (1981)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the bass line — it became the sample for MC Hammer's 'U Can't Touch This' a decade later. James mixed funk, rock, and a full brass section into something dangerously fun. Then listen to 'Give It to Me Baby' and hear the punk edge in the funk."
+    },
+    "tags": [
+      "Funk",
+      "Punk-Funk",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-teena-marie",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Teena Marie",
+    "teaser": "Ivory Queen of Soul — a white singer from Santa Monica who convinced Motown she was Black for years, then won a landmark lawsuit for artists' rights with her album Lady T.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Teena Marie — 'Lovergirl' (1984)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the voice — a huge, warm, gospel-trained instrument that fooled the world. Motown never put her photo on early covers because the label feared fans would figure out she was white. Her 1980 lawsuit set the standard for artists owning their masters."
+    },
+    "tags": [
+      "Soul",
+      "Funk",
+      "American"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-count-basie",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Count Basie",
+    "teaser": "The bandleader who made swing swing — his Kansas City orchestra played with a relaxed, blues-based rhythm that let the soloists float, and his piano was famous for saying more with less.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Count Basie — 'One O'Clock Jump' (1937)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the riff — the whole band playing a repeated phrase while the soloists trade choruses. Basie's piano comps with tiny, perfect jabs — he was famous for using almost no notes. The band's rhythm section — Basie, Freddie Green, Walter Page, Jo Jones — was the greatest in jazz."
+    },
+    "tags": [
+      "Jazz",
+      "Swing",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-benny-goodman",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Benny Goodman",
+    "teaser": "The King of Swing — a Chicago clarinetist who brought jazz to Carnegie Hall in 1938 and integrated his band, hiring pianist Teddy Wilson and vibraphonist Lionel Hampton when few would.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Benny Goodman — 'Sing, Sing, Sing' (1938 Carnegie Hall version)",
+      "durationMinutes": 9,
+      "instruction": "Listen to the drum break by Gene Krupa — the moment swing became rock and roll. Goodman's clarinet rides over the riffing band in a performance that shocked the staid Carnegie audience. The concert is considered the moment jazz became respectable."
+    },
+    "tags": [
+      "Jazz",
+      "Swing",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-glenn-miller",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Glenn Miller",
+    "teaser": "The most popular bandleader of the swing era — his clarinet-led reed sound on 'In the Mood' and 'Moonlight Serenade' made him a household name before he vanished over the English Channel in 1944.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Glenn Miller — 'In the Mood' (1939)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the saxophone riff that everyone knows — the melody that became the sound of the 1940s. Miller's band was the best-selling recording act in America, and he enlisted to lead the Army Air Force band during WWII. His plane disappeared over the Channel; the mystery never resolved."
+    },
+    "tags": [
+      "Jazz",
+      "Swing",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-sarah-vaughan",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Sarah Vaughan",
+    "teaser": "The Divine One — a New Jersey pianist's daughter with a four-octave voice and perfect pitch who turned the jazz ballad into a gymnast's event.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Sarah Vaughan — 'Lullaby of Birdland' (1954)",
+      "durationMinutes": 4,
+      "instruction": "Listen to her scat — she improvises with the flexibility of a horn player, dropping from high to low in one breath. Vaughan was discovered singing in a Harlem amateur night in 1943, and by the 1950s she was the most technically astonishing singer in jazz."
+    },
+    "tags": [
+      "Jazz",
+      "Vocal",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-dinah-washington",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Dinah Washington",
+    "teaser": "The Queen of the Blues — a Chicago gospel prodigy whose piercing, knowing voice could turn a pop song into a confession and a blues into a threat.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Dinah Washington — 'What a Diff'rence a Day Makes' (1959)",
+      "durationMinutes": 3,
+      "instruction": "Listen to the phrasing — she treats every word like a choice, bending the melody her way. Washington moved between blues, jazz, and pop without changing her attitude. Her version of this standard won the Grammy and became her biggest hit."
+    },
+    "tags": [
+      "Blues",
+      "Jazz",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-nancy-wilson",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Nancy Wilson",
+    "teaser": "The complete singer — a Columbus, Ohio voice who moved between jazz, pop, and soul so effortlessly that she recorded with Cannonball Adderley one day and sang a pop ballad the next.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Nancy Wilson — 'Guess Who I Saw Today' (1960)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the story-song — she narrates finding her husband with another woman over a glass of sherry, with devastating calm. Wilson's phrasing made her the most elegant voice of her generation, equally at home scatting with Adderley or singing standards."
+    },
+    "tags": [
+      "Jazz",
+      "Vocal",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-wayne-shorter",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Wayne Shorter",
+    "teaser": "The composer of jazz's most mysterious songs — a Newark saxophonist who wrote for Art Blakey, Miles Davis, and Weather Report, from 'Footprints' to 'Nefertiti,' for six decades.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Wayne Shorter — 'Footprints' (1966)",
+      "durationMinutes": 8,
+      "instruction": "Listen to the bass line first — a six-note riff in 3/4 that sounds like it's walking on the ocean floor. Shorter wrote it for his album Adam's Apple, and Miles Davis' band made it a standard. Then hear 'Nefertiti' — a 'song' where the horns repeat a melody while the rhythm section improvises, backwards and forward."
+    },
+    "tags": [
+      "Jazz",
+      "Saxophone",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-weather-report",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Weather Report",
+    "teaser": "The fusion supergroup — Joe Zawinul and Wayne Shorter took jazz's electricity and funk's groove and made 'Birdland' and 'Teen Town,' the biggest instrumental hits of 1970s jazz.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Weather Report — 'Birdland' (1977)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the layers — the synthesizer bass, the saxophone melody, the percussion pushing everything forward. 'Birdland' was named for the famous jazz club and became a dance hit, which was unheard of for a jazz band. Then hear Jaco Pastorius' fretless bass solo on 'Teen Town.'"
+    },
+    "tags": [
+      "Jazz",
+      "Fusion",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-return-to-forever",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Return to Forever",
+    "teaser": "Chick Corea's fusion band — first acoustic and lyrical, then an electrified four-piece with Stanley Clarke on bass that defined 1970s jazz-rock with 'Spain' and 'Romantic Warrior.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Chick Corea — 'Spain' (1973)",
+      "durationMinutes": 10,
+      "instruction": "Listen to the melody — it borrows the theme of Rodrigo's Concierto de Aranjuez and turns it into a jazz vehicle that every music student learns. Corea's piano dances over the band, and the piece shifts from flamenco to funk. Then hear Return to Forever's electric version and feel the difference."
+    },
+    "tags": [
+      "Jazz",
+      "Fusion",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-chick-corea",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Chick Corea",
+    "teaser": "The pianist who played with Miles Davis during Bitches Brew, then built his own worlds — from the spiritual 'Children's Songs' to the electric Return to Forever to the duets with Hiromi.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Chick Corea — 'Spain' solo piano version (1988)",
+      "durationMinutes": 6,
+      "instruction": "Listen to one man and one piano playing flamenco, jazz, and classical in a single piece. Corea wrote 'Spain' in 1971 and played it for fifty years, never the same way twice. He won 27 Grammys and played with everyone from Miles to Béla Fleck."
+    },
+    "tags": [
+      "Jazz",
+      "Piano",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-john-mclaughlin",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "John McLaughlin",
+    "teaser": "The guitar player who made fusion dangerous — an English speed-freak who played on Miles Davis' Bitches Brew, then formed the Mahavishnu Orchestra, jazz's loudest, fastest band.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Mahavishnu Orchestra — 'Meeting of the Spirits' (1971)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the intensity — guitar and violin playing the same fast melody in unison, the band at full throttle. McLaughlin played with a pick the size of a coin at impossible speed. He practiced 12 hours a day, and it shows in every note."
+    },
+    "tags": [
+      "Jazz",
+      "Fusion",
+      "Guitar"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-al-di-meola",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Al Di Meola",
+    "teaser": "The Mediterranean flash — a New Jersey guitar virtuoso who joined Return to Forever at 19 and became famous for speed, precision, and the nylon-string acoustic fury of Friday Night in San Francisco.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Al Di Meola — 'Mediterranean Sundance' (live, 1980)",
+      "durationMinutes": 7,
+      "instruction": "Listen to the tremolo — right hand moving so fast the notes blur into a shimmer. Di Meola plays flamenco-influenced lines on electric and acoustic guitar with a speed that sounds like two players. He played this duet live with Paco de Lucía to sold-out halls."
+    },
+    "tags": [
+      "Jazz",
+      "Fusion",
+      "Guitar"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-pat-metheny",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Pat Metheny",
+    "teaser": "The most decorated jazz guitarist alive — a Missouri native with a warm, singing tone who has won 20 Grammys across jazz, rock, and world music, from the Pat Metheny Group to his solo orchestrion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Pat Metheny Group — 'Phase Dance' (1978)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the melody — open, bright, and singable, a tune that sounds like a sunrise. Metheny's group sound blended jazz, Brazilian music, and folk into something the world could hum. Then hear his solo piece 'Are You Going with Me?' and the patience of his phrasing."
+    },
+    "tags": [
+      "Jazz",
+      "Guitar",
+      "American"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artist-bill-frisell",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Bill Frisell",
+    "teaser": "The poet of the pedal steel and the electric guitar — a Baltimore native who makes jazz, country, and noise sound like the same homesick song.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Bill Frisell — 'Throughout' (2001)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the tone — fuzzy, sustained, almost vocal. Frisell loops his own phrases and plays melodies over them like a one-man band. He's recorded with John Zorn, Elvis Costello, and his own country band; everything he touches sounds like a prairie at dusk."
+    },
+    "tags": [
+      "Jazz",
+      "Guitar",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-john-zorn",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "John Zorn",
+    "teaser": "The hurricane of downtown New York — a saxophonist and composer who records jazz, noise, klezmer, classical, and grindcore at a rate no one can keep up with.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "John Zorn — 'Spillane' (1987)",
+      "durationMinutes": 7,
+      "instruction": "Listen to the collage — film noir dialogue, free jazz, classical strings, all cut together with a chainsaw's precision. Zorn's music is a game of musical chairs with a gun. Then hear his Masada group play Jewish melodies as punk jazz."
+    },
+    "tags": [
+      "Avant-garde",
+      "Jazz",
+      "American"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-ornette-coleman",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Ornette Coleman",
+    "teaser": "The man who freed jazz from harmony — a Texas alto saxophonist whose 1959 album The Shape of Jazz to Come dropped chords entirely, making melody and feeling the only rules. Half of jazz called him a fraud; the other half called him a prophet.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Ornette Coleman — 'Lonely Woman' (1959)",
+      "durationMinutes": 5,
+      "instruction": "Listen to the melody — it wails and bends like a human voice, no chord changes underneath, just the bass holding the pulse. Coleman called this 'harmolodics,' his system where everyone improvises together. Miles Davis and John Coltrane both studied him closely."
+    },
+    "tags": [
+      "Jazz",
+      "Avant-garde",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-cecil-taylor",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Cecil Taylor",
+    "teaser": "The hurricane pianist — a New Yorker who treated the piano as a percussion instrument, playing dense storms of clustered notes that were called free jazz and felt like weather.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Cecil Taylor — 'Conquistador!' (1966)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the piano as a drum set — Taylor attacks the keys in clusters, building a rhythm so dense the melody is implied. He trained as a classical pianist and dancer; his concerts were athletic events. Listen once for the storm, again for the logic underneath."
+    },
+    "tags": [
+      "Jazz",
+      "Avant-garde",
+      "Piano"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-sun-ra",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Sun Ra",
+    "teaser": "The jazz composer who claimed to be from Saturn — his Arkestra mixed big-band swing, free jazz, chants, and cosmic philosophy into a sound that was half orchestra, half spaceship.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Sun Ra — 'Space Is the Place' (1972)",
+      "durationMinutes": 7,
+      "instruction": "Listen to the chanting and the big band — 'Space is the place / space is the place where you'll find your place.' Sun Ra led his Arkestra for decades, wearing capes and claiming extraterrestrial origin, and the music was seriously, gloriously strange. The band still performs in his name."
+    },
+    "tags": [
+      "Jazz",
+      "Avant-garde",
+      "American"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-alice-coltrane",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Alice Coltrane",
+    "teaser": "John Coltrane's widow who took the harp and the organ where jazz had never been — into devotional, cosmic music that influenced hip-hop producers fifty years later.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Alice Coltrane — 'Journey in Satchidananda' (1971)",
+      "durationMinutes": 7,
+      "instruction": "Listen to the harp — an instrument almost never used in jazz — floating over the drone and the tambura. After her husband's death, Alice turned to Eastern devotion and made albums of prayer-jazz. Kanye West and many others have sampled her work since."
+    },
+    "tags": [
+      "Jazz",
+      "Spiritual",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-pharoah-sanders",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Pharoah Sanders",
+    "teaser": "The tenor saxophonist of spiritual jazz — a Little Rock giant whose wailing, ecstatic sound carried John Coltrane's late experiments and then his own masterpiece Karma.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Pharoah Sanders — 'The Creator Has a Master Plan' (1969)",
+      "durationMinutes": 33,
+      "instruction": "Listen to the opening theme — a gentle, gospel-like chant that builds for minutes. Sanders plays tenor sax with a voice that can be honey or fire. The piece fills a whole side of an album and takes its time arriving; let it. His sound influenced a generation of spiritual jazz and hip-hop."
+    },
+    "tags": [
+      "Jazz",
+      "Spiritual",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-archie-shepp",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Archie Shepp",
+    "teaser": "The activist saxophonist of free jazz — a Floridian who combined Coltrane's fire with blues and political theater, making music that demanded to be heard as protest.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Archie Shepp — 'Blues for Brother George Jackson' (1972)",
+      "durationMinutes": 8,
+      "instruction": "Listen to the blues under the free jazz — Shepp never let go of the church and the juke joint. He was a playwright and professor who used the saxophone as a platform. The piece mourns the imprisoned activist George Jackson with a sorrow that turns to fury."
+    },
+    "tags": [
+      "Jazz",
+      "Avant-garde",
+      "American"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artist-eric-dolphy",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Eric Dolphy",
+    "teaser": "The bird of free jazz — an LA multi-instrumentalist who played alto sax, bass clarinet, and flute as one seamless voice, reshaping the sound of jazz in just five short years before dying at 36.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Eric Dolphy — 'Out to Lunch!' (1964)",
+      "durationMinutes": 6,
+      "instruction": "Listen to the bass clarinet — a low, woody instrument that Dolphy made sing like a bird. His album Out to Lunch is one of the great records of the 1960s, full of leaps and laughs. He died from a diabetic coma in Berlin, weeks after the session."
+    },
+    "tags": [
+      "Jazz",
+      "Avant-garde",
+      "American"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artist-rashaan-roland-kirk",
+    "categoryId": "ARTISTS",
+    "subtype": "Artist",
+    "name": "Rahsaan Roland Kirk",
+    "teaser": "The one-man horn section — a blind saxophonist who played three saxophones at once, circular-breathing until the music never stopped, and made 'the Black classical music' swing and shout.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "Rahsaan Roland Kirk — 'The Inflated Tear' (1967)",
+      "durationMinutes": 4,
+      "instruction": "Listen to the melody — a wistful tune played with one of the most expressive tones in jazz. Kirk could hold a note for minutes using circular breathing, and he recorded with three horns around his neck. He said jazz was Black classical music and refused to let it be called anything else."
+    },
+    "tags": [
+      "Jazz",
+      "Saxophone",
+      "American"
+    ],
+    "tier": 2
+  }
+]

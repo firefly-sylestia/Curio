@@ -1,0 +1,401 @@
+[
+  {
+    "id": "book-being-mortal",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Being Mortal",
+    "teaser": "Atul Gawande's 2014 book on aging and death — what medicine gets wrong when it treats mortality as a problem to solve instead of a life to live. A surgeon's humane study of the end.",
+    "imageUrl": "",
+    "byline": "Atul Gawande",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the independence chapter",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on the limits of independence as we age. Notice how Gawande builds argument from stories. Write what he proposes medicine should ask patients about — not just how to live longer, but how to live the life they want."
+    },
+    "tags": [
+      "American",
+      "Medicine",
+      "Aging"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-when-breath-becomes-air",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "When Breath Becomes Air",
+    "teaser": "Paul Kalanithi's 2016 memoir, finished as he died of lung cancer at 37 — a neurosurgeon's training to save lives and his own diagnosis, asking what makes a life meaningful when it ends early.",
+    "imageUrl": "",
+    "byline": "Paul Kalanithi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the resident and the diagnosis",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Kalanithi moves from dissecting cadavers to facing his own mortality. Notice how his medical voice never abandons him. Write what the book suggests about the difference between knowing death and knowing you will die."
+    },
+    "tags": [
+      "American",
+      "Memoir",
+      "Medicine"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-immortal-life-henrietta-lacks",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Immortal Life of Henrietta Lacks",
+    "teaser": "Rebecca Skloot's 2010 book — Henrietta Lacks's cells, taken without consent in 1951, became the HeLa line that changed medicine, while her family never shared the fortune or the story. Science and its debt to the invisible.",
+    "imageUrl": "",
+    "byline": "Rebecca Skloot",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the woman behind the cells",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the book moves between the lab and the Lacks family's living room. Notice how Skloot makes the science and the injustice inseparable. Write what the book says about consent, race, and who benefits from discovery."
+    },
+    "tags": [
+      "American",
+      "Science",
+      "Ethics"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-sixth-extinction",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Sixth Extinction",
+    "teaser": "Elizabeth Kolbert's 2014 Pulitzer winner — through frogs, corals, and great auks, she tracks the mass extinction now underway, caused by one species. A travelogue of the end of the world.",
+    "imageUrl": "",
+    "byline": "Elizabeth Kolbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the amphibian die-off",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on the golden frogs of Panama. Notice how Kolbert narrates extinction through fieldwork and specific species. Write how the book's structure — one extinction story per chapter — builds toward its unsettling conclusion."
+    },
+    "tags": [
+      "American",
+      "Environment",
+      "Pulitzer"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-man-search-for-meaning",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Man's Search for Meaning",
+    "teaser": "Viktor Frankl's 1946 memoir of surviving Auschwitz, and the therapy he built from it — logotherapy, the idea that the will to meaning is the deepest human drive. Part testimony, part manual for living.",
+    "imageUrl": "",
+    "byline": "Viktor E. Frankl",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The first part — life in the camp",
+      "durationMinutes": 60,
+      "instruction": "Read the first part, where Frankl describes the camp in three psychological phases. Notice how he analyzes rather than merely recounts. Write what his claim — that meaning can be found even in suffering — asks of the reader."
+    },
+    "tags": [
+      "Austrian",
+      "Memoir",
+      "Psychology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-thinking-fast-and-slow",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Thinking, Fast and Slow",
+    "teaser": "Daniel Kahneman's 2011 synthesis of a Nobel career — System 1 and System 2, heuristics and biases, and how our minds systematically fool us. The user manual for the human brain's bugs.",
+    "imageUrl": "",
+    "byline": "Daniel Kahneman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the two systems",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters introducing System 1 and System 2. Notice how Kahneman designs small experiments the reader can feel themselves failing. Write which of the book's biases you recognize in your own decisions, and why awareness alone is not enough."
+    },
+    "tags": [
+      "Israeli",
+      "Psychology",
+      "Nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-homo-deus",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Homo Deus: A Brief History of Tomorrow",
+    "teaser": "Yuval Noah Harari's 2015 sequel — having conquered famine, plague, and war, what will humans become? Harari's answers: gods, algorithms, or obsolete. A forecast that reads like science fiction.",
+    "imageUrl": "",
+    "byline": "Yuval Noah Harari",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the new human agenda",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Harari argues humanity now seeks immortality, bliss, and divinity. Notice how he treats futurism as history's continuation. Write how his account of 'dataism' challenges the value of individual consciousness."
+    },
+    "tags": [
+      "Israeli",
+      "Future",
+      "Big Ideas"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-outliers",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Outliers",
+    "teaser": "Malcolm Gladwell's 2008 book on success — the 10,000-hour rule, birth-month advantages, and the hidden cultural inheritances behind the famous. Success as accident plus inheritance plus practice.",
+    "imageUrl": "",
+    "byline": "Malcolm Gladwell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the rule of 10,000 hours",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on the Beatles, Bill Gates, and opportunity. Notice how Gladwell turns social science into narrative. Write what the book's emphasis on circumstance rather than talent changes about how you think about achievement."
+    },
+    "tags": [
+      "Canadian",
+      "Psychology",
+      "Success"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-power-of-habit",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Power of Habit",
+    "teaser": "Charles Duhigg's 2012 book on the science of habits — cue, routine, reward — and how individuals, companies, and movements are transformed by changing the loop. A practical theory of change.",
+    "imageUrl": "",
+    "byline": "Charles Duhigg",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the habit loop",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on the habit loop and the experiments at MIT. Notice how Duhigg alternates laboratory science with corporate stories. Write how you would apply the cue-routine-reward model to a habit you want to change."
+    },
+    "tags": [
+      "American",
+      "Psychology",
+      "Self-help"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-deep-work",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Deep Work",
+    "teaser": "Cal Newport's 2016 book on focused attention in a distracted age — rules for the deep, undistracted concentration that produces rare and valuable work, and how to defend it from the shallow.",
+    "imageUrl": "",
+    "byline": "Cal Newport",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — deep work is valuable and rare",
+      "durationMinutes": 45,
+      "instruction": "Read the opening chapters, where Newport argues for deep work's economic and personal value. Notice how he treats attention as a finite resource. Write which of his rules — ritual, boredom, shutdown — you could actually implement this week."
+    },
+    "tags": [
+      "American",
+      "Productivity",
+      "Attention"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-atomic-habits",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Atomic Habits",
+    "teaser": "James Clear's 2018 book on tiny changes and remarkable results — the four laws of behavior change and the compounding power of 1% improvements. A manual for becoming the person your habits are building.",
+    "imageUrl": "",
+    "byline": "James Clear",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the surprising power of atomic habits",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on British cycling and the aggregation of marginal gains. Notice how Clear frames identity as the engine of habit. Write what 'every action is a vote for the type of person you wish to become' means in practice."
+    },
+    "tags": [
+      "American",
+      "Habits",
+      "Self-improvement"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-short-history-nearly-everything",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "A Short History of Nearly Everything",
+    "teaser": "Bill Bryson's 2003 tour of science — from the big bang to the human genome, told through the eccentric scientists who discovered it. The funniest way to learn geology, chemistry, and cosmology.",
+    "imageUrl": "",
+    "byline": "Bill Bryson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the universe and the elements",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on the size and age of the universe. Notice how Bryson makes scale vivid through analogy. Write which discovery story in the book surprised you most, and what makes his approach to science writing work."
+    },
+    "tags": [
+      "American",
+      "Science",
+      "Popular"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-demon-haunted-world",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Demon-Haunted World",
+    "teaser": "Carl Sagan's 1995 defense of science and skepticism against pseudoscience — a toolkit of critical thinking from the great explainer, with the Baloney Detection Kit as its most famous gift.",
+    "imageUrl": "",
+    "byline": "Carl Sagan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The chapters on the Baloney Detection Kit",
+      "durationMinutes": 60,
+      "instruction": "Read the chapters where Sagan assembles his checklist for detecting flawed arguments. Notice how he applies it to both UFOs and everyday claims. Write how you would apply one of his tools to a claim you see circulating today."
+    },
+    "tags": [
+      "American",
+      "Science",
+      "Skepticism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-cosmos",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Cosmos",
+    "teaser": "Carl Sagan's 1980 companion to his landmark series — the shores of the cosmic ocean, the billion-galaxy perspective, and the pale blue dot. The book that made wonder a public service.",
+    "imageUrl": "",
+    "byline": "Carl Sagan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the shores of the cosmic ocean",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Sagan scales from a field in Ithaca to the edge of everything. Notice how he keeps the human at the center of the cosmic view. Write what the 'pale blue dot' perspective does to everyday concerns."
+    },
+    "tags": [
+      "American",
+      "Cosmology",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-emperor-of-all-maladies",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Emperor of All Maladies",
+    "teaser": "Siddhartha Mukherjee's 2010 Pulitzer-winning biography of cancer — from ancient descriptions to modern therapies, the disease as a living history of medicine, research, and hope.",
+    "imageUrl": "",
+    "byline": "Siddhartha Mukherjee",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the early history of cancer",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Mukherjee treats cancer as a civilization with a biography. Notice how he narrates medical history through people and experiments. Write how the book changes what you think a disease can be."
+    },
+    "tags": [
+      "American",
+      "Medicine",
+      "Pulitzer"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-gene",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Gene: An Intimate History",
+    "teaser": "Siddhartha Mukherjee's 2016 book on the gene and its meanings — from Mendel to CRISPR, and the science's entanglement with his own family's history of mental illness. Genetics as biography.",
+    "imageUrl": "",
+    "byline": "Siddhartha Mukherjee",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Mendel and the missing heritability",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on Mendel's peas and the rediscovery of heredity. Notice how Mukherjee keeps the science personal. Write what the book suggests about the boundary between what we inherit and what we become."
+    },
+    "tags": [
+      "American",
+      "Genetics",
+      "History"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-double-helix",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "The Double Helix",
+    "teaser": "James Watson's 1968 account of the race to discover DNA's structure — competitive, gossipy, and unapologetic, it made science look like a contact sport and remains the frankest memoir in biology.",
+    "imageUrl": "",
+    "byline": "James D. Watson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Cambridge and the race begins",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Watson describes the rivalries and the labs. Notice how the book reads like a novel of ambition. Write what the memoir's unvarnished account adds to — and takes from — the mythology of great discovery."
+    },
+    "tags": [
+      "American",
+      "Science",
+      "Memoir"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-selfish-gene",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Selfish Gene",
+    "teaser": "Richard Dawkins's 1976 book that reframed evolution from the gene's point of view — altruism as selfishness in disguise, and the 'meme' as the unit of cultural inheritance. Biology's most argued bestseller.",
+    "imageUrl": "",
+    "byline": "Richard Dawkins",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — why people exist",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Dawkins argues the gene is the unit of selection. Notice how the 'selfish' gene's behavior produces cooperation. Write how thinking from the gene's perspective changes the way you read altruism in everyday life."
+    },
+    "tags": [
+      "British",
+      "Evolution",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-freakonomics",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Freakonomics",
+    "teaser": "Steven Levitt and Stephen Dubner's 2005 book that applies economic thinking to everything — sumo wrestling, real estate agents, and the surprising causes of crime decline. The most provocative economics of its era.",
+    "imageUrl": "",
+    "byline": "Steven D. Levitt and Stephen J. Dubner",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — cheating teachers and sumo wrestlers",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters on incentives and cheating. Notice how the authors treat data as a detective story. Write which of the book's conclusions most surprised you, and how incentives explain behavior you see around you."
+    },
+    "tags": [
+      "American",
+      "Economics",
+      "Pop Science"
+    ],
+    "tier": 1
+  }
+]

@@ -1,0 +1,450 @@
+[
+  {
+    "id": "wildcard-aurora-australis",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Aurora Australis",
+    "teaser": "The southern twin of the northern lights — curtains of green and violet fire dancing over Antarctica's edge, visible from Tasmania, New Zealand, and Patagonia. Both poles wear the same crown, but the south wears it in silence.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Gaze",
+      "targetName": "Aurora viewing over the Southern Ocean",
+      "durationMinutes": 60,
+      "instruction": "Find a dark southern shore (Tasmania or New Zealand's South Island) on a clear winter night. Look south — the glow rises from the horizon in waves. Note how the color changes with solar activity, and how the curtains seem to 'breathe.'"
+    },
+    "tags": ["Phenomenon", "Natural", "Southern Hemisphere"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-catatumbo-lightning",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Catatumbo Lightning",
+    "teaser": "Over Lake Maracaibo in Venezuela, a storm grinds in place night after night, striking up to 280 times an hour for 300 nights a year. No other place on Earth earns more lightning — sailors once used it as a lighthouse.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Catatumbo lightning from the lake shore",
+      "durationMinutes": 45,
+      "instruction": "Read how the Catatumbo River's methane and the lake's warm air feed a permanent storm cell. Then watch a timelapse. Note the color of the lightning and why the local Wayuu people revere the phenomenon."
+    },
+    "tags": ["Phenomenon", "Weather", "Venezuela"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-milky-way-core",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Milky Way Core",
+    "teaser": "The glowing river of the night sky is really the packed heart of our galaxy — 400 billion stars seen edge-on, with a black hole called Sagittarius A* at its center. Our solar system rides one spiral arm far from the crowd.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Trace",
+      "targetName": "The Milky Way band across the sky",
+      "durationMinutes": 60,
+      "instruction": "From a dark site in the southern hemisphere, the galactic core is overhead in winter. Find the constellation Sagittarius — the 'teapot' — and trace the bright band from there across the sky. Note the dark lanes: those are dust, hiding newborn stars."
+    },
+    "tags": ["Astronomy", "Galaxy", "Night Sky"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-solar-eclipse-totality",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Total Solar Eclipse",
+    "teaser": "A cosmic coincidence of scale: the Moon is 400 times smaller than the Sun but 400 times closer, so it can perfectly cover it — revealing the corona, the Sun's ghostly crown. In totality, day turns to twilight and birds fall silent.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "A total solar eclipse path",
+      "durationMinutes": 45,
+      "instruction": "Plan for the next total eclipse along its path of totality. Watch the shadow approach from the west, feel the temperature drop, and look for the corona and any planets near the Sun. Never look directly except during totality."
+    },
+    "tags": ["Astronomy", "Eclipse", "Rare Event"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-blood-moon",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Total Lunar Eclipse (Blood Moon)",
+    "teaser": "When Earth steps between Sun and Moon, our atmosphere bends red light around the planet and paints the Moon copper. It is sunset light, projected onto the Moon — every sunrise and sunset on Earth, all at once.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "A total lunar eclipse",
+      "durationMinutes": 90,
+      "instruction": "Unlike a solar eclipse, a lunar eclipse is safe to watch with the naked eye. Time the umbra crossing the Moon and note the color — it deepens with dust in the atmosphere. Compare the shade with a scale of eclipse darkness."
+    },
+    "tags": ["Astronomy", "Eclipse", "Moon"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-supernova-1987a",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Supernova 1987A",
+    "teaser": "On February 23, 1987, light from a star that died 168,000 years ago reached Earth — the nearest supernova in four centuries. Its neutrinos arrived three hours before the light, letting physicists 'see' inside a dying star for the first time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Study",
+      "targetName": "The remnants of Supernova 1987A",
+      "durationMinutes": 45,
+      "instruction": "Read how neutrinos from SN 1987A were detected in three labs on Earth before the visible flash. Then look at Hubble images of its three glowing rings and write how the blast reshaped its neighborhood."
+    },
+    "tags": ["Astronomy", "Supernova", "Cosmic"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-hale-bopp",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Comet Hale–Bopp",
+    "teaser": "In 1997, the most-watched comet of modern times hung in the sky for 18 months, its twin blue and white tails stretching tens of millions of miles. It will not return until the year 4385 — one comet, one lifetime.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Spot",
+      "targetName": "A bright comet in the evening sky",
+      "durationMinutes": 30,
+      "instruction": "Learn how Hale–Bopp was discovered by two amateurs and why it stayed bright for so long. Then plan a viewing for the next bright comet: look west after sunset for a fuzzy star with a tail, and note how the tail always points away from the Sun."
+    },
+    "tags": ["Astronomy", "Comet", "Night Sky"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-perseid-meteors",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Perseid Meteor Shower",
+    "teaser": "Every August, Earth plows through the dusty tail of Comet Swift–Tuttle and the sky rains fire — up to a hundred meteors an hour, each a grain of dust vaporizing at 60 kilometers a second. The Perseids are summer's oldest light show.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Count",
+      "targetName": "The Perseid radiant",
+      "durationMinutes": 60,
+      "instruction": "On a moonless August night, lie flat and face northeast after midnight. Let your eyes adapt for 20 minutes, then count meteors for an hour. Notice that most streak from near Perseus — the radiant — and note their colors."
+    },
+    "tags": ["Astronomy", "Meteors", "Night Sky"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-tsunami-boxing-day",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The 2004 Indian Ocean Tsunami",
+    "teaser": "A magnitude 9.1 earthquake off Sumatra lifted the seafloor by meters, sending waves racing across the Indian Ocean at jet speed. Minutes to hours later, 230,000 people were gone — the deadliest tsunami in recorded history.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Understand",
+      "targetName": "Tsunami science and warning",
+      "durationMinutes": 60,
+      "instruction": "Read how tsunamis are generated by vertical seafloor displacement and why they travel so fast in deep water. Then study the 2004 timeline: how warning reached Sri Lanka and Africa too late, and what the Indian Ocean warning system now does."
+    },
+    "tags": ["Phenomenon", "Ocean", "Disaster"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-krakatoa-1883",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Krakatoa Eruption (1883)",
+    "teaser": "In August 1883, a volcanic island between Java and Sumatra blew itself apart with a sound heard 4,800 kilometers away — the loudest noise ever recorded. The blast's tsunamis killed 36,000 people and its dust dimmed sunsets worldwide for years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Trace",
+      "targetName": "The 1883 Krakatoa eruption",
+      "durationMinutes": 45,
+      "instruction": "Read the timeline of Krakatoa's 1883 collapse — the four great explosions, the tsunamis, the volcanic winter sunsets. Note how the shock wave circled the Earth seven times, and how Anak Krakatoa has since grown from its ruins."
+    },
+    "tags": ["Phenomenon", "Volcano", "History"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-mount-st-helens",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Mount St. Helens (1980)",
+    "teaser": "On May 18, 1980, a bulge on Mount St. Helens collapsed and the mountain uncorked sideways — a lateral blast that flattened 600 square kilometers of forest in minutes. The largest landslide in recorded history, followed by a mushroom cloud 24 kilometers tall.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Visit",
+      "targetName": "Mount St. Helens National Volcanic Monument",
+      "durationMinutes": 90,
+      "instruction": "Visit the Johnston Ridge Observatory and look across at the horseshoe crater. Read how the north flank's bulge slid away, releasing the blast, and how elk, flowers, and forests have recolonized the gray moonscape since 1980."
+    },
+    "tags": ["Phenomenon", "Volcano", "USA"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-big-bend-stars",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Dark Sky at Big Bend",
+    "teaser": "In far west Texas, Big Bend National Park keeps one of the darkest skies in the lower 48 — so dark the Milky Way casts a shadow and satellites streak silently overhead. It is a place to relearn what night used to be.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Gaze",
+      "targetName": "Big Bend's night sky",
+      "durationMinutes": 60,
+      "instruction": "Spend an hour at night in Big Bend without a flashlight. Watch the Milky Way rise, spot satellites, and notice how the landscape becomes silhouettes. Note how many stars you can count in Orion — then imagine cities without this."
+    },
+    "tags": ["Night Sky", "USA", "Dark Sky"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-glacial-erratics",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Glacial Erratics",
+    "teaser": "Scattered across northern plains sit boulders that belong nowhere nearby — carried hundreds of kilometers by vanished ice sheets and dropped when they melted. Each erratic is a silent witness to a world buried under kilometers of ice.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Locate",
+      "targetName": "A glacial erratic near you",
+      "durationMinutes": 45,
+      "instruction": "Find a famous erratic (like Doane Rock or the Okotoks Erratic) and learn its origin. Match its rock type to a distant source region and write the path the ice carried it, then consider: what will the next ice age move?"
+    },
+    "tags": ["Geology", "Ice Age", "Natural"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-giant-crystals-naica",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Cave of the Crystals, Naica",
+    "teaser": "Beneath Naica, Mexico, a cave holds gypsum crystals 11 meters long — some of the largest on Earth — grown slowly in 50°C water for half a million years. It is beautiful, deadly, and now sealed again: the pumps that drained it have been switched off.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Imagine",
+      "targetName": "Naica's giant crystals",
+      "durationMinutes": 45,
+      "instruction": "Read how the Cave of the Crystals formed in saturated, hot water and why it is unsurvivable without suits. Reflect on the timescale: each crystal needed half a million quiet years, and mining almost destroyed them."
+    },
+    "tags": ["Geology", "Crystals", "Mexico"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-royal-ghost-orchid",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Ghost Orchid",
+    "teaser": "A leafless, rootless orchid that lives entirely inside other plants, blooming for a few days once a year — or not at all. It has no chlorophyll and no leaves, only a pale flower that floats in the dark Florida swamp like a spirit.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Seek",
+      "targetName": "The ghost orchid's swamp habitat",
+      "durationMinutes": 45,
+      "instruction": "Learn how the ghost orchid survives by parasitizing tree bark fungi for nutrition. Reflect on why poachers and habitat loss threaten it, and what it means to preserve an organism you may never see bloom."
+    },
+    "tags": ["Nature", "Botany", "Rare"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-corpses-flower-plant",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Corpse Flower",
+    "teaser": "Amorphophallus titanum grows a bloom taller than a person, reeks of rotting flesh to attract flies, heats itself to 37°C, and flowers for barely 48 hours every few years. Crowds line up to smell a flower that smells like death.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Smell",
+      "targetName": "A blooming titan arum at a botanic garden",
+      "durationMinutes": 45,
+      "instruction": "Find a botanic garden with a titan arum and track its bloom alerts. When it opens, note the heat and the smell, the way the spathe unfurls, and how flies — not bees — are the intended visitors. Reflect on why evolution chose rot."
+    },
+    "tags": ["Botany", "Rare", "Nature"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-venus-flytrap",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Venus Flytrap",
+    "teaser": "A plant that eats animals, native to a single 100-kilometer strip of Carolina bog. Its trap snaps shut in a tenth of a second, but only if two hairs trip within 20 seconds — the plant counts, so it won't waste a meal on a raindrop.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Feed",
+      "targetName": "A Venus flytrap up close",
+      "durationMinutes": 30,
+      "instruction": "Observe a flytrap's leaves and trigger hairs. Read how the plant counts stimuli before closing, then digests prey with enzymes over days. Consider why it eats insects: the bogs it lives in are nutrient-starved."
+    },
+    "tags": ["Botany", "Carnivorous", "Nature"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-baobab-tree",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Baobab Tree",
+    "teaser": "The 'upside-down tree' of Africa, with a trunk like a swollen barrel that stores thousands of liters of water and a canopy that looks like roots reaching for the sky. Some baobabs are 2,000 years old — living monuments older than Rome.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Touch",
+      "targetName": "A giant baobab",
+      "durationMinutes": 30,
+      "instruction": "Look at photos or visit a baobab and note the trunk's smooth, water-swollen bark and the way its branches fork upward. Read how baobabs survive drought, feed people with their fruit, and how the oldest ones are now dying from climate change."
+    },
+    "tags": ["Botany", "Africa", "Ancient"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-giant-sequoia",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Giant Sequoia",
+    "teaser": "The largest living things on Earth by volume — a single sequoia can outweigh 10 blue whales and has a crown visible from space. The General Sherman tree is about 2,200 years old and still growing. They need fire to reproduce, yet fire now threatens them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Stand",
+      "targetName": "Giant sequoia groves, Sierra Nevada",
+      "durationMinutes": 60,
+      "instruction": "Visit a sequoia grove or study photos, then stand beneath the scale of the trunk. Read how sequoia seeds need fire-cleared soil and how modern fire suppression and megafires put them at risk. Measure how small you feel."
+    },
+    "tags": ["Botany", "Trees", "Giant"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-bristlecone-pines",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Bristlecone Pines",
+    "teaser": "On wind-scoured mountain ridges live the oldest individual organisms on Earth — bristlecone pines over 4,800 years old. Twisted and half-dead, they grow a millimeter a year in stone, outliving empires while barely seeming to live at all.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Age",
+      "targetName": "Bristlecone pines in the White Mountains",
+      "durationMinutes": 45,
+      "instruction": "Learn how dendrochronologists dated bristlecones to nearly 5,000 years and used their rings to calibrate the radiocarbon clock. Reflect on what a tree that predates the pyramids has witnessed — and what it takes to live that long."
+    },
+    "tags": ["Botany", "Ancient", "USA"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ginkgo-tree",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Ginkgo Biloba",
+    "teaser": "A living fossil unchanged for 200 million years — the only tree that survived the asteroid that killed the dinosaurs. Its fan-shaped leaves, once eaten by dinosaurs, now line city streets. Hiroshima's ginkgoes were among the few trees that survived the blast.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Leaf",
+      "targetName": "A ginkgo tree in autumn",
+      "durationMinutes": 30,
+      "instruction": "Find a ginkgo and study its fan-shaped, veined leaves that fall all at once in a golden carpet. Read why it is called a living fossil, how it survived ice ages in China, and why it is famously resilient in cities."
+    },
+    "tags": ["Botany", "Ancient", "Living Fossil"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-dragon-blood-tree",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Dragon's Blood Tree",
+    "teaser": "On Yemen's Socotra Island grows a tree shaped like an upturned umbrella, bleeding red sap called 'dragon's blood.' It exists nowhere else on Earth — an island that holds a third of all plant species found on it, and nowhere else.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Socotra's dragon's blood trees",
+      "durationMinutes": 45,
+      "instruction": "Read why Socotra's isolation produced so many endemic species, and how the dragon's blood tree's canopy catches fog in a dry climate. Reflect on how the red resin was used for medicine and dye for millennia."
+    },
+    "tags": ["Botany", "Socotra", "Endemic"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-iceberg-calving",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Iceberg Calving",
+    "teaser": "When a glacier's front wall collapses into the sea, a skyscraper of ice capsizes with a sound like cannon fire — and the newborn iceberg flips, revealing blue that seems lit from within. Only a tenth of an iceberg shows above water; the rest is a hidden mountain.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Listen",
+      "targetName": "A calving glacier front",
+      "durationMinutes": 45,
+      "instruction": "Watch footage of a calving event and note the sequence: the crack, the slow fall, the wave, and the iceberg's capsize. Read why icebergs appear blue (dense ice absorbs red light) and why only 10% floats above the surface."
+    },
+    "tags": ["Phenomenon", "Ice", "Ocean"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-glacial-blue-ice",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Glacial Blue Ice",
+    "teaser": "Antarctica's deepest ice is not white but a translucent sapphire blue — compressed over millennia until all air bubbles are squeezed out, letting light travel deep and bounce back only blue. Walking on it is like walking on a frozen ocean of glass.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "Blue ice at the Antarctic ice edge",
+      "durationMinutes": 45,
+      "instruction": "Read why glacial ice turns blue as pressure removes air bubbles, and why blue-ice areas in Antarctica are windows into ice hundreds of thousands of years old. Reflect on how scientists drill cores through it to read ancient climate."
+    },
+    "tags": ["Phenomenon", "Antarctica", "Ice"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-fire-rainbow",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Fire Rainbow (Circumhorizontal Arc)",
+    "teaser": "Not a rainbow and not fire — a circumhorizontal arc appears when sunlight passes through ice crystals in thin, high clouds at just the right angle, painting a horizontal smear of spectrum across the sky. It is rare, brief, and looks impossible.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Spot",
+      "targetName": "A circumhorizontal arc",
+      "durationMinutes": 30,
+      "instruction": "Learn the conditions: cirrus clouds with plate-shaped ice crystals, the Sun above 58° altitude, and your position between them. When the conditions align, look high in the sky — the arc appears below the Sun, colored like a rainbow turned on its side."
+    },
+    "tags": ["Phenomenon", "Weather", "Sky"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-sundog",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Sundogs",
+    "teaser": "Two glowing false suns that flank the real Sun, born when sunlight bends through hexagonal ice crystals floating in freezing air. They appear most often on cold, clear days — nature's halo, with the real Sun in the middle.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Spot",
+      "targetName": "Sundogs beside the winter sun",
+      "durationMinutes": 30,
+      "instruction": "On a cold, clear day, look about 22° from the Sun (arm's length at arms reach) for bright spots of colored light. Note their red inner edge and blue outer edge, and how they are caused by ice crystals falling flat in the sky."
+    },
+    "tags": ["Phenomenon", "Weather", "Sky"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-glory-optical",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Glory",
+    "teaser": "From a plane or mountain, look down at a cloud with the Sun behind you: a ring of rainbow light around your own shadow — the glory, made by light bouncing back off cloud droplets. Pilgrims climbing mountains once saw it as a halo of the gods.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "A glory from an airplane window",
+      "durationMinutes": 30,
+      "instruction": "Next time you fly, find your plane's shadow on a cloud layer with the Sun behind you and look for the colored ring around it. Read how backscattering of light by tiny droplets creates the glory, and why it always surrounds your own shadow."
+    },
+    "tags": ["Phenomenon", "Optics", "Sky"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-brocken-spectre",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Brocken Spectre",
+    "teaser": "Climb a misty peak with the Sun at your back and your shadow may appear enormous, ringed in rainbow, moving on the clouds below — a ghost of yourself called the Brocken spectre. It is just optics, but it feels like meeting your own spirit.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Meet",
+      "targetName": "Your shadow on a cloud sea",
+      "durationMinutes": 45,
+      "instruction": "Hike a mountain above a cloud layer at sunrise or sunset with the sun behind you. Look down: your shadow, magnified by perspective, surrounded by a glory ring. Read how this illusion got its name from Germany's Brocken peak."
+    },
+    "tags": ["Phenomenon", "Optics", "Mountains"],
+    "tier": 2
+  }
+]

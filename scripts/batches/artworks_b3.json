@@ -1,0 +1,674 @@
+[
+  {
+    "id": "artw-the-avenue-at-middelharnis-101",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Avenue at Middelharnis (1689)",
+    "teaser": "Hobberna's straight avenue of poplars vanishing toward a village — the most famous one-point perspective in landscape painting, admired by Constable and copied for two centuries.",
+    "imageUrl": "",
+    "byline": "Meindert Hobbema",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Avenue at Middelharnis (1689) by Hobbema, National Gallery",
+      "durationMinutes": 12,
+      "instruction": "Walk the road with your eyes: the trees line up exactly, the sky opens at the vanishing point. The painting is a hymn to order and to the quiet life of a Dutch village — the dirt road, the pollarded trees, the tiny figures with a dog."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "1680s",
+      "Landscape"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-rodeby-venus-103",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Rokeby Venus (1647)",
+    "teaser": "Velázquez's only surviving nude — Venus reclining, seen from behind, her face reflected in a mirror held by Cupid. The blurred reflection is the painting's magic: we see her face without ever turning her toward us.",
+    "imageUrl": "",
+    "byline": "Diego Velázquez",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Rokeby Venus (1647) by Velázquez, National Gallery",
+      "durationMinutes": 15,
+      "instruction": "Her face in the mirror is soft, unfocused — Velázquez painted the reflection as a memory, not a portrait. The sheets are silver-gray, her skin the only warm color. In 1914 a suffragette slashed it with a meat cleaver; the cuts were repaired so well they are nearly invisible."
+    },
+    "tags": [
+      "Baroque",
+      "Spanish",
+      "1640s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-judith-beheading-104",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Judith Beheading Holofernes (1599)",
+    "teaser": "Caravaggio's Judith grimaces as she saws through the general's neck while her maid waits with a sack — blood sprays, the bed sheets darken. It is the most violent painting of a Bible story ever made until that point.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Judith Beheading Holofernes (1599) by Caravaggio, Palazzo Barberini",
+      "durationMinutes": 15,
+      "instruction": "Look at the three faces: Judith's wrinkled nose and open mouth — the physical effort of the act — the maid's calm readiness, and Holofernes' twisted shout. The blood arcs in a line Caravaggio studied from real anatomy. He painted violence as news, not allegory."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-entombment-caravaggio-105",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Entombment of Christ (1604)",
+    "teaser": "Caravaggio's mourners lower Christ's body toward the viewer — the stone slab at the bottom edge points straight at us, making us the tomb. It is a painting that pulls the sacred into the present.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Entombment of Christ (1604) by Caravaggio, Vatican",
+      "durationMinutes": 15,
+      "instruction": "The slab juts out of the picture toward your feet — Caravaggio makes the viewer part of the scene. The figures are lit like a stage, the body heavy in the arms of the men who carry it. Mary's hands are raised in grief; her gesture is the painting's silent scream."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-bacchus-caravaggio-106",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Bacchus (1596)",
+    "teaser": "Caravaggio's young god of wine lounges with a glass of wine and a bowl of fruit — but the fruit is rotting, the wine is murky, and Bacchus himself looks tired. Caravaggio's gods are always a little sick.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Bacchus (1596) by Caravaggio, Uffizi",
+      "durationMinutes": 15,
+      "instruction": "Look at the still life first: the pomegranate is split, the grapes are browning, a fig is burst — decay mid-picture. Bacchus holds the glass with dirty fingernails. Caravaggio painted pleasure with its expiration date visible."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-fortune-teller-107",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Fortune Teller (1594)",
+    "teaser": "A young man offers his palm to a Romani fortune teller while she quietly slips the ring off his finger. Caravaggio's first genre scene — a pickpocket joke painted with the dignity of an altarpiece.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Fortune Teller (1594) by Caravaggio, Louvre",
+      "durationMinutes": 12,
+      "instruction": "Follow the hands: his glove is half off, her fingers work the ring. The two figures face each other like a duel — honesty and theft meeting palm to palm. Caravaggio painted this when he was poor, and it made his name."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-narcissus-caravaggio-108",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Narcissus (1599)",
+    "teaser": "Caravaggio's Narcissus kneels at a dark pool, his reflection touching his own hand — the circle of self-love closed into a perfect ring. It is one of only two known Caravaggios on a myth subject.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Narcissus (1599) by Caravaggio, Palazzo Barberini",
+      "durationMinutes": 12,
+      "instruction": "His elbows frame the pool, and his reflection is exactly symmetrical — the two figures almost form a complete circle. The water is black, the light is cold. Caravaggio paints the moment of falling in love with yourself, and it already looks like drowning."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-saint-jerome-writing-109",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Saint Jerome Writing (1606)",
+    "teaser": "Caravaggio's saint, an old man with a skull and a candle, writes in a shaft of light — the skull and the quill, death and translation, sharing the desk. It is a painting about work done in the face of death.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Saint Jerome Writing (1606) by Caravaggio, Galleria Borghese",
+      "durationMinutes": 12,
+      "instruction": "The light comes from a source we cannot see, falling only on the book, the hands, and the forehead. The skull sits at the corner like a colleague. Jerome translated the Bible; Caravaggio paints the desk where eternity gets written down."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-boy-with-a-basket-110",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Boy with a Basket of Fruit (1593)",
+    "teaser": "Caravaggio's teenage boy offers a basket of fruit so fresh the leaves are still veined — a perfect still life on top of a perfect portrait. It may be the painter himself, at the start of his career.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Boy with a Basket of Fruit (1593) by Caravaggio, Galleria Borghese",
+      "durationMinutes": 12,
+      "instruction": "The fruit is so carefully painted it has its own light — grapes, apples, figs, a pomegranate, each leaf with its veins. The boy's face is soft, almost feminine, his shoulder bare. The basket's shadow on the wall is painted as carefully as the boy."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-saint-francis-in-meditation-111",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Saint Francis in Meditation (1606)",
+    "teaser": "Caravaggio's monk holds a skull in the dark — no halo, no miracle, just a man contemplating what the skull means. It is the most purely human of all his religious paintings.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Saint Francis in Meditation (1606) by Caravaggio",
+      "durationMinutes": 12,
+      "instruction": "The skull faces the viewer, not Francis — we are the ones being asked. His hands rest on the bone like a man steadying himself. The robe and the darkness swallow the background; the face, the hands, and the skull are all that remain."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-amor-victorious-114",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Amor Victorious (1602)",
+    "teaser": "Caravaggio's naked Cupid grins while trampling the symbols of human achievement — musical instruments, books, armor, a laurel crown. Love defeats everything, and the boy knows it.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Amor Victorious (1602) by Caravaggio, Gemäldegalerie Berlin",
+      "durationMinutes": 12,
+      "instruction": "The boy's grin is knowing, almost cruel — he has already won. Under his foot: a violin, a compass, a book, armor, a crown. His wings are a real eagle's, painted from a specimen. Caravaggio painted love as a punk with a quiver."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-incredulity-of-thomas-115",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Incredulity of Saint Thomas (1602)",
+    "teaser": "Caravaggio's doubting Thomas puts his finger into Christ's side wound while the other apostles crowd to look — the moment belief becomes empirical. It scandalized some and thrilled everyone else.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Incredulity of Saint Thomas (1602) by Caravaggio, Sanssouci",
+      "durationMinutes": 12,
+      "instruction": "Christ guides Thomas's hand into the wound — the touch is the whole subject. The four heads press together like a medical consultation. Caravaggio painted doubt as the honest path: Thomas must check, and Christ lets him."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-seven-works-of-mercy-116",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Seven Works of Mercy (1607)",
+    "teaser": "Caravaggio's single canvas shows all seven acts of mercy happening at once — a naked man, a corpse carried feet-first, a woman breastfeeding her father in prison, a pilgrim drinking. The city of Naples is the stage.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Seven Works of Mercy (1607) by Caravaggio, Pio Monte della Misericordia",
+      "durationMinutes": 20,
+      "instruction": "Try to find all seven acts: feeding the hungry, giving drink to the thirsty, clothing the naked, sheltering the stranger, visiting the sick, visiting the imprisoned, burying the dead. The winged angel in the center pushes two men down — mercy is heavy work."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-saint-john-the-baptist-caravaggio-117",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Saint John the Baptist (1602)",
+    "teaser": "Caravaggio's teenage Baptist lounges in a dark landscape with a ram — half saint, half shepherd boy, wholly sensual. The church complained; Caravaggio painted sainthood with a body, not just a halo.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Saint John the Baptist (1602) by Caravaggio, Capitoline Museums",
+      "durationMinutes": 12,
+      "instruction": "The boy smiles at something only he can see. The ram, the staff, the animal-skin wrap: the symbols of the Baptist. Caravaggio's saints are street kids in studio light — that was the scandal, and it is the power."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-burial-of-saint-lucy-118",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Burial of Saint Lucy (1608)",
+    "teaser": "Caravaggio's last years in Sicily: two gravediggers lower the saint's body into the earth while mourners stand at the top of a staircase — grief from below, seen as if we are in the grave.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Burial of Saint Lucy (1608) by Caravaggio, Syracuse",
+      "durationMinutes": 12,
+      "instruction": "We see the burial from inside the pit — the mourners are silhouettes at the top, the gravediggers bend over the saint. The composition is brutal and bare, painted during Caravaggio's flight as a fugitive. He made death look like the literal ground beneath everyone."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-adoration-of-the-shepherds-119",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Adoration of the Shepherds (1609)",
+    "teaser": "Caravaggio's last nativity: shepherds crowd around the newborn in a bare room, Mary exhausted, Joseph a working man. No gold, no glory — just birth in a shed, painted by a man on the run.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Adoration of the Shepherds (1609) by Caravaggio, Messina",
+      "durationMinutes": 12,
+      "instruction": "The light comes from the baby himself — the only bright thing in the dark shed. The shepherds' faces are rough, their hands are working hands. Caravaggio stripped the nativity of every decoration; what remains is a family and some animals and a light."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-denial-of-saint-peter-120",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Denial of Saint Peter (1610)",
+    "teaser": "Caravaggio's Peter, three-fingered hand raised in denial, leans into a circle of lamplight while a soldier and a woman watch. It is among his very last paintings, and it shows a man who has failed the test.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Denial of Saint Peter (1610) by Caravaggio, Metropolitan Museum",
+      "durationMinutes": 12,
+      "instruction": "The three fingers up — the third denial, exactly as Peter warned. His face is lit from below by the fire, guilty already. The two others lean in, pressing the question. Caravaggio painted this while dying, alone, in 1610."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1610s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-david-and-goliath-caravaggio-121",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "David with the Head of Goliath (1610)",
+    "teaser": "Caravaggio's David holds Goliath's severed head at arm's length — and the head is Caravaggio's own face, painted during his last year as a condemned fugitive. The victim is the artist.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "David with the Head of Goliath (1610) by Caravaggio, Galleria Borghese",
+      "durationMinutes": 15,
+      "instruction": "Look closely at the head: it is Caravaggio's self-portrait, eyes open, mouth slack — the fugitive painting his own death warrant. David's face is sad, not triumphant. He sent the painting to the Pope as a plea for pardon. The pardon arrived days after Caravaggio died."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1610s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-saint-ursula-122",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Martyrdom of Saint Ursula (1610)",
+    "teaser": "Caravaggio's final painting: the moment an arrow pierces Ursula's chest while the king watches — the saint's face in shock, the arrow already through. He painted it in Naples, weeks before his death.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Martyrdom of Saint Ursula (1610) by Caravaggio, Naples",
+      "durationMinutes": 12,
+      "instruction": "The arrow has just entered — her lips part, her hand rises in a frozen gesture. The archer-king looks on with something like regret. Painted in Caravaggio's final weeks, it is a self-portrait of dying: the moment the world's arrow arrives."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1610s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-young-sick-bacchus-123",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Young Sick Bacchus (1593)",
+    "teaser": "Caravaggio's early self-portrait as a green-skinned Bacchus — a feverish young man in a sheet, offering grapes with an unwell smile. He painted himself as the god of wine while recovering from illness.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Young Sick Bacchus (1593) by Caravaggio, Galleria Borghese",
+      "durationMinutes": 12,
+      "instruction": "The skin is sallow, the gaze is glazed — this is sickness, not ecstasy. The grapes he offers are overripe. Caravaggio painted his own face as the god of wine, and the joke is on the gods: even Bacchus gets the flu."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-rest-on-the-flight-124",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Rest on the Flight into Egypt (1597)",
+    "teaser": "Caravaggio's holy family pauses on the run — Joseph holds the score for a singing angel while Mary and the child sleep against a donkey. Music, exhaustion, and escape in one quiet moment.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Rest on the Flight into Egypt (1597) by Caravaggio, Galleria Doria Pamphilj",
+      "durationMinutes": 12,
+      "instruction": "The angel plays a violin from behind — the music is the painting's light source. Joseph holds the open score; Mary sleeps wrapped in red. It is one of Caravaggio's gentlest works, painted before he turned to blood."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-crowning-with-thorns-125",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Crowning with Thorns (1602)",
+    "teaser": "Caravaggio's soldiers press a thorn crown onto Christ's head with canes, four hands working like a machine. The cruelty is bureaucratic — they are just doing their job.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Crowning with Thorns (1602) by Caravaggio, Kunsthistorisches Museum",
+      "durationMinutes": 12,
+      "instruction": "Two soldiers hold the canes, pushing the crown down — the third leans in to inspect. Christ's eyes are closed, his hands tied. The faces of the soldiers are ordinary, focused, almost bored. That is the point: cruelty needs no monsters."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-taking-of-christ-126",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Taking of Christ (1602)",
+    "teaser": "Caravaggio's arrest scene — Judas kisses Christ while soldiers close in, and a man at the edge raises a lantern and his arms, witnessing everything. The light reveals the betrayal like a flashbulb.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Taking of Christ (1602) by Caravaggio, National Gallery of Ireland",
+      "durationMinutes": 15,
+      "instruction": "The man with the lantern at the far right is a self-portrait — Caravaggio as the witness who sees but does nothing. Christ's hands are folded in calm; Judas's kiss lands on his cheek. The armor of the soldier glints with the lantern light: the whole scene is lit by the betrayal."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-flagellation-caravaggio-127",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Flagellation of Christ (1607)",
+    "teaser": "Caravaggio's Christ is tied to a column while three men take turns with the whip — the faces of the tormentors hidden or turned away, the body the only clear thing in the dark.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Flagellation of Christ (1607) by Caravaggio, Naples",
+      "durationMinutes": 12,
+      "instruction": "The light falls on Christ's back, already striped. The torturers' faces are cut off by the frame or turned aside — they are not individuals, they are the machinery of punishment. Painted in Naples, it is one of Caravaggio's most brutal and most silent works."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-martyrdom-of-st-matthew-128",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Martyrdom of Saint Matthew (1600)",
+    "teaser": "Caravaggio's altar for the Contarelli Chapel: an assassin lunges at the fallen Matthew while a naked youth flees and onlookers scatter — violence staged in a church, painted with a street brawler's energy.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Martyrdom of Saint Matthew (1600) by Caravaggio, San Luigi dei Francesi",
+      "durationMinutes": 12,
+      "instruction": "The killer holds Matthew down, his sword ready; Matthew reaches up, accepting. The crowd recoils in a wave. The boy at the left — a self-portrait — runs from the scene. Caravaggio's martyrs die in the middle of the street, not in heaven."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-calling-of-sts-129",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Conversion of Saint Paul (1601)",
+    "teaser": "Caravaggio's Paul lies flat under a rearing horse, blinded by a light from off-canvas — the road to Damascus reduced to a man, a horse, and a beam of light. The horse takes up most of the painting.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Conversion of Saint Paul (1601) by Caravaggio, Santa Maria del Popolo",
+      "durationMinutes": 12,
+      "instruction": "The horse is the largest thing in the frame; Paul is crushed beneath, arms out, a man who has been knocked flat by the truth. The light comes from nowhere visible — it simply happens. No road, no Damascus, no witnesses: just the moment."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-crucifixion-of-st-peter-130",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Crucifixion of Saint Peter (1601)",
+    "teaser": "Caravaggio's Peter is nailed upside down while three workers strain to raise the cross — the saint's face turned to us, the labor of execution laid bare. Crucifixion as a heavy, sweaty job.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Crucifixion of Saint Peter (1601) by Caravaggio, Santa Maria del Popolo",
+      "durationMinutes": 12,
+      "instruction": "The three men haul the cross up with their whole bodies — this is manual labor, filmed in a cellar. Peter's eyes meet ours. He asked to be crucified upside down, unworthy of Christ's death. Caravaggio paints the humility as physical fact."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-deposition-caravaggio-131",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Deposition (1604)",
+    "teaser": "Caravaggio's Pietà without Mary — three men lower Christ's body while a woman behind them howls with her arms up. The composition is a slow, painful ladder of grief from top to bottom.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Deposition (1604) by Caravaggio, Vatican",
+      "durationMinutes": 12,
+      "instruction": "Follow the arms: each figure holds Christ at a different height, forming a diagonal of grief. The woman behind — the weeping Mary — throws her arms wide and back, the painting's rawest gesture. The stone slab at the bottom points out at the viewer: the body is coming toward you."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-annunciation-caravaggio-132",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Annunciation (1608)",
+    "teaser": "Caravaggio's angel swoops in from the left, wings still beating, finger pointed — while Mary receives the news with a hand raised in a gesture that could be acceptance or protest. It is an annunciation with tension.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Annunciation (1608) by Caravaggio, Musée des Beaux-Arts de Nancy",
+      "durationMinutes": 12,
+      "instruction": "The angel is mid-flight, robe streaming, arriving like a report. Mary's raised hand is ambiguous — a greeting, a question, a shield. Painted during Caravaggio's flight from Rome, it is an annunciation to a man in hiding: news always arrives."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-saint-john-the-baptist-borghese-133",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Penitent Magdalene (1597)",
+    "teaser": "Caravaggio's Magdalene sits on the floor with a jar of ointment and her jewelry abandoned beside her — a teenage woman, exhausted, who has just made a decision. The tear on her cheek is the painting.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Penitent Magdalene (1597) by Caravaggio, Galleria Doria Pamphilj",
+      "durationMinutes": 12,
+      "instruction": "Her eyes are swollen, her head bowed — she has been crying for a long time. The pearls and the jar are at her feet, already given up. Caravaggio painted his friend, a courtesan, as the saint; the model's own story made the painting possible."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-beheading-of-st-john-134",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Beheading of Saint John the Baptist (1608)",
+    "teaser": "Caravaggio's largest painting and his only signed work — the signature is written in the blood pooling from John's neck. The executioner grips the head by the hair while Salome holds the basin.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Beheading of Saint John the Baptist (1608) by Caravaggio, Valletta",
+      "durationMinutes": 15,
+      "instruction": "Find the signature: 'f. Michelang.o' written in the red pool at the bottom — blood as ink. The executioner has his knee on John's back, the head hangs, the two onlookers at the window stare blankly. It was painted for the Knights of Malta while Caravaggio was their prisoner."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1600s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-judith-holofernes-135",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Judith and Holofernes (1612)",
+    "teaser": "Gentileschi's Judith saws through Holofernes' neck with the maid pressing him down — painted by a woman who knew violence firsthand. It is the most visceral Judith in art history.",
+    "imageUrl": "",
+    "byline": "Artemisia Gentileschi",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Judith and Holofernes (1612) by Gentileschi, Uffizi",
+      "durationMinutes": 15,
+      "instruction": "Both women are in the fight — Judith pulls the sword, the maid shoves the general's head down onto the blade. The blood sprays across the sheets in an arc. Gentileschi painted this after her own trial; the painting is her testimony in oil."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1610s"
+    ],
+    "tier": 1
+  }
+]

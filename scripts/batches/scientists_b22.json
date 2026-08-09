@@ -1,0 +1,282 @@
+[
+  {
+    "id": "scientist-howard-temin",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Howard Temin",
+    "teaser": "The American virologist who showed that some viruses copy RNA back into DNA — reverse transcription — overturning the 'central dogma' and explaining how retroviruses like HIV work. He shared the 1975 Nobel.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Reverse",
+      "targetName": "Temin's reverse transcriptase",
+      "instruction": "Learn how Temin discovered that RNA tumor viruses use reverse transcriptase to write their genes into host DNA. Write why this overturned the central dogma and how it guides HIV treatment today.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-craig-venter",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Craig Venter",
+    "teaser": "The American biologist who raced the public Human Genome Project to sequence the human genome with his private company, then built the first cell with a synthetic genome. He has spent his career pushing biology toward engineering.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Sequence",
+      "targetName": "Venter's genome race",
+      "instruction": "Learn how Venter's shotgun sequencing approach read the human genome faster than the public project. Write what his synthetic bacterium experiment achieved and how genomics is changing medicine.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-francis-collins",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Francis Collins",
+    "teaser": "The American geneticist who led the public Human Genome Project to completion, then directed the NIH — including through a pandemic. A born-again Christian, he argued science and faith can coexist and made the genome a shared human treasure.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Genome",
+      "targetName": "Collins's Human Genome Project",
+      "instruction": "Learn how Collins's international consortium finished sequencing the human genome in 2003. Write what we learned from the 3 billion base pairs and how genomics now guides precision medicine.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-paul-berg",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Paul Berg",
+    "teaser": "The American biochemist who created the first recombinant DNA molecule — splicing genes from different organisms — and then called for a moratorium on the technology until its risks were understood. He won the 1980 Nobel and helped write the safety rules for genetic engineering.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Splice",
+      "targetName": "Berg's recombinant DNA",
+      "instruction": "Learn how Berg joined a monkey virus's DNA to a bacterial plasmid in 1972. Write what recombinant DNA enabled, why scientists paused voluntarily at Asilomar, and how biotechnology grew from that moment.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-walter-gilbert",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Walter Gilbert",
+    "teaser": "The American physicist-turned-biologist who invented a chemical method for sequencing DNA and discovered the intron — the interrupting sequences in genes. He shared the 1980 Nobel and coined 'RNA world' for the origin of life.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Sequence",
+      "targetName": "Gilbert's DNA sequencing",
+      "instruction": "Learn how Gilbert's chemical cleavage method read DNA sequences in the 1970s. Write what introns are and how the 'RNA world' hypothesis explains how life began.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-ernst-chain",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ernst Chain",
+    "teaser": "The German-British biochemist who purified penicillin into a usable drug with Florey, racing the Blitz to save soldiers' lives. He shared the 1945 Nobel for turning Fleming's mold into medicine.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Purify",
+      "targetName": "Chain's penicillin",
+      "instruction": "Learn how Chain isolated and characterized penicillin at Oxford while bombs fell on London. Write the steps from mold broth to purified drug and why it was the first true antibiotic.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-claude-bernard",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Claude Bernard",
+    "teaser": "The French physiologist who introduced the 'milieu intérieur' — the idea that the body maintains a stable internal environment — the seed of the concept of homeostasis. He made experiment the heart of medicine.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Balance",
+      "targetName": "Bernard's internal environment",
+      "instruction": "Learn how Bernard discovered the liver stores sugar and coined the internal environment concept. Write what homeostasis is, with one example like body temperature, and why Bernard founded experimental medicine.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-walter-cannon",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Walter Cannon",
+    "teaser": "The American physiologist who coined 'fight or flight' and named homeostasis — the body's self-regulating balance. His book The Wisdom of the Body described how organs work together to keep us stable.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fight",
+      "targetName": "Cannon's fight or flight",
+      "instruction": "Learn how Cannon mapped the adrenal and sympathetic responses that prime the body for danger. Write how homeostasis maintains stability and give two examples of the body correcting itself.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-william-osler",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "William Osler",
+    "teaser": "The Canadian physician who transformed medical teaching by bringing students to the bedside instead of the lecture hall. His Principles and Practice of Medicine was the standard for half a century.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Bedside",
+      "targetName": "Osler's clinical teaching",
+      "instruction": "Learn how Osler created the clinical clerkship and made the patient the textbook. Write why listening and observation were his cardinal rules and how his approach shaped modern medical education.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-elizabeth-blackwell",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Elizabeth Blackwell",
+    "teaser": "The English-born physician who became the first woman in America to earn a medical degree — rejected by 29 schools before one admitted her as a 'joke.' She founded hospitals, medical schools for women, and opened medicine to half the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Open",
+      "targetName": "Blackwell's medical degree",
+      "instruction": "Learn how Blackwell won admission to Geneva Medical College and later founded the New York Infirmary. Write the obstacles she faced and how she advanced medicine for women and public health.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-christiaan-barnard",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Christiaan Barnard",
+    "teaser": "The South African surgeon who performed the world's first human heart transplant in 1967, in a hospital theater in Cape Town. The patient lived 18 days, and the world has never been the same.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Transplant",
+      "targetName": "Barnard's first heart transplant",
+      "instruction": "Learn how Barnard's team transplanted a donor heart into Louis Washkansky in 1967. Write the surgical challenges, the ethical questions the case raised, and how transplants have evolved since.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-willem-kolff",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Willem Kolff",
+    "teaser": "The Dutch physician who built the first kidney dialysis machine from sausage casings and a washing machine during the Nazi occupation, then moved to the US and helped develop the artificial heart and heart-lung machines.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dialysis",
+      "targetName": "Kolff's artificial kidney",
+      "instruction": "Learn how Kolff's rotating-drum dialyzer cleaned blood outside the body in 1943. Write what dialysis does and how his artificial organs work saved and extended countless lives.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-karl-landsteiner",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Karl Landsteiner",
+    "teaser": "The Austrian physician who discovered the ABO blood groups and made safe transfusions possible, later helping find the Rhesus factor. He won the 1930 Nobel for a discovery measured in lives saved by the millions.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Type",
+      "targetName": "Landsteiner's blood groups",
+      "instruction": "Learn how Landsteiner identified the A, B, and O blood types and why mismatched transfusions clump. Write how ABO compatibility works, why type O is the universal donor, and what the Rh factor is.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-godfrey-hounsfield",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Godfrey Hounsfield",
+    "teaser": "The English electrical engineer who invented the CT scanner — X-rays turned into cross-sectional slices by computer — and shared the 1979 Nobel. His prototype took hours per scan; today's take seconds and image the living body.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Slice",
+      "targetName": "Hounsfield's CT scanner",
+      "instruction": "Learn how Hounsfield's EMI scanner combined X-ray measurements with computer reconstruction. Write how CT imaging builds 3D views from many angles and why it transformed diagnosis.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-jacques-cousteau",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Jacques Cousteau",
+    "teaser": "The French naval officer who co-invented the Aqua-Lung, filmed the sea's depths in glowing color, and awakened the world to ocean conservation. His ship Calypso explored reefs, wrecks, and creatures never seen before.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dive",
+      "targetName": "Cousteau's Calypso expeditions",
+      "instruction": "Learn how Cousteau's self-contained breathing apparatus let divers swim free underwater. Write about one of his Calypso discoveries and how his films turned ocean conservation into a global cause.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-robert-ballard",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Robert Ballard",
+    "teaser": "The American oceanographer who found the wreck of the Titanic in 1985, then discovered hydrothermal vents — deep-sea chimneys teeming with life that thrives without sunlight. He has mapped the seafloor and explored shipwrecks from the deep.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Vent",
+      "targetName": "Ballard's hydrothermal vents",
+      "instruction": "Learn how Ballard's team found Titanic and later explored the mid-ocean ridge. Write what hydrothermal vents are, how tube worms and other life survive on chemicals there, and why the discovery changed biology.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-fridtjof-nansen",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Fridtjof Nansen",
+    "teaser": "The Norwegian explorer who let his ship freeze into the Arctic ice and drift toward the pole, proving ocean currents carry the sea. He later won the Nobel Peace Prize for refugee work — a scientist who cared for the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drift",
+      "targetName": "Nansen's Fram expedition",
+      "instruction": "Learn how Nansen deliberately froze the Fram into pack ice for three years to study Arctic currents. Write what the expedition revealed about the polar ocean and why he became the League of Nations' refugee commissioner.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-ernest-shackleton",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ernest Shackleton",
+    "teaser": "The Irish polar explorer whose ship Endurance was crushed by Antarctic ice in 1915 — and who brought all 27 men home alive through a legendary open-boat voyage. His leadership under disaster is studied by managers to this day.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Endure",
+      "targetName": "Shackleton's Endurance",
+      "instruction": "Learn how Shackleton saved his crew after the Endurance sank, sailing 800 miles in a lifeboat and crossing South Georgia on foot. Write the stages of the rescue and why his leadership is legendary.",
+      "durationMinutes": 25
+    }
+  },
+  {
+    "id": "scientist-joseph-banks",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Joseph Banks",
+    "teaser": "The English naturalist who sailed with Captain Cook aboard the Endeavour, collecting thousands of plant species and opening the Pacific to science. As president of the Royal Society for 42 years, he turned Kew Gardens into a global botanical hub.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Collect",
+      "targetName": "Banks's Endeavour voyage",
+      "instruction": "Learn how Banks documented the flora of Tahiti, New Zealand, and Australia on Cook's first voyage. Write about one discovery, like the eucalyptus or kangaroo, and how his collections changed botany.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-mary-sherman-morgan",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Mary Sherman Morgan",
+    "teaser": "The American chemist who, in the 1950s, invented hydyne — the rocket fuel that launched Explorer 1, America's first satellite — after being told a woman could never figure it out. Her work is one of the space race's best-kept secrets.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fuel",
+      "targetName": "Morgan's hydyne fuel",
+      "instruction": "Learn how Mary Sherman Morgan developed hydyne to give the Jupiter-C rocket enough thrust for Explorer 1. Write what rocket fuel must do and why her achievement stayed hidden for decades.",
+      "durationMinutes": 20
+    }
+  }
+]

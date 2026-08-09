@@ -1,3 +1,35 @@
+# Request — Topic data expansion to 500+ per category (DONE)
+
+## v8.53 — all 11 categories ≥500 entries, 5,838 topics total (pushed)
+
+- User asked to expand the topic data so every category has 500+ accurate,
+  enjoyable, hand-written topics with proper instructions; remove fake
+  entries, don't rewrite existing ones; keep going until all categories hit
+  500; no questions, work until finished.
+- Wrote ~3,500 new hand-written topics in `scripts/batches/{category}_b*.json`
+  (134 batch files, exact per-category schema) and merged them all into the
+  main `app/src/main/assets/topics/*.json` files (merge script:
+  `scripts/merge_topic_batches.js`).
+- Final counts: artists 506, albums 502, directors 508, films 802, authors
+  500, books 500, painters 506, artworks 504, scientists 501, discoveries
+  506, wildcard 503 → **5,838 topics** (was ~2,350).
+- Accuracy passes: every batch JSON-parses; name/id collision checks against
+  main + cross-batch (dups removed — e.g. Zhang Ailing dup, Fahrenheit 451
+  dups, A Tale of Two Cities / David Copperfield cross-batch, The Wave AZ /
+  Nazca Lines / Starling Murmurations vs main); `durationMinutes` normalized
+  to numbers where books wrote strings; fixed `danilo-kis` categoryId;
+  swapped a few unverified/fake entries for real notable people/works (e.g.
+  Signe Bang → Jonas Lie, A$AP Rocky collision resolved).
+- Validation: official `scripts/validate_topics.py` is Python-only and the
+  shell had no Python — added a faithful Node mirror `scripts/validate_topics.js`
+  (same checks: ids unique, categoryId matches, required fields present,
+  names non-empty, exploreAction.instruction present). All 5,838 topics
+  validate; `git diff --check` clean; films.json tiny pre-existing
+  enrichments (empty instructions filled) kept.
+- dev.nix: added python3 to the dev shell packages (per user request).
+- versionCode 20260909 → 20260910 + store changelog 20260910.txt.
+- Committed and pushed on `Alpha`.
+
 # Request — Pet screen redesign: Pets/Editor/Settings studio (DONE)
 
 ## v8.52 — 3-page studio + per-frame eyes editor (pushed)

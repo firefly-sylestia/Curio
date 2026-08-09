@@ -1,0 +1,282 @@
+[
+  {
+    "id": "scientist-james-watt",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "James Watt",
+    "teaser": "The Scottish instrument maker who added a separate condenser to the steam engine, tripling its efficiency and supercharging the Industrial Revolution. He later coined the word 'horsepower' — and the unit watt bears his name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Steam",
+      "targetName": "Watt's steam engine",
+      "instruction": "Learn why Watt's separate condenser made steam engines dramatically more efficient than Newcomen's. Write how the watt measures power and how his engine powered mills, mines, and locomotives.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-george-stephenson",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "George Stephenson",
+    "teaser": "The English self-taught engineer who built the first public steam railway between Stockton and Darlington, then the Liverpool–Manchester line. His Rocket won the Rainhill Trials in 1829 and set the pattern for all railways.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Rail",
+      "targetName": "Stephenson's Rocket",
+      "instruction": "Learn how Stephenson's Rocket combined a multi-tube boiler with a blast pipe to win the Rainhill Trials. Write why his gauge of 4 ft 8½ in became the world standard.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-richard-trevithick",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Richard Trevithick",
+    "teaser": "The Cornish engineer who built the first locomotive to run on rails in 1804 and the world's first road carriage — using high-pressure steam that frightened his contemporaries. He died poor, but his ideas moved the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "High",
+      "targetName": "Trevithick's high-pressure engine",
+      "instruction": "Learn how Trevithick's use of high-pressure steam allowed engines small enough to move. Write about his 1804 Penydarren locomotive and why high pressure was considered dangerous.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-isambard-kingdom-brunel",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Isambard Kingdom Brunel",
+    "teaser": "The British engineer who built the Thames Tunnel, the Clifton Suspension Bridge, and the Great Western Railway — then launched the Great Eastern, the largest ship ever built. He chased the impossible and usually caught it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Span",
+      "targetName": "Brunel's engineering wonders",
+      "instruction": "Learn about Brunel's Thames Tunnel, Box Tunnel, and the steamship Great Eastern. Write why he was called the greatest engineer of his age and one risk he took that nearly killed him.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-nikola-tesla",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Nikola Tesla",
+    "teaser": "The Serbian-American inventor who championed alternating current, built the first hydroelectric plant at Niagara, and dreamed of wireless power. He filed hundreds of patents, yet died nearly broke, and his name still sparks wonder.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Alternate",
+      "targetName": "Tesla's AC system",
+      "instruction": "Learn why alternating current won the 'War of the Currents' against Edison's direct current. Write how Tesla's induction motor and polyphase system made long-distance power possible.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-guglielmo-marconi",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Guglielmo Marconi",
+    "teaser": "The Italian inventor who turned radio waves into a worldwide telegraph, sending the first wireless signal across the Atlantic in 1901. His 'wireless' began as a hobby in his attic and ended as global communication.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Transmit",
+      "targetName": "Marconi's transatlantic signal",
+      "instruction": "Learn how Marconi transmitted the letter 'S' across the Atlantic from Cornwall to Newfoundland. Write how spark-gap transmitters worked and why the achievement was doubted at first.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-samuel-morse",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Samuel Morse",
+    "teaser": "The American painter who gave up art for invention and built the electric telegraph, sending 'What hath God wrought?' from Washington to Baltimore in 1844. His Morse code of dots and dashes bound the world together.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Dot",
+      "targetName": "Morse code",
+      "instruction": "Learn Morse code and why he assigned shorter codes to frequent letters like E and T. Write your own name in Morse and explain how the telegraph relay extended signals across continents.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-alexander-graham-bell",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Alexander Graham Bell",
+    "teaser": "The Scottish-born teacher of the deaf who invented the telephone in 1876, saying 'Mr. Watson, come here — I want to see you.' His real passion was helping the deaf, and his first 'phone' grew out of experiments on sound and speech.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Call",
+      "targetName": "Bell's telephone",
+      "instruction": "Learn how Bell's telephone converted sound vibrations into electric current and back. Write about the famous first call and why Bell's work with the deaf shaped his approach to sound.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-thomas-edison",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Thomas Edison",
+    "teaser": "The American inventor who brought the world electric light, recorded sound, and moving pictures — 1,093 patents in all. He said genius is 'one percent inspiration and ninety-nine percent perspiration,' and he sweated in the lab every day.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Illuminate",
+      "targetName": "Edison's inventions",
+      "instruction": "Learn how Edison's team tested thousands of materials for the light bulb filament and built the first central power station. Write about the phonograph and why Edison's Menlo Park lab mattered.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-philo-farnsworth",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Philo Farnsworth",
+    "teaser": "The Idaho farm boy who sketched his idea for electronic television in a high-school chemistry class and built the first working model at 21. He beat the big corporations to the invention — and was cheated out of the credit.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Scan",
+      "targetName": "Farnsworth's television",
+      "instruction": "Learn how Farnsworth's image dissector scanned a picture line by line to transmit it electronically. Write why his all-electronic system beat mechanical television and how RCA tried to claim it.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-lee-de-forest",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Lee de Forest",
+    "teaser": "The American inventor of the Audion tube — a tiny vacuum tube that amplified signals and made radio broadcasting, sound film, and early computers possible. He called it his 'burning sword of science.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Amplify",
+      "targetName": "de Forest's Audion tube",
+      "instruction": "Learn how the Audion's third grid let a weak signal control a strong current, amplifying radio waves. Write how vacuum tubes powered radios, telephones, and computers before transistors.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-john-logie-baird",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "John Logie Baird",
+    "teaser": "The Scottish engineer who demonstrated the first working television in 1926, using spinning discs in a London attic. His mechanical system was soon outdone by electronics, but he lit the screen that changed the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Scan",
+      "targetName": "Baird's mechanical TV",
+      "instruction": "Learn how Baird's Nipkow disc scanned a scene with a spiral of holes to produce an image. Write how his 1926 demonstration worked and why electronic television replaced the mechanical method.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-percy-spencer",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Percy Spencer",
+    "teaser": "The American engineer who noticed a chocolate bar melting in his pocket while testing radar magnetrons — and invented the microwave oven. His 'Radarange' went from a lab accident to a kitchen in every home.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Microwave",
+      "targetName": "Spencer's radar range",
+      "instruction": "Learn how Spencer tested popcorn and an egg in front of a magnetron, inventing microwave cooking. Write how microwaves heat food by vibrating water molecules and how his discovery was commercialized.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-edwin-armstrong",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Edwin Armstrong",
+    "teaser": "The American radio engineer who invented FM broadcasting — static-free radio — plus the regenerative and superheterodyne circuits. Corporations fought him for decades, and his fight for his patents ended in tragedy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Tune",
+      "targetName": "Armstrong's FM radio",
+      "instruction": "Learn how frequency modulation encodes sound by varying the frequency, not the amplitude, of a wave. Write why FM resists static and why Armstrong's invention was slow to be adopted.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-charles-kao",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Charles Kao",
+    "teaser": "The Chinese-born engineer who realized that ultra-pure glass fibers could carry light for kilometers — the idea behind fiber-optic communication. He won the 2009 Nobel for an insight that became the internet's backbone.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fiber",
+      "targetName": "Kao's fiber optics",
+      "instruction": "Learn how Kao showed that impurities, not glass itself, limited light transmission in fibers. Write how fiber optics carry data as pulses of light and why his 1966 paper started the communications revolution.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-dennis-gabor",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Dennis Gabor",
+    "teaser": "The Hungarian-British engineer who invented holography in 1947 — a way to record and replay a full 3D image — while trying to improve the electron microscope. He won the 1971 Nobel for an idea that waited 13 years for lasers to realize it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Hologram",
+      "targetName": "Gabor's holography",
+      "instruction": "Learn how holograms record both the intensity and phase of light waves, unlike photographs. Write how lasers made Gabor's idea practical and list two modern uses of holography.",
+      "durationMinutes": 20
+    }
+  },
+  {
+    "id": "scientist-rudolf-diesel",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Rudolf Diesel",
+    "teaser": "The German engineer who built an engine that ignites fuel by compression alone — no spark plugs — and ran it on vegetable oil at the 1900 World's Fair. His diesel engine became the workhorse of ships, trains, and trucks.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Compress",
+      "targetName": "Diesel's compression engine",
+      "instruction": "Learn how the diesel engine compresses air until it is hot enough to ignite fuel. Write why diesel engines are more efficient than gasoline engines and how Diesel's engine was first demonstrated.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-joseph-henry",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Joseph Henry",
+    "teaser": "The American physicist who built some of the first electromagnets and discovered electromagnetic induction — independently of Faraday — as well as the self-inductance that powers transformers. He became the first secretary of the Smithsonian.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Induce",
+      "targetName": "Henry's electromagnets",
+      "instruction": "Learn how Henry wound insulated wire into powerful electromagnets and discovered mutual and self-inductance. Write how his discoveries underpin transformers, motors, and generators.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-ernst-mach",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ernst Mach",
+    "teaser": "The Austrian physicist-philosopher who photographed bullets breaking the sound barrier and inspired Einstein with his skepticism about absolute space. The Mach number — how fast you travel compared to sound — bears his name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Sonic",
+      "targetName": "Mach number and shock waves",
+      "instruction": "Learn what Mach 1 means and how Mach photographed shock waves around supersonic bullets. Write what causes a sonic boom and how his philosophy of science influenced Einstein.",
+      "durationMinutes": 15
+    }
+  },
+  {
+    "id": "scientist-ludwig-boltzmann",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Scientist",
+    "name": "Ludwig Boltzmann",
+    "teaser": "The Austrian physicist who explained entropy as sheer statistics — the overwhelming probability of disorder among countless atoms. His formula S = k log W is carved on his tombstone, and his battles for atomism ended in despair.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Entropy",
+      "targetName": "Boltzmann's entropy",
+      "instruction": "Learn how Boltzmann linked entropy to the number of microscopic arrangements of atoms. Write why the universe tends toward disorder and how his statistical view was finally vindicated.",
+      "durationMinutes": 20
+    }
+  }
+]

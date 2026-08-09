@@ -1,0 +1,422 @@
+[
+  {
+    "id": "painter-pierre-bonnard",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Pierre Bonnard",
+    "teaser": "The French painter of intimate color — his bathtubs, breakfast tables, and nudes of his wife Marthe glow with a warmth that makes every room feel like a memory. He is called the painter of happiness, but his happiness is hard-won and fragile.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Bathroom or Nude in the Bath — the tiles",
+      "durationMinutes": 20,
+      "instruction": "Look at how Bonnard fills the edges of the frame: a woman in the tub, but the tiles, the window, the cat all compete for your eye. He painted from memory and photographs, adjusting colors as he went. Matisse called him 'the greatest colorist of our time.'"
+    },
+    "tags": [
+      "Post-Impressionism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-edouard-vuillard",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Édouard Vuillard",
+    "teaser": "The French painter of wallpaper — his scenes of women sewing, reading, and knitting in patterned rooms are mosaics of fabric and domestic quiet. He lived with his mother until her death at 90, and painted the life he had, not the one he wanted.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Seamstress or the interior scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Vuillard dissolves figures into their surroundings: a woman's dress becomes part of the wallpaper, the carpet, the tablecloth. Everything is pattern. He was called 'the Nabi of the interiors' — he painted the silence of rooms people actually lived in."
+    },
+    "tags": [
+      "Nabis",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-maurice-denys",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Maurice Denis",
+    "teaser": "The Nabi who wrote the slogan of modern painting — 'remember that a picture, before being a warhorse, a nude, or an anecdote, is essentially a flat surface covered with colors.' He painted devotional, decorative, dreamy scenes from his Brittany childhood.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Bathers at Perros-Guirec or the Muses",
+      "durationMinutes": 20,
+      "instruction": "Look at the flatness: Denis treated the canvas as a decorated surface first, a story second. His bathers, beach scenes, and religious processions are arranged like wallpaper with figures. He was also a devout Catholic who wanted to renew religious art — harmony was his faith."
+    },
+    "tags": [
+      "Nabis",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-paul-serusier",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Paul Sérusier",
+    "teaser": "The Nabi who started it all — his tiny landscape The Talisman, painted under Gauguin's instruction at Pont-Aven in 1888, told a whole generation to use pure color without copying nature. It is the founding document of the Nabis group.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Talisman (Musée d'Orsay) — the wood",
+      "durationMinutes": 20,
+      "instruction": "A small panel of a wood in autumn, painted in slabs of orange, violet, and green — not as the wood looked, but as it felt. Gauguin told the 24-year-old Sérusier: 'How do you see that tree? Green? Then put green — the greenest on your palette.' Painting would never be the same."
+    },
+    "tags": [
+      "Nabis",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-felix-vallotton",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Félix Vallotton",
+    "teaser": "The Swiss-French painter of sharp edges and flat shadows — his woodcuts of crowds, his cool nudes, and his unsettling interiors are precise, sardonic, and unforgettable. He was a member of the Nabis who kept his distance from all of them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Woodcut series of crowds or The White and the Black",
+      "durationMinutes": 20,
+      "instruction": "Look at his woodcuts: black and white cut into bold flat shapes, crowds becoming patterns, streets becoming traps. Then look at his oil The White and the Black: a Black woman and a white woman in a bedroom, painted with a gaze that is both cold and curious. Vallotton observed everyone, including himself."
+    },
+    "tags": [
+      "Nabis",
+      "Swiss",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ker-xavier-roussel",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ker-Xavier Roussel",
+    "teaser": "The Nabi who escaped indoors — while Vuillard painted wallpaper, Roussel painted parks, nymphs, and pastoral Arcadias in glowing color. He was Bonnard's best friend and fellow escapee of the studio, and his later mythological landscapes are exuberant.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Bacchantes or the pastoral landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at the energy: Roussel's nymphs, fauns, and lovers tumble through forests of green and gold, painted with broad, happy strokes. He said painting should be 'a feast for the eyes.' His Arcadia is the 19th century dreaming of escape."
+    },
+    "tags": [
+      "Nabis",
+      "French",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jan-toorop",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jan Toorop",
+    "teaser": "The Dutch-Indonesian Symbolist who made lines dance — his poster for salad oil, with its swirling hair and dotted patterns, became an icon of Art Nouveau. His mystical, decorative works mix Javanese ornament, religion, and fin-de-siècle anxiety.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Salad Oil poster (1894) or The Three Brides",
+      "durationMinutes": 20,
+      "instruction": "Look at the poster's lines: hair, flowers, and waves all spiral in the same rhythm, printed in a few flat colors — a masterpiece of graphic design before the term existed. Then The Three Brides: a dream of past, present, and future brides drawn in dots and curls. Mysticism made decorative."
+    },
+    "tags": [
+      "Symbolism",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-johan-barthold-jongkind",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Johan Barthold Jongkind",
+    "teaser": "The Dutch painter who showed Monet how to see — his luminous views of Paris bridges, Dutch canals, and the Normandy coast taught the young Impressionists that light moves and water shimmers. He painted the sea from a barrel on the beach.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Seine in Paris or the Dutch canal scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the water: Jongkind painted reflections as ripples of pure color, the sky as a moving thing. Monet said of him: 'It was he who trained my eye.' He was also a difficult man, prone to depression and drink, but his light is always clear and morning-fresh."
+    },
+    "tags": [
+      "Impressionism",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jozef-israels",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jozef Israëls",
+    "teaser": "The 'Dutch Millet' — a painter of fishermen, seamstresses, and the poor, whose dark, tender scenes of the North Sea coast made him the most famous Dutch artist of his day. His light is low, his people are tired, and his sympathy is total.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Alone in the World or the fishermen's wives scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the darkness: Israëls painted interiors lit by one window, faces lit by one lamp, the sea grey behind. His subjects wait — for husbands, for boats, for better times. He made poverty dignified without making it pretty. Van Gogh admired him deeply."
+    },
+    "tags": [
+      "Hague School",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jacob-maris",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jacob Maris",
+    "teaser": "The Hague School master of the Dutch sky — his broad views of windmills, canals, and grey cities are painted with a softness that makes Holland look like a watercolor of itself. He is the greatest landscape painter of the school.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Beach at Scheveningen or the canal views",
+      "durationMinutes": 20,
+      "instruction": "Look at the sky: Maris painted three-quarters sky, letting the grey light do the work. His windmills and towers rise from the haze like memories. The Dutch say his paintings smell of sea air — look long enough and you'll agree."
+    },
+    "tags": [
+      "Hague School",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-hendrik-willem-mesdag",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Hendrik Willem Mesdag",
+    "teaser": "The Dutch painter who built a panorama — his Panorama Mesdag, a cylindrical painting of the beach at Scheveningen, is one of the largest paintings in the world, 14 meters tall and 120 meters around. He painted the sea from his own house on the dunes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Panorama Mesdag (The Hague) — walk the circle",
+      "durationMinutes": 45,
+      "instruction": "Stand in the center of the round building and turn slowly: beach, sea, ships, and dunes surround you seamlessly, with real sand and rope in the foreground to trick your eye. Mesdag painted it in 1881 with his wife and students. The sea, everywhere you look."
+    },
+    "tags": [
+      "Hague School",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-isaac-israels",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Isaac Israëls",
+    "teaser": "The son of Jozef Israëls who traded his father's dark tenderness for bright Impressionism — he painted Parisian cafés, Amsterdam streets, and women in motion with a quick, sunlit brush. He was called the Dutch Manet.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Riders in the Wood or the café scenes",
+      "durationMinutes": 20,
+      "instruction": "Look at the speed: Israëls caught women walking, riders passing, crowds shifting — figures cropped and moving like snapshots. His palette is pale and brilliant: whites, creams, and sky blue. He painted the modern city's blur and made it elegant."
+    },
+    "tags": [
+      "Impressionism",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-floris-verster",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Floris Verster",
+    "teaser": "The Dutch painter of luminous still lifes and gardens — his jars of poppies and iris bouquets glow with a near-abstract intensity. He was a quiet, self-critical man who painted slowly and burned what he didn't love.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Still Life with Poppies or the garden views",
+      "durationMinutes": 20,
+      "instruction": "Look at how Verster pushes flowers past decoration: a jar of poppies becomes a furnace of red, the light behind them flaring. He destroyed hundreds of his own works — what survives is what he could forgive. Paintings that were hard-won, and glow because of it."
+    },
+    "tags": [
+      "Impressionism",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-george-hendrik-breitner",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "George Hendrik Breitner",
+    "teaser": "The Dutch Impressionist of the rainy street — his images of Amsterdam's Damrak, with horses, trams, and umbrellas in the drizzle, are the definitive pictures of the city in motion. He was also an early photographer who used photos to compose.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Damrak in Amsterdam or the Girls in Kimono studies",
+      "durationMinutes": 20,
+      "instruction": "Look at the grey: Breitner painted Amsterdam's wet pavements, its fog, its crowds — a city of movement caught mid-stride. He carried a camera to capture the instant, then painted from it. He is the painter of the Netherlands as it actually felt: damp, busy, alive."
+    },
+    "tags": [
+      "Impressionism",
+      "Dutch",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jan-sluyters",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jan Sluyters",
+    "teaser": "The Dutch painter who zigzagged through every modern style — Impressionism, luminism, expressionism — with a signature sensuality. His nudes and portraits vibrate with color, and his 1920s 'bathers' are among the boldest Dutch paintings of the century.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Bathers or the portraits of women",
+      "durationMinutes": 20,
+      "instruction": "Look at the color energy: Sluyters painted skin in pinks and greens, backgrounds in electric blue, with a loose, swinging brush. He could paint a party better than anyone in the Netherlands. His work swings between joy and unease, often in the same canvas."
+    },
+    "tags": [
+      "Expressionism",
+      "Dutch",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-karel-appel",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Karel Appel",
+    "teaser": "The CoBrA group's wild man — a Dutch painter who threw paint like a storm, building faces and figures out of thick, furious color. His Questioning Children made him famous and scandalized the Netherlands; he left for Paris and never looked back.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Questioning Children (Stedelijk Museum) — the paint",
+      "durationMinutes": 20,
+      "instruction": "Look at the surface: Appel applied paint with palette knives, fingers, and tubes — the canvas is a battlefield of color. Questioning Children caused a riot of controversy in 1949 for its 'ugliness.' He said: 'I don't paint, I hit.' The paint shows it."
+    },
+    "tags": [
+      "CoBrA",
+      "Dutch",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-constant-nieuwenhuys",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Constant Nieuwenhuys",
+    "teaser": "The CoBrA co-founder who gave up easel painting for utopia — his New Babylon project imagined a city of play and endless construction, drawn in vivid utopian plans. He wanted art to become life, not decorate it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The New Babylon models and drawings",
+      "durationMinutes": 30,
+      "instruction": "Look at the New Babylon drawings: vast suspended structures, mazes, and playgrounds where humans would wander and build forever, freed from work. Constant spent 20 years on the project and never finished it — that was the point. Art as a city that never stops becoming."
+    },
+    "tags": [
+      "CoBrA",
+      "Dutch",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-asger-jorn",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Asger Jorn",
+    "teaser": "The Danish engine of CoBrA — a painter, potter, and provocateur who believed art should be as free as children's drawings and as fierce as folk tales. His late 'modified' paintings — cheap flea-market canvases he repainted — are jokes with teeth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The modified paintings or the CoBrA works",
+      "durationMinutes": 20,
+      "instruction": "Look at how Jorn treats a flea-market painting: he adds a monster, a storm, a twist of paint that turns kitsch into menace. He called these 'modifications' — art that refuses to be respectable. His color is Nordic: fierce, muddy, and alive."
+    },
+    "tags": [
+      "CoBrA",
+      "Danish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-carl-henning-pedersen",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Carl-Henning Pedersen",
+    "teaser": "The Danish CoBrA painter of suns and fish — his vast, bright canvases are full of floating eyes, spirals, and children's-story creatures painted with total joy. He wanted to paint 'the morning of the world,' before things had names.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The sun paintings or the cosmic compositions",
+      "durationMinutes": 20,
+      "instruction": "Look at the imagery: big suns, flying fish, horses with human eyes — a private mythology repeated with endless variation. Pedersen's color is bright and his mood is generous. He built his own museum in Denmark so his 'morning of the world' could have a home."
+    },
+    "tags": [
+      "CoBrA",
+      "Danish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-else-alfelt",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Else Alfelt",
+    "teaser": "The Danish CoBrA painter of mountains and moons — her landscapes are built from layered, crystalline forms in cool blues and golds, like the world seen from a high window in winter. She was the group's quiet mystic.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The mountain compositions",
+      "durationMinutes": 20,
+      "instruction": "Look at how Alfelt builds a mountain: overlapping planes of color, each one a step toward the sky, with moons and stars placed like ornaments. She was drawn to what she called 'the mystery of the cosmic.' Her paintings feel cold and holy at once."
+    },
+    "tags": [
+      "CoBrA",
+      "Danish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-henry-heerup",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Henry Heerup",
+    "teaser": "The Danish sculptor-painter of folk grotesques — his painted stones, bottles, and carnival figures blend CoBrA energy with Danish peasant humor. He built a famous garden of painted junk in Copenhagen and drove a decorated tricycle.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The painted stones and sculptures",
+      "durationMinutes": 20,
+      "instruction": "Look at how Heerup turns trash into totems: a bottle becomes a person, a stone becomes a face, a bicycle becomes a monument. He said art should be 'for everyone, like bread.' His world is handmade, funny, and impossible to be sad in."
+    },
+    "tags": [
+      "CoBrA",
+      "Danish",
+      "20th Century"
+    ],
+    "tier": 1
+  }
+]

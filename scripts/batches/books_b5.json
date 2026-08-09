@@ -1,0 +1,233 @@
+[
+  {
+    "id": "book-fathers-and-sons",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Fathers and Sons",
+    "teaser": "Ivan Turgenev's 1862 novel that gave the world the word 'nihilist' — the medical student Bazarov arrives to unsettle the gentry estate, and the generation gap becomes a national argument.",
+    "imageUrl": "",
+    "byline": "Ivan Turgenev",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Bazarov's arrival",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Bazarov's rolled-up sleeves and confident denials arrive at the Kirsanov estate. Notice how Turgenev lets each generation make its case without tipping the scales. Write what nihilism meant in 1862, and whether Bazarov is consistent."
+    },
+    "tags": [
+      "Russian",
+      "Generations",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-resurrection",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Resurrection",
+    "teaser": "Tolstoy's 1899 late novel — a juror recognizes the accused prostitute as a woman he seduced decades before, and follows her to Siberia seeking redemption. The novel that made him a crusader for reform.",
+    "imageUrl": "",
+    "byline": "Leo Tolstoy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the courtroom",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Nekhlyudov sits on the jury and recognizes Katusha. Notice how Tolstoy's indictment of the justice system builds from the first page. Write how the novel's title works — who is resurrected, and into what?"
+    },
+    "tags": [
+      "Russian",
+      "Justice",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-dead-souls",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Dead Souls",
+    "teaser": "Gogol's 1842 picaresque — Chichikov travels provincial Russia buying the names of dead serfs. A comic masterpiece that flays a whole nation's vanity, greed, and emptiness.",
+    "imageUrl": "",
+    "byline": "Nikolai Gogol",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Chichikov's arrival",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Chichikov's errand is hidden and the town's officials adore him. Notice how Gogol's grotesque humor keeps the horror close. Write what the 'dead souls' purchase says about the living souls around him."
+    },
+    "tags": [
+      "Russian",
+      "Satire",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-oblomov",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Oblomov",
+    "teaser": "Ivan Goncharov's 1859 novel of the man who cannot get out of bed — Oblomov's magnificent, comic, heartbreaking inertia made him a byword for the Russian national disease of dreaming.",
+    "imageUrl": "",
+    "byline": "Ivan Goncharov",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the famous first chapter",
+      "durationMinutes": 60,
+      "instruction": "Read the first chapter, where Oblomov receives visitors while lying down. Notice how Goncharov turns inaction into drama. Write what Oblomov's refusal says about his alternatives — is his inertia laziness, wisdom, or fear?"
+    },
+    "tags": [
+      "Russian",
+      "Comedy",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-heart-of-darkness",
+    "categoryId": "BOOKS",
+    "subtype": "Novella",
+    "name": "Heart of Darkness",
+    "teaser": "Conrad's 1899 novella — Marlow travels up the Congo to collect the ivory trader Kurtz, and finds the horror at the heart of empire. A frame-story shadow that still shapes how we think about colonialism.",
+    "imageUrl": "",
+    "byline": "Joseph Conrad",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the Thames and the journey upriver",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the journey is framed as a story told on a boat at dusk. Notice how Conrad layers darkness upon darkness. Write what Kurtz's 'The horror! The horror!' means, and why the novella remains contested."
+    },
+    "tags": [
+      "British",
+      "Colonial",
+      "Novella"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-lord-jim",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Lord Jim",
+    "teaser": "Conrad's 1900 novel of a young officer who jumps from a sinking ship and spends his life trying to prove he is not a coward — a deep-sea dive into honor, guilt, and second chances.",
+    "imageUrl": "",
+    "byline": "Joseph Conrad",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the Patna and the jump",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Jim's moment of decision arrives and passes. Notice how Marlow narrates Jim's story through layers of testimony. Write what the novel suggests about whether one act can define a life."
+    },
+    "tags": [
+      "British",
+      "Honor",
+      "Classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-turn-of-the-screw",
+    "categoryId": "BOOKS",
+    "subtype": "Novella",
+    "name": "The Turn of the Screw",
+    "teaser": "Henry James's 1898 ghost story — a governess at Bly is convinced the children are possessed by the dead servants. Is she seeing ghosts or losing her mind? The most argued ambiguity in English fiction.",
+    "imageUrl": "",
+    "byline": "Henry James",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the governess arrives at Bly",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where the governess's excitement curdles into dread. Notice how James withholds certainty about what is real. Write which reading you favor — ghosts, madness, or something else — and what evidence tips you."
+    },
+    "tags": [
+      "American",
+      "Gothic",
+      "Novella"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-portrait-of-a-lady",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Portrait of a Lady",
+    "teaser": "Henry James's 1881 novel of Isabel Archer, an American woman of bright independence who chooses badly and stays — a study of freedom, money, and the traps set by people who love you.",
+    "imageUrl": "",
+    "byline": "Henry James",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — Isabel's arrival in England",
+      "durationMinutes": 75,
+      "instruction": "Read the opening chapters, where Isabel's intelligence and her illusions are both established. Notice how James tracks her choices with ironic sympathy. Write what the novel suggests about the freedom to make one's own life — and its costs."
+    },
+    "tags": [
+      "American",
+      "Classic",
+      "Freedom"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-remains-of-the-day",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Remains of the Day",
+    "teaser": "Kazuo Ishiguro's 1989 Booker winner — Stevens, an aging butler, takes a motoring trip through England and remembers the service, the dignity, and the love he misplaced. Regret in perfect white gloves.",
+    "imageUrl": "",
+    "byline": "Kazuo Ishiguro",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening chapters — the journey begins",
+      "durationMinutes": 60,
+      "instruction": "Read the opening chapters, where Stevens's stiff narration meets the England of the 1950s. Notice how the gaps in his account are the real story. Write what 'dignity' means to Stevens, and what his profession has cost him."
+    },
+    "tags": [
+      "British",
+      "Booker",
+      "Memory"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-pygmalion",
+    "categoryId": "BOOKS",
+    "subtype": "Drama",
+    "name": "Pygmalion",
+    "teaser": "George Bernard Shaw's 1913 play of Professor Higgins's bet that he can pass a flower girl off as a duchess — the sharpest comedy ever written about class, speech, and who gets to belong.",
+    "imageUrl": "",
+    "byline": "George Bernard Shaw",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening acts — Covent Garden and the bet",
+      "durationMinutes": 60,
+      "instruction": "Read the opening acts, where Eliza's accent marks her as fair game. Notice how Shaw's preface and stage directions carry his argument. Write what the play says about language as class passport — and why Shaw insisted Eliza does not marry Higgins."
+    },
+    "tags": [
+      "Irish",
+      "Drama",
+      "Class"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-importance-of-being-earnest",
+    "categoryId": "BOOKS",
+    "subtype": "Drama",
+    "name": "The Importance of Being Earnest",
+    "teaser": "Oscar Wilde's 1895 comedy of two young men who invent a friend named Bunbury and a name named Ernest — the most perfectly constructed farce in English, glittering with epigrams.",
+    "imageUrl": "",
+    "byline": "Oscar Wilde",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening act — Algernon and the cucumber sandwiches",
+      "durationMinutes": 60,
+      "instruction": "Read the opening act, where Ernest, Bunbury, and the cucumber sandwiches establish the play's logic of elegant deceit. Notice how every line works toward the final revelation. Write what the play's obsession with being 'earnest' is really satirizing."
+    },
+    "tags": [
+      "Irish",
+      "Comedy",
+      "Drama"
+    ],
+    "tier": 1
+  }
+]

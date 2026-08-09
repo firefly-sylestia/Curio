@@ -1,0 +1,342 @@
+[
+  {
+    "id": "painter-james-ensor",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "James Ensor",
+    "teaser": "The Belgian painter of masks, skeletons, and carnival chaos — his Christ's Entry into Brussels is a roaring parade of grotesques that predicted Expressionism and Surrealism. He painted skeletons having a wonderful time; nobody had more fun with death.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Christ's Entry into Brussels (Getty, Los Angeles) — find the masks",
+      "durationMinutes": 30,
+      "instruction": "A giant canvas of a parade: thousands of masked faces, a brass band, bishops, skeletons, and a tiny Christ on a donkey in the center distance. Look for the absurdist signs ('Vive la sociale'), the skeleton wearing a top hat, the sheer volume of faces. Ensor saw the crowd as a monster."
+    },
+    "tags": [
+      "Expressionism",
+      "Belgian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-otto-dix",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Otto Dix",
+    "teaser": "The German painter who documented WWI from the trenches and never looked away — his portraits of crippled veterans, scarred prostitutes, and fat profiteers are a devastating catalog of the Weimar Republic. The Nazis called his work degenerate and burned it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Trench (1923, destroyed) or War portfolio — the faces",
+      "durationMinutes": 30,
+      "instruction": "Dix volunteered for the war and served as a machine gunner, then painted what he saw. In his War prints, look at the faces of the soldiers — not heroic, just tired, disfigured, young. His triple portrait of the artist with 'sex murderers' and war cripples shows his unflinching stare at the wreckage he survived."
+    },
+    "tags": [
+      "New Objectivity",
+      "German",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-george-grosz",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "George Grosz",
+    "teaser": "The German satirist who drew Berlin as a sewer — capitalists with pig snouts, generals with skulls, prostitutes and profiteers in a city of greed. His savage ink drawings made him the most hated artist in Weimar Germany and a prophet of its collapse.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Pillars of Society (1926) — the three monsters",
+      "durationMinutes": 20,
+      "instruction": "A journalist with a chamber pot on his head and a swastika in his lapel, a politician with a pile of dung on his shoulders, a general with an erection — Grosz drew the pillars of society as filth. It was banned, but he kept the original safe. Notice the emaciated worker at the base."
+    },
+    "tags": [
+      "New Objectivity",
+      "German",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jose-clemente-orozco",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "José Clemente Orozco",
+    "teaser": "The darkest of the Mexican muralists — while Rivera painted happy workers, Orozco painted Prometheus, war machines, and a Christ who destroys his own cross. His frescoes at Guadalajara and Dartmouth are among the most powerful public art ever made.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Epic of American Civilization (Dartmouth College) — the murals",
+      "durationMinutes": 45,
+      "instruction": "Find the panel of the modern world: a bomb, a mushroom cloud, machine guns, and a university lecture hall where students learn from a professor whose notes are blank. Orozco didn't trust civilization. Look at the raw brushwork — fresco painted fast, with fury."
+    },
+    "tags": [
+      "Muralism",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-david-alfaro-siqueiros",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "David Alfaro Siqueiros",
+    "teaser": "The most radical Mexican muralist — a revolutionary who fought in the Mexican Revolution, tried to assassinate Trotsky, and painted with industrial spray guns and projection techniques decades before street art. His work is huge, political, and unforgiving.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Echo of a Scream (MoMA, New York) — the baby",
+      "durationMinutes": 20,
+      "instruction": "A giant baby's head screams in a field of industrial rubble — war machines, twisted steel, a world that destroys its children. Siqueiros used forced perspective and modern materials (pyroxylin paint, spray guns) to make the image punch. Notice the horror is painted with technical joy."
+    },
+    "tags": [
+      "Muralism",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-rufino-tamayo",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Rufino Tamayo",
+    "teaser": "The Mexican painter who refused to join the muralists — instead of politics, he painted watermelon, dogs, and the cosmos in colors that glow like Mexican fruit and folk art. His work bridges pre-Columbian imagery and European modernism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Watermelons (1950) — the red",
+      "durationMinutes": 20,
+      "instruction": "Look at the red: Tamayo's melons aren't fruit, they're the color of Mexico itself — blood, sun, celebration. He said he wanted to paint 'the plastic values of our race.' His figures are simple, his color is sensual, and his skies feel like pre-Columbian nights."
+    },
+    "tags": [
+      "Modern",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-wifredo-lam",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Wifredo Lam",
+    "teaser": "The Cuban painter who fused Afro-Caribbean religion with European Surrealism — his figures are part human, part horse, part plant, part spirit, born from Santería, Picasso, and the Cuban sugar fields he knew as a child.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Jungle (MoMA, New York) — the figures",
+      "durationMinutes": 30,
+      "instruction": "Four hybrid beings with crescent heads, hands like leaves, and glowing eyes stand in a sugarcane field. Lam said he painted 'the drama of Cuba' — the colonial past, African spirits, the plantation. Look at how the bodies grow out of the plants; the jungle is them."
+    },
+    "tags": [
+      "Surrealism",
+      "Cuban",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-tarsila-do-amaral",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Tarsila do Amaral",
+    "teaser": "The mother of Brazilian modernism — a São Paulo artist who studied in Paris, then painted her country the way it had never been painted: big, bright, and strange, with giant hands, oval faces, and landscapes of the heartland. Abaporu started the Anthropophagic movement.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Abaporu (1928) — the figure",
+      "durationMinutes": 20,
+      "instruction": "A giant figure with a tiny head and a huge foot sits beside a cactus under a big sun. The name means 'the one who eats people' in Tupi — her husband Oswald de Andrade used it to launch Anthropophagy, the idea that Brazil should 'cannibalize' European culture. Look at the scale: the body is a landscape."
+    },
+    "tags": [
+      "Modern",
+      "Brazilian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-leonora-carrington",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Leonora Carrington",
+    "teaser": "The British-born Surrealist who fled wartime Europe for Mexico and painted a world of horses, crones, and kitchen alchemy — she made magic feel domestic and domesticity magical. She also wrote novels and lived to 94, as defiant as her art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Inn of the Dawn Horse (1940) — the hyena",
+      "durationMinutes": 20,
+      "instruction": "A woman in a white dress (Carrington herself) faces a hyena-woman — her self-portrait as a wild double. Look at the rocking horse in the background, the flying horse outside the window, the glass ball. Carrington painted identity as a zoo of possible selves."
+    },
+    "tags": [
+      "Surrealism",
+      "British",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-remedios-varo",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Remedios Varo",
+    "teaser": "The Spanish-Mexican Surrealist who painted women as scientists of the impossible — traveling by rowboat through rooms, weaving tapestries that become landscapes, unlocking doors with music. Her precise, luminous technique makes every painting feel like a solved riddle.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Creation of the Birds (1957) — the painter-bird",
+      "durationMinutes": 30,
+      "instruction": "An owl-woman in a tower paints birds into existence: pigments flow from a prism, through a tube, and out of her brush as living song. Look at the machinery — wheels, beakers, moonlight refracted into color. Varo painted the mechanics of imagination itself."
+    },
+    "tags": [
+      "Surrealism",
+      "Spanish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jose-posada",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "José Guadalupe Posada",
+    "teaser": "The Mexican printmaker who made skeletons fashionable — his calaveras (grinning skull figures) in cheap broadsheets mocked politicians, taught the alphabet, and invented the imagery of Día de los Muertos. His famous 'Catrina' still defines the holiday.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "La Calavera Catrina (1913) — the skeleton lady",
+      "durationMinutes": 20,
+      "instruction": "A skeleton in a fancy French hat — the eternal image of Día de los Muertos. Posada printed it as a satire of Mexicans who pretended to be European. Look at how elegant and how mocking she is. His motto: death is the great equalizer — everyone ends up a skeleton."
+    },
+    "tags": [
+      "Printmaking",
+      "Mexican",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jacob-lawrence",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jacob Lawrence",
+    "teaser": "The American painter who told history in numbered panels — his Migration Series of 60 small paintings narrates the Great Migration of Black Americans from South to North with flat, jewel-toned shapes that are both folk art and high modernism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Migration Series (1940–41) — read the captions",
+      "durationMinutes": 45,
+      "instruction": "Lawrence painted all 60 panels in one burst, mixing his own colors first so they'd stay consistent. Read the captions aloud as you look — each panel is a sentence of history. Notice the repeated silhouettes, the flat spaces, the way crowds become architecture."
+    },
+    "tags": [
+      "Modern",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-aaron-douglas",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Aaron Douglas",
+    "teaser": "The visual voice of the Harlem Renaissance — his flat, geometric silhouettes of musicians, workers, and angels, inspired by African art and Art Deco, appeared on book covers and murals across 1920s Harlem. He called his style 'African design with a modern rhythm.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Aspects of Negro Life murals (Schomburg Center, NYC) — the circles",
+      "durationMinutes": 30,
+      "instruction": "Look at the concentric circles radiating behind his figures — like sound or time rippling outward. Douglas layered silhouettes of African history, slavery, and jazz into one continuous visual story. Notice how the shapes step forward and back in flat, rhythmic layers."
+    },
+    "tags": [
+      "Harlem Renaissance",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-romare-bearden",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Romare Bearden",
+    "teaser": "The American collagist who turned Black life into jazz — his cut-and-pasted city scenes of Harlem (The Block) layer photographs, paper, and paint into syncopated compositions that swing like a rhythm section. He also co-wrote a famous jazz hit.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Block (1971, Met) — the street life",
+      "durationMinutes": 30,
+      "instruction": "A full city block in cut paper: windows full of faces, a barber shop, a funeral, kids on stoops. Look at how Bearden breaks bodies and buildings into geometric shards, then stitches them into rhythm. He said he wanted his collages to work 'like a piano player' — one hand, then the other."
+    },
+    "tags": [
+      "Collage",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-horace-pippin",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Horace Pippin",
+    "teaser": "The self-taught American painter who lost the use of his right arm in WWI and painted with his left hand, holding the brush with his right to guide it — his warm, flat domestic scenes and war memories made him a celebrated 'outsider' artist of the 1930s.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Park Bench or Interior scenes — the warmth",
+      "durationMinutes": 20,
+      "instruction": "Pippin painted his world: his mother's kitchen, a Sunday church, a burning house in his childhood town. Look at the flat perspective, the deep browns, the candle-lit kindness. He survived a sniper shot that damaged his arm; painting was his recovery. Notice the deliberate, careful strokes."
+    },
+    "tags": [
+      "Naive Art",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-charles-white",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Charles White",
+    "teaser": "The American painter who made Black labor and dignity monumental — his charcoal drawings of workers, mothers, and historical figures glow with a light that feels like both struggle and triumph. He taught a generation of artists, including Kerry James Marshall.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Wanted Poster Series or the charcoal figure studies",
+      "durationMinutes": 20,
+      "instruction": "White's figures are heroic in scale and tender in detail — a woman's hand, a man's brow, the weight of a shoulder. Look at how he models skin with light itself: no harsh outlines, just glowing planes. He said he wanted to 'create positive images of Black people' after centuries of caricature."
+    },
+    "tags": [
+      "Social Realism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-elizabeth-catlett",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Elizabeth Catlett",
+    "teaser": "The American-Mexican sculptor and printmaker of Black motherhood and resistance — her linocuts and bronze figures are strong, simplified, and filled with dignity. She spent 60 years in Mexico, where her work hung beside the muralists she admired.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Sharecropper (1952, linocut) — the print",
+      "durationMinutes": 20,
+      "instruction": "A sharecropper's face in profile, head wrapped, chin lifted — carved in bold black-and-white woodcut. Look at the strength in the line: Catlett simplified her subjects into monument. She said Black women were her favorite subject 'because they're the most beautiful and the most oppressed.'"
+    },
+    "tags": [
+      "Social Realism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  }
+]

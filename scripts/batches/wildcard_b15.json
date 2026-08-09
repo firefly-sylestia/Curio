@@ -1,0 +1,98 @@
+[
+  {
+    "id": "wildcard-tide-pools",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Tide Pools",
+    "teaser": "When the sea retreats, it leaves behind whole little worlds — anemones, hermit crabs, and starfish packed into a basin that will be underwater again in hours. A tide pool is a miniature ocean with its own daily drama of escape and return.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "A tide pool at low tide",
+      "durationMinutes": 45,
+      "instruction": "Visit a rocky shore at low tide and kneel by a pool without disturbing it. Count the animals you can see — anemones, crabs, snails — and note how they cling against the waves. Read how the pool's inhabitants survive the twice-daily change."
+    },
+    "tags": ["Phenomenon", "Ocean", "Life"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-crown-of-thorns",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Crown-of-Thorns Starfish",
+    "teaser": "A spiny starfish that eats living coral and can devastate reefs when its numbers explode — a natural part of the reef's balance that human activity can tip into plague. Divers now hunt them by hand to give the corals a chance.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Balance",
+      "targetName": "Crown-of-thorns outbreaks",
+      "durationMinutes": 30,
+      "instruction": "Learn how crown-of-thorns starfish feed on coral and why outbreaks happen — nutrient runoff, overfishing of predators. Write how the reef recovers and how culling programs help, and the ethical debate about intervening."
+    },
+    "tags": ["Phenomenon", "Reef", "Ecology"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-sea-sponge",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Sea Sponges",
+    "teaser": "The simplest animals on Earth — no brain, no heart, no muscles — yet they can live for thousands of years and filter their own body volume of water every few seconds. Sponges have been on Earth for 600 million years and shaped the seafloor before fish existed.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Filter",
+      "targetName": "Sponge biology",
+      "durationMinutes": 30,
+      "instruction": "Learn how sponges feed by pumping water through pores and how their glass or collagen skeletons support them. Write why they are considered animals, how old some deep-sea sponges grow, and how they anchor reef ecosystems."
+    },
+    "tags": ["Phenomenon", "Ocean", "Animals"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-glacier-ice-cores",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Ice Cores",
+    "teaser": "Drill into a polar ice sheet and each layer is a page of climate history — air bubbles that preserve ancient atmospheres, ash from old eruptions, and dust from distant deserts. A 3-kilometer core reads back 800,000 years of Earth's climate.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drill",
+      "targetName": "Ice core science",
+      "durationMinutes": 45,
+      "instruction": "Learn how ice cores are drilled, dated, and read — including the air bubbles that reveal CO2 levels. Write what the ice cores show about natural climate swings and how they ground modern climate models."
+    },
+    "tags": ["Phenomenon", "Ice", "Climate"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-permafrost",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "Permafrost",
+    "teaser": "A quarter of the northern hemisphere's land is frozen year-round — and it is thawing. Permafrost holds twice as much carbon as the atmosphere, plus ancient microbes and perfectly preserved mammoths. Its thaw is one of climate change's wildest cards.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Thaw",
+      "targetName": "Permafrost science",
+      "durationMinutes": 45,
+      "instruction": "Learn what permafrost is, how deep it goes, and what thaws — from slumping land to released methane. Write how scientists study it and why its carbon makes it a 'sleeping giant' of climate feedback."
+    },
+    "tags": ["Phenomenon", "Arctic", "Climate"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-forest-canopy",
+    "categoryId": "WILDCARD",
+    "subtype": "Phenomenon",
+    "name": "The Rainforest Canopy",
+    "teaser": "Most rainforest life lives in the canopy — a hidden world 30 meters up where monkeys, sloths, and orchids never touch the ground. Scientists once studied it with binoculars from below; now they walk across it on rope bridges and build towers in the trees.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Climb",
+      "targetName": "Canopy research",
+      "durationMinutes": 45,
+      "instruction": "Learn how the canopy was explored — from early rope ladders to walkways and canopy cranes — and what lives there. Write what makes the canopy so rich and why it took so long to study properly."
+    },
+    "tags": ["Phenomenon", "Rainforest", "Life"],
+    "tier": 1
+  }
+]

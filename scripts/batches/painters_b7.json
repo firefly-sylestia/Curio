@@ -1,0 +1,402 @@
+[
+  {
+    "id": "painter-ivan-aivazovsky",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ivan Aivazovsky",
+    "teaser": "The Russian-Armenian painter of the sea who painted more than 6,000 waves — storms, shipwrecks, moonlit harbors, and the Ninth Wave, his most famous image of survivors clinging to a mast as dawn breaks. He could paint a wave in an hour, from memory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Ninth Wave (Russian Museum, St. Petersburg) — the dawn",
+      "durationMinutes": 20,
+      "instruction": "Shipwrecked sailors cling to a broken mast as a towering wave gathers behind them — but the sun is rising, and the water glows green and gold. Look at the light on the foam: Aivazovsky made the sea both enemy and promise. He painted from memory, never from the shore."
+    },
+    "tags": [
+      "Romanticism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-karl-bryullov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Karl Bryullov",
+    "teaser": "The Russian painter who made Europe gasp with The Last Day of Pompeii — a colossal canvas of the eruption of Vesuvius, crowded with collapsing temples and fleeing families, lit by volcanic lightning. Byron, Scott, and Gogol all celebrated it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Last Day of Pompeii (Russian Museum, St. Petersburg) — the chaos",
+      "durationMinutes": 30,
+      "instruction": "Statues fall, horses bolt, mothers shield children, and a priest drags a golden idol while the mountain erupts behind. Look at the faces — each one a different way of facing death. Bryullov painted a crowd of individuals; Gogol called it 'a universal resurrection.'"
+    },
+    "tags": [
+      "Romanticism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-ilya-repin",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Ilya Repin",
+    "teaser": "The greatest Russian realist — his Barge Haulers on the Volga turned forced labor into monumental art, and his Reply of the Zaporozhian Cossacks is a masterpiece of laughter. He painted Russian history with the truth-telling eye of a journalist.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Barge Haulers on the Volga (Russian Museum, St. Petersburg) — the figures",
+      "durationMinutes": 30,
+      "instruction": "Eleven men drag a barge through the shallows, each one an individual — the old man at the front, the young rebel in the middle, the boy at the back. Look at the straps cutting into their chests, the heat, the hopeless horizon. Repin was 25 and already painting history's wounds."
+    },
+    "tags": [
+      "Realism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-vasily-surikov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Vasily Surikov",
+    "teaser": "The Russian painter of history's cruelest moments — his Boyarina Morozova shows a defiant Old Believer being dragged to exile through the snow, her two raised fingers a protest that froze Russia's imagination.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Boyarina Morozova (Tretyakov Gallery, Moscow) — the gesture",
+      "durationMinutes": 30,
+      "instruction": "The boyarina raises two fingers in the Old Believer sign of the cross as the sled drags her through a crowd of gawkers, sympathizers, and a laughing priest. Look at the snow — pale blue, shadowed, cold — and the faces that surround her. One woman's gesture versus an empire."
+    },
+    "tags": [
+      "Realism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-valentin-serov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Valentin Serov",
+    "teaser": "The Russian portraitist who captured the silver age — his Girl with Peaches, painted at 22, is the most beloved image in Russian art, and his portraits of aristocrats and artists are studies in psychology as much as paint.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Girl with Peaches (Tretyakov Gallery, Moscow) — the light",
+      "durationMinutes": 20,
+      "instruction": "The daughter of his patron sits at a table with peaches, silverware, and sunlight bouncing off the wall. Look at the freshness — it was painted in one summer, outdoors in a dining room, and it changed Russian art. Serov made a girl at a table feel like a revolution."
+    },
+    "tags": [
+      "Impressionism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-mikhail-vrubel",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Mikhail Vrubel",
+    "teaser": "The Russian symbolist who painted demons and mosaics — his Seated Demon is a blue-black angel of despair with jewelled plumage, and his late years were consumed by the very demons he painted. He went blind and mad, and kept painting.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Seated Demon (Tretyakov Gallery, Moscow) — the wings",
+      "durationMinutes": 20,
+      "instruction": "A giant, melancholy figure sits among crystal flowers, his arms clasped, his eyes burning with knowledge of his own fall. Look at the technique — the paint is built like mosaic, faceted and glowing. Vrubel painted his own soul and called it a demon."
+    },
+    "tags": [
+      "Symbolism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-vasily-kandinsky",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Vasily Kandinsky",
+    "teaser": "The Russian who is often credited with painting the first abstract picture — he saw colors as sounds and believed art should vibrate like music. His 1910 compositions of floating shapes and lines turned painting into pure feeling.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Composition VII (Tretyakov Gallery, Moscow) — the chaos",
+      "durationMinutes": 30,
+      "instruction": "Kandinsky said he composed this like a symphony: swirling forms, floating circles, a crashing diagonal — sound made visible. Look without looking for objects; feel the rhythm. He claimed to have seen his first abstract image when he turned one of his own paintings upside down."
+    },
+    "tags": [
+      "Abstract",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-el-lissitzky",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "El Lissitzky",
+    "teaser": "The Russian avant-gardist who pushed art into architecture, posters, and books — his Beat the Whites with the Red Wedge is pure propaganda geometry, and his Proun paintings floated between painting and architecture like blueprints of another dimension.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Proun 19D or Beat the Whites with the Red Wedge",
+      "durationMinutes": 20,
+      "instruction": "A red wedge cuts into a white circle — a Civil War slogan in pure form. Then look at a Proun: floating planes, grids, and rods that seem to rotate in space. Lissitzky wanted painting to be 'the interchange station between painting and architecture.' He designed the future on canvas."
+    },
+    "tags": [
+      "Constructivism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-natalia-goncharova",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Natalia Goncharova",
+    "teaser": "The Russian avant-gardist who fused folk icon painting with Cubo-Futurism — her rayonist paintings of light rays and her peasant cycles are among the most original art of the 1910s. She was called 'the Amazons of the Russian avant-garde.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Cyclist or Rayonist compositions",
+      "durationMinutes": 20,
+      "instruction": "Look at The Cyclist: a blurred rider, the road, the buildings — all broken into intersecting lines of light, years before Futurism became famous in Italy. Then find her peasant cycle, where folk embroidery patterns meet modern abstraction. She collected Russia's past and exploded it into the future."
+    },
+    "tags": [
+      "Avant-Garde",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-lyubov-popova",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Lyubov Popova",
+    "teaser": "The Russian constructivist who moved from painting to designing fabric, posters, and theater sets — her compositions of arches, diagonals, and colored planes treat the canvas like an engineering problem solved beautifully. She died of scarlet fever at 35.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Painterly Architectonics (Tretyakov) — the planes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Popova stacks translucent colored planes like sheets of glass — red over green over grey, held together by diagonal beams. She called these 'painterly architectonics': paintings as buildings. Then find her fabric designs — she took the same geometry onto dresses."
+    },
+    "tags": [
+      "Constructivism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-aleksandra-exter",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Aleksandra Ekster",
+    "teaser": "The Ukrainian-Russian constructivist who painted color as kinetic energy — her dynamic compositions of intersecting arcs and rays influenced stage design, fashion, and the Bauhaus. She also designed revolutionary theater costumes that look like wearable sculptures.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Construction (1916–17) or her theater costume designs",
+      "durationMinutes": 20,
+      "instruction": "Look at how Ekster stacks arcs, planes, and rays so the canvas seems to spin. Then find her costume designs for plays like Salomé — cardboard, geometric, electrifying. She believed color could move; her paintings practically hum. One of the boldest women of the avant-garde."
+    },
+    "tags": [
+      "Constructivism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-varvara-stepanova",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Varvara Stepanova",
+    "teaser": "The Russian constructivist who declared painting dead and designed life instead — her textiles, sportswear, book covers, and agitprop posters treated the artist as an engineer of everyday life. Her geometric fabric patterns are wearable modernism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Her textile designs and posters — the geometry",
+      "durationMinutes": 20,
+      "instruction": "Look at her fabric samples: circles, crosses, and stripes in brutalist repeats — clothes for a new society. Then find her 'Figures' series, where she painted the human body as a machine of lines and planes. Stepanova asked what art is for, and answered: everything."
+    },
+    "tags": [
+      "Constructivism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-pavel-filonov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Pavel Filonov",
+    "teaser": "The Russian painter of analytical art — his canvases swarm with millions of tiny brushstrokes building faces, flowers, and cities out of atomic particles. He refused to sell his work, starved to death in the Leningrad siege, and left a thousand paintings to the state.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Formulas of Spring or the Head series — the particles",
+      "durationMinutes": 30,
+      "instruction": "Stand close: each face is made of thousands of tiny colored strokes, like cells under a microscope. Stand back: the particles assemble into a world. Filonov called it 'analytical art' — painting as science. He worked on each picture for years, stroke by stroke, until he died."
+    },
+    "tags": [
+      "Avant-Garde",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-kuzma-petrov-vodkin",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Kuzma Petrov-Vodkin",
+    "teaser": "The Russian painter of the tilted world — his Bathing of a Red Horse places a giant red stallion on a lake seen from a spherical perspective, a symbol of Russia on the eve of revolution. He painted with the icon-painter's tenderness and a modernist's geometry.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Bathing of a Red Horse (Tretyakov Gallery, Moscow) — the red",
+      "durationMinutes": 20,
+      "instruction": "A colossal red horse stands in green water while a boy on its back steadies himself. Look at the colors — lacquer red, emerald, pale skin — and the tilted horizon, like the world seen from above. Painted in 1912, it was read as the revolution coming. The red horse, waiting."
+    },
+    "tags": [
+      "Symbolism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-nikolai-ge",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Nikolai Ge",
+    "teaser": "The Russian painter who made the New Testament feel like a courtroom drama — his What Is Truth? shows a tired Pilate facing a calm Christ, and his Golgotha is raw, broken, and shocking. He was a friend of Tolstoy and painted doubt itself.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "What Is Truth? (Tretyakov Gallery, Moscow) — the two men",
+      "durationMinutes": 20,
+      "instruction": "Pilate stands, Christ sits, and the whole history of power versus truth hangs in the space between them. Look at Pilate's tired face and Christ's strange calm. The painting was banned from exhibition for insulting religious taste — Ge painted Christ without halo or glory, just a man with an answer."
+    },
+    "tags": [
+      "Realism",
+      "Russian",
+      "19th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-aleksandr-deineka",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Aleksandr Deineka",
+    "teaser": "The Soviet painter of sport, youth, and construction — his sunburned swimmers, pilots, and factory workers glow with propaganda optimism. The Defence of Sevastopol turns war into a muscular, tragic ballet of sailors in white.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Defence of Sevastopol (Russian Museum) — the sailors",
+      "durationMinutes": 20,
+      "instruction": "White-clad sailors hurl grenades at an advancing grey tide on the city's edge. Look at the composition — the diagonal line of bodies, the falling man, the heroic resistance. Deineka painted the Soviet dream: youth, industry, and sacrifice, all tanned by the sun."
+    },
+    "tags": [
+      "Socialist Realism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-arkady-plastov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Arkady Plastov",
+    "teaser": "The Soviet painter of village life who made collective farms look like paradise — haymaking, bathing, and harvest scenes in golden light. His Spring, with its barefoot girl at a water trough, is one of the most loved images in Russian art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Spring (Tretyakov Gallery) — the light",
+      "durationMinutes": 20,
+      "instruction": "A girl washes at a wooden trough in a barn, the snow still on the ground outside, light falling through the doorway. Look at the realism of the scene and the tenderness of the light. Plastov painted the Soviet countryside as a place of perpetual golden hour."
+    },
+    "tags": [
+      "Socialist Realism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-yuri-pimenov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Yuri Pimenov",
+    "teaser": "The Soviet painter who found poetry in construction sites and buses — his Future Cities and New Moscow show a bright, hopeful urban future in big brushy strokes. He was one of the few Soviet artists to combine propaganda with genuine visual joy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "New Moscow (Tretyakov Gallery) — the view",
+      "durationMinutes": 20,
+      "instruction": "From the back seat of a car, we watch a woman cross a street in the new Moscow — boulevards, scaffolding, big blue sky. Look at the mood: optimistic, hurried, alive. Pimenov painted the 1930s dream of a city that worked, with the dash of an Impressionist."
+    },
+    "tags": [
+      "Socialist Realism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-georgy-nissky",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Georgy Nissky",
+    "teaser": "The Soviet painter who made industrial landscapes feel like spring — his railways, canals, and reservoirs are clean, graphic, and bright, a Constructivist's view of a working socialist landscape. His work is social realism with a designer's eye.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "On the Tracks or Moscow Region landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Nissky reduces trains, cranes, and roads to clean graphic shapes under big pale skies — like posters of the future. No smoke, no grime; just order, light, and motion. He painted the machine age as a place you'd want to live."
+    },
+    "tags": [
+      "Socialist Realism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-pavel-kuznetsov",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Pavel Kuznetsov",
+    "teaser": "The Russian symbolist painter of the steppe — his Sleeping Women and Mirage in the Steppe are painted with a dreamy, decorative rhythm influenced by Persian miniatures and Central Asian life. He made the desert shimmer.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Mirage in the Steppe (Tretyakov) — the rhythm",
+      "durationMinutes": 20,
+      "instruction": "Women in pale robes gather at a well while a mirage of city towers shimmers on the horizon. Look at the flattened, decorative space — Kuznetsov borrowed the geometry of Persian miniatures and applied it to the Russian south. Silence, heat, and pattern, perfectly balanced."
+    },
+    "tags": [
+      "Symbolism",
+      "Russian",
+      "20th Century"
+    ],
+    "tier": 1
+  }
+]

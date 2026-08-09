@@ -1,0 +1,376 @@
+[
+  {
+    "id": "director-sidney-lumet",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sidney Lumet",
+    "teaser": "Lumet made 12 Angry Men in 19 days — it's a film about twelve men in one room, and it's never not gripping. He called directing 'the art of the possible.'",
+    "imageUrl": "",
+    "byline": "Director · Sidney Lumet",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "12 Angry Men (1957), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the jury, the heat, the first vote. Lumet films the room shrinking as the tension rises, gradually lowering the camera. Notice how the film is a debate that becomes a story."
+    },
+    "tags": ["Hollywood", "1950s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-richard-fleischer",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Richard Fleischer",
+    "teaser": "Fleischer directed Fantastic Voyage and Soylent Green — his father was Max Fleischer, the animator who created Betty Boop and Popeye.",
+    "imageUrl": "",
+    "byline": "Director · Richard Fleischer",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Soylent Green (1973), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the overcrowded future, the food lines, the murder. Fleischer's dystopia is thick with 1973 pessimism. Notice how the film's famous reveal lands because everything before it was so mundane."
+    },
+    "tags": ["Sci-Fi", "1970s", "Dystopia"],
+    "tier": 1
+  },
+  {
+    "id": "director-franklin-j-schaffner",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Franklin J. Schaffner",
+    "teaser": "Schaffner's Patton won seven Oscars including Best Picture — George C. Scott refused the Best Actor award, the first actor ever to do so.",
+    "imageUrl": "",
+    "byline": "Director · Franklin J. Schaffner",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Patton (1970), the opening monologue",
+      "durationMinutes": 15,
+      "instruction": "Watch the opening speech — Patton against a giant American flag. Schaffner shot it in one take with a 6-foot-wide flag as backdrop. Notice how the film makes you root for a man you'd hate to meet."
+    },
+    "tags": ["Hollywood", "1970s", "War"],
+    "tier": 1
+  },
+  {
+    "id": "director-george-cukor",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "George Cukor",
+    "teaser": "Cukor was known as the 'women's director' for the strength of his female leads — he directed The Philadelphia Story, My Fair Lady, and The Women, with an all-female cast.",
+    "imageUrl": "",
+    "byline": "Director · George Cukor",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Philadelphia Story (1940), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the wedding rehearsal, the family, the reporters. Cukor's comedy of manners gives every woman in the room the best lines. Notice how the dialogue dances around class without ever leaving the room."
+    },
+    "tags": ["Hollywood", "1940s", "Screwball"],
+    "tier": 1
+  },
+  {
+    "id": "director-king-vidor",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "King Vidor",
+    "teaser": "Vidor's The Crowd is about an ordinary man in an ordinary office — a silent film about anonymity that still feels modern.",
+    "imageUrl": "",
+    "byline": "Director · King Vidor",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Crowd (1928), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the birth, the city, the office full of identical desks. Vidor films the crowd as a living creature. Notice the crane shot pulling back from one man in a sea of thousands — cinema's first great statement about the modern worker."
+    },
+    "tags": ["Hollywood", "1920s", "Silent"],
+    "tier": 1
+  },
+  {
+    "id": "director-raoul-walsh",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Raoul Walsh",
+    "teaser": "Walsh directed White Heat, the film that made James Cagney's 'Made it, Ma! Top of the world!' a cinema landmark — Walsh had lost an eye in a real accident years earlier.",
+    "imageUrl": "",
+    "byline": "Director · Raoul Walsh",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "White Heat (1949), the ending",
+      "durationMinutes": 15,
+      "instruction": "Watch the finale — Cody Jarrett's last stand on the chemical plant. Walsh's gangster film is a study in madness disguised as a thriller. Notice how Cagney's face carries the whole tragedy."
+    },
+    "tags": ["Hollywood", "1940s", "Gangster"],
+    "tier": 1
+  },
+  {
+    "id": "director-anthony-mann",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Anthony Mann",
+    "teaser": "Mann's psychological westerns with James Stewart — Winchester '73, The Naked Spur — turned the genre into a study of obsession.",
+    "imageUrl": "",
+    "byline": "Director · Anthony Mann",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Winchester '73 (1950), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the shooting contest, the prized rifle, the handoff. Mann structures the whole film around the rifle passing from hand to hand. Notice how each new owner reveals a different kind of violence."
+    },
+    "tags": ["Western", "1950s", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "director-budd-boetticher",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Budd Boetticher",
+    "teaser": "Boetticher's Ranown cycle of westerns — seven films with Randolph Scott — are lean, moral, and perfectly made; The Tall T is the purest of them.",
+    "imageUrl": "",
+    "byline": "Director · Budd Boetticher",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Tall T (1957), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the stagecoach, the robbery, the hostages. Boetticher strips the western to its bones: a man, a gun, a choice. Notice how the film's simplicity is its sophistication."
+    },
+    "tags": ["Western", "1950s", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "director-samuel-fuller",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Samuel Fuller",
+    "teaser": "Fuller was a tabloid crime reporter and a soldier before filmmaking — his films like The Big Red One and Shock Corridor are pulp with a conscience.",
+    "imageUrl": "",
+    "byline": "Director · Samuel Fuller",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Shock Corridor (1963), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — a journalist checks himself into an asylum to solve a murder. Fuller films the ward in garish color and the memories in black and white. Notice how the film's cheapness becomes its honesty."
+    },
+    "tags": ["Hollywood", "1960s", "Cult"],
+    "tier": 1
+  },
+  {
+    "id": "director-don-siegel",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Don Siegel",
+    "teaser": "Siegel directed Invasion of the Body Snatchers and Dirty Harry — he was Clint Eastwood's mentor and taught him the art of efficient storytelling.",
+    "imageUrl": "",
+    "byline": "Director · Don Siegel",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Invasion of the Body Snatchers (1956), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the small town, the pods, the growing dread. Siegel films conformity as horror years before the term 'conformity' was a cliché. Notice how the film's paranoia works on both political sides."
+    },
+    "tags": ["Sci-Fi", "1950s", "Classic"],
+    "tier": 1
+  },
+  {
+    "id": "director-jules-dassin",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jules Dassin",
+    "teaser": "Dassin was blacklisted in Hollywood and fled to Europe — his Rififi, made in France, features the most famous silent heist sequence in cinema history.",
+    "imageUrl": "",
+    "byline": "Director · Jules Dassin",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Rififi (1955), the 30-minute heist scene",
+      "durationMinutes": 30,
+      "instruction": "Watch the heist — 30 minutes with no dialogue, no music, just the sound of tools on a safe. Dassin removed the score to build tension. Notice how the silence makes the audience hold its breath."
+    },
+    "tags": ["France", "1950s", "Heist"],
+    "tier": 1
+  },
+  {
+    "id": "director-alexander-mackendrick",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alexander Mackendrick",
+    "teaser": "Mackendrick directed Sweet Smell of Success, a film so cynical about the press that it flopped — it's now considered a masterpiece of 1950s noir.",
+    "imageUrl": "",
+    "byline": "Director · Alexander Mackendrick",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sweet Smell of Success (1957), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the columnist, the press agent, the night world of Broadway. Mackendrick films New York at night as a machinery of influence. Notice how the dialogue cuts like the city's neon."
+    },
+    "tags": ["Hollywood", "1950s", "Noir"],
+    "tier": 1
+  },
+  {
+    "id": "director-john-boorman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "John Boorman",
+    "teaser": "Boorman's Deliverance put four city men in a Georgia river and asked what civilization means — the film's 'Dueling Banjos' became a cultural touchstone.",
+    "imageUrl": "",
+    "byline": "Director · John Boorman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Deliverance (1972), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the banjo duel, the river, the launch. Boorman films the descent into the wild as a descent into the self. Notice how the film's violence is less about the river people than about the city men."
+    },
+    "tags": ["UK", "1970s", "Thriller"],
+    "tier": 1
+  },
+  {
+    "id": "director-alan-j-pakula",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alan J. Pakula",
+    "teaser": "Pakula directed All the President's Men — the film was shot in a replica of the Washington Post newsroom built to scale, and the journalism is treated like detective work.",
+    "imageUrl": "",
+    "byline": "Director · Alan J. Pakula",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "All the President's Men (1976), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the break-in, the reporters, the first hunch. Pakula films journalism as paranoia: long corridors, shadows, whispers. Notice how the film's climax is a man answering a phone."
+    },
+    "tags": ["Hollywood", "1970s", "Political"],
+    "tier": 1
+  },
+  {
+    "id": "director-bob-rafelson",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Bob Rafelson",
+    "teaser": "Rafelson co-created The Monkees, then directed Five Easy Pieces — the film's diner scene ('I'll have the chicken salad sandwich... no chicken') is a masterclass in alienation.",
+    "imageUrl": "",
+    "byline": "Director · Bob Rafelson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Five Easy Pieces (1970), the diner scene",
+      "durationMinutes": 10,
+      "instruction": "Watch the diner confrontation — the menu, the no-chicken chicken salad, the explosion. Rafelson films class resentment in a single scene. Notice how Jack Nicholson's rage is a mask for grief."
+    },
+    "tags": ["Hollywood", "1970s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-monte-hellman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Monte Hellman",
+    "teaser": "Hellman's Two-Lane Blacktop is a road movie with no destination — James Taylor and Dennis Wilson star as drag racers driving across America with nothing to prove.",
+    "imageUrl": "",
+    "byline": "Director · Monte Hellman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Two-Lane Blacktop (1971), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the races, the diners, the aimless driving. Hellman's film is about the road itself, not the journey. Notice how little dialogue the film needs — the cars are the characters."
+    },
+    "tags": ["Hollywood", "1970s", "Road Movie"],
+    "tier": 1
+  },
+  {
+    "id": "director-paul-mazursky",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Paul Mazursky",
+    "teaser": "Mazursky made An Unmarried Woman and Bob & Carol & Ted & Alice — he chronicled middle-class American relationships with a warm, satirical eye.",
+    "imageUrl": "",
+    "byline": "Director · Paul Mazursky",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "An Unmarried Woman (1978), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the marriage, the confession, the sudden end. Mazursky films the 'perfect' life collapsing without melodrama. Notice how the film's feminism is in the details, not the speeches."
+    },
+    "tags": ["Hollywood", "1970s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-joan-micklin-silver",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Joan Micklin Silver",
+    "teaser": "Silver made Hester Street — a Yiddish-language film about immigrant life on the Lower East Side — with her own money when studios wouldn't fund it.",
+    "imageUrl": "",
+    "byline": "Director · Joan Micklin Silver",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hester Street (1975), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the tenement, the new wife arriving, the old world meeting the new. Silver films assimilation as a marriage of languages. Notice how the film switches between Yiddish and English as the characters switch selves."
+    },
+    "tags": ["Indie", "1970s", "Drama"],
+    "tier": 1
+  },
+  {
+    "id": "director-amy-heckerling",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Amy Heckerling",
+    "teaser": "Heckerling directed Fast Times at Ridgemont High, then reinvented Austen for the 90s with Clueless — the film's 'as if!' still echoes in pop culture.",
+    "imageUrl": "",
+    "byline": "Director · Amy Heckerling",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Clueless (1995), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — Cher's wardrobe AI, the mall, the makeover. Heckerling adapts Emma into Beverly Hills without losing a single plot beat. Notice how the voiceover comedy is actually structure: Cher narrates her own life like a novel."
+    },
+    "tags": ["1990s", "Comedy", "Teen"],
+    "tier": 1
+  },
+  {
+    "id": "director-susan-seidelman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Susan Seidelman",
+    "teaser": "Seidelman's Desperately Seeking Susan turned Madonna's persona into cinema — the film made downtown New York the backdrop for a mainstream comedy.",
+    "imageUrl": "",
+    "byline": "Director · Susan Seidelman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Desperately Seeking Susan (1985), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the classified ads, the two women, the identity swap. Seidelman films 1980s New York as a punk fairy tale. Notice how the film's mix of high and low culture was radical for its time."
+    },
+    "tags": ["1980s", "Comedy", "Indie"],
+    "tier": 1
+  },
+  {
+    "id": "director-penny-marshall",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Penny Marshall",
+    "teaser": "Marshall was Laverne on Laverne & Shirley before directing Big — she became the first woman to direct a film grossing over $100 million.",
+    "imageUrl": "",
+    "byline": "Director · Penny Marshall",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Big (1988), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the carnival, the wish machine, the overnight transformation. Marshall films the wish with total sincerity. Notice how Tom Hanks's performance — a boy in a man's body — carries the whole premise."
+    },
+    "tags": ["Hollywood", "1980s", "Comedy"],
+    "tier": 1
+  },
+  {
+    "id": "director-nora-ephron",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Nora Ephron",
+    "teaser": "Ephron was a journalist and essayist before directing — her Sleepless in Seattle and You've Got Mail made her the queen of the modern rom-com.",
+    "imageUrl": "",
+    "byline": "Director · Nora Ephron",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sleepless in Seattle (1993), the first 25 minutes",
+      "durationMinutes": 25,
+      "instruction": "Watch the opening — the radio call, the two cities, the movie-of-the-week structure. Ephron builds a romance where the leads barely meet. Notice how the film's love story is told through other films."
+    },
+    "tags": ["1990s", "Rom-Com", "Hollywood"],
+    "tier": 1
+  }
+]

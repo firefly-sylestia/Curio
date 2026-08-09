@@ -1,0 +1,422 @@
+[
+  {
+    "id": "wildcard-wabi-sabi-now",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Wabi-sabi in Design",
+    "teaser": "The Japanese aesthetic that finds beauty in imperfection, impermanence, and incompleteness — a cracked pot, a weathered wall, a fading flower. Wabi-sabi has shaped Japanese gardens, ceramics, and architecture, and is now embraced by designers worldwide.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Accept",
+      "targetName": "Wabi-sabi aesthetics",
+      "durationMinutes": 30,
+      "instruction": "Learn how wabi (rustic simplicity) and sabi (the beauty of age) combine, and how they show in tea ware and gardens. Write how wabi-sabi differs from the Western pursuit of perfection, and find one imperfect thing to appreciate."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Aesthetics"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-jo-ha-kyu",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Jo-ha-kyū",
+    "teaser": "A Japanese rhythm of beginning, breaking, and speeding up — jo (slow start), ha (development), kyu (rapid climax) — that shapes everything from tea ceremony to kabuki to a samurai sword draw. It is pacing as philosophy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Rhythm",
+      "targetName": "Jo-ha-kyū structure",
+      "durationMinutes": 30,
+      "instruction": "Learn how jo-ha-kyū organizes Noh theater, tea ceremony, and even movement. Write how the three phases build and release tension, and how you can apply the rhythm to a story or a task."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Rhythm"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ma-spacing",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Ma: The Power of Space",
+    "teaser": "In Japanese art and architecture, ma is the meaningful gap — the silence between notes, the empty space in a painting, the pause that gives everything else meaning. Designers say space itself can be designed.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Pause",
+      "targetName": "Ma in art and music",
+      "durationMinutes": 30,
+      "instruction": "Learn how ma shapes Japanese gardens, ikebana, music, and calligraphy by treating emptiness as presence. Write how a pause in music or a gap in a painting changes what you feel, and notice one 'ma' today."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Design"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-kaizen",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Kaizen",
+    "teaser": "The Japanese philosophy of continuous improvement — small, constant refinements instead of big overhauls. Born in post-war manufacturing, kaizen has spread to healthcare, software, and personal habits: 1% better every day compounds.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Improve",
+      "targetName": "Kaizen practice",
+      "durationMinutes": 30,
+      "instruction": "Learn how kaizen transformed Toyota's factories and how the idea of small daily improvements works. Write one small change you could make today and how it compounds over a year."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Improvement"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-gemba",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Gemba Walks",
+    "teaser": "'Gemba' means 'the actual place' — the factory floor, the hospital ward, the kitchen where work really happens. A gemba walk is going there to see the truth with your own eyes instead of trusting reports. The real problems live in the real place.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Walk",
+      "targetName": "Gemba walk practice",
+      "durationMinutes": 30,
+      "instruction": "Learn how managers use gemba walks to observe work where it happens and ask questions without blame. Write what you would see on a gemba walk of your own routine — where do the friction points actually live?"
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Work"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-ikigai",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Ikigai",
+    "teaser": "The Japanese word for 'a reason to get up in the morning' — the sweet spot where what you love, what you are good at, what the world needs, and what you can be paid for overlap. Okinawans, who live remarkably long, often name their ikigai.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Find",
+      "targetName": "Ikigai's four circles",
+      "durationMinutes": 45,
+      "instruction": "Learn the four circles of ikigai and how they overlap. Write your own answers for each circle — love, skill, need, reward — and where the overlaps point for you."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Purpose"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-cosy-dozen",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "The Danish Jante Law",
+    "teaser": "A set of ten unwritten rules from a 1933 Danish-Norwegian novel, mocking a village culture that says 'don't think you are anyone special.' 'You're not to think you are anything at all' — janteloven is the modest heart of Nordic social culture.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Modest",
+      "targetName": "Jante law in Nordic culture",
+      "durationMinutes": 30,
+      "instruction": "Learn the ten rules of janteloven and how they shape Nordic humility, equality, and workplace culture. Write what it protects and what it might suppress, and how it compares to your own culture's norms."
+    },
+    "tags": [
+      "Concept",
+      "Denmark",
+      "Culture"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-dolce-far-niente",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Dolce Far Niente",
+    "teaser": "The Italian art of doing nothing — sweetly, without guilt. Not idleness as failure but as a pleasure: sitting in a piazza, watching the light move, letting time pass for its own sake. It is a skill some cultures practice and others must learn.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Nothing",
+      "targetName": "Dolce far niente",
+      "durationMinutes": 30,
+      "instruction": "Learn how dolce far niente differs from boredom or procrastination — it is intentional, unhurried enjoyment. Write what the Italian attitude to time is and plan one hour of genuinely guilt-free doing nothing."
+    },
+    "tags": [
+      "Concept",
+      "Italy",
+      "Rest"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-saudade",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Saudade",
+    "teaser": "A Portuguese word with no English equivalent — a deep, nostalgic longing for something or someone that may never return, or may never have existed. Fado music is built on saudade, and it carries both ache and a strange sweetness.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Long",
+      "targetName": "Saudade in fado",
+      "durationMinutes": 30,
+      "instruction": "Learn how saudade differs from nostalgia — it can yearn for something that never existed. Listen to a fado song and write how the emotion sounds, and what you feel saudade for."
+    },
+    "tags": [
+      "Concept",
+      "Portugal",
+      "Feeling"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-hiraeth",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Hiraeth",
+    "teaser": "A Welsh word for a longing for home that may be lost, distant, or never known — homesickness for a place that may only exist in memory. It is the ache behind much of Welsh poetry and emigration stories.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Yearn",
+      "targetName": "Hiraeth in Welsh culture",
+      "durationMinutes": 30,
+      "instruction": "Learn how hiraeth combines home and longing, and how it appears in Welsh literature and song. Write what home means to you and whether you have ever felt hiraeth for a place you cannot return to."
+    },
+    "tags": [
+      "Concept",
+      "Wales",
+      "Feeling"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-asmr",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "ASMR",
+    "teaser": "Whispers, tapping, and crinkling sounds that give some people a tingling sensation down the spine — autonomous sensory meridian response. It went from an obscure internet forum term to a genre with millions of listeners seeking calm.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Tingle",
+      "targetName": "ASMR research",
+      "durationMinutes": 30,
+      "instruction": "Learn what ASMR feels like, who experiences it, and what research says about it — some studies find real relaxation and heart-rate changes. Write the leading theories and why it is not universally felt."
+    },
+    "tags": [
+      "Concept",
+      "Sound",
+      "Relaxation"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-savant-now",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Savant Syndrome",
+    "teaser": "Some people with developmental conditions show islands of extraordinary ability — calendar calculating, perfect pitch, instant arithmetic, photographic drawing. How such skills emerge is still mysterious, and a few appear after brain injury in ordinary people.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Amaze",
+      "targetName": "Savant abilities",
+      "durationMinutes": 30,
+      "instruction": "Learn about savants like Kim Peek, the inspiration for Rain Man, and how savant skills are studied. Write the theories — compensation, enhanced memory, altered brain wiring — and why the phenomenon is so rare."
+    },
+    "tags": [
+      "Concept",
+      "Brain",
+      "Ability"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-retrocognition",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Deja Vu",
+    "teaser": "The eerie feeling that you have lived this exact moment before — a glitch in the brain's sense of familiarity. Scientists have theories: delayed neural processing, memory mismatch, or the brain misfiling the present as the past.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Familiar",
+      "targetName": "Déjà vu theories",
+      "durationMinutes": 30,
+      "instruction": "Learn the leading scientific explanations for déjà vu — dual processing, memory errors, and temporal lobe activity. Write the difference between déjà vu and jamais vu, and try the repetitive-word trick that induces jamais vu."
+    },
+    "tags": [
+      "Concept",
+      "Brain",
+      "Memory"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-jamais-vu",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Jamais Vu",
+    "teaser": "The opposite of déjà vu: a familiar place, word, or face suddenly feels utterly strange, as if you are seeing it for the first time. Psychologists induced it in the lab by having people repeat a word until it lost all meaning.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Repeat",
+      "targetName": "Jamais vu experiments",
+      "durationMinutes": 30,
+      "instruction": "Try the experiment: write 'door' over and over, and feel the word empty out. Learn how satiation of meaning creates jamais vu and how researchers use it to study familiarity and the brain."
+    },
+    "tags": [
+      "Concept",
+      "Brain",
+      "Perception"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-ineffability",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Ineffability",
+    "teaser": "The quality of being beyond words — the experience you cannot fully describe, like a sunset, a peak moment, or profound awe. Philosophers and mystics have long argued over whether some experiences simply outrun language.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Speechless",
+      "targetName": "Ineffable experiences",
+      "durationMinutes": 30,
+      "instruction": "Learn how the concept appears in philosophy, religion, and the psychology of awe. Write about an experience of yours that felt ineffable and why words fell short, then try to describe it anyway."
+    },
+    "tags": [
+      "Concept",
+      "Philosophy",
+      "Experience"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-liminality",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Liminal Spaces",
+    "teaser": "Airports at 3 AM, empty hallways, waiting rooms, stairwells between floors — spaces of transition that feel strangely charged. The internet named this feeling 'liminal space,' and it has become an aesthetic and a genre of art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Between",
+      "targetName": "Liminal space aesthetic",
+      "durationMinutes": 30,
+      "instruction": "Learn the anthropology of liminality — the in-between stage in rituals — and how the internet applied it to empty transitional architecture. Write why these places feel uncanny and how photographers capture them."
+    },
+    "tags": [
+      "Concept",
+      "Space",
+      "Feeling"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-mono-no-aware",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Mono no Aware",
+    "teaser": "A Japanese phrase for the gentle sadness of things passing — the beauty of cherry blossoms falling, the poignancy of a season ending. It is not melancholy but tender awareness that everything is fleeting, which makes it precious.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Feel",
+      "targetName": "Mono no aware",
+      "durationMinutes": 30,
+      "instruction": "Learn how mono no aware appears in Japanese poetry, literature, and film — the transience of beauty. Write a moment of your own mono no aware and how noticing impermanence changes what you value."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Feeling"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-akanbe-now",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Kawaii",
+    "teaser": "Japan's aesthetic of cuteness — round shapes, pastel colors, and childlike charm — that grew from a 1970s handwriting trend into a global cultural force. Kawaii is not just style; it softens products, cities, and even warnings.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Cute",
+      "targetName": "Kawaii culture",
+      "durationMinutes": 30,
+      "instruction": "Learn how kawaii emerged in Japan and how it shapes design, characters, and communication. Write why cute aesthetics are so effective at branding and how kawaii culture spread beyond Japan."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Aesthetics"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-otaku-culture",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Otaku Culture",
+    "teaser": "Once a derogatory Japanese word for obsessive fans, otaku became a badge of honor — and a global culture of anime, manga, cosplay, and conventions. What was mocked in Japan now drives entertainment worldwide.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fandom",
+      "targetName": "Otaku culture",
+      "durationMinutes": 30,
+      "instruction": "Learn how the term evolved from insult to identity, and how anime fandom grew into a global industry. Write what 'otaku' means today and how subcultures like Akihabara's maid cafés shaped the scene."
+    },
+    "tags": [
+      "Concept",
+      "Japan",
+      "Fandom"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-cosplay",
+    "categoryId": "WILDCARD",
+    "subtype": "Concept",
+    "name": "Cosplay",
+    "teaser": "Costume play — dressing as a character with obsessive attention to detail, from sewing and armor-smithing to makeup that takes hours. Born in Japan's fandom scene, cosplay is now a global craft and performance art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Craft",
+      "targetName": "Cosplay craftsmanship",
+      "durationMinutes": 30,
+      "instruction": "Learn how cosplayers build costumes — sewing, foam armor, prosthetics, and wigs — and how conventions celebrate the craft. Write what draws people to transform into characters and how the community works."
+    },
+    "tags": [
+      "Concept",
+      "Craft",
+      "Fandom"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-ragbrai",
+    "categoryId": "WILDCARD",
+    "subtype": "Tradition",
+    "name": "RAGBRAI",
+    "teaser": "The world's oldest and largest bicycle touring event — tens of thousands of riders cross Iowa over a week, town to town, on routes chosen for hills and hospitality. 'Register's Annual Great Bicycle Ride Across Iowa' turns a farm state into a rolling festival.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Ride",
+      "targetName": "RAGBRAI across Iowa",
+      "durationMinutes": 30,
+      "instruction": "Learn how RAGBRAI began in 1973 and how its routes, overnight towns, and legendary pie stops work. Write why thousands return every year and how a week on a bike through corn country became an institution."
+    },
+    "tags": [
+      "Tradition",
+      "USA",
+      "Cycling"
+    ],
+    "tier": 2
+  }
+]

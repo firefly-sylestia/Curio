@@ -1,0 +1,418 @@
+[
+  {
+    "id": "wildcard-svalbard-sun",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Polar Night and Midnight Sun",
+    "teaser": "Inside the Arctic Circle, the sun never sets in summer — and never rises in winter. In Svalbard, Norway, the midnight sun lasts four months, then darkness takes over for four. Time itself loosens its grip on the day.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Sun",
+      "targetName": "Polar day and polar night",
+      "durationMinutes": 30,
+      "instruction": "Learn why Earth's axial tilt creates the polar day and polar night beyond 66° latitude. Write how people adapt — blackout curtains, vitamin D, and the seasonal mood swings — and what the sun looks like circling the horizon."
+    },
+    "tags": ["Place", "Arctic", "Sun"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-trolltunga",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Trolltunga",
+    "teaser": "A tongue of rock jutting 700 meters above a Norwegian lake, so named because trolls were said to stick out their tongues at the valley. It took a legendary hike to become the country's most photographed cliff — and a queue to match.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Hike",
+      "targetName": "The Trolltunga trail",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Trolltunga glacier carved this cliff and how the hike to reach it became famous. Write why the tongue formed as it did, how long the hike takes, and why so many people brave it each summer."
+    },
+    "tags": ["Place", "Norway", "Cliff"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-prealpina-lakes",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Braies Lake",
+    "teaser": "An emerald lake cradled in the Italian Dolomites, ringed by sheer walls and a storybook wooden boathouse. Its color comes from fine glacial rock flour suspended in the meltwater — and its shores are among the most photographed in the Alps.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Row",
+      "targetName": "Lago di Braies",
+      "durationMinutes": 30,
+      "instruction": "Learn how glacial rock flour gives the lake its green-blue color and how the Dolomites' geology shapes the basin. Write about the lake's history as a WWI staging area and why it draws crowds before sunrise."
+    },
+    "tags": ["Place", "Italy", "Lake"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-marble-caves",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Marble Caves of Chile Chico",
+    "teaser": "Swirling blue chambers carved by turquoise water into solid marble on a Patagonian lake. The lake's level rises and falls with the seasons, so the caves change shape constantly — art made by water on stone.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Paddle",
+      "targetName": "The Marble Caves of General Carrera Lake",
+      "durationMinutes": 30,
+      "instruction": "Learn how wave action carved and polished the marble over thousands of years, and why the water's blue fills the caves with light. Write how the lake's color comes from glacial sediment and how the caves are reached by boat."
+    },
+    "tags": ["Place", "Chile", "Caves"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-hang-son-doong",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Hang Sơn Đoòng",
+    "teaser": "The largest cave on Earth — a tunnel so vast a 40-story building fits inside, with its own jungle, river, clouds, and weather. It was found by a local man in 1991 and explored only in 2009; its full length still hides secrets.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Descend",
+      "targetName": "Hang Sơn Đoòng's dimensions",
+      "durationMinutes": 45,
+      "instruction": "Learn how Sơn Đoòng formed, its scale, and the cave's own weather system fed by rivers and skylights. Write why it lay hidden for so long, how explorers mapped it, and why only a few hundred people have visited."
+    },
+    "tags": ["Place", "Vietnam", "Cave"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-tsingy",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Tsingy de Bemaraha",
+    "teaser": "A forest of razor-sharp limestone needles in Madagascar — 'tsingy' means 'where one cannot walk barefoot.' Erosion carved the plateau into a labyrinth of blades, and only lemurs and chameleons call it home.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Climb",
+      "targetName": "Tsingy limestone formation",
+      "durationMinutes": 30,
+      "instruction": "Learn how acidic rain dissolved the limestone into pinnacles and how the tsingy's microclimate supports rare species. Write why it is nearly impassable, how bridges let visitors cross, and what lives among the blades."
+    },
+    "tags": ["Place", "Madagascar", "Limestone"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-pamukkale-travertines",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Pamukkale Travertine Terraces",
+    "teaser": "White cotton-castle terraces in Turkey, built over millennia by hot springs depositing calcium carbonate. Ancient Romans built the spa city of Hierapolis above them, and people still bathe in the same warm, mineral pools.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Soak",
+      "targetName": "Pamukkale's terraces",
+      "durationMinutes": 30,
+      "instruction": "Learn how hot spring water saturated with calcium carbonate builds terrace after terrace as it cools. Write how Hierapolis used the springs, why the white is blinding, and why visitors must now walk the terraces barefoot."
+    },
+    "tags": ["Place", "Turkey", "Hot Springs"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-capadocia",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Cappadocia",
+    "teaser": "A Turkish landscape of fairy chimneys — rock pillars with caps — where people carved entire cities underground, some eight levels deep, to hide from invaders. At dawn, dozens of hot air balloons drift between the chimneys.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Drift",
+      "targetName": "Cappadocia's rock cities",
+      "durationMinutes": 45,
+      "instruction": "Learn how volcanic ash became soft tuff, eroded into fairy chimneys, and was carved into dwellings and churches. Write about the underground cities like Derinkuyu and how they sheltered thousands for months."
+    },
+    "tags": ["Place", "Turkey", "Rock"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-nubian-pyramids",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Nubian Pyramids of Meroë",
+    "teaser": "More pyramids than Egypt, hidden in the Sudanese desert: over 200 steep, narrow pyramids of the Kingdom of Kush. Once a rival empire that even ruled Egypt, Kush left a royal necropolis still standing in golden sand.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Count",
+      "targetName": "The pyramids of Meroë",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Kingdom of Kush built its pyramids at Meroë and why they are steeper than Egypt's. Write about the Kushite pharaohs who ruled Egypt, the 19th-century explorer who wrecked some tops, and what remains today."
+    },
+    "tags": ["Place", "Sudan", "Pyramids"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-lalibela",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Lalibela's Rock Churches",
+    "teaser": "Eleven churches carved top-down into the Ethiopian bedrock — from the roof down — in the 12th century, each a single massive block separated from the ground. Legend says angels helped build them; pilgrims still walk the trenches.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Carve",
+      "targetName": "Lalibela's monolithic churches",
+      "durationMinutes": 45,
+      "instruction": "Learn how the churches of Lalibela were carved from the top down, beginning with trenches around a block. Write how they were built without mortar, how the town's name honors King Lalibela, and how they serve as living churches today."
+    },
+    "tags": ["Place", "Ethiopia", "Churches"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-great-zimbabwe",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Great Zimbabwe",
+    "teaser": "A medieval city of granite walls, some 11 meters tall, built without mortar in southern Africa between the 11th and 15th centuries. Colonists refused to believe Africans built it — but it is the proud namesake of a nation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Build",
+      "targetName": "Great Zimbabwe's walls",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Shona people stacked granite blocks to build Great Zimbabwe and how the city grew wealthy on gold and ivory trade. Write why early Europeans doubted its origin and how the site shaped Zimbabwe's identity."
+    },
+    "tags": ["Place", "Zimbabwe", "Ruins"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-timbuktu-manuscripts",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Timbuktu's Manuscripts",
+    "teaser": "A Saharan crossroads city that once held hundreds of thousands of handwritten manuscripts — astronomy, law, poetry, medicine — in a golden age of learning. Families hid them from invaders in trunks, and scholars are still digitizing them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Preserve",
+      "targetName": "The Timbuktu manuscripts",
+      "durationMinutes": 45,
+      "instruction": "Learn how Timbuktu's university and libraries flourished in the 14th–16th centuries and what the manuscripts contain. Write how families saved them during the 2012 occupation and how preservation efforts continue today."
+    },
+    "tags": ["Place", "Mali", "History"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-petra-treasury",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Petra's Treasury",
+    "teaser": "A rose-red façade carved into a desert cliff, reached through a mile-long canyon called the Siq. It was probably a royal tomb, not a treasury — and its name came from a legend that pirates hid treasure in the urn above the door.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Enter",
+      "targetName": "Petra through the Siq",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Nabataeans carved the Treasury and the rest of their rose city, and how they engineered water systems in the desert. Write why the Treasury was named, what its carvings show, and how the city was lost and refound."
+    },
+    "tags": ["Place", "Jordan", "Carved"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-bagan",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Bagan",
+    "teaser": "Over 2,000 temples and stupas spread across the Myanmar plain — the remains of a kingdom that built feverishly between the 9th and 13th centuries. At sunrise, the plain glows gold and the temples pierce the mist like islands.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Bagan's temple plain",
+      "durationMinutes": 30,
+      "instruction": "Learn how Bagan's kings built thousands of Buddhist monuments and why the city was abandoned. Write how the temples were constructed, how earthquakes have damaged them, and why sunrise is the classic view."
+    },
+    "tags": ["Place", "Myanmar", "Temples"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-himeji-castle",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Himeji Castle",
+    "teaser": "Japan's most beautiful castle — a white heron of interlaced walls, gates, and mazes designed to confuse attackers. It survived earthquakes, wars, and firebombing, and its wooden structure has stood since the 1600s.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Defend",
+      "targetName": "Himeji's defensive design",
+      "durationMinutes": 30,
+      "instruction": "Learn how Himeji's winding paths, hidden gates, and stone drops were built to slow invaders. Write why it is called the White Heron, how its wooden joinery survived centuries, and how it was restored without losing authenticity."
+    },
+    "tags": ["Place", "Japan", "Castle"],
+    "tier": 1
+  },
+  {
+    "id": "wildcard-konark-sun-temple",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Konark Sun Temple",
+    "teaser": "A 13th-century temple built as a giant stone chariot of the sun god, with 24 carved wheels and seven horses. Each wheel is a sundial; the temple's stones tell the story of a day — and of the sun's journey.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Chariot",
+      "targetName": "Konark's stone wheels",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Konark temple was designed as a chariot and how its wheels work as sundials. Write what the carvings show, why the temple was built facing east, and how it is protected as a World Heritage site."
+    },
+    "tags": ["Place", "India", "Temple"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-caves-ellora",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Ellora's Kailasa Temple",
+    "teaser": "A cathedral-size temple carved from a single rock, from the top down — 100 feet tall, with elephants, towers, and halls all cut from one mountain in the 8th century. It is the largest monolithic carving in the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Carve",
+      "targetName": "The Kailasa temple at Ellora",
+      "durationMinutes": 45,
+      "instruction": "Learn how the Kailasa temple was carved top-down from a single basalt outcrop, removing 200,000 tons of rock. Write how the artists worked, what the carvings depict, and why it took roughly two decades to complete."
+    },
+    "tags": ["Place", "India", "Carved"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-dazu-rock",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Dazu Rock Carvings",
+    "teaser": "Over 50,000 statues carved into cliffs over nine centuries in China — some serene, some terrifying, all part of a mountain gallery of Buddhist, Taoist, and Confucian art. One sculpture, the reclining Buddha, is 31 meters long.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Gaze",
+      "targetName": "The Dazu carvings",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Dazu grottoes grew over centuries and what themes the carvings explore — from hell scenes to enlightenment. Write about the reclining Buddha and the Wheel of Life carving, and why the site is a World Heritage treasure."
+    },
+    "tags": ["Place", "China", "Carved"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-taktsang-monastery",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Tiger's Nest Monastery",
+    "teaser": "A monastery clinging to a cliff 900 meters above a Bhutanese valley, named for the legend that Guru Rinpoche flew there on a tigress. It has been rebuilt after fires, and pilgrims climb for hours to reach it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Climb",
+      "targetName": "Paro Taktsang",
+      "durationMinutes": 45,
+      "instruction": "Learn the legend of Guru Rinpoche's arrival on a flying tigress and how the monastery was built into the cliff. Write how it was damaged and rebuilt, what the hike is like, and why it is Bhutan's most sacred site."
+    },
+    "tags": ["Place", "Bhutan", "Monastery"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-cliffs-band-i-amir",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Band-e-Amir Lakes",
+    "teaser": "Six deep blue lakes dammed by natural travertine walls in the Hindu Kush of Afghanistan — among the highest lakes of their kind on Earth. Their color is so intense that locals call the water a gift from heaven.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Reflect",
+      "targetName": "Band-e-Amir's blue lakes",
+      "durationMinutes": 30,
+      "instruction": "Learn how mineral-rich springs built the travertine dams that hold the lakes, and why the water is so blue. Write how the lakes were formed, how they became Afghanistan's first national park, and the legends around them."
+    },
+    "tags": ["Place", "Afghanistan", "Lakes"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-canyon-chedi",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Cheddar Gorge",
+    "teaser": "Britain's largest gorge, carved by meltwater at the end of the last ice age — and home to Cheddar Man, Britain's oldest complete skeleton, plus the caves where cheese was aged. The gorge gave cheddar cheese its name.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Descend",
+      "targetName": "Cheddar Gorge and Cheddar Man",
+      "durationMinutes": 30,
+      "instruction": "Learn how the gorge formed and what Cheddar Man's 9,000-year-old remains revealed about early Britons. Write why the caves were perfect for aging cheese and how the gorge became a dramatic landmark."
+    },
+    "tags": ["Place", "England", "Gorge"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-cliffs-bungle-bungle",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "The Bungle Bungle Range",
+    "teaser": "Beehive-shaped domes striped in orange and black rise from the Australian outback — sandstone layers weathered into shapes no one knew existed until 1983, because the range is so remote. The stripes are cyanobacteria and iron.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Bungle Bungles",
+      "durationMinutes": 30,
+      "instruction": "Learn how the banded domes formed from ancient river deposits and how the stripes come from iron and living microbes. Write why the range was hidden from the world, how the cracks shape water flow, and the Aboriginal history of the land."
+    },
+    "tags": ["Place", "Australia", "Sandstone"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-avenue-baobabs",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Avenue of the Baobabs",
+    "teaser": "A dirt road in Madagascar lined with towering, trunk-swollen baobabs, some 800 years old — a natural cathedral of the island's most iconic trees. The trees once drew in the landscape's last trees as forests fell to farming.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Stand",
+      "targetName": "The Avenue of the Baobabs",
+      "durationMinutes": 30,
+      "instruction": "Learn why baobabs grow such massive trunks and how the avenue formed as forest gave way to fields. Write what the trees mean to Madagascar's ecology and culture, and how the site is protected and restored."
+    },
+    "tags": ["Place", "Madagascar", "Trees"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-socotra-archipelago",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Socotra Archipelago",
+    "teaser": "An island group called the 'Galápagos of the Indian Ocean' where a third of plant species exist nowhere else — umbrella-shaped dragon's blood trees, giant succulents, and frankincense groves. It split from Africa millions of years ago.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Isolate",
+      "targetName": "Socotra's endemic species",
+      "durationMinutes": 45,
+      "instruction": "Learn how Socotra's long isolation produced so many unique plants and animals. Write about the dragon's blood tree's shape and resin, the desert rose's swollen trunk, and the threats from development and goats."
+    },
+    "tags": ["Place", "Yemen", "Endemic"],
+    "tier": 3
+  },
+  {
+    "id": "wildcard-faroe-cliffs",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Faroe Islands",
+    "teaser": "Eighteen volcanic islands in the North Atlantic where grassy cliffs plunge into the sea, waterfalls drop straight off headlands, and the weather changes every ten minutes. Sheep outnumber people, and turf roofs are still common.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Island",
+      "targetName": "The Faroe Islands' landscape",
+      "durationMinutes": 30,
+      "instruction": "Learn how the Faroe Islands formed from volcanic eruptions and glaciers, and how their people live on wind-scoured land. Write about the sea cliffs, the underwater tunnel network, and the puffins that nest on the edges."
+    },
+    "tags": ["Place", "Faroe Islands", "Islands"],
+    "tier": 2
+  },
+  {
+    "id": "wildcard-lofoten",
+    "categoryId": "WILDCARD",
+    "subtype": "Place",
+    "name": "Lofoten Islands",
+    "teaser": "Sharp peaks rise straight from the Norwegian Sea on an archipelago above the Arctic Circle, where cod drying on racks has fed families for a thousand years. In winter the aurora dances over the black water and the peaks.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Fish",
+      "targetName": "Lofoten's fishing villages",
+      "durationMinutes": 30,
+      "instruction": "Learn how Lofoten's dramatic peaks formed and how the cod fishery shaped its villages and culture. Write about the stockfish tradition, the winter cod migration, and how the islands' light and mountains draw travelers."
+    },
+    "tags": ["Place", "Norway", "Islands"],
+    "tier": 2
+  }
+]

@@ -1,0 +1,410 @@
+[
+  {
+    "id": "director-otar-iosseliani",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Otar Iosseliani",
+    "teaser": "Georgian-born director of wordless, comic observations of everyday life, exiled from the USSR after criticizing its film bureaucracy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Falling Leaves (1966) — any 25-minute stretch",
+      "durationMinutes": 25,
+      "instruction": "Watch the faces of the workers on the tea plantation. Iosseliani finds whole novels in a glance."
+    },
+    "tags": [
+      "Georgian",
+      "1960s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-sergei-parajanov",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sergei Parajanov",
+    "teaser": "Armenian-born visual poet whose tableaux of folklore and faith are among the most image-dense films ever made. He painted with people.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Color of Pomegranates (1969) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Forget plot. Read the film like a museum wall of living icons — each shot is a painting that moves a little."
+    },
+    "tags": [
+      "Armenian",
+      "1960s",
+      "Art"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-andrei-konchalovsky",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Andrei Konchalovsky",
+    "teaser": "Russian-born director who moved between Soviet epics, Hollywood, and intimate dramas, always chasing big themes through small lives.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Siberiade (1979) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a Siberian village tracks a century of Russian history. Konchalovsky films the land as memory."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-ermann-olmi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ermanno Olmi",
+    "teaser": "Italian humanist who filmed workers, farmers, and drifters with documentary patience, finding sacredness in ordinary labor.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Tree of Wooden Clogs (1978) — the first 40 minutes",
+      "durationMinutes": 40,
+      "instruction": "Watch how Olmi lets a full season pass without drama. Life's rhythm is the movie; the clogs are the symbol."
+    },
+    "tags": [
+      "Italian",
+      "1970s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-maren-ade",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Maren Ade",
+    "teaser": "German director of excruciatingly truthful social comedies — office hierarchies, family road trips, and the unbearable weight of expectations.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Toni Erdmann (2016) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the awkwardness build in real time. Ade holds her scenes long enough for embarrassment to become love."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-matteo-garrone",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Matteo Garrone",
+    "teaser": "Italian director who moves between Naples crime stories and dark fairy tales with the same anthropological eye for how people survive.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Gomorrah (2008) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Notice what's missing: no heroes, no score, no glamour. The mafia is filmed like a factory's shift report."
+    },
+    "tags": [
+      "Italian",
+      "2000s",
+      "Crime"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-ciro-guerra",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ciro Guerra",
+    "teaser": "Colombian director who films the Amazon and the coast as characters — hypnotic voyages where myth and exploitation share a canoe.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Embrace of the Serpent (2015) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the black-and-white jungle double with a color version decades later. Guerra films colonialism as a river you travel twice."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-marco-bellocchio",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Marco Bellocchio",
+    "teaser": "Italian rebel of the 1960s who made explosive films about family, faith, and madness, still working six decades later.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fists in the Pocket (1965) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a family dinner becomes a chamber of psychological warfare. Bellocchio's debut never softens."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-ettore-scola",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ettore Scola",
+    "teaser": "Italian director of bittersweet ensemble comedies that hid social history inside jokes — a restaurant table becomes a century of Italy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "We All Loved Each Other So Much (1974) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how three friends' lives interleave across decades. Scola cuts between their fates like a deck of cards."
+    },
+    "tags": [
+      "Italian",
+      "1970s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-gillo-pontecorvo",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Gillo Pontecorvo",
+    "teaser": "Italian director of the anticolonial classic The Battle of Algiers, so real it was once used by the Pentagon for training.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Battle of Algiers (1966) — the first 40 minutes",
+      "durationMinutes": 40,
+      "instruction": "Watch it like news footage — that's the point. Pontecorvo rebuilt a revolution with non-professionals and documentary grammar."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "War"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-francesco-rosi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Francesco Rosi",
+    "teaser": "Italian director who invented the investigative thriller — films that use the camera like a prosecutor building a case against the powerful.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Salvatore Giuliano (1962) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Notice how the film starts with the death and works backwards. Rosi wants you to investigate, not just watch."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "Crime"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-liliana-cavani",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Liliana Cavani",
+    "teaser": "Italian director of provocative philosophical films — The Night Porter asked whether victims and perpetrators can ever really separate.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Night Porter (1974) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Hold the discomfort. Cavani is testing where complicity begins and whether memory can ever be escaped."
+    },
+    "tags": [
+      "Italian",
+      "1970s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-maria-luisa-berg",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Maria Luisa Bemberg",
+    "teaser": "Argentine director who came to film at fifty and made pointed period dramas about women trapped by the era they were born into.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Camila (1984) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch a forbidden love against a repressive state. Bemberg films defiance as a private, costly act."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-mario-monicelli",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mario Monicelli",
+    "teaser": "Italian master of commedia all'italiana who showed the poor laughing through misery — a comedian with a sociologist's eye.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Big Deal on Madonna Street (1958) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch a heist planned by people who can't even be trusted to hold a torch. Monicelli's genius is failing with style."
+    },
+    "tags": [
+      "Italian",
+      "1950s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-luigi-comencini",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Luigi Comencini",
+    "teaser": "Italian director of warm, precise films about children and the poor — often dismissed as gentle, often hiding real anger.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bread, Love and Dreams (1953) — any 25-minute stretch",
+      "durationMinutes": 25,
+      "instruction": "Watch how comedy and social observation share the same scenes. Comencini makes poverty funny without mocking it."
+    },
+    "tags": [
+      "Italian",
+      "1950s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-arturo-ripstein",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Arturo Ripstein",
+    "teaser": "Mexican director of dark, still melodramas about family rot and desperation — Buñuel approved of him, which says almost everything.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Principio y Fin (1993) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a family unravels in measured, gloomy steps. Ripstein films ruin the way others film romance."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-pablo-larrain",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Pablo Larraín",
+    "teaser": "Chilean director who makes psychological portraits of public figures — Pinochet, Jackie Kennedy, Diana — as haunted interior dramas.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "No (2012) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how the film itself looks like a 1988 TV broadcast. Larraín uses the medium of advertising to end a dictatorship."
+    },
+    "tags": [
+      "Chilean",
+      "2010s",
+      "History"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-sebastian-lelio",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sebastián Lelio",
+    "teaser": "Chilean director of precise, empathetic portraits of women breaking free — from a Jehovah's Witness housewife to a trans rock star.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Gloria (2013) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the dance floor scenes. Lelio lets a middle-aged woman be joyful, awkward, and alive without a single cruel joke."
+    },
+    "tags": [
+      "Chilean",
+      "2010s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-patricio-guzman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Patricio Guzmán",
+    "teaser": "Chilean documentarian who spent forty years filming his country's memory — first the coup, then the landscape that holds it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nostalgia for the Light (2010) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how astronomers and the mothers of the disappeared share the same desert. Guzmán films memory itself."
+    },
+    "tags": [
+      "Chilean",
+      "2010s",
+      "Documentary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-miguel-littin",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Miguel Littín",
+    "teaser": "Chilean director who returned to Pinochet's Chile in disguise to make a secret film about his own country — a story Gabriel García Márquez wrote down.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Acta General de Chile (1986) — any 30-minute stretch",
+      "durationMinutes": 30,
+      "instruction": "Watch it knowing the crew filmed under false identities. Every street scene is an act of resistance."
+    },
+    "tags": [
+      "Chilean",
+      "1980s",
+      "Documentary"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-ida-lupino",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ida Lupino",
+    "teaser": "Actress turned director who in 1949 became one of Hollywoods only female filmmakers, tackling rape, polio, and bigamy in hard little noirs.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Hitch-Hiker (1953) — end to end",
+      "durationMinutes": 71,
+      "instruction": "Watch the only classic noir directed by a woman. Lupino strips the thriller to two men and a killer in a car."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  }
+]

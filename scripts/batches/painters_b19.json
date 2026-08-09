@@ -1,0 +1,422 @@
+[
+  {
+    "id": "painter-georges-braque",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Georges Braque",
+    "teaser": "The co-inventor of Cubism — he and Picasso worked so closely that they couldn't tell each other's paintings apart. His still lifes of guitars, fruit, and newspapers are built from fractured planes and quiet greys; he was the more orderly, musical half of the pair.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Viollin and Candlestick or the early Cubist still lifes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Braque breaks a guitar into planes that slide past each other: you see the front and the side at once, light and shadow without a single source. He was a trained decorator and musician, and his Cubism has a rhythm Picasso's lacked. He painted the same few objects for forty years and never repeated himself."
+    },
+    "tags": [
+      "Cubism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-fernand-leger",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Fernand Léger",
+    "teaser": "The painter of the machine age — his workers, cyclists, and acrobats are built from tubes, cones, and bold color, celebrating the industrial world with a grin. He called his style 'mechanical realism,' and he meant the joy of it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The City (1919) or the mechanical compositions",
+      "durationMinutes": 20,
+      "instruction": "Look at how Léger stacks cylinders and angles to make a city: stairs, signs, and pipes in primary colors, flat and loud. He loved the modern world — factories, machines, posters — and painted it without irony. His figures are like friendly robots, and the world is a wonderful machine."
+    },
+    "tags": [
+      "Cubism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-juan-gris",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Juan Gris",
+    "teaser": "The 'third man' of Cubism — a Spanish painter who took Picasso and Braque's discoveries and made them elegant, clear, and personal. His still lifes are built like architecture, with the objects reassembled in a logic all their own.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Breakfast or the guitar still lifes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Gris constructs a table: the bottle, the newspaper, the fruit are drawn from several angles at once and fitted together like a jigsaw — but his jigsaws are tidy and calm, where Picasso's are wild. He said he painted 'the architecture of objects.' A poet of order in a revolutionary time."
+    },
+    "tags": [
+      "Cubism",
+      "Spanish",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-albert-gleizes",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Albert Gleizes",
+    "teaser": "The theorist of Cubism — he and Jean Metzinger wrote the movement's first book, Du Cubisme, and his paintings of landscapes and figures are built from bold, faceted planes. He later turned to spiritual, abstract art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Bathers or the Cubist landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Gleizes breaks a landscape into crystalline planes: the hills, the trees, and the sky are all facets of one geometric light. He believed Cubism expressed a higher reality, not just a new style. His book made the movement respectable — and his paintings made it beautiful."
+    },
+    "tags": [
+      "Cubism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-sonia-delaunay",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Sonia Delaunay",
+    "teaser": "The painter of simultaneity — she turned color into motion, painting and designing fabrics, dresses, and books where circles of pure color spin and clash. She was one of the first women to cross from art into design, and she did both brilliantly.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Electric Prisms or the fabric designs",
+      "durationMinutes": 20,
+      "instruction": "Look at how Sonia makes colors vibrate: disks of red, blue, and green placed so they seem to spin — she called it 'simultaneous contrast.' Then her fabrics and dresses, where the same circles became wearable art. She said color was her language, and she spoke it everywhere."
+    },
+    "tags": [
+      "Orphism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jacques-villon",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jacques Villon",
+    "teaser": "The oldest of the Cubist brothers (Marcel Duchamp's brother) — his refined Cubist paintings are built from delicate planes of grey and color, more subtle and lyrical than his peers'. He waited decades for recognition and got it, eventually.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Cubist compositions — the planes",
+      "durationMinutes": 20,
+      "instruction": "Look at how Villon dissolves a figure or a landscape into translucent planes of color, like stained glass in motion. He was trained as a printmaker, and his Cubism has a printmaker's precision. He kept refining the same idea for fifty years — and it kept getting better."
+    },
+    "tags": [
+      "Cubism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-roger-de-la-fresnaye",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Roger de La Fresnaye",
+    "teaser": "The French Cubist of bright, geometric figure scenes — his Conquest of the Air shows himself and his brother in an airplane-obsessed world of 1913, full of light, color, and optimism. He died young of tuberculosis, worn out by the war.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Conquest of the Air (MoMA) — the balloon",
+      "durationMinutes": 20,
+      "instruction": "Two men sit with a balloon and a view of a town, the whole scene built from bright faceted planes — optimism made visible. La Fresnaye painted the machine age as a picnic. He served in WWI, was invalided out with tuberculosis, and spent his last years painting quietly before dying at 39."
+    },
+    "tags": [
+      "Cubism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-andre-lhote",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "André Lhote",
+    "teaser": "The French painter who taught Cubism to generations — his own paintings of nudes, landscapes, and port scenes are structured, colorful, and calm, and his art school and writings spread Cubist thinking across the world. He was the professor of modernism.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The port scenes or the nudes — the structure",
+      "durationMinutes": 20,
+      "instruction": "Look at how Lhote organizes a scene: the figures, the boats, the sky all arranged on a hidden geometry of diagonals and curves. He believed painting needed rules as much as feeling. His school taught thousands, including the young women of the avant-garde. The professor of Cubism, painting calmly through the revolution."
+    },
+    "tags": [
+      "Cubism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-marie-laurencin",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Marie Laurencin",
+    "teaser": "The French painter of a private, feminine world — her portraits of women, girls, and animals are painted in pale roses, greys, and blues, soft and dreamlike. She was the only woman in Picasso's inner circle before WWI, and she made that circle her own.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The women and deer compositions — the palette",
+      "durationMinutes": 20,
+      "instruction": "Look at the palette: Laurencin painted almost everything in shades of pink, grey, and powder blue, so her women float in a dream that's both innocent and knowing. She was Apollinaire's lover and Picasso's friend, and she painted a world where women are the only real figures — men appear as shadows, if at all."
+    },
+    "tags": [
+      "Modern",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-francis-picabia",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Francis Picabia",
+    "teaser": "The eternal provocateur — a rich French painter who switched styles every few years: Impressionism, Cubism, Dada machine-paintings, abstract, and figurative again, always with a joke up his sleeve. He painted machines as lovers and called art 'a product of the spirit.'",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The mechanical drawings or the Dada works",
+      "durationMinutes": 20,
+      "instruction": "Look at his Dada machines: a spark plug, a woman, a poem — drawn with cold precision and titled with irony, like 'The Child Carburetor.' Picabia mocked seriousness while being seriously good. He said he wanted 'to do something new, then destroy it.' He did, for fifty years."
+    },
+    "tags": [
+      "Dada",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-marcel-duchamp",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Marcel Duchamp",
+    "teaser": "The artist who stopped making art and changed everything — his Nude Descending a Staircase scandalized America in 1913, and his urinal-signed-'R. Mutt' (Fountain) invented conceptual art. He spent his later years playing chess, which he considered a fine art.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "Nude Descending a Staircase, No. 2 (Philadelphia Museum) — the motion",
+      "durationMinutes": 20,
+      "instruction": "Look at how Duchamp paints a single body in many positions at once — descending the stairs like a stop-motion photograph, but in paint, in 1912, before anyone had seen a movie like it. It was called 'an explosion in a shingle factory.' Then find his readymades — the bicycle wheel, the bottle rack — and ask yourself: what is art, exactly?"
+    },
+    "tags": [
+      "Dada",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-man-ray",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Man Ray",
+    "teaser": "The American who made Paris surreal — as a painter, photographer, and object-maker, he turned the everyday into the uncanny: a metronome with an eye, a gift wrapped in iron, women's lips floating in the sky. He said he painted what cannot be photographed, and photographed what cannot be painted.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Observatory Time: The Lovers or the object sculptures",
+      "durationMinutes": 20,
+      "instruction": "Look at The Lovers: giant lips drift across a sky — painted as a memory of the mouth of Lee Miller, his lover and student. Then his objects: the metronome with the eye, the wrapped sewing machine. Man Ray made desire and distance into objects you could hold. The most elegant prankster of the century."
+    },
+    "tags": [
+      "Surrealism",
+      "American",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-yves-tanguy",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Yves Tanguy",
+    "teaser": "The Surrealist of endless bone-strewn plains — he painted vast, empty landscapes of strange standing stones and shadows, in pale greys and blues, like the floor of a drained ocean. He decided to become a painter after seeing a de Chirico in a shop window.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The palace of windowed rocks or the bone landscapes",
+      "durationMinutes": 20,
+      "instruction": "Look at the horizon: Tanguy's paintings stretch forever — grey ground, pale sky, and strange monuments standing alone. No people, no stories, just a world that feels like a memory of a place that never existed. He said his art came 'from the inside.' The inside was vast."
+    },
+    "tags": [
+      "Surrealism",
+      "French",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-roberto-matta",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Roberto Matta",
+    "teaser": "The Chilean Surrealist of cosmic space — his huge canvases are full of floating architectures, glowing forms, and 'psychological morphologies' that feel like the inside of a dream or an atom. He influenced the Abstract Expressionists and outlived them all.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The space compositions or the psychological morphologies",
+      "durationMinutes": 20,
+      "instruction": "Look at how Matta builds a universe: glowing shapes, strange machines, and horizons of fire and ice, painted large enough to walk into. He said he painted 'the internal landscape' of the modern mind. He was the bridge between European Surrealism and New York's big canvases — and his own are the biggest of all."
+    },
+    "tags": [
+      "Surrealism",
+      "Chilean",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-victor-brauner",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Victor Brauner",
+    "teaser": "The Romanian Surrealist of prophecy and the severed eye — he painted The Surrealist's Table in 1936, featuring a disembodied eye, and lost his own eye in a brawl in 1938. His work is full of chimeras, moon-women, and a strange personal mythology.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The Surrealist's Table (1936) — the eye",
+      "durationMinutes": 20,
+      "instruction": "Look at the painting: a strange table with a severed hand, an eye, and a spider-like creature. Two years later, in a fight between his friends, Brauner's left eye was destroyed — the prophecy, fulfilled. He kept painting chimeras and doubles for the rest of his life, with one eye and a memory."
+    },
+    "tags": [
+      "Surrealism",
+      "Romanian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-wolfgang-paalen",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Wolfgang Paalen",
+    "teaser": "The Austrian-Mexican Surrealist who invented fumage — painting with smoke from a candle held under the canvas. His smoky, totemic works and his journal DYN made him a key bridge between Paris and Mexico City, and between Surrealism and the abstract painters.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The fumage paintings — the smoke",
+      "durationMinutes": 20,
+      "instruction": "Look at how Paalen let candle smoke paint for him: the soot makes veils, branches, and faces that he then fixed and completed by hand. He called it 'an encounter with chance.' His Mexican years brought totems and volcanoes into the work. He died young, in the forest he loved, by his own hand."
+    },
+    "tags": [
+      "Surrealism",
+      "Austrian",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-gordon-onslow-ford",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Gordon Onslow Ford",
+    "teaser": "The British Surrealist who crossed the Atlantic and crossed out of painting — he moved from Paris's Surrealist circle to a volcano in Mexico and finally to a Californian retreat, where he painted cosmic landscapes and taught that art is a way of seeing the inner universe.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The cosmic landscapes — the inner space",
+      "durationMinutes": 20,
+      "instruction": "Look at how Onslow Ford paints the universe from the inside: arcs, disks, and floating forms in deep blues and golds, like astronomical maps of the soul. He left the Surrealist scene to find 'the reality of the inner world' — and spent 50 years painting it, first in Mexico, then in California."
+    },
+    "tags": [
+      "Surrealism",
+      "British",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-mathias-goeritz",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Mathias Goeritz",
+    "teaser": "The German-Mexican artist of 'emotional architecture' — his paintings of gold, his totemic sculpture towers, and his manifesto declaring 'architecture should cry and laugh' made him a cult figure in Mexico. He told us to feel buildings, not just use them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The gold paintings or the Torres de Satélite",
+      "durationMinutes": 20,
+      "instruction": "Look at the gold: Goeritz painted flat golden surfaces that glow like icons, and he built the Torres de Satélite — five giant concrete towers by the highway outside Mexico City, the largest sculpture ensemble of their time. He believed art should make you feel something, even on the road. Cry, laugh, feel — that was the order."
+    },
+    "tags": [
+      "Modern",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-gunther-gerzso",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Gunther Gerzso",
+    "teaser": "The Mexican painter of pre-Columbian abstraction — a set designer for Mexican cinema who began painting in his 40s, building landscapes from layered planes of deep color that echo the ruins and valleys of Mexico. He is one of Latin America's great abstract painters.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The abstract landscapes — the layers",
+      "durationMinutes": 20,
+      "instruction": "Look at how Gerzso stacks planes of color like geological strata: a valley, a ruin, a night — reduced to deep reds, greens, and golds that glow like lacquer. He spent 20 years designing movie sets, then turned to painting and found his real set: the Mexican landscape, abstracted into pure color."
+    },
+    "tags": [
+      "Abstract",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-dr-atl",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Dr. Atl",
+    "teaser": "The Mexican volcano painter — Gerardo Murillo, who took the Nahuatl name 'Atl' (water) and painted erupting volcanoes from the crater's edge. He also invented a painting surface called 'Atl-color' and lost a leg after a fall from a volcano, which only made him paint more.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The volcano paintings — the eruption",
+      "durationMinutes": 20,
+      "instruction": "Look at the red: Dr. Atl painted Paricutín erupting in 1943, standing closer than anyone should, capturing rivers of lava as streaks of fire. He climbed, fell, lost a leg, and kept climbing. He was the most romantic figure of Mexican modernism — a man who painted the earth's blood from inside it."
+    },
+    "tags": [
+      "Modern",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "painter-jesus-reyes-ferreira",
+    "categoryId": "PAINTERS",
+    "subtype": "Painter",
+    "name": "Jesús Reyes Ferreira",
+    "teaser": "The Mexican painter of ribbons and pastel skies — 'Chucho' Reyes painted swirls of color, angels, and folk-art motifs in a light, joyful style that made him a favorite of the muralists and of Luis Barragán, who used his colors in architecture.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look",
+      "targetName": "The ribbon paintings or the folk-art inspired works",
+      "durationMinutes": 20,
+      "instruction": "Look at the ribbons: Reyes Ferreira painted streams of color that curl like kite tails across the canvas, in pinks, blues, and golds straight from Mexican folk art. He began as an antiques dealer who collected pulque paintings and turned their spirit into his own joyful art. He painted angels that smile."
+    },
+    "tags": [
+      "Folk Art",
+      "Mexican",
+      "20th Century"
+    ],
+    "tier": 1
+  }
+]

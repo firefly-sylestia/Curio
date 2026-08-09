@@ -1,0 +1,422 @@
+[
+  {
+    "id": "author-juan-rulfo",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Juan Rulfo",
+    "teaser": "The Mexican writer who published almost nothing — but Pedro Páramo and The Burning Plain changed world literature. A village where the dead speak, and prose as dry and haunted as the dust.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pedro Páramo, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Pedro Páramo. Notice how the dead narrator and the living traveler blur, and how the village of Comala is described as heat and murmur. Write how Rulfo builds a landscape where the afterlife is just another room."
+    },
+    "tags": [
+      "Mexican",
+      "Magical Realism",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-jose-saramago",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "José Saramago",
+    "teaser": "The Portuguese Nobel laureate who wrote without conventional punctuation — long rivers of speech that pull you under. Blindness and Baltasar and Blimunda explore civilization's skin-thin veneer with rage and tenderness.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Blindness, the opening chapters",
+      "durationMinutes": "75",
+      "instruction": "Read the opening of Blindness. Notice how the white blindness spreads from one man to a city, and how Saramago's run-on prose mirrors contagion. Write what the novel says about the social contract when everyone loses sight."
+    },
+    "tags": [
+      "Portuguese",
+      "Nobel",
+      "Allegory"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-fernando-pessoa",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Fernando Pessoa",
+    "teaser": "The Portuguese poet who wrote as many selves — heteronyms with their own biographies and styles: the modernist Álvaro de Campos, the neoclassical Ricardo Reis, the humble Alberto Caeiro. The Book of Disquiet is his strange masterpiece.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Book of Disquiet, a selection",
+      "durationMinutes": "45",
+      "instruction": "Read a selection of fragments from The Book of Disquiet. Notice how Pessoa's assistant bookkeeper narrator dreams instead of acts. Write how writing as invented selves might be a way to live many lives — or none at all."
+    },
+    "tags": [
+      "Portuguese",
+      "Poetry",
+      "Modernism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-jorge-amado",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Jorge Amado",
+    "teaser": "The Brazilian novelist of Bahia — Dona Flor and Her Two Husbands, Gabriela, Clove and Cinnamon. He filled his pages with heat, humor, food, and the street wisdom of the poor. His books sold in the millions.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gabriela, Clove and Cinnamon, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Gabriela, Clove and Cinnamon. Notice how Amado makes the town of Ilhéus — its cacao, its customs, its gossip — the real main character. Write how food, scent, and weather carry the novel's sensuality."
+    },
+    "tags": [
+      "Brazilian",
+      "Classic",
+      "Regional"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-pablo-neruda",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Pablo Neruda",
+    "teaser": "The Chilean Nobel laureate — poet of love sonnets, odes to onions and socks, and the epic Canto General about Latin America's earth and history. He made poetry democratic, sensual, and political.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Twenty Love Poems, a selection, and an Ode",
+      "durationMinutes": "45",
+      "instruction": "Read a few love poems and one ode (try Ode to the Onion or Ode to My Socks). Notice how Neruda makes the humble object magnificent. Write how the odes find the sacred in the everyday, and why that is a political act too."
+    },
+    "tags": [
+      "Chilean",
+      "Nobel",
+      "Poetry"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-octavio-paz",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Octavio Paz",
+    "teaser": "The Mexican Nobel laureate — poet and essayist whose The Labyrinth of Solitude dissected Mexican identity, and whose poems (Sunstone, Blanco) are among the century's most beautiful meditations on time and love.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sunstone, the long poem",
+      "durationMinutes": "45",
+      "instruction": "Read Sunstone. Notice how the poem's circular form loops the same line back after 584 verses. Write how Paz's meditation on a single moment — a woman, a room, the Aztec calendar — expands into all of history."
+    },
+    "tags": [
+      "Mexican",
+      "Nobel",
+      "Poetry"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-horacio-quiroga",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Horacio Quiroga",
+    "teaser": "The Uruguayan master of the jungle story — his Tales of Love, Madness and Death and Jungle Tales turn the Misiones wilderness into a place of terrifying beauty. His life was as violent as his fiction.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Decapitated Chicken, and one jungle tale",
+      "durationMinutes": "45",
+      "instruction": "Read The Decapitated Chicken. Notice how Quiroga builds horror out of domestic detail and heredity. Write how his stories use the natural world as both refuge and threat, and what the title story says about obsession."
+    },
+    "tags": [
+      "Uruguayan",
+      "Short Stories",
+      "Horror"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-adolfo-bioy-casares",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Adolfo Bioy Casares",
+    "teaser": "The Argentine novelist and Borges's closest collaborator — The Invention of Morel is a perfect little novel about love, islands, and a machine that replays the past. Borges called it flawless.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Invention of Morel, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Invention of Morel. Notice how the castaway narrator's observations slowly decode the island's ghostly visitors. Write how the novel turns science fiction into a meditation on love and mortality."
+    },
+    "tags": [
+      "Argentine",
+      "Science Fiction",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-jose-donoso",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "José Donoso",
+    "teaser": "The Chilean novelist of The Obscene Bird of Night — a labyrinthine, Gothic masterwork about an old woman, her monsters, and the house where servants mimic their masters. Latin America's strangest novel of power.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Obscene Bird of Night, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Obscene Bird of Night. Notice how identity dissolves and multiplies, and how the house breathes. Write how Donoso uses the grotesque to explore the master-servant relationship at the heart of his society."
+    },
+    "tags": [
+      "Chilean",
+      "Gothic",
+      "Modernism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-silvina-ocampo",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Silvina Ocampo",
+    "teaser": "The Argentine short-story writer and poet — Borges and Bioy's collaborator, whose stories twist childhood, cruelty, and the fantastic into glittering, disturbing miniatures. Rediscovered as a hidden giant.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Silvina Ocampo, a handful of stories",
+      "durationMinutes": "45",
+      "instruction": "Read two or three of Ocampo's short stories. Notice how her child narrators observe adult cruelty with unsettling calm. Write what her fiction suggests about innocence — is it ever really innocent, or just another mask?"
+    },
+    "tags": [
+      "Argentine",
+      "Short Stories",
+      "Fantastic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-alejandra-pizarnik",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Alejandra Pizarnik",
+    "teaser": "The Argentine poet of darkness and desire — her short, intense poems face the night, the mirror, and silence without blinking. She died at 36, and her voice has only grown louder.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pizarnik's poems, a small selection",
+      "durationMinutes": "30",
+      "instruction": "Read a handful of Pizarnik's poems. Notice how few words she needs to create a whole night. Write what her poetry says about the desire to be seen and the fear of being seen, and why that tension still resonates."
+    },
+    "tags": [
+      "Argentine",
+      "Poetry",
+      "Confessional"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-federico-garcia-lorca",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Federico García Lorca",
+    "teaser": "The Andalusian poet and playwright — Blood Wedding, Yerma, and The House of Bernarda Alba turned Spanish rural tragedy into timeless theatre. He was murdered by Franco's men in 1936 at 38.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Blood Wedding, Act One",
+      "durationMinutes": "60",
+      "instruction": "Read the first act of Blood Wedding. Notice how the knife, the moon, and the lullaby carry the coming violence. Write how Lorca blends folk poetry and tragedy, and what the play says about desire against the law of the family."
+    },
+    "tags": [
+      "Spanish",
+      "Drama",
+      "Poetry"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-javier-marias",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Javier Marías",
+    "teaser": "The Spanish novelist of A Heart So White and All Souls — a master of the long, digressive, hypnotic sentence and of stories told through what people almost said. Also a sharp essayist and translator.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Heart So White, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of A Heart So White, which begins with a woman's suicide during her honeymoon. Notice how Marías circles events without ever quite landing on them. Write how the withheld telling becomes its own kind of suspense."
+    },
+    "tags": [
+      "Spanish",
+      "Contemporary",
+      "Modernism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-carmen-laforet",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Carmen Laforet",
+    "teaser": "The Spanish novelist who, at 23, wrote Nada — a devastating portrait of postwar Barcelona and a girl's arrival into a house full of ghosts. It won the first Nadal Prize and changed Spanish fiction.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nada, the opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of Nada. Notice how Andrea arrives in the dark city and the claustrophobic apartment. Write how Laforet makes hunger, poverty, and a family's decay feel like weather pressing on one girl."
+    },
+    "tags": [
+      "Spanish",
+      "Postwar",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-arturo-perez-reverte",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Arturo Pérez-Reverte",
+    "teaser": "The Spanish novelist of The Club Dumas and the Captain Alatriste series — swashbuckling, erudite, and dark. A former war correspondent, he writes about honor, books, and the sea with equal passion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Club Dumas, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Club Dumas. Notice how Pérez-Reverte treats rare books as objects of obsession and danger. Write how the novel blends detective story, book history, and the occult into a single page-turning engine."
+    },
+    "tags": [
+      "Spanish",
+      "Thriller",
+      "Historical"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-carlos-ruiz-zafon",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Carlos Ruiz Zafón",
+    "teaser": "The Spanish author of The Shadow of the Wind — a love letter to Barcelona and to books, set in a Cemetery of Forgotten Books. It became one of the best-selling Spanish novels ever written.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Shadow of the Wind, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Shadow of the Wind. Notice how the Cemetery of Forgotten Books is described as a holy place for readers. Write how the novel makes the act of choosing a book — and losing one — into a mystery."
+    },
+    "tags": [
+      "Spanish",
+      "Gothic",
+      "Best Seller"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-rosa-montero",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Rosa Montero",
+    "teaser": "The Spanish novelist and journalist whose fiction — The Lunatic of the House, Weep, My Lady — braids journalism, fantasy, and autobiography into a search for how stories keep us alive.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Lunatic of the House, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Lunatic of the House. Notice how Montero's narrator invents an alter ego to explore her own fears and desires. Write how the novel uses fantasy as a tool for honesty rather than escape."
+    },
+    "tags": [
+      "Spanish",
+      "Contemporary",
+      "Metafiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-rosa-chacel",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Rosa Chacel",
+    "teaser": "The Spanish novelist in the line of the great modernists — her dense, introspective fiction, like The Maravillas District, explores memory and the female self. She spent decades of exile in Brazil.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Maravillas District, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Maravillas District. Notice how Chacel's prose moves by association, circling memory rather than narrating it. Write how her experimental style gives access to an inner life that traditional realism flattens."
+    },
+    "tags": [
+      "Spanish",
+      "Modernism",
+      "Memory"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "author-rosario-castellanos",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Rosario Castellanos",
+    "teaser": "The Mexican writer and diplomat who wrote about women and indigenous life with irony and fury — The Book of Lamentations and her poems are essential reading for understanding Mexico's inner fractures.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Book of Lamentations, opening chapters",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Book of Lamentations. Notice how Castellanos gives voice to a Tzotzil woman's rebellion against both church and state. Write how the novel weaves colonial history into one woman's fierce refusal."
+    },
+    "tags": [
+      "Mexican",
+      "Feminist",
+      "Indigenous"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "author-elena-poniatowska",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Elena Poniatowska",
+    "teaser": "The Polish-born Mexican journalist and novelist of The Night of Tlatelolco — the oral history of the 1968 massacre that made her Mexico's conscience. Also wrote the dazzling biography Dear Diego.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Night of Tlatelolco, opening sections",
+      "durationMinutes": "60",
+      "instruction": "Read the opening of The Night of Tlatelolco. Notice how Poniatowska stitches together testimonies, slogans, and official lies. Write how oral history as a literary form can do what official accounts refuse to."
+    },
+    "tags": [
+      "Mexican",
+      "Journalism",
+      "Testimony"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "author-rosa-regas",
+    "categoryId": "AUTHORS",
+    "subtype": "Author",
+    "name": "Rosa Regàs",
+    "teaser": "The Spanish novelist and publisher — a free spirit of the Barcelona literary scene whose novels like Azul explore passion, memory, and the life of a woman who refuses the roles handed to her.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Azul, opening chapters",
+      "durationMinutes": "45",
+      "instruction": "Read the opening of Azul. Notice how Regàs weaves present and past, and how the sea functions as both setting and memory. Write how the novel uses recollection to measure what a woman's freedom has cost her."
+    },
+    "tags": [
+      "Spanish",
+      "Contemporary",
+      "Women"
+    ],
+    "tier": 3
+  }
+]

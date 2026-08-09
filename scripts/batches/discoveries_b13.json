@@ -1,0 +1,359 @@
+[
+  {
+    "id": "discovery-catalhoyuk",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Çatalhöyük (1958)",
+    "teaser": "On Turkey's Konya Plain, James Mellaart uncovered a Neolithic city of 8,000 people — no streets, houses entered through the roof, walls covered with bull heads and goddess murals. Dating to 7,400 BCE, it is one of the largest and earliest known towns, built before pottery, before metal, before writing.",
+    "imageUrl": "",
+    "byline": "James Mellaart",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery and excavation of Çatalhöyük",
+      "durationMinutes": 20,
+      "instruction": "Read how the mud-brick houses were packed together like honeycomb, entered by ladder from above, and how burials under the floors kept ancestors close. The site overturned ideas that cities required farming surpluses and chiefs — Çatalhöyük looks egalitarian. Excavation continues today under Ian Hodder.",
+      "tags": [
+        "Archaeology",
+        "20th Century",
+        "Turkish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-akrotiri",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Akrotiri, the Minoan Pompeii (1967)",
+    "teaser": "Spyridon Marinatos, who had theorized that a volcanic eruption destroyed Minoan Crete, dug into the island of Thera (Santorini) and found a whole town buried in pumice — multi-story houses, frescoes of dolphins and blue monkeys, and no bodies: the residents had fled before the cataclysm around 1600 BCE.",
+    "imageUrl": "",
+    "byline": "Spyridon Marinatos",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marinatos's excavations at Akrotiri (1967–74)",
+      "durationMinutes": 20,
+      "instruction": "The eruption of Thera was one of the largest in recorded history, and Marinatos believed it wrecked Minoan civilization. Read how Akrotiri's ash-covered houses preserved three-story architecture, advanced drainage, and frescoes, and how the eruption's timing — and whether it caused the legend of Atlantis — is still argued.",
+      "tags": [
+        "Archaeology",
+        "20th Century",
+        "Greek"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-ebla-tablets",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Ebla Tablets (1974)",
+    "teaser": "Italian archaeologists digging at Tell Mardikh in Syria found a room full of clay tablets — 17,000 of them, the archives of the kingdom of Ebla, a trading power of 4,300 years ago. The tablets showed a whole forgotten civilization, with a language scholars had never met.",
+    "imageUrl": "",
+    "byline": "Paolo Matthiae",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of the Ebla archives (1974–75)",
+      "durationMinutes": 20,
+      "instruction": "Read how the tablets, written in cuneiform in the local Eblaite language, record grain accounts, treaties, and diplomacy with cities like Ashur and Hamazi. Some scholars thought they found 'Ebla, the city of David' parallels, but the claims collapsed. The archive remains the richest third-millennium source outside Mesopotamia.",
+      "tags": [
+        "Archaeology",
+        "20th Century",
+        "Syrian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-oxyrhynchus",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Oxyrhynchus Papyri (1897)",
+    "teaser": "Two young Oxford classicists, Bernard Grenfell and Arthur Hunt, found a garbage dump in the Egyptian desert — and it was the greatest trash ever excavated: half a million papyrus fragments, including lost plays of Sophocles, an unknown Gospel, and a million everyday documents from Roman Egypt.",
+    "imageUrl": "",
+    "byline": "Grenfell & Hunt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Oxyrhynchus papyrus excavations (1897–1907)",
+      "durationMinutes": 20,
+      "instruction": "The dry sand of the rubbish mounds preserved everything: tax receipts, letters, school exercises, magic spells. Read how the pair worked in three-month seasons and shipped tons of papyrus to Oxford, where scholars are still publishing them — the largest single archive of writing from the ancient world.",
+      "tags": [
+        "Archaeology",
+        "19th-20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-nag-hammadi",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Nag Hammadi Library (1945)",
+    "teaser": "Egyptian farmers digging for fertilizer under a cliff near Nag Hammadi unearthed a sealed jar containing thirteen leather-bound codices — early Christian texts the Church had condemned and destroyed: the Gospel of Thomas, the Gospel of Philip, and other 'gnostic' writings hidden for 1,600 years.",
+    "imageUrl": "",
+    "byline": "Muhammad Ali & local farmers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1945 discovery of the Nag Hammadi codices",
+      "durationMinutes": 20,
+      "instruction": "The codices, written in Coptic in the 4th century, preserve sayings of Jesus not in the Bible — the Gospel of Thomas begins, 'These are the hidden words that the living Jesus spoke.' Read how the texts reshaped the study of early Christianity, revealing the diversity the early Church edited away.",
+      "tags": [
+        "Archaeology",
+        "20th Century",
+        "Egyptian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-gilgamesh-tablets",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Epic of Gilgamesh Found (1853)",
+    "teaser": "Hormuzd Rassam, digging in the ruins of Nineveh, found the library of the Assyrian king Ashurbanipal — and with it, clay tablets telling a story 1,000 years older than Homer: Gilgamesh, the flood, and a wild man named Enkidu. The world's oldest epic had been lost for two millennia.",
+    "imageUrl": "",
+    "byline": "Hormuzd Rassam",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The discovery of the Library of Ashurbanipal and the Gilgamesh tablets",
+      "durationMinutes": 20,
+      "instruction": "Read how George Smith, a young Assyriologist, first translated the flood tablet and how it caused a sensation — a Babylonian flood story that predated the Bible's. The epic was already ancient when it was copied onto Ashurbanipal's tablets around 650 BCE, centuries after it was composed in Sumer.",
+      "tags": [
+        "Archaeology",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-challenger-deep",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Challenger Deep (1951)",
+    "teaser": "The Royal Navy survey ship Challenger II, using echo sounders, measured the deepest point in the world's oceans: nearly 11 kilometers down in the Mariana Trench, a place now called the Challenger Deep — deeper than Everest is tall, with room to spare. It was first reached by humans in 1960.",
+    "imageUrl": "",
+    "byline": "HMS Challenger II",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1951 echo-sounding of the Challenger Deep",
+      "durationMinutes": 20,
+      "instruction": "Read how the survey ship recorded depths of about 5,960 fathoms (nearly 11 km) in the trench's southern end. The Trieste bathyscaphe reached the bottom in 1960 with two men aboard, finding fish and shrimp at pressures a thousand times atmospheric — proof that life thrives even in the deepest trench.",
+      "tags": [
+        "Oceanography",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-moho",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Mohorovičić Discontinuity (1909)",
+    "teaser": "Andrija Mohorovičić, a Croatian meteorologist, noticed that seismic waves from a Balkan earthquake arrived twice — a fast wave that had dipped into a deeper layer and a slow one that stayed shallow. The boundary between the crust and the mantle beneath is now named for him: the Moho.",
+    "imageUrl": "",
+    "byline": "Andrija Mohorovičić",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mohorovičić's 1909 analysis of the Kupa Valley earthquake",
+      "durationMinutes": 20,
+      "instruction": "Read how the doubled arrival times revealed a sudden jump in rock density at about 35 km depth — the base of the crust. The Moho was later mapped across the planet, and for decades a plan existed to drill through it: the abandoned 'Mohole' project. It remains unattained by drilling, though probes now exist.",
+      "tags": [
+        "Geology",
+        "20th Century",
+        "Croatian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-van-allen-belts",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Van Allen Belts (1958)",
+    "teaser": "Explorer 1, America's first satellite, carried a small Geiger counter — and it stopped counting at altitude. James Van Allen realized the instrument had saturated: the Earth is wrapped in belts of trapped radiation. The invisible shields that protect us were found by a dead battery and a mystery.",
+    "imageUrl": "",
+    "byline": "James Van Allen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Explorer 1 discovery of the radiation belts (1958)",
+      "durationMinutes": 20,
+      "instruction": "The satellite transmitted until its batteries died; the tape recorder was full of the signal. Read how Van Allen reconstructed the readings and found the count dropping to zero at altitude — not silence, but saturation. The belts are shaped by Earth's magnetic field and deflect much of the solar wind, protecting life at the surface.",
+      "tags": [
+        "Space",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-magnetic-reversals",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Magnetic Reversals (1906)",
+    "teaser": "Bernard Brunhes, studying volcanic lavas in France, found rocks magnetized in the opposite direction to today's field — as if the Earth's magnetic poles had once been swapped. The discovery of magnetic reversals was ignored for half a century, then became the key that unlocked plate tectonics.",
+    "imageUrl": "",
+    "byline": "Bernard Brunhes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Brunhes's 1906 discovery of reversed magnetization in lavas",
+      "durationMinutes": 20,
+      "instruction": "Read how volcanic rock records the Earth's field direction as it cools — a magnetic tape recorder. When seafloor stripes of normal and reversed magnetization were mapped in the 1960s, they confirmed seafloor spreading. The last reversal happened 780,000 years ago; the next one is overdue, and no one knows when it will come.",
+      "tags": [
+        "Geology",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-chicxulub",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Chicxulub Crater (1991)",
+    "teaser": "Luis and Walter Alvarez proposed in 1980 that the dinosaurs were killed by an asteroid, but the crater was missing. In 1991, geologists found it under the Yucatán coast: Chicxulub, 180 kilometers wide, dated exactly to the extinction 66 million years ago. The impact hypothesis had its smoking gun.",
+    "imageUrl": "",
+    "byline": "Hildebrand, Penfield & team",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The identification of the Chicxulub impact crater",
+      "durationMinutes": 20,
+      "instruction": "The telltale was iridium — an element rare on Earth but common in asteroids — in a thin clay layer worldwide. Read how the crater was hiding beneath a Mexican village, revealed by gravity maps and oil-well cores. An asteroid 10 km across hit, darkened the sky for years, and ended 75% of species. The dinos' death certificate.",
+      "tags": [
+        "Geology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "discovery-oldest-rocks",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Oldest Known Rocks (1989)",
+    "teaser": "In Canada's Northwest Territories, geologists found gneiss dated at 4.03 billion years — almost as old as the Earth itself, formed just half a billion years after the planet's birth. Zircon grains elsewhere push back further, to 4.4 billion years, showing Earth cooled to solid rock astonishingly quickly.",
+    "imageUrl": "",
+    "byline": "Samuel Bowring",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The dating of the Acasta Gneiss (1989)",
+      "durationMinutes": 20,
+      "instruction": "Read how the Acasta Gneiss in the Slave Craton was dated by uranium-lead isotopes in zircon crystals, and how even older zircons from Jack Hills, Australia — 4.4 billion years — hint at oceans very early. The oldest rocks are precious because they record conditions on the young Earth, mostly erased by plate tectonics.",
+      "tags": [
+        "Geology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-ozone-layer",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The Ozone Layer (1913)",
+    "teaser": "Charles Fabry and Henri Buisson, measuring sunlight from a Marseille hilltop, found that ultraviolet light was being absorbed high in the atmosphere — by a layer of ozone, a form of oxygen that blocks the sun's most damaging rays. Life on land exists because of this thin shield, invisible to the eye.",
+    "imageUrl": "",
+    "byline": "Fabry & Buisson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fabry & Buisson's 1913 identification of atmospheric ozone",
+      "durationMinutes": 20,
+      "instruction": "Read how the pair used spectrometers to compare sunlight with the solar spectrum and found a mysterious absorption band matching ozone. Gordon Dobson later mapped the layer and gave it his name — Dobson units still measure it. Without the ozone layer, UV would sterilize the land and sea alike.",
+      "tags": [
+        "Atmospheric Science",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-venus-atmosphere",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Venus's Thick Atmosphere (1761)",
+    "teaser": "Watching Venus cross the sun's disk, Mikhail Lomonosov saw a bright ring around the planet and a bulge where it entered — light bent by an atmosphere. He announced that Venus has an atmosphere 'similar to, if not greater than, that of our Earth.' He was right, and it's far thicker.",
+    "imageUrl": "",
+    "byline": "Mikhail Lomonosov",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lomonosov's 1761 observations of the transit of Venus",
+      "durationMinutes": 20,
+      "instruction": "Lomonosov was watching the transit through a telescope with smoked glass; the halo of refracted sunlight was the giveaway. Read how he reported the atmosphere at the St. Petersburg Academy, and how Venus's dense carbon-dioxide sky — 90 times Earth's pressure — was confirmed centuries later by probes.",
+      "tags": [
+        "Astronomy",
+        "18th Century",
+        "Russian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-titan-atmosphere",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Titan's Atmosphere (1944)",
+    "teaser": "Gerard Kuiper, peering at Saturn's largest moon through a telescope, found bands of methane in its spectrum — the first atmosphere ever discovered on a moon. Titan's sky turned out to be thick, orange, and nitrogen-rich, with rivers of liquid methane, making it the only other world with a dense atmosphere in the solar system.",
+    "imageUrl": "",
+    "byline": "Gerard Kuiper",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kuiper's 1944 spectroscopic detection of methane on Titan",
+      "durationMinutes": 20,
+      "instruction": "Read how Kuiper, working with the McDonald Observatory's telescope, identified methane bands that no previous observer had caught. The Huygens probe landed on Titan in 2005 and sent back pictures from a methane-rain world with hills of water ice and a hydrocarbon haze. A moon that behaves like an early Earth.",
+      "tags": [
+        "Astronomy",
+        "20th Century",
+        "Dutch-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-water-on-moon",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "Water on the Moon (2009)",
+    "teaser": "NASA crashed a rocket stage into a permanently shadowed lunar crater and watched the debris plume with a satellite — and found water ice, more than a hundred gallons' worth, in the spray. The moon, long assumed bone-dry, holds water in its dark, frozen craters: a resource for future bases.",
+    "imageUrl": "",
+    "byline": "LCROSS mission",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 2009 LCROSS impact and the detection of lunar water",
+      "durationMinutes": 20,
+      "instruction": "Earlier hints — from the Moon Mineralogy Mapper and India's Chandrayaan-1 — suggested water, but LCROSS proved it directly. Read how the mission aimed the spent Centaur rocket at Cabeus crater and analyzed the plume spectroscopically. Water ice in shadowed craters could be mined for drinking water and rocket fuel.",
+      "tags": [
+        "Space",
+        "21st Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "discovery-first-dinosaur",
+    "categoryId": "DISCOVERIES",
+    "subtype": "Discovery",
+    "name": "The First Dinosaur Named (1824)",
+    "teaser": "William Buckland, an eccentric Oxford geologist, described a giant fossil jaw from Oxfordshire and named it Megalosaurus — 'great lizard.' It was the first dinosaur ever given a scientific name, though the word 'dinosaur' itself wouldn't be coined for another 18 years. The dinosaur age in science had begun.",
+    "imageUrl": "",
+    "byline": "William Buckland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Buckland's 1824 description of Megalosaurus",
+      "durationMinutes": 20,
+      "instruction": "Buckland read his paper on the jaw, teeth, and bones to the Geological Society in February 1824. Read how he thought it was a giant reptile, a kind of oversize lizard, and how Richard Owen coined 'dinosauria' in 1842 to unite Megalosaurus, Iguanodon, and Hylaeosaurus as a distinct group. Buckland also claimed to have eaten his way through the animal kingdom.",
+      "tags": [
+        "Paleontology",
+        "19th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  }
+]

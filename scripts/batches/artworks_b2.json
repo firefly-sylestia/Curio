@@ -1,0 +1,443 @@
+[
+  {
+    "id": "artw-composition-in-red-038",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Red, Blue, Yellow (1929)",
+    "teaser": "Mondrian's perfect grid: a red square dominating, two smaller yellow and blue squares, black lines of different thicknesses. The whole history of De Stijl in one image — art reduced to primary colors and straight lines.",
+    "imageUrl": "",
+    "byline": "Piet Mondrian",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Composition with Red, Blue and Yellow (1929) by Mondrian",
+      "durationMinutes": 15,
+      "instruction": "Look at the black lines: they are not all the same thickness, and the grid does not continue past the canvas edge — the painting is a fragment of an infinite grid. The red block dominates by size, the yellow and blue balance it by placement. Mondrian removed everything else from art, and found peace."
+    },
+    "tags": [
+      "De Stijl",
+      "Dutch",
+      "1920s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-bathers-039",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Bathers at Asnières (1884)",
+    "teaser": "Seurat's young men lounging on the Seine shore at noon — painted with tiny dots of color that merge in the eye. It is the first great pointillist painting, made before Seurat finished inventing the method.",
+    "imageUrl": "",
+    "byline": "Georges Seurat",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Bathers at Asnières (1884) by Seurat, National Gallery",
+      "durationMinutes": 15,
+      "instruction": "Step close: the painting is dots — thousands of small marks. Step back: the dots fuse into solid figures. The boy in the water, the man with a pipe, the factories across the river — everyone is frozen in a Sunday stillness, painted with the science of color."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "French",
+      "1880s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-babylon-040",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Blue Rider (1903)",
+    "teaser": "Kandinsky's early painting of a rider on a horse — the motif that gave the Blue Rider movement its name. Within a few years Kandinsky would dissolve the rider into pure color and become the father of abstraction.",
+    "imageUrl": "",
+    "byline": "Wassily Kandinsky",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Blue Rider (1903) by Kandinsky",
+      "durationMinutes": 10,
+      "instruction": "The rider is still recognizable, but look at how the horse is built from streaks of blue — the landscape is already breaking into color fields. Compare it to Kandinsky's later 'Composition VII': the rider disappears, and only the feeling of galloping remains."
+    },
+    "tags": [
+      "Expressionism",
+      "Russian",
+      "1900s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-silent-harp-041",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Ancient of Days (1794)",
+    "teaser": "William Blake's frontispiece of an aged god leaning from a fiery disk to measure the void with a compass. It was Blake's favorite image, and he refused to say it was God — only 'the Ancient of Days,' the architect of the material world.",
+    "imageUrl": "",
+    "byline": "William Blake",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Ancient of Days (1794) by Blake",
+      "durationMinutes": 10,
+      "instruction": "Look at the compass: it measures the dark void below. The figure is bent, cramped, almost trapped inside the golden disk — Blake believed reason had imprisoned the imagination. The image is small, barely 23cm high, but its energy fills the whole page."
+    },
+    "tags": [
+      "Romanticism",
+      "British",
+      "1790s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-umbrellas-042",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Umbrellas (1886)",
+    "teaser": "Renoir's Paris street crowded with umbrellas — half painted in his usual feathery style, half re-painted with crisp, linear strokes after a trip to Italy. The two halves are visibly different, and that difference is the whole painting.",
+    "imageUrl": "",
+    "byline": "Pierre-Auguste Renoir",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Umbrellas (1886) by Renoir, National Gallery",
+      "durationMinutes": 12,
+      "instruction": "Look at the woman on the left holding a basket: she is painted with soft, blurry Impressionist strokes. The woman in the center is painted with firm outlines — Renoir repainted her years later. The painting is a conversation between two moments in his career."
+    },
+    "tags": [
+      "Impressionism",
+      "French",
+      "1880s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-wedding-feast-043",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Peasant Wedding (1568)",
+    "teaser": "Bruegel's chaotic feast in a barn — food being carried in on a door, musicians, a bride under a paper crown. Everyone is eating, and the painter is eating with his eyes: no one here is posed or idealized.",
+    "imageUrl": "",
+    "byline": "Pieter Bruegel the Elder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Peasant Wedding (1568) by Bruegel, Kunsthistorisches Museum",
+      "durationMinutes": 12,
+      "instruction": "Find the bride: she sits alone under the crown, hands folded, a small halo-like cloth behind her head — the only still figure in the room. Notice the porridge being carried on a door, the piper, the child licking a plate. Nobody is painted as noble or beautiful; they are simply alive."
+    },
+    "tags": [
+      "Renaissance",
+      "Flemish",
+      "1560s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-ballet-class-048",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Ballet Class (1874)",
+    "teaser": "Degas's rehearsal room full of young dancers in white tutus, a teacher with a stick, mothers knitting in the corner. The diagonal floor and the cropped edges make it feel like a photograph taken mid-moment — which it nearly is.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Ballet Class (1874) by Degas, Musée d'Orsay",
+      "durationMinutes": 15,
+      "instruction": "Look at the cutting: the dancer at the left edge is sliced in half, the stairs cut off — composition borrowed from Japanese prints and photography. The teacher is Jules Perrot, a famous ballet master. Degas painted dancers all his life; he said he saw them as 'human animals cleaning themselves.'"
+    },
+    "tags": [
+      "Impressionism",
+      "French",
+      "1870s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-untitled-1982-049",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Untitled (1982) — the skull paintings",
+    "teaser": "Jean-Michel Basquiat's crown-wearing skull in black, red, and yellow against a blue field — painted when he was 21. The crown is his signature: the artist as a self-made king of downtown New York.",
+    "imageUrl": "",
+    "byline": "Jean-Michel Basquiat",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Untitled (1982) skull painting by Basquiat",
+      "durationMinutes": 15,
+      "instruction": "The skull's teeth are scattered, the eyes are red dashes, the crown floats above the head. Look at the texture: pencil lines, drips, patches of color left raw. Basquiat painted fast, layering graffiti energy over a deep knowledge of art history — the crown is a Van Gogh echo, an African motif, and a brand."
+    },
+    "tags": [
+      "Neo-Expressionism",
+      "American",
+      "1980s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-apparition-050",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Apparition (1876)",
+    "teaser": "Gustave Moreau's Salome recoils as the severed head of John the Baptist appears, haloed, in a column of light — the most decadent religious painting of the century, dripping with jewels and shadow.",
+    "imageUrl": "",
+    "byline": "Gustave Moreau",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Apparition (1876) by Moreau, Musée d'Orsay",
+      "durationMinutes": 12,
+      "instruction": "The architecture is Mughal India, the jewels are oriental fantasy, the head floats in its own light. Salome points at it with one finger, her other hand frozen. Moreau painted desire and death as the same substance — the Symbolists worshipped him for it."
+    },
+    "tags": [
+      "Symbolism",
+      "French",
+      "1870s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-echo-narcissus-051",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Echo and Narcissus (1903)",
+    "teaser": "John William Waterhouse's Echo fades into the rocks — literally — while Narcissus kneels at his own reflection, already wasting away. It is Ovid's myth painted with pre-Raphaelite sensuality.",
+    "imageUrl": "",
+    "byline": "John William Waterhouse",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Echo and Narcissus (1903) by Waterhouse, Walker Art Gallery",
+      "durationMinutes": 12,
+      "instruction": "Echo is dissolving into the cliff on the left — her feet, her arms, her torso becoming stone. Narcissus, kneeling on the right, is whole and beautiful. The stream runs between them: one is losing herself in him, he is losing himself in the water."
+    },
+    "tags": [
+      "Pre-Raphaelite",
+      "British",
+      "1900s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-self-portrait-albrecht-056",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Self-Portrait at Twenty-Eight (1500)",
+    "teaser": "Dürer painted himself dead-on, symmetrical, hand raised in blessing — the artist as Christ. It was the first autonomous self-portrait in Western art, and the first time an artist claimed his own image with divine authority.",
+    "imageUrl": "",
+    "byline": "Albrecht Dürer",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Self-Portrait at Twenty-Eight (1500) by Dürer, Alte Pinakothek",
+      "durationMinutes": 12,
+      "instruction": "The pose copies images of Christ — frontal, symmetrical, hand in blessing — and the fur collar turns his shoulders into a cloak. Dürer's hair falls like a Renaissance Christ's. He signed it with a monogram and the date, and wrote: 'I, Albrecht Dürer, painted myself.'"
+    },
+    "tags": [
+      "Renaissance",
+      "German",
+      "1500s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-return-of-the-prodigal-057",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Return of the Prodigal Son (1669)",
+    "teaser": "Rembrandt's last great painting: the father, blind, embraces his ragged son while witnesses look on in shadow. Painted in his final year, it is a painting of forgiveness that took a lifetime to learn.",
+    "imageUrl": "",
+    "byline": "Rembrandt van Rijn",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Return of the Prodigal Son (1669) by Rembrandt, Hermitage",
+      "durationMinutes": 20,
+      "instruction": "The father's hands are different: one is a man's hand, firm and strong; the other is softer, a mother's hand. His face is lit from within, old and blind with seeing. The son's shoes are worn through — he walked home barefoot. The witnesses in the shadows are painted loosely, almost unfinished; only the embrace is fully there."
+    },
+    "tags": [
+      "Baroque",
+      "Dutch",
+      "1660s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-black-square-058",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Untitled (Black Square) (1915)",
+    "teaser": "Malevich's black square on a white ground — painted after a lifetime of painting everything else. He called it 'the zero of form': the point where painting stops representing the world and becomes only itself. It hung in the corner of his exhibition like an icon.",
+    "imageUrl": "",
+    "byline": "Kazimir Malevich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Black Square (1915) by Malevich, Tretyakov Gallery",
+      "durationMinutes": 15,
+      "instruction": "Look at the surface, not the shape: the black is not flat — brushstrokes, cracks, and a faint texture survive. Malevich hung it high in the corner of the room, the place Russians hang icons, facing the viewer like an altar. It is the end of painting and the beginning of everything after."
+    },
+    "tags": [
+      "Suprematism",
+      "Russian",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-fountain-duchamp-b-059",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Cardsharps (1595)",
+    "teaser": "Caravaggio's teenage masterpiece: three men at a card table, and the boy on the right is cheating — he has an extra card behind his back and is signaling his accomplice. It is the first Caravaggio, painted when he was 24, and it already has his signature trick: light that reveals a secret.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Cardsharps (1595) by Caravaggio, Kimbell Art Museum",
+      "durationMinutes": 15,
+      "instruction": "The light falls on the young man's face first, then on the cheat's signal. The older cheat wears a glove with a slit — for sliding cards. Caravaggio froze the exact second of the con; the whole painting is a suspense story in one frame. Notice how the shadows are almost black — his signature tenebrism."
+    },
+    "tags": [
+      "Baroque",
+      "Italian",
+      "1590s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-thunderstruck-061",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Desperate Man (1845)",
+    "teaser": "Gustave Courbet's self-portrait, eyes wild, hands tearing at his hair — painted when he was 26 and already broke. It is the most theatrical self-portrait of the century: the artist as a man barely containing his own energy.",
+    "imageUrl": "",
+    "byline": "Gustave Courbet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Desperate Man (1845) by Courbet",
+      "durationMinutes": 10,
+      "instruction": "His fingers are buried in his hair, his eyes are wide open, and the canvas is lit from below like a stage. Courbet, the founder of Realism, painted himself at the extreme edge of feeling. He kept this painting with him all his life — it was his own favorite image of himself."
+    },
+    "tags": [
+      "Realism",
+      "French",
+      "1840s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-crucifixion-white-062",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "White Crucifixion (1938)",
+    "teaser": "Marc Chagall's crucifixion with Jesus in a white prayer shawl, surrounded by fleeing refugees, a burning synagogue, and scenes of pogrom. Painted in 1938, it is one of the first artworks to read the Holocaust in advance.",
+    "imageUrl": "",
+    "byline": "Marc Chagall",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "White Crucifixion (1938) by Chagall, Art Institute of Chicago",
+      "durationMinutes": 15,
+      "instruction": "Jesus is wrapped in a tallit — the Jewish prayer shawl — and his mother Mary stands beside him in a refugee's coat. Around the cross: a village on fire, a Torah scroll being carried, an old man fleeing with a sack. Chagall painted Jewish suffering as the crucifixion itself."
+    },
+    "tags": [
+      "Expressionism",
+      "Russian",
+      "1930s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-peaceable-kingdom-063",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Peaceable Kingdom (1834)",
+    "teaser": "Edward Hicks painted the lion lying down with the lamb over 60 times — the same composition, the same message of peace, repainted for his entire life. He was a Quaker preacher who painted between sermons.",
+    "imageUrl": "",
+    "byline": "Edward Hicks",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Peaceable Kingdom (1834) by Hicks",
+      "durationMinutes": 10,
+      "instruction": "The foreground shows Isaiah's prophecy — wolf and lamb, leopard and kid, a child leading them. The background shows William Penn signing a treaty with the Lenape, the Quakers' hope made visible. Hicks was a self-taught folk painter; his flat, glowing animals are as sincere as art gets."
+    },
+    "tags": [
+      "Folk Art",
+      "American",
+      "1830s"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "artw-the-meeting-065",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Christina's World (1948) — the original",
+    "teaser": "Andrew Wyeth's painting of a woman lying in a field, looking toward a farmhouse on a hill — based on his neighbor Anna Christina Olson, who crawled everywhere because polio had paralyzed her legs. The painting hides the story; the pose tells it.",
+    "imageUrl": "",
+    "byline": "Andrew Wyeth",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Christina's World (1948) by Wyeth, MoMA",
+      "durationMinutes": 15,
+      "instruction": "The house is far; the grass is huge. Christina is not resting — she is dragging herself toward the house, her thin arms and sunken back the only clues. Wyeth painted the field's dry grass blade by blade. He called the painting a portrait of courage, and he never showed her face."
+    },
+    "tags": [
+      "American",
+      "1940s",
+      "Realism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-mont-sainte-victoire-069",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Mont Sainte-Victoire (1904)",
+    "teaser": "Cézanne painted the same mountain from the same window over 60 times — each version a new attempt to hold the mountain's mass in paint. In the late versions, the mountain dissolves into facets that would become Cubism.",
+    "imageUrl": "",
+    "byline": "Paul Cézanne",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Mont Sainte-Victoire (1904) by Cézanne, Philadelphia Museum",
+      "durationMinutes": 15,
+      "instruction": "Look at how the mountain is built from small flat planes of color — greens, ochres, blues — that lock together like masonry. Cézanne said he wanted to 'make of Impressionism something solid and durable, like the art of the museums.' Picasso called him 'the father of us all.'"
+    },
+    "tags": [
+      "Post-Impressionism",
+      "French",
+      "1900s"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-convergence-of-birds-071",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Migration of the Negro (1941)",
+    "teaser": "Jacob Lawrence's series of 60 small panels telling the story of the Great Migration — six million Black Americans leaving the South for northern cities between 1910 and 1940. Each panel is a chapter; the series is an epic in tempera.",
+    "imageUrl": "",
+    "byline": "Jacob Lawrence",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Migration Series (1941) by Lawrence — panels 1-6",
+      "durationMinutes": 15,
+      "instruction": "Panel 1: the massed figures wait at the station. Panel 3: the lynched figure against a red sky. Lawrence used flat, angular shapes and the same colors throughout so the series reads as one long pulse. He was 23 when he painted it, in a Harlem studio, in three months."
+    },
+    "tags": [
+      "American",
+      "1940s",
+      "History"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "artw-the-embrace-072",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Embrace (1903)",
+    "teaser": "Gustav Klimt's golden couple, entangled — their bodies dissolve into ornament, faces real. It is Klimt's celebration of love as the one thing that stays human in a world of pattern.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Embrace (1903) by Klimt",
+      "durationMinutes": 10,
+      "instruction": "The two figures are one shape: his robe and hers flow together into a single golden mass. Only their faces and hands are painted realistically. Klimt used real gold leaf — the patterns sparkle differently as you move. The pattern on her dress is the same eye-motif from The Kiss."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Austrian",
+      "1900s"
+    ],
+    "tier": 2
+  }
+]

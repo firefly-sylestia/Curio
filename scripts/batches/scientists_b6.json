@@ -1,0 +1,282 @@
+[
+  {
+    "id": "scientist-freud",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Sigmund Freud",
+    "teaser": "Austrian neurologist who invented psychoanalysis — the theory that unconscious drives, especially sexual and aggressive ones, shape our thoughts and dreams. His talking cure, free association, and dream interpretation changed how the West thinks about the mind, even where his theories remain disputed. He fled the Nazis for London in 1938.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Freud's The Interpretation of Dreams (1900), Chapter II, the dream of Irma's injection",
+      "durationMinutes": 90,
+      "instruction": "Read Freud's analysis of his own dream — the famous 'specimen dream' — where he shows how a dream's surface hides a wish. The book sold poorly for years, then became a cornerstone of modern thought. Read it as a theory of how the mind narrates itself, and consider both its brilliance and its unfalsifiability. His ideas about the unconscious survive even where his science failed.",
+      "tags": [
+        "Psychology",
+        "19th-20th Century",
+        "Austrian"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-jung",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Carl Jung",
+    "teaser": "Swiss psychiatrist, Freud's heir and then rival, who proposed the collective unconscious — a layer of the mind shared by all humans, populated by archetypes. He introduced the ideas of introversion and extraversion, synchronicity, and individuation, and his influence reached from psychology into art, literature, and religion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jung's 1921 Psychological Types, and his memoir Memories, Dreams, Reflections",
+      "durationMinutes": 90,
+      "instruction": "Read about the split with Freud in 1913, when Jung published his own theory of the libido as general psychic energy, not just sexuality. His Red Book — a manuscript of his visions, hidden for decades and published in 2009 — is a window into his inner explorations. His archetypes (the shadow, the anima, the hero) still structure how we read stories.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "Swiss"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-erikson",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Erik Erikson",
+    "teaser": "German-American psychoanalyst who mapped human development into eight stages, from trust in infancy to integrity in old age — each a crisis that shapes identity. He coined the term 'identity crisis' and showed that development continues across the whole lifespan, not just childhood. His work on adolescence became foundational for how we understand growing up.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Erikson's Childhood and Society (1950), the eight stages",
+      "durationMinutes": 90,
+      "instruction": "Read the eight stages: trust vs. mistrust, autonomy vs. shame, initiative vs. guilt, industry vs. inferiority, identity vs. role confusion, intimacy vs. isolation, generativity vs. stagnation, integrity vs. despair. Each stage's resolution shapes the next. Erikson had no medical degree — he became an analyst through training analysis — yet his stages are taught in every psychology course.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "German-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-rogers",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Carl Rogers",
+    "teaser": "American psychologist who created client-centered therapy — the revolutionary idea that the therapist should be a warm, genuine listener, not an authority interpreting the patient. His unconditional positive regard and empathy became the backbone of modern counseling, and he applied his approach to education, conflict, and politics.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rogers's Client-Centered Therapy (1951)",
+      "durationMinutes": 90,
+      "instruction": "Read how Rogers argued that people have an innate tendency to grow — the 'actualizing tendency' — and that therapy works when the therapist offers genuineness, empathy, and unconditional positive regard. He shocked the field by recording his sessions, so therapists could be studied like any other science. The word 'client' instead of 'patient' was his quiet revolution.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-beck",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychiatrist",
+    "name": "Aaron Beck",
+    "teaser": "American psychiatrist who, testing Freud's theories on depressed patients, found they didn't fit — and so invented cognitive therapy: the idea that depression comes from distorted thoughts, not buried conflicts. His approach, proven in trials, became the most effective and widely used psychotherapy, and he is called the father of cognitive behavioral therapy (CBT).",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beck's Cognitive Therapy and the Emotional Disorders (1976)",
+      "durationMinutes": 90,
+      "instruction": "Read how Beck noticed his depressed patients systematically distorted reality — 'cognitive triad' of negative views of self, world, and future — and that correcting these thoughts relieved the depression. He built questionnaires to measure it, and his methods were tested in randomized trials, making psychotherapy evidence-based. CBT is now the standard treatment for depression and anxiety worldwide.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-bowlby",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "John Bowlby",
+    "teaser": "British psychiatrist who founded attachment theory — the idea that infants are biologically wired to bond with caregivers, and that early attachment shapes lifelong relationships. His work on children separated from parents, partly inspired by orphans of WWII, showed that love is not a luxury but a biological need.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bowlby's Attachment and Loss trilogy (1969–80), Volume I",
+      "durationMinutes": 90,
+      "instruction": "Read how Bowlby, trained in psychoanalysis but impatient with its speculations, turned to ethology — watching how infant monkeys and human babies cling, follow, and signal. He argued the attachment system evolved to keep the child near protection. His colleague Mary Ainsworth's 'Strange Situation' test then measured secure and insecure attachment, one of psychology's most replicated findings.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-harlow",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Harry Harlow",
+    "teaser": "American psychologist who, using rhesus monkeys and terrycloth surrogate mothers, showed in 1958 that infant monkeys need contact comfort, not just food — they clung to the soft 'mother' even when the wire mother held the bottle. His experiments, ethically troubling by modern standards, proved that love and touch are biological necessities.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Harlow's 1958 paper 'The Nature of Love'",
+      "durationMinutes": 60,
+      "instruction": "Read how the infants spent nearly all day on the cloth mother and fled to her when frightened — contact comfort outweighed feeding. The 'love' paper, delivered to the American Psychological Association, was called the most influential in the field's history. His later isolation experiments were brutal and are now cited as a cautionary tale about the costs of animal research.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-milgram",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Stanley Milgram",
+    "teaser": "American psychologist whose 1961 obedience experiments — in which ordinary people delivered what they believed were painful shocks to a 'learner' because an authority told them to — are among the most famous and disturbing in psychology. Two-thirds of participants went to the maximum voltage. The question his work raised — how far will we obey? — has never stopped being relevant.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Milgram's 1963 paper 'Behavioral Study of Obedience'",
+      "durationMinutes": 90,
+      "instruction": "Read how the experiment was staged: a scientist in a lab coat instructed participants to shock a man in another room, with escalating voltages labeled up to 'Danger: Severe Shock.' 65% obeyed to the end. Milgram wrote that his findings raised the question of whether any of us would do what the guards of Nazi camps did — and his answer haunted him. The studies are now criticized for their stress on participants, yet their lesson endures.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-bandura",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Psychologist",
+    "name": "Albert Bandura",
+    "teaser": "Canadian-American psychologist who showed that children learn by watching — his 1961 Bobo doll experiment had kids watching an adult beat an inflatable clown, then do the same. His social learning theory, later renamed social cognitive theory, and his concept of self-efficacy (belief in your own capability) shaped education, health, and management.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bandura's 1961 Bobo doll experiment and 1977 self-efficacy paper",
+      "durationMinutes": 90,
+      "instruction": "Read how children who watched an aggressive adult model attacked the Bobo doll with the same words and actions — learning without reinforcement. Bandura argued we learn through observation, modeling, and the expectation of outcomes. His self-efficacy theory — that belief in your ability predicts success — became one of psychology's most cited concepts. He once said his best idea was that people can change themselves.",
+      "tags": [
+        "Psychology",
+        "20th Century",
+        "Canadian-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-galvani",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physiologist",
+    "name": "Luigi Galvani",
+    "teaser": "Italian physician who discovered 'animal electricity' in 1780 when a frog's leg twitched as if struck by lightning when touched by two different metals. His claim that animals generate electricity sparked the Volta–Galvani debate that produced the battery — and founded the study of bioelectricity that underlies the modern understanding of nerves.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Galvani's 1791 commentary on the effects of electricity on muscular motion",
+      "durationMinutes": 60,
+      "instruction": "Read about the twitching frog legs — Galvani believed the electricity came from the animal itself; Volta proved it came from the contact of the two metals, and built the first battery to prove it. They were both partly right: the frog's leg carries its own electricity, but the spark came from the metals. Galvani's name survives in the galvanometer and galvanism.",
+      "tags": [
+        "Physiology",
+        "18th Century",
+        "Italian"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-bichat",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Anatomist",
+    "name": "Xavier Bichat",
+    "teaser": "French anatomist who, at 29, founded histology — the study of tissues — by showing that organs are built from 21 basic tissue types. He worked so hard that he died at 30, after 600 autopsies, from tuberculosis. His insight that disease attacks tissues, not whole organs, reframed medicine.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bichat's Anatomie générale (1801)",
+      "durationMinutes": 60,
+      "instruction": "Read how Bichat, without a microscope, distinguished tissues by how they behave — muscle, nerve, bone, and 18 others — and argued that the properties of life live in the tissues. Every organ is a combination of a few tissue types, and disease begins in tissue. He wrote that death is the sum of the deaths of the tissues. His work prepared the ground for cellular pathology.",
+      "tags": [
+        "Anatomy",
+        "19th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-mendel-again",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Botanist",
+    "name": "Hugo von Mohl",
+    "teaser": "German botanist who discovered protoplasm — the living substance inside cells — and distinguished it from the cell wall, founding the study of cell contents. He also discovered that the nucleus divides during cell division, a step toward understanding heredity, and his microscope work made botany a science.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "von Mohl's 1846 discovery of protoplasm",
+      "durationMinutes": 60,
+      "instruction": "Read how von Mohl, studying plant cells, recognized that the living material — protoplasm — is distinct from the cell wall and is the seat of life. He was one of the first to describe the nucleus dividing during cell division. His systematic microscopy established the cell as the fundamental unit of plant structure, paving the way for the cell theory.",
+      "tags": [
+        "Botany",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-mendelsohn",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Physician",
+    "name": "Heinrich Mendelsohn",
+    "teaser": "German physician who co-founded electrocardiography, publishing one of the first descriptions of the human ECG in 1911 and helping bring Einthoven's technique to Germany. His clinical work on cardiac arrhythmias helped make the ECG a standard diagnostic tool within a decade of its invention.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mendelsohn's 1911 monograph on the human electrocardiogram",
+      "durationMinutes": 60,
+      "instruction": "Read how Mendelsohn, trained in physics and medicine, recognized that the heart's electrical tracing could reveal arrhythmias invisible to any other test. His 1911 book helped physicians interpret the PQRST waves. Though less famous than Einthoven, he represents the thousands of early adopters who turned a laboratory curiosity into the world's most common heart test.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-ramon-cajal",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Neuroscientist",
+    "name": "Camillo Golgi",
+    "teaser": "Italian physician who invented the silver staining method — the 'reazione nera' — that lets a single neuron glow against a field of thousands, making the microscopic study of the brain possible. He shared the 1906 Nobel with Cajal, even though he spent the ceremony arguing that the brain is a continuous web, not separate cells.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Golgi's 1873 discovery of the black reaction",
+      "durationMinutes": 60,
+      "instruction": "Read how Golgi, working in a kitchen in a small hospital in Pavia, discovered that soaking brain tissue in silver nitrate blackens only a few cells at a time — the first way to see a single neuron's shape. Cajal used his stain to prove the neuron doctrine, which Golgi rejected. The 'Golgi apparatus,' the organelle, is also his — he saw it in cells and named it the 'internal reticular apparatus.'",
+      "tags": [
+        "Neuroscience",
+        "19th-20th Century",
+        "Italian"
+      ],
+      "tier": 2
+    }
+  }
+]

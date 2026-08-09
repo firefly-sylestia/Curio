@@ -1,0 +1,1248 @@
+[
+  {
+    "id": "director-radu-mihail",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Radu Mihăileanu",
+    "teaser": "Romanian-French director of humane fables about refugees, train rides, and the stubborn refusal to give up hope at a border.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Train of Life (1998) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch a village stage its own deportation to survive. Mihăileanu makes tragedy swing like a comedy."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-isabel-coixet",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Isabel Coixet",
+    "teaser": "Spanish director who shoots small, quiet stories about longing across languages and distances — often in English, often in winter light.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Secret Life of Words (2005) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how two damaged strangers talk around their wounds. Coixet trusts silence more than speeches."
+    },
+    "tags": [
+      "Spanish",
+      "2000s",
+      "Romance"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-iciar-bollain",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Icíar Bollaín",
+    "teaser": "Spanish director of socially urgent dramas, from domestic abuse to the housing crisis, told through single, unforgettable protagonists.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Take My Eyes (2003) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how the film shows love and control in the same gesture. Bollaín never lets you separate them."
+    },
+    "tags": [
+      "Spanish",
+      "2000s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-julio-medem",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Julio Medem",
+    "teaser": "Basque director of ecstatic, spiral-shaped love stories that wind through landscapes, myths, and twin-like doublings.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lovers of the Arctic Circle (1998) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how the film spins in circles to tell its love story. Medem's camera moves like the plot does — around and around."
+    },
+    "tags": [
+      "Spanish",
+      "1990s",
+      "Romance"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-alejandro-amenabar",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alejandro Amenábar",
+    "teaser": "Spanish director of elegant, twist-driven films — from a haunted orphanage to a paralyzed composer's inner world — who prizes feeling over gimmick.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Others (2001) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how dread is built from fog, keys, and locked rooms. Amenábar scares you with manners, not monsters."
+    },
+    "tags": [
+      "Spanish",
+      "2000s",
+      "Thriller"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-nuri-bilge-ceylan",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Nuri Bilge Ceylan",
+    "teaser": "Turkish director of long, philosophical films about pride, loneliness, and marriage — landscapes shot like portraits and arguments that run for pages.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Once Upon a Time in Anatolia (2011) — the first 40 minutes",
+      "durationMinutes": 40,
+      "instruction": "Watch the night driving scene. Ceylan turns a police search into a meditation on everything — time, memory, men."
+    },
+    "tags": [
+      "Turkish",
+      "2010s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-zeki-demirkubuz",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Zeki Demirkubuz",
+    "teaser": "Turkish director of spare, punishing films about fate, guilt, and Dostoevsky — he has adapted the Russian master more than once.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fate (2001) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how stillness becomes menace. Demirkubuz holds shots long enough for the guilt inside them to surface."
+    },
+    "tags": [
+      "Turkish",
+      "2000s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-reha-erdem",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Reha Erdem",
+    "teaser": "Turkish director of dreamlike films where children, horses, and the sea stand in for everything adults won't say.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Times and Winds (2006) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a village's seasons shape its children. Erdem films wanting with the patience of a weather report."
+    },
+    "tags": [
+      "Turkish",
+      "2000s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-semih-kaplanoglu",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Semih Kaplanoğlu",
+    "teaser": "Turkish director of the slow, luminous Yusuf trilogy — a boy, then a man, traced through seasons, faith, and memory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Egg (2007) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the light on the wheat fields. Kaplanoğlu films waiting the way others film action."
+    },
+    "tags": [
+      "Turkish",
+      "2000s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-ferzan-ozpetek",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ferzan Özpetek",
+    "teaser": "Turkish-Italian director of warm ensemble melodramas set in Rome and Istanbul, full of food, friendship, and secrets at the table.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hamam (1997) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how the bathhouse becomes a character. Özpetek films steam, skin, and gossip like a slow tango."
+    },
+    "tags": [
+      "Turkish",
+      "1990s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-yavuz-turgul",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Yavuz Turgul",
+    "teaser": "Turkish screenwriter-director of crowd-pleasing epics about honor, migration, and the city — his gangster films carry real melancholy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bandit (1996) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a prisoner released after decades meets a country that forgot him. Turgul films the gap between promise and reality."
+    },
+    "tags": [
+      "Turkish",
+      "1990s",
+      "Crime"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-lukas-moodysson",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Lukas Moodysson",
+    "teaser": "Swedish director who jumped from tender ensemble comedies about teens to the brutal poetry of Lilya 4-ever, then back to punk warmth.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lilya 4-ever (2002) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how handheld intimacy turns into horror. Moodysson films a girl's fall with a camera that refuses to look away."
+    },
+    "tags": [
+      "Swedish",
+      "2000s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-ari-folman",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Ari Folman",
+    "teaser": "Israeli director who animates memory itself — his Waltz with Bashir reconstructs a war from the dreams and gaps of the soldiers who fought it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Waltz with Bashir (2008) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how animation lets memory hide and reveal. Folman draws the past because his characters cannot face it directly."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-annemarie-jacir",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Annemarie Jacir",
+    "teaser": "Palestinian director of understated road movies and family dramas that map displacement onto intimate, everyday life.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wajib (2017) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a father and son deliver wedding invitations through the streets of Nazareth. Every doorstep is a small political essay."
+    },
+    "tags": [
+      "Palestinian",
+      "2010s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-michel-khleifi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Michel Khleifi",
+    "teaser": "Palestinian-born Belgian director whose lyrical films set intimate family stories against the larger Palestinian memory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wedding in Galilee (1987) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a wedding becomes a negotiation between occupier and occupied. Khleifi films tradition as quiet resistance."
+    },
+    "tags": [
+      "Palestinian",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-shadi-abdel-salam",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Shadi Abdel Salam",
+    "teaser": "Egyptian director of a single majestic masterpiece, The Mummy, which reimagined ancient Egypt in monumental, almost silent images.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Mummy (1969) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the sand and the statues. Abdel Salam shoots antiquity with the gravity of a museum you can walk inside."
+    },
+    "tags": [
+      "Egyptian",
+      "1960s",
+      "History"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-mohamed-khan",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mohamed Khan",
+    "teaser": "Egyptian-Indian director who brought neorealist warmth to Cairo's streets, filming the city's poor with affection and humor.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Wife of an Important Man (1988) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how Khan films Cairo like a neighbor, not a tourist. Small apartments, loud streets, real lives."
+    },
+    "tags": [
+      "Egyptian",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-khairy-beshara",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Khairy Beshara",
+    "teaser": "Egyptian director of lively, politically sharp popular cinema who used thriller and melodrama forms to smuggle social critique.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bitter Days, Sweet Nights (1988) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how genre and protest share the frame. Beshara makes a nightclub and a newsroom into political arenas."
+    },
+    "tags": [
+      "Egyptian",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-merzak-allouache",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Merzak Allouache",
+    "teaser": "Algerian director who has spent four decades filming Algiers — first its youthful rebellions, later its everyday negotiations with the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bab El-Oued City (1994) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a neighborhood breathes as one character. Allouache films rooftops, stairwells, and loud arguments as civic life."
+    },
+    "tags": [
+      "Algerian",
+      "1990s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-nacer-khemir",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Nacer Khemir",
+    "teaser": "Tunisian director and storyteller whose desert films are fairytales of calligraphy, wandering, and lost treasure.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wanderers of the Desert (1984) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the dunes like paintings. Khemir turns a child's quest into a meditation on beauty and loss."
+    },
+    "tags": [
+      "Tunisian",
+      "1980s",
+      "Fantasy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-moufida-tlatli",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Moufida Tlatli",
+    "teaser": "Tunisian director and editor whose films give women's inner lives the space cinema rarely allows them — memory, touch, and silence.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Silences of the Palace (1994) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how the servants' quarters and the palace mirror each other. Tlatli films the hidden labor behind elegance."
+    },
+    "tags": [
+      "Tunisian",
+      "1990s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-raoul-peck",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Raoul Peck",
+    "teaser": "Haitian-born documentarian and fiction filmmaker who excavates colonial history — Lumumba, the Haitian revolution, James Baldwin — with forensic passion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "I Am Not Your Negro (2016) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Listen to Baldwin's words over Peck's images. The film argues with the present using the past's own voice."
+    },
+    "tags": [
+      "Haitian",
+      "2010s",
+      "Documentary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-sarah-maldoror",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sarah Maldoror",
+    "teaser": "Guadeloupean-born pioneer of African cinema whose Sambizanga told the story of Angolan independence through a womans solitary walk.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sambizanga (1972) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the political and the domestic share one frame. Maldoror films revolution as it is lived at home."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-jean-rouch",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jean Rouch",
+    "teaser": "French anthropologist-filmmaker who invented shared anthropology and let his West African collaborators improvise their own stories on camera.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Moi, un Noir (1958) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the men play themselves and invent their lives. Rouch turned documentary into collective fiction."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-marcel-lherbier",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Marcel LHerbier",
+    "teaser": "French silent-era modernist who filled his films with abstract sets and Expressionist light, a generation before the avant-garde got famous.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "LArgent (1928) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the machines and the money circulate like blood. LHerbier films capital with the fever of a silent epic."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-souleymane-cisse",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Souleymane Cissé",
+    "teaser": "Malian director whose blend of griot storytelling and modernist form produced African cinema's first Palme d'Or winner.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Yeelen (1987) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the light — it's the real protagonist. Cissé shoots a father-son myth in blinding sun and deep shadow."
+    },
+    "tags": [
+      "Malian",
+      "1980s",
+      "Fantasy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-idrissa-ouedraogo",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Idrissa Ouédraogo",
+    "teaser": "Burkinabé director of tender village dramas that showed African rural life with Neorealist warmth and earned Cannes glory.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Yaaba (1989) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the children's faces. Ouédraogo films friendship and prejudice in a village with a gentle, knowing hand."
+    },
+    "tags": [
+      "Burkinabé",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-gaston-kabore",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Gaston Kaboré",
+    "teaser": "Burkinabé director and film educator who built his country's cinema culture and told stories of children caught between worlds.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wend Kuuni (1982) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how silence carries the story of a mute boy. Kaboré films kindness and cruelty in equal, quiet measure."
+    },
+    "tags": [
+      "Burkinabé",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-mahamat-saleh-haroun",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mahamat-Saleh Haroun",
+    "teaser": "Chadian director who carries his country's cinema alone — spare dramas of refugees, fathers, and the desert roads between them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "A Screaming Man (2010) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a pool cleaner's quiet life gets caught in a civil war. Haroun films the war's edge, not its center."
+    },
+    "tags": [
+      "Chadian",
+      "2010s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-med-hondo",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Med Hondo",
+    "teaser": "Mauritanian-born revolutionary who directed searing satires of colonialism and dubbed Hollywood voices — including a famous king's roar.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "West Indies (1979) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch a ship built inside a warehouse become an empire. Hondo stages four centuries of exploitation in one set."
+    },
+    "tags": [
+      "Mauritanian",
+      "1970s",
+      "Satire"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-jacques-demy",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jacques Demy",
+    "teaser": "French director who painted everyday life in candy colors and had his lovers sing their feelings in full pop-musical form.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Umbrellas of Cherbourg (1964) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how every word is sung — even small talk. Demy turns the simplest parting into an aria of regret."
+    },
+    "tags": [
+      "French",
+      "1960s",
+      "Musical"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-chris-marker",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Chris Marker",
+    "teaser": "French essayist of the moving image who invented the photo-essay film and kept tinkering with memory, cats, and the future.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "La Jetée (1962) — end to end",
+      "durationMinutes": 28,
+      "instruction": "Watch the one moving image in a film made almost entirely of stills. Marker builds a time-travel story out of photographs."
+    },
+    "tags": [
+      "French",
+      "1960s",
+      "Sci-Fi"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-louis-feuillade",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Louis Feuillade",
+    "teaser": "French pioneer whose serial thrillers — an arch-criminal in black, an alluring thief in a catsuit — invented the crime saga on film.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Les Vampires (1915) — one full episode",
+      "durationMinutes": 30,
+      "instruction": "Watch for the proto-superhero energy: masks, traps, chases. A century later, cinema still lives in this serial's shadow."
+    },
+    "tags": [
+      "French",
+      "1910s",
+      "Silent"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-abel-gance",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Abel Gance",
+    "teaser": "French visionary of silent cinema who invented widescreen and triple-screen triptychs for his monumental Napoleon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Napoleon (1927) — the final triptych sequence",
+      "durationMinutes": 20,
+      "instruction": "Watch how three screens join into one image. Gance wanted cinema to feel like a symphony performed across walls."
+    },
+    "tags": [
+      "French",
+      "1920s",
+      "Silent"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-jean-epstein",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jean Epstein",
+    "teaser": "French theorist-filmmaker who worshipped the close-up and believed cinema's essence was rhythm, texture, and the soul of things.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Fall of the House of Usher (1928) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the fog and the faces. Epstein films Poe like a fever dream rendered in light."
+    },
+    "tags": [
+      "French",
+      "1920s",
+      "Silent"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-fernando-solanas",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Fernando Solanas",
+    "teaser": "Argentine director whose fiery essays and road-movie tangos turned political cinema into poetry and got him banned from his own country.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Hour of the Furnaces (1968) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Expect an essay, not a story. Solanas cuts between images, text, and testimony to build an argument you feel in your chest."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-jacques-becker",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jacques Becker",
+    "teaser": "French director of elegant, humane films about prison, work, and love — he proved that precision and warmth can share a frame.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Le Trou (1960) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the digging scenes as pure cinema — no dialogue needed. Becker films craft with the suspense of a thriller."
+    },
+    "tags": [
+      "French",
+      "1960s",
+      "Thriller"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-jean-gremillon",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jean Grémillon",
+    "teaser": "French director prized by cinephiles for films of great formal beauty — the sea, the salt marshes, and the people who work them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Lady of the Camellias (1934) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how Grémillon frames the sea against human longing. He films melodrama with documentary weather."
+    },
+    "tags": [
+      "French",
+      "1930s",
+      "Romance"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-jacques-rivette",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jacques Rivette",
+    "teaser": "French New Wave's secret master of the long, labyrinthine film — conspiracies, theater troupes, and running times that reach 13 hours.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Céline and Julie Go Boating (1974) — the first 40 minutes",
+      "durationMinutes": 40,
+      "instruction": "Watch the game begin: two women, a strange house, and a story they keep re-entering. Rivette lets playfulness lead."
+    },
+    "tags": [
+      "French",
+      "1970s",
+      "Avant-garde"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-bertrand-tavernier",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Bertrand Tavernier",
+    "teaser": "French director and tireless cinephile whose films range from jazz-soaked noir to savage police corruption, always rooting for the underdog.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Round Midnight (1986) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Listen to the music scenes as much as watch them. Tavernier films jazz the way it sounds — late, smoky, and alive."
+    },
+    "tags": [
+      "French",
+      "1980s",
+      "Music"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-andre-techine",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "André Téchiné",
+    "teaser": "French director of delicate, weather-lit dramas about desire and family across generations — the South of France's emotional cartographer.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wild Reeds (1994) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how four teenagers' friendships shift with the Algerian war news. Téchiné films adolescence as weather."
+    },
+    "tags": [
+      "French",
+      "1990s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-olivier-assayas",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Olivier Assayas",
+    "teaser": "French director who films the modern world's textures — global capital, artists, families — with restless, handheld intimacy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Summer Hours (2008) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how objects — a vase, a table — carry family memory. Assayas films inheritance as an argument with the past."
+    },
+    "tags": [
+      "French",
+      "2000s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-leos-carax",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Leos Carax",
+    "teaser": "French romantic of the New Extremity who makes operatic, self-destructive love stories — dancing, fire, and cinema itself as characters.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Holy Motors (2012) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Let the film's rules stay unclear. Carax is less telling a story than conducting a ceremony about performance."
+    },
+    "tags": [
+      "French",
+      "2010s",
+      "Fantasy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-patrick-leconte",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Patrice Leconte",
+    "teaser": "French director of bittersweet romantic comedies and elegant thrillers, equally at home with mime, widows, and a lipstick-red murderess.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ridicule (1996) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how wit becomes a weapon at court. Leconte makes verbal dueling feel like swordplay."
+    },
+    "tags": [
+      "French",
+      "1990s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-cedric-klapisch",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Cédric Klapisch",
+    "teaser": "French director of ensemble comedies about young people in Paris, Barcelona, and shared apartments — life advice disguised as romcom.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "L'Auberge Espagnole (2002) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a shared apartment becomes a small Europe. Klapisch films youth as a loud, multilingual collage."
+    },
+    "tags": [
+      "French",
+      "2000s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-mia-hansen-love",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mia Hansen-Løve",
+    "teaser": "French director of quiet, radiant films about vocation and heartbreak — DJs, philosophers, young women becoming themselves.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Things to Come (2016) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a philosopher's orderly life loosens. Hansen-Løve films change as a series of small, truthful mornings."
+    },
+    "tags": [
+      "French",
+      "2010s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-justine-triet",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Justine Triet",
+    "teaser": "French director of sharp, unruly dramas about women on trial — literally in Anatomy of a Fall, figuratively in everything she makes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Anatomy of a Fall (2023) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a marriage gets dissected in court. Triet turns every domestic detail into evidence."
+    },
+    "tags": [
+      "French",
+      "2020s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-julia-ducournau",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Julia Ducournau",
+    "teaser": "French body-horror radical whose films — cannibalistic coming-of-age, a driver turned living weapon — won Cannes and rewired the genre.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Raw (2016) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how appetite becomes the film's engine. Ducournau makes you feel the body as horror and as home."
+    },
+    "tags": [
+      "French",
+      "2010s",
+      "Horror"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-mathieu-kassovitz",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Mathieu Kassovitz",
+    "teaser": "French director whose La Haine turned the banlieue riot into a black-and-white epic that still defines French cinema's angry decade.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "La Haine (1995) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the long-take opening and the graffiti tag the trio keeps passing. Kassovitz films one night that never cools."
+    },
+    "tags": [
+      "French",
+      "1990s",
+      "Crime"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-jean-jacques-beineix",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Jean-Jacques Beineix",
+    "teaser": "French director of glossy 1980s cinema du look — neon, obsession, and the diva who sang for a dying boy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Diva (1981) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the opera-recording heist. Beineix turns a bootleg tape into the year's most stylish chase."
+    },
+    "tags": [
+      "French",
+      "1980s",
+      "Thriller"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-claude-berri",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Claude Berri",
+    "teaser": "French director and producer who made beloved adaptations of Pagnol's Provençal novels and bankrolled the New Wave's elders.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Jean de Florette (1986) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a landscape's water becomes a family feud. Berri films greed with the patience of a farmer."
+    },
+    "tags": [
+      "French",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-bertrand-blier",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Bertrand Blier",
+    "teaser": "French provocateur of odd-couple farce — he made Gerard Depardieu and Patrick Dewaere argue, charm, and outdo each other on screen.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Going Places (1974) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch two drifters live by appetite alone. Blier's anarchic comedy hides real tenderness under the shocks."
+    },
+    "tags": [
+      "French",
+      "1970s",
+      "Comedy"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-renato-castellani",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Renato Castellani",
+    "teaser": "Italian director of Romeo and Juliet on real Verona streets — a film so fresh it made Shakespeare feel improvised.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Romeo and Juliet (1954) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the non-professional teen leads against real Renaissance streets. Castellani films the play like a news story."
+    },
+    "tags": [
+      "Italian",
+      "1950s",
+      "Romance"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-carlo-lizzani",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Carlo Lizzani",
+    "teaser": "Italian director who traced his country's twentieth century — from wartime partisans to the Red Brigades — with a journalist's urgency.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Violent Four (1968) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a heist goes wrong in real time. Lizzani builds tension from procedure, not guns."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "Crime"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-valerio-zurlini",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Valerio Zurlini",
+    "teaser": "Italian director of melancholy youth films and searing war dramas whose visual elegance earned him a small, devoted cult.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Family Diary (1962) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how two brothers' love is told through memory fragments. Zurlini films loss with a painter's restraint."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-florestano-vancini",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Florestano Vancini",
+    "teaser": "Italian director of The Long Night of 1943, a bleak small-town tragedy of fascism that ranks among Italy's harshest political films.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Long Night of 1943 (1960) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a town's silence enables atrocity. Vancini films complicity the way Hitchcock filmed suspense."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "History"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-vittorio-de-seta",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Vittorio De Seta",
+    "teaser": "Italian documentarian who filmed Sicilian fishermen, miners, and shepherds in gorgeous color — real work, dignified and strange.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lu Tempu di li Pisci Spata (1955) — end to end",
+      "durationMinutes": 11,
+      "instruction": "Watch an eleven-minute film about swordfish hunting. De Seta makes labor look like ritual and ritual like labor."
+    },
+    "tags": [
+      "Italian",
+      "1950s",
+      "Documentary"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-pietro-germi",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Pietro Germi",
+    "teaser": "Italian director who made savage Sicilian satires — the honor-code divorce farce Divorce Italian Style earned him worldwide fame.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Divorce Italian Style (1961) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a man plans a murder as a social solution. Germi films the comedy of custom with a scalpel."
+    },
+    "tags": [
+      "Italian",
+      "1960s",
+      "Comedy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "director-alberto-lattuada",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Alberto Lattuada",
+    "teaser": "Italian director of neorealist tales and gothic comedies — he filmed Lombardy's poor and a bawdy Bell'Antonio with equal gusto.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Mill on the Po (1949) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the river dominate the frame. Lattuada films a peasant revolt with the force of weather."
+    },
+    "tags": [
+      "Italian",
+      "1940s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-maurice-pialat",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Maurice Pialat",
+    "teaser": "French realist who filmed family cruelty and desire without mercy — a director who believed truth was more important than beauty.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Loulou (1980) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the rawness of the performances. Pialat lets actors breathe and stumble like real people."
+    },
+    "tags": [
+      "French",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-claude-sautet",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Claude Sautet",
+    "teaser": "French director of quiet adult melodramas — men in bars, old friendships tested by new love — the poet of midlife melancholy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Things of Life (1970) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch how a crash's aftermath unfolds in memory fragments. Sautet films a life reviewed at the moment it ends."
+    },
+    "tags": [
+      "French",
+      "1970s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-jose-luis-garci",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "José Luis Garci",
+    "teaser": "Spanish director of nostalgic, dialogue-rich dramas — his Begin the Beguine became Spain's first Oscar winner for best foreign film.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Begin the Beguine (1982) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Listen to the conversation scenes. Garci builds a whole post-war Spain out of what people say over drinks."
+    },
+    "tags": [
+      "Spanish",
+      "1980s",
+      "Drama"
+    ],
+    "tier": 3
+  },
+  {
+    "id": "director-sergio-corbucci",
+    "categoryId": "DIRECTORS",
+    "subtype": "Director",
+    "name": "Sergio Corbucci",
+    "teaser": "Italian maestro of the spaghetti western whose Django, a coffin and a machine gun, was darker and wilder than anything Leone dared.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Django (1966) — the first 30 minutes",
+      "durationMinutes": 30,
+      "instruction": "Watch the mud, the coffin, and the machine gun. Corbucci makes violence look like a bargain with the devil."
+    },
+    "tags": [
+      "Director"
+    ],
+    "tier": 2
+  }
+]

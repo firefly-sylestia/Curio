@@ -1,0 +1,242 @@
+[
+  {
+    "id": "scientist-wohler",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Friedrich Wöhler",
+    "teaser": "German chemist who in 1828 synthesized urea — a product of living bodies — from inorganic chemicals, accidentally shattering the 'vital force' doctrine that organic matter could only come from life. The episode is considered the birth of organic chemistry.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wöhler's 1828 letter announcing the synthesis of urea",
+      "durationMinutes": 60,
+      "instruction": "Read how Wöhler, trying to make ammonium cyanate, obtained white crystals that behaved exactly like urea from urine. He wrote excitedly to his mentor Berzelius: 'I can no longer hold my chemical water and must tell you that I can make urea without a kidney.' The 'vital force' idea died slowly, but the field of organic synthesis began with those crystals.",
+      "tags": [
+        "Chemistry",
+        "19th Century",
+        "German"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-curie-joliot",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Irène Joliot-Curie",
+    "teaser": "French scientist, Marie Curie's daughter, who with her husband Frédéric discovered artificial radioactivity in 1934 — bombarding elements to make new radioactive isotopes. The discovery made radioactivity a controllable tool and won the 1935 Nobel, a year after her mother's death. She helped build France's first nuclear reactor and died of leukemia from radiation exposure.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Joliot-Curie's 1934 paper on artificial radioactivity",
+      "durationMinutes": 60,
+      "instruction": "Read how the couple bombarded aluminum with alpha particles and found it kept emitting positrons after the source was removed — a new radioactive element had been created. This opened the door to producing isotopes for medicine and research. Irène, trained in her mother's lab, faced the same radiation dangers without the same protections; she died at 58 of leukemia, as her mother had.",
+      "tags": [
+        "Chemistry",
+        "20th Century",
+        "French"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-pauling-mullis",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Chemist",
+    "name": "Kary Mullis",
+    "teaser": "American biochemist who, driving through the California night in 1983, imagined the polymerase chain reaction (PCR): a way to copy a single piece of DNA millions of times. His 1983 insight won the 1993 Nobel and became the workhorse of genetics — DNA fingerprinting, forensics, and medical diagnostics all depend on it. He was famously eccentric and contrarian.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mullis's 1985 PCR paper and the story of its conception",
+      "durationMinutes": 60,
+      "instruction": "Read how Mullis, a DNA chemist at Cetus, realized that two short primers and a heat-stable polymerase could amplify any DNA sequence exponentially — doubling each cycle. The idea came to him while driving; he said 'I was used to having ideas. I just had one.' PCR won the Nobel, made Cetus rich, and is used billions of times a day in labs worldwide.",
+      "tags": [
+        "Biochemistry",
+        "20th Century",
+        "American"
+      ],
+      "tier": 1
+    }
+  },
+  {
+    "id": "scientist-levene",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Biochemist",
+    "name": "Phoebus Levene",
+    "teaser": "Russian-American biochemist who worked out the structure of nucleic acids — showing that DNA and RNA are chains of sugars, phosphates, and bases, and distinguishing the sugar in each (deoxyribose vs. ribose). His 'tetranucleotide hypothesis' wrongly suggested DNA was too simple to carry heredity, a mistake that delayed the double helix by a generation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Levene's work on nucleic acid structure (1909–1930s)",
+      "durationMinutes": 60,
+      "instruction": "Read how Levene, working at the Rockefeller Institute, correctly identified the building blocks and their linkage — a phosphate-sugar-base 'nucleotide' — but then proposed that DNA was a monotonous repeating unit, which made scientists believe proteins must carry heredity. The experiment that overturned this (Avery, 1944) came a decade after Levene's death. He was right about the bricks, wrong about the building.",
+      "tags": [
+        "Biochemistry",
+        "20th Century",
+        "Russian-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-luria",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Biophysicist",
+    "name": "Salvador Luria",
+    "teaser": "Italian-American microbiologist who, with Delbrück, proved that mutations in bacteria occur randomly — not in response to selection — with the 1943 fluctuation test. The experiment used the mathematics of probability and helped found molecular genetics. He shared the 1969 Nobel with Delbrück and Hershey.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Luria & Delbrück's 1943 fluctuation test",
+      "durationMinutes": 90,
+      "instruction": "Read how the pair reasoned: if bacteria mutate randomly, independent cultures will show wildly different numbers of resistant cells (a Poisson 'fluctuation'), but if resistance is induced by the phage, all cultures will be similar. The wide fluctuations they observed proved random mutation — a conclusion that settled the debate and made the mutation process itself an object of study.",
+      "tags": [
+        "Biology",
+        "20th Century",
+        "Italian-American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-horvitz",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Geneticist",
+    "name": "Robert Horvitz",
+    "teaser": "American biologist who, using the roundworm C. elegans, identified the genes that control programmed cell death — apoptosis — showing that cells carry a built-in suicide program. He shared the 2002 Nobel with Brenner and Sulston, and his work underpins cancer therapy and developmental biology.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Horvitz's identification of the C. elegans cell death genes",
+      "durationMinutes": 90,
+      "instruction": "Read how Horvitz, trained in Brenner's lab, found that two genes, ced-3 and ced-4, are required for cells to die, and that ced-9 protects them — a genetic switch for life and death. The human versions of these genes were soon found, and their failure causes cancer and autoimmune disease. Understanding apoptosis now guides how we design chemotherapy.",
+      "tags": [
+        "Biology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-sulston",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Biologist",
+    "name": "John Sulston",
+    "teaser": "British biologist who mapped every cell division of the C. elegans worm and then led the British arm of the Human Genome Project, fighting to keep the genome data open and public. He shared the 2002 Nobel, and his stand for open science shaped how the human genome was released to the world.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sulston's C. elegans cell lineage and his role in the Human Genome Project",
+      "durationMinutes": 90,
+      "instruction": "Read how Sulston, an expert microscopist, traced the lineage of all 959 cells of the adult worm, cell by cell — years of patient observation that revealed how a nervous system is built. He then moved to genome sequencing, and his decision to make the human genome sequence freely available (against commercial attempts to patent it) defined the open science of the genomic era.",
+      "tags": [
+        "Biology",
+        "20th-21st Century",
+        "British"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-von-euler",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Biochemist",
+    "name": "Ulf von Euler",
+    "teaser": "Swedish physiologist who identified norepinephrine as the sympathetic nervous system's main neurotransmitter, and who discovered the prostaglandins — hormone-like compounds that regulate inflammation, blood pressure, and pain. He shared the 1970 Nobel, and his father Hans von Euler-Chelpin won the 1929 chemistry prize.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "von Euler's discovery of prostaglandins (1935) and norepinephrine",
+      "durationMinutes": 60,
+      "instruction": "Read how von Euler, working in his father's institute, extracted from seminal vesicles a substance that lowered blood pressure and contracted smooth muscle — he named it prostaglandin, thinking it came from the prostate. Later work showed prostaglandins are made in nearly every tissue. Ibuprofen and aspirin work by blocking their synthesis.",
+      "tags": [
+        "Physiology",
+        "20th Century",
+        "Swedish"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-hilleman",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Virologist",
+    "name": "Maurice Hilleman",
+    "teaser": "American microbiologist who developed more vaccines than anyone in history — measles, mumps, rubella, hepatitis A and B, chickenpox, meningitis, and pneumonia. His vaccines are estimated to save millions of lives every year, yet he is largely unknown. He once grew a mumps virus from his own daughter's throat and named the strain after her.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hilleman's development of the mumps, measles, and hepatitis B vaccines",
+      "durationMinutes": 90,
+      "instruction": "Read how Hilleman, working at Merck, combined the measles, mumps, and rubella vaccines into the MMR shot, and developed the first cancer-preventing vaccine, hepatitis B, using blood plasma from carriers. His daughter Jeryl Lynn's mumps strain is still in the vaccine today. He refused to slow down, saying 'I don't want to be retired. I want to be effective.'",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-enders",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Virologist",
+    "name": "John Franklin Enders",
+    "teaser": "American virologist who, with Weller and Robbins, grew the polio virus in non-nerve tissue culture — a technique that made the polio vaccines possible and won the 1954 Nobel. His lab was the seedbed of modern vaccine science, and his method let scientists grow virtually any virus in the lab.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Enders's 1949 paper on culturing poliovirus in tissue",
+      "durationMinutes": 60,
+      "instruction": "Read how Enders, a former English teacher turned scientist, discovered that polio virus could grow in human embryonic tissue in test tubes — overturning the belief that it only grew in nerve cells. This gave Salk and Sabin the virus they needed for vaccines, and it opened the door to growing measles, rubella, and mumps viruses as well. The 1954 Nobel honored the technique that ended polio in the West.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-gallo",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Virologist",
+    "name": "Robert Gallo",
+    "teaser": "American virologist who co-discovered HIV as the cause of AIDS in 1983–84, developed the blood test that screened HIV from transfusions, and helped develop the first HIV treatments. His lab also discovered the first human retrovirus (HTLV). The fight over credit with Montagnier's team took years and a diplomatic solution.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gallo's role in the discovery of HIV and the AIDS blood test",
+      "durationMinutes": 60,
+      "instruction": "Read how Gallo's lab, studying retroviruses, isolated HIV from AIDS patients in 1984 and, with Montagnier's earlier isolate, showed it caused the disease. His blood test let blood banks screen out the virus, saving hundreds of thousands of lives. The Gallo–Montagnier dispute over who discovered HIV was settled in 1987 with shared credit; Montagnier and Barré-Sinoussi won the 2008 Nobel.",
+      "tags": [
+        "Medicine",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  },
+  {
+    "id": "scientist-baltimore",
+    "categoryId": "SCIENTISTS",
+    "subtype": "Virologist",
+    "name": "David Baltimore",
+    "teaser": "American biologist who, independently of Howard Temin, discovered reverse transcriptase in 1970 — the enzyme by which RNA viruses copy their genome into DNA. The discovery proved the 'central dogma' of molecular biology could run backward and shared the 1975 Nobel. He later led Caltech and helped guide the national response to COVID-19's vaccines.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baltimore's 1970 discovery of reverse transcriptase",
+      "durationMinutes": 60,
+      "instruction": "Read how Baltimore, studying a tumor virus, found an enzyme that built DNA from an RNA template — the reverse of normal flow. Temin had predicted such an enzyme years earlier and was derided for it; Baltimore's independent discovery vindicated him, and the two shared the 1975 Nobel with Dulbecco. Reverse transcriptase is now the key to detecting and copying RNA, from HIV tests to mRNA research.",
+      "tags": [
+        "Virology",
+        "20th Century",
+        "American"
+      ],
+      "tier": 2
+    }
+  }
+]
