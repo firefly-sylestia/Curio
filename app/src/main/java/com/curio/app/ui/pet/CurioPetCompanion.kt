@@ -177,7 +177,7 @@ fun CurioPetHeroCard(
                             CurioPet.atHome ||
                             !AppPreferences.floatingPetEnabledState,
                         sleeping = !CurioPet.awake,
-                        bedSize = 74.dp,
+                        homeSize = 74.dp,
                         celebrateKey = celebrateKey + wakeCelebrate,
                         onTap = {
                             when {

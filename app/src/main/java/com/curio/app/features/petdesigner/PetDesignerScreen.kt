@@ -4426,6 +4426,7 @@ private fun effectiveDetailRows(design: PetDesign, layer: String): List<String> 
  */
 @Composable
 private fun PixelGrid(
+    modifier: Modifier = Modifier,
     design: PetDesign,
     grid: String,
     tool: PaintTool?,

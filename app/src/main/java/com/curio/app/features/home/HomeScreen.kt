@@ -216,7 +216,7 @@ fun HomeScreen(navController: NavController) {
                     petInside = !CurioPet.awake || CurioPet.atHome ||
                         !AppPreferences.floatingPetEnabledState,
                     sleeping = !CurioPet.awake,
-                    bedSize = 52.dp,
+                    homeSize = 52.dp,
                     onTap = {
                         when {
                             !CurioPet.awake -> CurioPet.wake()
