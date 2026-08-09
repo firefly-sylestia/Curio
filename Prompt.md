@@ -1,20 +1,25 @@
-# Request — Fix CI Kotlin compilation failures
+# Request — Fix intermittent blank shuffle page
 
 ## User request
-Fix the reported release/debug CI compilation errors in `CurioNavHost.kt`, `CurioCategoryCard.kt`, and `CurioTheme.kt`.
+The Spin/shuffle card page sometimes rendered with nothing, unlike before.
 
-## Fixes completed
-- `CurioNavHost.kt`: added the missing comma after `.padding(innerPadding)` before `contentAlignment`.
-- `CurioNavHost.kt`: kept the tour controls as a direct child of the existing root `Box`, restoring `Modifier.align(Alignment.BottomCenter)` scope without reintroducing a full-screen transparent wrapper.
-- `CurioCategoryCard.kt`: repaired the malformed `background` conditional so selected cards use `Brush.verticalGradient(gradient)` and idle cards use `SolidColor(idleSurface)`.
-- `CurioTheme.kt`: imported `androidx.compose.ui.graphics.lerp` for the Material surface-tone helper.
+## Diagnosis
+`HeroTicketCard` returned immediately when the shared-transition composition locals were temporarily unavailable during navigation or destination restoration:
+- `LocalRevealSharedScope.current ?: return`
+- `LocalRevealVisibilityScope.current ?: return`
+
+That early return removed the visible hero card for the frame, making the shuffle page appear blank. The shared transition is optional presentation polish; the deck must remain visible even when its scope is not ready.
+
+## Fix completed
+- `HeroTicketCard` now keeps rendering when either shared-transition local is unavailable.
+- The shared-element modifier is applied only when both scopes and the remembered shared state are available; otherwise the card uses its normal non-morphing modifier for that frame.
+- Intentional empty/filter behavior was preserved; no fake topic or loading card was added.
 
 ## Validation
-- `node scripts/check_braces.js` passed: 125 files checked.
+- `node scripts/check_braces.js` passed.
 - `git diff --check` passed.
-- Focused review found no critical compile or scope issues.
-- The affected symbols now resolve statically: `contentAlignment`, `SolidColor`, `lerp`, and BoxScope `align`.
-- Local Gradle compile/build/lint/test commands were not run because the repository explicitly forbids local Android builds; CI remains authoritative.
+- Focused review found no critical nullability or scope blockers.
+- Local Gradle compile/build/lint/test commands were not run because repository instructions forbid local Android builds; CI remains authoritative.
 
 ## Status
-Compile fix validated and committed/pushed in this turn.
+The targeted Spin fix is ready to commit and push.

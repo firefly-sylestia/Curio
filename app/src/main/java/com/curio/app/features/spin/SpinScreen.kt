@@ -2075,11 +2075,16 @@ private fun HeroTicketCard(
     // ── Shared-element handoff (Topic Reveal morph) ──────────────────────
     // This front ticket is the source of the "reveal-hero" shared element:
     // the reveal destination provides the matching hero, so opening the
-    // landed topic morphs the hero OUT of this card. The scopes are provided
-    // by the NavHost via composition locals (never null in its subtree).
-    val sharedTransitionScope = LocalRevealSharedScope.current ?: return
-    val animatedVisibilityScope = LocalRevealVisibilityScope.current ?: return
-    val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
+    // landed topic morphs the hero OUT of this card. The shared-transition
+    // locals can briefly be unavailable while a destination is restored; the
+    // card must still render normally in that frame, simply without a morph.
+    val sharedTransitionScope = LocalRevealSharedScope.current
+    val animatedVisibilityScope = LocalRevealVisibilityScope.current
+    val revealSharedState = if (sharedTransitionScope != null) {
+        sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
+    } else {
+        null
+    }
 
     // v6.3 — slightly bigger ticket (~6% up) so the hero card reads a
     // touch more prominent on the deck.
@@ -2305,11 +2310,17 @@ private fun HeroTicketCard(
                 .size(w, h)
                 .align(Alignment.Center)
                 .then(
-                    if (topic != null) {
+                    if (topic != null &&
+                        sharedTransitionScope != null &&
+                        animatedVisibilityScope != null &&
+                        revealSharedState != null
+                    ) {
                         // Shared-element source for the Topic Reveal hero —
                         // when this ticket is tapped (or the wheel lands),
                         // the reveal's hero expands out of this card's
-                        // position instead of the page sliding in.
+                        // position instead of the page sliding in. If the
+                        // transition scope is not ready yet, keep the card
+                        // visible and use a normal card for this frame.
                         sharedTransitionScope.run {
                             Modifier.sharedElement(
                                 revealSharedState,
