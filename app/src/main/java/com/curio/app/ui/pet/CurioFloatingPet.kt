@@ -185,7 +185,22 @@ fun CurioFloatingPet(
         var celebrateKey by remember { mutableIntStateOf(0) }
         var heartsKey by remember { mutableIntStateOf(0) }
         var reaction by remember { mutableStateOf<String?>(null) }
+        var reactionQueue by remember { mutableStateOf<List<String>>(emptyList()) }
         var reactionKey by remember { mutableIntStateOf(0) }
+        /**
+         * Keep one speech line on screen at a time. Reactions can arrive from
+         * several independent effects in the same frame (for example an app
+         * event plus a custom action); queue later lines instead of replacing
+         * the visible line and restarting its animation.
+         */
+        fun queueReaction(line: String) {
+            if (reaction == null && reactionQueue.isEmpty()) {
+                reaction = line
+                reactionKey++
+            } else {
+                reactionQueue = reactionQueue + line
+            }
+        }
         // v8.26 — the speech bubble fades + rises in and out instead of
         // popping, so line changes feel smooth rather than abrupt.
         val bubbleAnim = remember { Animatable(0f) }
@@ -273,10 +288,7 @@ fun CurioFloatingPet(
             routineKey++
             recentRoutineIds = (listOf(routine.id) + recentRoutineIds).distinct().take(5)
             lastTouch = System.currentTimeMillis()
-            routine.line?.let {
-                reaction = it
-                reactionKey++
-            }
+            routine.line?.let(::queueReaction)
         }
 
         /**
@@ -314,12 +326,13 @@ fun CurioFloatingPet(
                 // Custom lines are deliberately opt-in. When enabled, an
                 // event with saved lines speaks one of them; an event with
                 // no saved lines keeps Curie's built-in dialogue.
-                reaction = if (AppPreferences.customReactionLinesState) {
-                    rule.lines.randomOrNull() ?: line
-                } else {
-                    line
-                }
-                reactionKey++
+                queueReaction(
+                    if (AppPreferences.customReactionLinesState) {
+                        rule.lines.randomOrNull() ?: line
+                    } else {
+                        line
+                    }
+                )
             }
         }
 
@@ -346,8 +359,7 @@ fun CurioFloatingPet(
             lastTouch = System.currentTimeMillis()
             val line = action.dialogueLines.randomOrNull()
             if (line != null) {
-                reaction = line
-                reactionKey++
+                queueReaction(line)
             }
         }
 
@@ -789,8 +801,7 @@ fun CurioFloatingPet(
         LaunchedEffect(CurioPet.spinning) {
             if (CurioPet.spinning && autoWander) {
                 celebrateKey++
-                reaction = CurioPet.spinCheer()
-                reactionKey++
+                queueReaction(CurioPet.spinCheer())
                 lastTouch = System.currentTimeMillis()
             }
         }
@@ -859,6 +870,16 @@ fun CurioFloatingPet(
                 delay(2300)
                 bubbleAnim.animateTo(0f, tween(180, easing = FastOutSlowInEasing))
                 reaction = null
+                val nextReaction = reactionQueue.firstOrNull()
+                reactionQueue = if (nextReaction == null) {
+                    emptyList()
+                } else {
+                    reactionQueue.drop(1)
+                }
+                if (nextReaction != null) {
+                    reaction = nextReaction
+                    reactionKey++
+                }
             }
         }
 
@@ -905,8 +926,7 @@ fun CurioFloatingPet(
                     )
                     facing = 1f
                     squishKey++
-                    reaction = "Tap tap tap! I can type too!"
-                    reactionKey++
+                    queueReaction("Tap tap tap! I can type too!")
                 }
             } else {
                 typingReaction = false
@@ -1060,15 +1080,13 @@ fun CurioFloatingPet(
                                 if (dropped) {
                                     squishKey++
                                     heartsKey++
-                                    reaction = "Home sweet home!"
-                                    reactionKey++
+                                    queueReaction("Home sweet home!")
                                     leavingHome = true
                                 }
                             }
                             if (flung && !leavingHome) {
                                 recovering = true
-                                reaction = CurioPet.dizzyLine()
-                                reactionKey++
+                                queueReaction(CurioPet.dizzyLine())
                             }
                             // v8.26 — throw momentum: a real fling keeps a
                             // LITTLE of its speed on release (capped, and
@@ -1155,12 +1173,13 @@ fun CurioFloatingPet(
                                 reactionFaceKey++
                                 if (Random.nextFloat() < 0.4f) {
                                     val builtInLine = CurioPet.touchReaction(tier)
-                                    reaction = if (AppPreferences.customReactionLinesState) {
-                                        rule.lines.randomOrNull() ?: builtInLine
-                                    } else {
-                                        builtInLine
-                                    }
-                                    reactionKey++
+                                    queueReaction(
+                                        if (AppPreferences.customReactionLinesState) {
+                                            rule.lines.randomOrNull() ?: builtInLine
+                                        } else {
+                                            builtInLine
+                                        }
+                                    )
                                 }
                                 when (tier) {
                                     // v8.21 — tapping never spins it dizzy anymore
@@ -1202,8 +1221,7 @@ fun CurioFloatingPet(
                             tapStreak = 0 // a fresh start when it comes home
                             squishKey++
                             heartsKey++
-                            reaction = "Home sweet home!"
-                            reactionKey++
+                            queueReaction("Home sweet home!")
                             leavingHome = true
                         }
                     )
