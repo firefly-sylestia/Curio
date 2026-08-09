@@ -80,7 +80,6 @@ fun CurioFlowerBed(
     } ?: AppPreferences.bedDesignRowsState?.takeIf {
         it.size == BED_GRID_H && it.all { row -> row.length == BED_GRID_W }
     } ?: BED_ROWS
-    val context = LocalContext.current
     val ink = Color(0xFF4A3426)
     val wood = Color(0xFFB98A5E)
     val woodShade = Color(0xFF8A5A33)

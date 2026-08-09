@@ -1121,6 +1121,7 @@ private fun RevealActionRow(
                         screen = "reveal"
                     ) { lm ->
                         RevealStartButton(
+                            cat = cat,
                             enabled = resolved != null,
                             metrics = m,
                             modifier = lm.weight(1f),
@@ -1130,6 +1131,7 @@ private fun RevealActionRow(
                 } else if (onSilentExplore != null) {
                     // Browse mode: Explore opens the search page silently.
                     RevealStartButton(
+                        cat = cat,
                         enabled = resolved != null,
                         label = "Explore",
                         metrics = m,
@@ -1144,6 +1146,7 @@ private fun RevealActionRow(
 
 @Composable
 private fun RevealStartButton(
+    cat: CurioCategory,
     enabled: Boolean,
     modifier: Modifier = Modifier,
     label: String = "Start exploring",
