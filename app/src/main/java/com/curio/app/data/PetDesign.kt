@@ -271,6 +271,32 @@ data class PetDesign(
         DEFAULT_REACTIONS.keys.forEach { event ->
             appendLine("react=$event;${reactions[event]?.toConfig() ?: DEFAULT_REACTIONS[event]?.toConfig() ?: PetReaction().toConfig()}")
         }
+        // v8.52 — custom animation frames (per-frame pixel layers). Each
+        // `anim=id` line starts a section; the `frame=` lines that follow it
+        // (until the next `anim=`) carry that animation's frame config plus
+        // URL-encoded body/curled grid overrides.
+        animations.forEach { (id, anim) ->
+            appendLine("anim=$id")
+            anim.frames.forEachIndexed { index, fr ->
+                val parts = mutableListOf(
+                    "i=$index", "d=${fr.durationMs}", "y=${fr.offsetY}",
+                    "s=${fr.scale}", "r=${fr.rotationDegrees}"
+                )
+                fr.bodyRows?.let { rows ->
+                    val encoded = runCatching {
+                        java.net.URLEncoder.encode(rows.joinToString("\n"), "UTF-8")
+                    }.getOrDefault("")
+                    if (encoded.isNotBlank()) parts += "b=$encoded"
+                }
+                fr.curledRows?.let { rows ->
+                    val encoded = runCatching {
+                        java.net.URLEncoder.encode(rows.joinToString("\n"), "UTF-8")
+                    }.getOrDefault("")
+                    if (encoded.isNotBlank()) parts += "c=$encoded"
+                }
+                appendLine("frame=" + parts.joinToString(";"))
+            }
+        }
     }
 
     /**
@@ -293,6 +319,10 @@ data class PetDesign(
         // v8.51 — the design's species (multi-pet). Absent in old designs
         // and in hand-written text → falls back below.
         var petId: String? = null
+        // v8.52 — custom animation frames: current `anim=` section id →
+        // parsed per-frame configs (key = frame index).
+        var currentAnimId: String? = null
+        val animFrames = mutableMapOf<String, MutableMap<Int, PetAnimationFrame>>()
         text.lineSequence().forEach { raw ->
             val line = raw.trim()
             if (line.isEmpty()) return@forEach
@@ -362,6 +392,48 @@ data class PetDesign(
                         PetReaction.parse(config)?.let { reactions[event] = it }
                     }
                 }
+                line.startsWith("anim=") && eq == 4 -> {
+                    currentAnimId = line.substring(5).trim().lowercase().takeIf { it.isNotBlank() }
+                    if (currentAnimId != null && currentAnimId !in animFrames) {
+                        animFrames[currentAnimId] = mutableMapOf()
+                    }
+                }
+                line.startsWith("frame=") && eq == 5 -> {
+                    // A `frame=` with no preceding `anim=` is malformed text —
+                    // consume it rather than let it pollute the grid rows.
+                    val animId = currentAnimId ?: return@forEach
+                    var index: Int? = null
+                    var durationMs = 180
+                    var offsetY = 0f
+                    var scale = 1f
+                    var rotation = 0f
+                    var body: List<String>? = null
+                    var curled: List<String>? = null
+                    line.substring(6).split(';').forEach { seg ->
+                        val s = seg.indexOf('=')
+                        if (s <= 0) return@forEach
+                        val k = seg.substring(0, s)
+                        val v = seg.substring(s + 1)
+                        when (k) {
+                            "i" -> index = v.toIntOrNull()
+                            "d" -> durationMs = v.toIntOrNull() ?: 180
+                            "y" -> offsetY = v.toFloatOrNull() ?: 0f
+                            "s" -> scale = v.toFloatOrNull() ?: 1f
+                            "r" -> rotation = v.toFloatOrNull() ?: 0f
+                            "b" -> body = runCatching {
+                                java.net.URLDecoder.decode(v, "UTF-8").split("\n")
+                            }.getOrNull()
+                            "c" -> curled = runCatching {
+                                java.net.URLDecoder.decode(v, "UTF-8").split("\n")
+                            }.getOrNull()
+                        }
+                    }
+                    index?.let { i ->
+                        animFrames[animId]?.put(
+                            i, PetAnimationFrame(durationMs, offsetY, scale, rotation, body, curled)
+                        )
+                    }
+                }
                 eq == 1 && line.length > eq + 1 -> {
                     val key = line[0]
                     val hex = line.substring(eq + 1).trim()
@@ -394,6 +466,35 @@ data class PetDesign(
                     else parsedRows + List(size - parsedRows.size) { ".".repeat(size) }
                 }
         )
+        fun norm(rows: List<String>?): List<String>? {
+            if (rows == null) return null
+            val cleaned = rows.map { (it + ".".repeat(size)).take(size) }
+            return if (cleaned.size >= size) cleaned.take(size)
+            else cleaned + List(size - cleaned.size) { ".".repeat(size) }
+        }
+        // v8.52 — rebuild custom animations from parsed frames. Frames merge
+        // over the built-in ones (missing indices keep the base frame); an
+        // animation identical to its built-in is dropped so dirty-check and
+        // Reset behave. Unknown ids (not in BUILTIN_ANIMATIONS) are kept
+        // with their parsed frames.
+        val builtAnimations: Map<String, PetAnimation> = if (animFrames.isEmpty()) {
+            fallback.animations
+        } else {
+            animFrames.mapNotNull { (id, frameMap) ->
+                val base = animationById(id)
+                val normalized = frameMap.mapValues { (_, fr) ->
+                    fr.copy(bodyRows = norm(fr.bodyRows), curledRows = norm(fr.curledRows))
+                }
+                if (base != null) {
+                    val merged = base.frames.mapIndexed { i, f -> normalized[i] ?: f }
+                    if (merged == base.frames) null else id to base.copy(frames = merged)
+                } else {
+                    val frames = normalized.toSortedMap().values.toList()
+                    if (frames.isEmpty()) null
+                    else id to PetAnimation(id, petAnimationName(id), "HAPPY", frames)
+                }
+            }.toMap()
+        }
         return PetDesign(
             palette = if (palette.isEmpty()) fallback.palette else palette,
             bodyRows = body,
@@ -410,6 +511,7 @@ data class PetDesign(
                     }
             },
             procedural = procedural,
+            animations = builtAnimations,
             petSpeciesId = petId ?: fallback.petSpeciesId
         )
     }
@@ -529,7 +631,16 @@ data class PetDesign(
             curledRows = resizeGrid(curledRows, gridSize, newSize),
             faces = faces.mapValues { (_, face) -> resizeFace(face) },
             reactions = reactions.mapValues { (_, reaction) -> reaction.copy(face = resizeFace(reaction.face)) },
-            details = details.mapValues { (_, rows) -> resizeGrid(rows, gridSize, newSize) }
+            details = details.mapValues { (_, rows) -> resizeGrid(rows, gridSize, newSize) },
+            // v8.52 — per-frame pixel layers follow the canvas size too.
+            animations = animations.mapValues { (_, anim) ->
+                anim.copy(frames = anim.frames.map { fr ->
+                    fr.copy(
+                        bodyRows = fr.bodyRows?.let { resizeGrid(it, gridSize, newSize) },
+                        curledRows = fr.curledRows?.let { resizeGrid(it, gridSize, newSize) }
+                    )
+                })
+            }
         )
     }
 
@@ -960,8 +1071,23 @@ data class PetAnimationFrame(
     val durationMs: Int = 180,
     val offsetY: Float = 0f,
     val scale: Float = 1f,
-    val rotationDegrees: Float = 0f
-)
+    val rotationDegrees: Float = 0f,
+    /**
+     * v8.52 — per-frame pixel layers: when set, the sprite draws these rows
+     * instead of the design's body grid for this keyframe, so every frame can
+     * be a completely different pose. `null` keeps the base design pose.
+     * Rows must match `PetDesign.gridSize` (the parser normalizes them).
+     */
+    val bodyRows: List<String>? = null,
+    /** v8.52 — same idea for the asleep (curled) pose. */
+    val curledRows: List<String>? = null
+) {
+    /** v8.52 — returns a copy with a custom body pose for this frame. */
+    fun withBodyGrid(rows: List<String>): PetAnimationFrame = copy(bodyRows = rows)
+
+    /** v8.52 — returns a copy with a custom asleep pose for this frame. */
+    fun withCurledGrid(rows: List<String>): PetAnimationFrame = copy(curledRows = rows)
+}
 
 /**
  * v8.48 — a named, looping animation: [frames] each transform the pet, and

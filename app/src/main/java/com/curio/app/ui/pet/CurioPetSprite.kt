@@ -116,7 +116,15 @@ fun CurioPetSprite(
      * [AppPreferences.petDesignState]; the designer passes its working
      * copy here for a live preview. Null + no saved design = default look.
      */
-    design: PetDesign? = null
+    design: PetDesign? = null,
+    /**
+     * v8.52 — per-frame pixel layers from the animation timeline editor.
+     * When set, the sprite draws these rows INSTEAD of the active design's
+     * body (or curled) grid, so each animation keyframe can be a different
+     * pose. `null` keeps the base design pose.
+     */
+    bodyOverride: List<String>? = null,
+    curledOverride: List<String>? = null
 ) {
     val density = LocalDensity.current
     // v8.34 — resolve the active design: the explicit working copy wins;
@@ -479,7 +487,8 @@ fun CurioPetSprite(
                     // standing with closed eyes. v8.34 — the active design's
                     // grids replace the default ones. v8.35 — every palette
                     // key renders (custom paint slots included).
-                    val bodyRows = if (sleeping) activeDesign.curledRows else activeDesign.bodyRows
+                    val bodyRows = if (sleeping) (curledOverride ?: activeDesign.curledRows)
+                    else (bodyOverride ?: activeDesign.bodyRows)
                     bodyRows.forEachIndexed { row, line ->
                         line.forEachIndexed { col, ch ->
                             val hex = activeDesign.colorFor(ch)

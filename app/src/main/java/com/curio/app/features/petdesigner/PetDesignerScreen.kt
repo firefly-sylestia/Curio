@@ -18,6 +18,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -93,7 +94,6 @@ import com.curio.app.data.PetRegistry
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
 import com.curio.app.data.definition
-import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontStyle
@@ -563,7 +563,9 @@ fun PetDesignerScreen(navController: NavController) {
                 if (animTarget != null) AnimationTimelineEditor(
                     animationId = animTarget.animationId,
                     design = design,
-                    onDesignChange = { design = it }
+                    onDesignChange = { design = it },
+                    onPushUndo = { pushUndo() },
+                    onEditColor = { editingColorKey = it }
                 )
             }
 
@@ -2541,17 +2543,20 @@ private fun PetAnimationPreview(
     spriteSize: Dp,
     playing: Boolean = true
 ) {
+    // v8.52 — resolve the design's custom frames so gallery previews show the
+    // per-frame pixel poses the user drew (an absent key = built-in frames).
+    val effective = design.animations[animation.id] ?: animation
     var frameIndex by remember(animation.id) { mutableStateOf(0) }
-    LaunchedEffect(animation.id, playing) {
-        if (!playing || animation.frames.isEmpty()) return@LaunchedEffect
+    LaunchedEffect(animation.id, playing, effective.frames) {
+        if (!playing || effective.frames.isEmpty()) return@LaunchedEffect
         while (true) {
-            delay(animation.frames[frameIndex].durationMs.toLong())
-            frameIndex = (frameIndex + 1) % animation.frames.size
+            delay(effective.frames[frameIndex].durationMs.toLong())
+            frameIndex = (frameIndex + 1) % effective.frames.size
         }
     }
-    val frame = animation.frames.getOrNull(frameIndex) ?: PetAnimationFrame()
+    val frame = effective.frames.getOrNull(frameIndex) ?: PetAnimationFrame()
     AnimatedPetSprite(
-        animation = animation,
+        animation = effective,
         frame = frame,
         design = design,
         spriteSize = spriteSize,
@@ -2573,6 +2578,10 @@ private fun AnimatedPetSprite(
         mood = runCatching { CurioPet.Mood.valueOf(animation.mood) }.getOrDefault(CurioPet.Mood.HAPPY),
         spriteSize = spriteSize,
         design = design,
+        // v8.52 — per-frame pixel layers: a frame's custom pose overrides the
+        // design's body/curled grid while it plays.
+        bodyOverride = frame.bodyRows,
+        curledOverride = frame.curledRows,
         modifier = Modifier.graphicsLayer {
             translationY = frame.offsetY.dp.toPx()
             scaleX = frame.scale
@@ -2624,50 +2633,87 @@ private fun AnimationGalleryCard(
 private fun AnimationTimelineEditor(
     animationId: String,
     design: PetDesign,
-    onDesignChange: (PetDesign) -> Unit
+    onDesignChange: (PetDesign) -> Unit,
+    onPushUndo: () -> Unit = {},
+    onEditColor: (Char) -> Unit = {}
 ) {
     val base = animationById(animationId) ?: return
     var playing by rememberSaveable(animationId) { mutableStateOf(true) }
     var selectedFrame by rememberSaveable(animationId) { mutableStateOf(0) }
     var onionSkin by rememberSaveable { mutableStateOf(false) }
-    // v8.49 — global preview speed (0.5× / 1× / 2×); never touches saved timing.
-    var speed by rememberSaveable(animationId) { mutableStateOf(1f) }
-    var frames by remember(animationId) {
-        mutableStateOf(design.animations[animationId]?.frames ?: base.frames)
+    // v8.52 — per-frame drawing state: which grid ("body"/"curled"), the
+    // active paint tool, and the paint color (shares the design palette, but
+    // is independent so picking a frame tool never disturbs the main editor).
+    var frameGrid by rememberSaveable(animationId) { mutableStateOf("body") }
+    var frameTool by rememberSaveable(animationId) { mutableStateOf<PaintTool?>(null) }
+    var framePaintKey by rememberSaveable(animationId) { mutableStateOf('b') }
+    // v8.52 — in-progress per-frame pixel drafts (frame index → grid kind →
+    // rows). Kept separate from the committed design so a stroke renders
+    // immediately; the frame is committed to the design on every cell.
+    var frameDrafts by remember(animationId) {
+        mutableStateOf<Map<Int, Map<String, List<String>>>>(emptyMap())
     }
-    LaunchedEffect(animationId, playing, speed, frames) {
+    // v8.52 — frames derive from the design (not a remember() snapshot), so
+    // Undo/Redo from the footer and edits elsewhere stay in sync.
+    val frames = design.animations[animationId]?.frames ?: base.frames
+    LaunchedEffect(animationId, playing, frames) {
         if (!playing || frames.isEmpty()) return@LaunchedEffect
         while (true) {
-            // Float division first — speed.toLong() would truncate 0.5f to 0
-            // and divide by zero (crash) on the 0.5× pill.
-            delay(((frames.getOrNull(selectedFrame)?.durationMs ?: 180) / speed).toLong())
+            delay(frames.getOrNull(selectedFrame)?.durationMs?.toLong() ?: 180L)
             selectedFrame = (selectedFrame + 1) % frames.size
         }
     }
     val shown = frames.getOrNull(selectedFrame) ?: PetAnimationFrame()
-    fun commit(updated: List<PetAnimationFrame>) {
-        frames = updated
+    fun commitFrame(index: Int, frame: PetAnimationFrame) {
+        val updated = frames.mapIndexed { i, f -> if (i == index) frame else f }
         onDesignChange(
             design.copy(animations = design.animations + (animationId to base.copy(frames = updated)))
         )
     }
+    // The pose a frame is currently wearing: its own pixel override when it
+    // has one (and it matches the canvas), else the design's grid.
+    fun effectiveFrameRows(index: Int, kind: String): List<String> {
+        val frame = frames.getOrNull(index)
+            ?: return if (kind == "curled") design.curledRows else design.bodyRows
+        val override = if (kind == "curled") frame.curledRows else frame.bodyRows
+        if (override != null && override.size == design.gridSize &&
+            override.all { it.length == design.gridSize }
+        ) return override
+        return if (kind == "curled") design.curledRows else design.bodyRows
+    }
+    fun draftRows(index: Int, kind: String): List<String> =
+        frameDrafts[index]?.get(kind) ?: effectiveFrameRows(index, kind)
+    fun paintFrame(index: Int, kind: String, row: Int, col: Int) {
+        val current = draftRows(index, kind)
+        val next = applyToolToRows(current, frameTool, framePaintKey, row, col) ?: return
+        frameDrafts = frameDrafts + (index to (frameDrafts[index] ?: emptyMap()) + (kind to next))
+        val frame = frames.getOrNull(index) ?: return
+        val norm = normalizeFrameRows(next, design.gridSize)
+        commitFrame(
+            index,
+            if (kind == "curled") frame.copy(curledRows = norm) else frame.copy(bodyRows = norm)
+        )
+    }
     SectionCard(
         "${base.name} timeline",
-        if (frames == base.frames) "Built-in frames — tweak a frame's timing below"
-        else "Custom timing — Save pet keeps it"
+        if (design.animations[animationId] == null) "Draw each frame's pose below — untouched frames keep the base design"
+        else "Custom frames — Save pet keeps them"
     ) {
-        Box(
+        // v8.52 — the live preview fills the same width as the drawing grid
+        // below ("drawing size"), so the animation plays at the true scale.
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 14.dp),
             contentAlignment = Alignment.Center
         ) {
+            val previewSize = maxWidth
             if (onionSkin && selectedFrame > 0) {
                 AnimatedPetSprite(
                     animation = base,
                     frame = frames.getOrNull(selectedFrame - 1) ?: PetAnimationFrame(),
                     design = design,
-                    spriteSize = 120.dp,
+                    spriteSize = previewSize,
                     ghost = true
                 )
             }
@@ -2675,7 +2721,7 @@ private fun AnimationTimelineEditor(
                 animation = base,
                 frame = shown,
                 design = design,
-                spriteSize = 120.dp,
+                spriteSize = previewSize,
                 ghost = false
             )
         }
@@ -2702,45 +2748,15 @@ private fun AnimationTimelineEditor(
                 playing = false
                 selectedFrame = (selectedFrame + 1) % frames.size
             }
-            Spacer(Modifier.width(14.dp))
-            listOf(0.5f, 1f, 2f).forEach { s ->
-                SpeedChip(
-                    label = when (s) {
-                        0.5f -> "0.5×"
-                        1f -> "1×"
-                        else -> "2×"
-                    },
-                    selected = speed == s
-                ) { speed = s }
-                Spacer(Modifier.width(6.dp))
-            }
         }
-        Spacer(Modifier.height(12.dp))
-        val fps = (1000f / shown.durationMs).coerceIn(1f, 20f)
-        Text(
-            "Frame ${selectedFrame + 1} of ${frames.size} · ${fps.roundToInt()} fps · ${shown.durationMs} ms",
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-        )
-        Slider(
-            value = fps,
-            onValueChange = { f ->
-                // Dragging the timing pauses playback so the loop doesn't
-                // advance the frame under the finger.
-                if (playing) playing = false
-                val ms = (1000f / f).toInt().coerceIn(50, 1000)
-                frames = frames.mapIndexed { i, fr ->
-                    if (i == selectedFrame) fr.copy(durationMs = ms) else fr
-                }
-            },
-            onValueChangeFinished = { commit(frames) },
-            valueRange = 1f..20f
-        )
-        Text(
-            "Frame speed (fps) — higher = snappier",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
         Spacer(Modifier.height(8.dp))
+        Text(
+            "Frame ${selectedFrame + 1} of ${frames.size}",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(12.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2761,18 +2777,158 @@ private fun AnimationTimelineEditor(
                 )
             }
         }
+        // ── Per-frame pixel editor (v8.52) ─────────────────────────
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "Draw this frame",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+        )
+        Text(
+            "Paint this ${base.name} frame's pose — drawn frames override the base design while the animation plays. Blank cells stay transparent.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            GridTab("Body", frameGrid == "body") { frameGrid = "body" }
+            GridTab("Asleep", frameGrid == "curled") { frameGrid = "curled" }
+        }
+        Spacer(Modifier.height(10.dp))
+        CanvasStatus(activeTool = frameTool)
+        Spacer(Modifier.height(10.dp))
+        QuickPaletteRow(
+            selectedKey = framePaintKey,
+            design = design,
+            onSelect = {
+                framePaintKey = it
+                frameTool = PaintTool.BRUSH
+            },
+            onEdit = onEditColor
+        )
+        Spacer(Modifier.height(12.dp))
+        PixelGrid(
+            design = design,
+            grid = "frame",
+            rowsOverride = draftRows(selectedFrame, frameGrid),
+            tool = frameTool,
+            onTool = { row, col, continuous ->
+                val tool = frameTool
+                val mutating = tool == PaintTool.BRUSH || tool == PaintTool.FILL || tool == PaintTool.ERASER
+                if (mutating && !continuous) onPushUndo()
+                if (tool == PaintTool.EYEDROPPER) {
+                    if (!continuous) {
+                        val picked = draftRows(selectedFrame, frameGrid).getOrNull(row)?.getOrNull(col) ?: '.'
+                        if (picked != '.') {
+                            framePaintKey = picked
+                            frameTool = PaintTool.BRUSH
+                        } else {
+                            frameTool = PaintTool.ERASER
+                        }
+                    }
+                } else if (tool != null) {
+                    // FILL acts once per gesture (mirror the main editor) so
+                    // a drag doesn't re-run the bucket at every cell.
+                    if (tool == PaintTool.FILL) {
+                        if (!continuous) paintFrame(selectedFrame, frameGrid, row, col)
+                    } else {
+                        paintFrame(selectedFrame, frameGrid, row, col)
+                    }
+                }
+            }
+        )
+        Spacer(Modifier.height(10.dp))
+        ToolTray(
+            activeTool = frameTool,
+            onSelect = { frameTool = it }
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SmallAction(
+                "Reset frame pose",
+                enabled = shown.bodyRows != null || shown.curledRows != null
+            ) {
+                onPushUndo()
+                frameDrafts = frameDrafts - selectedFrame
+                commitFrame(selectedFrame, shown.copy(bodyRows = null, curledRows = null))
+            }
+            SmallAction(
+                "Reset all frames",
+                enabled = design.animations[animationId] != null
+            ) {
+                onPushUndo()
+                frameDrafts = emptyMap()
+                onDesignChange(design.copy(animations = design.animations - animationId))
+                selectedFrame = 0
+            }
+        }
         Spacer(Modifier.height(12.dp))
         ToggleRow(
             label = "Previous-frame ghost (onion skin)",
             checked = onionSkin,
             onCheckedChange = { onionSkin = it }
         )
-        Spacer(Modifier.height(8.dp))
-        SmallAction("Reset to built-in", enabled = frames != base.frames) {
-            commit(base.frames)
-            selectedFrame = 0
-        }
     }
+}
+
+/** v8.52 — applies a paint tool to one frame's pixel rows (null = no-op). */
+private fun applyToolToRows(
+    rows: List<String>,
+    tool: PaintTool?,
+    key: Char,
+    row: Int,
+    col: Int
+): List<String>? {
+    if (row !in rows.indices) return null
+    if (col !in rows[row].indices) return null
+    return when (tool) {
+        PaintTool.BRUSH -> setCell(rows, row, col, key)
+        PaintTool.ERASER -> setCell(rows, row, col, '.')
+        PaintTool.FILL -> floodFillRows(rows, row, col, key)
+        PaintTool.EYEDROPPER, null -> null
+    }
+}
+
+/** Sets one cell of a pixel rows list. */
+private fun setCell(rows: List<String>, row: Int, col: Int, key: Char): List<String> {
+    val out = rows.toMutableList()
+    val chars = out[row].toCharArray()
+    chars[col] = key
+    out[row] = String(chars)
+    return out
+}
+
+/** Flood-fills the connected region of the same key at [row]/[col]. */
+private fun floodFillRows(rows: List<String>, row: Int, col: Int, key: Char): List<String> {
+    val target = rows[row][col]
+    if (target == key) return rows
+    val work = rows.map { it.toCharArray() }
+    val size = work.size
+    val stack = ArrayDeque<Pair<Int, Int>>()
+    stack.add(row to col)
+    while (stack.isNotEmpty()) {
+        val (r, c) = stack.removeLast()
+        if (r !in 0 until size || c !in 0 until size) continue
+        if (work[r][c] != target) continue
+        work[r][c] = key
+        stack.add(r - 1 to c)
+        stack.add(r + 1 to c)
+        stack.add(r to c - 1)
+        stack.add(r to c + 1)
+    }
+    return work.map { String(it) }
+}
+
+/** Pads/truncates frame pixel rows to the canvas size (same rule as [PetDesign.withGrid]). */
+private fun normalizeFrameRows(rows: List<String>, gridSize: Int): List<String> {
+    val cleaned = rows.map { (it + ".".repeat(gridSize)).take(gridSize) }
+    return if (cleaned.size >= gridSize) cleaned.take(gridSize)
+    else cleaned + List(gridSize - cleaned.size) { ".".repeat(gridSize) }
 }
 
 /** v8.48 — one frame thumbnail in the timeline. */
@@ -3142,24 +3298,6 @@ private fun TransportIconButton(
     }
 }
 
-/** v8.49 — playback speed pill (0.5× / 1× / 2×). */
-@Composable
-private fun SpeedChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        onClick = onClick
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
-            ),
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-        )
-    }
-}
 
 /** v8.49 — icon + label action pill for the save footer. */
 @Composable

@@ -122,10 +122,14 @@ app/src/main/java/com/curio/app/
   + `y` eye colors), per-mood faces (`PetFace`), per-event reaction rules
   (`PetReaction`), optional authored reaction lines, four transparent detail
   layers (`tail`, `accessories`, `effects`, `antenna`), and per-element
-  procedural visibility overrides. Missing detail/toggle fields preserve the
-  prior procedural behavior for older saved designs. The text format (palette
-  lines + grids + `detail=` / `procedural=` / `face=` / `react=` / `size=`
-  lines) is documented in that file's KDoc/source implementation.
+  procedural visibility overrides. Animations (`PetAnimation`) are transform
+  keyframes plus v8.52 per-frame pixel layers (`PetAnimationFrame.bodyRows` /
+  `curledRows`) so each frame can be a fully different pose; `CurioPetSprite`
+  accepts `bodyOverride`/`curledOverride` to render them. Missing
+  detail/toggle fields preserve the prior procedural behavior for older saved
+  designs. The text format (palette lines + grids + `detail=` / `procedural=`
+  / `face=` / `react=` / `size=` / `anim=` / `frame=` lines) is documented in
+  that file's KDoc/source implementation.
 - `CurioPetSprite` renders any grid size, preserves existing motion, and draws
   authored detail layers last so the user can replace generated art without
   changing animation. The procedural antenna extras remain independently
@@ -205,7 +209,7 @@ These patterns and anti-patterns were learned the hard way (CI compile failures,
 
 ### Static validation when Gradle is unavailable
 - This environment has no Android SDK → no local `./gradlew` commands. Pre-CI validation = only static checks:
-  1. **Delimiter balance**: a Python script that strips Kotlin comments/strings and counts `{}[]()`. Write it to `/tmp/check_balance.py` to avoid JSON escaping.
+  1. **Delimiter balance**: `node scripts/check_braces.js` — repo-homed Kotlin/KTS checker that strips comments/strings and verifies `{}[]()` balance (run it on the whole repo, or pass specific files). This replaced the ad-hoc scripts that used to be written to /tmp mid-session.
   2. **`git diff --check`** — catches whitespace errors.
   3. **Import hygiene**: after removing a usage, `grep` the file for the removed symbol to confirm no remaining references (CI catches stale imports as compile errors).
   4. **Code review**: spawn a `code-reviewer-glm` or `code-reviewer-deepseek` agent with the full file list and the key risky patterns to check.

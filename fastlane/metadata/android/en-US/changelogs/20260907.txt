@@ -1,0 +1,1 @@
+Pet designer: every animation frame is now fully drawable — pick a frame and paint its own pose (body or asleep grid, same brush/fill/eraser/eyedropper tools and palette). The animation preview now plays at full drawing size, and the FPS bar and speed pills are gone — the timeline is just frame arrows plus play/pause.

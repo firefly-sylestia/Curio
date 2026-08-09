@@ -1,3 +1,39 @@
+# Request — Pet designer: per-frame pixel animation editing (DONE)
+
+## v8.52 — draw every animation frame + full-size preview (pushed)
+
+- User asked: "i cant edit the animation frames of my pet let me edit it.
+  increase the preview of the frames animation to the drawing size and show
+  the animation at that and remove the fps bar just the arrow to switch".
+  Confirmed via ask_user: **full pixel drawing per frame**, keep play/pause +
+  arrows, always-on (no Settings toggle).
+- **Data (`PetDesign.kt`)**: `PetAnimationFrame` gains optional `bodyRows` /
+  `curledRows` per-frame pixel layers (+ `withBodyGrid`/`withCurledGrid`);
+  `toText` now serializes `anim=id` + `frame=i;d;y;s;r;b=URL;c=URL` lines;
+  `toParsedOr` parses them (frames merge over built-ins, identical-to-base
+  animations dropped so dirty-check/Reset stay sane, unknown ids kept with
+  their frames); `withSize` resamples frame overrides on canvas resize.
+- **Sprite (`CurioPetSprite.kt`)**: new `bodyOverride`/`curledOverride` params
+  render per-frame pixel layers instead of the design grid (frame overrides
+  replace only the body pixels; procedural tail/belly/antenna still draw on
+  top, same as the base design).
+- **Editor (`PetDesignerScreen.kt`)**: `AnimationTimelineEditor` rewritten —
+  live preview fills the card width via `BoxWithConstraints` (same size as
+  the drawing grid, i.e. "drawing size"); FPS slider + speed pills + fps text
+  removed, keeping prev/play-pause/next arrows; new per-frame drawing section
+  (Body/Asleep toggle, palette, tool tray, PixelGrid with draft rows,
+  Reset frame pose / Reset all frames). Frames now derive from `design` (not
+  a remember snapshot) so footer Undo/Redo stays in sync. Gallery cards,
+  DrawPickerDialog previews and thumbnails all resolve the design's custom
+  animation and show drawn poses. Dead `SpeedChip` removed, `roundToInt`
+  import removed, `BoxWithConstraints` imported.
+- Review fixes: FILL now fires once per gesture (mirrors main editor);
+  `frame=` with no preceding `anim=` is consumed not treated as a grid row;
+  `versionCode` bumped 20260906 → 20260907 to match the new fastlane
+  changelog.
+- Verified: braces clean (125 files), `git diff --check` clean, import
+  hygiene checked, code-reviewed. CI is the compile gate.
+
 # Request — Pet Designer Phase 6: multi-pet foundations (DONE)
 
 ## Phase 6 — PetDefinition registry + backward-compatible species field (pushed)
