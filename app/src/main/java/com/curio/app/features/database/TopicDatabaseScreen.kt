@@ -131,6 +131,27 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     val totalTopics = catalog.sumOf { it.second.size }
 
+    // Build the expensive search/sort fields off the composition thread once
+    // per catalog load. Sorting used to lowercase strings and create year
+    // regexes for thousands of topics on the UI thread on every chip tap.
+    val indexedTopics by produceState<List<IndexedTopic>>(emptyList(), catalog) {
+        value = withContext(Dispatchers.Default) {
+            catalog.flatMap { (cat, topics) ->
+                topics.map { topic ->
+                    IndexedTopic(
+                        category = cat,
+                        topic = topic,
+                        nameKey = topic.name.lowercase(),
+                        subtypeKey = topic.subtype.lowercase(),
+                        bylineKey = topic.byline.lowercase(),
+                        teaserKey = topic.teaser.lowercase(),
+                        tagKeys = topic.tags.map(String::lowercase),
+                        year = topicYear(topic)
+                    )
+                }
+            }
+        }
+    }
     // v7.97 — the persisted filter can outlive its lane (a category hidden in
     // Manage Categories drops out of the catalog). Fall back to All instead
     // of leaving an invisible "no topics" state with no visible chip.
@@ -143,75 +164,75 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v8.54 — with a non-default sort active the list flattens to one sorted
     // run (section headers would break a global A–Z / year order).
     val needle = query.trim().lowercase()
-    val matches: (CurioTopic) -> Boolean = { t ->
+    val matches: (IndexedTopic) -> Boolean = { indexed ->
         needle.isEmpty() ||
-            t.name.lowercase().contains(needle) ||
-            t.subtype.lowercase().contains(needle) ||
-            t.byline.lowercase().contains(needle) ||
-            t.teaser.lowercase().contains(needle) ||
-            t.tags.any { it.lowercase().contains(needle) }
+            indexed.nameKey.contains(needle) ||
+            indexed.subtypeKey.contains(needle) ||
+            indexed.bylineKey.contains(needle) ||
+            indexed.teaserKey.contains(needle) ||
+            indexed.tagKeys.any { it.contains(needle) }
     }
-    val rows = remember(catalog, effectiveCat, needle, doneTopics, sortMode) {
-        if (sortMode == DatabaseSortMode.DEFAULT) {
-            buildList {
-                catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    val shown = topics.filter(matches)
-                    if (shown.isEmpty()) return@forEach
-                    if (effectiveCat == null) {
-                        add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
-                    }
-                    shown.forEach { t ->
-                        add(
-                            DatabaseRow(
-                                key = t.id,
-                                topic = t,
-                                done = "${cat.id.name}::$t.name" in doneTopics
+    // Filtering and sorting happen on Dispatchers.Default. `remember` only
+    // caches work; it still performs the entire sort on the UI thread.
+    val rows by produceState<List<DatabaseRow>>(
+        initialValue = emptyList(),
+        catalog,
+        indexedTopics,
+        effectiveCat,
+        needle,
+        doneTopics,
+        sortMode
+    ) {
+        value = withContext(Dispatchers.Default) {
+            val indexById = indexedTopics.associateBy { it.topic.id }
+            if (sortMode == DatabaseSortMode.DEFAULT) {
+                buildList {
+                    catalog.forEach { (cat, topics) ->
+                        if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                        val shown = topics.mapNotNull { indexById[it.id] }.filter(matches)
+                        if (shown.isEmpty()) return@forEach
+                        if (effectiveCat == null) {
+                            add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
+                        }
+                        shown.forEach { indexed ->
+                            add(
+                                DatabaseRow(
+                                    key = indexed.topic.id,
+                                    topic = indexed.topic,
+                                    done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                                )
                             )
-                        )
+                        }
                     }
                 }
-            }
-        } else {
-            val flat = buildList {
-                catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    topics.filter(matches).forEach { t ->
-                        add(
-                            DatabaseRow(
-                                key = t.id,
-                                topic = t,
-                                done = "${cat.id.name}::$t.name" in doneTopics
-                            )
-                        )
-                    }
+            } else {
+                val filtered = indexedTopics.filter { indexed ->
+                    (effectiveCat == null || indexed.category.id == effectiveCat) && matches(indexed)
                 }
-            }
-            val topics = flat.mapNotNull { it.topic }
-            val sorted = when (sortMode) {
-                DatabaseSortMode.ALPHA ->
-                    topics.sortedWith(compareBy({ it.name.lowercase() }, { it.id }))
-                DatabaseSortMode.YEAR_NEWEST ->
-                    // Explicit type arg: the compareByDescending(...).thenBy
-                    // chain can't infer T from sortedWith's contravariant
-                    // comparator (CI: "Cannot infer type for type parameter").
-                    topics.sortedWith(
-                        compareByDescending<CurioTopic> { topicYear(it) ?: Int.MIN_VALUE }
-                            .thenBy { it.name.lowercase() }
+                val sorted = when (sortMode) {
+                    DatabaseSortMode.ALPHA ->
+                        filtered.sortedWith(compareBy<IndexedTopic>({ it.nameKey }, { it.topic.id }))
+                    DatabaseSortMode.YEAR_NEWEST ->
+                        filtered.sortedWith(
+                            compareByDescending<IndexedTopic> { it.year ?: Int.MIN_VALUE }
+                                .thenBy { it.nameKey }
+                                .thenBy { it.topic.id }
+                        )
+                    DatabaseSortMode.YEAR_OLDEST ->
+                        filtered.sortedWith(
+                            compareBy<IndexedTopic> { it.year ?: Int.MAX_VALUE }
+                                .thenBy { it.nameKey }
+                                .thenBy { it.topic.id }
+                        )
+                    DatabaseSortMode.DEFAULT -> filtered
+                }
+                sorted.map { indexed ->
+                    DatabaseRow(
+                        key = indexed.topic.id,
+                        topic = indexed.topic,
+                        done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
                     )
-                DatabaseSortMode.YEAR_OLDEST ->
-                    topics.sortedWith(
-                        compareBy<CurioTopic> { topicYear(it) ?: Int.MAX_VALUE }
-                            .thenBy { it.name.lowercase() }
-                    )
-                DatabaseSortMode.DEFAULT -> topics
-            }
-            sorted.map { t ->
-                DatabaseRow(
-                    key = t.id,
-                    topic = t,
-                    done = "${t.categoryId.name}::$t.name" in doneTopics
-                )
+                }
             }
         }
     }
@@ -488,6 +509,18 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
 }
 
+/** Precomputed search/sort data for one topic. */
+private data class IndexedTopic(
+    val category: CurioCategory,
+    val topic: CurioTopic,
+    val nameKey: String,
+    val subtypeKey: String,
+    val bylineKey: String,
+    val teaserKey: String,
+    val tagKeys: List<String>,
+    val year: Int?
+)
+
 /** One row in the database list — a category section header or a topic. */
 private data class DatabaseRow(
     val key: String,
@@ -543,17 +576,17 @@ private enum class DatabaseSortMode {
  * ("1960s" → 1960). Returns null when nothing is recoverable (unknowns
  * sort last, alphabetically within that bucket).
  */
+private val PARENTHESIZED_YEAR = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
+private val BARE_YEAR = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
+private val DECADE_YEAR = Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b")
+
 private fun topicYear(topic: CurioTopic): Int? {
-    val parenthesized = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
-    parenthesized.find(topic.name)?.let { return it.groupValues[1].toInt() }
-    parenthesized.find(topic.exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
-    val bareYear = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
-    bareYear.find(topic.teaser)?.let { return it.value.toInt() }
-    bareYear.find(topic.exploreAction.instruction)?.let { return it.value.toInt() }
-    for (tag in topic.tags) {
-        Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b").find(tag)?.let {
-            return it.groupValues[1].toInt() * 10
-        }
+    PARENTHESIZED_YEAR.find(topic.name)?.let { return it.groupValues[1].toInt() }
+    PARENTHESIZED_YEAR.find(topic.exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
+    BARE_YEAR.find(topic.teaser)?.let { return it.value.toInt() }
+    BARE_YEAR.find(topic.exploreAction.instruction)?.let { return it.value.toInt() }
+    topic.tags.forEach { tag ->
+        DECADE_YEAR.find(tag)?.let { return it.groupValues[1].toInt() * 10 }
     }
     return null
 }

@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -42,6 +41,8 @@ import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
 import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
@@ -62,7 +63,7 @@ private fun petDesignColor(hex: String): Color =
  * dark mode. The face (eyes + mouth + cheeks) is drawn as overlays so moods
  * and the blink cycle swap without re-laying the body. Growth accessories
  * (spec §10.4) are stage-gated: a sprout leaf, a satchel, a tiny book, an
- * accent aura, a gold halo.
+ * gold halo.
  *
  * Animations: idle bob + periodic blink, a fast walk bob with a lean into
  * the direction of travel, a one-shot celebration hop ([celebrateKey]), a
@@ -71,7 +72,7 @@ private fun petDesignColor(hex: String): Color =
  * sparkle eyes, and a curious head tilt. [facing] mirrors the sprite (1 =
  * facing right, -1 = facing left).
  *
- * v8.10 — ONE fixed color on every theme: the scarf and aura always wear
+ * v8.10 — ONE fixed color on every theme: the scarf always wears
  * the Curio light-theme brand coral ([CurioColors.CategoryCoral]); they no
  * longer react to the category pastel accents or to dark mode.
  */
@@ -515,11 +516,8 @@ fun CurioPetSprite(
             .then(if (desc != null) Modifier.semantics { this.contentDescription = desc } else Modifier),
         contentAlignment = Alignment.Center
     ) {
-        // One motion layer carries the aura, the bob/hop/wiggle/lean and the
-        // breathing + squish scales so the glow always moves with the sprite.
-        val auraOn = activeDesign.isProceduralEnabled("effects") &&
-            (stage == CurioPet.Stage.FIRST_EVO || stage == CurioPet.Stage.FINAL_EVO)
-        val auraColor = if (stage == CurioPet.Stage.FINAL_EVO) gold else accent
+        // One motion layer carries the bob/hop/wiggle/lean and the breathing
+        // + squish scales so the pixel art moves as one clean silhouette.
         Box(
             modifier = Modifier
                 .size(spriteSize * 0.92f)
@@ -539,18 +537,6 @@ fun CurioPetSprite(
                         .coerceAtLeast(0.4f)
                     rotationZ = wiggle + walkLean + tilt + idleTilt + angleTilt + spinAngle.value + dizzyWobble
                 }
-                .then(
-                    if (auraOn) {
-                        Modifier.drawBehind {
-                            drawRoundRect(
-                                color = auraColor.copy(
-                                    alpha = 0.16f + 0.05f * sin(breathePhase * 2f * PI.toFloat())
-                                ),
-                                cornerRadius = CornerRadius(size.width * 0.24f)
-                            )
-                        }
-                    } else Modifier
-                )
         ) {
             // Flip layer — mirrors the sprite horizontally so it faces the
             // way it walks without touching the motion transforms above.
@@ -574,15 +560,18 @@ fun CurioPetSprite(
                     val opx = size.width / 16f
                     fun drawGridPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
                         if (col !in 0 until grid || row !in 0 until grid) return
-                        // v8.21 — softer pixels: each cell is a slightly-
-                        // ROUNDED, slightly-overlapping square so the sprite
-                        // reads soft and plush instead of crunchy. The 6%
-                        // overlap hides the seams between rounded corners.
-                        drawRoundRect(
+                        // Use exact, square cells. Rounded overlapping cells
+                        // created hairline seams and color halos on dense
+                        // 64×64 designs, especially while the sprite scaled
+                        // or moved between device pixels.
+                        val left = floor(col * px)
+                        val top = floor(row * px)
+                        val right = ceil((col + 1) * px)
+                        val bottom = ceil((row + 1) * px)
+                        drawRect(
                             color = color.copy(alpha = alpha),
-                            topLeft = Offset(col * px, row * px),
-                            size = Size(px * 1.06f, px * 1.06f),
-                            cornerRadius = CornerRadius(px * 0.16f)
+                            topLeft = Offset(left, top),
+                            size = Size(right - left, bottom - top)
                         )
                     }
                     // Procedural overlay cell — the legacy 16-grid authoring space.
@@ -590,11 +579,14 @@ fun CurioPetSprite(
                     // conversion, and the face art passes integer coords.
                     // (Int * opx yields Float, so scaling works.)
                     fun drawPx(col: Int, row: Int, color: Color, alpha: Float = 1f) {
-                        drawRoundRect(
+                        val left = floor(col * opx)
+                        val top = floor(row * opx)
+                        val right = ceil((col + 1) * opx)
+                        val bottom = ceil((row + 1) * opx)
+                        drawRect(
                             color = color.copy(alpha = alpha),
-                            topLeft = Offset(col * opx, row * opx),
-                            size = Size(opx * 1.06f, opx * 1.06f),
-                            cornerRadius = CornerRadius(opx * 0.16f)
+                            topLeft = Offset(left, top),
+                            size = Size(right - left, bottom - top)
                         )
                     }
 

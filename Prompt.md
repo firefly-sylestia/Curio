@@ -1,3 +1,27 @@
+# Request — Fix Topic Browser sort lag and pet sprite artifacts
+
+## User request
+Fix lag when changing Topic Browser sorting, remove the unwanted pet highlight, and fix line artifacts appearing across the sprite.
+
+## Analysis and plan
+- Precompute searchable topic fields and year values off the Compose/UI thread.
+- Move filtering and sorting into a cancellable `produceState` worker on `Dispatchers.Default`.
+- Remove the evolved sprite's broad aura/highlight layer that caused the unwanted halo.
+- Replace rounded overlapping pixel cells with pixel-snapped rectangles whose edges cover each source cell exactly, eliminating hairline seams on 64×64 designs.
+
+## Completed changes
+- Topic Browser now indexes lowercase search fields and years once per catalog load.
+- Topic filtering/sorting runs off the UI thread and retains deterministic tie-breakers.
+- Removed the unwanted evolved aura/highlight layer.
+- Pixel rendering now snaps cell boundaries using floor/ceil coverage rather than rounded overlapping cells, preventing visible lines between sprite cells.
+
+## Validation
+- `git diff --check` passed.
+- `node scripts/check_braces.js` passed.
+- Gradle was not run because local Android builds are forbidden; CI remains the compilation source of truth.
+
+---
+
 # Request — Stabilize tour Explore navigation and reduce topic-loading OOM risk
 
 ## User request
