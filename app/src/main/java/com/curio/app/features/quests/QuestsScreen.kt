@@ -83,14 +83,16 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.ConfettiBurst
+import com.curio.app.ui.components.BadgeTier
 import com.curio.app.ui.components.CurioBadgeMedal
 import com.curio.app.ui.components.CurioBadgeStrip
+import com.curio.app.ui.components.badgeTier
+import com.curio.app.ui.components.tierAccent
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
-import com.curio.app.ui.components.chainBadgeColor
 import com.curio.app.ui.pet.CurioPetHeroCard
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.PetLandmark
@@ -415,9 +417,9 @@ fun QuestsScreen(navController: NavController) {
                             color = CurioColors.Sage
                         )
                         Text(
-                            stage.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            "${badgeTier(stage).displayName} · ${stage.title}",
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            color = tierAccent(badgeTier(stage)),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1498,20 +1500,16 @@ private fun BadgeTile(
 ) {
     val unlocked = CurioQuests.isStageDone(stage)
     val progress = CurioQuests.stageProgress(stage)
-    val chainId = CurioQuests.Chains.firstOrNull { chain ->
-        chain.stages.any { it.id == stage.id }
-    }?.id
-    val medalColor = chainBadgeColor(chainId)
-    // Deepen the medal's lower stop so the white glyph always reads — even
-    // on the pale gold/peach chains.
-    val medalDeep = androidx.compose.ui.graphics.lerp(medalColor, Color.Black, 0.22f)
+    val tier = badgeTier(stage)
+    val accent = tierAccent(tier)
+    val secretLocked = !unlocked && tier == BadgeTier.SECRET
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = if (unlocked) medalColor.copy(alpha = 0.10f)
+        color = if (unlocked) accent.copy(alpha = 0.10f)
         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
         border = BorderStroke(
             1.dp,
-            if (unlocked) medalColor.copy(alpha = 0.30f)
+            if (unlocked) accent.copy(alpha = 0.30f)
             else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         ),
         modifier = modifier
@@ -1520,73 +1518,12 @@ private fun BadgeTile(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)
         ) {
-            // The medal — a round badge with a double ring.
-            Box(
-                modifier = Modifier.size(58.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (unlocked) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(Brush.linearGradient(listOf(medalColor, medalDeep)))
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f), CircleShape)
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(0.80f)
-                        .clip(CircleShape)
-                        .then(
-                            if (unlocked) {
-                                Modifier.border(1.5.dp, Color.White.copy(alpha = 0.55f), CircleShape)
-                            } else {
-                                Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CurioIcon(
-                        name = if (unlocked) badgeGlyph(stage) else CurioIcons.StarOutline,
-                        contentDescription = null,
-                        tint = if (unlocked) Color.White
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        size = 26.dp,
-                        weight = FontWeight.Bold
-                    )
-                }
-                // A tiny gold check pinned on earned medals.
-                if (unlocked) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(18.dp)
-                            .clip(CircleShape)
-                            .background(CurioColors.ButterYellow)
-                            .border(1.5.dp, Color.White, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.Check,
-                            contentDescription = null,
-                            tint = Color(0xFF7A5A00),
-                            size = 12.dp,
-                            weight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
+            // The medal — shared with Profile and the unlock toast, so every
+            // badge renders identically everywhere.
+            CurioBadgeMedal(stage = stage, medalSize = 58.dp)
             Spacer(Modifier.height(8.dp))
             Text(
-                stage.title,
+                if (secretLocked) "???" else stage.title,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = if (unlocked) FontWeight.ExtraBold else FontWeight.SemiBold
                 ),
@@ -1598,12 +1535,21 @@ private fun BadgeTile(
             )
             Spacer(Modifier.height(2.dp))
             if (unlocked) {
-                // v8.13 — earned badges show the badge IN FULL: no task text,
-                // no progress bar — just the medal and its reward.
+                // v8.28 — earned badges show the badge IN FULL: the metal tier
+                // chip and the reward, no task text, no progress bar.
                 Text(
-                    "Earned · +${stage.xpReward} XP",
+                    "${tier.displayName} · +${stage.xpReward} XP",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = accent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else if (secretLocked) {
+                // Secret badges never reveal their identity, title or target.
+                Text(
+                    "Secret · hidden",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = CurioColors.Sage,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1622,108 +1568,12 @@ private fun BadgeTile(
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(50)),
-                    color = medalColor,
+                    color = accent,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
         }
     }
-}
-
-/**
- * v8.13 — every stage wears its OWN glyph, so badges stop sharing one icon
- * per chain. Glyphs are Material Symbols ligatures already proven in the
- * bundled font (category watermark sets, chain glyphs, mood glyphs).
- */
-private fun badgeGlyph(stage: QuestStage): String = when (stage.id) {
-    // The Deck — spin milestones.
-    "deck-1" -> "casino"
-    "deck-3" -> "auto_awesome"
-    "deck-5" -> "star"
-    "deck-10" -> "layers"
-    "deck-25" -> "replay"
-    "deck-50" -> "refresh"
-    "deck-100" -> "workspace_premium"
-    // Discovery — explore milestones.
-    "disc-1" -> "explore"
-    "disc-3" -> "bolt"
-    "disc-5" -> "public"
-    "disc-10" -> "hub"
-    "disc-25" -> "rocket_launch"
-    "disc-lane3" -> "spa"
-    "disc-lanes" -> "diamond"
-    // Keepsakes — save milestones.
-    "keep-1" -> "inventory_2"
-    "keep-3" -> "bookmark"
-    "keep-5" -> "local_library"
-    "keep-10" -> "auto_stories"
-    "keep-25" -> "library_books"
-    "keep-50" -> "menu_book"
-    "keep-100" -> "museum"
-    "keep-formats" -> "photo_library"
-    // The Tour — guided walkthrough.
-    "tour-settings" -> "settings"
-    "tour-profile" -> "person"
-    "tour-pin" -> "bookmark_border"
-    "tour-quote" -> "format_quote"
-    "tour-daily" -> "schedule"
-    "tour-achievement" -> "flag"
-    // The Shelf — quote milestones.
-    "quote-1" -> "format_quote"
-    "quote-3" -> "auto_stories"
-    "quote-5" -> "edit_note"
-    // Pin Board — pin milestones.
-    "pin-1" -> "bookmark"
-    "pin-3" -> "bookmark_border"
-    "pin-5" -> "star"
-    // The Flame — streak milestones.
-    "flame-1" -> "local_fire_department"
-    "flame-3" -> "schedule"
-    "flame-7" -> "calendar_today"
-    "flame-14" -> "timer"
-    "flame-30" -> "nightlight"
-    // Taste — like milestones.
-    "like-1" -> "thumb_up"
-    "like-3" -> "sentiment_satisfied"
-    "like-10" -> "star"
-    // The Ladder — rank milestones.
-    "rank-5" -> "flag"
-    "rank-10" -> "workspace_premium"
-    "rank-20" -> "auto_awesome"
-    "rank-30" -> "diamond"
-    "rank-40" -> "star"
-    "rank-50" -> "rocket_launch"
-    // Fallback — a sensible glyph per quest kind for any future stage.
-    else -> when (stage.kind) {
-        CurioQuests.QuestKind.SPIN -> "casino"
-        CurioQuests.QuestKind.EXPLORE -> "explore"
-        CurioQuests.QuestKind.SAVE -> "inventory_2"
-        CurioQuests.QuestKind.SETTINGS -> "settings"
-        CurioQuests.QuestKind.PROFILE -> "person"
-        CurioQuests.QuestKind.PIN -> "bookmark"
-        CurioQuests.QuestKind.QUOTE -> "format_quote"
-        CurioQuests.QuestKind.DAILY -> "schedule"
-        CurioQuests.QuestKind.ACHIEVEMENT -> "workspace_premium"
-        CurioQuests.QuestKind.STREAK -> "local_fire_department"
-        CurioQuests.QuestKind.LIKE -> "thumb_up"
-        CurioQuests.QuestKind.FORMATS -> "photo_library"
-        CurioQuests.QuestKind.LANES -> "public"
-        CurioQuests.QuestKind.XP -> "star"
-    }
-}
-
-/** v8.13 — each chain's medals wear a distinct color, so the shelf reads like a set. */
-private fun chainBadgeColor(chainId: String?): Color = when (chainId) {
-    "deck" -> CurioColors.DustyBlue
-    "discovery" -> CurioColors.SkyMint
-    "keepsakes" -> CurioColors.Teal
-    "tour" -> CurioColors.CoralBlush
-    "shelf" -> CurioColors.Peach
-    "pinboard" -> CurioColors.Lilac
-    "flame" -> CurioColors.FireOrange
-    "taste" -> CurioColors.Sage
-    "rank" -> CurioColors.ButterYellow
-    else -> CurioColors.CoralBlush
 }
 
 /**
