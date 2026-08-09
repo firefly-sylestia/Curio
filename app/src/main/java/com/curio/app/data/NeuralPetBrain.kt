@@ -2,9 +2,9 @@ package com.curio.app.data
 
 import android.content.Context
 import android.util.Base64
-import ai.onnxruntime.OnnxTensor
-import ai.onnxruntime.OrtEnvironment
-import ai.onnxruntime.OrtSession
+import com.microsoft.onnxruntime.OnnxTensor
+import com.microsoft.onnxruntime.OrtEnvironment
+import com.microsoft.onnxruntime.OrtSession
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -123,12 +123,12 @@ object NeuralPetBrain {
                 val observationTensor = OnnxTensor.createTensor(
                     ortEnvironment,
                     FloatBuffer.wrap(observation),
-                    longArrayOf(1L, 1L, INPUT_SIZE.toLong())
+                    longArrayOf(1, 1, INPUT_SIZE)
                 )
                 val hiddenTensor = OnnxTensor.createTensor(
                     ortEnvironment,
                     FloatBuffer.wrap(currentHidden),
-                    longArrayOf(1L, 1L, HIDDEN_SIZE.toLong())
+                    longArrayOf(1, 1, HIDDEN_SIZE)
                 )
                 observationTensor.use { input ->
                     hiddenTensor.use { state ->
