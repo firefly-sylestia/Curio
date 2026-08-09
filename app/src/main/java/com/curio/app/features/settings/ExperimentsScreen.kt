@@ -142,7 +142,7 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setSpinFxReelEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Spring catch", "Juicy overshoot when the wheel locks in", AppPreferences.spinFxCatchState, enabled = fxOn) {
+                    ExperimentSwitchRow("Spring catch", "Smooth controlled settle as the wheel locks in", AppPreferences.spinFxCatchState, enabled = fxOn) {
                         AppPreferences.setSpinFxCatchEnabled(context, it)
                     }
                     CurioSettingsDivider()

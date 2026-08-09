@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -2200,11 +2199,13 @@ private fun HeroTicketCard(
                 // controlled Deliberate spring (85% damping, no bounce)
                 // instead of the extreme Elastic overshoot, so the wheel's
                 // stop reads as a confident rest, not a violent bounce.
-                // v9.1 — the premium catch swaps in the gummy Bouncy spring
-                // (one juicy overshoot that reads as the wheel locking in);
-                // the classic settle stays untouched when the FX is off.
-                val catchSpring = if (fxCatch) CurioMotion.Springs.Bouncy
-                                  else CurioMotion.Springs.Deliberate
+                // v9.1 — the premium catch swaps in a smooth, quick spring
+                // (75% damping / 400 stiffness — a controlled settle with a
+                // whisper of overshoot, never gummy-bouncy); the classic
+                // settle stays untouched when the FX is off.
+                val catchSpring = if (fxCatch)
+                    spring(dampingRatio = 0.75f, stiffness = 400f)
+                else CurioMotion.Springs.Deliberate
                 launch { settleScale.animateTo(LandedRestScale, catchSpring) }
                 launch { settleY.animateTo(0f, catchSpring) }
             }

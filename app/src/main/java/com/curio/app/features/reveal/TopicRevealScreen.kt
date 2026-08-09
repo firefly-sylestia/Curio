@@ -740,7 +740,8 @@ fun TopicRevealScreen(
     }
 
     // Leaving via the system back gesture without engaging → recently-unexplored
-    // (never in Browse-Topics mode — reading from the database is silent).        BackHandler {
+    // (never in Browse-Topics mode — reading from the database is silent).
+    BackHandler {
         if (!browseMode && !engaged) {
             resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
         }
@@ -976,6 +977,8 @@ fun TopicRevealScreen(
             )
         }
     }
+
+}
 
 /**
  * Horizontal size tiers for the reveal action pill: NARROW fits ~320dp
