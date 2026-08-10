@@ -382,22 +382,16 @@ object CurioGradients {
                 accentTrace
             )
         }
-        // v9.x — the blend experiment concluded: Material cards ALWAYS wear
-        // the device palette with the category whisper.
+        // v10 — increased category sprinkle so the card reads with more
+        // category identity (was 7-14% light, 12-20% dark — the cards
+        // looked like plain device-colored surfaces). Now ~12-22% light,
+        // ~18-28% dark: the device palette still owns ~78-88% of the
+        // card but the category tint is visibly present.
         if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
             val dark = isCurioDarkTheme()
             val pastel = AppPreferences.pastelColorsState
-            // TWO-color gradient: ~90-95% device color with a category
-            // sprinkle easing down the card. Light mode (and pastel mode)
-            // hold the pure 5% → 10% requested sprinkle — the device palette
-            // dominates and the category is a subtle accent. Dark mode
-            // (non-pastel) raises it to 10% → 18% because the floored device
-            // primary is a muted mid-tone there: at the light 5/10 ratios
-            // every category would read as the same device color and the
-            // deck/picker would lose its color-coding. The device color
-            // still owns ~82-90% of the card.
-            val sprinkleTop = if (dark && !pastel) 0.12f else 0.07f
-            val sprinkleBottom = if (dark && !pastel) 0.20f else 0.14f
+            val sprinkleTop = if (dark && !pastel) 0.18f else 0.12f
+            val sprinkleBottom = if (dark && !pastel) 0.28f else 0.22f
             return listOf(
                 materialDeviceStop(accent, dark, pastel, sprinkleTop),
                 materialDeviceStop(accent, dark, pastel, sprinkleBottom)
@@ -470,7 +464,7 @@ object CurioGradients {
         // pastel in pastel mode and black-tinted in AMOLED.
         val accentStop = when {
             amoled -> lerp(Color.Black, accent, 0.12f)
-            material -> materialDeviceStop(accent, dark, pastel, 0.14f)
+            material -> materialDeviceStop(accent, dark, pastel, 0.20f)
             pastel && AppPreferences.pastelCrownDepthState ->
                 lerp(categoryCardFill(accent, dark), Color.Black, 0.05f)
             else -> categoryCardFill(accent, dark)
@@ -479,7 +473,7 @@ object CurioGradients {
         // The golden companion stop — the warm accent at the bottom.
         val companionStop = when {
             amoled -> lerp(Color.Black, companionBase, 0.10f)
-            material -> materialDeviceStop(companionBase, dark, pastel, 0.07f)
+            material -> materialDeviceStop(companionBase, dark, pastel, 0.12f)
             else -> companionBase
         }
 

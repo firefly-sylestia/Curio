@@ -1406,11 +1406,13 @@ private fun ColumnScope.SpinDeckSection(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            // v9.x — the Material style's shuffle button wears the device
-            // primary; the category stays as the accent rim shine.
+            // v10 — the Material style's shuffle button blends the device
+            // primary with the category accent (65/35) so the button carries
+            // visible category identity instead of looking like a plain
+            // dynamic-color control in both light and dark mode.
             SpinButton(
                 tint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-                    MaterialTheme.colorScheme.primary
+                    lerp(MaterialTheme.colorScheme.primary, deckAccent, 0.35f)
                 } else {
                     deckAccent
                 },

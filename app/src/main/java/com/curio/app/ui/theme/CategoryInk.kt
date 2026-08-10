@@ -112,7 +112,10 @@ fun CurioCategory.onAccent(): Color = when {
  */
 @Composable
 fun CurioCategory.themedButtonFill(): Color = when (AppPreferences.themeStyleState) {
-    AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.primary
+    // v10 — blend the device primary with the category accent (65/35) so
+    // Material buttons carry visible category identity instead of looking
+    // like plain device-colored controls in both light and dark mode.
+    AppPreferences.THEME_STYLE_MATERIAL -> lerp(MaterialTheme.colorScheme.primary, themedAccent(), 0.35f)
     else -> themedAccent()
 }
 
