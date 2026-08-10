@@ -93,8 +93,15 @@ fun CurioCategory.readableAccentInk(): Color {
 fun CurioCategory.onAccent(): Color = when {
     AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
         MaterialTheme.colorScheme.onSurface
+    // v12 — Material wears the same rich category fills as the rest of the
+    // app (cards, heroes, chips), so its content ink is the same pastel-aware
+    // ink as [cardContentInk]/[themedButtonInk]: white on deep accents,
+    // deep same-hue ink on airy pastels. Pale accents (wildcard coral) get
+    // their deep hue twin even off pastel mode, mirroring [categoryInk]. The
+    // old scheme onPrimaryContainer (a device-hue role) read muddy or lost
+    // on the category fills.
     AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
-        MaterialTheme.colorScheme.onPrimaryContainer
+        if (accent.isPale()) deepHueInk(accent) else pastelFillInk(themedAccent())
     !AppPreferences.pastelColorsState -> Color.White
     isCurioDarkTheme() -> lightAccent
     // The wildcard's accent is ALREADY a pastel pink — a deep hue twin (the
@@ -104,38 +111,40 @@ fun CurioCategory.onAccent(): Color = when {
 }
 
 /**
- * v9.x — fill for CATEGORY ACCENT BUTTONS (deck control pills, CTAs): the
- * Material style wears the device PRIMARY so buttons read as proper Material
- * controls (matching the Mix button and the Home hero); Curio and AMOLED
- * keep the category accent (AMOLED overrides to black via
- * [com.curio.app.ui.components.curioButtonColors]).
+ * v12 — fill for CATEGORY ACCENT BUTTONS (deck control pills, CTAs, the
+ * reveal CTA): every style wears the TRUE category accent (pastel-aware), so
+ * Material buttons carry the same rich category identity as the cards
+ * instead of a muddy device+accent blend. AMOLED plates override to black
+ * via [com.curio.app.ui.components.curioButtonColors] where used.
  */
 @Composable
-fun CurioCategory.themedButtonFill(): Color = when (AppPreferences.themeStyleState) {
-    // v10 — blend the device primary with the category accent (65/35) so
-    // Material buttons carry visible category identity instead of looking
-    // like plain device-colored controls in both light and dark mode.
-    AppPreferences.THEME_STYLE_MATERIAL -> lerp(MaterialTheme.colorScheme.primary, themedAccent(), 0.35f)
-    else -> themedAccent()
-}
+fun CurioCategory.themedButtonFill(): Color = themedAccent()
 
-/** Content ink for [themedButtonFill] — the device onPrimary in Material. */
+/** Content ink for [themedButtonFill] — pastel-aware like the card fills. */
 @Composable
 fun CurioCategory.themedButtonInk(): Color = when (AppPreferences.themeStyleState) {
-    AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.onPrimary
+    AppPreferences.THEME_STYLE_MATERIAL ->
+        if (accent.isPale()) deepHueInk(accent) else pastelFillInk(themedAccent())
     else -> onAccent()
 }
 
 /**
- * Ink for a Material/AMOLED category card's dark tonal treatment. Category
- * cards use a theme-owned container first and a category accent second, so
- * their content must pair with the theme surface/primary role rather than
- * assuming every category fill is white-label safe.
+ * Ink for content sitting on a category card's fill in the active theme
+ * style. Material (v12) wears the same rich category fills as the rest of
+ * the app, so its content ink is the same pastel-aware ink as the Curio
+ * cards (white on deep, deep on airy pastel); AMOLED cards sit on black
+ * glass so their content pairs with the theme onSurface. Curio default
+ * resolves [onAccent].
  */
 @Composable
 fun CurioCategory.cardContentInk(): Color = when (AppPreferences.themeStyleState) {
     AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.onSurface
-    AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.onPrimary
+    // v12 — Material cards wear the category fills now, so their content
+    // ink is the same pastel-aware ink as the Curio-style cards (white on
+    // deep, deep on airy pastel) instead of the device onPrimary. Pale
+    // accents (wildcard coral) get their deep hue twin off pastel mode too.
+    AppPreferences.THEME_STYLE_MATERIAL ->
+        if (accent.isPale()) deepHueInk(accent) else pastelFillInk(themedAccent())
     else -> onAccent()
 }
 
@@ -357,7 +366,15 @@ private fun lightSurfaceTint(accent: Color): Color =
  */
 @Composable
 fun CurioCategory.categoryBorder(fallback: BorderStroke? = null): BorderStroke? {
-    if (!AppPreferences.tintWashEffective()) return fallback
+    if (!AppPreferences.tintWashEffective()) {
+        // Material keeps a quiet accent hairline so cards/pills read defined
+        // on the hue-neutral surfaces (AMOLED wears its own black-glass
+        // borders; Curio-with-tint-off falls back to the caller's default).
+        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+            return BorderStroke(1.dp, categoryInk().copy(alpha = 0.26f))
+        }
+        return fallback
+    }
     return BorderStroke(1.dp, categoryInk().copy(alpha = 0.30f))
 }
 

@@ -1,5 +1,22 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Full Material theme revamp (last chance)
+
+**Date:** 2026-08-10
+
+### What the user asked
+The Material theme is still ugly — category cards, the header, all of it — and needs a full revamp for pastel + non-pastel + dark mode colors, or the style will be removed.
+
+### Changes made
+- **CurioTheme.kt** — `calmMaterialColorScheme` rebuilt as a HUE-LOCKED palette: the device wallpaper's identity is kept as a single hue (from `dynamic.primary` via `toHsl`), and every scheme role is BUILT from that hue with Curio-tuned saturation/lightness (`fromHsl`); secondary/tertiary are the same hue family offset ±38°. No more raw dynamic colors (brown wallpapers rendered dull olive-grey). Light: near-white surfaces with a hue whisper, deep vivid primary, airy primary-container. Dark: deep tinted midnight from the same hue, bright readable primary, light same-hue container ink.
+- **CurioColors.kt** — Material no longer gets device-color + faint category "whisper" gradients; `cardGradient`/`heroBlendGradient`/`mixedDeckGradient` all wear the SAME rich category gradients as Curio/AMOLED (material identity lives in the hue-locked scheme surfaces/heroes, not desaturated cards). Removed the now-dead `materialDeviceStop` + `floorForWhiteInk`/`WhiteInkLightnessFloor`.
+- **CategoryInk.kt** — `themedButtonFill()` = true category accent (`themedAccent()`) everywhere; `themedButtonInk()`/`cardContentInk()`/`onAccent()` Material branches use the pastel-aware ink (white on deep, deep same-hue ink on airy pastels, light-tinted in dark pastel) with a `deepHueInk` guard for pale accents (wildcard coral) off pastel mode — fixes the review-found white-on-pink wildcard regression. `categoryBorder()` adds a quiet Material accent hairline when the tint toggle is off.
+- **CurioCategoryCard.kt** — Material idle tiles lerp `surfaceContainerHigh` toward the category's themed accent (0.12 dark / 0.14 light) instead of plain device-grey; selected cards keep the full rich gradient + accent edge shine.
+
+### Validation
+- Brace check + git diff --check clean; code review passed (wildcard pale-accent ink fix applied; HSL scheme contrast checked).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): AMOLED — pure-black Profile/Settings heroes + black accent buttons
 
 **Date:** 2026-08-10

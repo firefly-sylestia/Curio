@@ -113,7 +113,16 @@ fun CurioCategoryCard(
     // lives on the accent-tinted edge shine instead.
     val idleSurface = when (AppPreferences.themeStyleState) {
         AppPreferences.THEME_STYLE_AMOLED -> Color.Black
-        AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainerHigh
+        // v12 — Material: a soft category-tinted tile on the hue-neutral
+        // page — the old plain device-grey tile read dull and disconnected
+        // from the deck's category colors.
+        AppPreferences.THEME_STYLE_MATERIAL -> {
+            if (isCurioDarkTheme()) {
+                lerp(MaterialTheme.colorScheme.surfaceContainerHigh, category.themedAccent(), 0.12f)
+            } else {
+                lerp(MaterialTheme.colorScheme.surfaceContainerHigh, category.themedAccent(), 0.14f)
+            }
+        }
         else -> category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
     }
     val idleInk = category.categoryInk()

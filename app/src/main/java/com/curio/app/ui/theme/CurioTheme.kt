@@ -183,83 +183,84 @@ fun isCurioDarkThemeForContext(context: Context): Boolean {
 }
 
 /**
- * The Material style's CALM palette — the device's Material You hues (the
- * proper Material color given by the device, from the wallpaper) kept as
- * the identity, but MUTED into non-vibrant pastels on airy LIGHT surfaces
- * instead of the stock dynamic scheme's vivid primaries and grey
- * containers.
+ * The Material style's HUE-LOCKED palette — the device's Material You
+ * identity kept as a single HUE (from the wallpaper's dynamic primary), then
+ * the whole palette is BUILT from that hue with Curio-tuned saturation and
+ * lightness. The raw dynamic scheme's colors are often muddy or washed-out
+ * (a brown wallpaper can render the app in dull olive-grey), so this drops
+ * them and derives every role from the wallpaper's hue instead — the result
+ * is always vivid and coherent no matter what the wallpaper contributes.
  *
- *  - Light mode: near-white surfaces with a whisper of the device hue
- *    (very low saturation — calm, non-vibrant), muted pastel accents
- *    (same hue, low saturation, airy lightness) with deep same-hue ink.
- *  - Dark mode: a SOFT pastel-tinted dark — lighter and calmer than the
- *    Curio midnight — carrying the same muted pastel accents, so the
- *    Material style reads light and gentle in both modes.
+ *  - Light mode: near-white surfaces with a whisper of the device hue, an
+ *    airy tinted primary-container, and a deep vivid primary + same-hue ink.
+ *  - Dark mode: a deep tinted midnight from the same hue, bright readable
+ *    primary, and light same-hue container ink.
+ *  - Secondary / tertiary are the same hue family offset ±38°, so every
+ *    scheme color belongs to one harmonious story.
  */
 private fun calmMaterialColorScheme(dynamic: ColorScheme, dark: Boolean): ColorScheme {
-    // Keep the dynamic scheme's semantic foreground/background pairs intact.
-    // Only tint the neutral surface ladder very lightly with dynamic primary,
-    // giving Curio a coherent Material identity without breaking the contrast
-    // guarantees of onPrimary/onSurface/onContainer roles.
-    fun surfaceTone(color: Color, amount: Float): Color =
-        lerp(color, dynamic.primary, amount)
+    // The wallpaper's identity hue — a near-achromatic wallpaper falls back
+    // to hue 0 (warm rose, on-brand).
+    val hue = toHsl(dynamic.primary).h
+    val secondaryHue = (hue + 38f) % 360f
+    val tertiaryHue = (hue + 322f) % 360f
 
     return if (dark) darkColorScheme(
-        primary = dynamic.primary,
-        onPrimary = dynamic.onPrimary,
-        primaryContainer = dynamic.primaryContainer,
-        onPrimaryContainer = dynamic.onPrimaryContainer,
-        secondary = dynamic.secondary,
-        onSecondary = dynamic.onSecondary,
-        secondaryContainer = dynamic.secondaryContainer,
-        onSecondaryContainer = dynamic.onSecondaryContainer,
-        tertiary = dynamic.tertiary,
-        onTertiary = dynamic.onTertiary,
-        tertiaryContainer = dynamic.tertiaryContainer,
-        onTertiaryContainer = dynamic.onTertiaryContainer,
-        background = surfaceTone(dynamic.background, 0.05f),
-        onBackground = dynamic.onBackground,
-        surface = surfaceTone(dynamic.surface, 0.04f),
-        onSurface = dynamic.onSurface,
-        surfaceVariant = surfaceTone(dynamic.surfaceVariant, 0.05f),
-        onSurfaceVariant = dynamic.onSurfaceVariant,
-        surfaceContainerLowest = surfaceTone(dynamic.surfaceContainerLowest, 0.02f),
-        surfaceContainerLow = surfaceTone(dynamic.surfaceContainerLow, 0.03f),
-        surfaceContainer = surfaceTone(dynamic.surfaceContainer, 0.04f),
-        surfaceContainerHigh = surfaceTone(dynamic.surfaceContainerHigh, 0.05f),
-        surfaceContainerHighest = surfaceTone(dynamic.surfaceContainerHighest, 0.06f),
-        error = dynamic.error,
-        onError = dynamic.onError,
-        outline = dynamic.outline,
-        outlineVariant = dynamic.outlineVariant
+        primary = fromHsl(hue, 0.58f, 0.72f),
+        onPrimary = fromHsl(hue, 0.55f, 0.16f),
+        primaryContainer = fromHsl(hue, 0.40f, 0.28f),
+        onPrimaryContainer = fromHsl(hue, 0.55f, 0.86f),
+        secondary = fromHsl(secondaryHue, 0.46f, 0.70f),
+        onSecondary = fromHsl(secondaryHue, 0.50f, 0.18f),
+        secondaryContainer = fromHsl(secondaryHue, 0.36f, 0.28f),
+        onSecondaryContainer = fromHsl(secondaryHue, 0.48f, 0.84f),
+        tertiary = fromHsl(tertiaryHue, 0.40f, 0.72f),
+        onTertiary = fromHsl(tertiaryHue, 0.46f, 0.20f),
+        tertiaryContainer = fromHsl(tertiaryHue, 0.34f, 0.28f),
+        onTertiaryContainer = fromHsl(tertiaryHue, 0.44f, 0.84f),
+        background = fromHsl(hue, 0.07f, 0.055f),
+        onBackground = fromHsl(hue, 0.08f, 0.93f),
+        surface = fromHsl(hue, 0.07f, 0.06f),
+        onSurface = fromHsl(hue, 0.08f, 0.93f),
+        surfaceVariant = fromHsl(hue, 0.07f, 0.10f),
+        onSurfaceVariant = fromHsl(hue, 0.06f, 0.74f),
+        surfaceContainerLowest = fromHsl(hue, 0.06f, 0.045f),
+        surfaceContainerLow = fromHsl(hue, 0.07f, 0.065f),
+        surfaceContainer = fromHsl(hue, 0.07f, 0.08f),
+        surfaceContainerHigh = fromHsl(hue, 0.07f, 0.10f),
+        surfaceContainerHighest = fromHsl(hue, 0.08f, 0.125f),
+        error = CurioColors.WarmCoralRed,
+        onError = Color.White,
+        outline = fromHsl(hue, 0.08f, 0.93f).copy(alpha = 0.16f),
+        outlineVariant = fromHsl(hue, 0.08f, 0.93f).copy(alpha = 0.08f)
     ) else lightColorScheme(
-        primary = dynamic.primary,
-        onPrimary = dynamic.onPrimary,
-        primaryContainer = dynamic.primaryContainer,
-        onPrimaryContainer = dynamic.onPrimaryContainer,
-        secondary = dynamic.secondary,
-        onSecondary = dynamic.onSecondary,
-        secondaryContainer = dynamic.secondaryContainer,
-        onSecondaryContainer = dynamic.onSecondaryContainer,
-        tertiary = dynamic.tertiary,
-        onTertiary = dynamic.onTertiary,
-        tertiaryContainer = dynamic.tertiaryContainer,
-        onTertiaryContainer = dynamic.onTertiaryContainer,
-        background = surfaceTone(dynamic.background, 0.025f),
-        onBackground = dynamic.onBackground,
-        surface = surfaceTone(dynamic.surface, 0.02f),
-        onSurface = dynamic.onSurface,
-        surfaceVariant = surfaceTone(dynamic.surfaceVariant, 0.03f),
-        onSurfaceVariant = dynamic.onSurfaceVariant,
-        surfaceContainerLowest = surfaceTone(dynamic.surfaceContainerLowest, 0.01f),
-        surfaceContainerLow = surfaceTone(dynamic.surfaceContainerLow, 0.02f),
-        surfaceContainer = surfaceTone(dynamic.surfaceContainer, 0.03f),
-        surfaceContainerHigh = surfaceTone(dynamic.surfaceContainerHigh, 0.04f),
-        surfaceContainerHighest = surfaceTone(dynamic.surfaceContainerHighest, 0.05f),
-        error = dynamic.error,
-        onError = dynamic.onError,
-        outline = dynamic.outline,
-        outlineVariant = dynamic.outlineVariant
+        primary = fromHsl(hue, 0.60f, 0.46f),
+        onPrimary = Color.White,
+        primaryContainer = fromHsl(hue, 0.44f, 0.90f),
+        onPrimaryContainer = fromHsl(hue, 0.58f, 0.26f),
+        secondary = fromHsl(secondaryHue, 0.48f, 0.47f),
+        onSecondary = Color.White,
+        secondaryContainer = fromHsl(secondaryHue, 0.42f, 0.88f),
+        onSecondaryContainer = fromHsl(secondaryHue, 0.52f, 0.28f),
+        tertiary = fromHsl(tertiaryHue, 0.42f, 0.50f),
+        onTertiary = Color.White,
+        tertiaryContainer = fromHsl(tertiaryHue, 0.38f, 0.88f),
+        onTertiaryContainer = fromHsl(tertiaryHue, 0.48f, 0.30f),
+        background = fromHsl(hue, 0.05f, 0.985f),
+        onBackground = fromHsl(hue, 0.10f, 0.16f),
+        surface = fromHsl(hue, 0.05f, 0.985f),
+        onSurface = fromHsl(hue, 0.10f, 0.16f),
+        surfaceVariant = fromHsl(hue, 0.05f, 0.94f),
+        onSurfaceVariant = fromHsl(hue, 0.06f, 0.42f),
+        surfaceContainerLowest = Color.White,
+        surfaceContainerLow = fromHsl(hue, 0.05f, 0.965f),
+        surfaceContainer = fromHsl(hue, 0.05f, 0.945f),
+        surfaceContainerHigh = fromHsl(hue, 0.05f, 0.91f),
+        surfaceContainerHighest = fromHsl(hue, 0.06f, 0.87f),
+        error = CurioColors.WarmCoralRed,
+        onError = Color.White,
+        outline = fromHsl(hue, 0.10f, 0.16f).copy(alpha = 0.16f),
+        outlineVariant = fromHsl(hue, 0.10f, 0.16f).copy(alpha = 0.08f)
     )
 }
 
