@@ -139,6 +139,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.lightAccentTint
@@ -3285,10 +3286,17 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
     // the classic accent-colored dots.
     // v11 — Material LIGHT wears the device onSurface so the orbiting dots
     // stay visible on the light tinted page (white dots vanished on the wash).
-    val dotColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && !isCurioDarkTheme()) {
-        MaterialTheme.colorScheme.onSurface
-    } else {
-        pastelFillInk(color)
+    // v13 — NON-pastel LIGHT was the one gap: pastelFillInk returns WHITE off
+    // pastel mode, so the orbit dots lit up as a bright white necklace on the
+    // cream page (and the bloom made it read even whiter). Deepen to a deep
+    // same-hue ink so the dots carry the category color and read on the light
+    // surface in every mode.
+    val dotColor = when {
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && !isCurioDarkTheme() ->
+            MaterialTheme.colorScheme.onSurface
+        !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+            deepHueInk(color)
+        else -> pastelFillInk(color)
     }
     AnimatedVisibility(
         visible = active,
@@ -3319,10 +3327,18 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
                 for (i in 0 until n) {
                     val a = (i.toFloat() / n) * (2f * Math.PI.toFloat())
                     val center = Offset(cx + cos(a) * radius, cy + sin(a) * radius)
-                    // Shimmer: each dot breathes with a phase offset while
-                    // the ring orbits, so the band reads as living light
-                    // instead of a rigid necklace.
-                    val pulse = (sin(rotRad * 1.4f + i * 1.15f) + 1f) / 2f
+                    // v13 — shimmer keyed to each dot's ABSOLUTE angle
+                    // (rotation + its own position) instead of the raw
+                    // rotation angle. The old phase ran at 1.4x the ring's
+                    // rotation, so the brightness wave counter-rotated
+                    // against the dots — a strobe-like moiré that read as
+                    // skipping/stuttering instead of a smooth orbit, and
+                    // never felt like one loop. With the phase bound to the
+                    // dot's true position the wave travels WITH the ring,
+                    // and the 360° wrap is invisible (the pattern is
+                    // rotation-periodic).
+                    val absAngle = a + rotRad
+                    val pulse = (sin(absAngle * 1.4f + i * 1.15f) + 1f) / 2f
                     val r = dotR * (0.7f + 0.5f * pulse)
                     // Layered bloom: a broad haze, a tighter halo, then a
                     // bright core. The staggered pulse makes the orbit feel

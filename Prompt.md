@@ -1,5 +1,25 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Spin orbit dots white in non-pastel light + loop skips
+
+**Date:** 2026-08-10
+
+### What the user asked
+In non-pastel light mode the spin button's outer small dots look white while animating, and the orbit animation feels like it skips / isn't a real loop. Fix if confirmed.
+
+### Diagnosis (confirmed from code)
+- **White dots:** `OrbitRing`'s dot color used `pastelFillInk(color)`, which returns **white whenever pastel mode is OFF** — so non-pastel light mode lit the 10 orbit dots as a bright white necklace (the layered bloom read even whiter). Pastel mode returns deep colored ink, which is why only non-pastel showed it.
+- **Skipping loop:** the dot ROTATION was already a seamless 0→360° loop, but the shimmer phase was keyed to the raw rotation angle (`sin(rotRad * 1.4 + i * 1.15)`), so the brightness wave spun around the ring at **1.4× the physical rotation** — a strobe-like moiré that fought the dots and read as skipping/stuttering, never a smooth loop.
+
+### Changes made
+- **SpinScreen.kt (OrbitRing)** — dot color now has a non-pastel LIGHT branch that deepens the accent via `deepHueInk(color)` (deep same-hue ink) instead of white; Material-light still uses device onSurface; dark/pastel unchanged (white / light-tint / deep-hue respectively).
+- **SpinScreen.kt (OrbitRing)** — shimmer phase is now keyed to each dot's ABSOLUTE angle (`absAngle = a + rotRad`), so the brightness wave travels WITH the ring; the pattern is rotation-periodic, so the 360° wrap is invisible and the loop reads as one continuous orbit.
+- **CategoryInk.kt** — `deepHueInk` promoted private → internal (shared with SpinScreen's orbit dots; no other callers changed).
+
+### Validation
+- Brace check + git diff --check clean; code review passed (HSL math, branch ordering, wrap seamlessness all verified).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Full Material theme revamp (last chance)
 
 **Date:** 2026-08-10

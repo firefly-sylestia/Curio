@@ -195,9 +195,10 @@ private fun Color.isPale(): Boolean {
 /**
  * Deep ink of the SAME hue as a pale/pastel color — the light-mode ink twin
  * used by [categoryInk] (and equivalent to [pastelFillInk]'s light branch,
- * but unconditional so it never resolves to white).
+ * but unconditional so it never resolves to white). Shared with the Spin
+ * screen's orbit dots, which deepen non-pastel light accents the same way.
  */
-private fun deepHueInk(color: Color): Color {
+internal fun deepHueInk(color: Color): Color {
     val a = toHsl(color)
     return fromHsl(a.h, a.s.coerceIn(0.15f, 0.60f), 0.30f)
 }
