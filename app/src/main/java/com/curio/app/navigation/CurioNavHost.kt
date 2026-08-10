@@ -185,9 +185,9 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  *
  * All routes are flat. The bottom nav is rendered by a [Scaffold] wrapper
  * and is conditionally visible based on the current route (see
- * [CurioRoutes.bottomNavRoutes]). Reveal keeps the bar visible so its shared
- * hero morph has the same content height as the Spin deck; other push
- * destinations like Picker/Capture/Detail/Settings/Lightbox omit it.
+ * [CurioRoutes.bottomNavRoutes]). Topic Reveal renders its own torn paper
+ * edge at navbar height instead of the bar (see TopicRevealScreen); other
+ * push destinations like Picker/Capture/Detail/Settings/Lightbox omit it.
  *
  * Each tab uses the standard Compose Navigation pattern when navigated to:
  *   navigate(route) { popUpTo(startDestination) { saveState = true }; ... }
@@ -216,14 +216,15 @@ fun CurioNavHost(
     val routePrefix = remember(currentRoute) {
         currentRoute?.substringBefore("/")
     }
-    // Browse-mode Topic Reveal (opened from the topic browser) is a pushed
-    // read-only page — no bottom nav. Reveal opened from the Spin main card
-    // keeps the bar for shared-morph height stability.
+    // Topic Reveal renders its OWN torn paper edge at the bottom (at
+    // navbar height) instead of the bottom navigation bar — both from the
+    // Spin main card and from the topic browser, the reveal never shows
+    // the bar (see TopicRevealScreen's bottom tear).
     val showBottomBar =
         routePrefix in CurioRoutes.bottomNavRoutePrefixes &&
-            !isBrowseRevealRoute(backStackEntry)
-    // Topic Reveal keeps the same Scaffold content height as the Spin deck;
-    // the normal bottom bar remains visible while the shared hero morphs.
+            routePrefix != CurioRoutes.REVEAL.substringBefore("/")
+    // The reveal's own torn paper edge provides the bottom visual (see
+    // TopicRevealScreen), so the Scaffold adds no bar space for it.
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -735,10 +736,16 @@ fun CurioNavHost(
     val tourStep = TourController.currentStep
     if (tourStep != null && routePrefix == tourStep.routePrefix) {
         fun advanceTourAndNavigate() {
+            val wasLastStep = TourController.isLastStep
             TourController.advance()
             val nextRoute = TourController.routeForCurrentStep()
             if (nextRoute != null && nextRoute != currentRoute) {
                 navController.navigate(nextRoute) { launchSingleTop = true }
+            } else if (wasLastStep) {
+                // Tour finished — the tour always starts on the Home hub, so
+                // pop the whole tour stack back to Home (a clean finish
+                // instead of leaving the user stranded on the last stop).
+                navController.popBackStack(CurioRoutes.HOME, inclusive = false)
             }
         }
         Row(
@@ -750,7 +757,11 @@ fun CurioNavHost(
             horizontalArrangement = Arrangement.Center
         ) {
             TextButton(onClick = { TourController.skip() }) { Text("Skip") }
-            TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
+            // The final stop labels the control "Done" — advancing past it
+            // properly closes the tour instead of silently stopping.
+            TextButton(onClick = { advanceTourAndNavigate() }) {
+                Text(if (TourController.isLastStep) "Done" else "Next")
+            }
         }
     }
     }

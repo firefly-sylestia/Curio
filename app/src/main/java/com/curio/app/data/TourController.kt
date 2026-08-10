@@ -42,8 +42,48 @@ object TourController {
             route = CurioRoutes.revealForBrowse("artists", "David Bowie"),
             routePrefix = CurioRoutes.REVEAL.substringBefore("/"),
             landmarkId = "express-yourself",
-            dialogue = "When something sparks a thought, tap Express yourself to write it down.",
-            nextHint = "This tour will not open or save a note."
+            dialogue = "When something sparks a thought, you can tap Express yourself to write it down. This tour won’t open it — tap Next when you’re ready.",
+            nextHint = "The note stays closed on the tour."
+        ),
+        Step(
+            id = "cabinet",
+            route = CurioRoutes.CABINET,
+            routePrefix = CurioRoutes.CABINET,
+            landmarkId = "grid",
+            dialogue = "This is the Cabinet — every keepsake you save lands here.",
+            nextHint = "Everything you keep collects here."
+        ),
+        Step(
+            id = "topic-browser",
+            route = CurioRoutes.DATABASE,
+            routePrefix = CurioRoutes.DATABASE,
+            landmarkId = "search",
+            dialogue = "Browse Topics is the whole catalog — every artist, film, book, and discovery, ready to explore.",
+            nextHint = "Search and explore any lane."
+        ),
+        Step(
+            id = "profile",
+            route = CurioRoutes.PROFILE,
+            routePrefix = CurioRoutes.PROFILE,
+            landmarkId = "avatar",
+            dialogue = "Profile is where your journey lives — XP, badges, and your streak.",
+            nextHint = "Your progress lives here."
+        ),
+        Step(
+            id = "quests",
+            route = CurioRoutes.QUESTS,
+            routePrefix = CurioRoutes.QUESTS,
+            landmarkId = "daily",
+            dialogue = "Quests give you a tiny daily goal — the fastest way to grow.",
+            nextHint = "A little curiosity every day."
+        ),
+        Step(
+            id = "settings",
+            route = CurioRoutes.SETTINGS,
+            routePrefix = CurioRoutes.SETTINGS,
+            landmarkId = "appearance",
+            dialogue = "And this is Settings — where you make Curio yours: theme, permissions, your pet. That’s everything — you’re all set to explore!",
+            nextHint = "That’s the whole tour."
         ),
     )
 
@@ -55,6 +95,9 @@ object TourController {
         private set
 
     val currentStep: Step? get() = steps.getOrNull(stepIndex).takeIf { active }
+
+    /** True on the final stop — the tour controls label the button "Done". */
+    val isLastStep: Boolean get() = active && stepIndex >= steps.lastIndex
 
     fun offer() { offerPending = true }
     fun declineOffer() { offerPending = false }

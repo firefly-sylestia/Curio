@@ -49,6 +49,8 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -315,6 +317,14 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // ── Search + category filter chips ─────────────────────────
                 item("controls") {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        // v8.xx — the search box is a pet landmark: the pet
+                        // walks over and pokes it, and the tour's Browse-Topics
+                        // stop points the guide right at it.
+                        PetLandmark(
+                            id = "search",
+                            kind = PetLandmarks.Kind.FUN,
+                            screen = "database"
+                        ) { lm ->
                         OutlinedTextField(
                             value = query,
                             onValueChange = { query = it },
@@ -362,8 +372,9 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                                 cursorColor = MaterialTheme.colorScheme.primary
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = lm.fillMaxWidth()
                         )
+                        }
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {

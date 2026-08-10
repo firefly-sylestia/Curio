@@ -59,6 +59,8 @@ import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -372,8 +374,25 @@ fun SettingsHubScreen(navController: NavController) {
                                 }
                                 card.rows.forEachIndexed { index, row ->
                                     if (index > 0) CurioSettingsDivider()
-                                    CurioSettingsRow(row.icon, row.title, row.subtitle) {
-                                        navController.navigate(row.route) { launchSingleTop = true }
+                                    if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
+                                        // v8.xx — the Appearance row is a pet
+                                        // landmark: the pet pokes it, and the
+                                        // tour's Settings stop points at it.
+                                        PetLandmark(
+                                            id = "appearance",
+                                            kind = PetLandmarks.Kind.FUN,
+                                            screen = "settings"
+                                        ) { lm ->
+                                            Box(modifier = lm) {
+                                                CurioSettingsRow(row.icon, row.title, row.subtitle) {
+                                                    navController.navigate(row.route) { launchSingleTop = true }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        CurioSettingsRow(row.icon, row.title, row.subtitle) {
+                                            navController.navigate(row.route) { launchSingleTop = true }
+                                        }
                                     }
                                 }
                             }

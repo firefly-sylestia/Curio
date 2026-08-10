@@ -110,6 +110,8 @@ import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.SoftTornBottomShape
+import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -154,6 +156,14 @@ import com.curio.app.ui.theme.themedAccent
  *   24 dp      content breathing room
  *   below hero  inline actions (Start exploring + Already …)
  */
+
+// v8.xx — the reveal renders its OWN torn paper edge at the bottom of the
+// screen (at navbar height) instead of the bottom navigation bar — the
+// mirror of the hero's downward tear: this strip tears UP at its top edge
+// (see CurioNavHost.showBottomBar). Fixed seed → the seam never re-rolls.
+private const val REVEAL_BOTTOM_TEAR_SEED = 0xB07E4
+private val RevealBottomTearHeight = 80.dp
+
 @Composable
 fun TopicRevealScreen(
     categorySlug: String,
@@ -716,10 +726,32 @@ fun TopicRevealScreen(
                     }
                 }
 
-                Spacer(Modifier.height(24.dp))
+                // Bottom clearance — the torn paper edge (at navbar height)
+                // overlays the very bottom of the scroll area, so the last
+                // row clears the seam when fully scrolled down.
+                Spacer(Modifier.height(RevealBottomTearHeight + 24.dp))
             }
 
         }
+
+        // ── Bottom torn paper edge — replaces the bottom navigation bar ──
+        // The reveal renders its own torn seam at the bottom of the screen
+        // (at navbar height) instead of the Scaffold's navigation bar (see
+        // CurioNavHost.showBottomBar). It tears UP at its top edge — the
+        // mirror of the hero's downward tear — so the page reads as one
+        // torn sheet end-to-end. Fixed seed → never re-rolls.
+        val bottomTornShape = remember(REVEAL_BOTTOM_TEAR_SEED) {
+            SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true)
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(RevealBottomTearHeight)
+                .graphicsLayer { rotationZ = 180f }
+                .clip(bottomTornShape)
+                .background(CurioColors.CreamWhite)
+        )
     }
 
     // Leaving via the system back gesture without engaging → recently-unexplored
@@ -1039,7 +1071,9 @@ private fun RevealActionRow(
                 RevealAlreadyButton(
                     // Express Yourself remains available from Topic Reveal,
                     // including the read-only reveal opened from Topic Database.
-                    enabled = resolved != null,
+                    // During the pet-led tour the button is inert — the tour
+                    // only TELLS you about it and advances via Next.
+                    enabled = resolved != null && !TourController.active,
                     metrics = m,
                     modifier = lm.weight(1f),
                     onClick = onAlready
@@ -1055,7 +1089,9 @@ private fun RevealActionRow(
                     ) { lm ->
                         RevealStartButton(
                             cat = cat,
-                            enabled = resolved != null,
+                            // Inert during the pet-led tour — the action is
+                            // only demonstrated, never started.
+                            enabled = resolved != null && !TourController.active,
                             metrics = m,
                             modifier = lm.weight(1f),
                             onClick = onExplore
@@ -1070,7 +1106,9 @@ private fun RevealActionRow(
                     ) { lm ->
                         RevealStartButton(
                             cat = cat,
-                            enabled = resolved != null,
+                            // Inert during the pet-led tour — the action is
+                            // only demonstrated, never started.
+                            enabled = resolved != null && !TourController.active,
                             label = "Explore",
                             metrics = m,
                             modifier = lm.weight(1f),
