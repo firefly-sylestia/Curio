@@ -1,6 +1,5 @@
 package com.curio.app.features.petdesigner
 
-import com.curio.app.data.PetFaceMoods
 import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.petAnimationName
 
@@ -10,10 +9,11 @@ import com.curio.app.data.petAnimationName
  * (a [PetEditorTarget]) on one of three local pages ([PetDesignerPage]), then
  * edits it in ONE universal editor, with Save always visible below.
  *
- * The editor tabs (PREVIEW/BODY/FACES/COLORS/TOOLS) are replaced by this
- * model; each exposed editor surface (body canvas, mood faces, reactions,
- * palette) is reached through a target. Detail drawing is intentionally not an
- * editor target; detail visibility remains available in Settings.
+ * The editor tabs (PREVIEW/BODY/COLORS/TOOLS) are replaced by this model;
+ * each exposed editor surface (body canvas, reactions, palette) is reached
+ * through a target. Face data remains a runtime compatibility model, but face
+ * editing is intentionally not an editor target. Detail drawing is likewise
+ * not an editor target; detail visibility remains available in Settings.
  */
 // v8.52 — the three-page studio redesign: Pets (pick your companion + see
 // its animations), Editor (choose a target, then just the editor), Settings
@@ -22,8 +22,8 @@ internal enum class PetDesignerPage { PETS, EDITOR, SETTINGS }
 
 /**
  * What the universal editor is currently editing. Each target drives the
- * editor's mode: a pixel canvas (body / curled pose), face controls (per
- * mood), a reaction form (per event), or the palette editor.
+ * editor's mode: a pixel canvas (body / curled pose), a reaction form (per
+ * event), or the palette editor.
  */
 // Serializable so the selected target survives configuration changes via
 // rememberSaveable (a plain sealed interface would crash on rotation).
@@ -41,12 +41,6 @@ internal sealed interface PetEditorTarget : java.io.Serializable {
     data object CurledPose : PetEditorTarget {
         override val id = "curled"
         override val title = "Curled pose"
-    }
-
-    /** One mood's face. */
-    data class Face(val mood: String) : PetEditorTarget {
-        override val id = "face:$mood"
-        override val title = "${PetFaceMoods.label(mood)} face"
     }
 
     /** One event's reaction rule (an action the pet performs). */

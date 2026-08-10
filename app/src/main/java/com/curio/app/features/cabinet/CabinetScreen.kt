@@ -101,7 +101,10 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -220,6 +223,8 @@ fun CabinetScreen(navController: NavController) {
 
     if (showBulkDeleteConfirm) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { showBulkDeleteConfirm = false },
             title = { Text("Delete selected captures?", fontWeight = FontWeight.Bold) },
             text = { Text("This permanently deletes ${selectedEntryIds.size} selected capture(s), including their attached media.") },
@@ -246,7 +251,7 @@ fun CabinetScreen(navController: NavController) {
                 }) { Text("Delete", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
-                TextButton(onClick = { showBulkDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showBulkDeleteConfirm = false }, colors = curioDialogActionButtonColors()) { Text("Cancel") }
             }
         )
     }

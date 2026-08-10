@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -47,6 +46,8 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
+import com.curio.app.ui.components.categoryEdgeShine
+import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -206,6 +207,7 @@ fun CategoryPickerScreen(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                val mixShape = RoundedCornerShape(24.dp)
                 Button(
                     onClick = {
                         if (selectedSlugs.isEmpty()) return@Button
@@ -221,12 +223,20 @@ fun CategoryPickerScreen(navController: NavController) {
                         navController.navigateToTab(CurioRoutes.SPIN)
                     },
                     enabled = selectedSlugs.isNotEmpty(),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.buttonColors(
+                    shape = mixShape,
+                    colors = curioButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        // v12 — AMOLED: curioButtonColors forces the plate to
+                        // pitch black, so the scheme's onPrimary (a deep
+                        // maroon) would vanish on it — the content flips to
+                        // white on the black glass.
+                        contentColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                            MaterialTheme.colorScheme.onSurface
+                        else MaterialTheme.colorScheme.onPrimary
                     ),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .categoryEdgeShine(mixShape)
                 ) {
                     CurioIcon(CurioIcons.Check, null, size = 18.dp)
                     Text(

@@ -153,9 +153,12 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.readableAccentInk
@@ -337,8 +340,9 @@ fun EntryDetailScreen(
         // gaps show through the teeth. The tear is seeded from the entry id,
         // so every detail page gets its own stable texture that never changes
         // when reopened.
+        // v9.x — the blend experiment concluded: the Material style always
+        // uses the device-palette card blend here.
         val blendActive = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
-            AppPreferences.materialCardBlendsState &&
             !(isCurioDarkTheme() && !AppPreferences.pastelColorsState)
         val heroStart = if (blendActive) {
             val blendStart = CurioGradients.cardGradient(cat.themedAccent()).first()
@@ -709,6 +713,8 @@ fun EntryDetailScreen(
 
     if (deleteDialogVisible) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { deleteDialogVisible = false },
             title = { Text("Delete this entry?") },
             text = { Text("This capture will be permanently removed from your Cabinet.") },
@@ -731,7 +737,7 @@ fun EntryDetailScreen(
                 }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { deleteDialogVisible = false }) { Text("Cancel") }
+                TextButton(onClick = { deleteDialogVisible = false }, colors = curioDialogActionButtonColors()) { Text("Cancel") }
             }
         )
     }

@@ -27,12 +27,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -42,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -68,7 +68,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -113,6 +112,10 @@ import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.categoryEdgeShine
+import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -120,10 +123,15 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
+import com.curio.app.ui.theme.themedButtonFill
+import com.curio.app.ui.theme.themedButtonInk
 
 /**
  * Topic Reveal — see Curio reveal contract.
@@ -136,8 +144,8 @@ import com.curio.app.ui.theme.themedAccent
  *  - Hero shows the action you need to take immediately — the verb +
  *    duration badge sits on the ticket, not buried under the body copy.
  *  - Bigger, eye-catching topic name (uses the geom typography).
- *  - Tags row immediately under the title — gives instant context for
- *    genres / eras (e.g. "1970s · British · Art Rock").
+ *  - Tags chips in the bottom band — instant context for genres / eras
+ *    (e.g. "1970s · British · Art Rock") without cluttering the body.
  *  - Existing teaser card + explore-action prompt card are preserved.
  *  - Refined spacing — top padding tight (statusBarsPadding + 8dp.
  *
@@ -149,26 +157,28 @@ import com.curio.app.ui.theme.themedAccent
  *              the topic NAME — the title lives on the card so the
  *              shared-element morph grows it in place, v8.25)
  *   20 dp      gap
- *   ~42 dp     Tags chip row
- *   20 dp      gap
  *   ~auto     "One quirky fact to get you curious" card
  *   16 dp      gap
  *   ~auto     "{verb} {target}" action prompt card + "~N min"
  *   24 dp      content breathing room
- *   bottom     themed action dock (Start exploring + Already …)
- *   navigation-bar inset is applied inside the dock
+ *   below hero  inline actions (Start exploring + Already …)
  */
+
+// The reveal renders its OWN plain bottom band (at navbar height) instead
+// of the bottom navigation bar (see CurioNavHost.showBottomBar): a flat
+// theme-aware strip that carries the tags row and keeps the page's fixed
+// footprint — the NavHost reserves the same 80dp slot the bar would use.
+private val RevealBottomBarHeight = 80.dp
+
 @Composable
 fun TopicRevealScreen(
     categorySlug: String,
     topicName: String,
     navController: NavController,
-    // Browse-Topics read-only mode (see CurioRoutes.REVEAL): no explore
-    // CTA, no like/dislike, no recents recording, and "Already watched"
-    // confirms without the write-about-it dialog.
-    browseMode: Boolean = false,
-    onBottomBarContentChanged: (@Composable () -> Unit) -> Unit = {},
-    onBottomBarContentCleared: () -> Unit = {}
+    // Browse-Topics mode (see CurioRoutes.REVEAL): Explore is silent and
+    // feedback/recents are disabled, while Express Yourself intentionally
+    // remains available as the explicit write path.
+    browseMode: Boolean = false
 ) {
     val cat = remember(categorySlug) {
         CurioCategories.byRouteSlug(categorySlug)
@@ -234,32 +244,34 @@ fun TopicRevealScreen(
     val latestBrowseMode by rememberUpdatedState(browseMode)
     val latestResolved by rememberUpdatedState(resolved)
     val latestOnExplore by rememberUpdatedState<() -> Unit> {
-        if (TourController.consumeTap("start-exploring")) {
-            TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
+        // Explore is not a tour stop. During the tour, tapping it only exits
+        // the guide; it must not open a dialog/browser or navigate to a stale
+        // route. Normal taps continue into the real flow.
+        if (TourController.active) {
+            TourController.skip()
         } else {
             showExploreDialog = true
         }
     }
     // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
-    // explore: opens the topic's search page without recording quests,
-    // passport, pet events, recents or a timer — browsing must not count.
+    // Explore action: it opens the topic's search page without recording
+    // quests, passport, pet events, recents or a timer. Express Yourself is
+    // separate and remains the deliberate write-about-it path.
     val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
-        if (TourController.consumeTap("start-exploring")) {
-            TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
+        // Browse mode has no tour navigation. During a tour, only dismiss the
+        // guide; never launch a browser as a side effect of a demonstrated tap.
+        if (TourController.active) {
+            TourController.skip()
         } else {
             latestResolved?.let { topic -> openSilentExplore(context, topic) }
         }
     }
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
-        if (TourController.consumeTap("express-yourself")) {
-            TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
-        } else if (!latestBrowseMode) {
+        if (TourController.active) {
+            // Tour taps demonstrate controls only. End the tour instead of
+            // opening the capture task or navigating to a stale next route.
+            TourController.skip()
+        } else {
             latestResolved?.let { topic ->
                 engaged = true
                 navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
@@ -268,22 +280,9 @@ fun TopicRevealScreen(
             }
         }
     }
-    // v8.57 — the reveal no longer owns action buttons at the bottom: Start
-    // exploring / Already … live inline right below the hero card. The
-    // bottomBar slot still registers a static WASH STRIP (no buttons) so the
-    // NavHost's morph reserve stays registered for the WHOLE visit — including
-    // the pop transition, when the exiting screen's strip keeps Scaffold
-    // innerPadding constant (the v8.5/v8.36 freeze rule). The strip wears the
-    // same category wash as the page, so it reads as plain background.
-    val revealBottomBar = remember(cat) {
-        @Composable {
-            RevealWashStrip(cat = cat)
-        }
-    }
-    DisposableEffect(revealBottomBar) {
-        onBottomBarContentChanged(revealBottomBar)
-        onDispose { onBottomBarContentCleared() }
-    }
+    // v10 — Topic Reveal owns its content edge-to-edge. The old transparent
+    // bottom Scaffold slot was only a layout reservation and could leave the
+    // screen with stale bottom padding during navigation.
 
     // Android 13+ needs POST_NOTIFICATIONS before the persistent explore
     // notification can show — requested when the user starts exploring with
@@ -331,7 +330,7 @@ fun TopicRevealScreen(
         }
     }
 
-    // ── Floating explore bubble permission ────────────────────────────
+    // ── Floating explore bubble permission ────────────────────────�����───
     //    "Display over other apps" has no runtime dialog on Android 10+, so
     //    Allow opens the system special-access page; ON_RESUME below resumes
     //    the deferred flow (and starts the bubble service if granted). Asked
@@ -527,14 +526,11 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            // v8.57 — the bottom action dock is gone, so the watermark's
-            // glyph band is trimmed by the dock's former height (80dp) at
-            // the bottom: the pattern ends where the old scaffold used to
-            // sit, leaving a calm wash band below it.
-            CurioWatermarkBackdrop(
-                activeCat = cat,
-                modifier = Modifier.padding(bottom = 80.dp)
-            )
+            // The NavHost reserves a navbar-height placeholder for Reveal,
+            // so this backdrop can fill the same content bounds as the Spin
+            // tab. Keeping the whole destination's bounds stable fixes both
+            // the watermark level and the shared-card morph target.
+            CurioWatermarkBackdrop(activeCat = cat)
         }
 
         Column(
@@ -621,7 +617,7 @@ fun TopicRevealScreen(
                     )
                 }
 
-                // ── 2.5 Action row — Start exploring / Already … ───────
+                            // ── 2.5 Action row — Express yourself / Explore ─────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
                 RevealContentEntrance(delayMillis = 40) {
@@ -643,37 +639,6 @@ fun TopicRevealScreen(
                 // landed topic grows the title in place with the rest of
                 // the card. The tags row below simply follows the hero
                 // directly.
-
-                // ── 4. Tags chip row (genre / era context) ─────────────────
-                RevealContentEntrance(delayMillis = 80) {
-                    if (!resolved?.tags.isNullOrEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 20.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            resolved.tags.take(4).forEach { tag ->
-                                Surface(
-                                    shape = RoundedCornerShape(50),
-                                    color = cat.themedAccent().copy(alpha = 0.18f),
-                                    shadowElevation = 0.dp
-                                ) {
-                                    Text(
-                                        text = tag,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        // Spacer so subsequent sections don't crowd up.
-                        Spacer(Modifier.height(10.dp))
-                    }
-                }
 
                 // ── 5. Teaser card ──────────────────────────────────────────
                 RevealContentEntrance(delayMillis = 160) {
@@ -740,11 +705,82 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // v8.57 — extra clearance so content never hides behind the
-                // 80dp wash strip in the scaffold's bottom bar.
-                Spacer(Modifier.height(80.dp))
+                // Bottom clearance — the bottom band (at navbar height)
+                // overlays the very bottom of the scroll area, so the last
+                // row clears the band when fully scrolled down.
+                Spacer(Modifier.height(RevealBottomBarHeight + 24.dp))
             }
 
+        }
+
+        // ── Bottom band — replaces the bottom navigation bar ─────────────
+        // The reveal paints its own PLAIN, theme-aware band at the bottom of
+        // the screen (at navbar height) instead of the Scaffold's navigation
+        // bar (see CurioNavHost.showBottomBar): a flat rectangle with no
+        // torn seam or ragged edge — the tags row sits on it.
+        // v9.x — the band is fully opaque and follows the active appearance.
+        // Curio uses the category surface (anchored to the surface container
+        // so the band reads as a slightly darker, more defined strip; the old
+        // `surface` base washed white/creamy on the tinted page). Material
+        // uses the device surface, and AMOLED stays pure black.
+        val bandPaper = when (AppPreferences.themeStyleState) {
+            AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
+            AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
+            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainer)
+        }
+        val bandInk = MaterialTheme.colorScheme.onSurface
+        // v9.x — NavHost reserves the missing navbar footprint for Reveal
+        // without drawing the actual bar. This band is painted down into
+        // that reserved 80dp slot plus the system nav inset, ending flush at
+        // the physical screen bottom — it starts where the real navbar would
+        // start on Spin, keeping the page bounds, watermark and shared hero
+        // morph at the same level.
+        val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = RevealBottomBarHeight + navInset)
+                .fillMaxWidth()
+                .height(RevealBottomBarHeight + navInset)
+                .background(bandPaper)
+        )
+
+        // Compact context row: tags live in the reserved footer now, keeping
+        // the reveal body focused without changing the footer's fixed height.
+        // v11 — the chips sit a little LOWER (24dp inset) so they clear the
+        // plain band's top edge with breathing room, and each chip caps at a
+        // third of the row width with ellipsis so the row never runs off
+        // small screens.
+        if (!resolved?.tags.isNullOrEmpty()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = RevealBottomBarHeight + navInset)
+                    .fillMaxWidth()
+                    .height(RevealBottomBarHeight + navInset)
+                    .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = navInset + 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.Top
+            ) {
+                resolved.tags.take(3).forEach { tag ->
+                    Surface(
+                        modifier = Modifier.weight(1f, fill = false),
+                        shape = RoundedCornerShape(50),
+                        color = cat.themedAccent().copy(alpha = 0.22f),
+                        shadowElevation = 0.dp,
+                        border = BorderStroke(1.dp, cat.themedAccent().copy(alpha = 0.48f))
+                    ) {
+                        Text(
+                            text = tag,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = bandInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -759,6 +795,8 @@ fun TopicRevealScreen(
 
     if (showOverlayPermissionDialog) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 showOverlayPermissionDialog = false
                 // v8.1 — dismissing without granting is a "no": record it so
@@ -817,7 +855,9 @@ fun TopicRevealScreen(
                             continueExploreFlow(s)
                         }
                     }
-                }) { Text("Allow") }
+                }) {
+                    Text("Allow", color = curioDialogActionColor())
+                }
             },
             dismissButton = {
                 TextButton(onClick = {
@@ -828,17 +868,21 @@ fun TopicRevealScreen(
                     val s = pendingOverlaySession
                     pendingOverlaySession = null
                     if (s != null) continueExploreFlow(s)
-                }) { Text("Not now") }
+                }) { Text("Not now", color = curioDialogActionColor()) }
             }
         )
     }
 
-    var showProviderDialog by rememberSaveable { mutableStateOf(false) }
-
     if (showExploreDialog && resolved != null) {
         val topic = resolved
         val action = topic.exploreAction
+        // v11 — the dialog wears the shared Curio dialog theme: the card-
+        // matching 24dp shape, the pastel-aware container, and the readable
+        // action ink (deep rose on light/pastel so the buttons never wash
+        // out, device primary in Material and dark).
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 // A dismiss gesture (tap-outside / back / swipe) with no
                 // action picked = "backed out without exploring" — record
@@ -852,12 +896,18 @@ fun TopicRevealScreen(
                 }
                 showExploreDialog = false
             },
-            title = { Text("Explore ${topic.name}?") },
+            title = {
+                Text(
+                    "Explore ${topic.name}?",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. ${exploreOpenCopy(cat)}",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Choose Google or YouTube to begin.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         "Your explore gets timed (not a countdown), and when you come back we'll ask if you're done so you can write it down.",
@@ -867,48 +917,26 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showExploreDialog = false
-                    showProviderDialog = true
-                }) { Text("Explore now") }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        engaged = true
-                        ExploreSessionStore.recordExplored(context, cat.id, topic.name)
-                        ExploreSessionStore.removeUnexplored(context, cat.id, topic.name)
-                        showExploreDialog = false
-                        navController.navigate(CurioRoutes.captureFor(cat.id.routeSlug, topic.name)) {
-                            launchSingleTop = true
-                        }
-                    }
-                ) { Text("Express yourself") }
-            }
-        )
-    }
-
-    if (showProviderDialog && resolved != null) {
-        val topic = resolved
-        AlertDialog(
-            onDismissRequest = { showProviderDialog = false },
-            title = { Text("Choose where to explore") },
-            text = { Text("Pick a search companion for ${topic.name}.") },
-            confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = {
-                        showProviderDialog = false
-                        startExploreSession(topic, buildGoogleSearchUrl(topic))
-                    }) { Text("Google") }
-                    TextButton(onClick = {
-                        showProviderDialog = false
-                        startExploreSession(topic, buildYouTubeSearchUrl(topic))
-                    }) { Text("YouTube") }
+                    TextButton(
+                        onClick = {
+                            engaged = true
+                            showExploreDialog = false
+                            startExploreSession(topic, buildGoogleSearchUrl(topic))
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Explore in Google") }
+                    TextButton(
+                        onClick = {
+                            engaged = true
+                            showExploreDialog = false
+                            startExploreSession(topic, buildYouTubeSearchUrl(topic))
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Explore in YouTube") }
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showProviderDialog = false }) { Text("Not now") }
-            }
+            dismissButton = null
         )
     }
 
@@ -922,6 +950,8 @@ fun TopicRevealScreen(
         val next = pendingConflictSession
         if (old != null && next != null) {
             AlertDialog(
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
                 onDismissRequest = {
                     showConflictDialog = false
                     val s = pendingConflictSession
@@ -952,32 +982,38 @@ fun TopicRevealScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
-                        val s = pendingConflictSession
-                        showConflictDialog = false
-                        pendingConflictSession = null
-                        conflictActiveSession = null
-                        if (s != null) {
-                            // Queue the running session (paused, time banked),
-                            // then start the new explore in its place.
-                            ExploreReminderScheduler.cancel(context)
-                            ExploreSessionStore.queueActiveSession(context)
-                            beginExploreSession(s)
-                        }
-                    }) { Text("Start new explore") }
+                    TextButton(
+                        onClick = {
+                            val s = pendingConflictSession
+                            showConflictDialog = false
+                            pendingConflictSession = null
+                            conflictActiveSession = null
+                            if (s != null) {
+                                // Queue the running session (paused, time banked),
+                                // then start the new explore in its place.
+                                ExploreReminderScheduler.cancel(context)
+                                ExploreSessionStore.queueActiveSession(context)
+                                beginExploreSession(s)
+                            }
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Start new explore") }
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-                        // Save the new topic for later — the current session
-                        // keeps running untouched.
-                        val s = pendingConflictSession
-                        showConflictDialog = false
-                        pendingConflictSession = null
-                        conflictActiveSession = null
-                        if (s != null) {
-                            AppPreferences.pinTopic(context, s.categoryId, s.topicName)
-                        }
-                    }) { Text("Save for later") }
+                    TextButton(
+                        onClick = {
+                            // Save the new topic for later — the current session
+                            // keeps running untouched.
+                            val s = pendingConflictSession
+                            showConflictDialog = false
+                            pendingConflictSession = null
+                            conflictActiveSession = null
+                            if (s != null) {
+                                AppPreferences.pinTopic(context, s.categoryId, s.topicName)
+                            }
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Save for later") }
                 }
             )
         }
@@ -1007,8 +1043,6 @@ private data class RevealDockMetrics(
     val rowGap: Dp,
     val startPadH: Dp,
     val startPadV: Dp,
-    val alreadyPadH: Dp,
-    val alreadyPadV: Dp,
     val icon: Dp,
     val textSp: TextUnit,
     val gap: Dp,
@@ -1033,8 +1067,6 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
         rowGap = if (narrow) 6.dp else 8.dp,
         startPadH = if (narrow) 8.dp else if (compact) 10.dp else 20.dp,
         startPadV = vPad,
-        alreadyPadH = if (narrow) 6.dp else if (compact) 8.dp else 16.dp,
-        alreadyPadV = vPad,
         icon = if (narrow) 16.dp else if (compact) 18.dp else 20.dp,
         textSp = if (narrow) 13.sp else if (compact) 14.sp else 16.sp,
         gap = if (narrow) 6.dp else 8.dp,
@@ -1043,34 +1075,8 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
 }
 
 /**
- * v8.57 — the reveal's bottom-bar slot content: a static WASH STRIP with no
- * buttons. It keeps the NavHost morph reserve registered (and wearing the
- * page's category wash) for the whole visit — including the pop transition —
- * so Scaffold innerPadding never changes mid-morph (the v8.5 freeze rule).
- * It reads as plain page background; the real actions live inline below the
- * hero card ([RevealActionRow]).
- */
-@Composable
-private fun RevealWashStrip(
-    cat: com.curio.app.data.CurioCategory
-) {
-    // v8.57 — invisible spacer: keeps Scaffold innerPadding stable so
-    // content never shifts during the morph transition. Transparent
-    // surface sits at the same z-index as the watermark background.
-    Surface(
-        color = Color.Transparent,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .windowInsetsPadding(WindowInsets.navigationBars)
-    ) {}
-}
-
-/**
- * v8.57 — Start exploring / Already … — now a theme-aware inline row right
- * below the hero card (was a floating bottom dock). Reuses the tier metrics
+ * Start exploring / Already … — a theme-aware inline row right below the
+ * hero card. Reuses the tier metrics
  * so the pair resizes cleanly on every screen size.
  */
 @Composable
@@ -1090,9 +1096,8 @@ private fun RevealActionRow(
             maxWidth < 440.dp -> RevealDockTier.COMPACT
             else -> RevealDockTier.STANDARD
         }
-        // The dock's vertical squeeze tier was for the pinned bottom slot;
-        // inline under the hero the width tiers (NARROW/COMPACT/STANDARD)
-        // alone resize the pair cleanly on every screen.
+        // Inline under the hero, the width tiers (NARROW/COMPACT/STANDARD)
+        // resize the pair cleanly on every screen.
         val m = revealDockMetrics(tier, tight = false)
         // v8.57 — the action row sits directly on the category wash, no
         // floating pill: transparent background so the buttons feel part
@@ -1119,9 +1124,12 @@ private fun RevealActionRow(
                     screen = "reveal"
                 ) { lm ->
                 RevealAlreadyButton(
-                    enabled = resolved != null &&
-                        (!browseMode || TourController.currentStep?.landmarkId == "express-yourself"),
                     cat = cat,
+                    // Express Yourself remains available from Topic Reveal,
+                    // including the read-only reveal opened from Topic Database.
+                    // During the pet-led tour the button is inert — the tour
+                    // only TELLS you about it and advances via Next.
+                    enabled = resolved != null && !TourController.active,
                     metrics = m,
                     modifier = lm.weight(1f),
                     onClick = onAlready
@@ -1137,7 +1145,9 @@ private fun RevealActionRow(
                     ) { lm ->
                         RevealStartButton(
                             cat = cat,
-                            enabled = resolved != null,
+                            // Inert during the pet-led tour — the action is
+                            // only demonstrated, never started.
+                            enabled = resolved != null && !TourController.active,
                             metrics = m,
                             modifier = lm.weight(1f),
                             onClick = onExplore
@@ -1152,7 +1162,9 @@ private fun RevealActionRow(
                     ) { lm ->
                         RevealStartButton(
                             cat = cat,
-                            enabled = resolved != null,
+                            // Inert during the pet-led tour — the action is
+                            // only demonstrated, never started.
+                            enabled = resolved != null && !TourController.active,
                             label = "Explore",
                             metrics = m,
                             modifier = lm.weight(1f),
@@ -1180,23 +1192,31 @@ private fun RevealStartButton(
     // a comfortable vertical padding — the old 2dp tight tier is gone.
     // v8.55 — the tier metrics resize the button instead of squeezing the
     // label on small screens.
+    // v10 — fixed height matches the paired "Express yourself" button so
+    // the two actions read as a unified row instead of mismatched siblings.
+    val startShape = RoundedCornerShape(50)
     Button(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(50),
-        colors = ButtonDefaults.buttonColors(
+        shape = startShape,
+        colors = curioButtonColors(
             // v8.57 — themed to the category accent so the button wears the
-            // lane's own color instead of the generic theme primary.
-            containerColor = cat.themedAccent(),
-            contentColor = cat.onAccent(),
-            disabledContainerColor = cat.themedAccent().copy(alpha = 0.35f),
-            disabledContentColor = cat.onAccent().copy(alpha = 0.45f)
+            // lane's own color instead of the generic theme primary. v9.x —
+            // AMOLED overrides to pitch-black (accent becomes the edge
+            // shine); Material wears the device primary with the accent rim.
+            containerColor = cat.themedButtonFill(),
+            contentColor = cat.themedButtonInk(),
+            disabledContainerColor = cat.themedButtonFill().copy(alpha = 0.35f),
+            disabledContentColor = cat.themedButtonInk().copy(alpha = 0.45f)
         ),
         contentPadding = PaddingValues(
             horizontal = metrics.startPadH,
             vertical = metrics.startPadV
         ),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .categoryEdgeShine(startShape, accent = cat.themedAccent())
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1226,33 +1246,38 @@ private fun RevealStartButton(
 
 @Composable
 private fun RevealAlreadyButton(
+    cat: CurioCategory,
     enabled: Boolean,
-    cat: com.curio.app.data.CurioCategory,
     modifier: Modifier = Modifier,
     metrics: RevealDockMetrics,
     onClick: () -> Unit
 ) {
     // v8.49 — text-style writing action on the transparent inline row.
     // v8.55 — the tier metrics resize it with the pill.
-    val baseInk = MaterialTheme.colorScheme.onSurfaceVariant
-    val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
+    // v11 — SOLID surface: the ghost text button washed out next to the
+    // filled CTA, so it now wears a real theme-aware background (the same
+    // tinted card surface as the rest of the page) with readable category
+    // ink, a hairline edge, and the category edge shine. In Material style
+    // categorySurface falls back to the device surface so it stays a proper
+    // Material control.
+    val surface = cat.categorySurface()
+    val ink = if (enabled) cat.categoryInk() else cat.categoryInk().copy(alpha = 0.40f)
+    val shineAccent = cat.themedAccent()
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(18.dp),
-        color = Color.Transparent,
+        shape = RoundedCornerShape(50),
+        color = if (enabled) surface else surface.copy(alpha = 0.45f),
+        border = cat.categoryBorder(),
         modifier = modifier
-            .fillMaxWidth()
-            .then(
-                // Comfortable vertical padding on the floating pill — the old
-                // 2dp tight tier is gone (see RevealActionDock).
-                Modifier.padding(
-                    horizontal = metrics.alreadyPadH,
-                    vertical = metrics.alreadyPadV
-                )
-            )
+            .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
+            // Give the writing action a real, forgiving tap target across its
+            // entire weighted half of the row. The old inner padding made the
+            // visible label look wider than the actual touchable surface.
+            .height(52.dp)
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -1316,6 +1341,7 @@ private fun HeroCard(
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
+    val heroBlendOn = AppPreferences.heroBlendGradientState
 
     // v8.36 — auto-growing hero: the title used to be hard-capped at 3
     // lines, cutting very long topic names. The card now measures how much
@@ -1397,7 +1423,12 @@ private fun HeroCard(
             val density = LocalDensity.current
             val wPx = with(density) { maxWidth.toPx() }
             val hPx = with(density) { maxHeight.toPx() }
-            val heroBrush = if (heroGradientOn) {
+            val heroBrush = if (heroBlendOn) {
+                // v10 — dual-accent blend: category accent meets a warm
+                // golden companion in a multi-stop vertical gradient
+                // (works across all theme styles).
+                Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
+            } else if (heroGradientOn) {
                 val crown = lerp(heroGradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
                 val base = lerp(heroGradient.last(), Color.Black, 0.06f)
                 val stops = if (heroGradient.size > 2) {

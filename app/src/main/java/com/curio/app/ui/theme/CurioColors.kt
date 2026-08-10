@@ -238,37 +238,19 @@ object CurioGradients {
      * pastel deck read dimmer than it should (especially the shuffle main
      * card). The pastel accent is already soft enough for white-free ink.
      */
-    fun categoryCardFill(accent: Color, dark: Boolean = false): Color =
-        if (AppPreferences.pastelColorsState) {
-            accent
-        } else {
+    fun categoryCardFill(accent: Color, dark: Boolean = false): Color = when {
+        // AMOLED cards are intentionally near-black. The category identity is
+        // carried by a restrained accent trace, not a bright jewel-tone fill.
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+            lerp(Color.Black, accent, 0.12f)
+        AppPreferences.pastelColorsState -> accent
+        else -> {
             // Non-pastel dark heroes need a true jewel-tone depth; the old
             // 10% deepen left coral/sky/amber fills too close to bright raw
             // accents on the midnight surface. Light mode keeps its existing
             // treatment; callers opt into the dark value explicitly.
             lerp(accent, Color.Black, if (dark) 0.28f else 0.10f)
         }
-
-    /**
-     * Lightness floor for material stops — see [floorForWhiteInk].
-     * 0.30 luminance keeps white large/bold card titles ≥ ~3:1 (WCAG large
-     * text AA); the small teaser copy sits near the card's darker base.
-     */
-    private const val WhiteInkLightnessFloor = 0.30f
-
-    /**
-     * Floors a material stop's luminance to [WhiteInkLightnessFloor] so
-     * white card content stays readable on it. v7.37 — used on the device
-     * M3 primary in the redesigned Material card gradient: dark-mode
-     * dynamic primaries are pastel-pale and would wash out white text, so
-     * they're pulled down here (light dynamic primaries are already dark
-     * enough — a no-op there). The material HUE is untouched; only
-     * lightness is pulled down.
-     */
-    private fun floorForWhiteInk(c: Color): Color {
-        val lum = 0.2126f * c.red + 0.7152f * c.green + 0.0722f * c.blue
-        if (lum <= WhiteInkLightnessFloor) return c
-        return lerp(c, Color.Black, (lum - WhiteInkLightnessFloor) / lum)
     }
 
     /**
@@ -309,70 +291,23 @@ object CurioGradients {
      * always matches the app's background shade (the hero card must not
      * wash out to pure white on the cream surface).
      *
-     * v7.37 — Material card blend redesign: when "Material card blends" is on
-     * (default), every category card wears a clean TWO-color gradient — the
-     * device's M3 PRIMARY (the least-pastel of the Material You trio) at
-     * ~90-95%, with only a 5-10% "sprinkle" of the category accent. The old
-     * 6-band wheel that mixed all three M3 colors with 12-52% category tints
-     * read as a loud blend; this reads as the device's own color with just a
-     * whisper of the category so the palette stays true to the device.
-     *
-     * The sprinkle eases from 5% at the top of the card to 10% at the
-     * bottom, so the category presence is subtle but present. In dark mode
-     * the device's pale dynamic primary is floored for white card content
-     * (hue untouched) instead of being drowned in category tint, and the
-     * sprinkle strengthens a little (10% → 18%) so categories stay
-     * distinguishable on the muted mid-tone device color. Pastel mode
-     * softens both the device color and the sprinkle to their pastel
-     * twins. Off / non-Material style: falls through to the classic
-     * two-stop card gradient below.
+     * v12 — the Material style wears the SAME rich category gradient as the
+     * rest of the app (the old device-color + faint category "whisper" cards
+     * read muddy and grey). The Material identity lives in the hue-locked
+     * scheme surfaces and heroes, not in desaturated cards.
      */
     @Composable
     fun cardGradient(accent: Color): List<Color> {
-        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
-            AppPreferences.materialCardBlendsState
-        ) {
-            val scheme = MaterialTheme.colorScheme
-            val pastel = AppPreferences.pastelColorsState
-            val dark = isCurioDarkTheme()
-            // The device anchor — the M3 PRIMARY, the least-pastel of the
-            // Material You trio (secondary/tertiary are the muted pastel
-            // ones). Pastel mode softens it to its pastel twin; otherwise the
-            // raw device color is kept so the card reads as the device's own.
-            val deviceRaw = scheme.primary
-            // v7.37 — floor the device color's lightness for WHITE card
-            // content when it's too pale (dark-mode dynamic palettes are
-            // pastel-pale and would wash out white text; light dynamic
-            // primaries are already dark enough, so floorForWhiteInk is a
-            // no-op there). Only lightness moves — the device hue stays.
-            val device = if (pastel) {
-                pastelAccent(deviceRaw, dark)
-            } else {
-                val floored = floorForWhiteInk(deviceRaw)
-                if (dark) lerp(floored, Color.Black, 0.18f) else floored
-            }
-            // The category "sprinkle" — the single accent presence on the
-            // card, slightly deepened (or pastel twin in pastel mode) so it
-            // reads as a solid whisper rather than a flat wash.
-            val catStop = if (pastel) {
-                pastelAccent(accent, dark)
-            } else {
-                lerp(accent, Color.Black, if (dark) 0.22f else 0.08f)
-            }
-            // TWO-color gradient: ~90-95% device color with a category
-            // sprinkle easing down the card. Light mode (and pastel mode)
-            // hold the pure 5% → 10% requested sprinkle — the device palette
-            // dominates and the category is a subtle accent. Dark mode
-            // (non-pastel) raises it to 10% → 18% because the floored device
-            // primary is a muted mid-tone there: at the light 5/10 ratios
-            // every category would read as the same device color and the
-            // deck/picker would lose its color-coding. The device color
-            // still owns ~82-90% of the card.
-            val sprinkleTop = if (dark && !pastel) 0.10f else 0.05f
-            val sprinkleBottom = if (dark && !pastel) 0.18f else 0.10f
+        // v9.x — AMOLED cards are PROPER pitch black now: a pure black base
+        // (was the surfaceContainerHigh grey) with only a quiet category-
+        // color bloom, and the card edge carries the black-glass shine (see
+        // Modifier.categoryEdgeShine). Power-friendly and coherent everywhere.
+        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+            val base = Color.Black
+            val accentTrace = lerp(base, accent, 0.18f)
             return listOf(
-                lerp(device, catStop, sprinkleTop),
-                lerp(device, catStop, sprinkleBottom)
+                lerp(base, accent, 0.08f),
+                accentTrace
             )
         }
         // End on the ACTIVE theme's background so cards always echo the
@@ -396,6 +331,63 @@ object CurioGradients {
             MaterialTheme.colorScheme.background
         }
         return listOf(start, lerp(start, end, 0.30f))
+    }
+
+    /**
+     * v10 — Dual-accent blend hero gradient: the category accent meets a
+     * warm golden companion in HSL space for a richer, more sophisticated
+     * multi-tone gradient. The blend creates a premium duotone effect —
+     * accent at the top melting into warm gold at the bottom — that reads
+     * beautifully across all theme styles.
+     *
+     * The companion is a warm golden amber (hue ~42°, saturation ~0.85)
+     * that complements every researched accent without clashing: indigo →
+     * gold reads royal, rose → gold reads cinematic, teal → gold reads
+     * luxurious, sky → gold reads sunrise, amber → deepened gold reads
+     * cohesive, and coral → gold reads warm-fire. In dark/AMOLED modes the
+     * companion deepens; in pastel mode it softens.
+     */
+    @Composable
+    fun heroBlendGradient(accent: Color): List<Color> {
+        val dark = isCurioDarkTheme()
+        val pastel = AppPreferences.pastelColorsState
+        val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+
+        // The warm golden companion — a rich amber-gold that pairs with
+        // every category accent. In pastel mode it softens to a butter
+        // cream; in dark/AMOLED it deepens to a burnished bronze.
+        val companionBase = when {
+            amoled -> lerp(Color.Black, CurioColors.GoldInk, 0.28f)
+            pastel && !dark -> CurioColors.ButterYellow
+            dark -> lerp(CurioColors.GoldInk, Color.Black, 0.35f)
+            else -> CurioColors.GoldInk
+        }
+
+        // Top crown — a whisper of light at the very top for a premium
+        // lit-surface feel (muted in dark/AMOLED, crisp in light).
+        val crown = when {
+            amoled -> lerp(Color.Black, accent, 0.10f)
+            dark -> lerp(accent, Color.White, 0.06f)
+            pastel -> lerp(accent, Color.White, 0.10f)
+            else -> lerp(accent, Color.White, 0.16f)
+        }
+
+        // The accent stop — the card fill (theme-aware), which is already
+        // pastel in pastel mode and black-tinted in AMOLED.
+        val accentStop = when {
+            amoled -> lerp(Color.Black, accent, 0.12f)
+            pastel && AppPreferences.pastelCrownDepthState ->
+                lerp(categoryCardFill(accent, dark), Color.Black, 0.05f)
+            else -> categoryCardFill(accent, dark)
+        }
+
+        // The golden companion stop — the warm accent at the bottom.
+        val companionStop = when {
+            amoled -> lerp(Color.Black, companionBase, 0.10f)
+            else -> companionBase
+        }
+
+        return listOf(crown, accentStop, companionStop)
     }
 }
 
@@ -543,6 +535,7 @@ object CurioMixedDeck {
         }
         return stops
     }
+
 
     /**
      * The mixed deck's page wash — the Spin screen wears THE blended color

@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories
@@ -105,13 +106,18 @@ fun CurioEntryCard(
                     onClick()
                 },
                 onLongClick = onLongClick
-            ),
+            )
+            // v9.x — theme-style edge shine (hairline + top shine).
+            .categoryEdgeShine(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
-        // surfaceContainerHigh (not plain surface): in the AMOLED style
-        // `surface` is pure black, which made the whole Cabinet grid of
-        // cards invisible on the black page. The high container step keeps
-        // a faint grey lift so cards read as boxes in every theme.
-        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+        // v9.x — AMOLED cards are proper pitch black now: the old grey
+        // surfaceContainerHigh lift is replaced by the black-glass shine
+        // edge, so the cards read as boxes without sacrificing OLED black.
+        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+            Color.Black
+        } else {
+            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+        },
         border = if (selected) {
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
         } else {

@@ -94,8 +94,12 @@ import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
@@ -615,6 +619,8 @@ fun SaveCaptureScreen(
             // Drafted content → the full three-way leave dialog: save and
             // switch / keep editing / discard (discard pops the page).
             AlertDialog(
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
                 onDismissRequest = { showDiscardDialog = false },
                 title = { Text("Unsaved changes") },
                 text = { Text("You have unsaved edits. Save them and switch away, or leave without saving.") },
@@ -636,7 +642,11 @@ fun SaveCaptureScreen(
                                 showDiscardDialog = false
                                 performSave()
                             },
-                            shape = RoundedCornerShape(20.dp)
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = curioDialogActionColor(),
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) {
                             Text("Save and switch")
                         }
@@ -650,6 +660,8 @@ fun SaveCaptureScreen(
             // (the page is full of content even with no NEW edits), while a
             // fresh capture is genuinely empty.
             AlertDialog(
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
                 onDismissRequest = { showDiscardDialog = false },
                 title = { Text(if (editEntryId != null) "Discard your edits?" else "Leave this capture?") },
                 text = {
@@ -661,15 +673,21 @@ fun SaveCaptureScreen(
                     )
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-                        showDiscardDialog = false
-                        navController.popBackStack()
-                    }) {
+                    TextButton(
+                        onClick = {
+                            showDiscardDialog = false
+                            navController.popBackStack()
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) {
                         Text("Leave")
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showDiscardDialog = false }) {
+                    TextButton(
+                        onClick = { showDiscardDialog = false },
+                        colors = curioDialogActionButtonColors()
+                    ) {
                         Text("Keep editing")
                     }
                 }
@@ -684,6 +702,8 @@ fun SaveCaptureScreen(
     // loading it now.
     if (showResumeDraftDialog) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 pendingDraft = null
                 showResumeDraftDialog = false
@@ -700,11 +720,14 @@ fun SaveCaptureScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    resumedDraftData = pendingDraft
-                    pendingDraft = null
-                    showResumeDraftDialog = false
-                }) {
+                TextButton(
+                    onClick = {
+                        resumedDraftData = pendingDraft
+                        pendingDraft = null
+                        showResumeDraftDialog = false
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) {
                     Text("Resume")
                 }
             }
@@ -1197,6 +1220,8 @@ private fun FormatBodyForCategory(
     // ── Confirm before removing a take with drafted content ─────────────
     pendingRemoveIndex?.let { removeIdx ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingRemoveIndex = null },
             title = { Text("Remove this take?") },
             text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
@@ -1209,7 +1234,10 @@ private fun FormatBodyForCategory(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingRemoveIndex = null }) {
+                TextButton(
+                    onClick = { pendingRemoveIndex = null },
+                    colors = curioDialogActionButtonColors()
+                ) {
                     Text("Keep editing")
                 }
             }
@@ -1222,11 +1250,16 @@ private fun FormatBodyForCategory(
     // (Switch), or stay put (Keep editing).
     pendingFormatSwitch?.let { fmt ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingFormatSwitch = null },
             title = { Text("Switch format?") },
             text = { Text("Switch to ${fmt.shortName}? You can keep what you've added here as its own take first, or switch and clear it.") },
             dismissButton = {
-                TextButton(onClick = { pendingFormatSwitch = null }) {
+                TextButton(
+                    onClick = { pendingFormatSwitch = null },
+                    colors = curioDialogActionButtonColors()
+                ) {
                     Text("Keep editing")
                 }
             },
@@ -1261,7 +1294,11 @@ private fun FormatBodyForCategory(
                             }
                             pendingFormatSwitch = null
                         },
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = curioDialogActionColor(),
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         Text("Save and switch")
                     }

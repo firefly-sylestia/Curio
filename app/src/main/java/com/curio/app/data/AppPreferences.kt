@@ -72,6 +72,7 @@ object AppPreferences {
     private const val KEY_PEEK_HAIRLINE = "peek_hairline"
     private const val KEY_PEEK_SHADOWS = "peek_shadows"
     private const val KEY_PEEK_TITLES = "peek_titles"
+    private const val KEY_PEEK_TAIL_FADE = "peek_tail_fade"
     // v7.13 — Main card (hero ticket) redesign toggles: enhanced gradient
     // fill, accent border, soft shadow. All OFF by default so the current
     // hero card stays exactly as-is until enabled. (Enhanced typography was
@@ -79,7 +80,10 @@ object AppPreferences {
     private const val KEY_HERO_GRADIENT = "hero_gradient"
     private const val KEY_HERO_BORDER = "hero_border"
     private const val KEY_HERO_SHADOW = "hero_shadow"
-    private const val KEY_MATERIAL_CARD_BLENDS = "material_card_blends"
+    // v10 — dual-accent blend gradient: the hero card wears the category
+    // accent blended with a warm golden companion for a richer palette.
+    // Toggleable (default OFF); works across all theme styles.
+    private const val KEY_HERO_BLEND_GRADIENT = "hero_blend_gradient"
     private const val KEY_3D_BUTTON_GRADIENT = "3d_button_gradient"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
     private const val KEY_REMINDER_HOUR = "reminder_hour"
@@ -90,15 +94,6 @@ object AppPreferences {
     // boolean key below is read once for migration and then removed.
     private const val KEY_SMART_DENSITY_MODE = "smart_density_mode"
     private const val KEY_LEGACY_SMART_DENSITY_LAYOUT = "smart_density_layout"
-    // v9.1 — Premium Spin landing FX experiment (default OFF). The classic
-    // spin feel stays the shipped default; the master toggle swaps in the
-    // premium landing feel, and each layer (reel / catch / ring / sparkle)
-    // is independently toggleable for A/B tuning.
-    private const val KEY_SPIN_LANDING_FX = "spin_landing_fx"
-    private const val KEY_SPIN_FX_REEL = "spin_fx_reel"
-    private const val KEY_SPIN_FX_CATCH = "spin_fx_catch"
-    private const val KEY_SPIN_FX_RING = "spin_fx_ring"
-    private const val KEY_SPIN_FX_SPARKLE = "spin_fx_sparkle"
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
@@ -219,6 +214,9 @@ object AppPreferences {
         private set
     var peekTitlesState by mutableStateOf(false)
         private set
+    /** Experimental newer peek motion: travel first, then fade at the exit tail. */
+    var peekTailFadeState by mutableStateOf(false)
+        private set
 
     // Main card (hero ticket) redesign (v7.13, EXPERIMENTAL) — the Spin
     // deck's front hero card wears four independently-toggleable upgrades:
@@ -228,19 +226,16 @@ object AppPreferences {
     // until the experiment settles.
     var heroGradientState by mutableStateOf(false)
         private set
-    var heroBorderState by mutableStateOf(false)
+    // v10 — promoted from experiment to always-on: the accent border on the
+    // hero card is now the shipped default.
+    var heroBorderState by mutableStateOf(true)
         private set
     var heroShadowState by mutableStateOf(false)
         private set
-
-    // Material card blends (v7.8, EXPERIMENTAL) — when ON, cards in the
-    // Material theme style wear a MIXED gradient of the category accent + the
-    // device's dynamic Material colors (primary / secondary / tertiary) in the
-    // same multi-stop style as the mixed deck, so the card reads as a category
-    // × device blend. Default ON (the Material style's headline look); only
-    // takes effect while the Material style is active. When the experiment
-    // settles, hardcode the winner and remove the toggle.
-    var materialCardBlendsState by mutableStateOf(true)
+    // v10 — dual-accent blend gradient toggle (default OFF). When on, the
+    // hero card wears a richer multi-accent blend instead of the plain
+    // vertical gradient.
+    var heroBlendGradientState by mutableStateOf(false)
         private set
 
     // 3D button gradient & shadow (v7.11, EXPERIMENTAL) — when ON, the
@@ -286,15 +281,6 @@ object AppPreferences {
     // ships at its natural size; compact sizing is opt-in. Seeded from
     // prefs in [initThemeMode].
     var smartDensityModeState by mutableStateOf(SmartDensityMode.OFF)
-    // v9.1 — Premium Spin landing FX experiment. Master toggle (default
-    // OFF — the classic spin stays the shipped default); the four layers
-    // default ON so enabling the master turns on the full premium feel,
-    // and each layer can be A/B-tuned independently.
-    var spinLandingFxState by mutableStateOf(false)
-    var spinFxReelState by mutableStateOf(true)
-    var spinFxCatchState by mutableStateOf(true)
-    var spinFxRingState by mutableStateOf(true)
-    var spinFxSparkleState by mutableStateOf(true)
     // Explore sessions — the explore-now timer/reminder/done flow. Default
     // ON; off disables the timer notification + reminder + done prompt while
     // Explore-now still opens the browser and records recently-explored.
@@ -439,21 +425,17 @@ object AppPreferences {
         peekHairlineState = isPeekHairlineEnabled(context)
         peekShadowsState = isPeekShadowsEnabled(context)
         peekTitlesState = isPeekTitlesEnabled(context)
+        peekTailFadeState = isPeekTailFadeEnabled(context)
         heroGradientState = isHeroGradientEnabled(context)
         heroBorderState = isHeroBorderEnabled(context)
         heroShadowState = isHeroShadowEnabled(context)
-        materialCardBlendsState = isMaterialCardBlendsEnabled(context)
+        heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
         smartDensityModeState = getSmartDensityMode(context)
-        spinLandingFxState = isSpinLandingFxEnabled(context)
-        spinFxReelState = isSpinFxReelEnabled(context)
-        spinFxCatchState = isSpinFxCatchEnabled(context)
-        spinFxRingState = isSpinFxRingEnabled(context)
-        spinFxSparkleState = isSpinFxSparkleEnabled(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
@@ -561,6 +543,15 @@ object AppPreferences {
         peekTitlesState = enabled
     }
 
+    /** Whether the newer travel-then-tail-fade peek motion is on (default off). */
+    fun isPeekTailFadeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PEEK_TAIL_FADE, false)
+
+    fun setPeekTailFadeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PEEK_TAIL_FADE, enabled).apply()
+        peekTailFadeState = enabled
+    }
+
     // ── Main card (hero ticket) redesign (v7.13 experimental) ──────────
     /** Whether the enhanced hero-card gradient fill is on (default off). */
     fun isHeroGradientEnabled(context: Context): Boolean =
@@ -571,9 +562,9 @@ object AppPreferences {
         heroGradientState = enabled
     }
 
-    /** Whether the accent-tinted hero-card border is on (default off). */
+    /** Whether the accent-tinted hero-card border is on (v10 — default true, promoted from experiment). */
     fun isHeroBorderEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HERO_BORDER, false)
+        prefs(context).getBoolean(KEY_HERO_BORDER, true)
 
     fun setHeroBorderEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_BORDER, enabled).apply()
@@ -589,14 +580,14 @@ object AppPreferences {
         heroShadowState = enabled
     }
 
-    // ── Material card blends (v7.8 experimental) ───────────────────────
-    /** Whether Material-style cards mix the category accent with the device's dynamic colors (default on). */
-    fun isMaterialCardBlendsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_MATERIAL_CARD_BLENDS, true)
+    // ── Dual-accent blend gradient (v10 toggle) ────────────────────────
+    /** Whether the hero card wears the dual-accent blend gradient (default OFF). */
+    fun isHeroBlendGradientEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HERO_BLEND_GRADIENT, false)
 
-    fun setMaterialCardBlendsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_MATERIAL_CARD_BLENDS, enabled).apply()
-        materialCardBlendsState = enabled
+    fun setHeroBlendGradientEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HERO_BLEND_GRADIENT, enabled).apply()
+        heroBlendGradientState = enabled
     }
 
     // ── 3D button gradient & shadow (v7.11 experimental) ───────────────
@@ -675,51 +666,6 @@ object AppPreferences {
     fun setSmartDensityMode(context: Context, mode: SmartDensityMode) {
         prefs(context).edit().putString(KEY_SMART_DENSITY_MODE, mode.name).apply()
         smartDensityModeState = mode
-    }
-
-    /** v9.1 — master toggle for the premium Spin landing FX experiment. */
-    fun isSpinLandingFxEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_LANDING_FX, false)
-
-    fun setSpinLandingFxEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_LANDING_FX, enabled).apply()
-        spinLandingFxState = enabled
-    }
-
-    /** v9.1 — buttery reel glide (cubic ease-out deceleration on the wheel). */
-    fun isSpinFxReelEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_REEL, true)
-
-    fun setSpinFxReelEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_REEL, enabled).apply()
-        spinFxReelState = enabled
-    }
-
-    /** v9.1 — juicy spring catch on landing (replaces the calm settle). */
-    fun isSpinFxCatchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_CATCH, true)
-
-    fun setSpinFxCatchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_CATCH, enabled).apply()
-        spinFxCatchState = enabled
-    }
-
-    /** v9.1 — shockwave ring radiating from the landed card. */
-    fun isSpinFxRingEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_RING, true)
-
-    fun setSpinFxRingEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_RING, enabled).apply()
-        spinFxRingState = enabled
-    }
-
-    /** v9.1 — sparkle burst around the landed card. */
-    fun isSpinFxSparkleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_SPARKLE, true)
-
-    fun setSpinFxSparkleEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_SPARKLE, enabled).apply()
-        spinFxSparkleState = enabled
     }
 
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */

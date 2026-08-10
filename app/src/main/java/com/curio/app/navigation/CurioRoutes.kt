@@ -123,7 +123,7 @@ object CurioRoutes {
     const val SPLASH = "splash"
     const val ONBOARDING = "onboarding"
 
-    // ── Inside the Spin flow (no bottom nav)
+    // ── Inside the Spin flow (Reveal keeps bottom nav for morph stability)
     const val PICKER = "picker"
     const val SPIN_WITH_CATEGORY = "spin/{categorySlug}"
     // Optional ?browse=1 marks a topic opened from the Browse Topics
@@ -184,8 +184,13 @@ object CurioRoutes {
         return LIGHTBOX
     }
 
-    /** Routes where the bottom navigation bar should be visible. */
-    val bottomNavRoutes: Set<String> = setOf(HOME, SPIN, CABINET)
+    /**
+     * Bottom-nav tab route templates. Reveal is included as the Spin tab's
+     * continuation so bottom-nav selection/back-stack logic can still treat
+     * it as Spin-adjacent, but CurioNavHost hides the actual bar on Reveal
+     * and reserves an equal-height torn placeholder for morph stability.
+     */
+    val bottomNavRoutes: Set<String> = setOf(HOME, SPIN, CABINET, REVEAL)
 
     /**
      * Route PREFIXES where the bottom navigation bar should be visible.
@@ -197,7 +202,7 @@ object CurioRoutes {
      * `spin/{categorySlug}` (the Spin screen WITH a category), which is
      * exactly the user-visible splash-nav bug.
      */
-    val bottomNavRoutePrefixes: Set<String> = setOf(HOME, SPIN, CABINET)
+    val bottomNavRoutePrefixes: Set<String> = setOf(HOME, SPIN, CABINET, REVEAL)
 
     /**
      * Route PREFIXES that own navigation during app boot (splash → home /

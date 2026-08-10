@@ -58,6 +58,8 @@ import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -119,19 +121,31 @@ fun SettingsHeroHeader(
     }
     val fill = settingsRoseAccent()
     val ink = settingsReadableInk(fill)
+    // v12 — AMOLED: the pure-black banner carries the rose accent through the
+    // watermark collage + back pill (the black-glass language); the title
+    // stays white for readability.
+    val symbolTint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+        CurioColors.HomeRosewood else ink
     Box(
         modifier = Modifier
             .fillMaxWidth()            .height(totalHeight)
         ) {
             // ── Under-sheet — the shared white paper layer, so the tear stays
-            // bright beneath the rose hero in every theme.
+            // bright beneath the rose hero in every theme. AMOLED: the sheet
+            // turns a soft rose so the torn edge keeps reading through the
+            // up-bites of the pure-black banner (black-on-black would hide
+            // the seam), carrying the accent of the color.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(42.dp)
                     .offset(y = bannerHeight - 18.dp)
-                .clip(sheetShape)
-                .background(CurioColors.CreamWhite)
+                .clip(sheetShape)                    .background(
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                        CurioColors.HomeRosewood.copy(alpha = 0.45f)
+                    else MaterialTheme.colorScheme.surface
+                )
+
         )
         // ── Torn-edge shadow — hairline dark rim under the seam.
         Box(
@@ -139,7 +153,7 @@ fun SettingsHeroHeader(
                 .fillMaxWidth()                .height(bannerHeight)
                 .offset(y = 1.dp)
                 .clip(heroTornShape)
-                .background(Color.Black.copy(alpha = 0.20f))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f))
             )
             // ── Solid rose banner, torn bottom edge ────────────────────────
             Surface(
@@ -163,8 +177,8 @@ fun SettingsHeroHeader(
                     SettingsHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
                 )
                 pairs.forEachIndexed { i, pair ->
-                    SettingsHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, ink)
-                    SettingsHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, ink)
+                    SettingsHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, symbolTint)
+                    SettingsHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, symbolTint)
                 }
                 Column(
                     modifier = Modifier
@@ -180,8 +194,8 @@ fun SettingsHeroHeader(
                     ) {
                         CurioBackButton(
                             onClick = onBack,
-                            containerColor = ink.copy(alpha = 0.18f),
-                            contentColor = ink,
+                            containerColor = symbolTint.copy(alpha = 0.18f),
+                            contentColor = symbolTint,
                             disableRipple = true
                         )
                     }
@@ -237,6 +251,18 @@ private fun BoxScope.SettingsHeroSymbol(
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
+    // Material and AMOLED headers use the active scheme's semantic roles
+    // instead of the legacy rose fill. This keeps hero headers coherent with
+    // dynamic wallpaper colors and preserves a restrained dark AMOLED surface.
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.primary
+    }
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        // Pure black — no grey/primary tint: on OLED the banner is a true
+        // black plate and the rose accent comes through the watermark
+        // collage + back pill instead of a tinted fill.
+        return Color.Black
+    }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
         // Shared dark hero companion used by Settings, Cabinet, and Onboarding.
@@ -252,12 +278,14 @@ fun settingsRoseAccent(): Color {
 /** Readable ink for content sitting on the settings rose banner (Home's
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
-fun settingsReadableInk(fill: Color): Color = if (
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme()
-) {
-    MaterialTheme.colorScheme.onSurface
-} else {
-    pastelFillInk(fill)
+fun settingsReadableInk(fill: Color): Color = when {
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+        MaterialTheme.colorScheme.onPrimary
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+        MaterialTheme.colorScheme.onSurface
+    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+        MaterialTheme.colorScheme.onSurface
+    else -> pastelFillInk(fill)
 }
 
 /** Compact hub for the redesigned settings experience — the Profile-style
@@ -360,8 +388,25 @@ fun SettingsHubScreen(navController: NavController) {
                                 }
                                 card.rows.forEachIndexed { index, row ->
                                     if (index > 0) CurioSettingsDivider()
-                                    CurioSettingsRow(row.icon, row.title, row.subtitle) {
-                                        navController.navigate(row.route) { launchSingleTop = true }
+                                    if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
+                                        // v8.xx — the Appearance row is a pet
+                                        // landmark: the pet pokes it, and the
+                                        // tour's Settings stop points at it.
+                                        PetLandmark(
+                                            id = "appearance",
+                                            kind = PetLandmarks.Kind.FUN,
+                                            screen = "settings"
+                                        ) { lm ->
+                                            Box(modifier = lm) {
+                                                CurioSettingsRow(row.icon, row.title, row.subtitle) {
+                                                    navController.navigate(row.route) { launchSingleTop = true }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        CurioSettingsRow(row.icon, row.title, row.subtitle) {
+                                            navController.navigate(row.route) { launchSingleTop = true }
+                                        }
                                     }
                                 }
                             }

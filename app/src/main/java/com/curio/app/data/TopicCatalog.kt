@@ -88,6 +88,9 @@ object TopicCatalog {
      * the topic is expected to be in the already-loaded pool.
      */
     suspend fun findByNameAcrossAll(name: String): CurioTopic? {
+        // Preserve exhaustive lookup semantics without forcing a wildcard
+        // merge into the cache; this remains an explicit, potentially large
+        // operation for callers that truly need it.
         TopicJsonLoader.preloadAll()
         return findByName(name)
     }
@@ -100,6 +103,18 @@ object TopicCatalog {
     suspend fun tagsFor(id: CategoryId): List<String> =
         poolFor(id).flatMap { it.tags }.distinct().sorted()
 
+    /**
+     * The app's TOTAL topic count across the ten canonical lanes
+     * (wildcard excluded — it only mirrors them). Sync: reads the warm
+     * cache, which the splash preload fills before the UI renders; an
+     * uncached lane just contributes zero until it loads. Used by the
+     * Home hero's "Topics" stat.
+     */
+    fun totalTopicCount(): Int =
+        CategoryId.values()
+            .filter { it != CategoryId.WILDCARD }
+            .sumOf { TopicJsonLoader.cached(it)?.size ?: 0 }
+
     // ── Sample entries (sync, after preload) ───────────────────────────────
     //
     // CabinetScreen + EntryDetailScreen + TopicHistoryScreen use these
@@ -107,33 +122,31 @@ object TopicCatalog {
 
     /**
      * Returns a small set of pre-baked sample entries for the Cabinet
-     * grid + EntryDetail preview. Synchronous — assumes the relevant
-     * categories have been preloaded via [TopicJsonLoader.preloadAll].
+     * grid + EntryDetail preview. Each sample loads only its own category,
+     * avoiding the old all-catalog preload when promo content is opened.
      *
      * The samples are constructed in-memory from a curated subset of
      * topics; they don't come from JSON because they're
      * "the user already saved this" not "this topic exists".
      */
     suspend fun sampleEntries(): List<CurioEntry> = withContext(Dispatchers.Default) {
-        // Ensure the topic pools are loaded.
-        TopicJsonLoader.preloadAll()
-
         listOfNotNull(
-            sampleFor("artist-bowie",     daysAgo = 1,  format = CaptureFormat.SoundBite),
-            sampleFor("album-ziggy",      daysAgo = 2,  format = CaptureFormat.ReelNotes),
-            sampleFor("film-2001",        daysAgo = 4,  format = CaptureFormat.Marginalia),
-            sampleFor("book-beloved",     daysAgo = 6,  format = CaptureFormat.Marginalia),
-            sampleFor("painting-frida",   daysAgo = 8,  format = CaptureFormat.GalleryWall),
-            sampleFor("discovery-bh",     daysAgo = 11, format = CaptureFormat.FieldNotes)
-        ).also { /* ensure samples were found */ }
+            sampleFor("artist-david-bowie", CategoryId.ARTISTS, daysAgo = 1, format = CaptureFormat.SoundBite),
+            sampleFor("album-david-bowie-ziggy-stardust", CategoryId.ALBUMS, daysAgo = 2, format = CaptureFormat.ReelNotes),
+            sampleFor("film-2001-a-space-odyssey", CategoryId.FILMS, daysAgo = 4, format = CaptureFormat.Marginalia),
+            sampleFor("book-beloved", CategoryId.BOOKS, daysAgo = 6, format = CaptureFormat.Marginalia),
+            sampleFor("painter-frida-kahlo", CategoryId.PAINTERS, daysAgo = 8, format = CaptureFormat.GalleryWall),
+            sampleFor("discovery-exoplanet-atmosphere", CategoryId.DISCOVERIES, daysAgo = 11, format = CaptureFormat.FieldNotes)
+        )
     }
 
     private suspend fun sampleFor(
         topicId: String,
+        categoryId: CategoryId,
         daysAgo: Int,
         format: CaptureFormat
     ): CurioEntry? {
-        val topic = findByNameAcrossAll(topicId) ?: return null
+        val topic = TopicJsonLoader.load(categoryId).firstOrNull { it.id == topicId } ?: return null
         val now = System.currentTimeMillis()
         val oneDay = 24L * 60 * 60 * 1000
         val capturedAt = now - (daysAgo * oneDay)

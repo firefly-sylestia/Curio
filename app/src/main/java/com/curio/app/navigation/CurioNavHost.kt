@@ -13,7 +13,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,9 +30,13 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,10 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,9 +72,11 @@ import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.categoryBackgroundWash
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.delay
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
@@ -112,6 +116,10 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.theme.CurioMotion
 
+// Must match TopicRevealScreen's RevealBottomBarHeight: the hidden
+// navbar slot that the reveal paints with its plain bottom band.
+private val RevealBottomBarPlaceholderHeight = 80.dp
+
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
  * unpaired surrogates fall back to the raw value instead of crashing
@@ -133,6 +141,16 @@ private fun isRevealRoute(entry: NavBackStackEntry): Boolean =
 /** True when the route is the saved-entry detail page (any entry id). */
 private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route?.substringBefore("/") == CurioRoutes.ENTRY_DETAIL.substringBefore("/")
+
+/**
+ * True when the destination is the Topic Reveal page opened from the Browse
+ * Topics database (browse=1). Browse-mode reveals are read-only and are
+ * pushed from the topic browser — they are NOT part of the Spin morph flow,
+ * so the bottom navigation bar stays hidden on them.
+ */
+private fun isBrowseRevealRoute(entry: NavBackStackEntry?): Boolean =
+    entry?.destination?.route == CurioRoutes.REVEAL &&
+        entry.arguments?.getString("browse") == "1"
 
 /**
  * Push destinations that use the detail page's center pop-up (scale + fade)
@@ -169,7 +187,10 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     initialState: NavBackStackEntry,
     targetState: NavBackStackEntry
 ): Boolean =
-    initialState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes &&
+    // Browse-mode Reveal is a pushed read-only page, not a tab — it never
+    // crossfades like a tab switch.
+    !isBrowseRevealRoute(targetState) && !isBrowseRevealRoute(initialState) &&
+        initialState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes &&
         targetState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes
 
 /**
@@ -177,9 +198,10 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  *
  * All routes are flat. The bottom nav is rendered by a [Scaffold] wrapper
  * and is conditionally visible based on the current route (see
- * [CurioRoutes.bottomNavRoutes]). When the user is on a non-bottom-nav
- * route (push destinations like Picker/Reveal/Capture/Detail/Settings/
- * ManageCategories/TopicHistory/Lightbox), the bottom bar is omitted.
+ * [CurioRoutes.bottomNavRoutes]). Topic Reveal renders its own plain
+ * bottom band at navbar height instead of the bar (see TopicRevealScreen);
+ * other push destinations like Picker/Capture/Detail/Settings/Lightbox
+ * omit it.
  *
  * Each tab uses the standard Compose Navigation pattern when navigated to:
  *   navigate(route) { popUpTo(startDestination) { saveState = true }; ... }
@@ -200,37 +222,6 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * switches crossfade.
  */
 @Composable
-private fun RevealBottomBarPlaceholder(
-    bottomBarHeightPx: Int,
-    density: androidx.compose.ui.unit.Density,
-    // v8.25 — the reserved strip wears the reveal page's category wash (not
-    // the Scaffold's plain cream surface), so no cream band ever flashes
-    // between the Spin wash and the reveal dock registering.
-    background: Color
-) {
-    val reserve = if (bottomBarHeightPx > 0) {
-        with(density) { bottomBarHeightPx.toDp() }
-    } else null
-    // The fallback (no measured height yet — e.g. a deep link straight into
-    // Reveal) must reserve the SAME 80dp total as the measured bar AND the
-    // reveal dock (which is height(80.dp) with the nav-bar inset consumed
-    // INSIDE), so the placeholder → dock swap never changes Scaffold
-    // innerPadding mid-transition (an innerPadding change re-lays out the
-    // SharedTransitionLayout and freezes the reveal morph — v8.5).
-    Spacer(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(background)
-            .then(
-                if (reserve != null) Modifier.height(reserve)
-                else Modifier
-                    .height(80.dp)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-            )
-    )
-}
-
-@Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
 ) {
@@ -239,85 +230,29 @@ fun CurioNavHost(
     val routePrefix = remember(currentRoute) {
         currentRoute?.substringBefore("/")
     }
-    val showBottomBar = routePrefix in CurioRoutes.bottomNavRoutePrefixes
-    // Push destinations that host a shared-element morph TARGET whose
-    // source is a bottom-bar tab (the Reveal hero grows out of the Spin
-    // ticket). The bottom chrome must still RESERVE the bottom bar's height
-    // (an invisible placeholder below) so innerPadding never changes the
-    // moment the bar hides — otherwise the exiting Spin screen re-lays-out
-    // mid-transition and the morph source card visibly dips down before
-    // expanding (the "moves down, then animates" artifact), and the reveal
-    // watermark shifts down into the vacated bar strip.
-    // v8.2 — bug fix: this compared the route PREFIX ("reveal"/"detail")
-    // against the FULL route patterns ("reveal/{categorySlug}/{topicName}?
-    // browse={browse}", "detail/{entryId}"), so it was ALWAYS false and the
-    // placeholder never rendered — the bar hid mid-morph, innerPadding grew
-    // by the bar's height, and the watermark visibly shifted down. Compare
-    // the prefixes so the reserve actually engages.
-    // v8.36/v8.37 — the reserve covers the Reveal morph destination in both
-    // directions of travel: while the reveal is on top (route-prefix check),
-    // and while it is EXITING (popping reveal → spin) — detected by the
-    // exiting screen's dock still being registered in revealBottomBarContent
-    // (it only clears when the destination leaves composition, i.e. after
-    // the pop transition finishes). Without the exiting case the real bar
-    // swaps in mid-transition, innerPadding changes, and the
-    // SharedTransitionLayout re-lays out — the nav bar flashed the cream
-    // surface for a moment on reveal close. (v8.37 — this replaced the
-    // backStackEntry.previousBackStackEntry check, which navigation 2.9
-    // removed in the NavBackStackEntry rework.)
-    // v8.38 — Entry Detail no longer reserves the slot: its bottom wash
-    // strip is gone (the page pops up edge-to-edge), so only the reveal
-    // route keeps the reserve.
-    val revealPrefix = CurioRoutes.REVEAL.substringBefore("/")
-    val morphReservePrefixes = setOf(revealPrefix)
-    var revealBottomBarContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
-    val reserveBarSpace = (routePrefix != null && routePrefix in morphReservePrefixes) ||
-        revealBottomBarContent != null
-    // v8.25 — the reveal page's category, resolved from the reveal route's
-    // categorySlug so the reserved bottom strip below can wear the SAME wash
-    // as the page from the very first frame. The reveal dock (which carries
-    // the wash itself) registers a frame or two after the route switches —
-    // without this the transparent morph placeholder showed the Scaffold's
-    // plain cream surface in that gap (the "bottom nav flashes cream on
-    // open" bug). No exiting-entry resolution is needed: while the reveal
-    // pops back, its own dock is still registered and paints the wash.
-    val revealCat = if (routePrefix == revealPrefix) {
-        CurioCategories.byRouteSlug(
-            backStackEntry?.arguments?.getString("categorySlug").orEmpty()
-        ) ?: CurioCategories.byId(CategoryId.WILDCARD)
-    } else null
-    // The reserved strip's background: the reveal wash while the reveal is
-    // on top, else the surface. (The detail page reserves nothing — it pops
-    // up edge-to-edge with no bottom strip.)
-    val reserveBackground = when {
-        revealCat != null -> revealCat.categoryBackgroundWash()
-        else -> MaterialTheme.colorScheme.surface
-    }
-    // The reveal page paints its own category wash over the whole content
-    // area, and its action dock wears the SAME wash (see RevealActionDock),
-    // so the Scaffold's default background never shows as a strip behind
-    // the transparent dock while the reveal is open — and the Scaffold's
-    // containerColor stays CONSTANT across the whole route transition.
-    // (v8.5 regression fix: painting the Scaffold container with a
-    // dynamically-computed revealWash here restarted/disrupted the
-    // shared-element route transition — the morph froze and the entire
-    // reveal page stayed invisible except the dock, which lives outside
-    // the SharedTransitionLayout. The dock now carries the wash itself.)
-    // The bottom bar's exact measured height (px) — captured from the real
-    // bar so the invisible morph-transition placeholder can reserve IDENTICAL
-    // space. M3's NavigationBar consumes the nav-bar inset inside its 80dp
-    // min height, so a naive "80dp + nav inset" placeholder is TALLER than
-    // the bar by the inset: the moment the bar is swapped for the placeholder
-    // (Spin → Reveal), Scaffold innerPadding changes and the
-    // SharedTransitionLayout resizes mid-morph, re-laying out the exiting
-    // screen — the watermark re-aligns and the shared source bounds shift
-    // (the "morph starts a little down" artifact). Reserving the measured
-    // height keeps innerPadding constant across the whole transition.
-    var bottomBarHeightPx by rememberSaveable { mutableStateOf(0) }
+    // ── Adaptive window layout (tablet & landscape) ────────────────────
+    // Medium/Expanded windows (>= 600dp wide) move the three tabs into a
+    // left-edge NavigationRail and center page content in a comfortable
+    // max-width column ([CurioContentMaxWidth]) with the theme background
+    // filling the gutters. Compact phones keep the bottom bar and full-width
+    // content exactly as before. Always-on — no Settings toggle.
+    val wide = windowWidthSizeClass().isWide
 
+    // Topic Reveal renders its OWN plain bottom band at the bottom (at
+    // navbar height) instead of the bottom navigation bar — both from the
+    // Spin main card and from the topic browser, the reveal never shows
+    // the bar (see TopicRevealScreen's bottom band).
+    val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
+    val showBottomBar =
+        routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+    // Reveal intentionally hides the actual nav bar, but its content still
+    // reserves the same 80dp app-bar footprint. The reveal screen paints a
+    // plain band into that reserved slot, so the watermark coordinate space
+    // and shared hero target stay aligned with the Spin tab instead of
+    // stretching downward when the nav bar disappears.
+    val revealBottomBarPlaceholder = if (isRevealRoutePrefix && !wide) RevealBottomBarPlaceholderHeight else 0.dp
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val density = LocalDensity.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
     // v7.31 — two-step "Cancel session": the first tap flips the done-now
     // dialog into a confirm step, the second tap actually ends the explore.
@@ -410,41 +345,13 @@ fun CurioNavHost(
         }
     }
 
-    // ── Adaptive window layout (tablet & landscape) ────────────────────
-    // Medium/Expanded windows (>= 600dp wide) move the three tabs into a
-    // left-edge NavigationRail and center page content in a comfortable
-    // max-width column ([CurioContentMaxWidth]) with the theme background
-    // filling the gutters. Compact phones keep the bottom bar and full-width
-    // content exactly as before. Always-on — no Settings toggle.
-    val wide = windowWidthSizeClass().isWide
-
     // The floating explore bubble now lives in the explore service's overlay
     // window (over other apps), so the Scaffold simply fills the screen.
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
-                // Reserve-first (v8.36): any live shared-element morph — a
-                // reveal or detail destination on top, OR one still exiting
-                // (popping back) — keeps the bottom strip as the screen's
-                // dock / wash spacer or the tinted placeholder, so the real
-                // bar never swaps in mid-transition (innerPadding changes
-                // mid-morph would re-lay out the SharedTransitionLayout and
-                // jolt the animation / flash the cream surface).
-                if (!wide && reserveBarSpace) {
-                    revealBottomBarContent?.invoke()
-                        ?: RevealBottomBarPlaceholder(
-                            bottomBarHeightPx = bottomBarHeightPx,
-                            density = density,
-                            background = reserveBackground
-                        )
-                } else if (!wide && showBottomBar) {
-                    CurioBottomBar(
-                        navController = navController,
-                        // Measure the bar's real height so the morph
-                        // placeholder below can reserve exactly this much
-                        // (see bottomBarHeightPx).
-                        modifier = Modifier.onSizeChanged { bottomBarHeightPx = it.height }
-                    )
+                if (!wide && showBottomBar) {
+                    CurioBottomBar(navController = navController)
                 }
             },
             // Every screen applies its own statusBarsPadding().  This Scaffold
@@ -472,7 +379,8 @@ fun CurioNavHost(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .padding(bottom = revealBottomBarPlaceholder),
                 contentAlignment = Alignment.Center
             ) {
         // Wide windows (tablet / landscape / desktop): ONE continuous
@@ -710,13 +618,11 @@ fun CurioNavHost(
                 ) {
                     TopicRevealScreen(
                         categorySlug = entry.arguments?.getString("categorySlug").orEmpty(),
-                        topicName    = safeDecode(entry.arguments?.getString("topicName")),
-                    navController = navController,
-                    // Browse-Topics mode: read-only reveal (see CurioRoutes).
-                    browseMode = entry.arguments?.getString("browse") == "1",
-                    onBottomBarContentChanged = { revealBottomBarContent = it },
-                    onBottomBarContentCleared = { revealBottomBarContent = null }
-                )
+                        topicName = safeDecode(entry.arguments?.getString("topicName")),
+                        navController = navController,
+                        // Browse-Topics mode: read-only reveal (see CurioRoutes).
+                        browseMode = entry.arguments?.getString("browse") == "1"
+                    )
                 }
             }
             composable(
@@ -843,49 +749,104 @@ fun CurioNavHost(
             }
         }
     }
+
+    // Keep the tour controls inside the existing root Box. The Row is a
+    // small direct child, not a full-screen transparent hit-test layer.
+    val tourStep = TourController.currentStep
+    if (tourStep != null && routePrefix == tourStep.routePrefix) {
+        fun advanceTourAndNavigate() {
+            val wasLastStep = TourController.isLastStep
+            TourController.advance()
+            val nextRoute = TourController.routeForCurrentStep()
+            if (nextRoute != null && nextRoute != currentRoute) {
+                navController.navigate(nextRoute) { launchSingleTop = true }
+            } else if (wasLastStep) {
+                // Tour finished — the tour always starts on the Home hub, so
+                // pop the whole tour stack back to Home (a clean finish
+                // instead of leaving the user stranded on the last stop).
+                navController.popBackStack(CurioRoutes.HOME, inclusive = false)
+            }
+        }
+        // v9.x — tap ANYWHERE to advance the tour. A full-screen transparent
+        // hit layer sits behind the bottom dock, so every tap on the screen
+        // (the demonstrated control included) acts as "Next" without ever
+        // firing the real action — the tour stays a pure demo.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { advanceTourAndNavigate() }
+        )
+        // v9.x — a solid full-width dock: an opaque background that reaches
+        // under the system nav inset (covering the app's bottom bar and the
+        // gesture strip) so the tour controls never float over raw content.
+        // Bigger, clearly tappable buttons.
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 3.dp,
+            shadowElevation = 8.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { TourController.skip() },
+                    modifier = Modifier.weight(1f).height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(
+                        "Skip",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                // The final stop labels the control "Done" — advancing past
+                // it properly closes the tour instead of silently stopping.
+                Button(
+                    onClick = { advanceTourAndNavigate() },
+                    modifier = Modifier.weight(1f).height(54.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        if (TourController.isLastStep) "Done" else "Next",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
     }
     // ── Pet-led Tour offer and controls ─────────────────────────────────
     // The offer is intentionally rendered on Home after onboarding; the Tour
     // itself has no scrim and leaves every demonstrated control tappable.
     if (routePrefix == CurioRoutes.HOME && TourController.offerPending) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { TourController.declineOffer() },
             title = { Text("Take a tiny tour?") },
             text = { Text("Curie can walk you through the main controls. Nothing will start, open, or be saved while you tour.") },
             confirmButton = {
-                TextButton(onClick = { TourController.start() }) { Text("Take the tour") }
+                TextButton(onClick = { TourController.start() }, colors = curioDialogActionButtonColors()) { Text("Take the tour") }
             },
             dismissButton = {
-                TextButton(onClick = { TourController.declineOffer() }) { Text("Maybe later") }
+                TextButton(onClick = { TourController.declineOffer() }, colors = curioDialogActionButtonColors()) { Text("Maybe later") }
             }
         )
-    }
-
-    val tourStep = TourController.currentStep
-    if (tourStep != null && routePrefix == tourStep.routePrefix) {
-        fun advanceTourAndNavigate() {
-            TourController.advance()
-            val nextRoute = TourController.routeForCurrentStep()
-            if (nextRoute != null && nextRoute != currentRoute) {
-                navController.navigate(nextRoute) { launchSingleTop = true }
-            }
-        }
-        // A transparent full-screen parent would still participate in pointer
-        // dispatch. Keep only the controls themselves in this layer so the
-        // real screen remains completely tappable with no scrim.
-        Box(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 20.dp)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .padding(bottom = 18.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                TextButton(onClick = { TourController.skip() }) { Text("Skip") }
-                TextButton(onClick = { advanceTourAndNavigate() }) { Text("Next") }
-            }
-        }
     }
 
     // v8.8 — the floating Curio pet: a global overlay drawn above the whole
@@ -917,6 +878,8 @@ fun CurioNavHost(
             }
         }
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 showDoneDialog = false
                 confirmSessionCancel = false
@@ -996,19 +959,24 @@ fun CurioNavHost(
                         navController.navigate(
                             CurioRoutes.captureFor(activeSession.categoryId.routeSlug, activeSession.topicName)
                         ) { launchSingleTop = true }
-                    }) { Text("Done and write about it") }
+                    },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Done and write about it") }
                 }
             },
             dismissButton = {
                 if (confirmSessionCancel) {
                     // Back out of the cancel — keep exploring.
-                    TextButton(onClick = { confirmSessionCancel = false }) { Text("Keep exploring") }
+                    TextButton(
+                        onClick = { confirmSessionCancel = false },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Keep exploring") }
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = { confirmSessionCancel = true }) {
                             Text("Cancel session", color = MaterialTheme.colorScheme.error)
                         }
-                        TextButton(onClick = { showDoneDialog = false }) { Text("Keep exploring") }
+                        TextButton(onClick = { showDoneDialog = false }, colors = curioDialogActionButtonColors()) { Text("Keep exploring") }
                     }
                 }
             }

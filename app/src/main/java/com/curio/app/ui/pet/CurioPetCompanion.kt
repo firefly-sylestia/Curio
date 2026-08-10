@@ -1,11 +1,13 @@
 package com.curio.app.ui.pet
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -29,50 +31,68 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 
 /**
- * A cozy one-line speech bubble with a tail pointing at the pet (spec §10.7:
- * one sentence max for passive bubbles). Readable by screen readers — the
- * text is a real Text node.
+ * A cozy one-line speech bubble with a soft curved tail pointing at the pet
+ * (spec §10.7: one sentence max for passive bubbles). Readable by screen
+ * readers — the text is a real Text node.
+ *
+ * v9.x — redesigned: the hard diamond tail is now a smooth curved pointer
+ * with a rounded tip, and the bubble wears squishier corners (a slightly
+ * tighter corner on the tail side reads as a classic speech bubble instead
+ * of a plain rounded card).
  */
 @Composable
 fun PetSpeechBubble(
     text: String,
     modifier: Modifier = Modifier,
-    tailOnLeft: Boolean = true
+    tailOnLeft: Boolean = true,
+    // v9.x — the tour can pass a taller/wider cap so its dialogue is never
+    // clipped at the passive two-line limit; reactions keep the cozy default.
+    maxLines: Int = 2,
+    maxWidth: Dp = 260.dp
 ) {
     val bubbleColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val bubbleShape = RoundedCornerShape(
+        topStart = 20.dp,
+        topEnd = 20.dp,
+        bottomStart = if (tailOnLeft) 8.dp else 20.dp,
+        bottomEnd = if (tailOnLeft) 20.dp else 8.dp
+    )
     Row(
-        modifier = modifier.widthIn(max = 260.dp),
+        modifier = modifier.widthIn(max = maxWidth),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = if (tailOnLeft) Arrangement.Start else Arrangement.End
     ) {
-        // The tail diamond always sits on the PET's side (the bubble's
-        // edge nearest the sprite): before the bubble when tailOnLeft,
-        // after it otherwise. The diamond is shifted with Modifier.offset
-        // (a translation, which may be negative) so it straddles the
-        // bubble's edge and reads as a tail pointing at the pet — padding
-        // cannot be negative, so it is never used for this. A 45°-rotated
-        // square is symmetric, so only the SIDE matters.
+        // The tail always sits on the PET's side (the bubble's edge nearest
+        // the sprite): before the bubble when tailOnLeft, after it
+        // otherwise. It is shifted with Modifier.offset (a translation,
+        // which may be negative) so it straddles the bubble's edge and
+        // reads as a tail pointing at the pet — padding cannot be negative,
+        // so it is never used for this.
         if (tailOnLeft) {
             Spacer(Modifier.width(2.dp))
-            Box(Modifier.offset(x = 4.dp)) {
-                TailDiamond(bubbleColor)
+            Box(Modifier.offset(x = 5.dp)) {
+                CurvedBubbleTail(bubbleColor, pointingLeft = true)
             }
         }
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = bubbleShape,
             color = bubbleColor,
             shadowElevation = 0.dp
         ) {
@@ -83,29 +103,48 @@ fun PetSpeechBubble(
                     lineHeight = 17.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
+                maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
         }
         if (!tailOnLeft) {
-            Box(Modifier.offset(x = -4.dp)) {
-                TailDiamond(bubbleColor)
+            Box(Modifier.offset(x = -5.dp)) {
+                CurvedBubbleTail(bubbleColor, pointingLeft = false)
             }
             Spacer(Modifier.width(2.dp))
         }
     }
 }
 
-/** The bubble's tail — a tiny rotated square wearing the bubble fill. */
+/**
+ * The bubble's tail — a soft curved pointer with a rounded tip, drawn in
+ * the bubble fill. [pointingLeft] aims it at the pet on the left side; the
+ * base flares back into the bubble so the seam reads as one shape.
+ */
 @Composable
-private fun TailDiamond(color: Color) {
-    Box(
-        modifier = Modifier
-            .size(10.dp)
-            .rotate(45f)
-            .background(color, RoundedCornerShape(2.dp))
-    )
+private fun CurvedBubbleTail(color: Color, pointingLeft: Boolean, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.size(width = 16.dp, height = 14.dp)) {
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val path = Path().apply {
+                if (pointingLeft) {
+                    // Rooted at the bubble's left edge, tapering to a
+                    // rounded tip that points at the pet.
+                    moveTo(w, h * 0.22f)
+                    quadraticBezierTo(w * 0.35f, h * 0.20f, 0f, h * 0.5f)
+                    quadraticBezierTo(w * 0.35f, h * 0.80f, w, h * 0.78f)
+                } else {
+                    moveTo(0f, h * 0.22f)
+                    quadraticBezierTo(w * 0.65f, h * 0.20f, w, h * 0.5f)
+                    quadraticBezierTo(w * 0.65f, h * 0.80f, 0f, h * 0.78f)
+                }
+                close()
+            }
+            drawPath(path, color)
+        }
+    }
 }
 
 /**
@@ -257,6 +296,8 @@ fun CurioPetHeroCard(
         val info = CurioPet.tapInfo(context, lanes)
         val questRoute = CurioQuests.currentQuest()?.navRoute
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 showDialog = false
             },
@@ -306,9 +347,12 @@ fun CurioPetHeroCard(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showDialog = false
-                }) { Text("Okay") }
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Okay") }
             },
             dismissButton = {
                 if (questRoute != null) {
@@ -316,7 +360,8 @@ fun CurioPetHeroCard(
                         onClick = {
                             showDialog = false
                             questRoute.let(onGo)
-                        }
+                        },
+                        colors = curioDialogActionButtonColors()
                     ) { Text("Go to quest") }
                 }
             }

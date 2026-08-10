@@ -64,6 +64,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -80,7 +81,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -123,7 +123,9 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
+import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -137,12 +139,15 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
+import com.curio.app.ui.theme.themedButtonFill
+import com.curio.app.ui.theme.themedButtonInk
 import com.curio.app.ui.theme.toHsl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -458,13 +463,49 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // Defensive: a corrupted saved state could restore an empty category
     // set — fall back to the last-used category so the pool still loads.
     val poolIds = if (activeCatIds.isEmpty()) listOf(AppPreferences.getLastSpinCategory(context)) else activeCatIds
-    val pool by produceState<List<CurioTopic>>(initialValue = emptyList(), poolIds) {
+    // v9.x — returning to Spin must never flash the deck's empty state: the
+    // pool is seeded from the topic cache when it's still resident (a warm
+    // return renders the deck on the very first frame), and [poolLoading]
+    // separates a cold reload (cache cleared under memory pressure) from a
+    // genuinely empty lane so the deck shows a loading hint instead of the
+    // misleading "Nothing here yet" card.
+    var poolLoading by remember(poolIds) {
+        mutableStateOf(poolIds.any { TopicJsonLoader.cached(it) == null })
+    }
+    // v9.x — a failed load is NOT an empty lane. With valid data an empty
+    // pool AFTER loading means the read failed (interrupted IO, a hiccup
+    // parsing the heavy merged wildcard pool), so the deck shows a retry
+    // hint instead of the misleading "Nothing here yet" dead-end. A warm
+    // seeded pool is never wiped by a failed refresh.
+    var poolLoadFailed by remember(poolIds) { mutableStateOf(false) }
+    var poolRetryKey by remember(poolIds) { mutableIntStateOf(0) }
+    val pool by produceState(
+        initialValue = poolIds.flatMap { TopicJsonLoader.cached(it).orEmpty() },
+        poolIds, poolRetryKey
+    ) {
+        // NOTE: inside the producer lambda the outer `pool` delegate is not
+        // resolvable — read the scope's own `value` (the current pool,
+        // seeded from cache on a warm return) instead.
+        if (value.isEmpty()) poolLoading = true
+        poolLoadFailed = false
         val merged = mutableListOf<CurioTopic>()
         val seen = mutableSetOf<String>()
+        // A failed lane simply contributes nothing; empty-after-load still
+        // routes to the retry hint below (a lane can't be genuinely empty
+        // with valid data).
         poolIds.forEach { id ->
-            TopicJsonLoader.load(id).forEach { t -> if (seen.add(t.id)) merged.add(t) }
+            runCatching { TopicJsonLoader.load(id) }.getOrNull()
+                ?.forEach { t -> if (seen.add(t.id)) merged.add(t) }
         }
-        value = merged
+        poolLoading = false
+        if (merged.isNotEmpty()) {
+            value = merged
+        } else if (value.isEmpty()) {
+            // Empty after loading with valid data = the load failed (or a
+            // lane is truly empty) — offer a retry, never a dead end.
+            poolLoadFailed = true
+        }
+        // else: a failed refresh leaves any warm seeded cards untouched.
     }
 
     // ── Multi-select filter state (per-category, saveable) ────────────
@@ -504,6 +545,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
 
     // ── Spin state ────────────────────────────────────────────────────
     var shuffling by remember { mutableStateOf(false) }
+    // Visible to the deck so peek cards stay present through the reel and
+    // only fade during the final settle beat, not halfway through the spin.
+    var shuffleProgress by remember { mutableFloatStateOf(0f) }
     var shuffleCount by remember { mutableIntStateOf(0) }
     var confettiTrigger by remember { mutableIntStateOf(0) }
     // ── Landed topic — persisted by NAME (v5.6) so closing Reveal without
@@ -684,6 +728,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     LaunchedEffect(shuffleCount) {
         if (shuffleCount == 0 || filteredPool.isEmpty()) return@LaunchedEffect
         shuffling = true
+        shuffleProgress = 0f
         // v8.13 — the pet cheers while the deck reels (cleared at the settle).
         CurioPet.noteSpinning(true)
         landedTopicName = null
@@ -700,32 +745,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             val elapsed = System.currentTimeMillis() - start
             if (elapsed >= durationMs) break
             val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 1f)
+            shuffleProgress = progress
             // Smooth reel deceleration: a plain sine ease (no squaring) so
             // the wheel starts at a readable cadence and glides gently to a
             // stop — a graceful slow-down instead of a snappy whip. The
             // ~340ms floor keeps the fastest early ticks readable and sits
             // ABOVE the ~310ms staggered peek wave, so every transition
             // completes before the next tick lands. Intervals ~340ms -> ~520ms.
-            // v9.1 — premium reel: when the Spin landing FX experiment is on
-            // (with its reel layer), the wheel glides on a cubic ease-out —
-            // a confident opening cadence easing through a long, silky tail
-            // so the stop reads like a prize wheel locking in. The classic
-            // sine ease is untouched when the experiment is off.
-            val fxReel = AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState
-            val eased = if (fxReel) {
-                1f - (1f - progress) * (1f - progress) * (1f - progress)
-            } else {
-                sin(progress * Math.PI.toFloat() / 2f)
-            }
-            val interval = if (fxReel) {
-                // v9.2 — the premium reel is noticeably faster and brisker
-                // (140→370ms), so the wheel reads as a quick prize-wheel
-                // spin instead of a gentle shuffle. The classic sine reel
-                // stays the same calm cadence (340→520ms).
-                (140L + (230L * eased).toLong()).coerceAtMost(370L)
-            } else {
-                (340L + (180L * eased).toLong()).coerceAtMost(520L)
-            }
+            val eased = sin(progress * Math.PI.toFloat() / 2f)
+            val interval = (340L + (180L * eased).toLong()).coerceAtMost(520L)
             // Continue from the hand position the user is currently viewing.
             // Using a separate tick counter here reset every spin to hand[1],
             // which made the next swipe appear to pull the wrong visible peek
@@ -750,6 +778,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             delay(interval)
             if (System.currentTimeMillis() - start >= durationMs) break
         }
+        shuffleProgress = 1f
         shuffling = false
         // v8.13 — the reel stopped; the pet settles back to watching.
         CurioPet.noteSpinning(false)
@@ -840,6 +869,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
     }
 
+    // v9.x — [CurioPet.spinning] is flipped by the shuffle effect above; if
+    // the user leaves the Spin screen mid-spin that effect is cancelled and
+    // the flag would stay TRUE forever (the pet cheers spin lines on every
+    // screen and stops poking buttons). Reset it whenever Spin leaves
+    // composition so the pet always settles back to normal behavior.
+    DisposableEffect(Unit) {
+        onDispose { CurioPet.noteSpinning(false) }
+    }
+
     // ── Landed topic auto-opens on landing ───────────────────────────
     // The wheel now reveals its landed topic automatically; the center card
     // is no longer a spin trigger — it opens an already landed topic, while
@@ -849,8 +887,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     //    spins/shuffles again.  No longer auto-clears when explored.
 
     // ── Animations ────────────────────────────────────────────────────
+    // v9.x — during a shuffle the button TUCKS IN (shrinks to 0.92) while
+    // the orbit ring's dots keep their fixed radius (the ring lives on the
+    // unscaled container), so the spin reads as the center plate pulling
+    // away from the living ring of dots; at rest it springs back to full.
     val buttonPulse by animateFloatAsState(
-        targetValue = if (shuffling) 1.06f else 1f,
+        targetValue = if (shuffling) 0.92f else 1f,
         animationSpec = CurioMotion.Springs.Snappy,
         label = "buttonPulse"
     )
@@ -1042,11 +1084,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         displayPool = hand,
                         cycleIndex = cycleIndex,
                         shuffling = shuffling,
+                        shuffleProgress = shuffleProgress,
                         landedTopic = landedTopic,
                         opening = isOpening,
                         enabled = filteredPool.isNotEmpty() && !shuffling,
                         buttonPulse = buttonPulse,
                         fitScale = wideFit,
+                        poolLoading = poolLoading,
+                        poolLoadFailed = poolLoadFailed,
+                        onRetryPool = { poolRetryKey++ },
                         onCardTap = onDeckCardTap,
                         onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
@@ -1113,11 +1159,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     displayPool = hand,
                     cycleIndex = cycleIndex,
                     shuffling = shuffling,
+                    shuffleProgress = shuffleProgress,
                     landedTopic = landedTopic,
                     opening = isOpening,
                     enabled = filteredPool.isNotEmpty() && !shuffling,
                     buttonPulse = buttonPulse,
                     fitScale = fitScale,
+                    poolLoading = poolLoading,
+                    poolLoadFailed = poolLoadFailed,
+                    onRetryPool = { poolRetryKey++ },
                     onCardTap = onDeckCardTap,
                     onCycle = onDeckCycle,
                     onSpinClick = onSpinClick
@@ -1154,11 +1204,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         displayPool = hand,
                         cycleIndex = cycleIndex,
                         shuffling = shuffling,
+                        shuffleProgress = shuffleProgress,
                         landedTopic = landedTopic,
                         opening = isOpening,
                         enabled = filteredPool.isNotEmpty() && !shuffling,
                         buttonPulse = buttonPulse,
                         fitScale = fitScale,
+                        poolLoading = poolLoading,
+                        poolLoadFailed = poolLoadFailed,
+                        onRetryPool = { poolRetryKey++ },
                         onCardTap = onDeckCardTap,
                         onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
@@ -1264,11 +1318,15 @@ private fun ColumnScope.SpinDeckSection(
     displayPool: List<CurioTopic>,
     cycleIndex: Int,
     shuffling: Boolean,
+    shuffleProgress: Float,
     landedTopic: CurioTopic?,
     opening: Boolean,
     enabled: Boolean,
     buttonPulse: Float,
     fitScale: Float = 1f,
+    poolLoading: Boolean = false,
+    poolLoadFailed: Boolean = false,
+    onRetryPool: () -> Unit = {},
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
     onSpinClick: () -> Unit
@@ -1301,6 +1359,7 @@ private fun ColumnScope.SpinDeckSection(
             displayPool = displayPool,
             cycleIndex = cycleIndex,
             shuffling = shuffling,
+            shuffleProgress = shuffleProgress,
             landedTopic = landedTopic,
             opening = opening,
             enabled = enabled,
@@ -1309,6 +1368,9 @@ private fun ColumnScope.SpinDeckSection(
             densityExtraCompact = densityExtraCompact,
             roomy = roomy,
             fitScale = fitScale,
+            loading = poolLoading,
+            loadFailed = poolLoadFailed,
+            onRetryPool = onRetryPool,
             onCardTap = onCardTap,
             onCycle = onCycle,
             modifier = m.fillMaxWidth()
@@ -1345,8 +1407,17 @@ private fun ColumnScope.SpinDeckSection(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            // v10 — the Material style's shuffle button blends the device
+            // primary with the category accent (65/35) so the button carries
+            // visible category identity instead of looking like a plain
+            // dynamic-color control in both light and dark mode.
             SpinButton(
-                tint = deckAccent,
+                tint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+                    lerp(MaterialTheme.colorScheme.primary, deckAccent, 0.35f)
+                } else {
+                    deckAccent
+                },
+                shineAccent = deckAccent,
                 isShuffling = shuffling,
                 landedTopic = landedTopic,
                 pulseScale = buttonPulse,
@@ -1469,7 +1540,14 @@ private fun FilterSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        // v11 — the Material style wears the device surface container (no
+        // foreign category tint on the device palette); Curio/AMOLED keep
+        // the tinted category surface that melts into the washed page.
+        containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+        },
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -1688,15 +1766,15 @@ private fun FilterSheet(
                 onClick = { onApply(draftFilters, draftSubtypes) },
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = cat.themedAccent(),
-                    contentColor = cat.onAccent()
+                    containerColor = cat.themedButtonFill(),
+                    contentColor = cat.themedButtonInk()
                 ),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
-                CurioIcon(CurioIcons.Check, null, tint = cat.onAccent(), size = 18.dp)
+                CurioIcon(CurioIcons.Check, null, tint = cat.themedButtonInk(), size = 18.dp)
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
@@ -1869,6 +1947,7 @@ private fun Carousel(
     displayPool: List<CurioTopic>,
     cycleIndex: Int,
     shuffling: Boolean,
+    shuffleProgress: Float,
     landedTopic: CurioTopic?,
     opening: Boolean,
     enabled: Boolean,
@@ -1877,6 +1956,9 @@ private fun Carousel(
     densityExtraCompact: Boolean = false,
     roomy: Boolean = false,
     fitScale: Float = 1f,
+    loading: Boolean = false,
+    loadFailed: Boolean = false,
+    onRetryPool: () -> Unit = {},
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -1948,7 +2030,11 @@ private fun Carousel(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (poolSize == 0) {
+        if (poolSize == 0 && loading) {
+            DeckLoadingHint(cat)
+        } else if (poolSize == 0 && loadFailed) {
+            DeckLoadFailedHint(cat, onRetryPool)
+        } else if (poolSize == 0) {
             EmptyPoolHint(cat)
         } else {
             val slots = listOf(-2, 2, -1, 1, 0)
@@ -1994,6 +2080,106 @@ private fun Carousel(
                         cat = cat,
                         topic = topic,
                         shuffling = shuffling
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeckLoadingHint(cat: CurioCategory) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+            shadowElevation = 0.dp,
+            border = cat.categoryBorder(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CurioIcon(
+                    cat.iconGlyph, null,
+                    tint = cat.categoryInk().copy(alpha = 0.5f),
+                    size = 56.dp
+                )
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "Gathering the deck…",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "The topics are on their way.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeckLoadFailedHint(cat: CurioCategory, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+            shadowElevation = 0.dp,
+            border = cat.categoryBorder(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CurioIcon(
+                    CurioIcons.Refresh, null,
+                    tint = cat.categoryInk().copy(alpha = 0.5f),
+                    size = 40.dp
+                )
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "Couldn't load the deck",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "The topics didn't arrive. Give it another try?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = onRetry,
+                    shape = RoundedCornerShape(50),
+                    colors = curioButtonColors(
+                        containerColor = cat.themedButtonFill(),
+                        contentColor = cat.themedButtonInk()
+                    )
+                ) {
+                    Text(
+                        "Try again",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                     )
                 }
             }
@@ -2062,11 +2248,16 @@ private fun HeroTicketCard(
     // ── Shared-element handoff (Topic Reveal morph) ──────────────────────
     // This front ticket is the source of the "reveal-hero" shared element:
     // the reveal destination provides the matching hero, so opening the
-    // landed topic morphs the hero OUT of this card. The scopes are provided
-    // by the NavHost via composition locals (never null in its subtree).
-    val sharedTransitionScope = LocalRevealSharedScope.current ?: return
-    val animatedVisibilityScope = LocalRevealVisibilityScope.current ?: return
-    val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
+    // landed topic morphs the hero OUT of this card. The shared-transition
+    // locals can briefly be unavailable while a destination is restored; the
+    // card must still render normally in that frame, simply without a morph.
+    val sharedTransitionScope = LocalRevealSharedScope.current
+    val animatedVisibilityScope = LocalRevealVisibilityScope.current
+    val revealSharedState = if (sharedTransitionScope != null) {
+        sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
+    } else {
+        null
+    }
 
     // v6.3 — slightly bigger ticket (~6% up) so the hero card reads a
     // touch more prominent on the deck.
@@ -2087,6 +2278,7 @@ private fun HeroTicketCard(
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
     val heroShadowOn = AppPreferences.heroShadowState
+    val heroBlendOn = AppPreferences.heroBlendGradientState
     // v7.14 — the enhanced gradient is a top-left-lit DIAGONAL multi-stop
     // sweep: a bright crown at the top-left catches light, the card's own
     // stops run through the middle (the Material blend keeps its identity),
@@ -2098,6 +2290,11 @@ private fun HeroTicketCard(
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     val ticketBrush = if (isMixed) {
         CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+    } else if (heroBlendOn) {
+        // v10 — dual-accent blend: category accent meets a warm golden
+        // companion in a multi-stop vertical gradient (works across all
+        // theme styles — Curio, Material, AMOLED).
+        Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
     } else if (heroGradientOn) {
         val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
         val base = lerp(gradient.last(), Color.Black, 0.06f)
@@ -2148,15 +2345,8 @@ private fun HeroTicketCard(
     LaunchedEffect(topic?.id, shuffling) {
         if (!shuffling || topic == null) return@LaunchedEffect
         tickDir = -tickDir
-        tickPulse.snapTo(if (AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState) 1.04f else 1.02f)
-        // v9.1 — the premium reel rides a silkier pulse (softer spring) so
-        // every tick glides instead of snapping; the classic pulse is
-        // untouched when the experiment is off.
-        if (AppPreferences.spinLandingFxState && AppPreferences.spinFxReelState) {
-            tickPulse.animateTo(1f, spring(dampingRatio = 0.72f, stiffness = 300f))
-        } else {
-            tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
-        }
+        tickPulse.snapTo(1.02f)
+        tickPulse.animateTo(1f, spring(dampingRatio = 0.85f, stiffness = 420f))
     }
 
     // ── Category switch — one welcoming bounce as the deck re-fans to the
@@ -2168,17 +2358,6 @@ private fun HeroTicketCard(
             tickPulse.animateTo(1f, CurioMotion.Springs.Elastic)
         }
     }
-
-    // ── Premium landing FX (v9.1 — experimental, gated) ────────────────
-    // The classic landing feel stays exactly as-is when the master toggle
-    // is off. With it on, the landing plays a spring catch (the settle
-    // branch below), a shockwave ring, a sparkle burst and a brief glow
-    // flash — each an independent A/B layer. All reads are reactive state,
-    // so flipping toggles in Experiments recomposes the hero instantly.
-    val fxOn = AppPreferences.spinLandingFxState
-    val fxCatch = fxOn && AppPreferences.spinFxCatchState
-    val fxRing = fxOn && AppPreferences.spinFxRingState
-    val fxSparkle = fxOn && AppPreferences.spinFxSparkleState
 
     // ── Landing settle — seamless handoff from the shuffle tick pulse to
     //    the elastic rest spring. On landing, snap to wherever the pulse
@@ -2210,16 +2389,8 @@ private fun HeroTicketCard(
                 // controlled Deliberate spring (85% damping, no bounce)
                 // instead of the extreme Elastic overshoot, so the wheel's
                 // stop reads as a confident rest, not a violent bounce.
-                // v9.2 — the premium catch compresses the card to 0.97 and
-                // springs it back to rest (75% damping, visible squish that
-                // reads as a controlled lock-in); the classic settle stays
-                // untouched when the FX is off.
-                val catchSpring = if (fxCatch) {
-                    settleScale.snapTo(0.97f)
-                    spring(dampingRatio = 0.75f, stiffness = 400f)
-                } else CurioMotion.Springs.Deliberate
-                launch { settleScale.animateTo(LandedRestScale, catchSpring) }
-                launch { settleY.animateTo(0f, catchSpring) }
+                launch { settleScale.animateTo(LandedRestScale, CurioMotion.Springs.Deliberate) }
+                launch { settleY.animateTo(0f, CurioMotion.Springs.Deliberate) }
             }
         } else {
             settleScale.snapTo(1f)
@@ -2227,35 +2398,6 @@ private fun HeroTicketCard(
         }
     }
 
-    // ── Premium landing FX layers — ring, sparkle and glow play in
-    //    parallel with the settle spring the moment the wheel lands (never
-    //    on a restored / on-entry landed ticket), and stay fully inert when
-    //    the experiment is off.
-    val ringProgress = remember { Animatable(0f) }
-    val sparkleProgress = remember { Animatable(0f) }
-    val glowAlpha = remember { Animatable(0f) }
-    var sparkleSeed by remember { mutableIntStateOf(0) }
-    LaunchedEffect(landed) {
-        if (!landed || landedOnEntry) {
-            ringProgress.snapTo(0f)
-            sparkleProgress.snapTo(0f)
-            glowAlpha.snapTo(0f)
-        } else {
-            if (fxRing) {
-                ringProgress.snapTo(0f)
-                ringProgress.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
-            } else ringProgress.snapTo(0f)
-            if (fxSparkle) {
-                sparkleSeed++
-                sparkleProgress.snapTo(0f)
-                sparkleProgress.animateTo(1f, tween(850, easing = LinearEasing))
-            } else sparkleProgress.snapTo(0f)
-            if (fxCatch) {
-                glowAlpha.snapTo(0.5f)
-                glowAlpha.animateTo(0f, tween(600, easing = FastOutSlowInEasing))
-            } else glowAlpha.snapTo(0f)
-        }
-    }
     // When the user taps to open, settle back to EXACT scale 1 before the
     // shared-element morph captures bounds: the overlay animates the LAYOUT
     // bounds (scale 1.0), so a card still resting at LandedRestScale (1.02)
@@ -2300,11 +2442,17 @@ private fun HeroTicketCard(
                 .size(w, h)
                 .align(Alignment.Center)
                 .then(
-                    if (topic != null) {
+                    if (topic != null &&
+                        sharedTransitionScope != null &&
+                        animatedVisibilityScope != null &&
+                        revealSharedState != null
+                    ) {
                         // Shared-element source for the Topic Reveal hero —
                         // when this ticket is tapped (or the wheel lands),
                         // the reveal's hero expands out of this card's
-                        // position instead of the page sliding in.
+                        // position instead of the page sliding in. If the
+                        // transition scope is not ready yet, keep the card
+                        // visible and use a normal card for this frame.
                         sharedTransitionScope.run {
                             Modifier.sharedElement(
                                 revealSharedState,
@@ -2340,6 +2488,16 @@ private fun HeroTicketCard(
                     } else Modifier
                 )
                 .clip(RoundedCornerShape(30.dp))
+                .then(
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+                        // v13 — the near-black ticket wears the same black-glass
+                        // CATEGORY SHINE as the settings cards and deck pills: an
+                        // accent hairline around the edge plus a soft accent band
+                        // at the top, so the main card reads as sleek black glass
+                        // rimmed with its category color (not just a flat plate).
+                        Modifier.categoryEdgeShine(RoundedCornerShape(30.dp), accent)
+                    } else Modifier
+                )
         ) {
             Surface(
                 shape = RoundedCornerShape(30.dp),
@@ -2352,9 +2510,17 @@ private fun HeroTicketCard(
                 // accent outline (the accent rim-light stays OFF by default).
                 // ON drops the hairline lower and the accent is drawn as a
                 // soft gradient rim-light inside (the drawBehind below).
+                // v13 — AMOLED: the near-black ticket would sink into the
+                // pure-black page. The categoryEdgeShine above is the main
+                // accent carrier, so this hairline stays a quiet whisper
+                // (0.35) that seats the card without stacking a second loud
+                // rim — sleek black glass rimmed with its category color.
                 border = BorderStroke(
                     1.dp,
-                    ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                        accent.copy(alpha = 0.35f)
+                    else
+                        ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -2619,60 +2785,6 @@ private fun HeroTicketCard(
                     }
                 }
             }
-
-            // ── Premium landing FX — shockwave ring, sparkle burst and the
-            //    catch glow, drawn above the card (and expanding past its
-            //    edges). Gated by the experiment (v9.1); fully inert off.
-            if (fxRing && ringProgress.value > 0f) {
-                Canvas(modifier = Modifier.matchParentSize()) {
-                    val p = ringProgress.value
-                    val base = size.minDimension * 0.30f
-                    val radius = base + base * 1.7f * p
-                    val alpha = (1f - p) * 0.85f
-                    val strokeW = 3.dp.toPx() * (1f - p * 0.7f) + 1.dp.toPx()
-                    drawCircle(color = accent.copy(alpha = alpha), radius = radius, center = center, style = Stroke(width = strokeW))
-                    drawCircle(color = Color.White.copy(alpha = alpha * 0.60f), radius = radius * 0.82f, center = center, style = Stroke(width = strokeW * 0.6f))
-                }
-            }
-            if (fxSparkle && sparkleProgress.value > 0f) {
-                Canvas(modifier = Modifier.matchParentSize()) {
-                    val p = sparkleProgress.value
-                    val base = size.minDimension * 0.32f
-                    val fade = (1f - p).coerceIn(0f, 1f)
-                    val piF = Math.PI.toFloat() / 180f
-                    repeat(14) { i ->
-                        val angle = ((i * 36f + sparkleSeed * 11f) % 360f) * piF
-                        val dist = base * (0.9f + p * 1.2f) + (i % 3) * 5f
-                        val x = center.x + cos(angle) * dist
-                        val y = center.y + sin(angle) * dist
-                        val s = (10f - 5f * p) * (0.8f + (i % 4) * 0.15f)
-                        val alpha = fade * 1.0f
-                        rotate(degrees = p * 30f + i * 14f, pivot = Offset(x, y)) {
-                            drawLine(color = accent.copy(alpha = alpha), start = Offset(x - s, y), end = Offset(x + s, y), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
-                            drawLine(color = accent.copy(alpha = alpha), start = Offset(x, y - s), end = Offset(x, y + s), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
-                        }
-                        drawCircle(color = Color.White.copy(alpha = alpha * 0.9f), radius = 1.6.dp.toPx() * (1f - p * 0.5f), center = Offset(x, y))
-                    }
-                }
-            }
-            if (fxCatch && glowAlpha.value > 0f) {
-                Canvas(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(RoundedCornerShape(30.dp))
-                ) {
-                    val r = size.minDimension * 0.75f
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(accent.copy(alpha = 0.70f * glowAlpha.value), Color.Transparent),
-                            center = center,
-                            radius = r
-                        ),
-                        radius = r,
-                        center = center
-                    )
-                }
-            }
         }
     }
 }
@@ -2784,6 +2896,12 @@ private fun PeekCard(
     // v7.5 — pastel mode lightens the peek fill, so content flips to a deep
     // ink of the deck color (light mode) / a light tint (dark).
     val ink = pastelFillInk(accent)
+    // Peek cards stay fully present through the first half of the reel, then
+    // dissolve into the background so the final selection has visual focus.
+    // Opacity belongs to the card's own AnimatedContent transition below.
+    // Keeping the outer card fully opaque prevents a global reel clock from
+    // fading every slot at once; each outgoing card now travels first and
+    // dissolves only in the tail of its own exit.
 
     // v7.7 — deck card redesign (EXPERIMENTAL, four independent Settings
     // toggles, each OFF by default): the blend gradient is now the BASE
@@ -2796,6 +2914,7 @@ private fun PeekCard(
     val hairlineOn = AppPreferences.peekHairlineState
     val shadowsOn = AppPreferences.peekShadowsState
     val titlesOn = AppPreferences.peekTitlesState
+    val tailFadeOn = AppPreferences.peekTailFadeState
     // 1a — top-lit crown: a whisper of light at the card top so the top
     // peek catches light and whispers "next up" on the reel. The base is
     // always the level-darkened blend; the gradient toggle layers the
@@ -2861,9 +2980,10 @@ private fun PeekCard(
                 rotationZ = when (slot) { -2 -> -3.5f; -1 -> -1.4f; 1 -> 1.4f; else -> 3.5f }
                 scaleX = if (far) 0.92f else 0.98f
                 scaleY = if (far) 0.92f else 0.98f
-                // Fully opaque — translucent layers blend badly with the tilt
-                // and render the card as soft/pixelated. Depth comes from
-                // scale + rotation + zIndex instead of transparency.
+                // Fully opaque while the slot travels. The outgoing
+                // AnimatedContent child applies its own delayed fade after
+                // the movement, so the incoming card never gets faded by a
+                // global shuffle clock.
                 alpha = 1f
             }
             .zIndex(if (far) 2f else 5f)
@@ -2890,7 +3010,20 @@ private fun PeekCard(
                     slideOutVertically(
                         animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
+                    // The classic default fades across the full motion. The
+                    // experimental tail-fade option preserves the newer
+                    // travel-first, end-only fade behavior.
+                    if (tailFadeOn) {
+                        fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 90,
+                                delayMillis = PeekWipeOutMs - 90,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
+                    } else {
+                        fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing))
+                    } using SizeTransform(clip = false)
                 } else {
                     // Idle re-fan (landing re-deal / category switch) — a
                     // slower, softer pass in the same per-side direction.
@@ -2901,7 +3034,17 @@ private fun PeekCard(
                     slideOutVertically(
                         animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)
                     ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    fadeOut(animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)) using SizeTransform(clip = false)
+                    if (tailFadeOn) {
+                        fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 90,
+                                delayMillis = PeekIdleOutMs - 90,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
+                    } else {
+                        fadeOut(animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing))
+                    } using SizeTransform(clip = false)
                 }
             },
             label = "peekSlot_$slot"
@@ -2925,6 +3068,9 @@ private fun PeekCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(brush = fillBrush, shape = RoundedCornerShape(corner))
+                    // v9.x — Material peeks keep the deck's category identity
+                    // as the accent rim on the device-colored fill.
+                    .categoryEdgeShine(RoundedCornerShape(corner), accent = accent)
             ) {
                 Column(
                     modifier = Modifier
@@ -2991,7 +3137,10 @@ private fun SpinButton(
     enabled: Boolean,
     compact: Boolean = false,
     fitScale: Float = 1f,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    // v9.x — the category accent for the theme-style edge shine (the fill
+    // may be the Material device primary while the rim keeps the category).
+    shineAccent: Color = tint
 ) {
     // v6.3 — button grew a little (~7% up): 126dp idle, 108dp landed.
     // v6.11 — compact screens step the button + orbit down ~11% so the
@@ -3002,16 +3151,32 @@ private fun SpinButton(
     // shrinks WITH the deck (the orbit ring too), floored at 0.75 so the
     // CTA never gets tiny.
     val sizeScale = fitScale.coerceIn(0.75f, 1f)
-    val buttonSize = (if (compact) {
-        if (landedTopic != null) 96.dp else 112.dp
+    // v12 — AMOLED: the shuffle plate is pitch-black glass; the category
+    // accent moves to the orbit ring, the rim shine and the 3D sheen instead
+    // of a bright accent fill. The dice stays white for readability.
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+    val plateTint = if (isAmoled) Color.Black else tint
+    val orbitColor = if (isAmoled) shineAccent else tint
+    // v11 — Material keeps the device onPrimary as the glyph ink so the dice
+    // stays readable on the (possibly light) primary-based fill in dark mode;
+    // Curio/AMOLED keep the pastel-aware ink.
+    val glyphInk = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && isCurioDarkTheme()) {
+        MaterialTheme.colorScheme.onPrimary
     } else {
-        if (landedTopic != null) 108.dp else 126.dp
+        pastelFillInk(tint)
+    }
+    // Keep the animated orbit/dots at the same radius while making the
+    // actual circular button plate a little tighter and more elegant.
+    val buttonSize = (if (compact) {
+        if (landedTopic != null) 90.dp else 102.dp
+    } else {
+        if (landedTopic != null) 98.dp else 114.dp
     }) * sizeScale
     Box(
         modifier = Modifier.size((if (compact) 156.dp else 176.dp) * sizeScale),
         contentAlignment = Alignment.Center
     ) {
-        OrbitRing(active = isShuffling, color = tint, modifier = Modifier.fillMaxSize())
+        OrbitRing(active = isShuffling, color = orbitColor, modifier = Modifier.fillMaxSize())
         Surface(
             onClick = onClick,
             enabled = enabled,
@@ -3020,12 +3185,15 @@ private fun SpinButton(
             // shuffle button wears a radial gradient with a highlight toward
             // the top and a shadow toward the bottom, with a soft ambient
             // shadow, so it reads as a raised sphere instead of a flat circle.
-            // When OFF, the button keeps its classic flat accent fill.
-            color = if (AppPreferences.threeDButtonState) Color.Transparent else tint,
+            // When OFF, the button keeps its classic flat accent fill (pitch
+            // black on AMOLED).
+            color = if (AppPreferences.threeDButtonState) Color.Transparent else plateTint,
             shadowElevation = if (AppPreferences.threeDButtonState) 6.dp else 0.dp,
             modifier = Modifier
                 .size(buttonSize)
                 .scale(pulseScale.coerceIn(0.9f, 1.10f))
+                // v9.x — the theme-style accent rim on the shuffle button.
+                .categoryEdgeShine(CircleShape, accent = shineAccent)
         ) {
             Box(
                 modifier = Modifier
@@ -3039,10 +3207,17 @@ private fun SpinButton(
                             // sphere keeps a hint of shine without washing
                             // out, while darker fills keep their stronger cap.
                             val pastelLight = AppPreferences.pastelColorsState && !isCurioDarkTheme()
-                            val highlight = lerp(tint, Color.White, if (pastelLight) 0.12f else 0.22f)
+                            // v12 — AMOLED: the black plate gets a faint
+                            // accent-tinted sheen at the top instead of a
+                            // white cap, so the accent reads on the glass.
+                            val highlight = if (isAmoled) {
+                                lerp(plateTint, shineAccent, 0.24f)
+                            } else {
+                                lerp(plateTint, Color.White, if (pastelLight) 0.12f else 0.22f)
+                            }
                             Modifier.background(
                                 Brush.radialGradient(
-                                    listOf(highlight, tint, lerp(tint, Color.Black, 0.07f)),
+                                    listOf(highlight, plateTint, lerp(plateTint, Color.Black, 0.07f)),
                                     center = Offset(0.42f, 0.33f),
                                     radius = 1.15f
                                 ),
@@ -3073,7 +3248,7 @@ private fun SpinButton(
                 ) { shuffling ->
                     if (shuffling) {
                         ShuffleGlyph(
-                            tint = pastelFillInk(tint),
+                            tint = glyphInk,
                             modifier = Modifier
                                 .size(72.dp)
                                 // Keep the animated die on the same optical
@@ -3095,7 +3270,7 @@ private fun SpinButton(
                         )
                         CurioIcon(
                             CurioIcons.Casino, null,
-                            tint = pastelFillInk(tint),
+                            tint = glyphInk,
                             size = if (landedTopic != null) 52.dp else 60.dp,
                             // Optical correction for the casino glyph's
                             // visible bounds. The parent Box and button are
@@ -3127,7 +3302,20 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
     // in pastel light mode and a light tint in pastel dark mode, so the
     // orbiting dots stay readable on every background. Non-pastel keeps
     // the classic accent-colored dots.
-    val dotColor = pastelFillInk(color)
+    // v11 — Material LIGHT wears the device onSurface so the orbiting dots
+    // stay visible on the light tinted page (white dots vanished on the wash).
+    // v13 — NON-pastel LIGHT was the one gap: pastelFillInk returns WHITE off
+    // pastel mode, so the orbit dots lit up as a bright white necklace on the
+    // cream page (and the bloom made it read even whiter). Deepen to a deep
+    // same-hue ink so the dots carry the category color and read on the light
+    // surface in every mode.
+    val dotColor = when {
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && !isCurioDarkTheme() ->
+            MaterialTheme.colorScheme.onSurface
+        !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+            deepHueInk(color)
+        else -> pastelFillInk(color)
+    }
     AnimatedVisibility(
         visible = active,
         modifier = modifier,
@@ -3157,19 +3345,34 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
                 for (i in 0 until n) {
                     val a = (i.toFloat() / n) * (2f * Math.PI.toFloat())
                     val center = Offset(cx + cos(a) * radius, cy + sin(a) * radius)
-                    // Shimmer: each dot breathes with a phase offset while
-                    // the ring orbits, so the band reads as living light
-                    // instead of a rigid necklace.
-                    val pulse = (sin(rotRad * 1.4f + i * 1.15f) + 1f) / 2f
+                    // v13 — shimmer keyed to each dot's ABSOLUTE angle
+                    // (rotation + its own position) instead of the raw
+                    // rotation angle. The old phase ran at 1.4x the ring's
+                    // rotation, so the brightness wave counter-rotated
+                    // against the dots — a strobe-like moiré that read as
+                    // skipping/stuttering instead of a smooth orbit, and
+                    // never felt like one loop. With the phase bound to the
+                    // dot's true position the wave travels WITH the ring,
+                    // and the 360° wrap is invisible (the pattern is
+                    // rotation-periodic).
+                    val absAngle = a + rotRad
+                    val pulse = (sin(absAngle * 1.4f + i * 1.15f) + 1f) / 2f
                     val r = dotR * (0.7f + 0.5f * pulse)
-                    // Soft glow behind the dot.
+                    // Layered bloom: a broad haze, a tighter halo, then a
+                    // bright core. The staggered pulse makes the orbit feel
+                    // like living light instead of identical dots on a track.
                     drawCircle(
-                        color = dotColor.copy(alpha = 0.14f + 0.22f * pulse),
-                        radius = r * 1.9f,
+                        color = dotColor.copy(alpha = 0.06f + 0.10f * pulse),
+                        radius = r * 2.8f,
                         center = center
                     )
                     drawCircle(
-                        color = dotColor.copy(alpha = 0.4f + 0.6f * pulse),
+                        color = dotColor.copy(alpha = 0.16f + 0.24f * pulse),
+                        radius = r * 1.75f,
+                        center = center
+                    )
+                    drawCircle(
+                        color = dotColor.copy(alpha = 0.62f + 0.38f * pulse),
                         radius = r,
                         center = center
                     )
@@ -3367,6 +3570,41 @@ private fun BottomCta(
 }
 
 /**
+ * Unselected deck-control fill — the device surface container in the
+ * Material style (nothing foreign on the device palette), the tinted
+ * category surface otherwise (the page wash's stronger sibling).
+ */
+@Composable
+private fun deckControlSurface(cat: CurioCategory): Color =
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        // v13 — AMOLED unselected controls are PITCH BLACK like the selected
+        // ones (the dark-grey surfaceContainerHigh plate is gone); the accent
+        // hairline from [deckControlBorder] keeps them defined on the pure
+        // black page.
+        Color.Black
+    } else {
+        cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    }
+
+/**
+ * Unselected deck-control border — the device outline hairline in the
+ * Material style, the theme-aware category border otherwise. AMOLED keeps a
+ * quiet accent hairline so the pure-black pills stay distinct from the
+ * pure-black page.
+ */
+@Composable
+private fun deckControlBorder(cat: CurioCategory): BorderStroke? =
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        BorderStroke(1.dp, cat.categoryInk().copy(alpha = 0.28f))
+    } else {
+        cat.categoryBorder()
+    }
+
+/**
  * Tall vertical pill used by the extra-compact bottom bar (v7.2) — icon
  * over a stacked label, pinned to the left/right screen edge (Categories
  * left, Filter right) so the middle of a very short screen stays clear for
@@ -3384,10 +3622,19 @@ private fun VerticalDeckButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedAccent() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-        border = if (selected) null else cat.categoryBorder(),
+        // v12 — AMOLED: selected deck controls are pitch-black glass with the
+        // category accent rim — the bright accent fill is a Curio-style look.
+        color = if (selected) {
+            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
+            else cat.themedButtonFill()
+        } else deckControlSurface(cat),
+        border = if (selected) null else deckControlBorder(cat),
         shadowElevation = 0.dp,
-        modifier = modifier.size(width = 54.dp, height = 112.dp)
+        modifier = modifier
+            .size(width = 54.dp, height = 112.dp)
+            // v9.x — Material buttons keep their category identity as the
+            // accent rim shine on the device primary.
+            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
     ) {
         Column(
             modifier = Modifier
@@ -3398,14 +3645,14 @@ private fun VerticalDeckButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.onAccent() else cat.categoryInk(),
+                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 size = 22.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -3431,10 +3678,19 @@ private fun DeckControlButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedAccent() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-        border = if (selected) null else cat.categoryBorder(),
+        // v12 — AMOLED: selected deck controls are pitch-black glass with the
+        // category accent rim — the bright accent fill is a Curio-style look.
+        color = if (selected) {
+            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
+            else cat.themedButtonFill()
+        } else deckControlSurface(cat),
+        border = if (selected) null else deckControlBorder(cat),
         shadowElevation = 0.dp,
-        modifier = modifier.height(62.dp)
+        modifier = modifier
+            .height(62.dp)
+            // v9.x — Material buttons keep their category identity as the
+            // accent rim shine on the device primary.
+            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
     ) {
         Row(
             // The icon + label group sits CENTERED in the pill box (not
@@ -3447,7 +3703,7 @@ private fun DeckControlButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.onAccent() else cat.categoryInk(),
+                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 size = 24.dp
             )
             Text(
@@ -3458,7 +3714,12 @@ private fun DeckControlButton(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraBold
                 ),
-                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                // v11 — the label pairs with the icon's [themedButtonInk]
+                // (the device onPrimary in Material) instead of the old
+                // onAccent, whose Material value (onPrimaryContainer) left
+                // the text dark-on-primary in light and light-on-primary in
+                // dark — mismatched siblings on the same fill.
+                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -3503,7 +3764,14 @@ private fun CategoryPickerSheet(
         // v6.6 — the full-screen category selection page wears the
         // same category tint wash as the Spin page it sits on, so
         // the picker never flashes a foreign plain background.
-        containerColor = currentCat.categoryBackgroundWash(),
+        // v11 — the Material style wears the device surface container
+        // instead of the category wash (nothing foreign on the device
+        // palette); Curio/AMOLED keep the wash.
+        containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            currentCat.categoryBackgroundWash()
+        },
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {

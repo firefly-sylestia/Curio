@@ -41,14 +41,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.curio.app.R
-import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCategories
+import com.curio.app.data.TopicJsonLoader
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+
+/** Safety cap on startup catalog warm-up — never strand the splash on a
+ *  slow parse. The splash holds navigation until the canonical lanes are
+ *  cached so counts/loading states never read a half-warm catalog, but a
+ *  pathological parse must not block the app past this. */
+private const val CATALOG_WARM_TIMEOUT_MS = 6_000L
 
 /**
  * Splash screen — see Curio splash contract.
@@ -68,7 +80,8 @@ import kotlinx.coroutines.delay
  *   - if false → `CurioRoutes.ONBOARDING`
  *   - else    → `CurioRoutes.HOME`
  *
- * No back button. No interaction. Max 800ms before auto-dismiss.
+ * No back button. No interaction. Auto-dismisses after the branding plays
+ * and the bundled topic catalog has warmed (800ms minimum, ~6s cap).
  */
 @Composable
 fun SplashScreen(navController: NavHostController) {
@@ -116,8 +129,32 @@ fun SplashScreen(navController: NavHostController) {
     }
 
     LaunchedEffect(Unit) {
-        TopicJsonLoader.preloadAll()
+        // Warm the canonical catalog while the splash branding plays, and
+        // HOLD navigation until it's ready: the category picker counts, the
+        // Topic Database lanes and the Spin deck all read the topic cache
+        // synchronously, so a half-warm catalog reads as "0 topics" /
+        // "Loading topics…". Each lane is failure-guarded individually, so
+        // one broken asset never blocks the rest — and the safety timeout
+        // below keeps a pathological parse from stranding the splash.
+        val warmCatalog = launch(Dispatchers.Default) {
+            CurioCategories.visible
+                .filter { it.id != CategoryId.WILDCARD }
+                .forEach { category ->
+                    try {
+                        TopicJsonLoader.load(category.id)
+                    } catch (e: CancellationException) {
+                        // Let the timeout's cancellation abort the loop promptly
+                        // (a hard ~6s cap — runCatching would swallow it).
+                        throw e
+                    } catch (_: Throwable) {
+                        // One broken lane never blocks the rest from warming.
+                    }
+                }
+        }
         delay(800)
+        // Cap the total warm-up at ~6s (a cold first parse of the bundled
+        // 5MB+ catalogs can outlast the 800ms branding on slow devices).
+        withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
         // Check for pending crash from previous session — also route to the
         // crash screen when the crash-loop guard flipped on safe mode, so the
         // user always gets the log + safe restart instead of an endless loop.

@@ -70,6 +70,7 @@ import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioUpdateCheckRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.formatHour
+import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
 /** Settings destination selected from the compact hub. */
@@ -153,7 +154,15 @@ private fun AppearanceSection(highlightKey: String? = null) {
     Column(modifier = Modifier.fillMaxWidth()) {
         CurioCardHeader(CurioIcons.AutoAwesome, "Visual language", "Small choices shape every page")
         SettingsRowPulse(highlightKey == "appearance-style") {
-            CompactSegmentedRow("Theme style", listOf("Curio", "AMOLED", "Material"), styleIndex) { index ->
+            // The Material style stays greyed out until it ships — the option
+            // is visible so users know it's coming, but can't be selected.
+            CompactSegmentedRow(
+                "Theme style",
+                listOf("Curio", "AMOLED", "Material"),
+                styleIndex,
+                disabledIndices = setOf(2),
+                disabledHint = "Material theme · coming soon"
+            ) { index ->
                 AppPreferences.setThemeStyle(context, themeStyles[index])
             }
         }
@@ -479,7 +488,15 @@ private fun AboutSection(navController: NavController, highlightKey: String? = n
 }
 
 @Composable
-private fun CompactSegmentedRow(title: String, labels: List<String>, selectedIndex: Int, enabled: Boolean = true, onSelected: (Int) -> Unit) {
+private fun CompactSegmentedRow(
+    title: String,
+    labels: List<String>,
+    selectedIndex: Int,
+    enabled: Boolean = true,
+    disabledIndices: Set<Int> = emptySet(),
+    disabledHint: String? = null,
+    onSelected: (Int) -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(title, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -487,9 +504,23 @@ private fun CompactSegmentedRow(title: String, labels: List<String>, selectedInd
                 SegmentedButton(
                     selected = index == selectedIndex,
                     onClick = { onSelected(index) },
-                    enabled = enabled,
+                    enabled = enabled && index !in disabledIndices,
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = labels.size)
                 ) { Text(label, style = MaterialTheme.typography.labelSmall) }
+            }
+        }
+        if (disabledHint != null && disabledIndices.isNotEmpty()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(top = 2.dp, start = 2.dp)
+            ) {
+                CurioIcon(CurioIcons.Schedule, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                Text(
+                    disabledHint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

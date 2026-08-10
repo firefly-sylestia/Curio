@@ -81,16 +81,12 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setHeroGradientEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Main card accent border", "Category-tinted border on the hero card", AppPreferences.heroBorderState) {
-                        AppPreferences.setHeroBorderEnabled(context, it)
+                    ExperimentSwitchRow("Dual-accent hero gradient", "Blends the category accent with a warm golden companion for a richer multi-tone gradient", AppPreferences.heroBlendGradientState) {
+                        AppPreferences.setHeroBlendGradientEnabled(context, it)
                     }
                     CurioSettingsDivider()
                     ExperimentSwitchRow("Main card shadow", "Ambient depth below the hero card", AppPreferences.heroShadowState) {
                         AppPreferences.setHeroShadowEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Material card blends", "Device palette with a category-color whisper", AppPreferences.materialCardBlendsState) {
-                        AppPreferences.setMaterialCardBlendsEnabled(context, it)
                     }
                 }
             }
@@ -112,6 +108,10 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Roomier deck titles", "Two-line near-card titles", AppPreferences.peekTitlesState) {
                         AppPreferences.setPeekTitlesEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Tail-fade peek motion", "Newer travel-first motion that fades cards at the end", AppPreferences.peekTailFadeState) {
+                        AppPreferences.setPeekTailFadeEnabled(context, it)
+                    }
                 }
             }
             item {
@@ -123,35 +123,6 @@ fun ExperimentsScreen(navController: NavController) {
                     CurioSettingsDivider()
                     ExperimentSwitchRow("Pastel crown depth", "A subtle darker crown on pastel cards", AppPreferences.pastelCrownDepthState) {
                         AppPreferences.setPastelCrownDepthEnabled(context, it)
-                    }
-                }
-            }
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.AutoAwesome, "Spin landing FX", "Premium landing feel — in testing")
-                    ExperimentSwitchRow(
-                        "Premium landing FX",
-                        "Buttery reel, spring catch, ring + sparkles",
-                        AppPreferences.spinLandingFxState
-                    ) {
-                        AppPreferences.setSpinLandingFxEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    val fxOn = AppPreferences.spinLandingFxState
-                    ExperimentSwitchRow("Buttery reel glide", "Smooth prize-wheel deceleration", AppPreferences.spinFxReelState, enabled = fxOn) {
-                        AppPreferences.setSpinFxReelEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Spring catch", "Smooth controlled settle as the wheel locks in", AppPreferences.spinFxCatchState, enabled = fxOn) {
-                        AppPreferences.setSpinFxCatchEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Shockwave ring", "Accent ring radiates from the landed card", AppPreferences.spinFxRingState, enabled = fxOn) {
-                        AppPreferences.setSpinFxRingEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Sparkle burst", "Star sparks around the landed card", AppPreferences.spinFxSparkleState, enabled = fxOn) {
-                        AppPreferences.setSpinFxSparkleEnabled(context, it)
                     }
                 }
             }

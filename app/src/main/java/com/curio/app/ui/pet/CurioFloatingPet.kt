@@ -60,6 +60,7 @@ import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.TourController
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
+import com.curio.app.navigation.CurioRoutes
 import java.util.Calendar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -81,8 +82,11 @@ private val HEARTS_H = 84.dp
 // v8.26 — smaller and tucked right under the feet; the grid is 20 wide so
 // the full 20-char pixel rows render (the old 16-col grid clipped the
 // right edge and made the silhouette lopsided).
-private val CLOUD_W = 80.dp
-private val CLOUD_H = 32.dp
+// v9.x — scaled to the pet's 72dp box: the cloud is ~¾ of the pet's width
+// (was 80×32 — wider than the pet itself), so it reads as a ride under a
+// SMALL pet instead of a mat that dwarfs it.
+private val CLOUD_W = 56.dp
+private val CLOUD_H = CLOUD_W * 0.4f
 private const val CLOUD_GRID_W = 20
 private const val CLOUD_GRID_H = 8
 // v8.20 — how close a drop must be to the flower bed to count as "home".
@@ -90,6 +94,9 @@ private val DROP_FORGIVENESS = 12.dp
 // v8.35 — the tiny pixel keyboard Curie types on while the user types.
 private val TYPING_W = 150.dp
 private val TYPING_H = 60.dp
+// v9.x — Curie's typing keyboard renders 5× smaller (a tiny thing) so it
+// never competes with the user's own keyboard. Tunable in one place.
+private val TYPING_SCALE = 0.2f
 
 /**
  * The floating Curio pet (v8.8) — a global overlay that lives on top of
@@ -106,6 +113,10 @@ private val TYPING_H = 60.dp
  *    line and hearts, then a playful dart to a nearby spot. v8.21 — being
  *    DRAGGED is what makes it dizzy now: swirl eyes + a wobbly sway while
  *    it's flung around, then a short groggy recovery with a line.
+ *    v11 — a tap / drag / app event SKIPS whatever bubble is showing and
+ *    answers immediately instead of waiting behind (or cycling through)
+ *    queued chatter; ambient lines still queue, but capped so they never
+ *    pile up.
  *  - CELEBRATES: when its mood flips to EXCITED/PROUD (a new lane, a
  *    level-up, a claim), it hops with a short excited line.
  *  - NAPS: after a long idle it fades back into its flower bed
@@ -185,7 +196,39 @@ fun CurioFloatingPet(
         var celebrateKey by remember { mutableIntStateOf(0) }
         var heartsKey by remember { mutableIntStateOf(0) }
         var reaction by remember { mutableStateOf<String?>(null) }
+        var reactionQueue by remember { mutableStateOf<List<String>>(emptyList()) }
         var reactionKey by remember { mutableIntStateOf(0) }
+        /**
+         * Keep one speech line on screen at a time. Reactions can arrive from
+         * several independent effects in the same frame (for example an app
+         * event plus a custom action); queue later lines instead of replacing
+         * the visible line and restarting its animation. v11 — the backlog is
+         * CAPPED so ambient chatter can never pile up into a long cycle of
+         * stale lines: the pet repeats at most the latest one or two, then
+         * falls quiet.
+         */
+        fun queueReaction(line: String) {
+            if (reaction == null && reactionQueue.isEmpty()) {
+                reaction = line
+                reactionKey++
+            } else {
+                reactionQueue = (reactionQueue + line).takeLast(2)
+            }
+        }
+
+        /**
+         * v11 — speak a line RIGHT NOW: interrupts whatever bubble is showing
+         * (skips it) and drops any queued backlog, so a direct interaction (a
+         * tap, a drag, an app event) is answered immediately instead of
+         * waiting behind — and cycling through — ambient chatter. A null line
+         * simply dismisses the current bubble (the pet still reacts with its
+         * motion) without speaking.
+         */
+        fun speakNow(line: String?) {
+            reactionQueue = emptyList()
+            reaction = line
+            reactionKey++
+        }
         // v8.26 — the speech bubble fades + rises in and out instead of
         // popping, so line changes feel smooth rather than abrupt.
         val bubbleAnim = remember { Animatable(0f) }
@@ -205,12 +248,18 @@ fun CurioFloatingPet(
         var lastTapAt by remember { mutableStateOf(0L) }
         var playDartTarget by remember { mutableStateOf<Offset?>(null) }
         // v8.16 — landmark pokes keep a cooldown so the pet interacts often
-        // but never spams the same thing every beat. On the Spin screen the
-        // wander beat cycles every ~300ms (the watching gate exits the wait
-        // loop early), so without this the pet would boop the Shuffle button
-        // almost constantly while the deck waits.
+        // but never spams the same thing every beat. v9.x — the window grew
+        // from 4s to 12s so button pokes read as occasional, not hovering.
+        // On the Spin screen the wander beat cycles every ~300ms (the
+        // watching gate exits the wait loop early), so without this the pet
+        // would boop the Shuffle button almost constantly while the deck
+        // waits.
         var lastPokeAt by remember { mutableStateOf(0L) }
         val appear = remember { Animatable(0f) }
+        // v9.x — chameleon-game opacity: the pet fades to a faint outline
+        // ("camouflage"), then pops back at a fresh spot. Multiplied into
+        // the sprite's own alpha so the two fades compose cleanly.
+        val chameleonAlpha = remember { Animatable(1f) }
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
         val watching = routePrefix?.startsWith("spin") == true
@@ -273,10 +322,7 @@ fun CurioFloatingPet(
             routineKey++
             recentRoutineIds = (listOf(routine.id) + recentRoutineIds).distinct().take(5)
             lastTouch = System.currentTimeMillis()
-            routine.line?.let {
-                reaction = it
-                reactionKey++
-            }
+            routine.line?.let(::queueReaction)
         }
 
         /**
@@ -314,12 +360,17 @@ fun CurioFloatingPet(
                 // Custom lines are deliberately opt-in. When enabled, an
                 // event with saved lines speaks one of them; an event with
                 // no saved lines keeps Curie's built-in dialogue.
-                reaction = if (AppPreferences.customReactionLinesState) {
-                    rule.lines.randomOrNull() ?: line
-                } else {
-                    line
-                }
-                reactionKey++
+                // v11 — a real event (spin landed, reveal, save, level-up)
+                // speaks NOW: it skips whatever bubble is showing so the pet
+                // reacts to what the user just did instead of finishing old
+                // chatter first. A null line leaves the current bubble alone.
+                speakNow(
+                    if (AppPreferences.customReactionLinesState) {
+                        rule.lines.randomOrNull() ?: line
+                    } else {
+                        line
+                    }
+                )
             }
         }
 
@@ -346,8 +397,7 @@ fun CurioFloatingPet(
             lastTouch = System.currentTimeMillis()
             val line = action.dialogueLines.randomOrNull()
             if (line != null) {
-                reaction = line
-                reactionKey++
+                queueReaction(line)
             }
         }
 
@@ -431,6 +481,41 @@ fun CurioFloatingPet(
             moving = false
         }
 
+        // v9.x — the pet EMERGES FROM ITS HOME on the Home screen: instead
+        // of dropping into the screen corner, it SNAPS beside the house the
+        // moment the bed landmark is measured (the appear hop is still
+        // playing, so it reads as the pet popping out of its home — never a
+        // corner flash). One-time per appearance (the flag resets when the
+        // pet is sent home and comes back out, since the overlay leaves and
+        // re-enters composition).
+        val bedLandmark = PetLandmarks.forScreen(CurioRoutes.HOME)
+            .firstOrNull { it.id == "bed" }
+        val settledAtHome = remember { mutableStateOf(false) }
+        LaunchedEffect(bedLandmark?.bounds, overlayOrigin, maxW, maxH) {
+            if (settledAtHome.value) return@LaunchedEffect
+            if (tourActive) return@LaunchedEffect
+            if (routePrefix != CurioRoutes.HOME) return@LaunchedEffect
+            val bed = bedLandmark ?: return@LaunchedEffect
+            settledAtHome.value = true
+            if (dragged) return@LaunchedEffect
+            // Stand on the same floor line as the house, on the side away
+            // from the screen edge, facing it (like it just walked out).
+            val local = Rect(
+                left = bed.bounds.left - overlayOrigin.x,
+                top = bed.bounds.top - overlayOrigin.y,
+                right = bed.bounds.right - overlayOrigin.x,
+                bottom = bed.bounds.bottom - overlayOrigin.y
+            )
+            val side = if (local.center.x > maxW / 2f) -1f else 1f
+            val gap = petPx * 0.18f
+            val targetX = if (side > 0f) local.right + gap else local.left - petPx - gap
+            pos = Offset(
+                targetX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                (local.bottom - petPx).coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+            )
+            facing = if (side > 0f) -1f else 1f
+        }
+
         // ── Autonomy: wander, think, and PLAY (v8.11) ───────────────────
         // Keyed on awake too: the loop dies when the pet naps and restarts
         // fresh when it wakes again. On the Spin screen the pet prefers to
@@ -501,10 +586,11 @@ fun CurioFloatingPet(
                 val landmarks = PetLandmarks.forScreen(routePrefix)
                 // v8.16 — while the deck is actively reeling, the pet stays
                 // glued to watch it land; landmark pokes only happen when
-                // the deck is idle on the spin screen. The 4s cooldown keeps
-                // pokes occasional even where the beat loop cycles fast.
+                // the deck is idle on the spin screen. v9.x — the 12s
+                // cooldown keeps pokes occasional (3× rarer than the old 4s)
+                // even where the beat loop cycles fast.
                 if (!CurioPet.spinning && landmarks.isNotEmpty() &&
-                    System.currentTimeMillis() - lastPokeAt > 4_000L &&
+                    System.currentTimeMillis() - lastPokeAt > 12_000L &&
                     Random.nextFloat() < 0.45f
                 ) {
                     val target = landmarks.random()
@@ -516,21 +602,44 @@ fun CurioFloatingPet(
                             recentIds = recentRoutineIds.toSet()
                         )
                     )
-                    val c = target.bounds.center
-                    // Stand BESIDE the thing, never on top of it.
-                    val tx = (c.x + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
+                    // v9.x — walk right UP TO the thing instead of landing in
+                    // a random offset box around it: convert the landmark's
+                    // WINDOW bounds to overlay-local space, then stand on its
+                    // nearest edge (same vertical center, a small gap) so the
+                    // approach reads as walking to the button.
+                    val local = Rect(
+                        left = target.bounds.left - overlayOrigin.x,
+                        top = target.bounds.top - overlayOrigin.y,
+                        right = target.bounds.right - overlayOrigin.x,
+                        bottom = target.bounds.bottom - overlayOrigin.y
+                    )
+                    val gap = petPx * 0.16f
+                    val side = if (local.left - marginPx >=
+                        maxW - petPx - marginPx - local.right
+                    ) -1f else 1f
+                    val tx = (if (side > 0f) local.right + gap else local.left - petPx - gap)
                         .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
-                    val ty = (c.y + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
+                    val ty = (local.center.y - petPx / 2f)
                         .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                    // Poke ONLY when the pet actually reached the button — an
+                    // interrupted walk (drag / glide) must never interact
+                    // from across the screen.
+                    fun arrived(): Boolean {
+                        val dx = pos.x - tx
+                        val dy = pos.y - ty
+                        return dx * dx + dy * dy <= (petPx * 0.4f) * (petPx * 0.4f)
+                    }
                     when (target.kind) {
                         PetLandmarks.Kind.FUN -> {
                             // Eager approach — quick happy steps, then a
                             // boop with hearts.
                             if (Random.nextFloat() < 0.5f) playKey++
                             walkTo(Offset(tx, ty), stepMs = 15, steps = 44)
-                            PetLandmarks.poke(target.id)
-                            squishKey++
-                            heartsKey++
+                            if (arrived()) {
+                                PetLandmarks.poke(target.id)
+                                squishKey++
+                                heartsKey++
+                            }
                             // The selected Pet Life routine owns the speech
                             // bubble; this avoids replacing its contextual line
                             // with the old generic landmark phrase.
@@ -543,7 +652,7 @@ fun CurioFloatingPet(
                             walkTo(Offset(tx, ty), stepMs = 36, steps = 56)
                             thinking = false
                             delay(420)
-                            PetLandmarks.poke(target.id)
+                            if (arrived()) PetLandmarks.poke(target.id)
                             lastTouch = System.currentTimeMillis()
                         }
                         PetLandmarks.Kind.PLAY -> {
@@ -552,16 +661,18 @@ fun CurioFloatingPet(
                             // beat), then a little happy jig — a squish
                             // bounce, a play-bow and a twirl.
                             walkTo(Offset(tx, ty), stepMs = 15, steps = 44)
-                            PetLandmarks.poke(target.id)
-                            squishKey++
-                            delay(180)
-                            playKey++
-                            delay(320)
-                            // The hop fires with the twirl so the moment
-                            // reads as a real dance, not a generic spin.
-                            celebrateKey++
-                            spinKey++
-                            heartsKey++
+                            if (arrived()) {
+                                PetLandmarks.poke(target.id)
+                                squishKey++
+                                delay(180)
+                                playKey++
+                                delay(320)
+                                // The hop fires with the twirl so the moment
+                                // reads as a real dance, not a generic spin.
+                                celebrateKey++
+                                spinKey++
+                                heartsKey++
+                            }
                             lastTouch = System.currentTimeMillis()
                         }
                     }
@@ -594,6 +705,9 @@ fun CurioFloatingPet(
                     walkTo(Offset(tx, ty), stepMs = 24, steps = 46)
                     peeking = true
                     squishKey++
+                    // v9.x — hide-and-peek talks sometimes: a soft peek-a-boo
+                    // line instead of always playing the crouch in silence.
+                    if (Random.nextFloat() < 0.55f) queueReaction(CurioPet.peekLine())
                     delay(720)
                     peeking = false
                     squishKey++
@@ -619,6 +733,7 @@ fun CurioFloatingPet(
                     val tx = (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
                     walkTo(Offset(tx, edgeY), stepMs = 24, steps = 40)
                     peeking = true
+                    if (Random.nextFloat() < 0.55f) queueReaction(CurioPet.peekLine())
                     delay(900)
                     peeking = false
                     squishKey++
@@ -662,6 +777,50 @@ fun CurioFloatingPet(
                     squishKey++
                     heartsKey++
                     lastPokeAt = System.currentTimeMillis()
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
+                // v9.x — CHAMELEON GAME: the pet occasionally fades into the
+                // background (a faint outline), waits a beat, then pops back
+                // somewhere new with a flourish. Never while glued to the
+                // deck or mid-spin.
+                if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.05f) {
+                    CurioPet.notePlay(context)
+                    queueReaction(CurioPet.chameleonLine())
+                    squishKey++
+                    chameleonAlpha.snapTo(1f)
+                    chameleonAlpha.animateTo(0.12f, tween(420, easing = FastOutSlowInEasing))
+                    delay(760)
+                    // v9.x — if the user grabbed the pet while it was hidden,
+                    // never teleport it mid-drag: pop back visible and let
+                    // the drag win (the wander loop is NOT cancelled by a
+                    // drag, so this guard is the only thing that stops a
+                    // surprise jump under the finger).
+                    if (dragged) {
+                        chameleonAlpha.snapTo(1f)
+                        continue
+                    }
+                    val nx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    val ny = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    pos = Offset(nx, ny)
+                    facing = if (Random.nextFloat() < 0.5f) -1f else 1f
+                    chameleonAlpha.animateTo(1f, tween(360, easing = FastOutSlowInEasing))
+                    squishKey++
+                    celebrateKey++
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
+                // v9.x — SPARK-CATCH GAME: a quick eager dash to a fresh spot
+                // to "grab" a falling spark, with a celebration on arrival.
+                if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.06f) {
+                    CurioPet.notePlay(context)
+                    queueReaction(CurioPet.sparkLine())
+                    val sx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    val sy = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    walkTo(Offset(sx, sy), stepMs = 12, steps = 34)
+                    squishKey++
+                    celebrateKey++
+                    heartsKey++
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
@@ -786,11 +945,13 @@ fun CurioFloatingPet(
 
         // ── Spin cheer (v8.13) — while the deck is reeling, the pet cheers
         //    it on with a line + a little bounce (once per spin).
+        // v9.x — gated on [watching] (actually ON the Spin screen): a stale
+        // spinning flag (left mid-spin, effect cancelled) must never leak
+        // spin cheers onto other pages.
         LaunchedEffect(CurioPet.spinning) {
-            if (CurioPet.spinning && autoWander) {
+            if (CurioPet.spinning && autoWander && watching) {
                 celebrateKey++
-                reaction = CurioPet.spinCheer()
-                reactionKey++
+                queueReaction(CurioPet.spinCheer())
                 lastTouch = System.currentTimeMillis()
             }
         }
@@ -852,6 +1013,10 @@ fun CurioFloatingPet(
         // then clear. v8.26 — animated both ways so a new line never pops or
         // vanishes abruptly; the ~2.3s hold keeps reactions in the 2-3s range
         // (dizzy, cheers, home drops) so they read at a glance.
+        // v11 — a direct interaction (tap / drag / app event) calls speakNow,
+        // which re-keys this effect: the current hold is cancelled and the new
+        // line fades in at once (or the bubble dismisses), and the queue it
+        // drained from is already cleared — no more cycling stale lines.
         LaunchedEffect(reactionKey) {
             if (reaction != null) {
                 bubbleAnim.snapTo(0f)
@@ -859,6 +1024,16 @@ fun CurioFloatingPet(
                 delay(2300)
                 bubbleAnim.animateTo(0f, tween(180, easing = FastOutSlowInEasing))
                 reaction = null
+                val nextReaction = reactionQueue.firstOrNull()
+                reactionQueue = if (nextReaction == null) {
+                    emptyList()
+                } else {
+                    reactionQueue.drop(1)
+                }
+                if (nextReaction != null) {
+                    reaction = nextReaction
+                    reactionKey++
+                }
             }
         }
 
@@ -905,8 +1080,7 @@ fun CurioFloatingPet(
                     )
                     facing = 1f
                     squishKey++
-                    reaction = "Tap tap tap! I can type too!"
-                    reactionKey++
+                    queueReaction("Tap tap tap! I can type too!")
                 }
             } else {
                 typingReaction = false
@@ -944,7 +1118,7 @@ fun CurioFloatingPet(
                 .offset { IntOffset(pos.x.roundToInt(), pos.y.roundToInt()) }
                 .size(FLOAT_SIZE)
                 .graphicsLayer {
-                    alpha = appear.value
+                    alpha = appear.value * chameleonAlpha.value
                     scaleX = 0.5f + 0.5f * appear.value
                     scaleY = 0.5f + 0.5f * appear.value
                 }
@@ -989,6 +1163,12 @@ fun CurioFloatingPet(
                             dizzy = true
                             peeking = false
                             typingReaction = false
+                            // v9.x — grabbing the pet mid-chameleon brings it
+                            // straight back to full visibility (the drag
+                            // callbacks aren't suspend, so this hops onto the
+                            // composition glide scope, the same host the
+                            // throw-glide uses).
+                            glideScope.launch { chameleonAlpha.snapTo(1f) }
                             dragStartAt = System.currentTimeMillis()
                             lastTouch = System.currentTimeMillis()
                             // v8.20 — a fresh drag starts clear of the bed.
@@ -1060,15 +1240,13 @@ fun CurioFloatingPet(
                                 if (dropped) {
                                     squishKey++
                                     heartsKey++
-                                    reaction = "Home sweet home!"
-                                    reactionKey++
+                                    speakNow("Home sweet home!")
                                     leavingHome = true
                                 }
                             }
                             if (flung && !leavingHome) {
                                 recovering = true
-                                reaction = CurioPet.dizzyLine()
-                                reactionKey++
+                                speakNow(CurioPet.dizzyLine())
                             }
                             // v8.26 — throw momentum: a real fling keeps a
                             // LITTLE of its speed on release (capped, and
@@ -1153,15 +1331,20 @@ fun CurioFloatingPet(
                             if (rule.enabled) {
                                 reactionFace = rule.face
                                 reactionFaceKey++
-                                if (Random.nextFloat() < 0.4f) {
+                                // v11 — the tap answers IMMEDIATELY: it skips
+                                // whatever bubble is showing and drops the
+                                // queued chatter (a null line just dismisses
+                                // the bubble — the pet's motion is the
+                                // reaction).
+                                val line = if (Random.nextFloat() < 0.4f) {
                                     val builtInLine = CurioPet.touchReaction(tier)
-                                    reaction = if (AppPreferences.customReactionLinesState) {
+                                    if (AppPreferences.customReactionLinesState) {
                                         rule.lines.randomOrNull() ?: builtInLine
                                     } else {
                                         builtInLine
                                     }
-                                    reactionKey++
-                                }
+                                } else null
+                                speakNow(line)
                                 when (tier) {
                                     // v8.21 — tapping never spins it dizzy anymore
                                     // (that's for dragging): boop → play-bow → a
@@ -1202,8 +1385,7 @@ fun CurioFloatingPet(
                             tapStreak = 0 // a fresh start when it comes home
                             squishKey++
                             heartsKey++
-                            reaction = "Home sweet home!"
-                            reactionKey++
+                            speakNow("Home sweet home!")
                             leavingHome = true
                         }
                     )
@@ -1285,14 +1467,15 @@ fun CurioFloatingPet(
         TypingKeyboard(
             visible = typingReaction,
             accent = accentColor,
+            scale = TYPING_SCALE,
             modifier = Modifier
                 .offset {
                     IntOffset(
-                        (pos.x + petPx / 2f - with(density) { TYPING_W.toPx() } / 2f).roundToInt(),
-                        (pos.y - with(density) { 60.dp.toPx() }).roundToInt()
+                        (pos.x + petPx / 2f - with(density) { (TYPING_W * TYPING_SCALE).toPx() } / 2f).roundToInt(),
+                        (pos.y - with(density) { (60.dp * TYPING_SCALE + 6.dp).toPx() }).roundToInt()
                     )
                 }
-                .size(TYPING_W, TYPING_H)
+                .size(TYPING_W * TYPING_SCALE, TYPING_H * TYPING_SCALE)
         )
 
         // Reaction bubbles belong to the pet. Tour guidance is different: it
@@ -1368,6 +1551,12 @@ fun CurioFloatingPet(
                     // its left tail remains the least surprising orientation
                     // for controls near either side of the screen.
                     tailOnLeft = false,
+                    // v9.x — the tour dialogue is NOT clipped to two lines
+                    // (the old maxLines=2 cut longer steps like Settings) and
+                    // may grow wider than a passive reaction bubble. Regular
+                    // reactions keep their cozy two-line cap.
+                    maxLines = if (tourStep != null) Int.MAX_VALUE else 2,
+                    maxWidth = if (tourStep != null) 340.dp else 260.dp,
                     modifier = Modifier.align(Alignment.BottomStart)
                 )
             }
@@ -1382,7 +1571,15 @@ fun CurioFloatingPet(
  * them up as it taps. Calm, premium, readable — not the old flashing strip.
  */
 @Composable
-private fun TypingKeyboard(visible: Boolean, accent: Color, modifier: Modifier = Modifier) {
+private fun TypingKeyboard(
+    visible: Boolean,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    // v9.x — uniform scale for the whole keyboard: the canvas size AND the
+    // base dp unit below shrink together, so every key/row/hand scales
+    // proportionally (all inner dimensions derive from [d] or w/h).
+    scale: Float = 1f
+) {
     val density = LocalDensity.current
     val alpha by animateFloatAsState(
         targetValue = if (visible) 0.95f else 0f,
@@ -1408,7 +1605,7 @@ private fun TypingKeyboard(visible: Boolean, accent: Color, modifier: Modifier =
     Canvas(modifier = modifier.graphicsLayer { this.alpha = alpha }) {
         val w = size.width
         val h = size.height
-        val d = with(density) { 1.dp.toPx() }
+        val d = with(density) { (1.dp * scale.coerceIn(0.1f, 1f)).toPx() }
 
         // Keyboard body with a soft drop shadow.
         drawRoundRect(

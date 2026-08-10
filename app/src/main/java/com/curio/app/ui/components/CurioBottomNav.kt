@@ -1,5 +1,7 @@
 package com.curio.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -123,6 +125,13 @@ fun CurioBottomBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val routePrefix = currentRoute?.substringBefore("/")
+    // Reveal is entered from the Shuffle deck, so keep Shuffle selected while
+    // the reveal page is open instead of leaving every tab unselected.
+    val selectedRoute = if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+        CurioRoutes.SPIN
+    } else {
+        routePrefix
+    }
 
     NavigationBar(
         modifier = modifier
@@ -135,10 +144,10 @@ fun CurioBottomBar(
         CurioBottomNavItems.all.forEach { destination ->
             // The hierarchy walk handles nested-graph destinations; today all routes are flat
             // so the hierarchy contains exactly the current route + start destination.
-            val selected = navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
-                routeEntry.route == destination.route ||
+            val selected = selectedRoute == destination.route ||
+                navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
                     routeEntry.route?.substringBefore("/") == destination.route
-            } == true
+                } == true
 
             NavigationBarItem(
                 selected = selected,
@@ -147,7 +156,7 @@ fun CurioBottomBar(
                     // current screen when the deck was opened via a category
                     // launch ("spin/artists"), and re-tapping an already-
                     // selected tab must be a no-op instead of re-opening it.
-                    if (routePrefix != destination.route) {
+                    if (selectedRoute != destination.route) {
                         // Anchor to HOME (the persistent root), not the
                         // graph start destination: SPLASH is popped on
                         // launch, so popUpTo(startDestination) would be a
@@ -200,6 +209,11 @@ fun CurioNavigationRail(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val routePrefix = currentRoute?.substringBefore("/")
+    val selectedRoute = if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+        CurioRoutes.SPIN
+    } else {
+        routePrefix
+    }
 
     NavigationRail(
         modifier = modifier,
@@ -210,10 +224,10 @@ fun CurioNavigationRail(
         content = {
             Spacer(Modifier.height(10.dp))
             CurioBottomNavItems.all.forEach { destination ->
-                val selected = navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
-                    routeEntry.route == destination.route ||
+                val selected = selectedRoute == destination.route ||
+                    navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
                         routeEntry.route?.substringBefore("/") == destination.route
-                } == true
+                    } == true
 
                 NavigationRailItem(
                     selected = selected,
@@ -221,7 +235,7 @@ fun CurioNavigationRail(
                     // Same prefix-based no-op guard as the bottom bar: a
                     // category-launched deck ("spin/artists") is still the
                     // Shuffle tab, so re-tapping must not re-navigate.
-                    if (routePrefix != destination.route) {
+                    if (selectedRoute != destination.route) {
                         navController.navigateToTab(destination.route)
                     }
                 },
@@ -262,8 +276,15 @@ fun CurioNavigationRail(
  * and any route that publishes no wash falls back to the surface too.
  */
 @Composable
-private fun curioNavContainerColor(routePrefix: String?): Color = when (routePrefix) {
-    CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.surface
-    CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
-    else -> MaterialTheme.colorScheme.surface
+private fun curioNavContainerColor(routePrefix: String?): Color {
+    val target = when (routePrefix) {
+        CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.surface
+        CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.surface
+    }
+    return animateColorAsState(
+        targetValue = target,
+        animationSpec = tween(durationMillis = 420),
+        label = "curioNavContainerColor"
+    ).value
 }

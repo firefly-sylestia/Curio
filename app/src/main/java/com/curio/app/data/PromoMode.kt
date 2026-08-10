@@ -56,7 +56,8 @@ object PromoMode {
     /**
      * Real total topic count across all loaded pools — shown on the promo
      * poster's stat strip ("…+ topics") so the number is honest, not fake.
+     * Delegates to [TopicCatalog.totalTopicCount] (the same source of
+     * truth the Home hero's Topics stat uses), so the two can never drift.
      */
-    fun topicTotal(): Int =
-        CurioCategories.all.sumOf { cat -> TopicJsonLoader.cached(cat.id)?.size ?: 0 }
+    fun topicTotal(): Int = TopicCatalog.totalTopicCount()
 }

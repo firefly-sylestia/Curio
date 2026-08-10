@@ -295,10 +295,66 @@ Legend
     • "Take the tour" / "Not now"
 
 --------------------------------------------------------------------------------
+15. PET PERSONALITY SYSTEM (v9.x) — anti-repeat + sassy + games
+    Location: app/src/main/java/com/curio/app/data/CurioPet.kt
+            (pickLine, saidLines, isEventBurst, sassyLines, peekLine,
+             chameleonLine, sparkLine)
+
+  ANTI-REPEAT: every line picker now goes through pickLine(), which never
+  repeats a line spoken within the last 16 lines (a small in-memory bag).
+  Every pool was expanded to 8-16 variants, so chatter feels endless
+  instead of looping.
+
+  SASSY BURSTS — the SAME action 3× within 4 minutes earns one adorably
+  annoyed line, then the burst resets [picks one]:
+    • "Again?! …I mean, AGAIN! I love it!"
+    • "That's the third one today. Not that I'm counting. (I'm counting.)"
+    • "Okay, okay — one more cheer! My paws are getting tired!"
+    • "You're on a roll! I'm running out of sparkles… okay, no I'm not."
+    • "Another one?! You spoil me. …Keep going."
+    • "Hmph! So many things to open. My tiny heart can't take it. Do it again."
+    • "You again! Hehe — okay, I'm invested now."
+    • "I've cheered so much my sparkle needs a snack break."
+    • "Is that a new thing? …It's the same thing. I don't care. MORE!"
+    • "My excitement is now legally yours. Proceed."
+
+  PEEK-A-BOO — hiding around a button or the screen's bottom edge
+  (spoken ~55% of hide-and-peek crouches) [picks one]:
+    • "Peek-a-boo!" / "I see you!" / "Hidden! …Found! Dang."
+    • "Boo! …It's me. Cute boo." / "Peek! …peek! …PEEK!"
+    • "You can't see me. You saw me." / "Now you see me! …Me again!"
+    • "Surprise! It's a face! Mine!" / "Crouch… and POP!"
+    • "Sneak sneak sneak—HI!" / "I was here the whole time. Suspicious."
+    • "Boop from my hiding spot!"
+
+  CHAMELEON — the pet fades to a faint outline, then pops back somewhere
+  new (autonomous game, never while watching the Spin deck) [picks one]:
+    • "Chameleon mode… ON!" / "Can you see me? …Wait, no, don't answer!"
+    • "I'm part of the wallpaper now." / "Vanish! …Reappear! Ta-da!"
+    • "Fade to… me again!" / "I blend in. It's a talent."
+    • "Poof! …Poof back!" / "Sneak 100. I'm basically invisible."
+    • "Camouflage activated!" / "Now I'm here! …Now I'm not! …Now I am!"
+    • "Hiding is my love language."
+    • "Did I startle you? Good. I mean, sorry. I mean, again?"
+
+  SPARK-CATCH — an eager dash after a falling spark (autonomous game)
+  [picks one]:
+    • "A spark! Mine!" / "Catch the spark!" / "Ooh, shiny falling thing!"
+    • "Sparkle dash!" / "Got it! …Almost got it! …Got it!"
+    • "Falling stars are FASTER than me. Impressive." / "Zooms!"
+    • "One tiny spark, one big pounce!" / "I caught a star! Sort of!"
+    • "Chase chase chase—caught!" / "The spark didn't stand a chance."
+    • "Gravity vs me: round one, me!"
+
+--------------------------------------------------------------------------------
 Notes for future edits
   • Keep one sentence per passive bubble (the pill shows max 2 lines).
+  • The TOUR dialogue is NOT capped at 2 lines anymore: PetSpeechBubble
+    takes maxLines/maxWidth, and the tour passes unlimited lines + 340dp.
   • Try to avoid em dashes (—) in user-facing copy; use "…" or plain text.
   • Lines are picked at random per group — to change the mood, edit the
     matching group in CurioPet.kt (section headers name the list variable).
   • The pet's REACTION TIMING (how long a bubble stays up) lives in
     CurioFloatingPet.kt: hold ≈ 2.3s + fade, dizzy recovery 2.5s.
+  • New lines added to a pool automatically respect the anti-repeat bag
+    (pickLine) — no extra wiring needed.

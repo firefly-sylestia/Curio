@@ -47,9 +47,10 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
-import com.curio.app.data.openSilentExplore
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.ui.pet.PetLandmark
+import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -59,7 +60,6 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -67,10 +67,11 @@ import kotlinx.coroutines.withContext
  * Browse Topics — the whole Curio database in one place.
  *
  * Opened from the Home drawer ("Browse Topics"). Renders every topic across
- * the ten real categories (wildcard is a merge, so it isn't a separate lane)
- * with a search bar, per-category filter chips, a small "explored" badge on
- * topics already marked done, and a sort control (A–Z / newest / oldest by
- * year). Tapping any topic opens its full Topic Reveal page, exactly like
+ * the ten real categories PLUS a dedicated Wildcard lane (wildcard.json's
+ * hand-curated curiosities, browsable on their own) with a search bar,
+ * per-category filter chips, a small "explored" badge on
+ * topics already marked done, and sort controls for A–Z / Z–A / newest /
+ * oldest by year. Tapping any topic opens its full Topic Reveal page, exactly like
  * spinning it.
  *
  * Sorting reads each topic's year from its name ("Citizen Kane (1941)"),
@@ -84,19 +85,15 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun TopicDatabaseScreen(navController: NavController) {
-    // Hoisted (v8.13) — the silent Explore chip needs a Context, but
-    // LocalContext.current is @Composable and cannot be called inside the
-    // row's non-composable onExplore lambda.
-    val context = LocalContext.current
     // v7.97 — SAVEABLE state: the search query, the selected category filter
     // and the scroll position survive leaving the screen (Topic Reveal
     // round-trips, tab switches, rotation, process death) instead of
     // resetting to a fresh blank list every time you come back.
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
-    // v8.54 — sort control: DEFAULT (category file order) / ALPHA (A–Z by
-    // name) / YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so
-    // it survives reveal round-trips, tab switches, and rotation.
+    // v8.54 — sort control: DEFAULT (category file order) / A–Z / Z–A /
+    // YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so it
+    // survives reveal round-trips, tab switches, and rotation.
     var sortMode by rememberSaveable { mutableStateOf(DatabaseSortMode.DEFAULT) }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
@@ -115,20 +112,73 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Load + cache every category pool once; carry the topics alongside so
     // the filtered list stays a pure derivation. v7.94 — keyed on the
     // Manage Categories state so hidden/reordered lanes refresh on revisit.
-    val catalog by produceState<List<Pair<CurioCategory, List<CurioTopic>>>>(
-        initialValue = emptyList(),
+    // Cache-first initialization matters here: returning to the browser should
+    // render the already-parsed catalog immediately instead of flashing the
+    // loading state for one composition frame.
+    // The ten canonical lanes PLUS a dedicated Wildcard lane. wildcard.json
+    // holds 500+ hand-curated curiosities (categoryId == WILDCARD) that live
+    // in no other lane — the Spin deck's "wildcard" pool merges every lane,
+    // so without its own lane here those topics would never be browsable.
+    // Always present (the browser is an explicit browse-all surface) even if
+    // Wildcard is hidden from the tab pickers in Manage Categories.
+    val visibleCategories = (CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD)))
+        .distinctBy { it.id }
+    // The merged wildcard pool duplicates every canonical topic, so the
+    // Wildcard lane shows ONLY the hand-curated wildcard.json originals —
+    // the ten lanes keep their own topics and the sections never overlap.
+    fun laneTopics(cat: CurioCategory, topics: List<CurioTopic>): List<CurioTopic> =
+        if (cat.id == CategoryId.WILDCARD) topics.filter { it.categoryId == CategoryId.WILDCARD }
+        else topics
+    val cachedCatalog = remember(visibleCategories) {
+        visibleCategories.mapNotNull { cat ->
+            TopicJsonLoader.cached(cat.id)?.let { topics -> cat to laneTopics(cat, topics) }
+        }
+    }
+    val catalogState by produceState<CatalogState>(
+        initialValue = CatalogState(
+            entries = cachedCatalog,
+            loading = cachedCatalog.size < visibleCategories.size
+        ),
         AppPreferences.hiddenCategoriesState,
         AppPreferences.categoryOrderState
     ) {
         value = withContext(Dispatchers.Default) {
-            TopicJsonLoader.preloadAll()
-            CurioCategories.visible
-                .filter { it.id != CategoryId.WILDCARD }
-                .map { cat -> cat to TopicJsonLoader.cached(cat.id).orEmpty() }
+            // Load the canonical lanes; the wildcard lane reuses those caches
+            // (its pool merges every lane, then we keep only its own
+            // curiosities) so the extra lane adds no duplicate parses.
+            CatalogState(
+                entries = visibleCategories.map { cat ->
+                    cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
+                },
+                loading = false
+            )
         }
     }
+    val catalog = catalogState.entries
+    val catalogLoading = catalogState.loading
     val totalTopics = catalog.sumOf { it.second.size }
 
+    // Build the expensive search/sort fields off the composition thread once
+    // per catalog load. Sorting used to lowercase strings and create year
+    // regexes for thousands of topics on the UI thread on every chip tap.
+    val indexedTopics by produceState<List<IndexedTopic>>(emptyList(), catalog) {
+        value = withContext(Dispatchers.Default) {
+            catalog.flatMap { (cat, topics) ->
+                topics.map { topic ->
+                    IndexedTopic(
+                        category = cat,
+                        topic = topic,
+                        nameKey = topic.name.lowercase(),
+                        subtypeKey = topic.subtype.lowercase(),
+                        bylineKey = topic.byline.lowercase(),
+                        teaserKey = topic.teaser.lowercase(),
+                        tagKeys = topic.tags.map(String::lowercase),
+                        year = topicYear(topic)
+                    )
+                }
+            }
+        }
+    }
     // v7.97 — the persisted filter can outlive its lane (a category hidden in
     // Manage Categories drops out of the catalog). Fall back to All instead
     // of leaving an invisible "no topics" state with no visible chip.
@@ -141,75 +191,80 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v8.54 — with a non-default sort active the list flattens to one sorted
     // run (section headers would break a global A–Z / year order).
     val needle = query.trim().lowercase()
-    val matches: (CurioTopic) -> Boolean = { t ->
+    val matches: (IndexedTopic) -> Boolean = { indexed ->
         needle.isEmpty() ||
-            t.name.lowercase().contains(needle) ||
-            t.subtype.lowercase().contains(needle) ||
-            t.byline.lowercase().contains(needle) ||
-            t.teaser.lowercase().contains(needle) ||
-            t.tags.any { it.lowercase().contains(needle) }
+            indexed.nameKey.contains(needle) ||
+            indexed.subtypeKey.contains(needle) ||
+            indexed.bylineKey.contains(needle) ||
+            indexed.teaserKey.contains(needle) ||
+            indexed.tagKeys.any { it.contains(needle) }
     }
-    val rows = remember(catalog, effectiveCat, needle, doneTopics, sortMode) {
-        if (sortMode == DatabaseSortMode.DEFAULT) {
-            buildList {
-                catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    val shown = topics.filter(matches)
-                    if (shown.isEmpty()) return@forEach
-                    if (effectiveCat == null) {
-                        add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
-                    }
-                    shown.forEach { t ->
-                        add(
-                            DatabaseRow(
-                                key = t.id,
-                                topic = t,
-                                done = "${cat.id.name}::$t.name" in doneTopics
+    // Filtering and sorting happen on Dispatchers.Default. `remember` only
+    // caches work; it still performs the entire sort on the UI thread.
+    val rows by produceState<List<DatabaseRow>>(
+        initialValue = emptyList(),
+        catalog,
+        indexedTopics,
+        effectiveCat,
+        needle,
+        doneTopics,
+        sortMode
+    ) {
+        value = withContext(Dispatchers.Default) {
+            val indexById = indexedTopics.associateBy { it.topic.id }
+            if (sortMode == DatabaseSortMode.DEFAULT) {
+                buildList {
+                    catalog.forEach { (cat, topics) ->
+                        if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                        val shown = topics.mapNotNull { indexById[it.id] }.filter(matches)
+                        if (shown.isEmpty()) return@forEach
+                        if (effectiveCat == null) {
+                            add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
+                        }
+                        shown.forEach { indexed ->
+                            add(
+                                DatabaseRow(
+                                    key = indexed.topic.id,
+                                    topic = indexed.topic,
+                                    done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                                )
                             )
-                        )
+                        }
                     }
                 }
-            }
-        } else {
-            val flat = buildList {
-                catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    topics.filter(matches).forEach { t ->
-                        add(
-                            DatabaseRow(
-                                key = t.id,
-                                topic = t,
-                                done = "${cat.id.name}::$t.name" in doneTopics
-                            )
-                        )
-                    }
+            } else {
+                val filtered = indexedTopics.filter { indexed ->
+                    (effectiveCat == null || indexed.category.id == effectiveCat) && matches(indexed)
                 }
-            }
-            val topics = flat.mapNotNull { it.topic }
-            val sorted = when (sortMode) {
-                DatabaseSortMode.ALPHA ->
-                    topics.sortedWith(compareBy({ it.name.lowercase() }, { it.id }))
-                DatabaseSortMode.YEAR_NEWEST ->
-                    // Explicit type arg: the compareByDescending(...).thenBy
-                    // chain can't infer T from sortedWith's contravariant
-                    // comparator (CI: "Cannot infer type for type parameter").
-                    topics.sortedWith(
-                        compareByDescending<CurioTopic> { topicYear(it) ?: Int.MIN_VALUE }
-                            .thenBy { it.name.lowercase() }
+                val sorted = when (sortMode) {
+                    DatabaseSortMode.ALPHA_ASC ->
+                        filtered.sortedWith(compareBy<IndexedTopic>({ it.nameKey }, { it.topic.id }))
+                    DatabaseSortMode.ALPHA_DESC ->
+                        filtered.sortedWith(
+                            compareByDescending<IndexedTopic> { it.nameKey }
+                                .thenByDescending { it.topic.id }
+                        )
+                    DatabaseSortMode.YEAR_NEWEST ->
+                        filtered.sortedWith(
+                            compareByDescending<IndexedTopic> { it.year ?: Int.MIN_VALUE }
+                                .thenBy { it.nameKey }
+                                .thenBy { it.topic.id }
+                        )
+                    DatabaseSortMode.YEAR_OLDEST ->
+                        filtered.sortedWith(
+                            compareBy<IndexedTopic> { it.year ?: Int.MAX_VALUE }
+                                .thenBy { it.nameKey }
+                                .thenBy { it.topic.id }
+                        )
+                    DatabaseSortMode.DEFAULT -> filtered
+                }
+                sorted.map { indexed ->
+                    DatabaseRow(
+                        key = indexed.topic.id,
+                        topic = indexed.topic,
+                        done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
                     )
-                DatabaseSortMode.YEAR_OLDEST ->
-                    topics.sortedWith(
-                        compareBy<CurioTopic> { topicYear(it) ?: Int.MAX_VALUE }
-                            .thenBy { it.name.lowercase() }
-                    )
-                DatabaseSortMode.DEFAULT -> topics
-            }
-            sorted.map { t ->
-                DatabaseRow(
-                    key = t.id,
-                    topic = t,
-                    done = "${t.categoryId.name}::$t.name" in doneTopics
-                )
+                }
             }
         }
     }
@@ -277,6 +332,14 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // ── Search + category filter chips ─────────────────────────
                 item("controls") {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        // v8.xx — the search box is a pet landmark: the pet
+                        // walks over and pokes it, and the tour's Browse-Topics
+                        // stop points the guide right at it.
+                        PetLandmark(
+                            id = "search",
+                            kind = PetLandmarks.Kind.FUN,
+                            screen = "database"
+                        ) { lm ->
                         OutlinedTextField(
                             value = query,
                             onValueChange = { query = it },
@@ -324,8 +387,9 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                                 cursorColor = MaterialTheme.colorScheme.primary
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = lm.fillMaxWidth()
                         )
+                        }
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -352,8 +416,8 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 )
                             }
                         }
-                        // v8.54 — sort control: A–Z / Newest / Oldest (by year).
-                        // Tapping the active chip returns to the default order.
+                        // v8.54 — sort control: A–Z / Z–A / Newest / Oldest (by year).
+                        // Direction is explicit so sorting never depends on a hidden toggle state.
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -365,14 +429,20 @@ fun TopicDatabaseScreen(navController: NavController) {
                                     modifier = Modifier.padding(start = 2.dp)
                                 )
                             }
-                            item("sort-alpha") {
+                            item("sort-alpha-asc") {
                                 DatabaseSortChip(
                                     label = "A–Z",
-                                    selected = sortMode == DatabaseSortMode.ALPHA,
-                                    onClick = {
-                                        sortMode = if (sortMode == DatabaseSortMode.ALPHA) DatabaseSortMode.DEFAULT
-                                        else DatabaseSortMode.ALPHA
-                                    }
+                                    glyph = CurioIcons.ArrowUpward,
+                                    selected = sortMode == DatabaseSortMode.ALPHA_ASC,
+                                    onClick = { sortMode = DatabaseSortMode.ALPHA_ASC }
+                                )
+                            }
+                            item("sort-alpha-desc") {
+                                DatabaseSortChip(
+                                    label = "Z–A",
+                                    glyph = CurioIcons.ArrowDownward,
+                                    selected = sortMode == DatabaseSortMode.ALPHA_DESC,
+                                    onClick = { sortMode = DatabaseSortMode.ALPHA_DESC }
                                 )
                             }
                             item("sort-newest") {
@@ -402,10 +472,15 @@ fun TopicDatabaseScreen(navController: NavController) {
                 }
 
                 // ── Loading / empty / list states ──────────────────────────
-                if (catalog.isEmpty()) {
+                // Catalog parsing and indexing are separate background steps.
+                // Keep the loading state through both so the intermediate
+                // empty `rows` value never flashes "No topics match".
+                val browserLoading = catalogLoading ||
+                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0)
+                if (browserLoading) {
                     item("loading") {
                         Text(
-                            "Loading topics…",
+                            if (catalog.isEmpty()) "Loading topics…" else "Preparing topics…",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
@@ -451,14 +526,6 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 cat = CurioCategories.byId(row.topic.categoryId),
                                 topic = row.topic,
                                 done = row.done,
-                                // v8.12/8.13 — a silent Explore chip: opens the
-                                // topic's search page without quest chains,
-                                // dailies, recents or done-marks; it still
-                                // feeds the passport + awards the tiny
-                                // exploration XP (browsing shouldn't inflate
-                                // quest progress, but the pet knows you were
-                                // there).
-                                onExplore = { openSilentExplore(context, row.topic) },
                                 onClick = {
                                     // Browse-Topics mode: the reveal opens
                                     // read-only (no explore, no recents
@@ -486,7 +553,24 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
 }
 
+/** Precomputed search/sort data for one topic. */
+private data class IndexedTopic(
+    val category: CurioCategory,
+    val topic: CurioTopic,
+    val nameKey: String,
+    val subtypeKey: String,
+    val bylineKey: String,
+    val teaserKey: String,
+    val tagKeys: List<String>,
+    val year: Int?
+)
+
 /** One row in the database list — a category section header or a topic. */
+private data class CatalogState(
+    val entries: List<Pair<CurioCategory, List<CurioTopic>>>,
+    val loading: Boolean
+)
+
 private data class DatabaseRow(
     val key: String,
     val section: CurioCategory? = null,
@@ -528,7 +612,7 @@ private fun DatabaseFilterChip(
  * run (headers are hidden because a global sort breaks grouping).
  */
 private enum class DatabaseSortMode {
-    DEFAULT, ALPHA, YEAR_NEWEST, YEAR_OLDEST
+    DEFAULT, ALPHA_ASC, ALPHA_DESC, YEAR_NEWEST, YEAR_OLDEST
 }
 
 /**
@@ -541,17 +625,17 @@ private enum class DatabaseSortMode {
  * ("1960s" → 1960). Returns null when nothing is recoverable (unknowns
  * sort last, alphabetically within that bucket).
  */
+private val PARENTHESIZED_YEAR = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
+private val BARE_YEAR = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
+private val DECADE_YEAR = Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b")
+
 private fun topicYear(topic: CurioTopic): Int? {
-    val parenthesized = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
-    parenthesized.find(topic.name)?.let { return it.groupValues[1].toInt() }
-    parenthesized.find(topic.exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
-    val bareYear = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
-    bareYear.find(topic.teaser)?.let { return it.value.toInt() }
-    bareYear.find(topic.exploreAction.instruction)?.let { return it.value.toInt() }
-    for (tag in topic.tags) {
-        Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b").find(tag)?.let {
-            return it.groupValues[1].toInt() * 10
-        }
+    PARENTHESIZED_YEAR.find(topic.name)?.let { return it.groupValues[1].toInt() }
+    PARENTHESIZED_YEAR.find(topic.exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
+    BARE_YEAR.find(topic.teaser)?.let { return it.value.toInt() }
+    BARE_YEAR.find(topic.exploreAction.instruction)?.let { return it.value.toInt() }
+    topic.tags.forEach { tag ->
+        DECADE_YEAR.find(tag)?.let { return it.groupValues[1].toInt() * 10 }
     }
     return null
 }
@@ -628,9 +712,8 @@ private fun DatabaseSectionHeader(cat: CurioCategory, count: Int) {
 private fun DatabaseTopicRow(
     cat: CurioCategory,
     topic: CurioTopic,
-    done: Boolean,
-    onClick: () -> Unit,
-    onExplore: (() -> Unit)? = null
+    done: Boolean,                                onClick: () -> Unit
+
 ) {
     Surface(
         onClick = onClick,
@@ -713,34 +796,6 @@ private fun DatabaseTopicRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-            // v8.12 — silent explore chip: open the topic's search page with
-            // no tracking. Nested inside the clickable row, so its own tap
-            // consumes the event instead of opening the read-only reveal.
-            if (onExplore != null) {
-                Surface(
-                    onClick = onExplore,
-                    shape = RoundedCornerShape(50),
-                    color = cat.accent.copy(alpha = 0.14f),
-                    modifier = Modifier.padding(start = 6.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        CurioIcon(
-                            CurioIcons.AutoAwesome, null,
-                            tint = cat.accent,
-                            size = 14.dp
-                        )
-                        Text(
-                            text = "Explore",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = cat.accent
-                        )
-                    }
-                }
             }
             CurioIcon(
                 CurioIcons.ChevronRight, null,

@@ -82,6 +82,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.PromoMode
+import com.curio.app.data.TopicCatalog
 import com.curio.app.data.SavedQuote
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
@@ -110,7 +111,10 @@ import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
@@ -341,6 +345,12 @@ fun HomeScreen(navController: NavController) {
             // cleaner pink-rose hue carries through the greeting, stat icons
             // and hero watermark instead of falling back to a brown raw accent.
             val questInk = homeReadableInk(heroFill)
+            // v13 — AMOLED: the banner is pure black, so the rose accent
+            // shows through the hero's watermark symbols + stat pane (the
+            // Profile/Settings treatment) instead of disappearing into the
+            // plate. Every other style keeps the banner's own ink.
+            val symbolTint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                CurioColors.HomeRosewood else questInk
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -402,8 +412,8 @@ fun HomeScreen(navController: NavController) {
                             HomeHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
                         )
                         heroPairs.forEachIndexed { i, pair ->
-                            HomeHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, questInk)
-                            HomeHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, questInk)
+                            HomeHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, symbolTint)
+                            HomeHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, symbolTint)
                         }
                         Column(
                             modifier = Modifier
@@ -481,14 +491,24 @@ fun HomeScreen(navController: NavController) {
                                 // shape itself — Surface does not clip its
                                 // content, so a plain background() would bleed
                                 // square corners past the rounded border.
+                                // v13 — AMOLED: the pane is black, so the
+                                // gradient softens the rose accent into it
+                                // (top a strong rose, bottom a subtle glow)
+                                // instead of a black-on-black wash.
+                                val statPane = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+                                    listOf(
+                                        symbolTint.copy(alpha = 0.30f),
+                                        lerp(heroFill, symbolTint, 0.12f).copy(alpha = 0.16f)
+                                    )
+                                } else {
+                                    listOf(
+                                        heroFill.copy(alpha = 0.12f),
+                                        lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                    )
+                                }
                                 Box(
                                     modifier = Modifier.background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                heroFill.copy(alpha = 0.12f),
-                                                lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
-                                            )
-                                        ),
+                                        Brush.verticalGradient(statPane),
                                         RoundedCornerShape(20.dp)
                                     )
                                 ) {
@@ -526,10 +546,15 @@ fun HomeScreen(navController: NavController) {
                                             modifier = Modifier.height(34.dp),
                                             color = questInk.copy(alpha = 0.22f)
                                         )
+                                        // v13 — the stat now shows the app's
+                                        // TOTAL topic count (the catalog is
+                                        // warmed during splash, so the sync
+                                        // read is ready on the first frame)
+                                        // instead of the recent-feed size.
                                         HeroStatSegment(
-                                            glyph = CurioIcons.History,
-                                            value = "${if (promoOn) promoFeed.size else recentFeed.size}",
-                                            label = "Recent",
+                                            glyph = CurioIcons.AutoAwesome,
+                                            value = "${TopicCatalog.totalTopicCount()}",
+                                            label = "Topics",
                                             tint = questInk,
                                             ink = questInk,
                                             modifier = Modifier.weight(1f)
@@ -961,17 +986,22 @@ fun HomeScreen(navController: NavController) {
     // ── Unsave-quote confirmation — never remove a bookmark silently ──
     pendingUnsave?.let { quote ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingUnsave = null },
             title = { Text("Remove saved quote?") },
             text = { Text("This removes \u201C${quote.quoteText}\u201D from your Saved shelf. The entry itself stays in the Cabinet.") },
             confirmButton = {
-                TextButton(onClick = {
-                    AppPreferences.removeSavedQuote(context, quote.entryId, quote.quoteText)
-                    pendingUnsave = null
-                }) { Text("Remove") }
+                TextButton(
+                    onClick = {
+                        AppPreferences.removeSavedQuote(context, quote.entryId, quote.quoteText)
+                        pendingUnsave = null
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Remove") }
             },
             dismissButton = {
-                TextButton(onClick = { pendingUnsave = null }) { Text("Keep") }
+                TextButton(onClick = { pendingUnsave = null }, colors = curioDialogActionButtonColors()) { Text("Keep") }
             }
         )
     }
@@ -979,17 +1009,22 @@ fun HomeScreen(navController: NavController) {
     // ── Unpin-topic confirmation — never drop a pin silently ──
     pendingUnpin?.let { pinned ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingUnpin = null },
             title = { Text("Unpin ${pinned.topicName}?") },
             text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck. You can pin it again anytime.") },
             confirmButton = {
-                TextButton(onClick = {
-                    AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
-                    pendingUnpin = null
-                }) { Text("Unpin") }
+                TextButton(
+                    onClick = {
+                        AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
+                        pendingUnpin = null
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Unpin") }
             },
             dismissButton = {
-                TextButton(onClick = { pendingUnpin = null }) { Text("Keep") }
+                TextButton(onClick = { pendingUnpin = null }, colors = curioDialogActionButtonColors()) { Text("Keep") }
             }
         )
     }
@@ -1376,16 +1411,32 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
  * on — so the hero, empty state and drawer all wear the SAME rose-wood.
  */
 @Composable
-private fun homeReadableInk(fill: Color): Color = if (
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme()
-) {
-    MaterialTheme.colorScheme.onSurface
-} else {
-    pastelFillInk(fill)
+private fun homeReadableInk(fill: Color): Color = when {
+    // v9.x — mirror Settings' ink so Material/AMOLED hero text stays
+    // readable on the scheme-driven hero fills.
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+        MaterialTheme.colorScheme.onPrimary
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+        MaterialTheme.colorScheme.onSurface
+    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+        MaterialTheme.colorScheme.onSurface
+    else -> pastelFillInk(fill)
 }
 
 @Composable
 private fun homeRoseAccent(): Color {
+    // v9.x — hero headers stay coherent with Settings: Material and AMOLED
+    // use the active scheme's semantic roles instead of the legacy rose.
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.primary
+    }
+    // v13 — AMOLED heroes are PROPER pitch black now: the old grey-coral
+    // tint (lerp(surfaceContainerHigh, primary, 0.16f)) is gone — the rose
+    // accent lives on the black plate via the hero's watermark symbols and
+    // stat pane instead (see the quest hero's symbolTint).
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return Color.Black
+    }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
         // One shared deep companion keeps this hero family atmospheric in
@@ -1457,10 +1508,15 @@ private fun FirstTimeEmpty(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
+                        // v13 — the button fill follows homeRoseAccent (black
+                        // in AMOLED), so its ink resolves like every other
+                        // accent fill (white on black) instead of the hard
+                        // DeepPlum that vanished on the AMOLED plate.
+                        val buttonInk = homeReadableInk(roseAccent)
                         CurioIcon(
                             CurioIcons.Casino,
                             null,
-                            tint = CurioColors.DeepPlum,
+                            tint = buttonInk,
                             size = 16.dp,
                             // Match the shared icon lift plus the casino
                             // glyph's half-dp extra correction.
@@ -1469,7 +1525,7 @@ private fun FirstTimeEmpty(
                         Text(
                             "Surprise me",
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CurioColors.DeepPlum
+                            color = buttonInk
                         )
                     }
                 }

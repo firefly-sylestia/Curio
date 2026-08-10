@@ -74,8 +74,11 @@ import com.curio.app.ui.components.MoodBoardZoomOverlay
 import com.curio.app.ui.components.NotePaperCard
 import com.curio.app.ui.components.moodBoardPainter
 import com.curio.app.ui.components.rememberMoodBoardZoomState
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.pastelFillInk
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -954,6 +957,8 @@ private fun MoodBoardCanvas(
 
     if (showClearConfirm) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { showClearConfirm = false },
             title = { Text("Clear mood board?") },
             text = { Text("Remove all ${tiles.size} images? This can't be undone.") },
@@ -966,7 +971,10 @@ private fun MoodBoardCanvas(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) {
+                TextButton(
+                    onClick = { showClearConfirm = false },
+                    colors = curioDialogActionButtonColors()
+                ) {
                     Text("Keep")
                 }
             }
@@ -976,6 +984,8 @@ private fun MoodBoardCanvas(
     // ── Confirm before removing a single tile via its × ──────────────
     if (pendingRemoveTileId != null) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingRemoveTileId = null },
             title = { Text("Remove this image?") },
             text = { Text("This will delete the image from your mood board. This can't be undone.") },
@@ -990,7 +1000,10 @@ private fun MoodBoardCanvas(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingRemoveTileId = null }) {
+                TextButton(
+                    onClick = { pendingRemoveTileId = null },
+                    colors = curioDialogActionButtonColors()
+                ) {
                     Text("Keep")
                 }
             }

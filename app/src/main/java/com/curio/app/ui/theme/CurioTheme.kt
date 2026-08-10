@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -16,7 +19,9 @@ import androidx.compose.runtime.SideEffect
 import com.curio.app.data.AppPreferences
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -178,101 +183,84 @@ fun isCurioDarkThemeForContext(context: Context): Boolean {
 }
 
 /**
- * The Material style's CALM palette — the device's Material You hues (the
- * proper Material color given by the device, from the wallpaper) kept as
- * the identity, but MUTED into non-vibrant pastels on airy LIGHT surfaces
- * instead of the stock dynamic scheme's vivid primaries and grey
- * containers.
+ * The Material style's HUE-LOCKED palette — the device's Material You
+ * identity kept as a single HUE (from the wallpaper's dynamic primary), then
+ * the whole palette is BUILT from that hue with Curio-tuned saturation and
+ * lightness. The raw dynamic scheme's colors are often muddy or washed-out
+ * (a brown wallpaper can render the app in dull olive-grey), so this drops
+ * them and derives every role from the wallpaper's hue instead — the result
+ * is always vivid and coherent no matter what the wallpaper contributes.
  *
- *  - Light mode: near-white surfaces with a whisper of the device hue
- *    (very low saturation — calm, non-vibrant), muted pastel accents
- *    (same hue, low saturation, airy lightness) with deep same-hue ink.
- *  - Dark mode: a SOFT pastel-tinted dark — lighter and calmer than the
- *    Curio midnight — carrying the same muted pastel accents, so the
- *    Material style reads light and gentle in both modes.
+ *  - Light mode: near-white surfaces with a whisper of the device hue, an
+ *    airy tinted primary-container, and a deep vivid primary + same-hue ink.
+ *  - Dark mode: a deep tinted midnight from the same hue, bright readable
+ *    primary, and light same-hue container ink.
+ *  - Secondary / tertiary are the same hue family offset ±38°, so every
+ *    scheme color belongs to one harmonious story.
  */
 private fun calmMaterialColorScheme(dynamic: ColorScheme, dark: Boolean): ColorScheme {
-    // Every accent keeps the device hue; only saturation + lightness move.
-    // Saturation is held LOW everywhere (0.08–0.36) so nothing reads
-    // vibrant — the palette stays calm and pastel in every mode.
-    fun hueOf(c: Color): Float = toHsl(c).h
-
-    // Muted pastel fill + deep same-hue ink: light = airy (l 0.80), dark =
-    // soft mid-tone (l 0.62) so buttons/chips read as gentle pastels over
-    // the dark page with crisp deep ink on top.
-    fun fill(c: Color) = fromHsl(hueOf(c), if (dark) 0.34f else 0.30f, if (dark) 0.62f else 0.80f)
-    fun onFill(c: Color) = fromHsl(hueOf(c), if (dark) 0.30f else 0.36f, if (dark) 0.18f else 0.24f)
-    fun container(c: Color) = fromHsl(hueOf(c), if (dark) 0.16f else 0.16f, if (dark) 0.34f else 0.92f)
-    fun onContainer(c: Color) = fromHsl(hueOf(c), if (dark) 0.10f else 0.34f, if (dark) 0.90f else 0.28f)
-
-    val ph = hueOf(dynamic.primary)
-    val sh = hueOf(dynamic.secondary)
-    val th = hueOf(dynamic.tertiary)
-
-    // Surfaces — tinted with the device hue (unique, not stock grey):
-    // light = near-white airy paper, dark = soft pastel-tinted night.
-    val surfaceBg = if (dark) fromHsl(ph, 0.14f, 0.17f) else fromHsl(ph, 0.10f, 0.95f)
-    val surfaceMain = if (dark) fromHsl(ph, 0.13f, 0.19f) else fromHsl(ph, 0.10f, 0.95f)
-    val onSurface = if (dark) fromHsl(ph, 0.08f, 0.92f) else fromHsl(ph, 0.24f, 0.20f)
-    val variant = if (dark) fromHsl(ph, 0.12f, 0.22f) else fromHsl(ph, 0.12f, 0.90f)
-    val onVariant = if (dark) fromHsl(ph, 0.08f, 0.74f) else fromHsl(ph, 0.18f, 0.42f)
+    // The wallpaper's identity hue — a near-achromatic wallpaper falls back
+    // to hue 0 (warm rose, on-brand).
+    val hue = toHsl(dynamic.primary).h
+    val secondaryHue = (hue + 38f) % 360f
+    val tertiaryHue = (hue + 322f) % 360f
 
     return if (dark) darkColorScheme(
-        primary = fill(dynamic.primary),
-        onPrimary = onFill(dynamic.primary),
-        primaryContainer = container(dynamic.primary),
-        onPrimaryContainer = onContainer(dynamic.primary),
-        secondary = fill(dynamic.secondary),
-        onSecondary = onFill(dynamic.secondary),
-        secondaryContainer = container(dynamic.secondary),
-        onSecondaryContainer = onContainer(dynamic.secondary),
-        tertiary = fill(dynamic.tertiary),
-        onTertiary = onFill(dynamic.tertiary),
-        tertiaryContainer = container(dynamic.tertiary),
-        onTertiaryContainer = onContainer(dynamic.tertiary),
-        background = surfaceBg,
-        onBackground = onSurface,
-        surface = surfaceMain,
-        onSurface = onSurface,
-        surfaceVariant = variant,
-        onSurfaceVariant = onVariant,
-        surfaceContainerLowest = fromHsl(ph, 0.15f, 0.14f),
-        surfaceContainerLow = fromHsl(ph, 0.13f, 0.20f),
-        surfaceContainer = fromHsl(ph, 0.12f, 0.23f),
-        surfaceContainerHigh = fromHsl(ph, 0.11f, 0.27f),
-        surfaceContainerHighest = fromHsl(ph, 0.10f, 0.31f),
+        primary = fromHsl(hue, 0.58f, 0.72f),
+        onPrimary = fromHsl(hue, 0.55f, 0.16f),
+        primaryContainer = fromHsl(hue, 0.40f, 0.28f),
+        onPrimaryContainer = fromHsl(hue, 0.55f, 0.86f),
+        secondary = fromHsl(secondaryHue, 0.46f, 0.70f),
+        onSecondary = fromHsl(secondaryHue, 0.50f, 0.18f),
+        secondaryContainer = fromHsl(secondaryHue, 0.36f, 0.28f),
+        onSecondaryContainer = fromHsl(secondaryHue, 0.48f, 0.84f),
+        tertiary = fromHsl(tertiaryHue, 0.40f, 0.72f),
+        onTertiary = fromHsl(tertiaryHue, 0.46f, 0.20f),
+        tertiaryContainer = fromHsl(tertiaryHue, 0.34f, 0.28f),
+        onTertiaryContainer = fromHsl(tertiaryHue, 0.44f, 0.84f),
+        background = fromHsl(hue, 0.07f, 0.055f),
+        onBackground = fromHsl(hue, 0.08f, 0.93f),
+        surface = fromHsl(hue, 0.07f, 0.06f),
+        onSurface = fromHsl(hue, 0.08f, 0.93f),
+        surfaceVariant = fromHsl(hue, 0.07f, 0.10f),
+        onSurfaceVariant = fromHsl(hue, 0.06f, 0.74f),
+        surfaceContainerLowest = fromHsl(hue, 0.06f, 0.045f),
+        surfaceContainerLow = fromHsl(hue, 0.07f, 0.065f),
+        surfaceContainer = fromHsl(hue, 0.07f, 0.08f),
+        surfaceContainerHigh = fromHsl(hue, 0.07f, 0.10f),
+        surfaceContainerHighest = fromHsl(hue, 0.08f, 0.125f),
         error = CurioColors.WarmCoralRed,
         onError = Color.White,
-        outline = fromHsl(ph, 0.10f, 0.50f),
-        outlineVariant = fromHsl(ph, 0.10f, 0.30f)
+        outline = fromHsl(hue, 0.08f, 0.93f).copy(alpha = 0.16f),
+        outlineVariant = fromHsl(hue, 0.08f, 0.93f).copy(alpha = 0.08f)
     ) else lightColorScheme(
-        primary = fill(dynamic.primary),
-        onPrimary = onFill(dynamic.primary),
-        primaryContainer = container(dynamic.primary),
-        onPrimaryContainer = onContainer(dynamic.primary),
-        secondary = fill(dynamic.secondary),
-        onSecondary = onFill(dynamic.secondary),
-        secondaryContainer = container(dynamic.secondary),
-        onSecondaryContainer = onContainer(dynamic.secondary),
-        tertiary = fill(dynamic.tertiary),
-        onTertiary = onFill(dynamic.tertiary),
-        tertiaryContainer = container(dynamic.tertiary),
-        onTertiaryContainer = onContainer(dynamic.tertiary),
-        background = surfaceBg,
-        onBackground = onSurface,
-        surface = surfaceMain,
-        onSurface = onSurface,
-        surfaceVariant = variant,
-        onSurfaceVariant = onVariant,
-        surfaceContainerLowest = fromHsl(ph, 0.07f, 0.97f),
-        surfaceContainerLow = fromHsl(ph, 0.11f, 0.93f),
-        surfaceContainer = fromHsl(ph, 0.12f, 0.90f),
-        surfaceContainerHigh = fromHsl(ph, 0.13f, 0.87f),
-        surfaceContainerHighest = fromHsl(ph, 0.14f, 0.84f),
+        primary = fromHsl(hue, 0.60f, 0.46f),
+        onPrimary = Color.White,
+        primaryContainer = fromHsl(hue, 0.44f, 0.90f),
+        onPrimaryContainer = fromHsl(hue, 0.58f, 0.26f),
+        secondary = fromHsl(secondaryHue, 0.48f, 0.47f),
+        onSecondary = Color.White,
+        secondaryContainer = fromHsl(secondaryHue, 0.42f, 0.88f),
+        onSecondaryContainer = fromHsl(secondaryHue, 0.52f, 0.28f),
+        tertiary = fromHsl(tertiaryHue, 0.42f, 0.50f),
+        onTertiary = Color.White,
+        tertiaryContainer = fromHsl(tertiaryHue, 0.38f, 0.88f),
+        onTertiaryContainer = fromHsl(tertiaryHue, 0.48f, 0.30f),
+        background = fromHsl(hue, 0.05f, 0.985f),
+        onBackground = fromHsl(hue, 0.10f, 0.16f),
+        surface = fromHsl(hue, 0.05f, 0.985f),
+        onSurface = fromHsl(hue, 0.10f, 0.16f),
+        surfaceVariant = fromHsl(hue, 0.05f, 0.94f),
+        onSurfaceVariant = fromHsl(hue, 0.06f, 0.42f),
+        surfaceContainerLowest = Color.White,
+        surfaceContainerLow = fromHsl(hue, 0.05f, 0.965f),
+        surfaceContainer = fromHsl(hue, 0.05f, 0.945f),
+        surfaceContainerHigh = fromHsl(hue, 0.05f, 0.91f),
+        surfaceContainerHighest = fromHsl(hue, 0.06f, 0.87f),
         error = CurioColors.WarmCoralRed,
-        onError = CurioColors.CreamWhite,
-        outline = fromHsl(ph, 0.16f, 0.55f),
-        outlineVariant = fromHsl(ph, 0.12f, 0.80f)
+        onError = Color.White,
+        outline = fromHsl(hue, 0.10f, 0.16f).copy(alpha = 0.16f),
+        outlineVariant = fromHsl(hue, 0.10f, 0.16f).copy(alpha = 0.08f)
     )
 }
 
@@ -342,3 +330,61 @@ fun CurioTheme(
         content     = content
     )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared dialog styling — one container, shape and action ink for every
+// AlertDialog in the app, so dialogs match the card language (24dp corners)
+// and the pastel-tinted page instead of floating a foreign cream panel.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The card-matching corner radius every AlertDialog wears — the same 24dp
+ * medium token as the cards and the Topic Reveal explore dialog.
+ */
+val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
+
+/**
+ * Theme-aware AlertDialog container. Curio LIGHT mode (pastel and plain)
+ * blends the surface container toward the soft cream background so the
+ * dialog melts into the tinted page instead of floating a deeper yellow-
+ * cream panel; dark and Material keep the scheme's own elevated surface.
+ */
+@Composable
+fun curioDialogContainerColor(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+    if (isCurioDarkTheme()) {
+        return MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+    // v11 — light: a soft near-background sheet that matches the page wash
+    // family (the cream background) instead of the deeper #E4D7BF container.
+    return lerp(
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        MaterialTheme.colorScheme.background,
+        0.60f
+    )
+}
+
+/**
+ * Readable dialog ACTION ink. In light mode the scheme primary is the pale
+ * coral-pink brand color that washes out on a light dialog, so actions flip
+ * to a deep same-hue rose for real contrast; dark and Material keep the
+ * scheme primary.
+ */
+@Composable
+fun curioDialogActionColor(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.primary
+    }
+    if (isCurioDarkTheme()) {
+        return MaterialTheme.colorScheme.primary
+    }
+    val a = toHsl(MaterialTheme.colorScheme.primary)
+    return fromHsl(a.h, a.s.coerceIn(0.35f, 0.60f), 0.36f)
+}
+
+/** TextButton colors for dialog actions — dark readable ink in light mode. */
+@Composable
+fun curioDialogActionButtonColors(): ButtonColors =
+    ButtonDefaults.textButtonColors(contentColor = curioDialogActionColor())

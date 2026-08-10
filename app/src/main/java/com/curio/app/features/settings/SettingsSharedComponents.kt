@@ -21,7 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AudioQuality
-import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioDialogContainerColor
 
 @Composable
 fun AudioQualityDialog(
@@ -30,8 +33,9 @@ fun AudioQualityDialog(
     onSelected: (AudioQuality) -> Unit
 ) {
     AlertDialog(
+        containerColor = curioDialogContainerColor(),
+        shape = CurioDialogShape,
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(28.dp),
         title = { Text("Recording quality", fontWeight = FontWeight.ExtraBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -45,10 +49,10 @@ fun AudioQualityDialog(
                     Surface(
                         onClick = { onSelected(quality) },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (selected) CurioColors.CoralBlush.copy(alpha = 0.12f) else Color.Transparent,
+                        color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else Color.Transparent,
                         border = BorderStroke(
                             1.dp,
-                            if (selected) CurioColors.CoralBlush else MaterialTheme.colorScheme.outlineVariant
+                            if (selected) curioDialogActionColor() else MaterialTheme.colorScheme.outlineVariant
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -60,7 +64,7 @@ fun AudioQualityDialog(
                             RadioButton(
                                 selected = selected,
                                 onClick = null,
-                                colors = RadioButtonDefaults.colors(selectedColor = CurioColors.CoralBlush)
+                                colors = RadioButtonDefaults.colors(selectedColor = curioDialogActionColor())
                             )
                             Column {
                                 Text(quality.label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
@@ -75,6 +79,8 @@ fun AudioQualityDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Close", fontWeight = FontWeight.Bold) } }
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close", fontWeight = FontWeight.Bold) }
+        }
     )
 }
