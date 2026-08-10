@@ -103,6 +103,18 @@ object TopicCatalog {
     suspend fun tagsFor(id: CategoryId): List<String> =
         poolFor(id).flatMap { it.tags }.distinct().sorted()
 
+    /**
+     * The app's TOTAL topic count across the ten canonical lanes
+     * (wildcard excluded — it only mirrors them). Sync: reads the warm
+     * cache, which the splash preload fills before the UI renders; an
+     * uncached lane just contributes zero until it loads. Used by the
+     * Home hero's "Topics" stat.
+     */
+    fun totalTopicCount(): Int =
+        CategoryId.values()
+            .filter { it != CategoryId.WILDCARD }
+            .sumOf { TopicJsonLoader.cached(it)?.size ?: 0 }
+
     // ── Sample entries (sync, after preload) ───────────────────────────────
     //
     // CabinetScreen + EntryDetailScreen + TopicHistoryScreen use these

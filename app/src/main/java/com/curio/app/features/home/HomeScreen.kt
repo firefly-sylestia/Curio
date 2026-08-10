@@ -82,6 +82,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.PromoMode
+import com.curio.app.data.TopicCatalog
 import com.curio.app.data.SavedQuote
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
@@ -545,10 +546,15 @@ fun HomeScreen(navController: NavController) {
                                             modifier = Modifier.height(34.dp),
                                             color = questInk.copy(alpha = 0.22f)
                                         )
+                                        // v13 — the stat now shows the app's
+                                        // TOTAL topic count (the catalog is
+                                        // warmed during splash, so the sync
+                                        // read is ready on the first frame)
+                                        // instead of the recent-feed size.
                                         HeroStatSegment(
-                                            glyph = CurioIcons.History,
-                                            value = "${if (promoOn) promoFeed.size else recentFeed.size}",
-                                            label = "Recent",
+                                            glyph = CurioIcons.AutoAwesome,
+                                            value = "${TopicCatalog.totalTopicCount()}",
+                                            label = "Topics",
                                             tint = questInk,
                                             ink = questInk,
                                             modifier = Modifier.weight(1f)

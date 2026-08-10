@@ -1,5 +1,21 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Home hero stat shows total topics instead of recents count
+
+**Date:** 2026-08-10
+
+### What the user asked
+On the Home page, change the stat that shows the recent count to show the total number of topics the app has.
+
+### Changes made
+- **TopicCatalog.kt** — new `totalTopicCount()`: sync sum of the ten non-wildcard lanes' cached pool sizes (the catalog is warmed during splash, so it's ready on the Home's first frame; an uncached lane contributes 0 until loaded). Wildcard excluded — it only mirrors the canonical lanes.
+- **HomeScreen.kt** — the hero stat bar's third segment now shows `TopicCatalog.totalTopicCount()` with label "Topics" and the AutoAwesome glyph (was the recent-feed size, "Recent", History glyph). The recents feed variables stay used by the Recents section below. Works in promo mode too (shows the real total).
+- **PromoMode.kt** — `topicTotal()` now delegates to `TopicCatalog.totalTopicCount()` (was a duplicated cached sum) so the two can never drift.
+
+### Validation
+- Brace check + git diff --check clean; code review passed (no dead code, imports verified, DRY consolidation).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): AMOLED unselected Categories/Filter pills → pure black
 
 **Date:** 2026-08-10
