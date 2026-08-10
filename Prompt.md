@@ -1,20 +1,52 @@
-# Request — Pet home spawn, speech bubble redesign, ride-cloud scale
+# Prompt.md — Request Log
 
-## User request
-1. When the app opens, the pet is at the screen corner instead of its home — it should start from its home (confirmed: float beside its house on the Home screen).
-2. Redesign the speech bubble shape (the old one is "bad").
-3. Scale "the cloud" to the pet's size (confirmed: the little pixel ride-cloud the pet stands on while walking, which was 80×32dp — wider than the 72dp pet).
+## Current Request (COMPLETED): AMOLED theme polish — pitch-black cards, edge shine, buttons, unified heroes
 
-## Changes completed
-- `CurioFloatingPet.kt`:
-  - New settle-at-home effect: the moment the Home screen's "bed" landmark is measured, the pet SNAPS beside its house (floor-aligned, on the side away from the screen edge, facing it) instead of sitting at the bottom-right corner — no corner flash. One-shot per appearance via a `settledAtHome` remember flag (resets when the overlay leaves/re-enters composition, e.g. coming out of the house); skipped during the tour and while dragged. Added the `CurioRoutes` import.
-  - Ride cloud scaled to the pet: `CLOUD_W` 80→56dp, `CLOUD_H = CLOUD_W * 0.4f` (22.4dp) so the 20×8 pixel grid keeps square cells (~¾ of the pet's width).
-- `CurioPetCompanion.kt`: redesigned `PetSpeechBubble` — replaced the rotated-square diamond tail (`TailDiamond`, removed with the now-unused `rotate` import) with a soft curved Path-based tail (`CurvedBubbleTail`, quadratic beziers, rounded tip, 16×14dp Canvas) and squishier asymmetric corners (20dp with an 8dp corner on the tail side). Added `Canvas`/`fillMaxSize`/`Path` imports. Quests-screen call site unchanged.
+**Date:** 2026-08-10
 
-## Validation
-- `node scripts/check_braces.js` passed on both files.
-- Code review confirmed compile-safety (imports balanced, Dp math valid, `hypot`/`Rect`/`mutableStateOf`/`delay` already imported) and led to switching the initial glide (which left the pet at the corner for the first frames) to a snap-to-home so the pet is never seen at the corner.
-- Local Gradle compile/build/lint/test commands were not run because repository instructions forbid local Android builds; CI remains authoritative.
+### What the user asked
+"Also let's fix the amoled theme — the cards look great, how about make it proper pitch black and give the corner a little of the shade line a shine, and also expand that to buttons as well. And category browser too."
 
-## Status
-Committed and pushed: `51987cc feat: pet starts at its home, redesigned speech bubble, scaled ride cloud` (branch Alpha).
+Clarifications gathered via ask_user:
+- "Category browser" = the **category picker grid**.
+- Buttons should be **pitch black with the category-colored shine**.
+- Shine = **hairline all around PLUS a brighter top-edge** ("Both").
+- Bonus fix: Home/Profile hero colors should match Settings' AMOLED hero treatment (Settings' was already good).
+
+### Changes made (commit `b351b42`, pushed to Alpha)
+
+**New file: `app/src/main/java/com/curio/app/ui/components/AmoledEdgeShine.kt`**
+- `Modifier.amoledEdgeShine(shape, accent?)` — "black glass" edge: faint 1dp hairline light border all around + brighter 1.4dp top-edge shine fading over an 18dp band (via `drawWithCache` + `clipRect`). Accent-tinted when a category color is passed; **no-op outside the AMOLED style**.
+- `curioButtonColors(...)` — button containers become `Color.Black` in AMOLED (light content preserved), pass-through otherwise.
+
+**Pitch-black card fills (AMOLED only):**
+- `CurioGradients.cardGradient` — base changed from `surfaceContainerHigh` grey to pure `Color.Black` (kept the quiet category bloom).
+- `CurioCategoryCard` idle — `Color.Black` + accent-tinted shine.
+- `CurioTopicCard` (Cabinet grid) — `Color.Black` + shine (replaces the old grey lift).
+- `CurioSettingsCard` — `Color.Black` + shine.
+- `CurioHeroShuffleCard` — white shine (no accent).
+
+**Buttons:**
+- `RevealStartButton` (topic reveal CTA) — pitch-black pill in AMOLED, category accent becomes the edge shine.
+- Picker "Mix" button (multi-select row) — pitch-black + shine.
+- SpinButton deliberately left alone (3D sphere with its own highlight cap — flat edge shine would fight it).
+
+**Unified hero colors (Home/Profile now match Settings):**
+- `homeRoseAccent` / `profileRoseAccent` — added the same Material (`primary`) and AMOLED (`lerp(surfaceContainerHigh, primary, 0.16f)`) branches Settings already had.
+- `homeReadableInk` / `profileReadableInk` — mirror `settingsReadableInk` (Material → onPrimary, AMOLED → onSurface).
+
+### Validation
+- Brace balance OK on all 10 touched files (`scripts/check_braces.js`).
+- Import audit: removed now-unused `ButtonDefaults` imports from TopicRevealScreen + CategoryPickerScreen; confirmed `Color`, `RoundedCornerShape`, `lerp`, and same-package `amoledEdgeShine`/`curioButtonColors` resolution.
+- Code reviewer spawn failed to return (tool hiccup) — substituted a manual compile-safety review (drawWithCache scope, Brush overloads, Shape.createOutline, modifier order, Dp math).
+- Gradle builds are CI-only per repo rules.
+
+### Notes / follow-ups
+- Worth a device check in AMOLED: shine intensity (hairline 0.10–0.26 alpha, top 0.22–0.45 alpha), and that Cabinet topic cards still read as boxes now that the grey lift is gone.
+- The `amoledEdgeShine` modifier is reusable for any future AMOLED surface.
+
+---
+
+## Prior requests (archive)
+- Pet-led tour completion + reveal torn bottom edge (`5464cd4`, `1265c75`).
+- Pet starts at its home, redesigned speech bubble, scaled ride cloud (`51987cc`, `c38c4fd`).
