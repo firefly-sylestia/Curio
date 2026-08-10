@@ -106,8 +106,8 @@ fun CurioEntryCard(
                 },
                 onLongClick = onLongClick
             )
-            // v9.x — AMOLED black-glass edge (hairline + top shine).
-            .amoledEdgeShine(RoundedCornerShape(20.dp)),
+            // v9.x — theme-style edge shine (hairline + top shine).
+            .categoryEdgeShine(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
         // v9.x — AMOLED cards are proper pitch black now: the old grey
         // surfaceContainerHigh lift is replaced by the black-glass shine

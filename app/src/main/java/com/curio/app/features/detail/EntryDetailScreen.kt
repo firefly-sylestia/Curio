@@ -337,8 +337,9 @@ fun EntryDetailScreen(
         // gaps show through the teeth. The tear is seeded from the entry id,
         // so every detail page gets its own stable texture that never changes
         // when reopened.
+        // v9.x — the blend experiment concluded: the Material style always
+        // uses the device-palette card blend here.
         val blendActive = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
-            AppPreferences.materialCardBlendsState &&
             !(isCurioDarkTheme() && !AppPreferences.pastelColorsState)
         val heroStart = if (blendActive) {
             val blendStart = CurioGradients.cardGradient(cat.themedAccent()).first()

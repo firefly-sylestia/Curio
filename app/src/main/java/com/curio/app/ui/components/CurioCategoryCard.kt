@@ -135,8 +135,9 @@ fun CurioCategoryCard(
             .fillMaxWidth()
             .height(104.dp)
             .scale(scale)
-            // v9.x — AMOLED black-glass edge: the category-colored shine.
-            .amoledEdgeShine(
+            // v9.x — the theme-style edge shine: AMOLED black-glass and
+            // Material both wear the category-colored rim light.
+            .categoryEdgeShine(
                 RoundedCornerShape(22.dp),
                 accent = category.themedAccent()
             )

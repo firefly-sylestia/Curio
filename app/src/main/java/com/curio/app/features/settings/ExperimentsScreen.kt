@@ -88,10 +88,6 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Main card shadow", "Ambient depth below the hero card", AppPreferences.heroShadowState) {
                         AppPreferences.setHeroShadowEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Material card blends", "Device palette with a category-color whisper", AppPreferences.materialCardBlendsState) {
-                        AppPreferences.setMaterialCardBlendsEnabled(context, it)
-                    }
                 }
             }
             item {

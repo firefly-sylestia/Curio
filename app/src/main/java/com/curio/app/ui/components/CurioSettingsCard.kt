@@ -54,7 +54,7 @@ fun CurioSettingsCard(
         border = border,
         modifier = modifier
             .fillMaxWidth()
-            .amoledEdgeShine(RoundedCornerShape(28.dp))
+            .categoryEdgeShine(RoundedCornerShape(28.dp))
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 

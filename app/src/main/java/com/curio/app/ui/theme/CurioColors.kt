@@ -213,6 +213,43 @@ internal fun pastelAccent(accent: Color, dark: Boolean): Color {
 }
 
 /**
+ * v9.x — the shared Material-style "device + category whisper" stop. The
+ * device's dynamic [MaterialTheme.colorScheme.primaryContainer] owns the
+ * color (~82-95%), with the category accent as a restrained trace so the
+ * deck/picker keeps its color-coding without glowing in raw category colors.
+ * Shared by [CurioGradients.cardGradient]'s two-stop Material branch and
+ * [CurioMixedDeck.mixedDeckGradient]'s multi-accent sweeps, so both can
+ * never drift apart. [factor] is the category sprinkle strength.
+ */
+@Composable
+internal fun materialDeviceStop(accent: Color, dark: Boolean, pastel: Boolean, factor: Float): Color {
+    // Material cards use the semantic primary-container pair as their
+    // readable base, then add a restrained category trace. This keeps
+    // the dynamic wallpaper palette coherent without breaking the
+    // onPrimaryContainer contrast contract.
+    val deviceRaw = MaterialTheme.colorScheme.primaryContainer
+    // v7.37 — floor the device color's lightness for WHITE card
+    // content when it's too pale (dark-mode dynamic palettes are
+    // pastel-pale and would wash out white text; light dynamic
+    // primaries are already dark enough, so floorForWhiteInk is a
+    // no-op there). Only lightness moves — the device hue stays.
+    val device = if (pastel) {
+        pastelAccent(deviceRaw, dark)
+    } else {
+        deviceRaw
+    }
+    // The category "sprinkle" — the single accent presence on the
+    // card, slightly deepened (or pastel twin in pastel mode) so it
+    // reads as a solid whisper rather than a flat wash.
+    val catStop = if (pastel) {
+        pastelAccent(accent, dark)
+    } else {
+        lerp(accent, Color.Black, if (dark) 0.22f else 0.08f)
+    }
+    return lerp(device, catStop, factor)
+}
+
+/**
  * Solid gradient definitions for card surfaces. Every card gradient opens on
  * the same deepened accent used by the flat category cards ([categoryCardFill])
  * and fades toward the active theme's background — white in light mode, black
@@ -336,7 +373,7 @@ object CurioGradients {
         // v9.x — AMOLED cards are PROPER pitch black now: a pure black base
         // (was the surfaceContainerHigh grey) with only a quiet category-
         // color bloom, and the card edge carries the black-glass shine (see
-        // Modifier.amoledEdgeShine). Power-friendly and coherent everywhere.
+        // Modifier.categoryEdgeShine). Power-friendly and coherent everywhere.
         if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
             val base = Color.Black
             val accentTrace = lerp(base, accent, 0.18f)
@@ -345,35 +382,11 @@ object CurioGradients {
                 accentTrace
             )
         }
-        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
-            AppPreferences.materialCardBlendsState
-        ) {
-            val scheme = MaterialTheme.colorScheme
-            val pastel = AppPreferences.pastelColorsState
+        // v9.x — the blend experiment concluded: Material cards ALWAYS wear
+        // the device palette with the category whisper.
+        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
             val dark = isCurioDarkTheme()
-            // Material cards use the semantic primary-container pair as their
-            // readable base, then add a restrained category trace. This keeps
-            // the dynamic wallpaper palette coherent without breaking the
-            // onPrimaryContainer contrast contract.
-            val deviceRaw = scheme.primaryContainer
-            // v7.37 — floor the device color's lightness for WHITE card
-            // content when it's too pale (dark-mode dynamic palettes are
-            // pastel-pale and would wash out white text; light dynamic
-            // primaries are already dark enough, so floorForWhiteInk is a
-            // no-op there). Only lightness moves — the device hue stays.
-            val device = if (pastel) {
-                pastelAccent(deviceRaw, dark)
-            } else {
-                deviceRaw
-            }
-            // The category "sprinkle" — the single accent presence on the
-            // card, slightly deepened (or pastel twin in pastel mode) so it
-            // reads as a solid whisper rather than a flat wash.
-            val catStop = if (pastel) {
-                pastelAccent(accent, dark)
-            } else {
-                lerp(accent, Color.Black, if (dark) 0.22f else 0.08f)
-            }
+            val pastel = AppPreferences.pastelColorsState
             // TWO-color gradient: ~90-95% device color with a category
             // sprinkle easing down the card. Light mode (and pastel mode)
             // hold the pure 5% → 10% requested sprinkle — the device palette
@@ -386,8 +399,8 @@ object CurioGradients {
             val sprinkleTop = if (dark && !pastel) 0.12f else 0.07f
             val sprinkleBottom = if (dark && !pastel) 0.20f else 0.14f
             return listOf(
-                lerp(device, catStop, sprinkleTop),
-                lerp(device, catStop, sprinkleBottom)
+                materialDeviceStop(accent, dark, pastel, sprinkleTop),
+                materialDeviceStop(accent, dark, pastel, sprinkleBottom)
             )
         }
         // End on the ACTIVE theme's background so cards always echo the
@@ -542,9 +555,18 @@ object CurioMixedDeck {
         }
         val dark = isCurioDarkTheme()
         val pastel = AppPreferences.pastelColorsState
+        // v9.x — the Material style renders multi-accent sweeps on the device
+        // palette too (same primaryContainer base + category whisper as
+        // [cardGradient]), so mixed decks stop glowing in raw category colors.
+        val material = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL
+        // Multi-accent sweeps land on the same shared device+whisper stop as
+        // single decks — a single mid-range sprinkle keeps the sweep from
+        // glowing in raw category colors while preserving some hue movement.
+        val whisperFactor = if (dark && !pastel) 0.16f else 0.10f
         val stops = mutableListOf<Color>()
         distinct.take(4).forEachIndexed { i, accent ->
-            stops.add(accent)
+            val stop = if (material) materialDeviceStop(accent, dark, pastel, whisperFactor) else accent
+            stops.add(stop)
             // Seam through the curated pair blend (saturation-boosted,
             // dead-zone steered) so the transition stays vivid rather than
             // graying out. v7.5 — pastel mode softens the DEEP seam blends
@@ -553,11 +575,12 @@ object CurioMixedDeck {
             if (i < 3 && i < distinct.size - 1) {
                 var seam = mixedDeckAccent(listOf(accent, distinct[i + 1]))
                 if (pastel) seam = pastelAccent(seam, dark)
-                stops.add(seam)
+                stops.add(if (material) materialDeviceStop(seam, dark, pastel, whisperFactor) else seam)
             }
         }
         return stops
     }
+
 
     /**
      * The mixed deck's page wash — the Spin screen wears THE blended color

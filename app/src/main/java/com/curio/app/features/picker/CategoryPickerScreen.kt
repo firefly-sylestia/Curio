@@ -46,7 +46,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
-import com.curio.app.ui.components.amoledEdgeShine
+import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
@@ -230,7 +230,7 @@ fun CategoryPickerScreen(navController: NavController) {
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .amoledEdgeShine(mixShape)
+                        .categoryEdgeShine(mixShape)
                 ) {
                     CurioIcon(CurioIcons.Check, null, size = 18.dp)
                     Text(

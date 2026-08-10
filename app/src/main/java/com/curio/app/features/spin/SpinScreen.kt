@@ -124,6 +124,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
@@ -144,6 +145,8 @@ import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
+import com.curio.app.ui.theme.themedButtonFill
+import com.curio.app.ui.theme.themedButtonInk
 import com.curio.app.ui.theme.toHsl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1357,8 +1360,15 @@ private fun ColumnScope.SpinDeckSection(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            // v9.x — the Material style's shuffle button wears the device
+            // primary; the category stays as the accent rim shine.
             SpinButton(
-                tint = deckAccent,
+                tint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    deckAccent
+                },
+                shineAccent = deckAccent,
                 isShuffling = shuffling,
                 landedTopic = landedTopic,
                 pulseScale = buttonPulse,
@@ -1700,15 +1710,15 @@ private fun FilterSheet(
                 onClick = { onApply(draftFilters, draftSubtypes) },
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = cat.themedAccent(),
-                    contentColor = cat.onAccent()
+                    containerColor = cat.themedButtonFill(),
+                    contentColor = cat.themedButtonInk()
                 ),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
-                CurioIcon(CurioIcons.Check, null, tint = cat.onAccent(), size = 18.dp)
+                CurioIcon(CurioIcons.Check, null, tint = cat.themedButtonInk(), size = 18.dp)
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
@@ -2960,6 +2970,9 @@ private fun PeekCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(brush = fillBrush, shape = RoundedCornerShape(corner))
+                    // v9.x — Material peeks keep the deck's category identity
+                    // as the accent rim on the device-colored fill.
+                    .categoryEdgeShine(RoundedCornerShape(corner), accent = accent)
             ) {
                 Column(
                     modifier = Modifier
@@ -3026,7 +3039,10 @@ private fun SpinButton(
     enabled: Boolean,
     compact: Boolean = false,
     fitScale: Float = 1f,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    // v9.x — the category accent for the theme-style edge shine (the fill
+    // may be the Material device primary while the rim keeps the category).
+    shineAccent: Color = tint
 ) {
     // v6.3 — button grew a little (~7% up): 126dp idle, 108dp landed.
     // v6.11 — compact screens step the button + orbit down ~11% so the
@@ -3063,6 +3079,8 @@ private fun SpinButton(
             modifier = Modifier
                 .size(buttonSize)
                 .scale(pulseScale.coerceIn(0.9f, 1.10f))
+                // v9.x — the theme-style accent rim on the shuffle button.
+                .categoryEdgeShine(CircleShape, accent = shineAccent)
         ) {
             Box(
                 modifier = Modifier
@@ -3428,10 +3446,14 @@ private fun VerticalDeckButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedAccent() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+        color = if (selected) cat.themedButtonFill() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
         border = if (selected) null else cat.categoryBorder(),
         shadowElevation = 0.dp,
-        modifier = modifier.size(width = 54.dp, height = 112.dp)
+        modifier = modifier
+            .size(width = 54.dp, height = 112.dp)
+            // v9.x — Material buttons keep their category identity as the
+            // accent rim shine on the device primary.
+            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
     ) {
         Column(
             modifier = Modifier
@@ -3442,14 +3464,14 @@ private fun VerticalDeckButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.onAccent() else cat.categoryInk(),
+                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 size = 22.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -3475,10 +3497,14 @@ private fun DeckControlButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedAccent() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+        color = if (selected) cat.themedButtonFill() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
         border = if (selected) null else cat.categoryBorder(),
         shadowElevation = 0.dp,
-        modifier = modifier.height(62.dp)
+        modifier = modifier
+            .height(62.dp)
+            // v9.x — Material buttons keep their category identity as the
+            // accent rim shine on the device primary.
+            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
     ) {
         Row(
             // The icon + label group sits CENTERED in the pill box (not
@@ -3491,7 +3517,7 @@ private fun DeckControlButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.onAccent() else cat.categoryInk(),
+                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 size = 24.dp
             )
             Text(

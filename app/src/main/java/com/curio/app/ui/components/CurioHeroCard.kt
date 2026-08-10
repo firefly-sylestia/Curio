@@ -105,8 +105,8 @@ fun CurioHeroShuffleCard(
             .fillMaxWidth()
             .height(220.dp)
             .scale(pressScale)
-            // v9.x — AMOLED black-glass edge (hairline + top shine).
-            .amoledEdgeShine(RoundedCornerShape(28.dp)),
+            // v9.x — theme-style edge shine (hairline + top shine).
+            .categoryEdgeShine(RoundedCornerShape(28.dp)),
         shape = RoundedCornerShape(28.dp),
         color = Color.Transparent,
         shadowElevation = 0.dp

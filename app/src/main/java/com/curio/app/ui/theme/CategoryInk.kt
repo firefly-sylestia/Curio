@@ -104,6 +104,26 @@ fun CurioCategory.onAccent(): Color = when {
 }
 
 /**
+ * v9.x — fill for CATEGORY ACCENT BUTTONS (deck control pills, CTAs): the
+ * Material style wears the device PRIMARY so buttons read as proper Material
+ * controls (matching the Mix button and the Home hero); Curio and AMOLED
+ * keep the category accent (AMOLED overrides to black via
+ * [com.curio.app.ui.components.curioButtonColors]).
+ */
+@Composable
+fun CurioCategory.themedButtonFill(): Color = when (AppPreferences.themeStyleState) {
+    AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.primary
+    else -> themedAccent()
+}
+
+/** Content ink for [themedButtonFill] — the device onPrimary in Material. */
+@Composable
+fun CurioCategory.themedButtonInk(): Color = when (AppPreferences.themeStyleState) {
+    AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.onPrimary
+    else -> onAccent()
+}
+
+/**
  * Ink for a Material/AMOLED category card's dark tonal treatment. Category
  * cards use a theme-owned container first and a category accent second, so
  * their content must pair with the theme surface/primary role rather than

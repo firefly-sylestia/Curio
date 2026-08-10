@@ -80,7 +80,6 @@ object AppPreferences {
     private const val KEY_HERO_GRADIENT = "hero_gradient"
     private const val KEY_HERO_BORDER = "hero_border"
     private const val KEY_HERO_SHADOW = "hero_shadow"
-    private const val KEY_MATERIAL_CARD_BLENDS = "material_card_blends"
     private const val KEY_3D_BUTTON_GRADIENT = "3d_button_gradient"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
     private const val KEY_REMINDER_HOUR = "reminder_hour"
@@ -234,16 +233,6 @@ object AppPreferences {
     var heroBorderState by mutableStateOf(false)
         private set
     var heroShadowState by mutableStateOf(false)
-        private set
-
-    // Material card blends (v7.8, EXPERIMENTAL) — when ON, cards in the
-    // Material theme style wear a MIXED gradient of the category accent + the
-    // device's dynamic Material colors (primary / secondary / tertiary) in the
-    // same multi-stop style as the mixed deck, so the card reads as a category
-    // × device blend. Default ON (the Material style's headline look); only
-    // takes effect while the Material style is active. When the experiment
-    // settles, hardcode the winner and remove the toggle.
-    var materialCardBlendsState by mutableStateOf(true)
         private set
 
     // 3D button gradient & shadow (v7.11, EXPERIMENTAL) — when ON, the
@@ -445,7 +434,6 @@ object AppPreferences {
         heroGradientState = isHeroGradientEnabled(context)
         heroBorderState = isHeroBorderEnabled(context)
         heroShadowState = isHeroShadowEnabled(context)
-        materialCardBlendsState = isMaterialCardBlendsEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
@@ -598,16 +586,6 @@ object AppPreferences {
     fun setHeroShadowEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_SHADOW, enabled).apply()
         heroShadowState = enabled
-    }
-
-    // ── Material card blends (v7.8 experimental) ───────────────────────
-    /** Whether Material-style cards mix the category accent with the device's dynamic colors (default on). */
-    fun isMaterialCardBlendsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_MATERIAL_CARD_BLENDS, true)
-
-    fun setMaterialCardBlendsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_MATERIAL_CARD_BLENDS, enabled).apply()
-        materialCardBlendsState = enabled
     }
 
     // ── 3D button gradient & shadow (v7.11 experimental) ───────────────

@@ -16,16 +16,22 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 
 /**
- * v9.x — the AMOLED "black glass" card edge: a faint hairline light border
- * all around the surface PLUS a slightly brighter top-edge shine that fades
- * down over the corners — the classic pure-black card look. [accent] tints
- * the shine with a category color ("the category shine"), e.g. on category
- * cards and category buttons, so the identity stays even on pitch-black.
- * No-op outside the AMOLED theme style.
+ * v9.x — the theme-style edge shine: a faint hairline light border all
+ * around a surface PLUS a slightly brighter top-edge shine that fades down
+ * over the corners — the classic raised-surface look.
+ *  - AMOLED — "black glass": white (or [accent]-tinted) shine on the pure
+ *    black cards and buttons.
+ *  - Material — the category accent shines at the edge: device-colored
+ *    surfaces keep their category identity as a colored rim light (the
+ *    "category accent shine"), so buttons/cards stay Material while the
+ *    category still glows on the rim.
+ * No-op in the default Curio style.
  */
 @Composable
-fun Modifier.amoledEdgeShine(shape: Shape, accent: Color? = null): Modifier {
-    if (AppPreferences.themeStyleState != AppPreferences.THEME_STYLE_AMOLED) return this
+fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null): Modifier {
+    val style = AppPreferences.themeStyleState
+    if (style != AppPreferences.THEME_STYLE_AMOLED && style != AppPreferences.THEME_STYLE_MATERIAL) return this
+    val amoled = style == AppPreferences.THEME_STYLE_AMOLED
     return this.drawWithCache {
         val outline = shape.createOutline(size, layoutDirection, density)
         val path = when (outline) {
@@ -34,6 +40,11 @@ fun Modifier.amoledEdgeShine(shape: Shape, accent: Color? = null): Modifier {
             is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
         }
         val shine = accent ?: Color.White
+        // AMOLED sits on pitch black, so the shine can stay quieter; Material
+        // surfaces are mid-tone device colors, so the accent rim needs a touch
+        // more presence to read as a rim light.
+        val hairlineAlpha = if (accent != null) (if (amoled) 0.26f else 0.30f) else (if (amoled) 0.10f else 0.14f)
+        val topAlpha = if (accent != null) (if (amoled) 0.45f else 0.52f) else (if (amoled) 0.22f else 0.30f)
         val hairlineW = 1.dp.toPx()
         val shineW = 1.4.dp.toPx()
         val shineBand = 18.dp.toPx()
@@ -44,7 +55,7 @@ fun Modifier.amoledEdgeShine(shape: Shape, accent: Color? = null): Modifier {
             // 1. Faint hairline around the whole edge.
             drawPath(
                 path,
-                color = shine.copy(alpha = if (accent != null) 0.26f else 0.10f),
+                color = shine.copy(alpha = hairlineAlpha),
                 style = Stroke(width = hairlineW)
             )
             // 2. Brighter top-edge shine, fading out over the top band.
@@ -52,7 +63,7 @@ fun Modifier.amoledEdgeShine(shape: Shape, accent: Color? = null): Modifier {
                 drawPath(
                     path,
                     brush = Brush.verticalGradient(
-                        0f to shine.copy(alpha = if (accent != null) 0.45f else 0.22f),
+                        0f to shine.copy(alpha = topAlpha),
                         1f to shine.copy(alpha = 0f),
                         startY = 0f,
                         endY = shineBand
@@ -65,10 +76,12 @@ fun Modifier.amoledEdgeShine(shape: Shape, accent: Color? = null): Modifier {
 }
 
 /**
- * v9.x — AMOLED button colors: buttons go PITCH BLACK with their light
- * content kept readable (the edge shine is applied separately via
- * [Modifier.amoledEdgeShine], tinted with the button's accent). Outside the
- * AMOLED style the caller's colors pass through untouched.
+ * v9.x — theme-style button colors:
+ *  - AMOLED: buttons go PITCH BLACK with their light content kept readable
+ *    (the edge shine is applied separately via [Modifier.categoryEdgeShine],
+ *    tinted with the button's accent).
+ *  - Otherwise the caller's colors pass through untouched (Material callers
+ *    pass the device primary via [com.curio.app.ui.theme.CurioCategory.themedButtonFill]).
  */
 @Composable
 fun curioButtonColors(
