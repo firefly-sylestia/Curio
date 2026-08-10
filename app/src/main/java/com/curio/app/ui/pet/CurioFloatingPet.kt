@@ -94,6 +94,9 @@ private val DROP_FORGIVENESS = 12.dp
 // v8.35 — the tiny pixel keyboard Curie types on while the user types.
 private val TYPING_W = 150.dp
 private val TYPING_H = 60.dp
+// v9.x — Curie's typing keyboard renders 5× smaller (a tiny thing) so it
+// never competes with the user's own keyboard. Tunable in one place.
+private val TYPING_SCALE = 0.2f
 
 /**
  * The floating Curio pet (v8.8) — a global overlay that lives on top of
@@ -567,21 +570,44 @@ fun CurioFloatingPet(
                             recentIds = recentRoutineIds.toSet()
                         )
                     )
-                    val c = target.bounds.center
-                    // Stand BESIDE the thing, never on top of it.
-                    val tx = (c.x + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
+                    // v9.x — walk right UP TO the thing instead of landing in
+                    // a random offset box around it: convert the landmark's
+                    // WINDOW bounds to overlay-local space, then stand on its
+                    // nearest edge (same vertical center, a small gap) so the
+                    // approach reads as walking to the button.
+                    val local = Rect(
+                        left = target.bounds.left - overlayOrigin.x,
+                        top = target.bounds.top - overlayOrigin.y,
+                        right = target.bounds.right - overlayOrigin.x,
+                        bottom = target.bounds.bottom - overlayOrigin.y
+                    )
+                    val gap = petPx * 0.16f
+                    val side = if (local.left - marginPx >=
+                        maxW - petPx - marginPx - local.right
+                    ) -1f else 1f
+                    val tx = (if (side > 0f) local.right + gap else local.left - petPx - gap)
                         .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
-                    val ty = (c.y + (if (Random.nextFloat() < 0.5f) -1 else 1) * (petPx * 0.95f))
+                    val ty = (local.center.y - petPx / 2f)
                         .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                    // Poke ONLY when the pet actually reached the button — an
+                    // interrupted walk (drag / glide) must never interact
+                    // from across the screen.
+                    fun arrived(): Boolean {
+                        val dx = pos.x - tx
+                        val dy = pos.y - ty
+                        return dx * dx + dy * dy <= (petPx * 0.4f) * (petPx * 0.4f)
+                    }
                     when (target.kind) {
                         PetLandmarks.Kind.FUN -> {
                             // Eager approach — quick happy steps, then a
                             // boop with hearts.
                             if (Random.nextFloat() < 0.5f) playKey++
                             walkTo(Offset(tx, ty), stepMs = 15, steps = 44)
-                            PetLandmarks.poke(target.id)
-                            squishKey++
-                            heartsKey++
+                            if (arrived()) {
+                                PetLandmarks.poke(target.id)
+                                squishKey++
+                                heartsKey++
+                            }
                             // The selected Pet Life routine owns the speech
                             // bubble; this avoids replacing its contextual line
                             // with the old generic landmark phrase.
@@ -594,7 +620,7 @@ fun CurioFloatingPet(
                             walkTo(Offset(tx, ty), stepMs = 36, steps = 56)
                             thinking = false
                             delay(420)
-                            PetLandmarks.poke(target.id)
+                            if (arrived()) PetLandmarks.poke(target.id)
                             lastTouch = System.currentTimeMillis()
                         }
                         PetLandmarks.Kind.PLAY -> {
@@ -603,16 +629,18 @@ fun CurioFloatingPet(
                             // beat), then a little happy jig — a squish
                             // bounce, a play-bow and a twirl.
                             walkTo(Offset(tx, ty), stepMs = 15, steps = 44)
-                            PetLandmarks.poke(target.id)
-                            squishKey++
-                            delay(180)
-                            playKey++
-                            delay(320)
-                            // The hop fires with the twirl so the moment
-                            // reads as a real dance, not a generic spin.
-                            celebrateKey++
-                            spinKey++
-                            heartsKey++
+                            if (arrived()) {
+                                PetLandmarks.poke(target.id)
+                                squishKey++
+                                delay(180)
+                                playKey++
+                                delay(320)
+                                // The hop fires with the twirl so the moment
+                                // reads as a real dance, not a generic spin.
+                                celebrateKey++
+                                spinKey++
+                                heartsKey++
+                            }
                             lastTouch = System.currentTimeMillis()
                         }
                     }
@@ -837,8 +865,11 @@ fun CurioFloatingPet(
 
         // ── Spin cheer (v8.13) — while the deck is reeling, the pet cheers
         //    it on with a line + a little bounce (once per spin).
+        // v9.x — gated on [watching] (actually ON the Spin screen): a stale
+        // spinning flag (left mid-spin, effect cancelled) must never leak
+        // spin cheers onto other pages.
         LaunchedEffect(CurioPet.spinning) {
-            if (CurioPet.spinning && autoWander) {
+            if (CurioPet.spinning && autoWander && watching) {
                 celebrateKey++
                 queueReaction(CurioPet.spinCheer())
                 lastTouch = System.currentTimeMillis()
@@ -1342,14 +1373,15 @@ fun CurioFloatingPet(
         TypingKeyboard(
             visible = typingReaction,
             accent = accentColor,
+            scale = TYPING_SCALE,
             modifier = Modifier
                 .offset {
                     IntOffset(
-                        (pos.x + petPx / 2f - with(density) { TYPING_W.toPx() } / 2f).roundToInt(),
-                        (pos.y - with(density) { 60.dp.toPx() }).roundToInt()
+                        (pos.x + petPx / 2f - with(density) { (TYPING_W * TYPING_SCALE).toPx() } / 2f).roundToInt(),
+                        (pos.y - with(density) { (60.dp * TYPING_SCALE + 6.dp).toPx() }).roundToInt()
                     )
                 }
-                .size(TYPING_W, TYPING_H)
+                .size(TYPING_W * TYPING_SCALE, TYPING_H * TYPING_SCALE)
         )
 
         // Reaction bubbles belong to the pet. Tour guidance is different: it
@@ -1439,7 +1471,15 @@ fun CurioFloatingPet(
  * them up as it taps. Calm, premium, readable — not the old flashing strip.
  */
 @Composable
-private fun TypingKeyboard(visible: Boolean, accent: Color, modifier: Modifier = Modifier) {
+private fun TypingKeyboard(
+    visible: Boolean,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    // v9.x — uniform scale for the whole keyboard: the canvas size AND the
+    // base dp unit below shrink together, so every key/row/hand scales
+    // proportionally (all inner dimensions derive from [d] or w/h).
+    scale: Float = 1f
+) {
     val density = LocalDensity.current
     val alpha by animateFloatAsState(
         targetValue = if (visible) 0.95f else 0f,
@@ -1465,7 +1505,7 @@ private fun TypingKeyboard(visible: Boolean, accent: Color, modifier: Modifier =
     Canvas(modifier = modifier.graphicsLayer { this.alpha = alpha }) {
         val w = size.width
         val h = size.height
-        val d = with(density) { 1.dp.toPx() }
+        val d = with(density) { (1.dp * scale.coerceIn(0.1f, 1f)).toPx() }
 
         // Keyboard body with a soft drop shadow.
         drawRoundRect(

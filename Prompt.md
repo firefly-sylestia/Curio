@@ -1,6 +1,34 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Spin button shrinks during shuffle (orbit dots stay put)
+## Current Request (COMPLETED): Pet fixes (spin-dialog loop, walk-to-button, tiny keyboard) + approved Spin pool-loading fix
+
+**Date:** 2026-08-10
+
+### What the user asked
+1. Implement the previously approved Spin "Nothing here yet" pool-loading fix.
+2. Make the pet keyboard 5× smaller (a tiny thing).
+3. Fix pet interaction: wrong dialogs, not walking up to buttons (interacts from far).
+4. Fix the pet stuck in a loop of Spin-page dialogs on other screens.
+
+### Root cause (all three pet issues = one bug)
+`CurioPet.spinning` gets STUCK true: SpinScreen flips it in `LaunchedEffect(shuffleCount)` (true at start, false at settle); leaving mid-spin cancels the effect so `noteSpinning(false)` never runs. With the flag stuck: the pet's spin-cheer effect fires on EVERY screen (no screen gate) → the "loop" + "wrong dialogs"; the landmark-poke branch is gated on `!spinning` → the pet never walks to buttons; spin-flavored lines fire from anywhere.
+
+### Changes made
+- `SpinScreen.kt` — `DisposableEffect(Unit) { onDispose { CurioPet.noteSpinning(false) } }` guarantees the flag resets whenever Spin leaves composition.
+- `CurioFloatingPet.kt` — spin cheer gated on `watching` (Spin screen only); landmark pokes now walk to the landmark's NEAREST EDGE (window→local bounds conversion, nearest-side stand, vertical-center align, small gap) and only poke if the pet actually arrived (interrupted drag/glide can never interact from afar).
+- `CurioFloatingPet.kt` — typing keyboard: new `TYPING_SCALE = 0.2f` + `scale` param on `TypingKeyboard` (scales the canvas size AND the base dp unit uniformly); call-site size/offset scaled.
+- `SpinScreen.kt` (approved plan) — pool seeded from `TopicJsonLoader.cached()` (warm return = instant deck); `poolLoading` flag distinguishes loading vs genuinely-empty; Carousel shows new `DeckLoadingHint` ("Gathering the deck…") while loading, `EmptyPoolHint` only when truly empty; load wrapped in runCatching; threaded `poolLoading` through SpinDeckSection + 3 call sites.
+
+### Validation
+- Brace checks on both edited files (to run), `git diff --check`, import audit (no new imports added; Rect/overlayOrigin already in scope in CurioFloatingPet).
+
+---
+
+## Prior requests (archive)
+- Spin button shrinks during shuffle, orbit dots stay put (`5532bb7`).
+- Release analysis + remove the Spin landing FX experiment (`c1369e4`).
+- Fix CI compile errors (missing `AppPreferences` imports) + reveal tear navbar footprint (`ccf4a3f`).
+- Fix `CategoryEdgeShine` Density argument (`b57c0f7`).
 
 **Date:** 2026-08-10
 

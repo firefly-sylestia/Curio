@@ -461,13 +461,28 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // Defensive: a corrupted saved state could restore an empty category
     // set — fall back to the last-used category so the pool still loads.
     val poolIds = if (activeCatIds.isEmpty()) listOf(AppPreferences.getLastSpinCategory(context)) else activeCatIds
-    val pool by produceState<List<CurioTopic>>(initialValue = emptyList(), poolIds) {
+    // v9.x — returning to Spin must never flash the deck's empty state: the
+    // pool is seeded from the topic cache when it's still resident (a warm
+    // return renders the deck on the very first frame), and [poolLoading]
+    // separates a cold reload (cache cleared under memory pressure) from a
+    // genuinely empty lane so the deck shows a loading hint instead of the
+    // misleading "Nothing here yet" card.
+    var poolLoading by remember(poolIds) {
+        mutableStateOf(poolIds.any { TopicJsonLoader.cached(it) == null })
+    }
+    val pool by produceState(
+        initialValue = poolIds.flatMap { TopicJsonLoader.cached(it).orEmpty() },
+        poolIds
+    ) {
+        if (pool.isEmpty()) poolLoading = true
         val merged = mutableListOf<CurioTopic>()
         val seen = mutableSetOf<String>()
         poolIds.forEach { id ->
-            TopicJsonLoader.load(id).forEach { t -> if (seen.add(t.id)) merged.add(t) }
+            runCatching { TopicJsonLoader.load(id) }.getOrElse { emptyList() }
+                .forEach { t -> if (seen.add(t.id)) merged.add(t) }
         }
         value = merged
+        poolLoading = false
     }
 
     // ── Multi-select filter state (per-category, saveable) ────────────
@@ -831,6 +846,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
     }
 
+    // v9.x — [CurioPet.spinning] is flipped by the shuffle effect above; if
+    // the user leaves the Spin screen mid-spin that effect is cancelled and
+    // the flag would stay TRUE forever (the pet cheers spin lines on every
+    // screen and stops poking buttons). Reset it whenever Spin leaves
+    // composition so the pet always settles back to normal behavior.
+    DisposableEffect(Unit) {
+        onDispose { CurioPet.noteSpinning(false) }
+    }
+
     // ── Landed topic auto-opens on landing ───────────────────────────
     // The wheel now reveals its landed topic automatically; the center card
     // is no longer a spin trigger — it opens an already landed topic, while
@@ -1043,6 +1067,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         enabled = filteredPool.isNotEmpty() && !shuffling,
                         buttonPulse = buttonPulse,
                         fitScale = wideFit,
+                        poolLoading = poolLoading,
                         onCardTap = onDeckCardTap,
                         onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
@@ -1115,6 +1140,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     enabled = filteredPool.isNotEmpty() && !shuffling,
                     buttonPulse = buttonPulse,
                     fitScale = fitScale,
+                    poolLoading = poolLoading,
                     onCardTap = onDeckCardTap,
                     onCycle = onDeckCycle,
                     onSpinClick = onSpinClick
@@ -1157,6 +1183,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         enabled = filteredPool.isNotEmpty() && !shuffling,
                         buttonPulse = buttonPulse,
                         fitScale = fitScale,
+                        poolLoading = poolLoading,
                         onCardTap = onDeckCardTap,
                         onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
@@ -1268,6 +1295,7 @@ private fun ColumnScope.SpinDeckSection(
     enabled: Boolean,
     buttonPulse: Float,
     fitScale: Float = 1f,
+    poolLoading: Boolean = false,
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
     onSpinClick: () -> Unit
@@ -1309,6 +1337,7 @@ private fun ColumnScope.SpinDeckSection(
             densityExtraCompact = densityExtraCompact,
             roomy = roomy,
             fitScale = fitScale,
+            loading = poolLoading,
             onCardTap = onCardTap,
             onCycle = onCycle,
             modifier = m.fillMaxWidth()
@@ -1885,6 +1914,7 @@ private fun Carousel(
     densityExtraCompact: Boolean = false,
     roomy: Boolean = false,
     fitScale: Float = 1f,
+    loading: Boolean = false,
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -1956,7 +1986,9 @@ private fun Carousel(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (poolSize == 0) {
+        if (poolSize == 0 && loading) {
+            DeckLoadingHint(cat)
+        } else if (poolSize == 0) {
             EmptyPoolHint(cat)
         } else {
             val slots = listOf(-2, 2, -1, 1, 0)
@@ -2004,6 +2036,49 @@ private fun Carousel(
                         shuffling = shuffling
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeckLoadingHint(cat: CurioCategory) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+            shadowElevation = 0.dp,
+            border = cat.categoryBorder(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CurioIcon(
+                    cat.iconGlyph, null,
+                    tint = cat.categoryInk().copy(alpha = 0.5f),
+                    size = 56.dp
+                )
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "Gathering the deck…",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "The topics are on their way.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
