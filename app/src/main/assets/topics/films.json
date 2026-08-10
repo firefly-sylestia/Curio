@@ -479,7 +479,8 @@
     "tags": [
       "Sci-Fi",
       "1970s",
-      "Hollywood"
+      "Hollywood",
+      "Star Wars"
     ],
     "tier": 1
   },
@@ -647,7 +648,8 @@
     "tags": [
       "Animation",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -668,7 +670,8 @@
     "tags": [
       "Animation",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -983,7 +986,8 @@
     "tags": [
       "Western",
       "1960s",
-      "Spaghetti"
+      "Spaghetti",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -996,7 +1000,10 @@
     "imageUrl": "",
     "byline": "Stanley Kubrick",
     "exploreAction": {
-      "verb": "Watch","targetName": "A Clockwork Orange (1971) — the Ludovico technique scene","durationMinutes":171,"instruction": "Watch the conditioning sequence twice: once for the cruelty, once for Kubrick's craft — the camera work, the classical score against the violence, and how Alex's gaze turns the audience into accomplices."
+      "verb": "Watch",
+      "targetName": "A Clockwork Orange (1971) — the Ludovico technique scene",
+      "durationMinutes": 171,
+      "instruction": "Watch the conditioning sequence twice: once for the cruelty, once for Kubrick's craft — the camera work, the classical score against the violence, and how Alex's gaze turns the audience into accomplices."
     },
     "tags": [
       "Dystopian",
@@ -1484,7 +1491,8 @@
     "tags": [
       "Action",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 2
   },
@@ -1673,7 +1681,8 @@
     "tags": [
       "Animation",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -3279,13 +3288,17 @@
     "imageUrl": "",
     "byline": "Lee Unkrich",
     "exploreAction": {
-      "verb": "Watch","targetName": "Coco (2017) — the opening and the Remember Me scene","durationMinutes":105,"instruction": "Watch the papel picado prologue, then the final Remember Me performance. Notice how the song's meaning flips completely once you know who really wrote it — and how the marigold bridge is both a visual and an emotional threshold."
+      "verb": "Watch",
+      "targetName": "Coco (2017) — the opening and the Remember Me scene",
+      "durationMinutes": 105,
+      "instruction": "Watch the papel picado prologue, then the final Remember Me performance. Notice how the song's meaning flips completely once you know who really wrote it — and how the marigold bridge is both a visual and an emotional threshold."
     },
     "tags": [
       "Animation",
       "Family",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -5033,7 +5046,8 @@
     "tags": [
       "Mystery",
       "Classic",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -6322,7 +6336,8 @@
     "tags": [
       "Crime",
       "1980s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -6835,7 +6850,8 @@
       "Animation",
       "Family",
       "1980s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -6944,7 +6960,8 @@
       "Animation",
       "Family",
       "1990s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -7094,7 +7111,8 @@
       "Animation",
       "Family",
       "1990s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -7307,7 +7325,8 @@
       "Animation",
       "Family",
       "1990s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -7372,7 +7391,8 @@
       "Animation",
       "Family",
       "1990s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -7416,7 +7436,8 @@
       "War",
       "Drama",
       "1990s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -7931,7 +7952,8 @@
       "Fantasy",
       "Adventure",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Lord of the Rings"
     ],
     "tier": 1
   },
@@ -8062,7 +8084,8 @@
       "Animation",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8150,7 +8173,8 @@
       "Animation",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8193,7 +8217,8 @@
     "tags": [
       "Action",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 1
   },
@@ -8303,7 +8328,8 @@
       "Animation",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8455,7 +8481,8 @@
       "Animation",
       "Family",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8520,7 +8547,8 @@
       "Animation",
       "Family",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8586,7 +8614,8 @@
       "Action",
       "Adventure",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -8720,7 +8749,8 @@
       "Family",
       "Musical",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -9093,7 +9123,8 @@
       "Drama",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -9361,7 +9392,8 @@
       "Crime",
       "Mystery",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 1
   },
@@ -9891,7 +9923,8 @@
       "Fantasy",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Harry Potter"
     ],
     "tier": 1
   },
@@ -9913,7 +9946,8 @@
       "Animation",
       "Comedy",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -9979,7 +10013,8 @@
       "Fantasy",
       "Adventure",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Lord of the Rings"
     ],
     "tier": 1
   },
@@ -10045,7 +10080,8 @@
       "Fantasy",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Harry Potter"
     ],
     "tier": 1
   },
@@ -10331,7 +10367,8 @@
       "Action",
       "Thriller",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -10397,7 +10434,8 @@
       "Fantasy",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Harry Potter"
     ],
     "tier": 1
   },
@@ -10661,7 +10699,8 @@
       "Fantasy",
       "Family",
       "2000s",
-      "Hollywood"
+      "Hollywood",
+      "Harry Potter"
     ],
     "tier": 1
   },
@@ -10815,7 +10854,8 @@
       "Animation",
       "Musical",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -11079,7 +11119,8 @@
       "Sci-Fi",
       "Mystery",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -11167,7 +11208,8 @@
       "Romance",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -11277,7 +11319,8 @@
       "Fantasy",
       "Adventure",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Harry Potter"
     ],
     "tier": 1
   },
@@ -11299,7 +11342,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 1
   },
@@ -11585,7 +11629,8 @@
       "Animation",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 2
   },
@@ -11981,7 +12026,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12003,7 +12049,8 @@
       "Fantasy",
       "Adventure",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Lord of the Rings"
     ],
     "tier": 2
   },
@@ -12157,7 +12204,8 @@
       "Sci-Fi",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -12179,7 +12227,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12223,7 +12272,8 @@
       "Animation",
       "Action",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 2
   },
@@ -12487,7 +12537,8 @@
       "Sci-Fi",
       "Adventure",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Star Wars"
     ],
     "tier": 1
   },
@@ -12531,7 +12582,8 @@
       "Action",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12553,7 +12605,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12575,7 +12628,8 @@
       "Action",
       "Fantasy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12597,7 +12651,8 @@
       "Animation",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -12619,7 +12674,8 @@
       "Animation",
       "Musical",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -12773,7 +12829,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 1
   },
@@ -12795,7 +12852,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12817,7 +12875,8 @@
       "Action",
       "Comedy",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -12993,7 +13052,8 @@
       "Action",
       "Superhero",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -13323,7 +13383,8 @@
       "Drama",
       "Thriller",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 2
   },
@@ -13851,7 +13912,8 @@
       "Action",
       "Superhero",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -13917,7 +13979,8 @@
       "Action",
       "Comedy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "DC"
     ],
     "tier": 2
   },
@@ -13939,7 +14002,8 @@
       "Action",
       "Fantasy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -13961,7 +14025,8 @@
       "Action",
       "Superhero",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -14027,7 +14092,8 @@
       "Animation",
       "Musical",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -14049,7 +14115,8 @@
       "Animation",
       "Family",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -14071,7 +14138,8 @@
       "Animation",
       "Adventure",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 2
   },
@@ -14379,7 +14447,8 @@
       "Comedy",
       "Satire",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -14621,7 +14690,8 @@
       "Action",
       "Superhero",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -14643,7 +14713,8 @@
       "Action",
       "Comedy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -14665,7 +14736,8 @@
       "Action",
       "Fantasy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 2
   },
@@ -14709,7 +14781,8 @@
       "Animation",
       "Comedy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -14753,7 +14826,8 @@
       "Animation",
       "Adventure",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -14775,7 +14849,8 @@
       "Animation",
       "Fantasy",
       "2020s",
-      "Mexican"
+      "Mexican",
+      "Disney"
     ],
     "tier": 2
   },
@@ -15303,7 +15378,8 @@
       "Sci-Fi",
       "Comedy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -15325,7 +15401,8 @@
       "Animation",
       "Romance",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -15391,7 +15468,8 @@
       "Animation",
       "Comedy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -15897,7 +15975,8 @@
       "Animation",
       "Family",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -15919,7 +15998,8 @@
       "Action",
       "Comedy",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -16667,7 +16747,8 @@
       "Action",
       "Sci-Fi",
       "2020s",
-      "Hollywood"
+      "Hollywood",
+      "MCU"
     ],
     "tier": 1
   },
@@ -17063,7 +17144,8 @@
       "Sci-Fi",
       "Action",
       "2010s",
-      "Hollywood"
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },

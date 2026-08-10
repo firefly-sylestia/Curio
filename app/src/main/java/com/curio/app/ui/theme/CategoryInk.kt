@@ -426,5 +426,22 @@ private val DARK_WASH_TUNING: Map<CategoryFamily, DarkWashTuning> = mapOf(
     // dark, and deepening toward black turned it a muddy grey-pink. Deepen
     // toward the same deep-rose twin as the movies family so the wash is a
     // dark #5E0034 burgundy instead of a pale rose-pink.
-    CategoryFamily.WILDCARD to DarkWashTuning(0.10f, 0.24f, darken = 0.60f, deepTwin = Color(0xFF5E0034))
+    CategoryFamily.WILDCARD to DarkWashTuning(0.10f, 0.24f, darken = 0.60f, deepTwin = Color(0xFF5E0034)),
+    // Violet (anime/comics) — hug the deep accent and deepen toward a dark
+    // plum so the wash is a midnight violet instead of a floating pale lilac.
+    CategoryFamily.ANIME_COMICS to DarkWashTuning(0.12f, 0.20f, darken = 0.35f, deepTwin = Color(0xFF4C1D95)),
+    // Fuchsia (games) — deepen toward a dark magenta so it reads jewel-toned.
+    CategoryFamily.GAMES to DarkWashTuning(0.12f, 0.20f, darken = 0.35f, deepTwin = Color(0xFF701A75)),
+    // Emerald (sports) is already deep — keep it near the accent, deepen
+    // toward a dark forest twin so the wash doesn't grey out.
+    CategoryFamily.SPORTS to DarkWashTuning(0.15f, 0.22f, darken = 0.30f, deepTwin = Color(0xFF064E3B)),
+    // Orange (mythology) — warm and already mid-tone; deepen toward a dark
+    // ember brown so the page wash stays rich over midnight.
+    CategoryFamily.MYTHOLOGY to DarkWashTuning(0.15f, 0.22f, darken = 0.40f, deepTwin = Color(0xFF7C2D12)),
+    // Red (food) — red reads well over dark; hug the accent and deepen
+    // toward a dark crimson so it stays saturated.
+    CategoryFamily.FOOD to DarkWashTuning(0.12f, 0.22f, darken = 0.35f, deepTwin = Color(0xFF7F1D1D)),
+    // Blue (internet culture) — deepen toward a dark navy so the wash is a
+    // midnight indigo instead of a pale azure float.
+    CategoryFamily.INTERNET to DarkWashTuning(0.12f, 0.20f, darken = 0.30f, deepTwin = Color(0xFF1E3A8A))
 )

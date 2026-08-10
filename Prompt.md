@@ -1,5 +1,37 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): 10 new topic categories + franchise filter + science-tag enrichment
+
+**Date:** 2026-08-10
+
+### What the user asked
+Expand the topic database with fun stuff (franchises etc.), add an MCU-like franchise filter (not too many), add new categories — Anime, Songs, Manga, Manhwa — and suggest more.
+
+### Decisions (asked via ask_user)
+User picked **10 categories total** (Anime, Songs, Manga, Manhwa + Games, TV Series, Mythology & Legends, Sports, Food & Drink, Internet Culture), **~60 topics each this drop** (idempotent scripts make topping up to 100 trivial), and franchises **MCU, Pixar, Studio Ghibli, Harry Potter** (plus the existing Star Wars/DC/LOTR/Disney tags already in `FranchiseTags`).
+
+### Code changes
+- **Category.kt** — 10 new `CategoryId` values + routeSlugs + defaultOrder; 6 new `CategoryFamily` values (ANIME_COMICS, GAMES, MYTHOLOGY, SPORTS, FOOD, INTERNET); exhaustive `CategoryFamily.of()` updated; 10 new `CurioCategory` entries (icon glyphs font-verified against the bundled `material_symbols_outlined.ttf`).
+- **CurioColors.kt** — new accent/ink/tint pairs: Violet (anime/comics), Fuchsia (games), Emerald (sports), Orange (mythology), Red (food), Blue (internet).
+- **CurioIcons.kt** — `heroWatermarkSymbols()` gained branches for the 6 new families (only exhaustive `when(family)`).
+- **CategoryInk.kt** — `DARK_WASH_TUNING` gained tuned entries for the 6 new families (dark washes stay jewel-toned over midnight; map has safe fallback).
+- **SpinScreen.kt** — `FranchiseTags` set (MCU, Star Wars, DC, Harry Potter, Lord of the Rings, Pixar, Studio Ghibli, Disney); `FilterGroups` + `buildFilterGroups` + `FilterSheet` gained a **Franchise** row.
+- **CaptureEntity.kt** — fixed the exhaustive `when (categoryId)` verb fallback (was the #1 CI compile breaker — new enum values made it non-exhaustive).
+- **ExploreSession.kt** — fixed the exhaustive `when (categoryId)` in `reflectionQuestion()` with new-category branches.
+- Byline-label `when`s in TopicReveal/Spin have `else -> null` — safe untouched.
+
+### Data changes
+- ~640 hand-curated topics across 10 new JSON files: anime 61, manga 75, manhwa 64, songs 60, series 60, games 65, mythology 60, sports 59, food 77, internet 61. Every topic has the quality bar (quirky teaser + personalized explore instruction) and full tags.
+- **Franchise tags** — `scripts/add_franchise_tags.py` tagged 76 films (MCU/Star Wars/DC/Harry Potter/LOTR/Pixar/Disney); anime already carried Studio Ghibli.
+- **Parked enrichment DONE** — `scripts/enrich_science_tags.py` ran: 591 tags added (scientists 370 + discoveries 221); no untagged topics remain in either lane.
+- **SCHEMA.md** — 21 files, new subtypes/verbs (Play, Cook), franchise-tag note.
+- **validate_topics.py** — EXPECTED_CATEGORIES now includes the 10 new slugs.
+- New idempotent batch scripts: `batch_anime_comics.py`, `batch_comics_topup.py`, `batch_songs_series.py`, `batch_media_topup.py`, `batch_culture_topup.py`, `add_franchise_tags.py`.
+
+### Validation
+- `validate_topics.py`: 21 files / 6,480 topics / 6,480 unique ids / **0 errors**. check_assets.py ALL VALID. Braces + `git diff --check` clean. Code review passed (exhaustive-when sweep caught the two fixed files).
+- Gradle compile/build/lint/test not run locally (environment forbids it) — CI validates on push.
+
 ## Current Request (COMPLETED): Material theme → coming soon; AMOLED main card accent restored
 
 **Date:** 2026-08-10

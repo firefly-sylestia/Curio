@@ -1,0 +1,1637 @@
+[
+  {
+    "id": "dish-pizza-margherita",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pizza Margherita (1889)",
+    "teaser": "Named for Queen Margherita of Savoy — the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real.",
+    "imageUrl": "",
+    "byline": "Naples, Italy",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Pizza Margherita (1889) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Make it from scratch and notice the dough — the 48-hour ferment is the flavor. The dish's genius is that the 'three colors' are the flag."
+    },
+    "tags": [
+      "Italian",
+      "Pizza",
+      "Classic",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-sushi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Sushi",
+    "teaser": "Originally a fermentation method — fish preserved in rice for months — the modern nigiri (raw fish on rice) is a 19th-century street food from Tokyo.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Sushi",
+      "durationMinutes": 30,
+      "instruction": "Try a piece of aged nigiri and notice the rice — the vinegar seasoning is the craft. The dish's genius is that the 'fermentation' became the art."
+    },
+    "tags": [
+      "Japanese",
+      "Seafood",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-ramen",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Ramen (1910)",
+    "teaser": "The noodle soup is Chinese in origin but Japan perfected it — the 'tonkotsu' broth is simmered for 18+ hours, and a ramen shop's broth is its secret recipe.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Ramen (1910) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Slurp the noodles and notice the broth — the 'tonkotsu' is the time. The dish's genius is that the 'soup' is the science."
+    },
+    "tags": [
+      "Japanese",
+      "Noodles",
+      "Comfort",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tacos-al-pastor",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tacos al Pastor (1960)",
+    "teaser": "Lebanese immigrants brought shawarma to Mexico — the pork version, marinated in achiote and roasted on a vertical spit, is the fusion dish that became Mexico's national street food.",
+    "imageUrl": "",
+    "byline": "Mexico City",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Tacos al Pastor (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try one with pineapple — the sweet is the counterpoint. The dish's genius is that the 'fusion' is the origin."
+    },
+    "tags": [
+      "Mexican",
+      "Street Food",
+      "Pork",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pad-thai",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pad Thai (1938)",
+    "teaser": "The 'national dish' was invented in the 1930s as part of a nationalist campaign — the stir-fried rice noodles were a government PR project that became a global classic.",
+    "imageUrl": "",
+    "byline": "Thailand",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Pad Thai (1938) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Make it and notice the tamarind — the sour is the balance. The dish's genius is that the 'nationalism' is the origin."
+    },
+    "tags": [
+      "Thai",
+      "Noodles",
+      "Street Food",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-croissant",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Croissant (1839)",
+    "teaser": "The crescent is Austrian in origin (the kipferl) — the 'Austrian bakery' myth about Vienna is false, but the laminated dough is a French triumph of technique.",
+    "imageUrl": "",
+    "byline": "France",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Croissant (1839) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Bite into a fresh one and notice the layers — the 27 folds are the craft. The pastry's genius is that the 'butter' is the architecture."
+    },
+    "tags": [
+      "French",
+      "Pastry",
+      "Breakfast",
+      "1830s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-french-fries",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "French Fries",
+    "teaser": "The 'French' fry is Belgian — historians date the fried potato to the Meuse valley, and the double-fry method (blanch, rest, fry) is the difference between good and great.",
+    "imageUrl": "",
+    "byline": "Belgium",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "French Fries",
+      "durationMinutes": 30,
+      "instruction": "Try the double-fry method and notice the crisp — the rest is the secret. The dish's genius is that the 'French' is the mistake."
+    },
+    "tags": [
+      "Belgian",
+      "Street Food",
+      "Potato"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pasta-carbonara",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pasta Carbonara",
+    "teaser": "The Roman classic has no cream — egg, pecorino, guanciale, pepper — and the 'carbonara' name may come from coal miners (carbonai) who made it with their campfire provisions.",
+    "imageUrl": "",
+    "byline": "Rome, Italy",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Pasta Carbonara",
+      "durationMinutes": 30,
+      "instruction": "Make it and notice the egg — the sauce is the technique. The dish's genius is that the 'no cream' is the purity."
+    },
+    "tags": [
+      "Italian",
+      "Pasta",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-risotto",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Risotto",
+    "teaser": "The Milanese rice dish is a lesson in patience — the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master.",
+    "imageUrl": "",
+    "byline": "Milan, Italy",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Risotto",
+      "durationMinutes": 30,
+      "instruction": "Cook it and notice the stirring — the 18 minutes are the craft. The dish's genius is that the 'slow' is the flavor."
+    },
+    "tags": [
+      "Italian",
+      "Rice",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-paella",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Paella",
+    "teaser": "The Valencian rice dish was a farmhouse meal — the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients.",
+    "imageUrl": "",
+    "byline": "Valencia, Spain",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Paella",
+      "durationMinutes": 30,
+      "instruction": "Cook it and notice the socarrat — the crispy bottom is the goal. The dish's genius is that the 'pan' is the name."
+    },
+    "tags": [
+      "Spanish",
+      "Rice",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pho",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pho (1900)",
+    "teaser": "The Vietnamese noodle soup is a 20th-century invention — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul.",
+    "imageUrl": "",
+    "byline": "Vietnam",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Pho (1900) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Make the broth and notice the spices — the star anise is the signature. The dish's genius is that the 'French' is the history."
+    },
+    "tags": [
+      "Vietnamese",
+      "Soup",
+      "Comfort",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-biryani",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Biryani",
+    "teaser": "The layered rice dish of the Mughal courts — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity.",
+    "imageUrl": "",
+    "byline": "India",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Biryani",
+      "durationMinutes": 30,
+      "instruction": "Cook the dum method and notice the layering — the seal is the flavor. The dish's genius is that the 'layers' are the history."
+    },
+    "tags": [
+      "Indian",
+      "Rice",
+      "Festive"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-butter-chicken",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Butter Chicken (1950)",
+    "teaser": "Invented by accident — leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world.",
+    "imageUrl": "",
+    "byline": "Delhi, India",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Butter Chicken (1950) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Make the marinade and notice the tandoor — the smoke is the flavor. The dish's genius is that the 'leftover' was the invention."
+    },
+    "tags": [
+      "Indian",
+      "Curry",
+      "Comfort",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-dim-sum",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Dim Sum",
+    "teaser": "The Cantonese 'touch the heart' — small dishes served with tea, originally from teahouses on the Silk Road — and the pushcart tradition is the social ritual.",
+    "imageUrl": "",
+    "byline": "Guangdong, China",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Dim Sum",
+      "durationMinutes": 30,
+      "instruction": "Try a bamboo steamer of har gow and notice the wrapper — the translucent skin is the craft. The dish's genius is that the 'tea' is the ritual."
+    },
+    "tags": [
+      "Chinese",
+      "Dumplings",
+      "Cantonese"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-peking-duck",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Peking Duck (1330)",
+    "teaser": "The imperial duck — the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique.",
+    "imageUrl": "",
+    "byline": "Beijing, China",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Peking Duck (1330) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try the skin with the pancakes and notice the crisp — the air-dry is the secret. The dish's genius is that the 'skin' is the dish."
+    },
+    "tags": [
+      "Chinese",
+      "Duck",
+      "Classic",
+      "1330s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hot-pot",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hot Pot",
+    "teaser": "The communal boiling pot — the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Hot Pot",
+      "durationMinutes": 30,
+      "instruction": "Try the Sichuan broth and notice the numbness — the Sichuan peppercorn is the signature. The dish's genius is that the 'communal' is the meal."
+    },
+    "tags": [
+      "Chinese",
+      "Communal",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-mapo-tofu",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Mapo Tofu",
+    "teaser": "The 'pockmarked grandmother's tofu' — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature.",
+    "imageUrl": "",
+    "byline": "Sichuan, China",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Mapo Tofu",
+      "durationMinutes": 30,
+      "instruction": "Cook it and notice the doubanjiang — the fermented bean paste is the depth. The dish's genius is that the 'grandmother' is the brand."
+    },
+    "tags": [
+      "Chinese",
+      "Sichuan",
+      "Tofu"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-kimchi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Kimchi",
+    "teaser": "The Korean staple with 200+ varieties — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar.",
+    "imageUrl": "",
+    "byline": "Korea",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Kimchi",
+      "durationMinutes": 30,
+      "instruction": "Make it and notice the fermentation — the 3-day room-temperature ferment is the flavor. The dish's genius is that the 'science' is the tradition."
+    },
+    "tags": [
+      "Korean",
+      "Fermented",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bibimbap",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bibimbap",
+    "teaser": "The 'mixed rice' bowl — the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus.",
+    "imageUrl": "",
+    "byline": "Korea",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Bibimbap",
+      "durationMinutes": 30,
+      "instruction": "Mix it fully and notice the gochujang — the paste is the sauce. The dish's genius is that the 'colors' are the balance."
+    },
+    "tags": [
+      "Korean",
+      "Rice",
+      "Bowl"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bulgogi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bulgogi",
+    "teaser": "The 'fire meat' — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor.",
+    "imageUrl": "",
+    "byline": "Korea",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Bulgogi",
+      "durationMinutes": 30,
+      "instruction": "Grill it and notice the marinade — the pear is the tenderizer. The dish's genius is that the 'fire' is the name."
+    },
+    "tags": [
+      "Korean",
+      "BBQ",
+      "Beef"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-sashimi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Sashimi",
+    "teaser": "The sliced raw fish — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Sashimi",
+      "durationMinutes": 30,
+      "instruction": "Try a high-grade piece and notice the cut — the knife angle is the texture. The dish's genius is that the 'nothing' is the everything."
+    },
+    "tags": [
+      "Japanese",
+      "Seafood",
+      "Raw"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tempura",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tempura",
+    "teaser": "The 'batter-fried' dish came from Portuguese missionaries in the 16th century — the cold-batter technique and the 'kakiage' style are the craft.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Tempura",
+      "durationMinutes": 30,
+      "instruction": "Try the shrimp and notice the batter — the cold water is the crisp. The dish's genius is that the 'Portuguese' is the origin."
+    },
+    "tags": [
+      "Japanese",
+      "Fried",
+      "Seafood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-miso-soup",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Miso Soup",
+    "teaser": "The daily soup of Japan — the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Miso Soup",
+      "durationMinutes": 30,
+      "instruction": "Make it and notice the dashi — the kombu and bonito are the umami. The dish's genius is that the 'two' ingredients are the whole."
+    },
+    "tags": [
+      "Japanese",
+      "Soup",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-katsu-curry",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Katsu Curry",
+    "teaser": "The British navy brought curry to Japan — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Katsu Curry",
+      "durationMinutes": 30,
+      "instruction": "Try the katsu and notice the panko — the flaky breadcrumb is the crisp. The dish's genius is that the 'British' is the origin."
+    },
+    "tags": [
+      "Japanese",
+      "Curry",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-okonomiyaki",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Okonomiyaki",
+    "teaser": "The 'as-you-like-it' griddle pancake — the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Okonomiyaki",
+      "durationMinutes": 30,
+      "instruction": "Make it and notice the cabbage — the shred is the texture. The dish's genius is that the 'you-like-it' is the name."
+    },
+    "tags": [
+      "Japanese",
+      "Pancake",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-takoyaki",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Takoyaki (1935)",
+    "teaser": "The octopus balls were invented in Osaka in the 1930s — the special pan and the batter's dance are the craft, and the dish is the city's soul.",
+    "imageUrl": "",
+    "byline": "Osaka, Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Takoyaki (1935) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try them fresh and notice the molten center — the batter is the texture. The dish's genius is that the 'pan' is the invention."
+    },
+    "tags": [
+      "Japanese",
+      "Street Food",
+      "Octopus",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-yakitori",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Yakitori",
+    "teaser": "The grilled chicken skewers — every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Yakitori",
+      "durationMinutes": 30,
+      "instruction": "Try the thigh skewer and notice the tare — the glaze is the flavor. The dish's genius is that the 'parts' are the craft."
+    },
+    "tags": [
+      "Japanese",
+      "Grill",
+      "Chicken"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-onigiri",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Onigiri",
+    "teaser": "The rice ball — a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Onigiri",
+      "durationMinutes": 30,
+      "instruction": "Make one and notice the fillings — the umeboshi is the classic. The dish's genius is that the 'simple' is the design."
+    },
+    "tags": [
+      "Japanese",
+      "Rice",
+      "Snack"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-curry-rice",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Curry Rice",
+    "teaser": "The Japanese curry is a roux-based dish adapted from British navy curry — the 'curry rice' is the most popular home-cooked meal in Japan.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Curry Rice",
+      "durationMinutes": 30,
+      "instruction": "Cook the roux and notice the sweetness — the apple and honey are the Japanese touch. The dish's genius is that the 'British' became the 'Japanese'."
+    },
+    "tags": [
+      "Japanese",
+      "Curry",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-wagyu",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Wagyu",
+    "teaser": "The 'Japanese cow' — the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Wagyu",
+      "durationMinutes": 30,
+      "instruction": "Try a slice of A5 and notice the melt — the fat is the flavor. The dish's genius is that the 'marbling' is the craft."
+    },
+    "tags": [
+      "Japanese",
+      "Beef",
+      "Luxury"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-poutine",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Poutine (1950)",
+    "teaser": "The fries, curds and gravy dish was born in rural Quebec in the 1950s — the cheese curds must squeak, and the 'poutine' has become Canada's national dish.",
+    "imageUrl": "",
+    "byline": "Quebec, Canada",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Poutine (1950) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try it fresh and notice the curds — the squeak is the freshness. The dish's genius is that the 'mess' is the joy."
+    },
+    "tags": [
+      "Canadian",
+      "Comfort",
+      "Street Food",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-fish-and-chips",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Fish and Chips (1860)",
+    "teaser": "The British national dish — the fried fish in beer batter and the chips, wrapped in paper — has fed the working class since the 1860s.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Fish and Chips (1860) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try the batter and notice the beer — the carbonation is the crisp. The dish's genius is that the 'paper' is the ritual."
+    },
+    "tags": [
+      "British",
+      "Fried",
+      "Classic",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-sunday-roast",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Sunday Roast",
+    "teaser": "The Sunday roast — beef, Yorkshire pudding, roast potatoes, gravy — is the British family ritual, and the 'Yorkshire pudding' was originally a cheap filler.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Sunday Roast",
+      "durationMinutes": 30,
+      "instruction": "Try the roast potatoes and notice the fat — the pre-heated oil is the crisp. The dish's genius is that the 'Sunday' is the ritual."
+    },
+    "tags": [
+      "British",
+      "Roast",
+      "Sunday"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-full-english-breakfast",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Full English Breakfast",
+    "teaser": "The fry-up — eggs, bacon, sausage, beans, toast — is the hangover cure of a nation, and the 'full English' is a 19th-century invention from the Victorian boarding house.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Full English Breakfast",
+      "durationMinutes": 30,
+      "instruction": "Try the components and notice the balance — the beans are the counterpoint. The dish's genius is that the 'full' is the point."
+    },
+    "tags": [
+      "British",
+      "Breakfast",
+      "Hearty"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-shepherd-s-pie",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Shepherd's Pie",
+    "teaser": "The minced lamb dish with mashed potato topping — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Shepherd's Pie",
+      "durationMinutes": 30,
+      "instruction": "Make it and notice the topping — the potato is the crust. The dish's genius is that the 'shepherd' is the name."
+    },
+    "tags": [
+      "British",
+      "Comfort",
+      "Mince"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-cornish-pasty",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Cornish Pasty",
+    "teaser": "The miner's lunch — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish.",
+    "imageUrl": "",
+    "byline": "Cornwall, England",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Cornish Pasty",
+      "durationMinutes": 30,
+      "instruction": "Try the crimp and notice the edge — the handle was the design. The dish's genius is that the 'pastry' is the fork."
+    },
+    "tags": [
+      "British",
+      "Pie",
+      "Handheld"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-haggis",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Haggis",
+    "teaser": "The sheep's pluck (heart, liver, lungs) with oats in a stomach casing — the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece.",
+    "imageUrl": "",
+    "byline": "Scotland",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Haggis",
+      "durationMinutes": 30,
+      "instruction": "Try it with neeps and tatties — the turnip is the counterpoint. The dish's genius is that the 'offal' is the thrift."
+    },
+    "tags": [
+      "Scottish",
+      "Offal",
+      "Traditional"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-scotch-egg",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Scotch Egg",
+    "teaser": "The boiled egg wrapped in sausage and breadcrumbs — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Scotch Egg",
+      "durationMinutes": 30,
+      "instruction": "Try the soft-boiled version and notice the yolk — the runny center is the upgrade. The dish's genius is that the 'egg' is the core."
+    },
+    "tags": [
+      "British",
+      "Egg",
+      "Snack"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chicken-tikka-masala",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chicken Tikka Masala (1960)",
+    "teaser": "The 'British national dish' — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food.",
+    "imageUrl": "",
+    "byline": "Glasgow, Scotland",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Chicken Tikka Masala (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try the sauce and notice the cream — the 'masala' is the marriage. The dish's genius is that the 'Glasgow' is the origin."
+    },
+    "tags": [
+      "British Indian",
+      "Curry",
+      "Fusion",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-naan",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Naan",
+    "teaser": "The tandoor-baked flatbread — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister.",
+    "imageUrl": "",
+    "byline": "India",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Naan",
+      "durationMinutes": 30,
+      "instruction": "Try it fresh and notice the blisters — the tandoor is the flavor. The dish's genius is that the 'oven' is the technique."
+    },
+    "tags": [
+      "Indian",
+      "Bread",
+      "Tandoor"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-samosa",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Samosa",
+    "teaser": "The triangular fried pastry — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard.",
+    "imageUrl": "",
+    "byline": "India",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Samosa",
+      "durationMinutes": 30,
+      "instruction": "Try one fresh and notice the crust — the flaky layers are the craft. The dish's genius is that the 'triangle' is the history."
+    },
+    "tags": [
+      "Indian",
+      "Snack",
+      "Fried"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-dosa",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Dosa",
+    "teaser": "The fermented rice-lentil crepe — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic.",
+    "imageUrl": "",
+    "byline": "South India",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Dosa",
+      "durationMinutes": 30,
+      "instruction": "Try the masala dosa and notice the crisp — the ferment is the flavor. The dish's genius is that the 'batter' is the science."
+    },
+    "tags": [
+      "Indian",
+      "Pancake",
+      "South Indian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-biryani-hyderabadi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Biryani (Hyderabadi) (1857)",
+    "teaser": "The Nizam's biryani — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method.",
+    "imageUrl": "",
+    "byline": "Hyderabad, India",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Biryani (Hyderabadi) (1857) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try the kacchi method and notice the layering — the raw meat is the technique. The dish's genius is that the 'royal' is the method."
+    },
+    "tags": [
+      "Indian",
+      "Rice",
+      "Festive",
+      "1850s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-kebab",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Kebab",
+    "teaser": "The skewered meat of the Ottoman world — the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food.",
+    "imageUrl": "",
+    "byline": "Middle East",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Kebab",
+      "durationMinutes": 30,
+      "instruction": "Try the shish and notice the charcoal — the smoke is the flavor. The dish's genius is that the 'skewer' is the technology."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Grill",
+      "Meat"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-shawarma",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Shawarma",
+    "teaser": "The vertical-spit roasted meat — the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual.",
+    "imageUrl": "",
+    "byline": "Levant",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Shawarma",
+      "durationMinutes": 30,
+      "instruction": "Try the garlic sauce and notice the tang — the toum is the signature. The dish's genius is that the 'spit' is the theater."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Street Food",
+      "Meat"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-falafel",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Falafel",
+    "teaser": "The fried chickpea ball — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Falafel",
+      "durationMinutes": 30,
+      "instruction": "Try the tahini and notice the texture — the chickpea is the base. The dish's genius is that the 'street' is the ritual."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Fried",
+      "Vegan"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hummus",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hummus",
+    "teaser": "The chickpea-tahini dip — the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves.",
+    "imageUrl": "",
+    "byline": "Levant",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Hummus",
+      "durationMinutes": 30,
+      "instruction": "Try it fresh and notice the tahini — the sesame is the depth. The dish's genius is that the 'simple' is the debate."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Dip",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-baklava",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Baklava",
+    "teaser": "The layered filo pastry with nuts and honey — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it.",
+    "imageUrl": "",
+    "byline": "Ottoman",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Baklava",
+      "durationMinutes": 30,
+      "instruction": "Try the pistachio version and notice the filo — the layers are the technique. The dish's genius is that the 'claim' is the culture."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Pastry",
+      "Sweet"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-kunafa",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Kunafa",
+    "teaser": "The shredded-phyllo cheese dessert soaked in syrup — the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment.",
+    "imageUrl": "",
+    "byline": "Levant",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Kunafa",
+      "durationMinutes": 30,
+      "instruction": "Try it warm and notice the cheese — the pull is the moment. The dish's genius is that the 'syrup' is the balance."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Dessert",
+      "Sweet"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-arepas",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Arepas",
+    "teaser": "The corn cakes of Venezuela and Colombia — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich.",
+    "imageUrl": "",
+    "byline": "Venezuela/Colombia",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Arepas",
+      "durationMinutes": 30,
+      "instruction": "Try the stuffed version and notice the corn — the masa is the base. The dish's genius is that the 'ancient' is the staple."
+    },
+    "tags": [
+      "Latin American",
+      "Corn",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-ceviche",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Ceviche",
+    "teaser": "The raw fish 'cooked' in citrus — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure.",
+    "imageUrl": "",
+    "byline": "Peru",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Ceviche",
+      "durationMinutes": 30,
+      "instruction": "Try the leche de tigre and notice the lime — the acid is the cook. The dish's genius is that the 'cooking' is the chemistry."
+    },
+    "tags": [
+      "Peruvian",
+      "Seafood",
+      "Fresh"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-empanadas",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Empanadas",
+    "teaser": "The filled pastry — from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried.",
+    "imageUrl": "",
+    "byline": "Spain/Latin America",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Empanadas",
+      "durationMinutes": 30,
+      "instruction": "Try the Argentine version and notice the crimp — the repulgue is the signature. The dish's genius is that the 'bread' is the name."
+    },
+    "tags": [
+      "Latin American",
+      "Pastry",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-feijoada",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Feijoada",
+    "teaser": "The black bean and pork stew — the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual.",
+    "imageUrl": "",
+    "byline": "Brazil",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Feijoada",
+      "durationMinutes": 30,
+      "instruction": "Try the full spread and notice the beans — the slow cook is the depth. The dish's genius is that the 'Saturday' is the ritual."
+    },
+    "tags": [
+      "Brazilian",
+      "Stew",
+      "Black Beans"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-churros",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Churros",
+    "teaser": "The fried dough sticks with sugar and chocolate — the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast.",
+    "imageUrl": "",
+    "byline": "Spain",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Churros",
+      "durationMinutes": 30,
+      "instruction": "Try the chocolate — the thick dipping chocolate is the ritual. The dish's genius is that the 'stick' is the design."
+    },
+    "tags": [
+      "Spanish",
+      "Dessert",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-gazpacho",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Gazpacho",
+    "teaser": "The cold tomato soup of Andalusia — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin.",
+    "imageUrl": "",
+    "byline": "Andalusia, Spain",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Gazpacho",
+      "durationMinutes": 30,
+      "instruction": "Try it very cold and notice the vinegar — the sharpness is the balance. The dish's genius is that the 'cold' is the design."
+    },
+    "tags": [
+      "Spanish",
+      "Cold Soup",
+      "Summer"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tiramisu",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tiramisu (1960)",
+    "teaser": "The 'pick-me-up' dessert was invented in the 1960s in the Veneto — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute.",
+    "imageUrl": "",
+    "byline": "Treviso, Italy",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Tiramisu (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try the mascarpone and notice the coffee — the soak is the flavor. The dish's genius is that the 'pick-me-up' is the name."
+    },
+    "tags": [
+      "Italian",
+      "Dessert",
+      "Coffee",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-cheesecake",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Cheesecake",
+    "teaser": "The cheesecake is ancient — the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Cheesecake",
+      "durationMinutes": 30,
+      "instruction": "Try the New York style and notice the density — the cream cheese is the texture. The dish's genius is that the 'ancient' is the origin."
+    },
+    "tags": [
+      "Dessert",
+      "Cheese",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-ice-cream",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Ice Cream",
+    "teaser": "The frozen dessert was invented in Tang-dynasty China — milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Ice Cream",
+      "durationMinutes": 30,
+      "instruction": "Try a high-quality gelato and notice the density — the churn is the texture. The dish's genius is that the 'Chinese' is the origin."
+    },
+    "tags": [
+      "Dessert",
+      "Frozen",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chocolate",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chocolate (3000)",
+    "teaser": "The cacao drink of the Maya and Aztecs was bitter and spiced — the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847.",
+    "imageUrl": "",
+    "byline": "Mesoamerica",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Chocolate (3000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try a dark bar and notice the origin — the bean's terroir is the flavor. The food's genius is that the 'bitter' was the beginning."
+    },
+    "tags": [
+      "Dessert",
+      "Cacao",
+      "Classic",
+      "3000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bread-sourdough",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bread (Sourdough)",
+    "teaser": "The fermented bread — the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades.",
+    "imageUrl": "",
+    "byline": "Ancient Egypt",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Bread (Sourdough)",
+      "durationMinutes": 30,
+      "instruction": "Make a sourdough and notice the starter — the wild yeast is the flavor. The bread's genius is that the 'accident' was the invention."
+    },
+    "tags": [
+      "Bread",
+      "Fermented",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bagel",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bagel",
+    "teaser": "The boiled-then-baked bread ring — the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust.",
+    "imageUrl": "",
+    "byline": "Poland",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Bagel",
+      "durationMinutes": 30,
+      "instruction": "Try a fresh bagel and notice the boil — the crust is the signature. The bread's genius is that the 'boil' is the craft."
+    },
+    "tags": [
+      "Bread",
+      "Jewish",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pretzel",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pretzel",
+    "teaser": "The knotted bread — the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend.",
+    "imageUrl": "",
+    "byline": "Germany",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Pretzel",
+      "durationMinutes": 30,
+      "instruction": "Try the lye version and notice the crust — the lye is the flavor. The bread's genius is that the 'knot' is the legend."
+    },
+    "tags": [
+      "Bread",
+      "Baked",
+      "Snack"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-macaron",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Macaron",
+    "teaser": "The meringue-almond sandwich cookie — the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master.",
+    "imageUrl": "",
+    "byline": "France",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Macaron",
+      "durationMinutes": 30,
+      "instruction": "Try one and notice the foot — the ruffled base is the craft. The pastry's genius is that the 'foot' is the signature."
+    },
+    "tags": [
+      "French",
+      "Pastry",
+      "Dessert"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pancakes",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pancakes",
+    "teaser": "The griddle cake exists in every culture — from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard.",
+    "imageUrl": "",
+    "byline": "Global",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Pancakes",
+      "durationMinutes": 30,
+      "instruction": "Make a stack and notice the first side — the bubbles are the timing. The dish's genius is that the 'universal' is the form."
+    },
+    "tags": [
+      "Breakfast",
+      "Griddle",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hamburger",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hamburger (1900)",
+    "teaser": "The ground-beef patty in a bun — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food.",
+    "imageUrl": "",
+    "byline": "USA",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Hamburger (1900) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try a smash burger and notice the crust — the maillard is the flavor. The dish's genius is that the 'argument' is the origin."
+    },
+    "tags": [
+      "American",
+      "Fast Food",
+      "Icon",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hot-dog",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hot Dog",
+    "teaser": "The sausage in a bun — the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke.",
+    "imageUrl": "",
+    "byline": "USA",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Hot Dog",
+      "durationMinutes": 30,
+      "instruction": "Try one with mustard and notice the snap — the casing is the texture. The dish's genius is that the 'joke' is the name."
+    },
+    "tags": [
+      "American",
+      "Street Food",
+      "Icon"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-fried-chicken",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Fried Chicken",
+    "teaser": "The buttermilk-soaked, seasoned, fried chicken of the American South — the 'brine' is the moisture, and the dish's roots include West African frying techniques.",
+    "imageUrl": "",
+    "byline": "American South",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Fried Chicken",
+      "durationMinutes": 30,
+      "instruction": "Try the brine method and notice the crust — the seasoning is the identity. The dish's genius is that the 'brine' is the science."
+    },
+    "tags": [
+      "Southern",
+      "Fried",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-buffalo-wings",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Buffalo Wings (1964)",
+    "teaser": "Invented at the Anchor Bar in Buffalo in 1964 — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual.",
+    "imageUrl": "",
+    "byline": "Buffalo, NY",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Buffalo Wings (1964) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try the classic sauce and notice the butter — the fat is the balance. The dish's genius is that the 'bar' is the origin."
+    },
+    "tags": [
+      "American",
+      "Wings",
+      "Bar Food",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-mac-and-cheese",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Mac and Cheese",
+    "teaser": "The baked pasta and cheese — Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation.",
+    "imageUrl": "",
+    "byline": "USA",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Mac and Cheese",
+      "durationMinutes": 30,
+      "instruction": "Try the baked version and notice the crust — the breadcrumb is the texture. The dish's genius is that the 'Jefferson' is the history."
+    },
+    "tags": [
+      "American",
+      "Pasta",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chili",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chili",
+    "teaser": "The Texas chili is 'a bowl of red' — no beans in the classic version, and the 'chili cook-off' is a Texas institution.",
+    "imageUrl": "",
+    "byline": "Texas",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Chili",
+      "durationMinutes": 30,
+      "instruction": "Try the no-bean version and notice the beef — the meat is the bowl. The dish's genius is that the 'no beans' is the debate."
+    },
+    "tags": [
+      "American",
+      "Stew",
+      "Spicy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-gumbo",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Gumbo",
+    "teaser": "The Louisiana stew with a roux base — the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking.",
+    "imageUrl": "",
+    "byline": "Louisiana",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Gumbo",
+      "durationMinutes": 30,
+      "instruction": "Try the roux and notice the dark color — the burn is the flavor. The dish's genius is that the 'blend' is the history."
+    },
+    "tags": [
+      "Cajun",
+      "Stew",
+      "Creole"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-jambalaya",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Jambalaya",
+    "teaser": "The Creole rice dish with sausage, chicken and shrimp — the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base.",
+    "imageUrl": "",
+    "byline": "Louisiana",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Jambalaya",
+      "durationMinutes": 30,
+      "instruction": "Try the andouille and notice the smoke — the sausage is the flavor. The dish's genius is that the 'paella' is the cousin."
+    },
+    "tags": [
+      "Cajun",
+      "Rice",
+      "Creole"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tacos",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tacos",
+    "teaser": "The folded tortilla with filling — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Tacos",
+      "durationMinutes": 30,
+      "instruction": "Try the carnitas version and notice the tortilla — the handmade corn is the base. The dish's genius is that the 'street' is the culture."
+    },
+    "tags": [
+      "Mexican",
+      "Street Food",
+      "Icon"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-burrito",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Burrito",
+    "teaser": "The wrapped tortilla — the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Burrito",
+      "durationMinutes": 30,
+      "instruction": "Try the mission style and notice the foil — the wrap is the ritual. The dish's genius is that the 'donkey' is the name."
+    },
+    "tags": [
+      "Mexican",
+      "Wrap",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-guacamole",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Guacamole",
+    "teaser": "The mashed avocado dip — the 'ahuacamolli' is Aztec in origin, and the lime and salt are the technique.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Guacamole",
+      "durationMinutes": 30,
+      "instruction": "Try the molcajete version and notice the texture — the stone bowl is the craft. The dish's genius is that the 'Aztec' is the origin."
+    },
+    "tags": [
+      "Mexican",
+      "Dip",
+      "Avocado"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-mole",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Mole",
+    "teaser": "The complex sauce with 20+ ingredients including chocolate — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Mole",
+      "durationMinutes": 30,
+      "instruction": "Try the mole poblano and notice the chocolate — the bitterness is the depth. The dish's genius is that the '20' ingredients are the craft."
+    },
+    "tags": [
+      "Mexican",
+      "Sauce",
+      "Complex"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chiles-en-nogada",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chiles en Nogada (1821)",
+    "teaser": "The stuffed poblano with walnut sauce and pomegranate — created for Mexico's independence in 1821, and the dish's colors are the flag.",
+    "imageUrl": "",
+    "byline": "Puebla, Mexico",
+    "exploreAction": {
+      "verb": "Cook",
+      "targetName": "Chiles en Nogada (1821) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Try it and notice the colors — the flag is the dish. The recipe's genius is that the 'independence' is the history."
+    },
+    "tags": [
+      "Mexican",
+      "Festive",
+      "Historic",
+      "1820s"
+    ],
+    "tier": 1
+  }
+]

@@ -41,6 +41,16 @@ enum class CategoryId {
     ARTWORKS,
     SCIENTISTS,
     DISCOVERIES,
+    SONGS,
+    SERIES,
+    ANIME,
+    MANGA,
+    MANHWA,
+    GAMES,
+    MYTHOLOGY,
+    SPORTS,
+    FOOD,
+    INTERNET,
     WILDCARD;
 
     companion object {
@@ -49,11 +59,17 @@ enum class CategoryId {
 
         /** Default chip order on Home + Category Picker. Wildcard stays last. */
         val defaultOrder: List<CategoryId> = listOf(
-            ARTISTS, ALBUMS,
-            DIRECTORS, FILMS,
+            ARTISTS, ALBUMS, SONGS,
+            DIRECTORS, FILMS, SERIES,
             AUTHORS, BOOKS,
             PAINTERS, ARTWORKS,
             SCIENTISTS, DISCOVERIES,
+            ANIME, MANGA, MANHWA,
+            GAMES,
+            MYTHOLOGY,
+            SPORTS,
+            FOOD,
+            INTERNET,
             WILDCARD
         )
     }
@@ -70,6 +86,16 @@ enum class CategoryId {
         ARTWORKS    -> "artworks"
         SCIENTISTS  -> "scientists"
         DISCOVERIES -> "discoveries"
+        SONGS       -> "songs"
+        SERIES      -> "series"
+        ANIME       -> "anime"
+        MANGA       -> "manga"
+        MANHWA      -> "manhwa"
+        GAMES       -> "games"
+        MYTHOLOGY   -> "mythology"
+        SPORTS      -> "sports"
+        FOOD        -> "food"
+        INTERNET    -> "internet"
         WILDCARD    -> "wildcard"
     }
 }
@@ -88,15 +114,27 @@ enum class CategoryFamily {
     BOOKS,
     VISUAL_ART,
     SCIENCE,
+    ANIME_COMICS,
+    GAMES,
+    MYTHOLOGY,
+    SPORTS,
+    FOOD,
+    INTERNET,
     WILDCARD;
 
     companion object {
         fun of(id: CategoryId): CategoryFamily = when (id) {
-            CategoryId.ARTISTS, CategoryId.ALBUMS -> MUSIC
-            CategoryId.DIRECTORS, CategoryId.FILMS -> MOVIES
+            CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS -> MUSIC
+            CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.SERIES -> MOVIES
             CategoryId.AUTHORS, CategoryId.BOOKS -> BOOKS
             CategoryId.PAINTERS, CategoryId.ARTWORKS -> VISUAL_ART
             CategoryId.SCIENTISTS, CategoryId.DISCOVERIES -> SCIENCE
+            CategoryId.ANIME, CategoryId.MANGA, CategoryId.MANHWA -> ANIME_COMICS
+            CategoryId.GAMES -> GAMES
+            CategoryId.MYTHOLOGY -> MYTHOLOGY
+            CategoryId.SPORTS -> SPORTS
+            CategoryId.FOOD -> FOOD
+            CategoryId.INTERNET -> INTERNET
             CategoryId.WILDCARD -> WILDCARD
         }
     }
@@ -278,6 +316,114 @@ object CurioCategories {
             iconGlyph     = "lightbulb",
             family        = CategoryFamily.SCIENCE,
             defaultFormat = CaptureFormat.FieldNotes
+        ),
+        // ── Music family (Indigo) — Songs joins Artists/Albums ───────────
+        CurioCategory(
+            id            = CategoryId.SONGS,
+            displayName   = "Songs",
+            accent        = CurioColors.CategoryIndigo,
+            lightAccent   = CurioColors.CategoryIndigoInk,
+            tint          = CurioColors.CategoryIndigoTint,
+            iconGlyph     = "queue_music",
+            family        = CategoryFamily.MUSIC,
+            defaultFormat = CaptureFormat.SoundBite
+        ),
+        // ── Movies family (Rose) — Series joins Directors/Films ──────────
+        CurioCategory(
+            id            = CategoryId.SERIES,
+            displayName   = "Series",
+            accent        = CurioColors.CategoryRose,
+            lightAccent   = CurioColors.CategoryRoseInk,
+            tint          = CurioColors.CategoryRoseTint,
+            iconGlyph     = "tv",
+            family        = CategoryFamily.MOVIES,
+            defaultFormat = CaptureFormat.Marginalia
+        ),
+        // ── Anime & Comics family (Violet) ───────────────────────────────
+        CurioCategory(
+            id            = CategoryId.ANIME,
+            displayName   = "Anime",
+            accent        = CurioColors.CategoryViolet,
+            lightAccent   = CurioColors.CategoryVioletInk,
+            tint          = CurioColors.CategoryVioletTint,
+            iconGlyph     = "smart_display",
+            family        = CategoryFamily.ANIME_COMICS,
+            defaultFormat = CaptureFormat.Marginalia
+        ),
+        CurioCategory(
+            id            = CategoryId.MANGA,
+            displayName   = "Manga",
+            accent        = CurioColors.CategoryViolet,
+            lightAccent   = CurioColors.CategoryVioletInk,
+            tint          = CurioColors.CategoryVioletTint,
+            iconGlyph     = "auto_stories",
+            family        = CategoryFamily.ANIME_COMICS,
+            defaultFormat = CaptureFormat.Marginalia
+        ),
+        CurioCategory(
+            id            = CategoryId.MANHWA,
+            displayName   = "Manhwa",
+            accent        = CurioColors.CategoryViolet,
+            lightAccent   = CurioColors.CategoryVioletInk,
+            tint          = CurioColors.CategoryVioletTint,
+            iconGlyph     = "import_contacts",
+            family        = CategoryFamily.ANIME_COMICS,
+            defaultFormat = CaptureFormat.Marginalia
+        ),
+        // ── Games family (Fuchsia) ───────────────────────────────────────
+        CurioCategory(
+            id            = CategoryId.GAMES,
+            displayName   = "Games",
+            accent        = CurioColors.CategoryFuchsia,
+            lightAccent   = CurioColors.CategoryFuchsiaInk,
+            tint          = CurioColors.CategoryFuchsiaTint,
+            iconGlyph     = "sports_esports",
+            family        = CategoryFamily.GAMES,
+            defaultFormat = CaptureFormat.ReelNotes
+        ),
+        // ── Mythology family (Orange) ────────────────────────────────────
+        CurioCategory(
+            id            = CategoryId.MYTHOLOGY,
+            displayName   = "Mythology",
+            accent        = CurioColors.CategoryOrange,
+            lightAccent   = CurioColors.CategoryOrangeInk,
+            tint          = CurioColors.CategoryOrangeTint,
+            iconGlyph     = "auto_awesome",
+            family        = CategoryFamily.MYTHOLOGY,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        // ── Sports family (Emerald) ──────────────────────────────────────
+        CurioCategory(
+            id            = CategoryId.SPORTS,
+            displayName   = "Sports",
+            accent        = CurioColors.CategoryEmerald,
+            lightAccent   = CurioColors.CategoryEmeraldInk,
+            tint          = CurioColors.CategoryEmeraldTint,
+            iconGlyph     = "sports_soccer",
+            family        = CategoryFamily.SPORTS,
+            defaultFormat = CaptureFormat.ReelNotes
+        ),
+        // ── Food family (Red) ────────────────────────────────────────────
+        CurioCategory(
+            id            = CategoryId.FOOD,
+            displayName   = "Food",
+            accent        = CurioColors.CategoryRed,
+            lightAccent   = CurioColors.CategoryRedInk,
+            tint          = CurioColors.CategoryRedTint,
+            iconGlyph     = "restaurant",
+            family        = CategoryFamily.FOOD,
+            defaultFormat = CaptureFormat.GalleryWall
+        ),
+        // ── Internet culture family (Blue) ───────────────────────────────
+        CurioCategory(
+            id            = CategoryId.INTERNET,
+            displayName   = "Internet",
+            accent        = CurioColors.CategoryBlue,
+            lightAccent   = CurioColors.CategoryBlueInk,
+            tint          = CurioColors.CategoryBlueTint,
+            iconGlyph     = "public",
+            family        = CategoryFamily.INTERNET,
+            defaultFormat = CaptureFormat.OpenNotebook
         ),
         // ── Wildcard (brand coral; cards use the themed coral gradient) ──
         CurioCategory(

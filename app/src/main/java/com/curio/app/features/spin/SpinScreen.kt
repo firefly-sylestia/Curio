@@ -1441,7 +1441,19 @@ private data class FilterGroups(
     val types: List<String>,
     val genres: List<String>,
     val eras: List<String>,
-    val origins: List<String>
+    val origins: List<String>,
+    val franchises: List<String>
+)
+
+/**
+ * Franchise tags — set aside as their OWN filter row (MCU, Star Wars, …)
+ * instead of burying them among genres, so film/anime/comics decks can be
+ * filtered by universe. Kept to the recognizable blockbusters; the sheet
+ * caps the row at a handful of chips anyway.
+ */
+private val FranchiseTags = setOf(
+    "MCU", "Star Wars", "DC", "Harry Potter", "Lord of the Rings",
+    "Pixar", "Studio Ghibli", "Disney"
 )
 
 /** Common nationality/origin tags — anything else is treated as a genre. */
@@ -1482,7 +1494,7 @@ private val NationalityTags = setOf(
  * are the most-used tags, each capped so the sheet stays tidy.
  */
 private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
-    if (pool.isEmpty()) return FilterGroups(emptyList(), emptyList(), emptyList(), emptyList())
+    if (pool.isEmpty()) return FilterGroups(emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
     val types = pool.map { it.subtype }.distinct().sorted()
     val counts = pool.flatMap { it.tags }.groupingBy { it }.eachCount()
     // Era chips: pick whichever family is more prevalent in this category —
@@ -1504,11 +1516,21 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
         .filter { it in NationalityTags }
         .sortedByDescending { counts[it] ?: 0 }
         .take(3)
-    val genres = counts.keys
-        .filter { !decadeRe.matches(it) && !centuryRe.matches(it) && it !in NationalityTags }
+    // Franchise chips — the blockbuster universe tags get their own row
+    // (MCU, Star Wars, …) instead of competing with genres for the top-4.
+    val franchises = counts.keys
+        .filter { it in FranchiseTags }
         .sortedByDescending { counts[it] ?: 0 }
         .take(4)
-    return FilterGroups(types = types, genres = genres, eras = eras, origins = origins)
+        .sorted()
+    val genres = counts.keys
+        .filter {
+            !decadeRe.matches(it) && !centuryRe.matches(it) &&
+                it !in NationalityTags && it !in FranchiseTags
+        }
+        .sortedByDescending { counts[it] ?: 0 }
+        .take(4)
+    return FilterGroups(types = types, genres = genres, eras = eras, origins = origins, franchises = franchises)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1642,7 +1664,8 @@ private fun FilterSheet(
             val hasAny = subtypes.size > 1 ||
                 groups.genres.isNotEmpty() ||
                 groups.eras.isNotEmpty() ||
-                groups.origins.isNotEmpty()
+                groups.origins.isNotEmpty() ||
+                groups.franchises.isNotEmpty()
             if (!hasAny) {
                 Text(
                     text = "No filters for this category yet.",
@@ -1752,6 +1775,29 @@ private fun FilterSheet(
                                 ),
                                 onClick = {
                                     draftFilters = if (origin in draftFilters) draftFilters - origin else draftFilters + origin
+                                }
+                            )
+                        }
+                    }
+                    if (groups.franchises.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SectionLabel(
+                                "Franchise",
+                                Modifier.padding(top = if (subtypes.size > 1) 6.dp else 6.dp, bottom = 2.dp)
+                            )
+                        }
+                        items(groups.franchises) { franchise ->
+                            CompactChip(
+                                label = franchise,
+                                selected = franchise in draftFilters,
+                                accent = cat.themedAccent(),
+                                ink = cat.onAccent(),
+                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                chipBorder = cat.categoryBorder(
+                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                ),
+                                onClick = {
+                                    draftFilters = if (franchise in draftFilters) draftFilters - franchise else draftFilters + franchise
                                 }
                             )
                         }

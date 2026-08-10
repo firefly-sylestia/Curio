@@ -3031,7 +3031,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-chlorine",
@@ -3052,7 +3056,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Swedish",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-nitrogen",
@@ -3073,7 +3082,12 @@
         "Scottish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Scottish",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-iodine-element",
@@ -3094,7 +3108,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-bromine",
@@ -3115,7 +3134,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-lithium-element",
@@ -3136,7 +3160,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Swedish",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-selenium",
@@ -3157,7 +3186,11 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-cadmium",
@@ -3178,7 +3211,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Greek",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-aluminium-metal",
@@ -3199,7 +3237,11 @@
         "Danish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-silicon",
@@ -3220,7 +3262,11 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-beryllium",
@@ -3241,7 +3287,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-titanium",
@@ -3262,7 +3312,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Greek",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-chromium",
@@ -3283,7 +3338,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Greek",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-manganese",
@@ -3304,7 +3364,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Swedish",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-molybdenum",
@@ -3325,7 +3390,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Greek",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-tungsten",
@@ -3346,7 +3416,12 @@
         "Spanish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Spanish",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-uranium-element",
@@ -3367,7 +3442,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-zirconium",
@@ -3388,7 +3467,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-vanadium",
@@ -3409,7 +3492,12 @@
         "Mexican"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Spanish",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-tantalum",
@@ -3430,7 +3518,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Greek",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-niobium",
@@ -3451,7 +3544,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "British",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-palladium-rhodium",
@@ -3472,7 +3570,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "English",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-osmium-iridium",
@@ -3493,7 +3596,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-sodium-potassium",
@@ -3514,7 +3621,11 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-fluorine",
@@ -3535,7 +3646,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-argon",
@@ -3556,7 +3671,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-neon-krypton-xenon",
@@ -3577,7 +3696,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-technetium",
@@ -3598,7 +3721,11 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-francium",
@@ -3619,7 +3746,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-plutonium",
@@ -3640,7 +3771,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-first-enzyme",
@@ -3661,7 +3796,13 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biochemistry",
+      "Biology",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-cell-free-fermentation",
@@ -3682,7 +3823,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Cell Biology",
+      "Biology",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-secretin",
@@ -3703,7 +3849,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Endocrinology",
+      "Medicine",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-adrenaline",
@@ -3724,7 +3875,13 @@
         "Japanese-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Endocrinology",
+      "Medicine",
+      "Japanese",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-acetylcholine",
@@ -3745,7 +3902,12 @@
         "Austrian-German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Neuroscience",
+      "Medicine",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-citric-acid-cycle",
@@ -3766,7 +3928,13 @@
         "German-British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biochemistry",
+      "Biology",
+      "German",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-calvin-cycle",
@@ -3787,7 +3955,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biochemistry",
+      "Biology",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-lac-operon",
@@ -3808,7 +3981,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Genetics",
+      "Biology",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-cell-nucleus",
@@ -3829,7 +4007,12 @@
         "Scottish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Cell Biology",
+      "Biology",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-mitosis",
@@ -3850,7 +4033,13 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Genetics",
+      "Biology",
+      "Greek",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-neuron-doctrine",
@@ -3871,7 +4060,12 @@
         "Spanish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Neuroscience",
+      "Medicine",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-sodium-potassium-pump",
@@ -3892,7 +4086,13 @@
         "Danish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Cell Biology",
+      "Biology",
+      "Danish",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-action-potential",
@@ -3913,7 +4113,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Optics",
+      "Physics",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-lysosomes",
@@ -3934,7 +4139,12 @@
         "Belgian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biochemistry",
+      "Biology",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-first-tumor-virus",
@@ -3955,7 +4165,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Virology",
+      "Medicine",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-first-oncogene",
@@ -3976,7 +4191,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Genetics",
+      "Biology",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-p53",
@@ -3997,7 +4217,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Genetics",
+      "Biology",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-taung-child",
@@ -4018,7 +4243,12 @@
         "South African"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-peking-man",
@@ -4039,7 +4269,12 @@
         "Chinese"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-neanderthal-fossils",
@@ -4060,7 +4295,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-turkana-boy",
@@ -4081,7 +4321,12 @@
         "Kenyan"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-ardi",
@@ -4102,7 +4347,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-dmanisi",
@@ -4123,7 +4373,12 @@
         "Georgian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-troy",
@@ -4144,7 +4399,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-mohenjo-daro",
@@ -4165,7 +4425,11 @@
         "Indian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-machu-picchu",
@@ -4186,7 +4450,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-nazca-lines",
@@ -4207,7 +4476,11 @@
         "Peruvian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-knossos",
@@ -4228,7 +4501,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-catalhoyuk",
@@ -4249,7 +4527,11 @@
         "Turkish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-akrotiri",
@@ -4270,7 +4552,11 @@
         "Greek"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-ebla-tablets",
@@ -4291,7 +4577,12 @@
         "Syrian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-oxyrhynchus",
@@ -4312,7 +4603,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Egyptian",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-nag-hammadi",
@@ -4333,7 +4629,12 @@
         "Egyptian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Egyptian",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-gilgamesh-tablets",
@@ -4354,7 +4655,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Assyrian",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-challenger-deep",
@@ -4375,7 +4681,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-moho",
@@ -4396,7 +4706,11 @@
         "Croatian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Earth Science",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-van-allen-belts",
@@ -4417,7 +4731,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Space",
+      "Engineering",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-magnetic-reversals",
@@ -4438,7 +4757,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Electromagnetism",
+      "Physics",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-chicxulub",
@@ -4459,7 +4783,11 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-oldest-rocks",
@@ -4480,7 +4808,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-ozone-layer",
@@ -4501,7 +4833,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Earth Science",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-venus-atmosphere",
@@ -4522,7 +4858,11 @@
         "Russian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-titan-atmosphere",
@@ -4543,7 +4883,11 @@
         "Dutch-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-water-on-moon",
@@ -4564,7 +4908,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-first-dinosaur",
@@ -4585,7 +4933,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Biology",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-ecg",
@@ -4606,7 +4959,11 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-eeg",
@@ -4627,7 +4984,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-heparin",
@@ -4648,7 +5010,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Hematology",
+      "Medicine",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-quinine-alkaloid",
@@ -4669,7 +5036,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-morphine",
@@ -4690,7 +5061,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Greek",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-digitalis",
@@ -4711,7 +5087,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-scurvy-cure",
@@ -4732,7 +5113,11 @@
         "Scottish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-beriberi-cause",
@@ -4753,7 +5138,13 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Nutrition",
+      "Medicine",
+      "Dutch",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-pellagra-cause",
@@ -4774,7 +5165,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-rh-factor",
@@ -4795,7 +5191,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Hematology",
+      "Medicine",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-ebola-virus",
@@ -4816,7 +5217,13 @@
         "Belgian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Virology",
+      "Medicine",
+      "Belgian",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-vitamin-a",
@@ -4837,7 +5244,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Nutrition",
+      "Medicine",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-hr-diagram",
@@ -4858,7 +5270,11 @@
         "Danish-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1910s"
+    ]
   },
   {
     "id": "discovery-stellar-nucleosynthesis",
@@ -4879,7 +5295,11 @@
         "British-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-cepheid-standard-candle",
@@ -4900,7 +5320,11 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-andromeda-distance",
@@ -4921,7 +5345,11 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-21cm-line",
@@ -4942,7 +5370,11 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-halleys-comet",
@@ -4963,7 +5395,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-oumuamua",
@@ -4984,7 +5420,11 @@
         "Hawaiian-American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2010s"
+    ]
   },
   {
     "id": "discovery-proxima-b",
@@ -5005,7 +5445,11 @@
         "Spanish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2010s"
+    ]
   },
   {
     "id": "discovery-compton-effect",
@@ -5026,7 +5470,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Radiology",
+      "Physics",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-raman-effect",
@@ -5047,7 +5496,12 @@
         "Indian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Indian",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-speed-of-light",
@@ -5068,7 +5522,11 @@
         "Danish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "17th Century"
+    ]
   },
   {
     "id": "discovery-barometer",
@@ -5089,7 +5547,11 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Earth Science",
+      "17th Century"
+    ]
   },
   {
     "id": "discovery-carrington-event",
@@ -5110,7 +5572,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Space",
+      "Engineering",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-top-quark",
@@ -5131,7 +5598,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-gluon",
@@ -5152,7 +5624,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-cp-violation",
@@ -5173,7 +5650,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-meissner-effect",
@@ -5194,7 +5675,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Electromagnetism",
+      "Physics",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-quantum-hall-effect",
@@ -5215,7 +5701,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Quantum",
+      "Physics",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-zeeman-effect",
@@ -5236,7 +5727,12 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Electromagnetism",
+      "Physics",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-doppler-demonstration",
@@ -5257,7 +5753,11 @@
         "Austrian-Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-tau-neutrino",
@@ -5278,7 +5778,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-charm-quark",
@@ -5299,7 +5804,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-bottom-quark",
@@ -5320,7 +5830,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-lunar-laser-ranging",
@@ -5341,7 +5856,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Optics",
+      "Physics",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-magnetars",
@@ -5362,7 +5882,12 @@
         "Greek-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Electromagnetism",
+      "Physics",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-kepler-22b",
@@ -5383,7 +5908,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2010s"
+    ]
   },
   {
     "id": "discovery-exoplanet-atmosphere",
@@ -5404,7 +5933,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-mauveine",
@@ -5425,7 +5958,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-bakelite-plastic",
@@ -5446,7 +5983,13 @@
         "Belgian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Materials",
+      "Chemistry",
+      "Belgian",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-teflon-ptfe",
@@ -5467,7 +6010,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-nylon-fiber",
@@ -5488,7 +6035,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Optics",
+      "Physics",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-polyethylene",
@@ -5509,7 +6061,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Materials",
+      "Chemistry",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-kevlar-fiber",
@@ -5530,7 +6087,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Optics",
+      "Physics",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-superglue",
@@ -5551,7 +6113,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Optics",
+      "Physics",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-first-photograph",
@@ -5572,7 +6139,13 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Photography",
+      "Engineering",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-first-sound-recording",
@@ -5593,7 +6166,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Sound",
+      "Engineering",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-xerography",
@@ -5614,7 +6192,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-synthetic-rubber",
@@ -5635,7 +6217,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-rayon",
@@ -5656,7 +6242,13 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Optics",
+      "Physics",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-aspirin-acetylsalicylic",
@@ -5677,7 +6269,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-lsd",
@@ -5698,7 +6294,11 @@
         "Swiss"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-prontosil",
@@ -5719,7 +6319,13 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Microbiology",
+      "Biology",
+      "German",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-veronal",
@@ -5740,7 +6346,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-nitroglycerin",
@@ -5761,7 +6372,12 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-dynamite",
@@ -5782,7 +6398,11 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-synthetic-quinine",
@@ -5803,7 +6423,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-vacuum-tube",
@@ -5824,7 +6448,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Electronics",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-blood-transfusion",
@@ -5845,7 +6473,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Hematology",
+      "Medicine",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-kidney-dialysis",
@@ -5866,7 +6499,12 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Dutch",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-pacemaker",
@@ -5887,7 +6525,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Electromagnetism",
+      "Physics",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-defibrillator",
@@ -5908,7 +6551,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Surgery",
+      "Medicine",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-heart-transplant-barnard",
@@ -5929,7 +6577,12 @@
         "South African"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Surgery",
+      "Medicine",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-ivf-louise-brown",
@@ -5950,7 +6603,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-coronary-bypass",
@@ -5971,7 +6628,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Surgery",
+      "Medicine",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-angioplasty",
@@ -5992,7 +6654,13 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Hematology",
+      "Medicine",
+      "German",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-cochlear-implant",
@@ -6013,7 +6681,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-blood-groups",
@@ -6034,7 +6706,12 @@
         "Austrian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Hematology",
+      "Medicine",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-measles-vaccine",
@@ -6055,7 +6732,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Vaccines",
+      "Medicine",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-mumps-vaccine",
@@ -6076,7 +6758,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Vaccines",
+      "Medicine",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-rubella-vaccine",
@@ -6097,7 +6784,13 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Vaccines",
+      "Medicine",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-hpv-vaccine",
@@ -6118,7 +6811,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Vaccines",
+      "Medicine",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-smallpox-eradication",
@@ -6139,7 +6837,13 @@
         "International"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Vaccines",
+      "Medicine",
+      "Russian",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-monoclonal-antibodies",
@@ -6160,7 +6864,11 @@
         "German-Argentine"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-oral-rehydration",
@@ -6181,7 +6889,11 @@
         "Bangladeshi-Indian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-cancer-chemotherapy",
@@ -6202,7 +6914,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-cardiac-catheterization",
@@ -6223,7 +6939,13 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Surgery",
+      "Medicine",
+      "German",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-moons-of-mars",
@@ -6244,7 +6966,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-jupiter-rings",
@@ -6265,7 +6991,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-neptune-rings",
@@ -6286,7 +7016,11 @@
         "French-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-io-volcanoes",
@@ -6307,7 +7041,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-titan",
@@ -6328,7 +7066,11 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "17th Century"
+    ]
   },
   {
     "id": "discovery-great-red-spot",
@@ -6349,7 +7091,11 @@
         "Italian-French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "17th Century"
+    ]
   },
   {
     "id": "discovery-sedna",
@@ -6370,7 +7116,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-borisov",
@@ -6391,7 +7141,11 @@
         "Crimean"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2010s"
+    ]
   },
   {
     "id": "discovery-pluto-atmosphere",
@@ -6412,7 +7166,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-water-ice-mars",
@@ -6433,7 +7191,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-moon-rocks",
@@ -6454,7 +7216,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-exomoon-candidate",
@@ -6475,7 +7241,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2010s"
+    ]
   },
   {
     "id": "discovery-radio-star",
@@ -6496,7 +7266,13 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Communications",
+      "Engineering",
+      "British",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-cygnus-a",
@@ -6517,7 +7293,11 @@
         "German-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-milky-way-spiral-arms",
@@ -6538,7 +7318,12 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Communications",
+      "Engineering",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-first-moon-photo",
@@ -6559,7 +7344,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-tiros",
@@ -6580,7 +7369,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Space",
+      "Engineering",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-telstar",
@@ -6601,7 +7395,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Space",
+      "Engineering",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-gps-satellite",
@@ -6622,7 +7421,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Space",
+      "Engineering",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-heliopause",
@@ -6643,7 +7447,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Space",
+      "Engineering",
+      "2010s"
+    ]
   },
   {
     "id": "discovery-gobekli-tepe",
@@ -6664,7 +7473,11 @@
         "Turkish"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-heracleion",
@@ -6685,7 +7498,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Egyptian",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-oseberg-ship",
@@ -6706,7 +7524,11 @@
         "Norwegian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-sutton-hoo",
@@ -6727,7 +7549,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-ishtar-gate",
@@ -6748,7 +7575,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-ashurbanipal-library",
@@ -6769,7 +7601,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-behistun",
@@ -6790,7 +7626,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Babylonian",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-hieroglyphs",
@@ -6811,7 +7652,12 @@
         "French"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "Egyptian",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-linear-b",
@@ -6832,7 +7678,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Greek",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-piri-reis",
@@ -6853,7 +7704,11 @@
         "Turkish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-turin-papyrus",
@@ -6874,7 +7729,12 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Egyptian",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-olmec-heads",
@@ -6895,7 +7755,11 @@
         "Mexican"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-cueva-de-las-manos",
@@ -6916,7 +7780,11 @@
         "Argentine"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-blombos-ochre",
@@ -6937,7 +7805,11 @@
         "South African"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-altamira",
@@ -6958,7 +7830,11 @@
         "Spanish"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-chauvet",
@@ -6979,7 +7855,12 @@
         "French"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-venus-willendorf",
@@ -7000,7 +7881,11 @@
         "Austrian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-lion-man",
@@ -7021,7 +7906,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-nebra-sky-disc",
@@ -7042,7 +7932,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-uluburun",
@@ -7063,7 +7957,11 @@
         "Turkish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-terracotta-army",
@@ -7084,7 +7982,11 @@
         "Chinese"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-dead-sea-scrolls",
@@ -7105,7 +8007,11 @@
         "Palestinian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-rosetta-stone",
@@ -7126,7 +8032,12 @@
         "Egyptian-French"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "Egyptian",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-antikythera",
@@ -7147,7 +8058,13 @@
         "Greek"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Radiology",
+      "Physics",
+      "Greek",
+      "1900s"
+    ]
   },
   {
     "id": "discovery-lascaux",
@@ -7168,7 +8085,11 @@
         "French"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1940s"
+    ]
   },
   {
     "id": "discovery-otzi",
@@ -7189,7 +8110,11 @@
         "Italian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-tutankhamun",
@@ -7210,7 +8135,11 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "1920s"
+    ]
   },
   {
     "id": "discovery-pompeii",
@@ -7231,7 +8160,12 @@
         "Italian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Science",
+      "Roman",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-vergina-tombs",
@@ -7252,7 +8186,12 @@
         "Greek"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Greek",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-big-bang-evidence",
@@ -10397,7 +11336,11 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "18th Century"
+    ]
   },
   {
     "id": "discovery-ceres",
@@ -10418,7 +11361,11 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-pluto",
@@ -10439,7 +11386,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "English",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-quasar-3c273",
@@ -10460,7 +11412,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Communications",
+      "Engineering",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-cygnus-x1",
@@ -10481,7 +11438,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-gamma-ray-bursts",
@@ -10502,7 +11463,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Nuclear",
+      "Physics",
+      "1960s"
+    ]
   },
   {
     "id": "discovery-kuiper-belt",
@@ -10523,7 +11489,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1990s"
+    ]
   },
   {
     "id": "discovery-uranus-rings",
@@ -10544,7 +11514,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-charon",
@@ -10565,7 +11539,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-tycho-supernova",
@@ -10586,7 +11564,11 @@
         "Danish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "16th Century"
+    ]
   },
   {
     "id": "discovery-kepler-supernova",
@@ -10607,7 +11589,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "17th Century"
+    ]
   },
   {
     "id": "discovery-sn1987a",
@@ -10628,7 +11614,11 @@
         "Astrophysics"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "1980s"
+    ]
   },
   {
     "id": "discovery-helium-on-sun",
@@ -10649,7 +11639,12 @@
         "19th Century"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Greek",
+      "19th Century"
+    ]
   },
   {
     "id": "discovery-neutrino-detection",
@@ -10670,7 +11665,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1950s"
+    ]
   },
   {
     "id": "discovery-positron",
@@ -10691,7 +11691,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-muon",
@@ -10712,7 +11717,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1930s"
+    ]
   },
   {
     "id": "discovery-tau-lepton",
@@ -10733,7 +11743,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Particle Physics",
+      "Physics",
+      "1970s"
+    ]
   },
   {
     "id": "discovery-sagittarius-a-star",
@@ -10754,7 +11769,11 @@
         "Astrophysics"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "2000s"
+    ]
   },
   {
     "id": "discovery-moon-far-side",
@@ -10775,6 +11794,11 @@
         "Soviet"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "Russian",
+      "1950s"
+    ]
   }
 ]

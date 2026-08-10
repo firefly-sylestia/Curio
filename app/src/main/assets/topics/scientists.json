@@ -812,7 +812,11 @@
       "targetName": "Erdős's papers in analytic number theory — e.g. with Kac \"On the number of prime factors of n\" (1940), or with Selberg the elementary proof of the prime number theorem (1949)",
       "durationMinutes": 60,
       "instruction": "Pick one of his 1,500+ papers. Read the abstract and the introduction. Notice the spare, direct style — no preamble, no apology. Erdős wrote like he talked: in proofs, not in prose. If you finish one, look for the \"Erdős number\" — your distance from him through co-authorship."
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "Hungarian"
+    ]
   },
   {
     "id": "scientist-chan-shih-ho",
@@ -2650,7 +2654,12 @@
         "Physics"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "Arab",
+      "Medieval"
+    ]
   },
   {
     "id": "scientist-avicenna",
@@ -2670,7 +2679,12 @@
         "Persian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "Persian",
+      "Medieval"
+    ]
   },
   {
     "id": "scientist-al-biruni",
@@ -2690,7 +2704,12 @@
         "Astronomy"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "Persian",
+      "Medieval"
+    ]
   },
   {
     "id": "scientist-al-khwarizmi",
@@ -2710,7 +2729,12 @@
         "Algebra"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "Persian",
+      "Medieval"
+    ]
   },
   {
     "id": "scientist-hero",
@@ -2730,7 +2754,12 @@
         "Greek"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Engineering",
+      "Greek",
+      "1st Century"
+    ]
   },
   {
     "id": "scientist-eratosthenes",
@@ -2750,7 +2779,12 @@
         "Greek"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Geography",
+      "Greek",
+      "3rd Century BCE"
+    ]
   },
   {
     "id": "scientist-democritus",
@@ -2770,7 +2804,12 @@
         "Greek"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Philosophy",
+      "Greek",
+      "Ancient"
+    ]
   },
   {
     "id": "scientist-pythagoras",
@@ -2790,7 +2829,12 @@
         "Greek"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "Greek",
+      "Ancient"
+    ]
   },
   {
     "id": "scientist-vesalius",
@@ -2810,7 +2854,12 @@
         "Flemish"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Medicine",
+      "Belgian",
+      "16th Century"
+    ]
   },
   {
     "id": "scientist-harvey",
@@ -2830,7 +2879,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Medicine",
+      "English",
+      "17th Century"
+    ]
   },
   {
     "id": "scientist-boyle",
@@ -2850,7 +2904,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Irish",
+      "17th Century"
+    ]
   },
   {
     "id": "scientist-huygens",
@@ -2870,7 +2929,12 @@
         "Dutch"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "Dutch",
+      "17th Century"
+    ]
   },
   {
     "id": "scientist-halley",
@@ -2890,7 +2954,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "English",
+      "17th-18th Century"
+    ]
   },
   {
     "id": "scientist-cavendish",
@@ -2910,7 +2979,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "English",
+      "18th Century"
+    ]
   },
   {
     "id": "scientist-volta",
@@ -2930,7 +3004,12 @@
         "Italian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "Italian",
+      "18th-19th Century"
+    ]
   },
   {
     "id": "scientist-ampere",
@@ -2950,7 +3029,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "French",
+      "18th-19th Century"
+    ]
   },
   {
     "id": "scientist-ohm",
@@ -2970,7 +3054,12 @@
         "German"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-dalton",
@@ -2990,7 +3079,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "English",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-avogadro",
@@ -3010,7 +3104,12 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Italian",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-berzelius",
@@ -3030,7 +3129,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Swedish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-liebig",
@@ -3050,7 +3154,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-kekule",
@@ -3070,7 +3179,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-arrhenius",
@@ -3090,7 +3204,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Swedish",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-born",
@@ -3110,7 +3229,12 @@
         "German-British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "German-British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-soddy",
@@ -3130,7 +3254,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-moseley",
@@ -3150,7 +3279,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "English",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-becquerel",
@@ -3170,7 +3304,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "French",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-thomson-plum",
@@ -3190,7 +3329,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "British",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-brahe-supernova",
@@ -3210,7 +3354,12 @@
         "Danish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "Danish",
+      "16th-17th Century"
+    ]
   },
   {
     "id": "scientist-herschel-galaxy",
@@ -3230,7 +3379,12 @@
         "German-British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "German",
+      "18th Century"
+    ]
   },
   {
     "id": "scientist-gibbs",
@@ -3250,7 +3404,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-clausius",
@@ -3270,7 +3429,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-carnot",
@@ -3290,7 +3454,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-mayer",
@@ -3310,7 +3479,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-helmholtz",
@@ -3330,7 +3504,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-vant-hoff",
@@ -3350,7 +3529,12 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Dutch",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-le-chatelier",
@@ -3370,7 +3554,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "French",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-haber",
@@ -3390,7 +3579,12 @@
         "German"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-bosch",
@@ -3410,7 +3604,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ostwald",
@@ -3430,7 +3629,12 @@
         "German-Latvian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-baeyer",
@@ -3450,7 +3654,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-emil-fischer",
@@ -3470,7 +3679,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-staudinger",
@@ -3490,7 +3704,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-carothers",
@@ -3510,7 +3729,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-kwolek",
@@ -3530,7 +3754,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-goodyear",
@@ -3550,7 +3779,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Engineering",
+      "American",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-alfred-nobel",
@@ -3570,7 +3804,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Swedish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-woodward",
@@ -3590,7 +3829,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-corey",
@@ -3610,7 +3854,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-djerassi",
@@ -3630,7 +3879,12 @@
         "Austrian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Austrian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-julian",
@@ -3650,7 +3904,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-sharpless",
@@ -3670,7 +3929,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-bohr-sommerfeld",
@@ -3690,7 +3954,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-bloch",
@@ -3710,7 +3979,12 @@
         "Swiss-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Swiss",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ramsey",
@@ -3730,7 +4004,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-maiman",
@@ -3750,7 +4029,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-bethe",
@@ -3770,7 +4054,12 @@
         "German-American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "German-American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-gamow",
@@ -3790,7 +4079,12 @@
         "Russian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Russian-American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-alpher",
@@ -3810,7 +4104,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-schawlow",
@@ -3830,7 +4129,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-townes",
@@ -3850,7 +4154,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-kroto",
@@ -3870,7 +4179,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-geim",
@@ -3890,7 +4204,12 @@
         "Dutch-Russian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "Dutch-Russian",
+      "2000s"
+    ]
   },
   {
     "id": "scientist-novoselov",
@@ -3910,7 +4229,12 @@
         "Russian-British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Russian-British",
+      "2000s"
+    ]
   },
   {
     "id": "scientist-onsager",
@@ -3930,7 +4254,12 @@
         "Norwegian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Norwegian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-debye",
@@ -3950,7 +4279,12 @@
         "Dutch-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "Dutch",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-uhlenbeck",
@@ -3970,7 +4304,12 @@
         "Dutch-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Dutch",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-rainwater",
@@ -3990,7 +4329,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-wilczek",
@@ -4010,7 +4354,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-gross",
@@ -4030,7 +4379,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-politzer",
@@ -4050,7 +4404,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-schleiden",
@@ -4070,7 +4429,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-brown-motion",
@@ -4090,7 +4454,12 @@
         "Scottish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "Scottish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-dubois",
@@ -4110,7 +4479,12 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Anthropology",
+      "Dutch",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-leakey",
@@ -4130,7 +4504,12 @@
         "British-Kenyan"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-johanson",
@@ -4150,7 +4529,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-broom",
@@ -4170,7 +4554,12 @@
         "Scottish-South African"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "Scottish",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-dart",
@@ -4190,7 +4579,12 @@
         "Australian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Medicine",
+      "Australian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-copeland",
@@ -4210,7 +4604,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-whittaker",
@@ -4230,7 +4629,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-lovelock",
@@ -4250,7 +4654,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Earth Science",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-elton",
@@ -4270,7 +4679,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Ecology",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-leopold",
@@ -4290,7 +4704,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Ecology",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-atanasoff",
@@ -4310,7 +4729,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ekert",
@@ -4330,7 +4754,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-mauchly",
@@ -4350,7 +4779,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-cray",
@@ -4370,7 +4804,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Engineering",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ritchie",
@@ -4390,7 +4829,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-wirth",
@@ -4410,7 +4854,12 @@
         "Swiss"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "Swiss",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-alexander-von-humboldt",
@@ -4424,7 +4873,12 @@
       "targetName": "Humboldt's Andean expedition route",
       "instruction": "Follow Humboldt's 1799–1804 route through Venezuela, Colombia, Ecuador, Peru, and Mexico on a map. At each stop, note one thing he measured or collected — altitude, temperature, species, or rocks.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-birute-galdikas",
@@ -4438,7 +4892,12 @@
       "targetName": "Bornean orangutan research",
       "instruction": "Read about Galdikas's Camp Leakey in Borneo. Compare how orangutan social life differs from chimpanzees and gorillas, and list two threats orangutans face from deforestation.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Lithuanian-Canadian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-john-muir",
@@ -4452,7 +4911,12 @@
       "targetName": "Muir's Sierra Nevada",
       "instruction": "Read a chapter of Muir's My First Summer in the Sierra or watch footage of Yosemite. Write three observations he made about glaciers, forests, or wildlife, and note why they mattered for conservation.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-norman-borlaug",
@@ -4466,7 +4930,12 @@
       "targetName": "Borlaug's dwarf wheat",
       "instruction": "Learn how Borlaug's semi-dwarf wheat varieties reshaped farming in Mexico, India, and Pakistan. Write what the Green Revolution achieved and two criticisms of its long-term effects.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-wangari-maathai",
@@ -4480,7 +4949,12 @@
       "targetName": "The Green Belt Movement",
       "instruction": "Research the Green Belt Movement's tree-planting campaigns in Kenya. Write how planting trees addressed both environmental damage and poverty, and find how many trees the movement has planted.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Kenyan",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-sylvia-earle",
@@ -4494,7 +4968,12 @@
       "targetName": "Sylvia Earle's ocean expeditions",
       "instruction": "Watch or read about Earle's Tektite underwater habitat mission and her Mission Blue initiative. Write three discoveries she made about ocean life and why she calls protected marine areas 'hope spots.'",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ernst-mayr",
@@ -4508,7 +4987,12 @@
       "targetName": "Mayr's biological species concept",
       "instruction": "Study Mayr's biological species concept — that species are groups that can interbreed. Find two examples of populations that split into new species through geographic isolation.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German-American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-george-gaylord-simpson",
@@ -4522,7 +5006,12 @@
       "targetName": "Simpson's evolutionary tempo",
       "instruction": "Learn about Simpson's work on horse evolution and his concepts of quantum evolution and bradytely. Write how the fossil record shows both slow and sudden bursts of change.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-clyde-tombaugh",
@@ -4536,7 +5025,12 @@
       "targetName": "Tombaugh's blink comparator",
       "instruction": "Learn how Tombaugh used a blink comparator to flip between two photographs and spot Pluto's motion. Write why Pluto was reclassified as a dwarf planet and where Tombaugh's ashes are today.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-annie-jump-cannon",
@@ -4550,7 +5044,12 @@
       "targetName": "Cannon's stellar classification",
       "instruction": "Learn the mnemonic 'Oh Be A Fine Girl, Kiss Me' for the stellar classes OBAFGKM. Write what each letter means in temperature and color, and how Cannon classified 350,000 stars without a computer.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-henrietta-swan-leavitt",
@@ -4564,7 +5063,12 @@
       "targetName": "Leavitt's Cepheid yardstick",
       "instruction": "Learn how Leavitt's law connects a Cepheid star's brightness to its pulse period. Write how Edwin Hubble used her work to prove galaxies are far away and the universe is expanding.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-hermann-oberth",
@@ -4578,7 +5082,12 @@
       "targetName": "Oberth's rocket equations",
       "instruction": "Learn about Oberth's contributions to rocket theory, including the Oberth effect — how burning fuel in a gravity well gives extra energy. Write one example of the Oberth effect used in real missions.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-tsiolkovsky-rocket",
@@ -4592,7 +5101,12 @@
       "targetName": "Tsiolkovsky's rocket equation",
       "instruction": "Learn the Tsiolkovsky rocket equation and what it means for how much fuel a rocket must carry. Write why his three-stage rocket idea solved the problem of reaching orbit.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-goddard-first-rocket",
@@ -4606,7 +5120,12 @@
       "targetName": "Goddard's first liquid rocket",
       "instruction": "Read about Goddard's 1926 launch of the first liquid-fueled rocket in Auburn, Massachusetts. Write how liquid fuel solved the problems of solid rockets and why Goddard's early work mattered to the Space Age.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-rudolf-virchow",
@@ -4620,7 +5139,12 @@
       "targetName": "Virchow's cellular pathology",
       "instruction": "Learn Virchow's principle that every cell comes from another cell and his founding of cellular pathology. Write how this idea changed the understanding of cancer and disease.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-sewall-wright",
@@ -4634,7 +5158,11 @@
       "targetName": "Wright's genetic drift",
       "instruction": "Learn how genetic drift randomly changes allele frequencies in small populations. Write how drift differs from natural selection and give one real example, such as the cheetah's low genetic diversity.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American"
+    ]
   },
   {
     "id": "scientist-ronald-fisher",
@@ -4648,7 +5176,12 @@
       "targetName": "Fisher's experimental design",
       "instruction": "Learn Fisher's principles of randomization and replication from his famous tea-tasting experiment. Write why controlled experiments need randomization and how his methods underpin modern clinical trials.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-jbs-haldane",
@@ -4662,7 +5195,12 @@
       "targetName": "Haldane's evolutionary math",
       "instruction": "Learn how Haldane calculated the cost of natural selection and the rate of gene spread. Write one of his famous essays, like 'On Being the Right Size,' and why his wit made science popular.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-theodosius-dobzhansky",
@@ -4676,7 +5214,12 @@
       "targetName": "Dobzhansky's modern synthesis",
       "instruction": "Learn how Dobzhansky's work on fruit fly populations helped create the modern evolutionary synthesis. Write how he showed that mutations and natural selection together drive speciation.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Ukrainian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ernst-haeckel",
@@ -4690,7 +5233,12 @@
       "targetName": "Haeckel's Kunstformen der Natur",
       "instruction": "Look through Haeckel's Art Forms in Nature illustrations and pick one plate, like a radiolarian or medusa. Write what the creature is and why his scientific art helped spread evolutionary ideas.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-niels-henrik-abel",
@@ -4704,7 +5252,12 @@
       "targetName": "Abel's impossibility theorem",
       "instruction": "Learn why fifth-degree polynomial equations have no general radical solution, as Abel proved. Write what the quadratic formula does for degree 2 and why degree 5 broke the pattern.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "Norwegian",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-georg-cantor",
@@ -4718,7 +5271,12 @@
       "targetName": "Cantor's infinities",
       "instruction": "Learn Cantor's diagonal argument that the real numbers outnumber the integers. Write what countable and uncountable infinity mean and how his ideas were rejected before being embraced.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-david-hilbert",
@@ -4732,7 +5290,12 @@
       "targetName": "Hilbert's 23 problems",
       "instruction": "List Hilbert's 23 problems and pick one that has been solved, like Fermat's Last Theorem (problem 10 or 9). Write who solved it and what it took.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-henri-poincare",
@@ -4746,7 +5309,12 @@
       "targetName": "Poincaré's chaos",
       "instruction": "Learn how Poincaré found chaos in the three-body problem and how his conjecture about spheres was finally proven in 2003. Write what chaos means in his work and how it appears in weather prediction.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-maryam-mirzakhani",
@@ -4760,7 +5328,12 @@
       "targetName": "Mirzakhani's hyperbolic surfaces",
       "instruction": "Learn what hyperbolic geometry is and how Mirzakhani counted the ways to slice a surface. Write why her work on 'the moduli space of Riemann surfaces' earned the Fields Medal in 2014.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "Iranian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-blaise-pascal",
@@ -4774,7 +5347,12 @@
       "targetName": "Pascal's calculator and triangle",
       "instruction": "Learn how Pascal's triangle organizes combinations and probability, and how his Pascaline calculator worked. Write how Pascal and Fermat resolved a dice problem and founded probability theory.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "17th Century"
+    ]
   },
   {
     "id": "scientist-caroline-herschel",
@@ -4788,7 +5366,12 @@
       "targetName": "Caroline Herschel's comets",
       "instruction": "Learn how Caroline Herschel discovered eight comets and was awarded the Gold Medal of the Royal Astronomical Society. Write how she helped her brother build his great telescope and why her work mattered.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "18th-19th Century"
+    ]
   },
   {
     "id": "scientist-ibn-al-haytham",
@@ -4802,7 +5385,12 @@
       "targetName": "Al-Haytham's optics",
       "instruction": "Learn how Ibn al-Haytham's experiments with pinholes and dark rooms proved how vision works. Write how his method of hypothesis, experiment, and proof resembles modern science.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Arab",
+      "Medieval"
+    ]
   },
   {
     "id": "scientist-aryabhata",
@@ -4816,7 +5404,12 @@
       "targetName": "Aryabhata's astronomy",
       "instruction": "Learn how Aryabhata calculated the Earth's circumference and the length of the year, and explained lunar and solar eclipses. Write how his place-value system and sine table advanced mathematics.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Indian",
+      "Ancient"
+    ]
   },
   {
     "id": "scientist-zhang-heng",
@@ -4830,7 +5423,12 @@
       "targetName": "Zhang Heng's seismoscope",
       "instruction": "Learn how Zhang Heng's 132 CE seismoscope detected distant earthquakes by dropping a ball from a dragon's mouth. Write how it worked and why it was the first instrument of its kind.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Chinese",
+      "2nd Century"
+    ]
   },
   {
     "id": "scientist-shen-kuo",
@@ -4844,7 +5442,12 @@
       "targetName": "Shen Kuo's Dream Pool Essays",
       "instruction": "Learn what Shen Kuo recorded in his Dream Pool Essays, from the compass to erosion and fossil seashells. Write three of his observations and how they anticipated later European discoveries.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Chinese",
+      "11th Century"
+    ]
   },
   {
     "id": "scientist-james-chadwick",
@@ -4858,7 +5461,12 @@
       "targetName": "Chadwick's neutron",
       "instruction": "Learn how Chadwick identified the neutron by firing particles at beryllium. Write why the neutron's lack of charge let it penetrate nuclei, making both fission and nuclear weapons possible.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-glenn-seaborg",
@@ -4872,7 +5480,12 @@
       "targetName": "Seaborg's transuranium elements",
       "instruction": "Learn how Seaborg produced plutonium in a cyclotron and how transuranium elements are made by neutron capture. Write about his actinide concept and why he has a living element named for him.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-melvin-calvin",
@@ -4886,7 +5499,12 @@
       "targetName": "The Calvin cycle",
       "instruction": "Learn the stages of the Calvin cycle: carbon fixation, reduction, and regeneration. Write how carbon-14 tracing let Calvin follow the path and why the cycle powers nearly all life.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-erwin-chargaff",
@@ -4900,7 +5518,12 @@
       "targetName": "Chargaff's rules",
       "instruction": "Learn Chargaff's discovery that in any DNA, adenine equals thymine and guanine equals cytosine. Write how these ratios pointed Watson and Crick to base pairing and the double helix.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-maurice-wilkins",
@@ -4914,7 +5537,12 @@
       "targetName": "Wilkins' DNA X-rays",
       "instruction": "Learn how X-ray crystallography images of DNA revealed its helical structure. Write what the X-shaped diffraction pattern shows and why the 1962 Nobel remains controversial.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-carl-woese",
@@ -4928,7 +5556,12 @@
       "targetName": "Woese's archaea",
       "instruction": "Learn how Woese's comparison of ribosomal RNA revealed archaea as a separate domain of life. Write one extreme environment where archaea live and why this changed the tree of life.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-sydney-brenner",
@@ -4942,7 +5575,12 @@
       "targetName": "Brenner's C. elegans",
       "instruction": "Learn why Brenner chose C. elegans and how his team traced every cell's fate and the first animal nervous system. Write how this tiny worm became a model for understanding human development and disease.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "South African",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-max-delbruck",
@@ -4956,7 +5594,12 @@
       "targetName": "The phage group",
       "instruction": "Learn how Delbrück and Salvador Luria's fluctuation test showed mutations arise randomly, not in response to challenge. Write how studying bacteriophages revealed the nature of genes.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German-American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-lev-landau",
@@ -4970,7 +5613,12 @@
       "targetName": "Landau's physics ladder",
       "instruction": "Learn how Landau explained superfluidity in liquid helium and why he ranked physicists on a logarithmic scale. Write what superfluidity is and one more of his contributions, like the Landau levels.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-abdus-salam",
@@ -4984,7 +5632,12 @@
       "targetName": "Salam's electroweak theory",
       "instruction": "Learn how Salam, Glashow, and Weinberg unified two of nature's four forces. Write what the W and Z bosons proved and how Salam's ICTP helped scientists from developing nations.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Pakistani",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-steven-weinberg",
@@ -4998,7 +5651,12 @@
       "targetName": "The first three minutes",
       "instruction": "Read about Weinberg's account of the universe's first three minutes, from quark soup to the formation of nuclei. Write the sequence of events and why the cosmic microwave background confirms it.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-alan-guth",
@@ -5012,7 +5670,12 @@
       "targetName": "Guth's cosmic inflation",
       "instruction": "Learn how inflation solves the flatness and horizon problems of the early universe. Write what 'cosmic inflation' means and how it explains the seeds of galaxies in the cosmic microwave background.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-andrei-sakharov",
@@ -5026,7 +5689,12 @@
       "targetName": "Sakharov's dissent",
       "instruction": "Learn how Sakharov moved from designing the Soviet H-bomb to opposing nuclear testing and defending human rights. Write why he is called the conscience of the nuclear age.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ignaz-semmelweis",
@@ -5040,7 +5708,12 @@
       "targetName": "Semmelweis' handwashing",
       "instruction": "Learn how Semmelweis noticed that doctors who dissected corpses then delivered babies spread childbed fever. Write why his chlorine handwash worked and why his colleagues rejected him.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Hungarian",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-paul-ehrlich",
@@ -5054,7 +5727,12 @@
       "targetName": "Ehrlich's magic bullet",
       "instruction": "Learn how Ehrlich screened hundreds of compounds to find Salvarsan, compound 606. Write what the 'magic bullet' idea means and how it led to modern targeted chemotherapy.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-john-snow",
@@ -5068,7 +5746,12 @@
       "targetName": "Snow's cholera map",
       "instruction": "Learn how Snow plotted the 1854 Broad Street cholera cases and traced them to one pump. Write how his map, dot by dot, proved waterborne transmission and founded epidemiology.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-james-hutton",
@@ -5082,7 +5765,12 @@
       "targetName": "Hutton's unconformity at Siccar Point",
       "instruction": "Learn about Siccar Point, where Hutton saw tilted ancient rocks capped by younger horizontal layers. Write what an unconformity proves and how 'deep time' changed our sense of Earth's age.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "18th Century"
+    ]
   },
   {
     "id": "scientist-charles-lyell",
@@ -5096,7 +5784,12 @@
       "targetName": "Lyell's uniformitarianism",
       "instruction": "Learn Lyell's principle that 'the present is the key to the past.' Write one landscape feature, like a river valley, explained by slow forces and why Lyell's deep time made evolution plausible.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-alfred-wegener",
@@ -5110,7 +5803,12 @@
       "targetName": "Wegener's supercontinent Pangaea",
       "instruction": "Learn the evidence Wegener marshaled: matching coastlines, fossils, and glacial striations. Write why geologists rejected his mechanism and how seafloor spreading finally proved him right.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-marie-tharp",
@@ -5124,7 +5822,12 @@
       "targetName": "Tharp's ocean floor maps",
       "instruction": "Learn how Tharp turned echo-sounder depth data into the first maps of the seafloor. Write how the rift valley down the mid-Atlantic ridge revealed where new crust is born.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-inge-lehmann",
@@ -5138,7 +5841,12 @@
       "targetName": "Lehmann's inner core",
       "instruction": "Learn how Lehmann used earthquake P-wave shadows to deduce a solid inner core. Write the evidence — waves that should not arrive but did — and how her discovery revised the Earth's structure.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Danish",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-harry-hess",
@@ -5152,7 +5860,12 @@
       "targetName": "Hess's seafloor spreading",
       "instruction": "Learn how Hess realized the ocean floor is young, spreading outward from mid-ocean ridges. Write how magnetic stripes on the seafloor, added later, confirmed his hypothesis and dated the spreading.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-john-tuzo-wilson",
@@ -5166,7 +5879,12 @@
       "targetName": "Wilson's plate tectonics",
       "instruction": "Learn how Wilson combined continental drift and seafloor spreading into plate tectonics. Write what a transform fault is and how the Hawaiian hot spot reveals a plate moving over a fixed plume.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Canadian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-milutin-milankovic",
@@ -5180,7 +5898,12 @@
       "targetName": "Milanković cycles",
       "instruction": "Learn the three Milanković cycles: eccentricity, obliquity, and precession, and how they alter sunlight. Write how these cycles pace ice ages and how ocean sediments confirmed them.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Serbian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-edward-lorenz",
@@ -5194,7 +5917,12 @@
       "targetName": "Lorenz's butterfly effect",
       "instruction": "Learn how Lorenz found sensitive dependence on initial conditions in his weather model. Write what the butterfly effect means, why forecasts degrade after about ten days, and how chaos differs from randomness.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-wilhelm-wundt",
@@ -5208,7 +5936,12 @@
       "targetName": "Wundt's first lab",
       "instruction": "Learn about Wundt's Leipzig laboratory and his method of introspection. Write one experiment he ran, like reaction time or attention, and why the lab marks psychology's birthday.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-william-james",
@@ -5222,7 +5955,12 @@
       "targetName": "James's stream of consciousness",
       "instruction": "Read a chapter of James's Principles of Psychology on habit or the stream of thought. Write his argument about habit as 'the enormous flywheel of society' and why he matters to modern psychology.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-ivan-pavlov",
@@ -5236,7 +5974,12 @@
       "targetName": "Pavlov's dogs",
       "instruction": "Learn how Pavlov paired a bell with food until the bell alone made dogs salivate. Write the steps of classical conditioning and give one modern example, from ads to alarms.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-elizabeth-loftus",
@@ -5250,7 +5993,12 @@
       "targetName": "Loftus's false memory research",
       "instruction": "Learn Loftus's experiments with the 'lost in the mall' technique and misleading post-event information. Write how eyewitness memory can be distorted and what courts now do about it.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-abraham-maslow",
@@ -5264,7 +6012,12 @@
       "targetName": "Maslow's hierarchy of needs",
       "instruction": "Learn the five levels of Maslow's hierarchy and the idea of self-actualization. Write how each level builds on the last and find one real-world critique of the strict pyramid order.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-charles-babbage",
@@ -5278,7 +6031,12 @@
       "targetName": "Babbage's Analytical Engine",
       "instruction": "Learn how the Analytical Engine separated memory from the 'mill' (CPU) and was programmed with punched cards. Write how Ada Lovelace imagined it could compose music, and why it was never built.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-konrad-zuse",
@@ -5292,7 +6050,12 @@
       "targetName": "Zuse's Z3",
       "instruction": "Learn how Zuse built the Z3 from relays and punched tape, performing floating-point arithmetic automatically. Write why it counts as the first programmable computer and how wartime secrecy buried it.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-john-mccarthy",
@@ -5306,7 +6069,12 @@
       "targetName": "McCarthy's Dartmouth workshop",
       "instruction": "Learn about the 1956 Dartmouth Summer Research Project that launched AI. Write what the founders hoped machines could do and how Lisp, which McCarthy created, shaped AI research for decades.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-edsger-dijkstra",
@@ -5320,7 +6088,12 @@
       "targetName": "Dijkstra's algorithm",
       "instruction": "Learn Dijkstra's algorithm for finding the shortest path in a graph. Write how it works step by step on a small map and why his 'Go To Statement Considered Harmful' letter changed programming.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Dutch",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-barbara-liskov",
@@ -5334,7 +6107,12 @@
       "targetName": "Liskov's substitution principle",
       "instruction": "Learn the Liskov substitution principle: a subclass should stand in for its parent without breaking behavior. Write a small example of when substituting breaks a program and why she earned the Turing Award.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-george-washington-carver",
@@ -5348,7 +6126,12 @@
       "targetName": "Carver's crop rotation",
       "instruction": "Learn how Carver promoted crop rotation with nitrogen-fixing legumes to restore cotton-drained soil. Write about his peanut research at Tuskegee and how his work helped poor farmers.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-luther-burbank",
@@ -5362,7 +6145,12 @@
       "targetName": "Burbank's plant breeding",
       "instruction": "Learn how Burbank crossed and selected plants to create new varieties. Write about two of his creations, like the plumcot or the Shasta daisy, and how his methods foreshadowed modern breeding.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-nikolai-vavilov",
@@ -5376,7 +6164,12 @@
       "targetName": "Vavilov's seed collection",
       "instruction": "Learn how Vavilov's expeditions built the world's greatest seed bank and mapped centers of crop origin. Write why he defied Lysenko's rejection of genetics and what happened to him.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-eugene-odum",
@@ -5390,7 +6183,12 @@
       "targetName": "Odum's ecosystem concept",
       "instruction": "Learn how Odum defined an ecosystem as organisms plus their environment exchanging energy and matter. Write about energy flow and nutrient cycling, and why his textbook shaped environmental science.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-arthur-tansley",
@@ -5404,7 +6202,12 @@
       "targetName": "Tansley's ecosystem term",
       "instruction": "Learn why Tansley coined 'ecosystem' and what he meant by it. Write how his systems view differs from simply listing species, and give one example of an ecosystem in balance and disturbance.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-karl-von-frisch",
@@ -5418,7 +6221,12 @@
       "targetName": "The honeybee waggle dance",
       "instruction": "Learn how von Frisch deciphered the waggle dance's angle and duration as a coded map to food. Write how bees communicate distance and direction, and how scientists confirmed the dance.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-konrad-lorenz",
@@ -5432,7 +6240,12 @@
       "targetName": "Lorenz's imprinting",
       "instruction": "Learn how Lorenz showed that goslings follow the first moving thing they see after hatching. Write what imprinting is, its critical period, and why his work founded the study of instinct.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-john-tyndall",
@@ -5446,7 +6259,12 @@
       "targetName": "Tyndall's greenhouse gases",
       "instruction": "Learn how Tyndall showed that water vapor and carbon dioxide absorb infrared heat. Write why the sky is blue via Tyndall scattering and why his 1859 experiments matter to climate science today.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Irish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-george-de-hevesy",
@@ -5460,7 +6278,12 @@
       "targetName": "Hevesy's radioactive tracers",
       "instruction": "Learn how Hevesy used radioactive isotopes as tracers in biology and chemistry. Write how tracer experiments revealed metabolic pathways and how he discovered the element hafnium.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Hungarian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-emil-von-behring",
@@ -5474,7 +6297,12 @@
       "targetName": "Behring's diphtheria antitoxin",
       "instruction": "Learn how Behring and Kitasato developed antitoxin therapy against diphtheria and tetanus. Write how passive immunization works and why his serum treatment saved thousands of children.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-selman-waksman",
@@ -5488,7 +6316,12 @@
       "targetName": "Waksman's soil antibiotics",
       "instruction": "Learn how Waksman's systematic search of soil microbes yielded streptomycin against TB. Write how actinomycetes produce antibiotics and why his discovery transformed treatment of the 'white plague.'",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-howard-florey",
@@ -5502,7 +6335,12 @@
       "targetName": "Florey's penicillin push",
       "instruction": "Learn how Florey's Oxford team purified and mass-produced penicillin during WWII. Write the steps from Fleming's mold to the wonder drug, and why Florey's work saved more lives than the bomb took.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Australian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-walter-reed",
@@ -5516,7 +6354,12 @@
       "targetName": "Reed's yellow fever experiment",
       "instruction": "Learn how Reed's carefully designed experiments in Cuba incriminated the Aedes mosquito. Write how his use of consenting volunteers and quarantine huts proved transmission beyond doubt.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-alexander-yersin",
@@ -5530,7 +6373,12 @@
       "targetName": "Yersin's plague bacillus",
       "instruction": "Learn how Yersin, working with a simple microscope in Hong Kong, identified the plague bacterium. Write how it spreads from rats via fleas and why his discovery made diagnosis and control possible.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-ronald-ross",
@@ -5544,7 +6392,12 @@
       "targetName": "Ross's malaria mosquito",
       "instruction": "Learn how Ross found malaria parasites inside Anopheles mosquitoes and proved the transmission cycle. Write the full cycle from mosquito to human and back, and why his finding made malaria control possible.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-charles-nicolle",
@@ -5558,7 +6411,12 @@
       "targetName": "Nicolle's typhus discovery",
       "instruction": "Learn how Nicolle deduced that typhus spreads through body lice by observing hospital admissions. Write how delousing camps and the later DDT campaigns used his insight to stop typhus epidemics.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-virginia-apgar",
@@ -5572,7 +6430,12 @@
       "targetName": "The Apgar score",
       "instruction": "Learn the five Apgar criteria — Appearance, Pulse, Grimace, Activity, Respiration — each scored 0-2. Write what each checks and why assessing a newborn at 1 and 5 minutes is so valuable.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-charles-drew",
@@ -5586,7 +6449,12 @@
       "targetName": "Drew's blood plasma",
       "instruction": "Learn how Drew found that plasma could be separated, dried, and safely transported. Write how his blood bank methods transformed surgery and wartime medicine, and the discrimination he faced.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-joule",
@@ -5606,7 +6474,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "English",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-orsted",
@@ -5626,7 +6499,12 @@
         "Danish"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Physics",
+      "Danish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-millikan",
@@ -5646,7 +6524,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "1900s"
+    ]
   },
   {
     "id": "scientist-de-broglie",
@@ -5666,7 +6549,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "French",
+      "1920s"
+    ]
   },
   {
     "id": "scientist-schwinger",
@@ -5686,7 +6574,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-tomonaga",
@@ -5706,7 +6599,12 @@
         "Japanese"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Japanese",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-glashow",
@@ -5726,7 +6624,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-higgs",
@@ -5746,7 +6649,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "British",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-englert",
@@ -5766,7 +6674,12 @@
         "Belgian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Belgian",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-yukawa",
@@ -5786,7 +6699,12 @@
         "Japanese"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Japanese",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-penzias",
@@ -5806,7 +6724,12 @@
         "German-American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-robert-wilson",
@@ -5826,7 +6749,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-hoyle",
@@ -5846,7 +6774,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-shapley",
@@ -5866,7 +6799,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1920s"
+    ]
   },
   {
     "id": "scientist-payne-gaposchkin",
@@ -5886,7 +6824,12 @@
         "British-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "British",
+      "1920s"
+    ]
   },
   {
     "id": "scientist-james-watt",
@@ -5900,7 +6843,12 @@
       "targetName": "Watt's steam engine",
       "instruction": "Learn why Watt's separate condenser made steam engines dramatically more efficient than Newcomen's. Write how the watt measures power and how his engine powered mills, mines, and locomotives.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "18th Century"
+    ]
   },
   {
     "id": "scientist-george-stephenson",
@@ -5914,7 +6862,12 @@
       "targetName": "Stephenson's Rocket",
       "instruction": "Learn how Stephenson's Rocket combined a multi-tube boiler with a blast pipe to win the Rainhill Trials. Write why his gauge of 4 ft 8½ in became the world standard.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-richard-trevithick",
@@ -5928,7 +6881,11 @@
       "targetName": "Trevithick's high-pressure engine",
       "instruction": "Learn how Trevithick's use of high-pressure steam allowed engines small enough to move. Write about his 1804 Penydarren locomotive and why high pressure was considered dangerous.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-isambard-kingdom-brunel",
@@ -5942,7 +6899,12 @@
       "targetName": "Brunel's engineering wonders",
       "instruction": "Learn about Brunel's Thames Tunnel, Box Tunnel, and the steamship Great Eastern. Write why he was called the greatest engineer of his age and one risk he took that nearly killed him.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-nikola-tesla",
@@ -5956,7 +6918,12 @@
       "targetName": "Tesla's AC system",
       "instruction": "Learn why alternating current won the 'War of the Currents' against Edison's direct current. Write how Tesla's induction motor and polyphase system made long-distance power possible.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Serbian-American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-guglielmo-marconi",
@@ -5970,7 +6937,12 @@
       "targetName": "Marconi's transatlantic signal",
       "instruction": "Learn how Marconi transmitted the letter 'S' across the Atlantic from Cornwall to Newfoundland. Write how spark-gap transmitters worked and why the achievement was doubted at first.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-samuel-morse",
@@ -5984,7 +6956,12 @@
       "targetName": "Morse code",
       "instruction": "Learn Morse code and why he assigned shorter codes to frequent letters like E and T. Write your own name in Morse and explain how the telegraph relay extended signals across continents.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-alexander-graham-bell",
@@ -5998,7 +6975,12 @@
       "targetName": "Bell's telephone",
       "instruction": "Learn how Bell's telephone converted sound vibrations into electric current and back. Write about the famous first call and why Bell's work with the deaf shaped his approach to sound.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-thomas-edison",
@@ -6012,7 +6994,12 @@
       "targetName": "Edison's inventions",
       "instruction": "Learn how Edison's team tested thousands of materials for the light bulb filament and built the first central power station. Write about the phonograph and why Edison's Menlo Park lab mattered.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-philo-farnsworth",
@@ -6026,7 +7013,12 @@
       "targetName": "Farnsworth's television",
       "instruction": "Learn how Farnsworth's image dissector scanned a picture line by line to transmit it electronically. Write why his all-electronic system beat mechanical television and how RCA tried to claim it.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-lee-de-forest",
@@ -6040,7 +7032,12 @@
       "targetName": "de Forest's Audion tube",
       "instruction": "Learn how the Audion's third grid let a weak signal control a strong current, amplifying radio waves. Write how vacuum tubes powered radios, telephones, and computers before transistors.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-john-logie-baird",
@@ -6054,7 +7051,12 @@
       "targetName": "Baird's mechanical TV",
       "instruction": "Learn how Baird's Nipkow disc scanned a scene with a spiral of holes to produce an image. Write how his 1926 demonstration worked and why electronic television replaced the mechanical method.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-percy-spencer",
@@ -6068,7 +7070,12 @@
       "targetName": "Spencer's radar range",
       "instruction": "Learn how Spencer tested popcorn and an egg in front of a magnetron, inventing microwave cooking. Write how microwaves heat food by vibrating water molecules and how his discovery was commercialized.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-edwin-armstrong",
@@ -6082,7 +7089,12 @@
       "targetName": "Armstrong's FM radio",
       "instruction": "Learn how frequency modulation encodes sound by varying the frequency, not the amplitude, of a wave. Write why FM resists static and why Armstrong's invention was slow to be adopted.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-charles-kao",
@@ -6096,7 +7108,12 @@
       "targetName": "Kao's fiber optics",
       "instruction": "Learn how Kao showed that impurities, not glass itself, limited light transmission in fibers. Write how fiber optics carry data as pulses of light and why his 1966 paper started the communications revolution.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Chinese",
+      "2000s"
+    ]
   },
   {
     "id": "scientist-dennis-gabor",
@@ -6110,7 +7127,12 @@
       "targetName": "Gabor's holography",
       "instruction": "Learn how holograms record both the intensity and phase of light waves, unlike photographs. Write how lasers made Gabor's idea practical and list two modern uses of holography.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Hungarian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-rudolf-diesel",
@@ -6124,7 +7146,12 @@
       "targetName": "Diesel's compression engine",
       "instruction": "Learn how the diesel engine compresses air until it is hot enough to ignite fuel. Write why diesel engines are more efficient than gasoline engines and how Diesel's engine was first demonstrated.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-joseph-henry",
@@ -6138,7 +7165,12 @@
       "targetName": "Henry's electromagnets",
       "instruction": "Learn how Henry wound insulated wire into powerful electromagnets and discovered mutual and self-inductance. Write how his discoveries underpin transformers, motors, and generators.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-ernst-mach",
@@ -6152,7 +7184,12 @@
       "targetName": "Mach number and shock waves",
       "instruction": "Learn what Mach 1 means and how Mach photographed shock waves around supersonic bullets. Write what causes a sonic boom and how his philosophy of science influenced Einstein.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-ludwig-boltzmann",
@@ -6166,7 +7203,12 @@
       "targetName": "Boltzmann's entropy",
       "instruction": "Learn how Boltzmann linked entropy to the number of microscopic arrangements of atoms. Write why the universe tends toward disorder and how his statistical view was finally vindicated.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-satyendra-nath-bose",
@@ -6180,7 +7222,12 @@
       "targetName": "Bose–Einstein statistics",
       "instruction": "Learn how Bose counted photons differently, letting them share the same quantum state. Write what a Bose–Einstein condensate is and why particles that obey his statistics are named bosons.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Indian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-cv-raman",
@@ -6194,7 +7241,12 @@
       "targetName": "The Raman effect",
       "instruction": "Learn how Raman, working with simple equipment and sunlight, found inelastic scattering of light by molecules. Write how Raman spectroscopy fingerprints molecules today, from drugs to art.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Indian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-meghnad-saha",
@@ -6208,7 +7260,12 @@
       "targetName": "The Saha equation",
       "instruction": "Learn how the Saha equation connects temperature to the ionization of atoms in stellar atmospheres. Write how it let Cecilia Payne and others decode what stars are made of.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Indian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-emilio-segre",
@@ -6222,7 +7279,12 @@
       "targetName": "Segrè's antiproton",
       "instruction": "Learn how Segrè and Chamberlain found the antiproton at Berkeley's Bevatron in 1955. Write why antimatter must exist as a mirror image of matter and how it annihilates on contact.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-luis-alvarez",
@@ -6236,7 +7298,12 @@
       "targetName": "The Alvarez asteroid theory",
       "instruction": "Learn how the Alvarez team found iridium in the Cretaceous–Paleogene boundary layer. Write how the Chicxulub crater confirmed the impact and what the extinction event tells us about planetary danger.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ernest-lawrence",
@@ -6250,7 +7317,12 @@
       "targetName": "Lawrence's cyclotron",
       "instruction": "Learn how the cyclotron accelerates particles in expanding spiral orbits using magnetic and electric fields. Write how it enabled the discovery of new elements and why it earned Lawrence the 1939 Nobel.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-leo-szilard",
@@ -6264,7 +7336,12 @@
       "targetName": "Szilard's chain reaction",
       "instruction": "Learn how Szilard realized that neutron emission from fission could sustain a chain reaction. Write how the Einstein–Szilard letter led to the Manhattan Project and how Szilard campaigned to stop the bomb's use.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Hungarian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-eugene-wigner",
@@ -6278,7 +7355,12 @@
       "targetName": "Wigner's symmetry principles",
       "instruction": "Learn how Wigner used group theory to classify particles and symmetries in quantum mechanics. Write what his phrase about mathematics' unreasonable effectiveness means and how symmetry guides modern physics.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Hungarian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-john-wheeler",
@@ -6292,7 +7374,12 @@
       "targetName": "Wheeler's black holes",
       "instruction": "Learn how Wheeler coined 'black hole' in 1967 and explored the idea's consequences with his students. Write what a black hole is and why 'it from bit' was his famous slogan about information.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-david-bohm",
@@ -6306,7 +7393,12 @@
       "targetName": "Bohm's hidden variables",
       "instruction": "Learn how Bohm's interpretation keeps particles with definite positions, guided by a quantum wave. Write how it differs from standard quantum mechanics and why it was long dismissed.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-alice-ball",
@@ -6320,7 +7412,12 @@
       "targetName": "Ball's leprosy treatment",
       "instruction": "Learn how Alice Ball made chaulmoogra oil's active esters water-soluble for injection. Write why the disease was feared, how her method transformed treatment, and how her credit was restored.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-esther-lederberg",
@@ -6334,7 +7431,12 @@
       "targetName": "Lederberg's replica plating",
       "instruction": "Learn how Esther Lederberg invented replica plating with velvet, transferring colonies between plates. Write what lambda phage is and how it became a model for understanding gene switching.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-gladys-west",
@@ -6348,7 +7450,12 @@
       "targetName": "West's GPS mathematics",
       "instruction": "Learn how Gladys West processed satellite data to model the Earth's geoid precisely. Write how GPS uses satellites and time to fix your position and why her calculations were essential.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-yvonne-brill",
@@ -6362,7 +7469,12 @@
       "targetName": "Brill's hydrazine thruster",
       "instruction": "Learn how Brill's thruster used electrical heat to double the efficiency of hydrazine fuel for satellite station-keeping. Write why this invention extended satellite lifetimes and how she broke into aerospace.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-williamina-fleming",
@@ -6376,7 +7488,12 @@
       "targetName": "Fleming's stellar spectra",
       "instruction": "Learn how Fleming developed a letter scheme for stellar spectra while cataloging the sky at Harvard. Write what the Horsehead Nebula is and how the Harvard Computers advanced astronomy.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Scottish",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-ruby-payne-scott",
@@ -6390,7 +7507,12 @@
       "targetName": "Payne-Scott's solar radio",
       "instruction": "Learn how Payne-Scott used a cliff-top antenna to detect radio bursts from the Sun. Write what solar radio emission tells us about the Sun's activity and why she is a pioneer of radio astronomy.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Australian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-katharine-burr-blodgett",
@@ -6404,7 +7526,12 @@
       "targetName": "Blodgett's non-reflective glass",
       "instruction": "Learn how Blodgett built up molecular layers of soap film to make glass transmit light without reflection. Write how her 'invisible glass' improved optics and why her Langmuir–Blodgett films matter in labs today.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-edith-clarke",
@@ -6418,7 +7545,12 @@
       "targetName": "Clarke's power calculations",
       "instruction": "Learn how Edith Clarke's calculator and her 1943 textbook simplified power transmission analysis. Write why her work on long-distance power lines mattered as grids grew across America.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-hedy-lamarr",
@@ -6432,7 +7564,12 @@
       "targetName": "Lamarr's frequency hopping",
       "instruction": "Learn how Lamarr and Antheil's 1942 patent used 88 piano-like channels to hop radio frequencies. Write how spread spectrum makes Wi-Fi and Bluetooth robust and why her contribution was recognized late.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-francois-jacob",
@@ -6446,7 +7583,12 @@
       "targetName": "Jacob and Monod's operon",
       "instruction": "Learn how the lac operon controls lactose metabolism in E. coli, with repressors and inducers. Write how gene regulation works and why this model transformed molecular biology.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-jacques-monod",
@@ -6460,7 +7602,11 @@
       "targetName": "Monod's messenger RNA",
       "instruction": "Learn how Monod and Jacob discovered that a messenger molecule carries genetic instructions from DNA to the ribosome. Write how messenger RNA works and why it connects DNA to proteins.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "French"
+    ]
   },
   {
     "id": "scientist-howard-temin",
@@ -6474,7 +7620,12 @@
       "targetName": "Temin's reverse transcriptase",
       "instruction": "Learn how Temin discovered that RNA tumor viruses use reverse transcriptase to write their genes into host DNA. Write why this overturned the central dogma and how it guides HIV treatment today.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-craig-venter",
@@ -6488,7 +7639,12 @@
       "targetName": "Venter's genome race",
       "instruction": "Learn how Venter's shotgun sequencing approach read the human genome faster than the public project. Write what his synthetic bacterium experiment achieved and how genomics is changing medicine.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-francis-collins",
@@ -6502,7 +7658,12 @@
       "targetName": "Collins's Human Genome Project",
       "instruction": "Learn how Collins's international consortium finished sequencing the human genome in 2003. Write what we learned from the 3 billion base pairs and how genomics now guides precision medicine.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-paul-berg",
@@ -6516,7 +7677,12 @@
       "targetName": "Berg's recombinant DNA",
       "instruction": "Learn how Berg joined a monkey virus's DNA to a bacterial plasmid in 1972. Write what recombinant DNA enabled, why scientists paused voluntarily at Asilomar, and how biotechnology grew from that moment.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-walter-gilbert",
@@ -6530,7 +7696,12 @@
       "targetName": "Gilbert's DNA sequencing",
       "instruction": "Learn how Gilbert's chemical cleavage method read DNA sequences in the 1970s. Write what introns are and how the 'RNA world' hypothesis explains how life began.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-ernst-chain",
@@ -6544,7 +7715,12 @@
       "targetName": "Chain's penicillin",
       "instruction": "Learn how Chain isolated and characterized penicillin at Oxford while bombs fell on London. Write the steps from mold broth to purified drug and why it was the first true antibiotic.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German-British",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-claude-bernard",
@@ -6558,7 +7734,12 @@
       "targetName": "Bernard's internal environment",
       "instruction": "Learn how Bernard discovered the liver stores sugar and coined the internal environment concept. Write what homeostasis is, with one example like body temperature, and why Bernard founded experimental medicine.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "French",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-walter-cannon",
@@ -6572,7 +7753,12 @@
       "targetName": "Cannon's fight or flight",
       "instruction": "Learn how Cannon mapped the adrenal and sympathetic responses that prime the body for danger. Write how homeostasis maintains stability and give two examples of the body correcting itself.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "20th Century"
+    ]
   },
   {
     "id": "scientist-william-osler",
@@ -6586,7 +7772,12 @@
       "targetName": "Osler's clinical teaching",
       "instruction": "Learn how Osler created the clinical clerkship and made the patient the textbook. Write why listening and observation were his cardinal rules and how his approach shaped modern medical education.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Canadian",
+      "19th-20th Century"
+    ]
   },
   {
     "id": "scientist-elizabeth-blackwell",
@@ -6600,7 +7791,11 @@
       "targetName": "Blackwell's medical degree",
       "instruction": "Learn how Blackwell won admission to Geneva Medical College and later founded the New York Infirmary. Write the obstacles she faced and how she advanced medicine for women and public health.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English"
+    ]
   },
   {
     "id": "scientist-christiaan-barnard",
@@ -6614,7 +7809,11 @@
       "targetName": "Barnard's first heart transplant",
       "instruction": "Learn how Barnard's team transplanted a donor heart into Louis Washkansky in 1967. Write the surgical challenges, the ethical questions the case raised, and how transplants have evolved since.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-willem-kolff",
@@ -6628,7 +7827,11 @@
       "targetName": "Kolff's artificial kidney",
       "instruction": "Learn how Kolff's rotating-drum dialyzer cleaned blood outside the body in 1943. Write what dialysis does and how his artificial organs work saved and extended countless lives.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Dutch"
+    ]
   },
   {
     "id": "scientist-karl-landsteiner",
@@ -6642,7 +7845,12 @@
       "targetName": "Landsteiner's blood groups",
       "instruction": "Learn how Landsteiner identified the A, B, and O blood types and why mismatched transfusions clump. Write how ABO compatibility works, why type O is the universal donor, and what the Rh factor is.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Austrian",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-godfrey-hounsfield",
@@ -6656,7 +7864,12 @@
       "targetName": "Hounsfield's CT scanner",
       "instruction": "Learn how Hounsfield's EMI scanner combined X-ray measurements with computer reconstruction. Write how CT imaging builds 3D views from many angles and why it transformed diagnosis.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-jacques-cousteau",
@@ -6670,7 +7883,11 @@
       "targetName": "Cousteau's Calypso expeditions",
       "instruction": "Learn how Cousteau's self-contained breathing apparatus let divers swim free underwater. Write about one of his Calypso discoveries and how his films turned ocean conservation into a global cause.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "French"
+    ]
   },
   {
     "id": "scientist-robert-ballard",
@@ -6684,7 +7901,12 @@
       "targetName": "Ballard's hydrothermal vents",
       "instruction": "Learn how Ballard's team found Titanic and later explored the mid-ocean ridge. Write what hydrothermal vents are, how tube worms and other life survive on chemicals there, and why the discovery changed biology.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1980s"
+    ]
   },
   {
     "id": "scientist-fridtjof-nansen",
@@ -6698,7 +7920,11 @@
       "targetName": "Nansen's Fram expedition",
       "instruction": "Learn how Nansen deliberately froze the Fram into pack ice for three years to study Arctic currents. Write what the expedition revealed about the polar ocean and why he became the League of Nations' refugee commissioner.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Norwegian"
+    ]
   },
   {
     "id": "scientist-ernest-shackleton",
@@ -6712,7 +7938,12 @@
       "targetName": "Shackleton's Endurance",
       "instruction": "Learn how Shackleton saved his crew after the Endurance sank, sailing 800 miles in a lifeboat and crossing South Georgia on foot. Write the stages of the rescue and why his leadership is legendary.",
       "durationMinutes": 25
-    }
+    },
+    "tags": [
+      "Science",
+      "Irish",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-joseph-banks",
@@ -6726,7 +7957,11 @@
       "targetName": "Banks's Endeavour voyage",
       "instruction": "Learn how Banks documented the flora of Tahiti, New Zealand, and Australia on Cook's first voyage. Write about one discovery, like the eucalyptus or kangaroo, and how his collections changed botany.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English"
+    ]
   },
   {
     "id": "scientist-mary-sherman-morgan",
@@ -6740,7 +7975,12 @@
       "targetName": "Morgan's hydyne fuel",
       "instruction": "Learn how Mary Sherman Morgan developed hydyne to give the Jupiter-C rocket enough thrust for Explorer 1. Write what rocket fuel must do and why her achievement stayed hidden for decades.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-annibale-fantoli",
@@ -6754,7 +7994,11 @@
       "targetName": "de Gasparis's asteroid finds",
       "instruction": "Learn how de Gasparis discovered nine main-belt asteroids from Naples in the mid-1800s. Write what asteroids are, where the main belt lies, and why 19th-century astronomers hunted them.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian"
+    ]
   },
   {
     "id": "scientist-robert-hutchings-goddard-grad",
@@ -6768,7 +8012,11 @@
       "targetName": "Adams's Neptune prediction",
       "instruction": "Learn how Adams and Le Verrier independently used Uranus's wobbles to predict Neptune's location. Write how the discovery was confirmed by telescope in 1846 and how the two men shared the credit.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English"
+    ]
   },
   {
     "id": "scientist-karl-schwarzschild",
@@ -6782,7 +8030,12 @@
       "targetName": "Schwarzschild's black hole solution",
       "instruction": "Learn how Schwarzschild derived the first exact solution to Einstein's equations and its event horizon. Write what the Schwarzschild radius is and how his wartime paper predicted black holes.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-hans-geiger",
@@ -6796,7 +8049,11 @@
       "targetName": "Geiger's radiation counter",
       "instruction": "Learn how Geiger and Müller's counter tube amplifies the tiny ionization from each radioactive particle into a click. Write how the Geiger–Marsden experiment revealed the nucleus and how counters are used today.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "German"
+    ]
   },
   {
     "id": "scientist-johannes-diderik-van-der-waals",
@@ -6810,7 +8067,12 @@
       "targetName": "van der Waals forces",
       "instruction": "Learn how van der Waals accounted for molecular size and attraction in his gas equation. Write what van der Waals forces are, with a real example like gecko feet or water droplets, and why they matter.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Dutch",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-joseph-fourier",
@@ -6824,7 +8086,11 @@
       "targetName": "Fourier's analysis",
       "instruction": "Learn how the Fourier transform decomposes any waveform into its frequencies. Write how it underlies JPEG images, MP3 audio, and WiFi, and how Fourier connected heat flow to Earth's temperature.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "French"
+    ]
   },
   {
     "id": "scientist-george-green",
@@ -6838,7 +8104,12 @@
       "targetName": "Green's theorem",
       "instruction": "Learn Green's theorem, relating the circulation around a curve to the sum inside it. Write where Green's functions are used today, from physics to machine learning, and why his miller's life delayed his fame.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-william-bateson",
@@ -6852,7 +8123,11 @@
       "targetName": "Bateson's genetics",
       "instruction": "Learn how Bateson translated and defended Mendel's work and coined 'genetics' in 1905. Write what linkage is and why his discovery complicated the simple rules of inheritance.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "English"
+    ]
   },
   {
     "id": "scientist-hugo-de-vries",
@@ -6866,7 +8141,11 @@
       "targetName": "de Vries's mutation theory",
       "instruction": "Learn how de Vries observed sudden new forms in evening primroses and coined 'mutation.' Write how his idea complemented natural selection and how modern genetics reframed his findings.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Dutch"
+    ]
   },
   {
     "id": "scientist-wilhelm-johannsen",
@@ -6880,7 +8159,11 @@
       "targetName": "Johannsen's gene concept",
       "instruction": "Learn how Johannsen's self-fertilized bean lines proved that selection cannot change a pure genotype. Write the difference between genotype and phenotype and why his naming of the 'gene' mattered.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Danish"
+    ]
   },
   {
     "id": "scientist-thomas-hunt-morgan-lab",
@@ -6894,7 +8177,12 @@
       "targetName": "Muller's X-ray mutations",
       "instruction": "Learn how Muller exposed fruit flies to X-rays and measured a leap in mutation rates. Write why his 1927 result was shocking and how it shaped radiation safety standards.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1940s"
+    ]
   },
   {
     "id": "scientist-alfred-hershey-dna",
@@ -6908,7 +8196,12 @@
       "targetName": "Hershey–Chase experiment",
       "instruction": "Learn how Hershey and Chase labeled phage DNA and protein with different isotopes and blended the shells off bacteria. Write how the radioactivity that entered cells identified DNA as the genetic material.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-oswald-avery-dna",
@@ -6922,7 +8215,12 @@
       "targetName": "Avery's transforming principle",
       "instruction": "Learn how Avery's team purified the transforming substance from bacteria and identified it as DNA. Write what the transformation experiment showed and why scientists were slow to accept it.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1940s"
+    ]
   },
   {
     "id": "scientist-george-beadle",
@@ -6936,7 +8234,12 @@
       "targetName": "Beadle and Tatum's bread mold",
       "instruction": "Learn how Beadle and Tatum's Neurospora experiments linked single genes to single enzymes. Write how they used X-ray mutants and growth media and why the one gene–one enzyme idea launched biochemical genetics.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-edward-tatum",
@@ -6950,7 +8253,11 @@
       "targetName": "Tatum's bacterial genetics",
       "instruction": "Learn how Tatum and Lederberg found that E. coli strains can exchange genetic material. Write what bacterial conjugation is and how it enabled the later recombinant DNA revolution.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American"
+    ]
   },
   {
     "id": "scientist-joshua-lederberg-lab",
@@ -6964,7 +8271,12 @@
       "targetName": "Lederberg's conjugation",
       "instruction": "Learn how Lederberg and Tatum proved bacteria exchange genes by physical contact. Write what conjugation is, how it spreads antibiotic resistance, and how Lederberg pioneered biosecurity thinking.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-frederick-griffith-lab",
@@ -6978,7 +8290,12 @@
       "targetName": "Griffith's transformation",
       "instruction": "Learn how Griffith's mouse experiments showed a heat-killed strain could transform a live one. Write what his 1928 finding implied and how Avery, then Hershey and Chase, identified the transforming substance.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "1920s"
+    ]
   },
   {
     "id": "scientist-nettie-stevens",
@@ -6992,7 +8309,12 @@
       "targetName": "Stevens's sex chromosomes",
       "instruction": "Learn how Stevens found that female and male mealworms differ by one chromosome pair. Write how the XX/XY system works in humans and why her discovery took decades to be credited.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1900s"
+    ]
   },
   {
     "id": "scientist-edmund-bechtel",
@@ -7006,7 +8328,11 @@
       "targetName": "Wilson's cell biology",
       "instruction": "Learn how E. B. Wilson synthesized cell division, fertilization, and heredity in his landmark book. Write what the chromosomal theory of inheritance states and how Wilson's teaching shaped American biology.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "American"
+    ]
   },
   {
     "id": "scientist-harold-u-rey",
@@ -7020,7 +8346,12 @@
       "targetName": "Urey's deuterium and Miller–Urey",
       "instruction": "Learn how Urey found deuterium in distilled water and later designed the Miller–Urey experiment on life's origins. Write what the experiment produced and what it suggests about how life began.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-stanley-miller",
@@ -7034,7 +8365,11 @@
       "targetName": "The Miller–Urey experiment",
       "instruction": "Learn how Miller's spark-discharge apparatus simulated lightning on the early Earth. Write what amino acids appeared, what the experiment proved about abiogenesis, and how later reanalyses refined its conclusions.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American"
+    ]
   },
   {
     "id": "scientist-george-wald",
@@ -7048,7 +8383,12 @@
       "targetName": "Wald's vision chemistry",
       "instruction": "Learn how Wald traced the visual cycle in which retinal changes shape when light hits it. Write how rods detect dim light, how color vision works in cones, and why vitamin A is essential for sight.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-ralph-steinman",
@@ -7062,7 +8402,12 @@
       "targetName": "Steinman's dendritic cells",
       "instruction": "Learn how Steinman found the cells that present antigens and awaken T cells. Write how dendritic cells patrol the body and how their discovery led to therapeutic cancer vaccines and checkpoint therapy.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Canadian",
+      "2010s"
+    ]
   },
   {
     "id": "scientist-michael-rosbash",
@@ -7076,7 +8421,12 @@
       "targetName": "Rosbash's circadian clock",
       "instruction": "Learn how Rosbash's team showed that the period gene and its protein form a feedback loop that ticks every 24 hours. Write how the circadian clock affects sleep, health, and shift work.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "2010s"
+    ]
   },
   {
     "id": "scientist-jeffrey-hall",
@@ -7090,7 +8440,12 @@
       "targetName": "Hall's clock genes",
       "instruction": "Learn how Hall and Rosbash used fruit flies to find the period gene and its feedback loop. Write what happens when clock genes are disrupted and why the Nobel committee honored a fly's sleep.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "2010s"
+    ]
   },
   {
     "id": "scientist-charles-kao-fiber",
@@ -7104,7 +8459,11 @@
       "targetName": "Schoenheimer's dynamic body",
       "instruction": "Learn how Schoenheimer's heavy-isotope feeding experiments revealed constant molecular turnover. Write what 'the dynamic state of body constituents' means and why it changed nutrition and medicine.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German-American"
+    ]
   },
   {
     "id": "scientist-fritz-lipmann",
@@ -7118,7 +8477,12 @@
       "targetName": "Lipmann's ATP",
       "instruction": "Learn how Lipmann identified coenzyme A and recognized ATP as the cell's reusable energy store. Write how ATP transfers energy between reactions and why he called it the 'energy currency' of the cell.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German-American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-hans-krebs",
@@ -7132,7 +8496,12 @@
       "targetName": "Krebs's citric acid cycle",
       "instruction": "Learn the steps of the Krebs cycle and why it is the crossroads of metabolism. Write how acetyl-CoA enters the cycle and what the cycle produces for the cell's energy supply.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "German-British",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-albert-szent-gyorgyi",
@@ -7146,7 +8515,12 @@
       "targetName": "Szent-Györgyi's vitamin C",
       "instruction": "Learn how Szent-Györgyi purified ascorbic acid, using Hungarian peppers as his source. Write what vitamin C does in the body and how his muscle research connected to cell energy.",
       "durationMinutes": 15
-    }
+    },
+    "tags": [
+      "Science",
+      "Hungarian",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-severo-ochoa",
@@ -7160,7 +8534,12 @@
       "targetName": "Ochoa's RNA polymerase",
       "instruction": "Learn how Ochoa's polynucleotide phosphorylase made RNA in the test tube, helping scientists decode the genetic code. Write how RNA is built from a DNA template and why the code matters.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-arthur-kornberg-synth",
@@ -7174,7 +8553,12 @@
       "targetName": "Kornberg's DNA polymerase",
       "instruction": "Learn how Kornberg isolated DNA polymerase I and synthesized DNA outside a cell. Write how polymerases copy DNA with high fidelity and why his work underpins PCR and genetic engineering.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-marshall-nirenberg",
@@ -7188,7 +8572,12 @@
       "targetName": "Nirenberg's genetic code",
       "instruction": "Learn how Nirenberg used synthetic RNA messages to decode codons into amino acids. Write how the 64 codons map to 20 amino acids and why the code is called nearly universal.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-h-g-khorana",
@@ -7202,7 +8591,12 @@
       "targetName": "Khorana's gene synthesis",
       "instruction": "Learn how Khorana assembled nucleotide chains to confirm codons and built a working artificial gene. Write how gene synthesis works today and how it powers modern biotechnology.",
       "durationMinutes": 20
-    }
+    },
+    "tags": [
+      "Science",
+      "Indian",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-frege",
@@ -7222,7 +8616,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-russell",
@@ -7242,7 +8641,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "British",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-galois",
@@ -7262,7 +8666,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "French"
+    ]
   },
   {
     "id": "scientist-laplace",
@@ -7282,7 +8690,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "French"
+    ]
   },
   {
     "id": "scientist-lagrange",
@@ -7302,7 +8714,12 @@
         "Italian-French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "Italian",
+      "18th Century"
+    ]
   },
   {
     "id": "scientist-cauchy",
@@ -7322,7 +8739,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "French"
+    ]
   },
   {
     "id": "scientist-germain",
@@ -7342,7 +8763,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "French"
+    ]
   },
   {
     "id": "scientist-kovalevskaya",
@@ -7362,7 +8787,12 @@
         "Russian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "Russian",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-klein",
@@ -7382,7 +8812,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-wiles",
@@ -7402,7 +8837,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "British",
+      "1990s"
+    ]
   },
   {
     "id": "scientist-perelman",
@@ -7422,7 +8862,12 @@
         "Russian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "Russian",
+      "2000s"
+    ]
   },
   {
     "id": "scientist-nash",
@@ -7442,7 +8887,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "American",
+      "1990s"
+    ]
   },
   {
     "id": "scientist-minsky",
@@ -7462,7 +8912,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-hinton",
@@ -7482,7 +8937,12 @@
         "British-Canadian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "British",
+      "2010s"
+    ]
   },
   {
     "id": "scientist-schwann",
@@ -7502,7 +8962,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "German"
+    ]
   },
   {
     "id": "scientist-morgan",
@@ -7522,7 +8986,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Genetics",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-weismann",
@@ -7542,7 +9011,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "German"
+    ]
   },
   {
     "id": "scientist-kitasato",
@@ -7562,7 +9035,11 @@
         "Japanese"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Microbiology",
+      "Japanese"
+    ]
   },
   {
     "id": "scientist-nightingale",
@@ -7582,7 +9059,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "English"
+    ]
   },
   {
     "id": "scientist-tinbergen",
@@ -7602,7 +9083,12 @@
         "Dutch"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Dutch",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-holmes",
@@ -7622,7 +9108,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Geology",
+      "British",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-tuzo-wilson",
@@ -7642,7 +9133,12 @@
         "Canadian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Earth Science",
+      "Canadian",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-richter",
@@ -7662,7 +9158,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Earth Science",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-anning",
@@ -7682,7 +9183,11 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "English"
+    ]
   },
   {
     "id": "scientist-cuvier",
@@ -7702,7 +9207,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Paleontology",
+      "French"
+    ]
   },
   {
     "id": "scientist-agassiz",
@@ -7722,7 +9231,12 @@
         "Swiss-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "American",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-keeling",
@@ -7742,7 +9256,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-freud",
@@ -7762,7 +9281,12 @@
         "Austrian"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Psychology",
+      "Austrian",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-jung",
@@ -7782,7 +9306,11 @@
         "Swiss"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "Swiss"
+    ]
   },
   {
     "id": "scientist-erikson",
@@ -7802,7 +9330,11 @@
         "German-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "German-American"
+    ]
   },
   {
     "id": "scientist-rogers",
@@ -7822,7 +9354,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "American"
+    ]
   },
   {
     "id": "scientist-beck",
@@ -7842,7 +9378,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "American"
+    ]
   },
   {
     "id": "scientist-bowlby",
@@ -7862,7 +9402,11 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "British"
+    ]
   },
   {
     "id": "scientist-harlow",
@@ -7882,7 +9426,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-milgram",
@@ -7902,7 +9451,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-bandura",
@@ -7922,7 +9476,12 @@
         "Canadian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Psychology",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-galvani",
@@ -7942,7 +9501,12 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "18th Century"
+    ]
   },
   {
     "id": "scientist-bichat",
@@ -7962,7 +9526,11 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "French"
+    ]
   },
   {
     "id": "scientist-mendel-again",
@@ -7982,7 +9550,11 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "German"
+    ]
   },
   {
     "id": "scientist-mendelsohn",
@@ -8002,7 +9574,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "German",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-ramon-cajal",
@@ -8022,7 +9599,12 @@
         "Italian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Italian",
+      "1900s"
+    ]
   },
   {
     "id": "scientist-cassini",
@@ -8042,7 +9624,11 @@
         "Italian-French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "Italian"
+    ]
   },
   {
     "id": "scientist-jansky",
@@ -8062,7 +9648,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-reber",
@@ -8082,7 +9673,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-hewish",
@@ -8102,7 +9698,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "British",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-ryle",
@@ -8122,7 +9723,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "British",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-lowell",
@@ -8142,7 +9748,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American"
+    ]
   },
   {
     "id": "scientist-van-allen",
@@ -8162,7 +9772,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American"
+    ]
   },
   {
     "id": "scientist-eddington",
@@ -8182,7 +9796,12 @@
         "British"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "British",
+      "1910s"
+    ]
   },
   {
     "id": "scientist-friedmann",
@@ -8202,7 +9821,12 @@
         "Russian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Science",
+      "Russian",
+      "1920s"
+    ]
   },
   {
     "id": "scientist-zwicky",
@@ -8222,7 +9846,12 @@
         "Swiss-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-burbidge",
@@ -8242,7 +9871,12 @@
         "British-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "British",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-thorne",
@@ -8262,7 +9896,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "2010s"
+    ]
   },
   {
     "id": "scientist-weiss",
@@ -8282,7 +9921,12 @@
         "German-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "German",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-bell",
@@ -8302,7 +9946,12 @@
         "Irish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Irish",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-aspect",
@@ -8322,7 +9971,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "French",
+      "1980s"
+    ]
   },
   {
     "id": "scientist-clauser",
@@ -8342,7 +9996,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-zeilinger",
@@ -8362,7 +10021,12 @@
         "Austrian"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "Austrian",
+      "2020s"
+    ]
   },
   {
     "id": "scientist-mayor-queloz",
@@ -8382,7 +10046,12 @@
         "Swiss"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "Swiss",
+      "1990s"
+    ]
   },
   {
     "id": "scientist-frank-drake",
@@ -8402,7 +10071,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Astronomy",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-wohler",
@@ -8422,7 +10096,12 @@
         "German"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "German",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-curie-joliot",
@@ -8442,7 +10121,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "French",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-pauling-mullis",
@@ -8462,7 +10146,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "1980s"
+    ]
   },
   {
     "id": "scientist-levene",
@@ -8482,7 +10171,11 @@
         "Russian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biochemistry",
+      "Russian-American"
+    ]
   },
   {
     "id": "scientist-luria",
@@ -8502,7 +10195,12 @@
         "Italian-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biophysics",
+      "American",
+      "1940s"
+    ]
   },
   {
     "id": "scientist-horvitz",
@@ -8522,7 +10220,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Genetics",
+      "American",
+      "2000s"
+    ]
   },
   {
     "id": "scientist-sulston",
@@ -8542,7 +10245,12 @@
         "British"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biology",
+      "British",
+      "2000s"
+    ]
   },
   {
     "id": "scientist-von-euler",
@@ -8562,7 +10270,12 @@
         "Swedish"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Biochemistry",
+      "Swedish",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-hilleman",
@@ -8582,7 +10295,11 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "American"
+    ]
   },
   {
     "id": "scientist-enders",
@@ -8602,7 +10319,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-gallo",
@@ -8622,7 +10344,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "American",
+      "1980s"
+    ]
   },
   {
     "id": "scientist-baltimore",
@@ -8642,7 +10369,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Medicine",
+      "American",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-hilbert-kahn",
@@ -8662,7 +10394,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-licklider",
@@ -8682,7 +10419,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-engelbart",
@@ -8702,7 +10444,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-kay",
@@ -8722,7 +10469,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-ritchie-thompson",
@@ -8742,7 +10494,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-stallman",
@@ -8762,7 +10519,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1980s"
+    ]
   },
   {
     "id": "scientist-torvalds",
@@ -8782,7 +10544,12 @@
         "Finnish-American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1990s"
+    ]
   },
   {
     "id": "scientist-berners-lee-larry",
@@ -8802,7 +10569,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Computer Science",
+      "American",
+      "1990s"
+    ]
   },
   {
     "id": "scientist-wozniak",
@@ -8822,7 +10594,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Engineering",
+      "American",
+      "1970s"
+    ]
   },
   {
     "id": "scientist-argonne-hollerith",
@@ -8842,7 +10619,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Engineering",
+      "American",
+      "19th Century"
+    ]
   },
   {
     "id": "scientist-shockley",
@@ -8862,7 +10644,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Physics",
+      "American",
+      "1940s"
+    ]
   },
   {
     "id": "scientist-kilby-noyce",
@@ -8882,7 +10669,12 @@
         "American"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Engineering",
+      "American",
+      "1950s"
+    ]
   },
   {
     "id": "scientist-shriver",
@@ -8902,7 +10694,12 @@
         "American"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Chemistry",
+      "American",
+      "1930s"
+    ]
   },
   {
     "id": "scientist-grothendieck",
@@ -8922,7 +10719,12 @@
         "French"
       ],
       "tier": 2
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "French",
+      "1960s"
+    ]
   },
   {
     "id": "scientist-wiles-fermat",
@@ -8942,6 +10744,11 @@
         "French"
       ],
       "tier": 1
-    }
+    },
+    "tags": [
+      "Mathematics",
+      "French",
+      "17th Century"
+    ]
   }
 ]

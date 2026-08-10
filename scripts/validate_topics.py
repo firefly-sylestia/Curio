@@ -24,8 +24,10 @@ from pathlib import Path
 
 TOPICS_DIR = Path("app/src/main/assets/topics")
 EXPECTED_CATEGORIES = {
-    "artists", "albums", "directors", "films", "authors", "books",
-    "painters", "artworks", "scientists", "discoveries", "wildcard",
+    "artists", "albums", "songs", "directors", "films", "series", "authors",
+    "books", "painters", "artworks", "scientists", "discoveries", "anime",
+    "manga", "manhwa", "games", "mythology", "sports", "food", "internet",
+    "wildcard",
 }
 REQUIRED_TOPIC_FIELDS = ("subtype", "name", "teaser", "imageUrl", "exploreAction")
 REQUIRED_ACTION_FIELDS = ("verb", "targetName", "durationMinutes", "instruction")
