@@ -55,7 +55,11 @@
 
 **Date:** 2026-08-10
 
-### What the user asked
+### Follow-up: poke cooldown raised
+"The pet pokes now require arrival — increase the poke cooldown window so it pokes buttons even less frequently (less intrusive)."
+- `CurioFloatingPet.kt` — landmark (button) poke cooldown raised `4_000L → 12_000L` (3× rarer); comments updated. The drawer-peek branch (sheet open) keeps its 4s gate but shares `lastPokeAt`, so it still can't spam. Peek-a-boo (22s `lastPeekAt`) untouched.
+
+### Previous request — pet personality + tour pass
 "Increase the pet actions, make it not repeat the same dialogs, add an 'annoyed' reaction for repeated actions, add 100s of reactions + fun games (hide-and-peek behind buttons, chameleon disappear). Tour dialog is cut at 2 lines — fix. Next/Skip buttons not visible — give a proper background that hides the nav bar and make them bigger. Tapping anything on screen should advance the tour."
 
 ### Pet personality + tour pass (v9.x) — complete

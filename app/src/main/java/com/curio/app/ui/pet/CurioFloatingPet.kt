@@ -227,10 +227,12 @@ fun CurioFloatingPet(
         var lastTapAt by remember { mutableStateOf(0L) }
         var playDartTarget by remember { mutableStateOf<Offset?>(null) }
         // v8.16 — landmark pokes keep a cooldown so the pet interacts often
-        // but never spams the same thing every beat. On the Spin screen the
-        // wander beat cycles every ~300ms (the watching gate exits the wait
-        // loop early), so without this the pet would boop the Shuffle button
-        // almost constantly while the deck waits.
+        // but never spams the same thing every beat. v9.x — the window grew
+        // from 4s to 12s so button pokes read as occasional, not hovering.
+        // On the Spin screen the wander beat cycles every ~300ms (the
+        // watching gate exits the wait loop early), so without this the pet
+        // would boop the Shuffle button almost constantly while the deck
+        // waits.
         var lastPokeAt by remember { mutableStateOf(0L) }
         val appear = remember { Animatable(0f) }
         // v9.x — chameleon-game opacity: the pet fades to a faint outline
@@ -559,10 +561,11 @@ fun CurioFloatingPet(
                 val landmarks = PetLandmarks.forScreen(routePrefix)
                 // v8.16 — while the deck is actively reeling, the pet stays
                 // glued to watch it land; landmark pokes only happen when
-                // the deck is idle on the spin screen. The 4s cooldown keeps
-                // pokes occasional even where the beat loop cycles fast.
+                // the deck is idle on the spin screen. v9.x — the 12s
+                // cooldown keeps pokes occasional (3× rarer than the old 4s)
+                // even where the beat loop cycles fast.
                 if (!CurioPet.spinning && landmarks.isNotEmpty() &&
-                    System.currentTimeMillis() - lastPokeAt > 4_000L &&
+                    System.currentTimeMillis() - lastPokeAt > 12_000L &&
                     Random.nextFloat() < 0.45f
                 ) {
                     val target = landmarks.random()
