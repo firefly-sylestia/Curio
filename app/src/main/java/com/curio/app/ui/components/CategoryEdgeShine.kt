@@ -33,7 +33,9 @@ fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null): Modifier {
     if (style != AppPreferences.THEME_STYLE_AMOLED && style != AppPreferences.THEME_STYLE_MATERIAL) return this
     val amoled = style == AppPreferences.THEME_STYLE_AMOLED
     return this.drawWithCache {
-        val outline = shape.createOutline(size, layoutDirection, density)
+        // The draw scope itself implements Density — `density` alone would
+        // resolve to the scale factor (Float), which createOutline rejects.
+        val outline = shape.createOutline(size, layoutDirection, this)
         val path = when (outline) {
             is Outline.Generic -> outline.path
             is Outline.Rectangle -> Path().apply { addRect(outline.rect) }
