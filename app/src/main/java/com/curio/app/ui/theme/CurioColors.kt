@@ -425,6 +425,66 @@ object CurioGradients {
         }
         return listOf(start, lerp(start, end, 0.30f))
     }
+
+    /**
+     * v10 — Dual-accent blend hero gradient: the category accent meets a
+     * warm golden companion in HSL space for a richer, more sophisticated
+     * multi-tone gradient. The blend creates a premium duotone effect —
+     * accent at the top melting into warm gold at the bottom — that reads
+     * beautifully across all theme styles.
+     *
+     * The companion is a warm golden amber (hue ~42°, saturation ~0.85)
+     * that complements every researched accent without clashing: indigo →
+     * gold reads royal, rose → gold reads cinematic, teal → gold reads
+     * luxurious, sky → gold reads sunrise, amber → deepened gold reads
+     * cohesive, and coral → gold reads warm-fire. In dark/AMOLED modes the
+     * companion deepens; in pastel mode it softens.
+     */
+    @Composable
+    fun heroBlendGradient(accent: Color): List<Color> {
+        val dark = isCurioDarkTheme()
+        val pastel = AppPreferences.pastelColorsState
+        val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+        val material = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL
+
+        // The warm golden companion — a rich amber-gold that pairs with
+        // every category accent. In pastel mode it softens to a butter
+        // cream; in dark/AMOLED it deepens to a burnished bronze.
+        val companionBase = when {
+            amoled -> lerp(Color.Black, CurioColors.GoldInk, 0.28f)
+            pastel && !dark -> CurioColors.ButterYellow
+            dark -> lerp(CurioColors.GoldInk, Color.Black, 0.35f)
+            else -> CurioColors.GoldInk
+        }
+
+        // Top crown — a whisper of light at the very top for a premium
+        // lit-surface feel (muted in dark/AMOLED, crisp in light).
+        val crown = when {
+            amoled -> lerp(Color.Black, accent, 0.10f)
+            dark -> lerp(accent, Color.White, 0.06f)
+            pastel -> lerp(accent, Color.White, 0.10f)
+            else -> lerp(accent, Color.White, 0.16f)
+        }
+
+        // The accent stop — the card fill (theme-aware), which is already
+        // pastel in pastel mode and black-tinted in AMOLED.
+        val accentStop = when {
+            amoled -> lerp(Color.Black, accent, 0.12f)
+            material -> materialDeviceStop(accent, dark, pastel, 0.14f)
+            pastel && AppPreferences.pastelCrownDepthState ->
+                lerp(categoryCardFill(accent, dark), Color.Black, 0.05f)
+            else -> categoryCardFill(accent, dark)
+        }
+
+        // The golden companion stop — the warm accent at the bottom.
+        val companionStop = when {
+            amoled -> lerp(Color.Black, companionBase, 0.10f)
+            material -> materialDeviceStop(companionBase, dark, pastel, 0.07f)
+            else -> companionBase
+        }
+
+        return listOf(crown, accentStop, companionStop)
+    }
 }
 
 /**

@@ -81,8 +81,8 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setHeroGradientEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Main card accent border", "Category-tinted border on the hero card", AppPreferences.heroBorderState) {
-                        AppPreferences.setHeroBorderEnabled(context, it)
+                    ExperimentSwitchRow("Dual-accent hero gradient", "Blends the category accent with a warm golden companion for a richer multi-tone gradient", AppPreferences.heroBlendGradientState) {
+                        AppPreferences.setHeroBlendGradientEnabled(context, it)
                     }
                     CurioSettingsDivider()
                     ExperimentSwitchRow("Main card shadow", "Ambient depth below the hero card", AppPreferences.heroShadowState) {

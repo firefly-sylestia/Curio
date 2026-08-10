@@ -2268,6 +2268,7 @@ private fun HeroTicketCard(
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
     val heroShadowOn = AppPreferences.heroShadowState
+    val heroBlendOn = AppPreferences.heroBlendGradientState
     // v7.14 — the enhanced gradient is a top-left-lit DIAGONAL multi-stop
     // sweep: a bright crown at the top-left catches light, the card's own
     // stops run through the middle (the Material blend keeps its identity),
@@ -2279,6 +2280,11 @@ private fun HeroTicketCard(
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     val ticketBrush = if (isMixed) {
         CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+    } else if (heroBlendOn) {
+        // v10 — dual-accent blend: category accent meets a warm golden
+        // companion in a multi-stop vertical gradient (works across all
+        // theme styles — Curio, Material, AMOLED).
+        Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
     } else if (heroGradientOn) {
         val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
         val base = lerp(gradient.last(), Color.Black, 0.06f)

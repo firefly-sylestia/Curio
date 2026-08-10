@@ -1335,6 +1335,7 @@ private fun HeroCard(
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
+    val heroBlendOn = AppPreferences.heroBlendGradientState
 
     // v8.36 — auto-growing hero: the title used to be hard-capped at 3
     // lines, cutting very long topic names. The card now measures how much
@@ -1416,7 +1417,12 @@ private fun HeroCard(
             val density = LocalDensity.current
             val wPx = with(density) { maxWidth.toPx() }
             val hPx = with(density) { maxHeight.toPx() }
-            val heroBrush = if (heroGradientOn) {
+            val heroBrush = if (heroBlendOn) {
+                // v10 — dual-accent blend: category accent meets a warm
+                // golden companion in a multi-stop vertical gradient
+                // (works across all theme styles).
+                Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
+            } else if (heroGradientOn) {
                 val crown = lerp(heroGradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
                 val base = lerp(heroGradient.last(), Color.Black, 0.06f)
                 val stops = if (heroGradient.size > 2) {

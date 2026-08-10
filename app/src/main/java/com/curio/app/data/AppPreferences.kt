@@ -80,6 +80,10 @@ object AppPreferences {
     private const val KEY_HERO_GRADIENT = "hero_gradient"
     private const val KEY_HERO_BORDER = "hero_border"
     private const val KEY_HERO_SHADOW = "hero_shadow"
+    // v10 — dual-accent blend gradient: the hero card wears the category
+    // accent blended with a warm golden companion for a richer palette.
+    // Toggleable (default OFF); works across all theme styles.
+    private const val KEY_HERO_BLEND_GRADIENT = "hero_blend_gradient"
     private const val KEY_3D_BUTTON_GRADIENT = "3d_button_gradient"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
     private const val KEY_REMINDER_HOUR = "reminder_hour"
@@ -222,9 +226,16 @@ object AppPreferences {
     // until the experiment settles.
     var heroGradientState by mutableStateOf(false)
         private set
-    var heroBorderState by mutableStateOf(false)
+    // v10 — promoted from experiment to always-on: the accent border on the
+    // hero card is now the shipped default.
+    var heroBorderState by mutableStateOf(true)
         private set
     var heroShadowState by mutableStateOf(false)
+        private set
+    // v10 — dual-accent blend gradient toggle (default OFF). When on, the
+    // hero card wears a richer multi-accent blend instead of the plain
+    // vertical gradient.
+    var heroBlendGradientState by mutableStateOf(false)
         private set
 
     // 3D button gradient & shadow (v7.11, EXPERIMENTAL) — when ON, the
@@ -418,6 +429,7 @@ object AppPreferences {
         heroGradientState = isHeroGradientEnabled(context)
         heroBorderState = isHeroBorderEnabled(context)
         heroShadowState = isHeroShadowEnabled(context)
+        heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
@@ -550,9 +562,9 @@ object AppPreferences {
         heroGradientState = enabled
     }
 
-    /** Whether the accent-tinted hero-card border is on (default off). */
+    /** Whether the accent-tinted hero-card border is on (v10 — default true, promoted from experiment). */
     fun isHeroBorderEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HERO_BORDER, false)
+        prefs(context).getBoolean(KEY_HERO_BORDER, true)
 
     fun setHeroBorderEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_BORDER, enabled).apply()
@@ -566,6 +578,16 @@ object AppPreferences {
     fun setHeroShadowEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_SHADOW, enabled).apply()
         heroShadowState = enabled
+    }
+
+    // ── Dual-accent blend gradient (v10 toggle) ────────────────────────
+    /** Whether the hero card wears the dual-accent blend gradient (default OFF). */
+    fun isHeroBlendGradientEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HERO_BLEND_GRADIENT, false)
+
+    fun setHeroBlendGradientEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HERO_BLEND_GRADIENT, enabled).apply()
+        heroBlendGradientState = enabled
     }
 
     // ── 3D button gradient & shadow (v7.11 experimental) ───────────────
