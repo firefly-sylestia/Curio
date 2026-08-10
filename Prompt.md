@@ -21,4 +21,16 @@ Make the newly added Topic Reveal bottom torn strip useful without increasing it
 - Review the diff before commit/push.
 
 ### Follow-up
-Commit and push the functional change using the repository's conventional commit workflow.
+Refine the footer tear so it projects slightly farther and improve the footer tags into clearer pill chips without increasing the fixed height.
+
+## Current Request (IN PROGRESS): Refine Topic Reveal tear and tags
+
+**Date:** 2026-08-10
+
+### Changes made
+- Increased the tear's visible irregularity using the existing detail geometry mode while preserving the fixed footer height.
+- Strengthened footer tag pills with a clearer category-tinted fill and outline.
+
+### Validation
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+- Run `git diff --check` and the lightweight source checks before commit/push.

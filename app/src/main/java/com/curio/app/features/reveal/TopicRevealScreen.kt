@@ -331,7 +331,7 @@ fun TopicRevealScreen(
         }
     }
 
-    // ── Floating explore bubble permission ────────────────────────���───
+    // ── Floating explore bubble permission ────────────────────────�����───
     //    "Display over other apps" has no runtime dialog on Android 10+, so
     //    Allow opens the system special-access page; ON_RESUME below resumes
     //    the deferred flow (and starts the bubble service if granted). Asked
@@ -721,7 +721,9 @@ fun TopicRevealScreen(
         // mirror of the hero's downward tear — so the page reads as one
         // torn sheet end-to-end. Fixed seed → never re-rolls.
         val bottomTornShape = remember(REVEAL_BOTTOM_TEAR_SEED) {
-            SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true)
+            // Detail adds a slightly deeper, more expressive lip without
+            // changing the fixed footer height.
+            SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true, detail = true)
         }
         // v9.x — the strip and its tear are fully opaque and follow the active
         // appearance. Curio uses the category surface, Material uses the
@@ -767,8 +769,9 @@ fun TopicRevealScreen(
                     Surface(
                         modifier = Modifier.weight(1f, fill = false),
                         shape = RoundedCornerShape(50),
-                        color = cat.themedAccent().copy(alpha = 0.18f),
-                        shadowElevation = 0.dp
+                        color = cat.themedAccent().copy(alpha = 0.22f),
+                        shadowElevation = 0.dp,
+                        border = BorderStroke(1.dp, cat.themedAccent().copy(alpha = 0.48f))
                     ) {
                         Text(
                             text = tag,
