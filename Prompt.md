@@ -1,21 +1,20 @@
-# Request — Complete the pet-led tour + torn paper edge on Topic Reveal
+# Request — Pet home spawn, speech bubble redesign, ride-cloud scale
 
 ## User request
-1. In the tour, remove the "Express yourself" tap-as-next behavior: instead, TELL the user they can use Express yourself, but keep the button inert during the tour — they advance via Next, and the tour finishes properly after everything.
-2. Add more tour stops so the tour shows Cabinet → Topic Browser → Profile → Quests → Settings ("and everything").
-3. On Topic Reveal (from the Spin main card), hide the bottom nav and add a torn paper edge at navbar height instead (the tear REPLACES the nav; "the tear in opp" = torn at the top edge of a bottom strip).
+1. When the app opens, the pet is at the screen corner instead of its home — it should start from its home (confirmed: float beside its house on the Home screen).
+2. Redesign the speech bubble shape (the old one is "bad").
+3. Scale "the cloud" to the pet's size (confirmed: the little pixel ride-cloud the pet stands on while walking, which was 80×32dp — wider than the 72dp pet).
 
 ## Changes completed
-- `TourController.kt`: tour steps are now Home shuffle → Spin → Reveal (express-yourself tell-only stop) → Cabinet → Topic Browser → Profile → Quests → Settings. Added `isLastStep` ("Done" label on the final stop). The express-yourself step dialogue now tells the user the note stays closed and to tap Next.
-- `CurioNavHost.kt`: `showBottomBar` now excludes ALL reveal routes (routePrefix "reveal") — the reveal never shows the bottom bar. Tour controls label the final step "Done"; on Done the tour deactivates and pops the whole tour stack back to HOME (clean finish, no deep back stack). Updated stale comments.
-- `TopicRevealScreen.kt`: added a bottom torn paper edge at navbar height (80dp, `SoftTornBottomShape` flipped 180° so it tears UP, `CurioColors.CreamWhite`, fixed seed) that replaces the bottom nav; bumped the scroll's trailing spacer so content clears the seam. "Express yourself" and Explore buttons are inert while `TourController.active`.
-- `TopicDatabaseScreen.kt`: wrapped the search field in a `PetLandmark` (id "search", screen "database") so the tour's Browse-Topics stop points at it.
-- `SettingsHubScreen.kt`: wrapped the Appearance row in a `PetLandmark` (id "appearance", screen "settings") for the tour's Settings stop.
+- `CurioFloatingPet.kt`:
+  - New settle-at-home effect: the moment the Home screen's "bed" landmark is measured, the pet SNAPS beside its house (floor-aligned, on the side away from the screen edge, facing it) instead of sitting at the bottom-right corner — no corner flash. One-shot per appearance via a `settledAtHome` remember flag (resets when the overlay leaves/re-enters composition, e.g. coming out of the house); skipped during the tour and while dragged. Added the `CurioRoutes` import.
+  - Ride cloud scaled to the pet: `CLOUD_W` 80→56dp, `CLOUD_H = CLOUD_W * 0.4f` (22.4dp) so the 20×8 pixel grid keeps square cells (~¾ of the pet's width).
+- `CurioPetCompanion.kt`: redesigned `PetSpeechBubble` — replaced the rotated-square diamond tail (`TailDiamond`, removed with the now-unused `rotate` import) with a soft curved Path-based tail (`CurvedBubbleTail`, quadratic beziers, rounded tip, 16×14dp Canvas) and squishier asymmetric corners (20dp with an 8dp corner on the tail side). Added `Canvas`/`fillMaxSize`/`Path` imports. Quests-screen call site unchanged.
 
 ## Validation
-- `node scripts/check_braces.js` passed on all 5 edited files.
-- Code review confirmed compile-safety (imports, BoxScope `.align`, modifier order, unused-import removal for `offset`/`SoftTornSheetShape`) and flagged only the shared-hero morph height change (expected consequence of the tear replacing the nav — verify on device).
+- `node scripts/check_braces.js` passed on both files.
+- Code review confirmed compile-safety (imports balanced, Dp math valid, `hypot`/`Rect`/`mutableStateOf`/`delay` already imported) and led to switching the initial glide (which left the pet at the corner for the first frames) to a snap-to-home so the pet is never seen at the corner.
 - Local Gradle compile/build/lint/test commands were not run because repository instructions forbid local Android builds; CI remains authoritative.
 
 ## Status
-Committed and pushed: `5464cd4 feat: complete pet-led tour and add reveal torn bottom edge` (branch Alpha).
+Committed and pushed: `51987cc feat: pet starts at its home, redesigned speech bubble, scaled ride cloud` (branch Alpha).
