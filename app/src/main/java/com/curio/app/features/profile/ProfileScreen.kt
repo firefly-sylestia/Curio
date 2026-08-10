@@ -530,6 +530,10 @@ private fun ProfileHero(
     val sheetShape = remember(PROFILE_TEAR_SEED) {
         SoftTornSheetShape(PROFILE_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
     }
+    // v12 — AMOLED: the pure-black banner carries the rose accent through the
+    // watermark collage (the black-glass language); content stays white.
+    val symbolTint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+        CurioColors.HomeRosewood else ink
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -537,6 +541,9 @@ private fun ProfileHero(
     ) {
         // ── Under-sheet — the shared white paper layer. The hero can stay
         // dark in dark mode, but the paper beneath the tear remains bright.
+        // AMOLED: the sheet turns a soft rose so the torn edge keeps reading
+        // through the up-bites of the pure-black banner, carrying the accent
+        // of the color instead of a bright white punch.
         // Same seeded torn top as the banner,
         // hidden behind it except through the up-bites.
         Box(
@@ -545,7 +552,11 @@ private fun ProfileHero(
                 .height(42.dp)
                 .offset(y = ProfileHeroHeight - 18.dp)
                 .clip(sheetShape)
-                .background(CurioColors.CreamWhite)
+                .background(
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                        CurioColors.HomeRosewood.copy(alpha = 0.45f)
+                    else CurioColors.CreamWhite
+                )
         )
         // ── Torn-edge shadow — hairline dark rim under the seam so the
         // tear reads as a real paper edge (the Home construction).
@@ -580,8 +591,8 @@ private fun ProfileHero(
                     ProfileHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
                 )
                 pairs.forEachIndexed { i, pair ->
-                    ProfileHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, ink)
-                    ProfileHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, ink)
+                    ProfileHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, symbolTint)
+                    ProfileHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, symbolTint)
                 }
                 Column(
                     modifier = Modifier
@@ -712,7 +723,9 @@ private fun ProfileHero(
                                 Brush.verticalGradient(
                                     listOf(
                                         fill.copy(alpha = 0.12f),
-                                        lerp(fill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                                            CurioColors.HomeRosewood.copy(alpha = 0.30f)
+                                        else lerp(fill, Color.White, 0.26f).copy(alpha = 0.55f)
                                     )
                                 ),
                                 RoundedCornerShape(20.dp)
@@ -879,7 +892,10 @@ private fun profileRoseAccent(): Color {
         return MaterialTheme.colorScheme.primary
     }
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
+        // Pure black — no grey/primary tint: on OLED the banner is a true
+        // black plate and the rose accent comes through the watermark
+        // collage + the sticky pills instead of a tinted fill.
+        return Color.Black
     }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {

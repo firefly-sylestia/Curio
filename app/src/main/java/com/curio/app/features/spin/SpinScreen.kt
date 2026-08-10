@@ -3132,6 +3132,12 @@ private fun SpinButton(
     // shrinks WITH the deck (the orbit ring too), floored at 0.75 so the
     // CTA never gets tiny.
     val sizeScale = fitScale.coerceIn(0.75f, 1f)
+    // v12 — AMOLED: the shuffle plate is pitch-black glass; the category
+    // accent moves to the orbit ring, the rim shine and the 3D sheen instead
+    // of a bright accent fill. The dice stays white for readability.
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+    val plateTint = if (isAmoled) Color.Black else tint
+    val orbitColor = if (isAmoled) shineAccent else tint
     // v11 — Material keeps the device onPrimary as the glyph ink so the dice
     // stays readable on the (possibly light) primary-based fill in dark mode;
     // Curio/AMOLED keep the pastel-aware ink.
@@ -3151,7 +3157,7 @@ private fun SpinButton(
         modifier = Modifier.size((if (compact) 156.dp else 176.dp) * sizeScale),
         contentAlignment = Alignment.Center
     ) {
-        OrbitRing(active = isShuffling, color = tint, modifier = Modifier.fillMaxSize())
+        OrbitRing(active = isShuffling, color = orbitColor, modifier = Modifier.fillMaxSize())
         Surface(
             onClick = onClick,
             enabled = enabled,
@@ -3160,8 +3166,9 @@ private fun SpinButton(
             // shuffle button wears a radial gradient with a highlight toward
             // the top and a shadow toward the bottom, with a soft ambient
             // shadow, so it reads as a raised sphere instead of a flat circle.
-            // When OFF, the button keeps its classic flat accent fill.
-            color = if (AppPreferences.threeDButtonState) Color.Transparent else tint,
+            // When OFF, the button keeps its classic flat accent fill (pitch
+            // black on AMOLED).
+            color = if (AppPreferences.threeDButtonState) Color.Transparent else plateTint,
             shadowElevation = if (AppPreferences.threeDButtonState) 6.dp else 0.dp,
             modifier = Modifier
                 .size(buttonSize)
@@ -3181,10 +3188,17 @@ private fun SpinButton(
                             // sphere keeps a hint of shine without washing
                             // out, while darker fills keep their stronger cap.
                             val pastelLight = AppPreferences.pastelColorsState && !isCurioDarkTheme()
-                            val highlight = lerp(tint, Color.White, if (pastelLight) 0.12f else 0.22f)
+                            // v12 — AMOLED: the black plate gets a faint
+                            // accent-tinted sheen at the top instead of a
+                            // white cap, so the accent reads on the glass.
+                            val highlight = if (isAmoled) {
+                                lerp(plateTint, shineAccent, 0.24f)
+                            } else {
+                                lerp(plateTint, Color.White, if (pastelLight) 0.12f else 0.22f)
+                            }
                             Modifier.background(
                                 Brush.radialGradient(
-                                    listOf(highlight, tint, lerp(tint, Color.Black, 0.07f)),
+                                    listOf(highlight, plateTint, lerp(plateTint, Color.Black, 0.07f)),
                                     center = Offset(0.42f, 0.33f),
                                     radius = 1.15f
                                 ),
@@ -3564,7 +3578,12 @@ private fun VerticalDeckButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
+        // v12 — AMOLED: selected deck controls are pitch-black glass with the
+        // category accent rim — the bright accent fill is a Curio-style look.
+        color = if (selected) {
+            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
+            else cat.themedButtonFill()
+        } else deckControlSurface(cat),
         border = if (selected) null else deckControlBorder(cat),
         shadowElevation = 0.dp,
         modifier = modifier
@@ -3615,7 +3634,12 @@ private fun DeckControlButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
+        // v12 — AMOLED: selected deck controls are pitch-black glass with the
+        // category accent rim — the bright accent fill is a Curio-style look.
+        color = if (selected) {
+            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
+            else cat.themedButtonFill()
+        } else deckControlSurface(cat),
         border = if (selected) null else deckControlBorder(cat),
         shadowElevation = 0.dp,
         modifier = modifier

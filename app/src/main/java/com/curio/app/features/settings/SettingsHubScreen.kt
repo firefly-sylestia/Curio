@@ -33,7 +33,6 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -122,18 +121,30 @@ fun SettingsHeroHeader(
     }
     val fill = settingsRoseAccent()
     val ink = settingsReadableInk(fill)
+    // v12 — AMOLED: the pure-black banner carries the rose accent through the
+    // watermark collage + back pill (the black-glass language); the title
+    // stays white for readability.
+    val symbolTint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+        CurioColors.HomeRosewood else ink
     Box(
         modifier = Modifier
             .fillMaxWidth()            .height(totalHeight)
         ) {
             // ── Under-sheet — the shared white paper layer, so the tear stays
-            // bright beneath the rose hero in every theme.
+            // bright beneath the rose hero in every theme. AMOLED: the sheet
+            // turns a soft rose so the torn edge keeps reading through the
+            // up-bites of the pure-black banner (black-on-black would hide
+            // the seam), carrying the accent of the color.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(42.dp)
                     .offset(y = bannerHeight - 18.dp)
-                .clip(sheetShape)                    .background(MaterialTheme.colorScheme.surface)
+                .clip(sheetShape)                    .background(
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                        CurioColors.HomeRosewood.copy(alpha = 0.45f)
+                    else MaterialTheme.colorScheme.surface
+                )
 
         )
         // ── Torn-edge shadow — hairline dark rim under the seam.
@@ -166,8 +177,8 @@ fun SettingsHeroHeader(
                     SettingsHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
                 )
                 pairs.forEachIndexed { i, pair ->
-                    SettingsHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, ink)
-                    SettingsHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, ink)
+                    SettingsHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, symbolTint)
+                    SettingsHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, symbolTint)
                 }
                 Column(
                     modifier = Modifier
@@ -183,8 +194,8 @@ fun SettingsHeroHeader(
                     ) {
                         CurioBackButton(
                             onClick = onBack,
-                            containerColor = ink.copy(alpha = 0.18f),
-                            contentColor = ink,
+                            containerColor = symbolTint.copy(alpha = 0.18f),
+                            contentColor = symbolTint,
                             disableRipple = true
                         )
                     }
@@ -247,7 +258,10 @@ fun settingsRoseAccent(): Color {
         return MaterialTheme.colorScheme.primary
     }
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
+        // Pure black — no grey/primary tint: on OLED the banner is a true
+        // black plate and the rose accent comes through the watermark
+        // collage + back pill instead of a tinted fill.
+        return Color.Black
     }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {

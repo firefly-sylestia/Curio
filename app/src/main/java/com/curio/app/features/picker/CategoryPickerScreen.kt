@@ -226,7 +226,13 @@ fun CategoryPickerScreen(navController: NavController) {
                     shape = mixShape,
                     colors = curioButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        // v12 — AMOLED: curioButtonColors forces the plate to
+                        // pitch black, so the scheme's onPrimary (a deep
+                        // maroon) would vanish on it — the content flips to
+                        // white on the black glass.
+                        contentColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                            MaterialTheme.colorScheme.onSurface
+                        else MaterialTheme.colorScheme.onPrimary
                     ),
                     modifier = Modifier
                         .weight(1f)

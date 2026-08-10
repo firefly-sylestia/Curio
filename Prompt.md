@@ -1,5 +1,23 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): AMOLED — pure-black Profile/Settings heroes + black accent buttons
+
+**Date:** 2026-08-10
+
+### What the user asked
+In AMOLED, don't give Profile and Settings that tint — make them pure black with the accent. Make the header black too with an accent of the color. Also change the Spin button and the category picker button colors.
+
+### Changes made
+- **SettingsHubScreen.kt / ProfileScreen.kt** — `settingsRoseAccent()` / `profileRoseAccent()` AMOLED now return pure `Color.Black` (was `lerp(surfaceContainerHigh, primary, 0.16f)` grey-coral tint).
+- Hero headers carry the rose accent on the black plate: watermark symbols + back pill tinted `CurioColors.HomeRosewood` in AMOLED (new `symbolTint`); Profile's stat-bar gradient pane uses a rose 30% pane in AMOLED. Titles/content stay white.
+- **SpinScreen.kt** — SpinButton plate is pitch-black in AMOLED (`plateTint`): the category accent moves to the orbit ring, edge-shine rim and the 3D sheen (faint accent-tinted highlight instead of the white cap); the dice stays white. Selected Categories/Filter deck pills (`DeckControlButton` + `VerticalDeckButton`) are pitch black with the accent rim in AMOLED instead of the bright accent fill.
+- **CategoryPickerScreen.kt** — the Mix button's AMOLED content flips to white (`onSurface`) — `curioButtonColors` already forces the plate black, but the old `onPrimary` (deep maroon) vanished on it.
+- Cascade: Onboarding/Cabinet share `settingsRoseAccent()`, so their heroes go black in AMOLED too (consistent with the pure-black style).
+
+### Validation
+- Brace check + git diff --check clean.
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Topic catalog not loaded from startup (0 counts / spurious loading)
 
 **Date:** 2026-08-10
