@@ -60,6 +60,7 @@ import com.curio.app.data.PetReactionEvents
 import com.curio.app.data.TourController
 import com.curio.app.data.ReactionAnim
 import com.curio.app.data.animationById
+import com.curio.app.navigation.CurioRoutes
 import java.util.Calendar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -81,8 +82,11 @@ private val HEARTS_H = 84.dp
 // v8.26 — smaller and tucked right under the feet; the grid is 20 wide so
 // the full 20-char pixel rows render (the old 16-col grid clipped the
 // right edge and made the silhouette lopsided).
-private val CLOUD_W = 80.dp
-private val CLOUD_H = 32.dp
+// v9.x — scaled to the pet's 72dp box: the cloud is ~¾ of the pet's width
+// (was 80×32 — wider than the pet itself), so it reads as a ride under a
+// SMALL pet instead of a mat that dwarfs it.
+private val CLOUD_W = 56.dp
+private val CLOUD_H = CLOUD_W * 0.4f
 private const val CLOUD_GRID_W = 20
 private const val CLOUD_GRID_H = 8
 // v8.20 — how close a drop must be to the flower bed to count as "home".
@@ -441,6 +445,41 @@ fun CurioFloatingPet(
                 delay(18)
             }
             moving = false
+        }
+
+        // v9.x — the pet EMERGES FROM ITS HOME on the Home screen: instead
+        // of dropping into the screen corner, it SNAPS beside the house the
+        // moment the bed landmark is measured (the appear hop is still
+        // playing, so it reads as the pet popping out of its home — never a
+        // corner flash). One-time per appearance (the flag resets when the
+        // pet is sent home and comes back out, since the overlay leaves and
+        // re-enters composition).
+        val bedLandmark = PetLandmarks.forScreen(CurioRoutes.HOME)
+            .firstOrNull { it.id == "bed" }
+        val settledAtHome = remember { mutableStateOf(false) }
+        LaunchedEffect(bedLandmark?.bounds, overlayOrigin, maxW, maxH) {
+            if (settledAtHome.value) return@LaunchedEffect
+            if (tourActive) return@LaunchedEffect
+            if (routePrefix != CurioRoutes.HOME) return@LaunchedEffect
+            val bed = bedLandmark ?: return@LaunchedEffect
+            settledAtHome.value = true
+            if (dragged) return@LaunchedEffect
+            // Stand on the same floor line as the house, on the side away
+            // from the screen edge, facing it (like it just walked out).
+            val local = Rect(
+                left = bed.bounds.left - overlayOrigin.x,
+                top = bed.bounds.top - overlayOrigin.y,
+                right = bed.bounds.right - overlayOrigin.x,
+                bottom = bed.bounds.bottom - overlayOrigin.y
+            )
+            val side = if (local.center.x > maxW / 2f) -1f else 1f
+            val gap = petPx * 0.18f
+            val targetX = if (side > 0f) local.right + gap else local.left - petPx - gap
+            pos = Offset(
+                targetX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                (local.bottom - petPx).coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+            )
+            facing = if (side > 0f) -1f else 1f
         }
 
         // ── Autonomy: wander, think, and PLAY (v8.11) ───────────────────
