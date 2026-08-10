@@ -527,7 +527,20 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            CurioWatermarkBackdrop(activeCat = cat)
+            // v9.x — bottom padding placeholder at navbar height: the reveal
+            // shows NO bottom nav bar (it renders the torn paper seam
+            // instead), so without this placeholder the watermark's content
+            // area would extend all the way down behind the tear and its
+            // scattered glyphs would sit visibly LOWER than on the Spin
+            // page — the watermark appears to shift down as the bar
+            // disappears. Padding by the tear strip's height (exactly the
+            // navbar footprint — 80dp; the Scaffold already applies the
+            // nav-inset to this content Box) holds the collage at the same
+            // level as every tab screen.
+            CurioWatermarkBackdrop(
+                activeCat = cat,
+                modifier = Modifier.padding(bottom = RevealBottomTearHeight)
+            )
         }
 
         Column(

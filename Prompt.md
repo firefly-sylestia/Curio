@@ -55,6 +55,10 @@
 
 **Date:** 2026-08-10
 
+### Follow-up: Topic Reveal watermark bottom-padding placeholder
+"The topic reveal page still don't have the bottom padding scaffold placeholder that keeps the watermark from shifting down as the navbar gets hidden."
+- `TopicRevealScreen.kt` — the reveal's `CurioWatermarkBackdrop` now takes `modifier = Modifier.padding(bottom = RevealBottomTearHeight)`. Root cause: tab screens' content Box ends at the navbar top (Scaffold bottomBar + nav-inset), but the reveal has no bar, so its watermark Box ran 80dp lower behind the torn strip → glyphs sat lower than on Spin. The 80dp placeholder (the tear strip's exact navbar footprint; the Scaffold already applies the nav inset) holds the collage at the same level as every tab screen.
+
 ### Follow-up: poke cooldown raised
 "The pet pokes now require arrival — increase the poke cooldown window so it pokes buttons even less frequently (less intrusive)."
 - `CurioFloatingPet.kt` — landmark (button) poke cooldown raised `4_000L → 12_000L` (3× rarer); comments updated. The drawer-peek branch (sheet open) keeps its 4s gate but shares `lastPokeAt`, so it still can't spam. Peek-a-boo (22s `lastPeekAt`) untouched.
