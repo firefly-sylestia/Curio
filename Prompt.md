@@ -1,5 +1,22 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Topic Reveal plain bottom band
+
+**Date:** 2026-08-10
+
+### What the user asked
+On the Topic Reveal page: remove the tear style from the bottom (keep it plain and theme-aware) and move the tags down a little.
+
+### Changes made
+- **TopicRevealScreen.kt** — removed the torn seam entirely: dropped the `SoftTornBottomShape` clip + 180° rotation from the bottom strip so it's now a flat, theme-aware band (unchanged `bandPaper`: Curio category surface / Material surfaceContainer / AMOLED surface). Removed the now-unused `REVEAL_BOTTOM_TEAR_SEED` constant and `SoftTornBottomShape`/`graphicsLayer` imports; renamed `RevealBottomTearHeight` → `RevealBottomBarHeight` (same 80dp footprint) and `tearPaper`/`tearInk` → `bandPaper`/`bandInk`.
+- Tags row moved down a little: top inset 16 → 24dp inside the bottom band; comments updated to describe the plain band.
+- **CurioNavHost.kt** — comment-only: reveal references now say "plain bottom band" instead of "torn paper edge/sheet".
+
+### Validation
+- Grep-verified: no stale references to the removed/renamed symbols anywhere; `graphicsLayer`/`SoftTornBottomShape` unused in the reveal file.
+- Code review passed (imports, rename consistency, band geometry math unchanged).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Pet speech bubbles skip on interaction
 
 **Date:** 2026-08-10

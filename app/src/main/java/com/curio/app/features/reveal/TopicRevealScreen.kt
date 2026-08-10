@@ -68,7 +68,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -113,7 +112,6 @@ import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.theme.CurioColors
@@ -146,8 +144,8 @@ import com.curio.app.ui.theme.themedButtonInk
  *  - Hero shows the action you need to take immediately — the verb +
  *    duration badge sits on the ticket, not buried under the body copy.
  *  - Bigger, eye-catching topic name (uses the geom typography).
- *  - Tags row immediately under the title — gives instant context for
- *    genres / eras (e.g. "1970s · British · Art Rock").
+ *  - Tags chips in the bottom band — instant context for genres / eras
+ *    (e.g. "1970s · British · Art Rock") without cluttering the body.
  *  - Existing teaser card + explore-action prompt card are preserved.
  *  - Refined spacing — top padding tight (statusBarsPadding + 8dp.
  *
@@ -159,8 +157,6 @@ import com.curio.app.ui.theme.themedButtonInk
  *              the topic NAME — the title lives on the card so the
  *              shared-element morph grows it in place, v8.25)
  *   20 dp      gap
- *   ~42 dp     Tags chip row
- *   20 dp      gap
  *   ~auto     "One quirky fact to get you curious" card
  *   16 dp      gap
  *   ~auto     "{verb} {target}" action prompt card + "~N min"
@@ -168,12 +164,11 @@ import com.curio.app.ui.theme.themedButtonInk
  *   below hero  inline actions (Start exploring + Already …)
  */
 
-// v8.xx — the reveal renders its OWN torn paper edge at the bottom of the
-// screen (at navbar height) instead of the bottom navigation bar — the
-// mirror of the hero's downward tear: this strip tears UP at its top edge
-// (see CurioNavHost.showBottomBar). Fixed seed → the seam never re-rolls.
-private const val REVEAL_BOTTOM_TEAR_SEED = 0xB07E4
-private val RevealBottomTearHeight = 80.dp
+// The reveal renders its OWN plain bottom band (at navbar height) instead
+// of the bottom navigation bar (see CurioNavHost.showBottomBar): a flat
+// theme-aware strip that carries the tags row and keeps the page's fixed
+// footprint — the NavHost reserves the same 80dp slot the bar would use.
+private val RevealBottomBarHeight = 80.dp
 
 @Composable
 fun TopicRevealScreen(
@@ -710,69 +705,60 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // Bottom clearance — the torn paper edge (at navbar height)
+                // Bottom clearance — the bottom band (at navbar height)
                 // overlays the very bottom of the scroll area, so the last
-                // row clears the seam when fully scrolled down.
-                Spacer(Modifier.height(RevealBottomTearHeight + 24.dp))
+                // row clears the band when fully scrolled down.
+                Spacer(Modifier.height(RevealBottomBarHeight + 24.dp))
             }
 
         }
 
-        // ── Bottom torn paper edge — replaces the bottom navigation bar ──
-        // The reveal renders its own torn seam at the bottom of the screen
-        // (at navbar height) instead of the Scaffold's navigation bar (see
-        // CurioNavHost.showBottomBar). It tears UP at its top edge — the
-        // mirror of the hero's downward tear — so the page reads as one
-        // torn sheet end-to-end. Fixed seed → never re-rolls.
-        // v11 — the strip wears the PLAIN tear (no bold/detail lip): a calm
-        // no-design seam that stays theme-aware and keeps the footer's fixed
-        // height, so the tags row below never collides with a deep lip.
-        val bottomTornShape = remember(REVEAL_BOTTOM_TEAR_SEED) {
-            SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED)
-        }
-        // v9.x — the strip and its tear are fully opaque and follow the active
-        // appearance. Curio uses the category surface (anchored to the
-        // surface container so the paper reads as a slightly darker, more
-        // defined strip; the old `surface` base washed white/creamy on the
-        // tinted page). Material uses the device surface, and AMOLED stays
-        // pure black.
-        val tearPaper = when (AppPreferences.themeStyleState) {
+        // ── Bottom band — replaces the bottom navigation bar ─────────────
+        // The reveal paints its own PLAIN, theme-aware band at the bottom of
+        // the screen (at navbar height) instead of the Scaffold's navigation
+        // bar (see CurioNavHost.showBottomBar): a flat rectangle with no
+        // torn seam or ragged edge — the tags row sits on it.
+        // v9.x — the band is fully opaque and follows the active appearance.
+        // Curio uses the category surface (anchored to the surface container
+        // so the band reads as a slightly darker, more defined strip; the old
+        // `surface` base washed white/creamy on the tinted page). Material
+        // uses the device surface, and AMOLED stays pure black.
+        val bandPaper = when (AppPreferences.themeStyleState) {
             AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
             AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
             else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainer)
         }
-        val tearInk = MaterialTheme.colorScheme.onSurface
+        val bandInk = MaterialTheme.colorScheme.onSurface
         // v9.x — NavHost reserves the missing navbar footprint for Reveal
-        // without drawing the actual bar. This strip is painted down into
+        // without drawing the actual bar. This band is painted down into
         // that reserved 80dp slot plus the system nav inset, ending flush at
-        // the physical screen bottom. The torn seam therefore starts where
-        // the real navbar would start on Spin, keeping the page bounds,
-        // watermark and shared hero morph at the same level.
+        // the physical screen bottom — it starts where the real navbar would
+        // start on Spin, keeping the page bounds, watermark and shared hero
+        // morph at the same level.
         val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .offset(y = RevealBottomTearHeight + navInset)
+                .offset(y = RevealBottomBarHeight + navInset)
                 .fillMaxWidth()
-                .height(RevealBottomTearHeight + navInset)
-                .graphicsLayer { rotationZ = 180f }
-                .clip(bottomTornShape)
-                .background(tearPaper)
+                .height(RevealBottomBarHeight + navInset)
+                .background(bandPaper)
         )
 
         // Compact context row: tags live in the reserved footer now, keeping
         // the reveal body focused without changing the footer's fixed height.
-        // v11 — the chips sit a little LOWER (16dp inset) so they clear the
-        // torn seam entirely, and each chip caps at a third of the row width
-        // with ellipsis so the row never runs off small screens.
+        // v11 — the chips sit a little LOWER (24dp inset) so they clear the
+        // plain band's top edge with breathing room, and each chip caps at a
+        // third of the row width with ellipsis so the row never runs off
+        // small screens.
         if (!resolved?.tags.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = RevealBottomTearHeight + navInset)
+                    .offset(y = RevealBottomBarHeight + navInset)
                     .fillMaxWidth()
-                    .height(RevealBottomTearHeight + navInset)
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = navInset + 8.dp),
+                    .height(RevealBottomBarHeight + navInset)
+                    .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = navInset + 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.Top
             ) {
@@ -787,7 +773,7 @@ fun TopicRevealScreen(
                         Text(
                             text = tag,
                             style = MaterialTheme.typography.labelSmall,
-                            color = tearInk,
+                            color = bandInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
