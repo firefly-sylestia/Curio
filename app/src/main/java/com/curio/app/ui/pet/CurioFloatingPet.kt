@@ -233,6 +233,10 @@ fun CurioFloatingPet(
         // almost constantly while the deck waits.
         var lastPokeAt by remember { mutableStateOf(0L) }
         val appear = remember { Animatable(0f) }
+        // v9.x — chameleon-game opacity: the pet fades to a faint outline
+        // ("camouflage"), then pops back at a fresh spot. Multiplied into
+        // the sprite's own alpha so the two fades compose cleanly.
+        val chameleonAlpha = remember { Animatable(1f) }
         // v8.9 — on the Spin screen the pet stops to watch the deck; event
         // reactions start from the current count so stale events never fire.
         val watching = routePrefix?.startsWith("spin") == true
@@ -673,6 +677,9 @@ fun CurioFloatingPet(
                     walkTo(Offset(tx, ty), stepMs = 24, steps = 46)
                     peeking = true
                     squishKey++
+                    // v9.x — hide-and-peek talks sometimes: a soft peek-a-boo
+                    // line instead of always playing the crouch in silence.
+                    if (Random.nextFloat() < 0.55f) queueReaction(CurioPet.peekLine())
                     delay(720)
                     peeking = false
                     squishKey++
@@ -698,6 +705,7 @@ fun CurioFloatingPet(
                     val tx = (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
                     walkTo(Offset(tx, edgeY), stepMs = 24, steps = 40)
                     peeking = true
+                    if (Random.nextFloat() < 0.55f) queueReaction(CurioPet.peekLine())
                     delay(900)
                     peeking = false
                     squishKey++
@@ -741,6 +749,50 @@ fun CurioFloatingPet(
                     squishKey++
                     heartsKey++
                     lastPokeAt = System.currentTimeMillis()
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
+                // v9.x — CHAMELEON GAME: the pet occasionally fades into the
+                // background (a faint outline), waits a beat, then pops back
+                // somewhere new with a flourish. Never while glued to the
+                // deck or mid-spin.
+                if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.05f) {
+                    CurioPet.notePlay(context)
+                    queueReaction(CurioPet.chameleonLine())
+                    squishKey++
+                    chameleonAlpha.snapTo(1f)
+                    chameleonAlpha.animateTo(0.12f, tween(420, easing = FastOutSlowInEasing))
+                    delay(760)
+                    // v9.x — if the user grabbed the pet while it was hidden,
+                    // never teleport it mid-drag: pop back visible and let
+                    // the drag win (the wander loop is NOT cancelled by a
+                    // drag, so this guard is the only thing that stops a
+                    // surprise jump under the finger).
+                    if (dragged) {
+                        chameleonAlpha.snapTo(1f)
+                        continue
+                    }
+                    val nx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    val ny = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    pos = Offset(nx, ny)
+                    facing = if (Random.nextFloat() < 0.5f) -1f else 1f
+                    chameleonAlpha.animateTo(1f, tween(360, easing = FastOutSlowInEasing))
+                    squishKey++
+                    celebrateKey++
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
+                // v9.x — SPARK-CATCH GAME: a quick eager dash to a fresh spot
+                // to "grab" a falling spark, with a celebration on arrival.
+                if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.06f) {
+                    CurioPet.notePlay(context)
+                    queueReaction(CurioPet.sparkLine())
+                    val sx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    val sy = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    walkTo(Offset(sx, sy), stepMs = 12, steps = 34)
+                    squishKey++
+                    celebrateKey++
+                    heartsKey++
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
@@ -1034,7 +1086,7 @@ fun CurioFloatingPet(
                 .offset { IntOffset(pos.x.roundToInt(), pos.y.roundToInt()) }
                 .size(FLOAT_SIZE)
                 .graphicsLayer {
-                    alpha = appear.value
+                    alpha = appear.value * chameleonAlpha.value
                     scaleX = 0.5f + 0.5f * appear.value
                     scaleY = 0.5f + 0.5f * appear.value
                 }
@@ -1079,6 +1131,12 @@ fun CurioFloatingPet(
                             dizzy = true
                             peeking = false
                             typingReaction = false
+                            // v9.x — grabbing the pet mid-chameleon brings it
+                            // straight back to full visibility (the drag
+                            // callbacks aren't suspend, so this hops onto the
+                            // composition glide scope, the same host the
+                            // throw-glide uses).
+                            glideScope.launch { chameleonAlpha.snapTo(1f) }
                             dragStartAt = System.currentTimeMillis()
                             lastTouch = System.currentTimeMillis()
                             // v8.20 — a fresh drag starts clear of the bed.
@@ -1457,6 +1515,12 @@ fun CurioFloatingPet(
                     // its left tail remains the least surprising orientation
                     // for controls near either side of the screen.
                     tailOnLeft = false,
+                    // v9.x — the tour dialogue is NOT clipped to two lines
+                    // (the old maxLines=2 cut longer steps like Settings) and
+                    // may grow wider than a passive reaction bubble. Regular
+                    // reactions keep their cozy two-line cap.
+                    maxLines = if (tourStep != null) Int.MAX_VALUE else 2,
+                    maxWidth = if (tourStep != null) 340.dp else 260.dp,
                     modifier = Modifier.align(Alignment.BottomStart)
                 )
             }

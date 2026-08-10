@@ -2,3 +2,6 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Fixed the pet getting stuck in Spin chatter after leaving mid-spin — it now cheers only while you’re actually on the Spin page, walks right up to buttons before poking them, and never interacts from across the screen.
 • Curie’s typing keyboard is now a tiny 5× smaller thing while you type.
 • Returning to the Spin page no longer flashes a “Nothing here yet” card while the deck loads — the deck appears instantly from cache, or shows a brief “Gathering the deck…” hint on a cold load.
+• Curie’s personality grew a lot: 150+ new reactions, an anti-repeat memory so she never says the same line twice in a row, and adorable sassy comebacks when you open the same thing over and over.
+• New pet games: she plays chameleon (fades into the background, then pops back somewhere new), dashes after falling sparks, and says peek-a-boo when hiding around buttons.
+• The Tour got a proper bottom dock with big Next and Skip buttons on a solid background, tour dialogue is no longer cut off at two lines, and tapping anywhere on screen advances the tour.

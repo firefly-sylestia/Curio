@@ -13,8 +13,11 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,9 +31,13 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -748,19 +755,65 @@ fun CurioNavHost(
                 navController.popBackStack(CurioRoutes.HOME, inclusive = false)
             }
         }
-        Row(
+        // v9.x — tap ANYWHERE to advance the tour. A full-screen transparent
+        // hit layer sits behind the bottom dock, so every tap on the screen
+        // (the demonstrated control included) acts as "Next" without ever
+        // firing the real action — the tour stays a pure demo.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { advanceTourAndNavigate() }
+        )
+        // v9.x — a solid full-width dock: an opaque background that reaches
+        // under the system nav inset (covering the app's bottom bar and the
+        // gesture strip) so the tour controls never float over raw content.
+        // Bigger, clearly tappable buttons.
+        Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 20.dp)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = 18.dp),
-            horizontalArrangement = Arrangement.Center
+                .fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 3.dp,
+            shadowElevation = 8.dp
         ) {
-            TextButton(onClick = { TourController.skip() }) { Text("Skip") }
-            // The final stop labels the control "Done" — advancing past it
-            // properly closes the tour instead of silently stopping.
-            TextButton(onClick = { advanceTourAndNavigate() }) {
-                Text(if (TourController.isLastStep) "Done" else "Next")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { TourController.skip() },
+                    modifier = Modifier.weight(1f).height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(
+                        "Skip",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                // The final stop labels the control "Done" — advancing past
+                // it properly closes the tour instead of silently stopping.
+                Button(
+                    onClick = { advanceTourAndNavigate() },
+                    modifier = Modifier.weight(1f).height(54.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        if (TourController.isLastStep) "Done" else "Next",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

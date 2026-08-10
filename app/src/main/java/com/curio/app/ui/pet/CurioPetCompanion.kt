@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.AppPreferences
@@ -57,7 +58,11 @@ import com.curio.app.ui.theme.CurioColors
 fun PetSpeechBubble(
     text: String,
     modifier: Modifier = Modifier,
-    tailOnLeft: Boolean = true
+    tailOnLeft: Boolean = true,
+    // v9.x — the tour can pass a taller/wider cap so its dialogue is never
+    // clipped at the passive two-line limit; reactions keep the cozy default.
+    maxLines: Int = 2,
+    maxWidth: Dp = 260.dp
 ) {
     val bubbleColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val bubbleShape = RoundedCornerShape(
@@ -67,7 +72,7 @@ fun PetSpeechBubble(
         bottomEnd = if (tailOnLeft) 20.dp else 8.dp
     )
     Row(
-        modifier = modifier.widthIn(max = 260.dp),
+        modifier = modifier.widthIn(max = maxWidth),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = if (tailOnLeft) Arrangement.Start else Arrangement.End
     ) {
@@ -95,7 +100,7 @@ fun PetSpeechBubble(
                     lineHeight = 17.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
+                maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )

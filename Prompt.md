@@ -56,6 +56,24 @@
 **Date:** 2026-08-10
 
 ### What the user asked
+"Increase the pet actions, make it not repeat the same dialogs, add an 'annoyed' reaction for repeated actions, add 100s of reactions + fun games (hide-and-peek behind buttons, chameleon disappear). Tour dialog is cut at 2 lines — fix. Next/Skip buttons not visible — give a proper background that hides the nav bar and make them bigger. Tapping anything on screen should advance the tour."
+
+### Pet personality + tour pass (v9.x) — complete
+
+**CurioPet.kt** — every line pool expanded (8-16 variants each, ~150+ new lines across mood bubbles, reactions, cheers, boops, jigs, dizzy, drawers, games). All pickers route through a new `pickLine()` anti-repeat bag (never repeats a line spoken in the last 16). New `isEventBurst()` mechanic: the SAME action 3× within 4 minutes earns one adorable sassy line (10 variants), then the burst resets. New game line pools: `peekLine()`, `chameleonLine()`, `sparkLine()`.
+
+**CurioFloatingPet.kt** — new `chameleonAlpha` Animatable multiplied into the sprite's alpha; the wander loop now runs two autonomous games (chameleon fade-out/reappear-at-new-spot, spark-catch dash with hearts) gated off the Spin deck; hide-and-peek crouches speak a peek-a-boo line ~55% of the time. Tour bubble call passes `maxLines = Int.MAX_VALUE, maxWidth = 340.dp`.
+
+**PetSpeechBubble** — gained `maxLines` + `maxWidth` params (defaults keep passive bubbles at 2 lines / 260dp).
+
+**CurioNavHost** — tour controls replaced: full-screen transparent tap layer (any tap advances the tour, `clickable` with null indication) + solid full-width bottom `Surface` dock (surfaceContainerHigh, reaches under the nav inset, covering the app's bottom bar) with two big 54dp rounded buttons (Skip tonal, Next/Done primary).
+
+### Validation
+- `scripts/check_braces.js` passes on all 4 edited Kotlin files.
+- `git diff --check` clean.
+- Code review (deepseek-flash) passed.
+
+### Previous request — FX removed + release analysis
 "We are near release — analyse the full app and give me a full analysis of what should be refined and what else. Also we are removing the fx option and not implementing it."
 
 ### FX experiment removed (decision: NOT implementing)
