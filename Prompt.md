@@ -55,6 +55,11 @@
 
 **Date:** 2026-08-10
 
+### CI fix (2 compile errors from the 1903fd8/7036275 push)
+- `SpinScreen.kt:477` — `Unresolved reference 'pool'`: inside the `produceState` producer lambda the outer `pool` delegate is NOT resolvable (latent since the 57dff36 pool-loading fix; CI caught it now). Fixed by reading the scope's own `value` instead: `if (value.isEmpty()) poolLoading = true` and `else if (value.isEmpty())` — identical semantics (value = current pool, seeded from cache on warm returns).
+- `CurioNavHost.kt:20` — `Cannot access 'RowColumnParentData?.weight' (internal)`: the tour-dock change added `import androidx.compose.foundation.layout.weight`, which resolves to an INTERNAL property, not the RowScope extension. `Modifier.weight` inside a RowScope needs no import — removed the line.
+- Verified: no other `layout.weight` imports in the tree, no other producer-scope self-references, braces + `git diff --check` clean.
+
 ### Batches question + empty-state fix + Wildcard browse
 "Why do we have scripts/batches/*.json? Are they in the app or leftover? The nothing-to-show is more frequent now; add a separate wildcard browse in Browse Topics."
 - **Batches explained** (no code change): `scripts/batches/*.json` are dev-time staging batches merged by `scripts/merge_topic_batches.js` into the final `app/src/main/assets/topics/*.json`. Zero build/app references — not in the APK. Leftovers of the content pipeline; kept as the merge source of truth.

@@ -481,23 +481,24 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         initialValue = poolIds.flatMap { TopicJsonLoader.cached(it).orEmpty() },
         poolIds, poolRetryKey
     ) {
-        if (pool.isEmpty()) poolLoading = true
+        // NOTE: inside the producer lambda the outer `pool` delegate is not
+        // resolvable — read the scope's own `value` (the current pool,
+        // seeded from cache on a warm return) instead.
+        if (value.isEmpty()) poolLoading = true
         poolLoadFailed = false
         val merged = mutableListOf<CurioTopic>()
         val seen = mutableSetOf<String>()
-        var anyFailed = false
+        // A failed lane simply contributes nothing; empty-after-load still
+        // routes to the retry hint below (a lane can't be genuinely empty
+        // with valid data).
         poolIds.forEach { id ->
-            val result = runCatching { TopicJsonLoader.load(id) }
-            if (result.isFailure) {
-                anyFailed = true
-                return@forEach
-            }
-            result.getOrThrow().forEach { t -> if (seen.add(t.id)) merged.add(t) }
+            runCatching { TopicJsonLoader.load(id) }.getOrNull()
+                ?.forEach { t -> if (seen.add(t.id)) merged.add(t) }
         }
         poolLoading = false
         if (merged.isNotEmpty()) {
             value = merged
-        } else if (pool.isEmpty()) {
+        } else if (value.isEmpty()) {
             // Empty after loading with valid data = the load failed (or a
             // lane is truly empty) — offer a retry, never a dead end.
             poolLoadFailed = true
