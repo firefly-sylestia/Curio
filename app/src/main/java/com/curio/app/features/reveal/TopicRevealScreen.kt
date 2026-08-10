@@ -43,6 +43,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -726,12 +727,15 @@ fun TopicRevealScreen(
             SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true, detail = true)
         }
         // v9.x — the strip and its tear are fully opaque and follow the active
-        // appearance. Curio uses the category surface, Material uses the
-        // device surface, and AMOLED stays pure black.
+        // appearance. Curio uses the category surface (anchored to the
+        // surface container so the paper reads as a slightly darker, more
+        // defined strip; the old `surface` base washed white/creamy on the
+        // tinted page). Material uses the device surface, and AMOLED stays
+        // pure black.
         val tearPaper = when (AppPreferences.themeStyleState) {
             AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
             AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
-            else -> cat.categorySurface(MaterialTheme.colorScheme.surface)
+            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainer)
         }
         val tearInk = MaterialTheme.colorScheme.onSurface
         // v9.x — NavHost reserves the missing navbar footprint for Reveal
@@ -875,6 +879,18 @@ fun TopicRevealScreen(
     if (showExploreDialog && resolved != null) {
         val topic = resolved
         val action = topic.exploreAction
+        // v10 — theme-aware explore dialog: uses the category's readable
+        // accent as the button ink so "Explore in Google" / "Explore in
+        // YouTube" are vivid and visible in every theme (the old default
+        // pink primary washed out on tinted surfaces in dark mode). The
+        // dialog shape uses a generous rounded corner to match the card
+        // language of the page instead of the default sharp rect.
+        val dialogAccent = cat.themedAccent()
+        val dialogButtonColors = ButtonDefaults.textButtonColors(
+            contentColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL)
+                MaterialTheme.colorScheme.primary
+            else dialogAccent
+        )
         AlertDialog(
             onDismissRequest = {
                 // A dismiss gesture (tap-outside / back / swipe) with no
@@ -889,12 +905,19 @@ fun TopicRevealScreen(
                 }
                 showExploreDialog = false
             },
-            title = { Text("Explore ${topic.name}?") },
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Text(
+                    "Explore ${topic.name}?",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Choose Google or YouTube to begin.",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         "Your explore gets timed (not a countdown), and when you come back we'll ask if you're done so you can write it down.",
@@ -905,16 +928,22 @@ fun TopicRevealScreen(
             },
             confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = {
-                        engaged = true
-                        showExploreDialog = false
-                        startExploreSession(topic, buildGoogleSearchUrl(topic))
-                    }) { Text("Explore in Google") }
-                    TextButton(onClick = {
-                        engaged = true
-                        showExploreDialog = false
-                        startExploreSession(topic, buildYouTubeSearchUrl(topic))
-                    }) { Text("Explore in YouTube") }
+                    TextButton(
+                        onClick = {
+                            engaged = true
+                            showExploreDialog = false
+                            startExploreSession(topic, buildGoogleSearchUrl(topic))
+                        },
+                        colors = dialogButtonColors
+                    ) { Text("Explore in Google") }
+                    TextButton(
+                        onClick = {
+                            engaged = true
+                            showExploreDialog = false
+                            startExploreSession(topic, buildYouTubeSearchUrl(topic))
+                        },
+                        colors = dialogButtonColors
+                    ) { Text("Explore in YouTube") }
                 }
             },
             dismissButton = null
@@ -1164,6 +1193,8 @@ private fun RevealStartButton(
     // a comfortable vertical padding — the old 2dp tight tier is gone.
     // v8.55 — the tier metrics resize the button instead of squeezing the
     // label on small screens.
+    // v10 — fixed height matches the paired "Express yourself" button so
+    // the two actions read as a unified row instead of mismatched siblings.
     val startShape = RoundedCornerShape(50)
     Button(
         onClick = onClick,
@@ -1185,6 +1216,7 @@ private fun RevealStartButton(
         ),
         modifier = modifier
             .fillMaxWidth()
+            .height(52.dp)
             .categoryEdgeShine(startShape, accent = cat.themedAccent())
     ) {
         Row(
