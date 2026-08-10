@@ -1376,16 +1376,28 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
  * on — so the hero, empty state and drawer all wear the SAME rose-wood.
  */
 @Composable
-private fun homeReadableInk(fill: Color): Color = if (
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme()
-) {
-    MaterialTheme.colorScheme.onSurface
-} else {
-    pastelFillInk(fill)
+private fun homeReadableInk(fill: Color): Color = when {
+    // v9.x — mirror Settings' ink so Material/AMOLED hero text stays
+    // readable on the scheme-driven hero fills.
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+        MaterialTheme.colorScheme.onPrimary
+    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+        MaterialTheme.colorScheme.onSurface
+    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+        MaterialTheme.colorScheme.onSurface
+    else -> pastelFillInk(fill)
 }
 
 @Composable
 private fun homeRoseAccent(): Color {
+    // v9.x — hero headers stay coherent with Settings: Material and AMOLED
+    // use the active scheme's semantic roles instead of the legacy rose.
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.primary
+    }
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
+    }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
         // One shared deep companion keeps this hero family atmospheric in

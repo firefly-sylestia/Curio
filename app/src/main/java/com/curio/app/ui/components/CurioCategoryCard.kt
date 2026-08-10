@@ -107,8 +107,10 @@ fun CurioCategoryCard(
     // Idle cards wear the category's tinted surface — the page wash, but a
     // touch stronger — so unselected tiles sit on the washed page as soft
     // tints of their own color instead of shouting in full brightness.
+    // v9.x — AMOLED idle tiles are PROPER pitch black; the category identity
+    // lives on the accent-tinted edge shine instead.
     val idleSurface = when (AppPreferences.themeStyleState) {
-        AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surfaceContainer
+        AppPreferences.THEME_STYLE_AMOLED -> Color.Black
         AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainerHigh
         else -> category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
     }
@@ -133,6 +135,11 @@ fun CurioCategoryCard(
             .fillMaxWidth()
             .height(104.dp)
             .scale(scale)
+            // v9.x — AMOLED black-glass edge: the category-colored shine.
+            .amoledEdgeShine(
+                RoundedCornerShape(22.dp),
+                accent = category.themedAccent()
+            )
     ) {
         Box(
             modifier = Modifier

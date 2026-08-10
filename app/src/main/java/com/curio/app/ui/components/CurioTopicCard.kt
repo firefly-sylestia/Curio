@@ -105,13 +105,18 @@ fun CurioEntryCard(
                     onClick()
                 },
                 onLongClick = onLongClick
-            ),
+            )
+            // v9.x — AMOLED black-glass edge (hairline + top shine).
+            .amoledEdgeShine(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
-        // surfaceContainerHigh (not plain surface): in the AMOLED style
-        // `surface` is pure black, which made the whole Cabinet grid of
-        // cards invisible on the black page. The high container step keeps
-        // a faint grey lift so cards read as boxes in every theme.
-        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+        // v9.x — AMOLED cards are proper pitch black now: the old grey
+        // surfaceContainerHigh lift is replaced by the black-glass shine
+        // edge, so the cards read as boxes without sacrificing OLED black.
+        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+            Color.Black
+        } else {
+            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+        },
         border = if (selected) {
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
         } else {

@@ -42,11 +42,19 @@ fun CurioSettingsCard(
 ) {
     Surface(
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        // v9.x — AMOLED settings cards are proper pitch black; the black-glass
+        // shine edge keeps them readable on the pure-black page.
+        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+            Color.Black
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        },
         tonalElevation = 3.dp,
         shadowElevation = 0.dp,
         border = border,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .amoledEdgeShine(RoundedCornerShape(28.dp))
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 

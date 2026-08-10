@@ -39,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -111,6 +110,8 @@ import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
+import com.curio.app.ui.components.amoledEdgeShine
+import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -1136,13 +1137,16 @@ private fun RevealStartButton(
     // a comfortable vertical padding — the old 2dp tight tier is gone.
     // v8.55 — the tier metrics resize the button instead of squeezing the
     // label on small screens.
+    val startShape = RoundedCornerShape(50)
     Button(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(50),
-        colors = ButtonDefaults.buttonColors(
+        shape = startShape,
+        colors = curioButtonColors(
             // v8.57 — themed to the category accent so the button wears the
-            // lane's own color instead of the generic theme primary.
+            // lane's own color instead of the generic theme primary. v9.x —
+            // in AMOLED the pill goes pitch-black and the category accent
+            // becomes the edge shine instead.
             containerColor = cat.themedAccent(),
             contentColor = cat.onAccent(),
             disabledContainerColor = cat.themedAccent().copy(alpha = 0.35f),
@@ -1152,7 +1156,9 @@ private fun RevealStartButton(
             horizontal = metrics.startPadH,
             vertical = metrics.startPadV
         ),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .amoledEdgeShine(startShape, accent = cat.themedAccent())
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

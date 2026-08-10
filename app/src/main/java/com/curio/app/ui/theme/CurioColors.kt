@@ -333,11 +333,12 @@ object CurioGradients {
      */
     @Composable
     fun cardGradient(accent: Color): List<Color> {
-        // AMOLED uses the same near-black card language everywhere: a raised
-        // black surface with only a quiet category-color bloom. This keeps
-        // category cards, heroes, and peek cards power-friendly and coherent.
+        // v9.x — AMOLED cards are PROPER pitch black now: a pure black base
+        // (was the surfaceContainerHigh grey) with only a quiet category-
+        // color bloom, and the card edge carries the black-glass shine (see
+        // Modifier.amoledEdgeShine). Power-friendly and coherent everywhere.
         if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            val base = MaterialTheme.colorScheme.surfaceContainerHigh
+            val base = Color.Black
             val accentTrace = lerp(base, accent, 0.18f)
             return listOf(
                 lerp(base, accent, 0.08f),
