@@ -331,7 +331,7 @@ fun TopicRevealScreen(
         }
     }
 
-    // ── Floating explore bubble permission ────────────────────────────
+    // ── Floating explore bubble permission ────────────────────────���───
     //    "Display over other apps" has no runtime dialog on Android 10+, so
     //    Allow opens the system special-access page; ON_RESUME below resumes
     //    the deferred flow (and starts the bubble service if granted). Asked
@@ -641,37 +641,6 @@ fun TopicRevealScreen(
                 // the card. The tags row below simply follows the hero
                 // directly.
 
-                // ── 4. Tags chip row (genre / era context) ─────────────────
-                RevealContentEntrance(delayMillis = 80) {
-                    if (!resolved?.tags.isNullOrEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 20.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            resolved.tags.take(4).forEach { tag ->
-                                Surface(
-                                    shape = RoundedCornerShape(50),
-                                    color = cat.themedAccent().copy(alpha = 0.18f),
-                                    shadowElevation = 0.dp
-                                ) {
-                                    Text(
-                                        text = tag,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        // Spacer so subsequent sections don't crowd up.
-                        Spacer(Modifier.height(10.dp))
-                    }
-                }
-
                 // ── 5. Teaser card ──────────────────────────────────────────
                 RevealContentEntrance(delayMillis = 160) {
                     TeaserCard(
@@ -754,11 +723,15 @@ fun TopicRevealScreen(
         val bottomTornShape = remember(REVEAL_BOTTOM_TEAR_SEED) {
             SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true)
         }
-        // v9.x — the torn paper is theme-aware: the warm cream sheet in
-        // light mode, but in dark mode the page wash's lifted sibling (the
-        // deep category-tinted card surface — near-black in AMOLED), so the
-        // strip never glares against the dark page.
-        val tearPaper = if (isCurioDarkTheme()) cat.categorySurface() else CurioColors.CreamWhite
+        // v9.x — the strip and its tear are fully opaque and follow the active
+        // appearance. Curio uses the category surface, Material uses the
+        // device surface, and AMOLED stays pure black.
+        val tearPaper = when (AppPreferences.themeStyleState) {
+            AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
+            AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
+            else -> cat.categorySurface(MaterialTheme.colorScheme.surface)
+        }
+        val tearInk = MaterialTheme.colorScheme.onSurface
         // v9.x — NavHost reserves the missing navbar footprint for Reveal
         // without drawing the actual bar. This strip is painted down into
         // that reserved 80dp slot plus the system nav inset, ending flush at
@@ -776,6 +749,39 @@ fun TopicRevealScreen(
                 .clip(bottomTornShape)
                 .background(tearPaper)
         )
+
+        // Compact context row: tags live in the reserved footer now, keeping
+        // the reveal body focused without changing the footer's fixed height.
+        if (!resolved?.tags.isNullOrEmpty()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = RevealBottomTearHeight + navInset)
+                    .fillMaxWidth()
+                    .height(RevealBottomTearHeight + navInset)
+                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = navInset + 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.Top
+            ) {
+                resolved.tags.take(3).forEach { tag ->
+                    Surface(
+                        modifier = Modifier.weight(1f, fill = false),
+                        shape = RoundedCornerShape(50),
+                        color = cat.themedAccent().copy(alpha = 0.18f),
+                        shadowElevation = 0.dp
+                    ) {
+                        Text(
+                            text = tag,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = tearInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 
     // Leaving via the system back gesture without engaging → recently-unexplored
