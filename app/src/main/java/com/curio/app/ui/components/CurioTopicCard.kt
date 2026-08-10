@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories

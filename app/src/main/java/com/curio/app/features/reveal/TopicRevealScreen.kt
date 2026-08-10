@@ -26,9 +26,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -751,11 +755,21 @@ fun TopicRevealScreen(
         // deep category-tinted card surface — near-black in AMOLED), so the
         // strip never glares against the dark page.
         val tearPaper = if (isCurioDarkTheme()) cat.categorySurface() else CurioColors.CreamWhite
+        // v9.x — the strip spans the FULL navbar footprint: 80dp of torn
+        // paper PLUS the system navigation-bar inset, ending flush at the
+        // physical screen bottom — exactly where the bottom nav bar sits on
+        // other screens. The reveal's content area is already inset by the
+        // Scaffold's navigationBars, so the strip offsets down by that
+        // inset to reach the edge; the torn seam stays at the same height
+        // as the navbar's top, keeping the hero morph at the same level it
+        // would have with the bar present.
+        val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .offset(y = navInset)
                 .fillMaxWidth()
-                .height(RevealBottomTearHeight)
+                .height(RevealBottomTearHeight + navInset)
                 .graphicsLayer { rotationZ = 180f }
                 .clip(bottomTornShape)
                 .background(tearPaper)

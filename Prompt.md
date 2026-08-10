@@ -1,51 +1,39 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Material theme adopts device colors with the category accent shine
+## Current Request (COMPLETED): Fix CI compile errors + reveal tear navbar footprint
 
 **Date:** 2026-08-10
 
 ### What the user asked
-"Fix the material theme — many things don't get the material colors — the category button etc, the peek cards — fix them."
+"fi this and in topic reveal screen the tear doesnt have the buttom paddng or scaffhold that keep the morph animation at level at the same heigh as the navar"
 
-Clarifications gathered via ask_user:
-- Scope (multi-select, all chosen): **category buttons, peek cards + deck, picker category cards, spin button** — "with the category accent shine".
-- The "Material card blends" experiment: **always-on in Material, remove the toggle** (experiment concluded).
+1. Fix the pasted CI compile failure (`compileReleaseKotlin` / `compileDebugKotlin`).
+2. Topic Reveal's torn bottom edge should span the same bottom footprint as the bottom navigation bar so the page (and the shared-element hero morph) sits at the same height as with the navbar.
 
-### Changes made (commit `b8e3b7c`, pushed to Alpha)
+### CI errors triaged
+- `AmoledEdgeShine.kt:30:66` (Float vs Density) — **stale**: that file was renamed to `CategoryEdgeShine.kt` in `b8e3b7c`, which imports `AppPreferences` and uses `shape.createOutline(size, layoutDirection, density)` with correct types. No references to the old name remain.
+- `CurioSettingsCard.kt:47` — **real**: used `AppPreferences.themeStyleState` / `THEME_STYLE_AMOLED` without importing it.
+- `CurioTopicCard.kt:115` — **real**: same missing import.
 
-**Renamed + generalized: `AmoledEdgeShine.kt` → `CategoryEdgeShine.kt`**
-- `Modifier.amoledEdgeShine` → `Modifier.categoryEdgeShine(shape, accent?)` — now active in **both** AMOLED (black-glass, unchanged) and **Material** (the category accent shines at the edge as a colored rim light on the device-colored surfaces; alphas tuned up slightly since Material surfaces are mid-tone). All 8 call sites updated.
-- `curioButtonColors` kept (AMOLED → black, pass-through otherwise).
-
-**Toggle removal (experiment concluded):**
-- `materialCardBlendsState` var + KEY + getter/setter + load line removed from `AppPreferences`.
-- "Material card blends" row removed from `ExperimentsScreen`.
-- `cardGradient` Material branch now unconditional (always device-palette blend).
-- `EntryDetailScreen` hero blend gate simplified.
-
-**Deck / peek cards now Material:**
-- New shared `materialDeviceStop(accent, dark, pastel, factor)` (top-level internal in `CurioColors.kt`) — the device primaryContainer + category whisper, used by both `cardGradient` (two-stop) and `mixedDeckGradient` (multi-accent sweeps + seams), so **mixed decks no longer glow in raw category colors**.
-- Peek cards carry the accent rim shine.
-
-**Category buttons now Material:**
-- New `themedButtonFill()` / `themedButtonInk()` in `CategoryInk.kt` — Material style wears the device `primary` / `onPrimary` (like the Mix button and Home hero already did); Curio/AMOLED keep the category accent.
-- Applied to: `DeckControlButton`, `VerticalDeckButton` (selected state + accent rim), the Filter sheet's Apply button, `RevealStartButton`, and the **SpinButton** (tint resolves to Material primary; new `shineAccent` param keeps the category rim).
-- Picker Mix button already used primary — now also gets the Material shine.
+### Changes made
+- `CurioSettingsCard.kt` — added `import com.curio.app.data.AppPreferences` (alphabetically placed).
+- `CurioTopicCard.kt` — added `import com.curio.app.data.AppPreferences` (alphabetically placed).
+- `TopicRevealScreen.kt` — the reveal's bottom torn strip now spans the FULL navbar footprint: `height = RevealBottomTearHeight + navInset` with `.offset(y = navInset)` (from `WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()`). The torn seam stays at the same height (content bottom − 80dp), but the paper now extends through the gesture-bar inset to the physical screen bottom — exactly where the bottom bar sits on other screens, so the reveal page + morph read at the same level as with the navbar. The scroll-clearance Spacer stays valid (seam position unchanged).
 
 ### Validation
-- Brace balance OK on all 13 files (`scripts/check_braces.js`).
-- No stale references: `amoledEdgeShine`, `materialCardBlends`, `materialWhisperStop` all gone (grep clean).
-- Code review (deepseek-flash) passed; fixed its one actionable item — extracted the duplicated whisper math into the shared `materialDeviceStop` helper.
-- Import audit: all imports still used; `categoryEdgeShine` import placed alphabetically.
-- Gradle builds are CI-only per repo rules.
+- Brace balance OK on all 3 edited files (`scripts/check_braces.js`).
+- No stale `amoledEdgeShine` / `AmoledEdgeShine` references anywhere (grep clean).
+- All other components that use `AppPreferences` (CurioHeroCard, CurioCategoryCard, CategoryEdgeShine) already import it.
+- Code review (deepseek-flash) passed — import ordering, modifier order (`align` + `offset`), inset geometry, and compile-safety rules all verified.
 
 ### Notes / follow-ups
-- Worth a device check in Material: (1) deck button selected = device primary with the category rim; (2) peek/deck cards read as device palette with a faint category trace (mixed decks especially); (3) the spin button on device primary.
-- AMOLED deck control pills were never part of the black pass — they keep their grey `surfaceContainerHigh` fill and now catch the white rim in AMOLED too; if you want them pitch-black like the reveal/picker buttons, that's a small follow-up.
+- Worth a device check: open a reveal on a gesture-nav device — the torn seam should sit at the navbar's top edge with paper filling to the screen bottom (no gap above the gesture bar).
+- The CI log was from an intermediate state; after these fixes the current tree should compile clean.
 
 ---
 
 ## Prior requests (archive)
+- Material theme adopts device colors with category accent shine (`b8e3b7c`, `c151f1d`).
 - AMOLED theme polish — pitch-black cards + edge shine + unified heroes (`b351b42`, `e38a6c3`).
 - Theme-aware tear strip on the reveal (`ddec939`, `b74c7f5`).
 - Pet-led tour completion + reveal torn bottom edge (`5464cd4`, `1265c75`).
