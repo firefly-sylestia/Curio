@@ -744,6 +744,11 @@ fun TopicRevealScreen(
         val bottomTornShape = remember(REVEAL_BOTTOM_TEAR_SEED) {
             SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true)
         }
+        // v9.x — the torn paper is theme-aware: the warm cream sheet in
+        // light mode, but in dark mode the page wash's lifted sibling (the
+        // deep category-tinted card surface — near-black in AMOLED), so the
+        // strip never glares against the dark page.
+        val tearPaper = if (isCurioDarkTheme()) cat.categorySurface() else CurioColors.CreamWhite
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -751,7 +756,7 @@ fun TopicRevealScreen(
                 .height(RevealBottomTearHeight)
                 .graphicsLayer { rotationZ = 180f }
                 .clip(bottomTornShape)
-                .background(CurioColors.CreamWhite)
+                .background(tearPaper)
         )
     }
 
