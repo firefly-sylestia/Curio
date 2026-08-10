@@ -184,7 +184,12 @@ object CurioRoutes {
         return LIGHTBOX
     }
 
-    /** Routes where the bottom navigation bar should be visible, including Reveal for morph stability. */
+    /**
+     * Bottom-nav tab route templates. Reveal is included as the Spin tab's
+     * continuation so bottom-nav selection/back-stack logic can still treat
+     * it as Spin-adjacent, but CurioNavHost hides the actual bar on Reveal
+     * and reserves an equal-height torn placeholder for morph stability.
+     */
     val bottomNavRoutes: Set<String> = setOf(HOME, SPIN, CABINET, REVEAL)
 
     /**

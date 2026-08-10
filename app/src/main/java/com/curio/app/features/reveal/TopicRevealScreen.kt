@@ -527,20 +527,11 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            // v9.x — bottom padding placeholder at navbar height: the reveal
-            // shows NO bottom nav bar (it renders the torn paper seam
-            // instead), so without this placeholder the watermark's content
-            // area would extend all the way down behind the tear and its
-            // scattered glyphs would sit visibly LOWER than on the Spin
-            // page — the watermark appears to shift down as the bar
-            // disappears. Padding by the tear strip's height (exactly the
-            // navbar footprint — 80dp; the Scaffold already applies the
-            // nav-inset to this content Box) holds the collage at the same
-            // level as every tab screen.
-            CurioWatermarkBackdrop(
-                activeCat = cat,
-                modifier = Modifier.padding(bottom = RevealBottomTearHeight)
-            )
+            // The NavHost reserves a navbar-height placeholder for Reveal,
+            // so this backdrop can fill the same content bounds as the Spin
+            // tab. Keeping the whole destination's bounds stable fixes both
+            // the watermark level and the shared-card morph target.
+            CurioWatermarkBackdrop(activeCat = cat)
         }
 
         Column(
@@ -768,19 +759,17 @@ fun TopicRevealScreen(
         // deep category-tinted card surface — near-black in AMOLED), so the
         // strip never glares against the dark page.
         val tearPaper = if (isCurioDarkTheme()) cat.categorySurface() else CurioColors.CreamWhite
-        // v9.x — the strip spans the FULL navbar footprint: 80dp of torn
-        // paper PLUS the system navigation-bar inset, ending flush at the
-        // physical screen bottom — exactly where the bottom nav bar sits on
-        // other screens. The reveal's content area is already inset by the
-        // Scaffold's navigationBars, so the strip offsets down by that
-        // inset to reach the edge; the torn seam stays at the same height
-        // as the navbar's top, keeping the hero morph at the same level it
-        // would have with the bar present.
+        // v9.x — NavHost reserves the missing navbar footprint for Reveal
+        // without drawing the actual bar. This strip is painted down into
+        // that reserved 80dp slot plus the system nav inset, ending flush at
+        // the physical screen bottom. The torn seam therefore starts where
+        // the real navbar would start on Spin, keeping the page bounds,
+        // watermark and shared hero morph at the same level.
         val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .offset(y = navInset)
+                .offset(y = RevealBottomTearHeight + navInset)
                 .fillMaxWidth()
                 .height(RevealBottomTearHeight + navInset)
                 .graphicsLayer { rotationZ = 180f }

@@ -113,6 +113,10 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.theme.CurioMotion
 
+// Must match TopicRevealScreen's RevealBottomTearHeight: the hidden
+// navbar slot that the reveal paints with its torn bottom sheet.
+private val RevealBottomBarPlaceholderHeight = 80.dp
+
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
  * unpaired surrogates fall back to the raw value instead of crashing
@@ -222,15 +226,27 @@ fun CurioNavHost(
     val routePrefix = remember(currentRoute) {
         currentRoute?.substringBefore("/")
     }
+    // ── Adaptive window layout (tablet & landscape) ────────────────────
+    // Medium/Expanded windows (>= 600dp wide) move the three tabs into a
+    // left-edge NavigationRail and center page content in a comfortable
+    // max-width column ([CurioContentMaxWidth]) with the theme background
+    // filling the gutters. Compact phones keep the bottom bar and full-width
+    // content exactly as before. Always-on — no Settings toggle.
+    val wide = windowWidthSizeClass().isWide
+
     // Topic Reveal renders its OWN torn paper edge at the bottom (at
     // navbar height) instead of the bottom navigation bar — both from the
     // Spin main card and from the topic browser, the reveal never shows
     // the bar (see TopicRevealScreen's bottom tear).
+    val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
     val showBottomBar =
-        routePrefix in CurioRoutes.bottomNavRoutePrefixes &&
-            routePrefix != CurioRoutes.REVEAL.substringBefore("/")
-    // The reveal's own torn paper edge provides the bottom visual (see
-    // TopicRevealScreen), so the Scaffold adds no bar space for it.
+        routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+    // Reveal intentionally hides the actual nav bar, but its content still
+    // reserves the same 80dp app-bar footprint. The reveal screen paints a
+    // torn sheet into that reserved slot, so the watermark coordinate space
+    // and shared hero target stay aligned with the Spin tab instead of
+    // stretching downward when the nav bar disappears.
+    val revealBottomBarPlaceholder = if (isRevealRoutePrefix && !wide) RevealBottomBarPlaceholderHeight else 0.dp
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -325,14 +341,6 @@ fun CurioNavHost(
         }
     }
 
-    // ── Adaptive window layout (tablet & landscape) ────────────────────
-    // Medium/Expanded windows (>= 600dp wide) move the three tabs into a
-    // left-edge NavigationRail and center page content in a comfortable
-    // max-width column ([CurioContentMaxWidth]) with the theme background
-    // filling the gutters. Compact phones keep the bottom bar and full-width
-    // content exactly as before. Always-on — no Settings toggle.
-    val wide = windowWidthSizeClass().isWide
-
     // The floating explore bubble now lives in the explore service's overlay
     // window (over other apps), so the Scaffold simply fills the screen.
     Box(modifier = Modifier.fillMaxSize()) {
@@ -367,7 +375,8 @@ fun CurioNavHost(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .padding(bottom = revealBottomBarPlaceholder),
                 contentAlignment = Alignment.Center
             ) {
         // Wide windows (tablet / landscape / desktop): ONE continuous

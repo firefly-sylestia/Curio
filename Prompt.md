@@ -1,136 +1,24 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Pet fixes (spin-dialog loop, walk-to-button, tiny keyboard) + approved Spin pool-loading fix
+## Current Request (COMPLETED): Topic Reveal bottom tear / watermark / morph stability
 
 **Date:** 2026-08-10
 
 ### What the user asked
-1. Implement the previously approved Spin "Nothing here yet" pool-loading fix.
-2. Make the pet keyboard 5× smaller (a tiny thing).
-3. Fix pet interaction: wrong dialogs, not walking up to buttons (interacts from far).
-4. Fix the pet stuck in a loop of Spin-page dialogs on other screens.
+Fix the Topic Reveal page bottom tear/placeholder so hiding the bottom navbar does not make the watermark or the shared hero morph animation shift downward.
 
-### Root cause (all three pet issues = one bug)
-`CurioPet.spinning` gets STUCK true: SpinScreen flips it in `LaunchedEffect(shuffleCount)` (true at start, false at settle); leaving mid-spin cancels the effect so `noteSpinning(false)` never runs. With the flag stuck: the pet's spin-cheer effect fires on EVERY screen (no screen gate) → the "loop" + "wrong dialogs"; the landmark-poke branch is gated on `!spinning` → the pet never walks to buttons; spin-flavored lines fire from anywhere.
+### Root cause
+`CurioNavHost` hid the actual bottom bar on Reveal, so Scaffold `innerPadding` only reserved the system navigation-bar inset there. Normal tab pages reserve the app bottom nav footprint plus the system nav inset. Padding only `CurioWatermarkBackdrop` in `TopicRevealScreen` did not stabilize the whole destination/shared-transition content bounds, so the watermark coordinate space and the shared hero target could still stretch downward.
 
 ### Changes made
-- `SpinScreen.kt` — `DisposableEffect(Unit) { onDispose { CurioPet.noteSpinning(false) } }` guarantees the flag resets whenever Spin leaves composition.
-- `CurioFloatingPet.kt` — spin cheer gated on `watching` (Spin screen only); landmark pokes now walk to the landmark's NEAREST EDGE (window→local bounds conversion, nearest-side stand, vertical-center align, small gap) and only poke if the pet actually arrived (interrupted drag/glide can never interact from afar).
-- `CurioFloatingPet.kt` — typing keyboard: new `TYPING_SCALE = 0.2f` + `scale` param on `TypingKeyboard` (scales the canvas size AND the base dp unit uniformly); call-site size/offset scaled.
-- `SpinScreen.kt` (approved plan) — pool seeded from `TopicJsonLoader.cached()` (warm return = instant deck); `poolLoading` flag distinguishes loading vs genuinely-empty; Carousel shows new `DeckLoadingHint` ("Gathering the deck…") while loading, `EmptyPoolHint` only when truly empty; load wrapped in runCatching; threaded `poolLoading` through SpinDeckSection + 3 call sites.
+- `CurioNavHost.kt` now detects Reveal routes and, on compact bottom-nav layouts, adds a navbar-height placeholder (`RevealBottomBarPlaceholderHeight = 80.dp`) to the NavHost content padding without rendering the actual bottom bar.
+- `TopicRevealScreen.kt` lets the watermark backdrop fill the stabilized content bounds and paints the torn strip down through the reserved 80dp slot plus the system nav inset.
+- `CurioRoutes.kt` and `app/AGENTS.md` were updated so future agents know Reveal is bottom-nav-adjacent for metadata/selection, but the actual bar is hidden and replaced by a same-height torn placeholder.
+- `fastlane/metadata/android/en-US/changelogs/20260918.txt` notes the visual stability fix and stays under the 500-character store limit.
 
 ### Validation
-- Brace checks on both edited files (to run), `git diff --check`, import audit (no new imports added; Rect/overlayOrigin already in scope in CurioFloatingPet).
-
----
-
-## Prior requests (archive)
-- Spin button shrinks during shuffle, orbit dots stay put (`5532bb7`).
-- Release analysis + remove the Spin landing FX experiment (`c1369e4`).
-- Fix CI compile errors (missing `AppPreferences` imports) + reveal tear navbar footprint (`ccf4a3f`).
-- Fix `CategoryEdgeShine` Density argument (`b57c0f7`).
-
-**Date:** 2026-08-10
-
-### What the user asked
-"Make the spin button smaller during the animation and keep the outside small balls at their place." (Clarified: the button is already round — the ask is about the shuffle-time animation.)
-
-### Change made
-- `SpinScreen.kt` — `buttonPulse` target during shuffle flipped from **grow 1.06 → shrink 0.92** (`if (shuffling) 0.92f else 1f`). The button plate now tucks in while the `OrbitRing` dots keep their fixed radius (the ring lives on the unscaled 176dp container), so the spin reads as the center pulling away from the living ring. The `0.92` value sits inside the existing `.scale(pulseScale.coerceIn(0.9f, 1.10f))` clamp. Rest state unchanged (1.0).
-
-### Validation
-- `check_braces.js` OK, `git diff --check` OK, diff is a single targeted hunk.
-
-### Notes
-- The Home screen's small Shuffle button has no orbit ring — untouched.
-
----
-
-## Prior requests (archive)
-- Release analysis + remove the Spin landing FX experiment (`c1369e4`).
-- Fix CI compile errors (missing `AppPreferences` imports) + reveal tear navbar footprint (`ccf4a3f`).
-- Fix `CategoryEdgeShine` Density argument (`b57c0f7`).
-
-## Historical (pre-analysis) requests
-
-**Date:** 2026-08-10
-
-### CI fix (2 compile errors from the 1903fd8/7036275 push)
-- `SpinScreen.kt:477` — `Unresolved reference 'pool'`: inside the `produceState` producer lambda the outer `pool` delegate is NOT resolvable (latent since the 57dff36 pool-loading fix; CI caught it now). Fixed by reading the scope's own `value` instead: `if (value.isEmpty()) poolLoading = true` and `else if (value.isEmpty())` — identical semantics (value = current pool, seeded from cache on warm returns).
-- `CurioNavHost.kt:20` — `Cannot access 'RowColumnParentData?.weight' (internal)`: the tour-dock change added `import androidx.compose.foundation.layout.weight`, which resolves to an INTERNAL property, not the RowScope extension. `Modifier.weight` inside a RowScope needs no import — removed the line.
-- Verified: no other `layout.weight` imports in the tree, no other producer-scope self-references, braces + `git diff --check` clean.
-
-### Batches question + empty-state fix + Wildcard browse
-"Why do we have scripts/batches/*.json? Are they in the app or leftover? The nothing-to-show is more frequent now; add a separate wildcard browse in Browse Topics."
-- **Batches explained** (no code change): `scripts/batches/*.json` are dev-time staging batches merged by `scripts/merge_topic_batches.js` into the final `app/src/main/assets/topics/*.json`. Zero build/app references — not in the APK. Leftovers of the content pipeline; kept as the merge source of truth.
-- **Spin empty state** (`SpinScreen.kt`): `poolLoadFailed` + `poolRetryKey` states. A failed/interrupted load now shows a new `DeckLoadFailedHint` ("Couldn't load the deck — Try again") instead of the misleading "Nothing here yet" dead-end; a warm seeded pool is never wiped by a failed refresh. EmptyPoolHint remains only as the genuine-empty safety net. New `loadFailed`/`onRetryPool` params threaded through the 3 SpinDeckSection call sites + Carousel.
-- **Wildcard lane** (`TopicDatabaseScreen.kt`): the browser now always includes a dedicated Wildcard lane (chip + section, 503 topics) via `(CurioCategories.visible + WILDCARD).distinctBy`. New `laneTopics()` helper filters the merged wildcard pool to `categoryId == WILDCARD` only, so the lane shows wildcard.json's hand-curated originals with no overlap/duplication of the ten lanes.
-- All 11 asset files validated parseable (`scripts/check_assets.py`, kept as a repo validation helper).
-
-### Batch cleanup (approved)
-User approved deleting the 100+ staging batches. `scripts/batches/` (137 files, 2.8MB) removed entirely. Replaced with ONE compact duplicate-check file: `scripts/topics_inventory.txt` — 5,838 topics across 11 lanes, `NAME | id` per line, no teasers/instructions, plus a header flagging all 74 duplicate names with per-lane counts (e.g. `1984 (1949) -> books (2)`, `ball lightning -> books, wildcard`). Generated one-off from the final assets; the merge/validation scripts remain for future use.
-
-### Follow-up: Topic Reveal watermark bottom-padding placeholder
-"The topic reveal page still don't have the bottom padding scaffold placeholder that keeps the watermark from shifting down as the navbar gets hidden."
-- `TopicRevealScreen.kt` — the reveal's `CurioWatermarkBackdrop` now takes `modifier = Modifier.padding(bottom = RevealBottomTearHeight)`. Root cause: tab screens' content Box ends at the navbar top (Scaffold bottomBar + nav-inset), but the reveal has no bar, so its watermark Box ran 80dp lower behind the torn strip → glyphs sat lower than on Spin. The 80dp placeholder (the tear strip's exact navbar footprint; the Scaffold already applies the nav inset) holds the collage at the same level as every tab screen.
-
-### Follow-up: poke cooldown raised
-"The pet pokes now require arrival — increase the poke cooldown window so it pokes buttons even less frequently (less intrusive)."
-- `CurioFloatingPet.kt` — landmark (button) poke cooldown raised `4_000L → 12_000L` (3× rarer); comments updated. The drawer-peek branch (sheet open) keeps its 4s gate but shares `lastPokeAt`, so it still can't spam. Peek-a-boo (22s `lastPeekAt`) untouched.
-
-### Previous request — pet personality + tour pass
-"Increase the pet actions, make it not repeat the same dialogs, add an 'annoyed' reaction for repeated actions, add 100s of reactions + fun games (hide-and-peek behind buttons, chameleon disappear). Tour dialog is cut at 2 lines — fix. Next/Skip buttons not visible — give a proper background that hides the nav bar and make them bigger. Tapping anything on screen should advance the tour."
-
-### Pet personality + tour pass (v9.x) — complete
-
-**CurioPet.kt** — every line pool expanded (8-16 variants each, ~150+ new lines across mood bubbles, reactions, cheers, boops, jigs, dizzy, drawers, games). All pickers route through a new `pickLine()` anti-repeat bag (never repeats a line spoken in the last 16). New `isEventBurst()` mechanic: the SAME action 3× within 4 minutes earns one adorable sassy line (10 variants), then the burst resets. New game line pools: `peekLine()`, `chameleonLine()`, `sparkLine()`.
-
-**CurioFloatingPet.kt** — new `chameleonAlpha` Animatable multiplied into the sprite's alpha; the wander loop now runs two autonomous games (chameleon fade-out/reappear-at-new-spot, spark-catch dash with hearts) gated off the Spin deck; hide-and-peek crouches speak a peek-a-boo line ~55% of the time. Tour bubble call passes `maxLines = Int.MAX_VALUE, maxWidth = 340.dp`.
-
-**PetSpeechBubble** — gained `maxLines` + `maxWidth` params (defaults keep passive bubbles at 2 lines / 260dp).
-
-**CurioNavHost** — tour controls replaced: full-screen transparent tap layer (any tap advances the tour, `clickable` with null indication) + solid full-width bottom `Surface` dock (surfaceContainerHigh, reaches under the nav inset, covering the app's bottom bar) with two big 54dp rounded buttons (Skip tonal, Next/Done primary).
-
-### Validation
-- `scripts/check_braces.js` passes on all 4 edited Kotlin files.
-- `git diff --check` clean.
-- Code review (deepseek-flash) passed.
-
-### Previous request — FX removed + release analysis
-"We are near release — analyse the full app and give me a full analysis of what should be refined and what else. Also we are removing the fx option and not implementing it."
-
-### FX experiment removed (decision: NOT implementing)
-The v9.1 "Spin landing FX" experiment is gone entirely; the classic spin feel (the pre-experiment shipped default) is hardcoded:
-
-- `AppPreferences.kt` — deleted the 4 `KEY_SPIN_*` constants, 4 `spin*FxState` vars, 4 `initThemeMode` seed lines, and the 8 getter/setter functions.
-- `ExperimentsScreen.kt` — deleted the whole "Spin landing FX" item (master switch + Buttery reel / Spring catch / Sparkle burst sub-switches).
-- `SpinScreen.kt` — restored the classic path byte-for-byte (exactly what ran with the master toggle OFF): sine ease-out reel + 340→520ms interval, `tickPulse.snapTo(1.02f)` + `spring(0.85, 420)`, `CurioMotion.Springs.Deliberate` settle (no 0.97 catch squish), and removed the sparkle burst + catch glow Canvas layers, their `LaunchedEffect(landed)` + Animatable state, and the now-unused `StrokeCap` import. Brace structure after removal matches original nesting.
-- `fastlane/.../changelogs/20260915.txt` — removed the FX bullet (the store listing has never shipped; no changelog may advertise a feature that will never exist).
-
-### Validation
-- `scripts/check_braces.js` passes on all 3 edited Kotlin files (SpinScreen's hero-card closers were repaired to 28/24/20/16/12/8/4/0 after the FX-canvas removal).
-- No stale FX references anywhere in `app/src/main/java` (only the unrelated `KEY_SPINS` in CurioPassport remains).
-- `git diff --check` clean. Import audit: only `StrokeCap` became unused → removed; every other symbol still has uses elsewhere.
-- Code review (deepseek-flash) passed — flagged + fixed the 20260915 changelog mention.
-
-### Release-readiness analysis (delivered to user — full detail in chat)
-- **CI**: last fix (`b57c0f7`, Density in `CategoryEdgeShine`) was in progress when this request started; verify green before release.
-- **versionCode/changelog mismatch**: `versionCode = 20260918` but latest staged changelog is `20260919.txt` — bump versionCode to 20260919 (or rewrite the changelog) before the release tag.
-- **Play Store listing missing**: `fastlane/metadata/android/en-US/` contains only `changelogs/` — no title, short/full description, screenshots, feature graphic, or data-safety form. If Play is a target, this is the biggest blocker; the release workflow only publishes GitHub releases today.
-- **Permissions / Play policy**: RECORD_AUDIO (data-safety declaration + audio-recording policy), SYSTEM_ALERT_WINDOW (overlay bubble — must be declared), FOREGROUND_SERVICE_SPECIAL_USE (special-use declaration + Play Console rationale), POST_NOTIFICATIONS.
-- **Dead / unfinished code**: `ReelNotesFormat.kt:221` has a dead `onClick = { /* TODO Phase 4: open lightbox */ }` — wire the Lightbox or drop the tap affordance.
-- **Experiments screen cleanup**: many default-OFF experimental toggles (peek deck redesign, hero redesign) — per repo rules, decide winners and hardcode/remove before 1.0, or they ship as settings clutter.
-- **app/AGENTS.md is stale** (says Phase 2 / "no persistence yet" / 6 categories / 11 placeholder stubs — all outdated) — DOX pass recommended.
-- **Update checker** (Support screen) queries GitHub releases — fine for GitHub-distributed builds; consider gating for a store build.
-
-### Notes / follow-ups
-- Watch CI for the Density fix + this FX-removal push.
-- Decide: versionCode bump, Play listing work, Experiments close-out, ReelNotes lightbox TODO.
-
----
-
-- Material theme adopts device colors with category accent shine (`b8e3b7c`, `c151f1d`).
-- AMOLED theme polish — pitch-black cards + edge shine + unified heroes (`b351b42`, `e38a6c3`).
-- Theme-aware tear strip on the reveal (`ddec939`, `b74c7f5`).
-- Pet-led tour completion + reveal torn bottom edge (`5464cd4`, `1265c75`).
-- Pet starts at its home, redesigned speech bubble, scaled ride cloud (`51987cc`, `c38c4fd`).
+- `node scripts/check_braces.js app/src/main/java/com/curio/app/navigation/CurioNavHost.kt app/src/main/java/com/curio/app/navigation/CurioRoutes.kt app/src/main/java/com/curio/app/features/reveal/TopicRevealScreen.kt` — OK.
+- `git diff --check` — OK.
+- `wc -c fastlane/metadata/android/en-US/changelogs/20260918.txt` — 352 chars.
+- Code review subagent found no Compose layout or Kotlin compile blockers; suggested doc/comment cleanup and named placeholder constant, both addressed.
+- Gradle compile/build/lint/test were not run because root AGENTS.md forbids local Gradle commands in this environment.
