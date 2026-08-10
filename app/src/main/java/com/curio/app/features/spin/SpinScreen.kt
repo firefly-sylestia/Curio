@@ -3560,18 +3560,28 @@ private fun BottomCta(
 private fun deckControlSurface(cat: CurioCategory): Color =
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
         MaterialTheme.colorScheme.surfaceContainerHigh
+    } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        // v13 — AMOLED unselected controls are PITCH BLACK like the selected
+        // ones (the dark-grey surfaceContainerHigh plate is gone); the accent
+        // hairline from [deckControlBorder] keeps them defined on the pure
+        // black page.
+        Color.Black
     } else {
         cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
     }
 
 /**
  * Unselected deck-control border — the device outline hairline in the
- * Material style, the theme-aware category border otherwise.
+ * Material style, the theme-aware category border otherwise. AMOLED keeps a
+ * quiet accent hairline so the pure-black pills stay distinct from the
+ * pure-black page.
  */
 @Composable
 private fun deckControlBorder(cat: CurioCategory): BorderStroke? =
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
         BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        BorderStroke(1.dp, cat.categoryInk().copy(alpha = 0.28f))
     } else {
         cat.categoryBorder()
     }

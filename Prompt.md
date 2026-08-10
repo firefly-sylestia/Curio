@@ -1,5 +1,21 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): AMOLED unselected Categories/Filter pills → pure black
+
+**Date:** 2026-08-10
+
+### What the user asked
+Make the unselected Categories/Filter pills pure black in AMOLED instead of dark grey.
+
+### Changes made
+- **SpinScreen.kt** — `deckControlSurface()` now returns pure `Color.Black` for the AMOLED style (unselected pills were falling through to `categorySurface(...)` → the dark-grey `surfaceContainerHigh`). Both pill variants (`DeckControlButton` horizontal + `VerticalDeckButton` extra-compact) share this helper, so one edit covers every unselected pill.
+- `deckControlBorder()` adds an AMOLED branch — a quiet 1dp accent hairline (`categoryInk()` at 0.28 alpha, the light accent in dark) so the pure-black pills stay distinct from the pure-black Spin page (without it they'd be invisible). Selected pills were already black with the accent rim from the earlier AMOLED pass.
+- Material / Curio branches untouched.
+
+### Validation
+- Brace check + git diff --check clean; code review passed (both variants covered, no new imports, Material/Curio unchanged).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): AMOLED Home quest banner → pure black with rose accent
 
 **Date:** 2026-08-10
