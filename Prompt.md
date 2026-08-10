@@ -1,5 +1,24 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Material theme → coming soon; AMOLED main card accent restored
+
+**Date:** 2026-08-10
+
+### What the user asked
+Grey out the Material theme option and mark it "coming soon". Also: the AMOLED main Spin card used to have a beautiful, sleek category-color accent — check if it's still there and add it back.
+
+### Changes made
+- **SettingsSectionScreen.kt** — `CompactSegmentedRow` gained `disabledIndices: Set<Int> = emptySet()` + `disabledHint: String? = null` (defaults keep the Theme row and any other call site unchanged). The Theme style row now disables the Material segment (`disabledIndices = setOf(2)`) and shows a small clock-glyph + "Material theme · coming soon" caption in onSurfaceVariant. M3's disabled SegmentedButton greys the segment automatically; the Material style code path itself is untouched (it simply can no longer be picked). Note: a user who already has Material selected keeps it until they pick Curio/AMOLED — left self-resolving (no silent theme reset).
+- **SpinScreen.kt (HeroTicketCard)** — the AMOLED main ticket now wears the same black-glass CATEGORY SHINE as the settings cards / deck pills: `Modifier.categoryEdgeShine(RoundedCornerShape(30.dp), accent)` on the clipped Box (accent hairline around the edge + a soft 18dp accent band at the top). The Surface hairline border in AMOLED carries the deck accent at a restrained 0.35 alpha (down from the uncommitted 0.55 — the edge shine is the primary accent carrier, so the card stays sleek rather than stacking two loud rims). This was previously uncommitted, which is why the user didn't see it on device.
+- **fastlane 20260919.txt** — added a store-changelog bullet (Material on hold + AMOLED card accent).
+
+### Validation
+- Brace check + git diff --check clean; code review passed (segment disable + caption compile-safe; edge shine clipped/gated to AMOLED, non-AMOLED themes untouched).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
+### Parked (previous request, still pending)
+Adding missing tags to scientists/discoveries: `scripts/enrich_science_tags.py` is written and dry-run validated (word-boundary field matching, element-isolation rule, CE/BCE era parsing, ~180 curated origin/era overrides). Remaining: full-data audit run (the full 501-scientist set has ~60 more names with no era signal that need overrides), then run the script against the real JSON and commit.
+
 ## Current Request (COMPLETED): Home hero stat shows total topics instead of recents count
 
 **Date:** 2026-08-10

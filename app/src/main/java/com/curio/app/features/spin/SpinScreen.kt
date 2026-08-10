@@ -2488,6 +2488,16 @@ private fun HeroTicketCard(
                     } else Modifier
                 )
                 .clip(RoundedCornerShape(30.dp))
+                .then(
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+                        // v13 — the near-black ticket wears the same black-glass
+                        // CATEGORY SHINE as the settings cards and deck pills: an
+                        // accent hairline around the edge plus a soft accent band
+                        // at the top, so the main card reads as sleek black glass
+                        // rimmed with its category color (not just a flat plate).
+                        Modifier.categoryEdgeShine(RoundedCornerShape(30.dp), accent)
+                    } else Modifier
+                )
         ) {
             Surface(
                 shape = RoundedCornerShape(30.dp),
@@ -2500,9 +2510,17 @@ private fun HeroTicketCard(
                 // accent outline (the accent rim-light stays OFF by default).
                 // ON drops the hairline lower and the accent is drawn as a
                 // soft gradient rim-light inside (the drawBehind below).
+                // v13 — AMOLED: the near-black ticket would sink into the
+                // pure-black page. The categoryEdgeShine above is the main
+                // accent carrier, so this hairline stays a quiet whisper
+                // (0.35) that seats the card without stacking a second loud
+                // rim — sleek black glass rimmed with its category color.
                 border = BorderStroke(
                     1.dp,
-                    ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
+                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                        accent.copy(alpha = 0.35f)
+                    else
+                        ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
