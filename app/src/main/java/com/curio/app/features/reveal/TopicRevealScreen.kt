@@ -1138,6 +1138,7 @@ private fun RevealActionRow(
                     screen = "reveal"
                 ) { lm ->
                 RevealAlreadyButton(
+                    cat = cat,
                     // Express Yourself remains available from Topic Reveal,
                     // including the read-only reveal opened from Topic Database.
                     // During the pet-led tour the button is inert — the tour
@@ -1259,6 +1260,7 @@ private fun RevealStartButton(
 
 @Composable
 private fun RevealAlreadyButton(
+    cat: CurioCategory,
     enabled: Boolean,
     modifier: Modifier = Modifier,
     metrics: RevealDockMetrics,
@@ -1266,17 +1268,23 @@ private fun RevealAlreadyButton(
 ) {
     // v8.49 — text-style writing action on the transparent inline row.
     // v8.55 — the tier metrics resize it with the pill.
-    val baseInk = MaterialTheme.colorScheme.onSurfaceVariant
-    val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
-    val pillAccent = MaterialTheme.colorScheme.primary
+    // v11 — SOLID surface: the ghost text button washed out next to the
+    // filled CTA, so it now wears a real theme-aware background (the same
+    // tinted card surface as the rest of the page) with readable category
+    // ink, a hairline edge, and the category edge shine. In Material style
+    // categorySurface falls back to the device surface so it stays a proper
+    // Material control.
+    val surface = cat.categorySurface()
+    val ink = if (enabled) cat.categoryInk() else cat.categoryInk().copy(alpha = 0.40f)
+    val shineAccent = cat.themedAccent()
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        color = pillAccent.copy(alpha = if (enabled) 0.12f else 0.06f),
-        border = BorderStroke(1.dp, pillAccent.copy(alpha = if (enabled) 0.30f else 0.12f)),
+        color = if (enabled) surface else surface.copy(alpha = 0.45f),
+        border = cat.categoryBorder(),
         modifier = modifier
-            .categoryEdgeShine(RoundedCornerShape(50), accent = pillAccent)
+            .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
             // Give the writing action a real, forgiving tap target across its
             // entire weighted half of the row. The old inner padding made the
             // visible label look wider than the actual touchable surface.
