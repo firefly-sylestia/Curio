@@ -45,6 +45,9 @@ Clarifications gathered via ask_user:
 - Worth a device check in AMOLED: shine intensity (hairline 0.10–0.26 alpha, top 0.22–0.45 alpha), and that Cabinet topic cards still read as boxes now that the grey lift is gone.
 - The `amoledEdgeShine` modifier is reusable for any future AMOLED surface.
 
+### Follow-up fix (commit `ddec939`): theme-aware tear strip
+- The reveal's bottom torn paper strip no longer glares in dark mode: light mode keeps the warm `CreamWhite` sheet, but dark mode uses `cat.categorySurface()` — the deep category-tinted card tone (near-black `#0A0A0A` in AMOLED), so the strip reads as dark paper matching the washed page.
+
 ---
 
 ## Prior requests (archive)
