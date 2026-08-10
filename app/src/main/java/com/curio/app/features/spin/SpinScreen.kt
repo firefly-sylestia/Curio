@@ -840,8 +840,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     //    spins/shuffles again.  No longer auto-clears when explored.
 
     // ── Animations ────────────────────────────────────────────────────
+    // v9.x — during a shuffle the button TUCKS IN (shrinks to 0.92) while
+    // the orbit ring's dots keep their fixed radius (the ring lives on the
+    // unscaled container), so the spin reads as the center plate pulling
+    // away from the living ring of dots; at rest it springs back to full.
     val buttonPulse by animateFloatAsState(
-        targetValue = if (shuffling) 1.06f else 1f,
+        targetValue = if (shuffling) 0.92f else 1f,
         animationSpec = CurioMotion.Springs.Snappy,
         label = "buttonPulse"
     )

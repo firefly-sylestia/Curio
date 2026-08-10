@@ -1,6 +1,29 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Release analysis + remove the Spin landing FX experiment
+## Current Request (COMPLETED): Spin button shrinks during shuffle (orbit dots stay put)
+
+**Date:** 2026-08-10
+
+### What the user asked
+"Make the spin button smaller during the animation and keep the outside small balls at their place." (Clarified: the button is already round — the ask is about the shuffle-time animation.)
+
+### Change made
+- `SpinScreen.kt` — `buttonPulse` target during shuffle flipped from **grow 1.06 → shrink 0.92** (`if (shuffling) 0.92f else 1f`). The button plate now tucks in while the `OrbitRing` dots keep their fixed radius (the ring lives on the unscaled 176dp container), so the spin reads as the center pulling away from the living ring. The `0.92` value sits inside the existing `.scale(pulseScale.coerceIn(0.9f, 1.10f))` clamp. Rest state unchanged (1.0).
+
+### Validation
+- `check_braces.js` OK, `git diff --check` OK, diff is a single targeted hunk.
+
+### Notes
+- The Home screen's small Shuffle button has no orbit ring — untouched.
+
+---
+
+## Prior requests (archive)
+- Release analysis + remove the Spin landing FX experiment (`c1369e4`).
+- Fix CI compile errors (missing `AppPreferences` imports) + reveal tear navbar footprint (`ccf4a3f`).
+- Fix `CategoryEdgeShine` Density argument (`b57c0f7`).
+
+## Historical (pre-analysis) requests
 
 **Date:** 2026-08-10
 
@@ -37,9 +60,6 @@ The v9.1 "Spin landing FX" experiment is gone entirely; the classic spin feel (t
 
 ---
 
-## Prior requests (archive)
-- Fix CI compile errors (missing `AppPreferences` imports) + reveal tear navbar footprint (`ccf4a3f`).
-- Fix `CategoryEdgeShine` Density argument — `shape.createOutline(size, layoutDirection, this)` (`b57c0f7`).
 - Material theme adopts device colors with category accent shine (`b8e3b7c`, `c151f1d`).
 - AMOLED theme polish — pitch-black cards + edge shine + unified heroes (`b351b42`, `e38a6c3`).
 - Theme-aware tear strip on the reveal (`ddec939`, `b74c7f5`).
