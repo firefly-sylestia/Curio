@@ -90,14 +90,6 @@ object AppPreferences {
     // boolean key below is read once for migration and then removed.
     private const val KEY_SMART_DENSITY_MODE = "smart_density_mode"
     private const val KEY_LEGACY_SMART_DENSITY_LAYOUT = "smart_density_layout"
-    // v9.1 — Premium Spin landing FX experiment (default OFF). The classic
-    // spin feel stays the shipped default; the master toggle swaps in the
-    // premium landing feel, with reel / catch / sparkle layers independently
-    // toggleable for A/B tuning.
-    private const val KEY_SPIN_LANDING_FX = "spin_landing_fx"
-    private const val KEY_SPIN_FX_REEL = "spin_fx_reel"
-    private const val KEY_SPIN_FX_CATCH = "spin_fx_catch"
-    private const val KEY_SPIN_FX_SPARKLE = "spin_fx_sparkle"
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
@@ -278,14 +270,6 @@ object AppPreferences {
     // ships at its natural size; compact sizing is opt-in. Seeded from
     // prefs in [initThemeMode].
     var smartDensityModeState by mutableStateOf(SmartDensityMode.OFF)
-    // v9.1 — Premium Spin landing FX experiment. Master toggle (default
-    // OFF — the classic spin stays the shipped default); the four layers
-    // default ON so enabling the master turns on the full premium feel,
-    // and each layer can be A/B-tuned independently.
-    var spinLandingFxState by mutableStateOf(false)
-    var spinFxReelState by mutableStateOf(true)
-    var spinFxCatchState by mutableStateOf(true)
-    var spinFxSparkleState by mutableStateOf(true)
     // Explore sessions — the explore-now timer/reminder/done flow. Default
     // ON; off disables the timer notification + reminder + done prompt while
     // Explore-now still opens the browser and records recently-explored.
@@ -440,10 +424,6 @@ object AppPreferences {
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
         smartDensityModeState = getSmartDensityMode(context)
-        spinLandingFxState = isSpinLandingFxEnabled(context)
-        spinFxReelState = isSpinFxReelEnabled(context)
-        spinFxCatchState = isSpinFxCatchEnabled(context)
-        spinFxSparkleState = isSpinFxSparkleEnabled(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
@@ -664,42 +644,6 @@ object AppPreferences {
     fun setSmartDensityMode(context: Context, mode: SmartDensityMode) {
         prefs(context).edit().putString(KEY_SMART_DENSITY_MODE, mode.name).apply()
         smartDensityModeState = mode
-    }
-
-    /** v9.1 — master toggle for the premium Spin landing FX experiment. */
-    fun isSpinLandingFxEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_LANDING_FX, false)
-
-    fun setSpinLandingFxEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_LANDING_FX, enabled).apply()
-        spinLandingFxState = enabled
-    }
-
-    /** v9.1 — buttery reel glide (cubic ease-out deceleration on the wheel). */
-    fun isSpinFxReelEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_REEL, true)
-
-    fun setSpinFxReelEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_REEL, enabled).apply()
-        spinFxReelState = enabled
-    }
-
-    /** v9.1 — juicy spring catch on landing (replaces the calm settle). */
-    fun isSpinFxCatchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_CATCH, true)
-
-    fun setSpinFxCatchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_CATCH, enabled).apply()
-        spinFxCatchState = enabled
-    }
-
-    /** v9.1 — sparkle burst around the landed card. */
-    fun isSpinFxSparkleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SPIN_FX_SPARKLE, true)
-
-    fun setSpinFxSparkleEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SPIN_FX_SPARKLE, enabled).apply()
-        spinFxSparkleState = enabled
     }
 
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */

@@ -126,30 +126,6 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                 }
             }
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.AutoAwesome, "Spin landing FX", "Premium landing feel — in testing")
-                    ExperimentSwitchRow(
-                        "Premium landing FX",
-                        "Buttery reel, spring catch, sparkle burst + glow",
-                        AppPreferences.spinLandingFxState
-                    ) {
-                        AppPreferences.setSpinLandingFxEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    val fxOn = AppPreferences.spinLandingFxState
-                    ExperimentSwitchRow("Buttery reel glide", "Smooth prize-wheel deceleration", AppPreferences.spinFxReelState, enabled = fxOn) {
-                        AppPreferences.setSpinFxReelEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Spring catch", "Smooth controlled settle as the wheel locks in", AppPreferences.spinFxCatchState, enabled = fxOn) {
-                        AppPreferences.setSpinFxCatchEnabled(context, it)
-                    }
-                    ExperimentSwitchRow("Sparkle burst", "Star sparks around the landed card", AppPreferences.spinFxSparkleState, enabled = fxOn) {
-                        AppPreferences.setSpinFxSparkleEnabled(context, it)
-                    }
-                }
-            }
             item { CurioSectionLabel("Layout & input") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {

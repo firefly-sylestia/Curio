@@ -1,38 +1,45 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Fix CI compile errors + reveal tear navbar footprint
+## Current Request (COMPLETED): Release analysis + remove the Spin landing FX experiment
 
 **Date:** 2026-08-10
 
 ### What the user asked
-"fi this and in topic reveal screen the tear doesnt have the buttom paddng or scaffhold that keep the morph animation at level at the same heigh as the navar"
+"We are near release — analyse the full app and give me a full analysis of what should be refined and what else. Also we are removing the fx option and not implementing it."
 
-1. Fix the pasted CI compile failure (`compileReleaseKotlin` / `compileDebugKotlin`).
-2. Topic Reveal's torn bottom edge should span the same bottom footprint as the bottom navigation bar so the page (and the shared-element hero morph) sits at the same height as with the navbar.
+### FX experiment removed (decision: NOT implementing)
+The v9.1 "Spin landing FX" experiment is gone entirely; the classic spin feel (the pre-experiment shipped default) is hardcoded:
 
-### CI errors triaged
-- `AmoledEdgeShine.kt:30:66` (Float vs Density) — **stale**: that file was renamed to `CategoryEdgeShine.kt` in `b8e3b7c`, which imports `AppPreferences` and uses `shape.createOutline(size, layoutDirection, density)` with correct types. No references to the old name remain.
-- `CurioSettingsCard.kt:47` — **real**: used `AppPreferences.themeStyleState` / `THEME_STYLE_AMOLED` without importing it.
-- `CurioTopicCard.kt:115` — **real**: same missing import.
-
-### Changes made
-- `CurioSettingsCard.kt` — added `import com.curio.app.data.AppPreferences` (alphabetically placed).
-- `CurioTopicCard.kt` — added `import com.curio.app.data.AppPreferences` (alphabetically placed).
-- `TopicRevealScreen.kt` — the reveal's bottom torn strip now spans the FULL navbar footprint: `height = RevealBottomTearHeight + navInset` with `.offset(y = navInset)` (from `WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()`). The torn seam stays at the same height (content bottom − 80dp), but the paper now extends through the gesture-bar inset to the physical screen bottom — exactly where the bottom bar sits on other screens, so the reveal page + morph read at the same level as with the navbar. The scroll-clearance Spacer stays valid (seam position unchanged).
+- `AppPreferences.kt` — deleted the 4 `KEY_SPIN_*` constants, 4 `spin*FxState` vars, 4 `initThemeMode` seed lines, and the 8 getter/setter functions.
+- `ExperimentsScreen.kt` — deleted the whole "Spin landing FX" item (master switch + Buttery reel / Spring catch / Sparkle burst sub-switches).
+- `SpinScreen.kt` — restored the classic path byte-for-byte (exactly what ran with the master toggle OFF): sine ease-out reel + 340→520ms interval, `tickPulse.snapTo(1.02f)` + `spring(0.85, 420)`, `CurioMotion.Springs.Deliberate` settle (no 0.97 catch squish), and removed the sparkle burst + catch glow Canvas layers, their `LaunchedEffect(landed)` + Animatable state, and the now-unused `StrokeCap` import. Brace structure after removal matches original nesting.
+- `fastlane/.../changelogs/20260915.txt` — removed the FX bullet (the store listing has never shipped; no changelog may advertise a feature that will never exist).
 
 ### Validation
-- Brace balance OK on all 3 edited files (`scripts/check_braces.js`).
-- No stale `amoledEdgeShine` / `AmoledEdgeShine` references anywhere (grep clean).
-- All other components that use `AppPreferences` (CurioHeroCard, CurioCategoryCard, CategoryEdgeShine) already import it.
-- Code review (deepseek-flash) passed — import ordering, modifier order (`align` + `offset`), inset geometry, and compile-safety rules all verified.
+- `scripts/check_braces.js` passes on all 3 edited Kotlin files (SpinScreen's hero-card closers were repaired to 28/24/20/16/12/8/4/0 after the FX-canvas removal).
+- No stale FX references anywhere in `app/src/main/java` (only the unrelated `KEY_SPINS` in CurioPassport remains).
+- `git diff --check` clean. Import audit: only `StrokeCap` became unused → removed; every other symbol still has uses elsewhere.
+- Code review (deepseek-flash) passed — flagged + fixed the 20260915 changelog mention.
+
+### Release-readiness analysis (delivered to user — full detail in chat)
+- **CI**: last fix (`b57c0f7`, Density in `CategoryEdgeShine`) was in progress when this request started; verify green before release.
+- **versionCode/changelog mismatch**: `versionCode = 20260918` but latest staged changelog is `20260919.txt` — bump versionCode to 20260919 (or rewrite the changelog) before the release tag.
+- **Play Store listing missing**: `fastlane/metadata/android/en-US/` contains only `changelogs/` — no title, short/full description, screenshots, feature graphic, or data-safety form. If Play is a target, this is the biggest blocker; the release workflow only publishes GitHub releases today.
+- **Permissions / Play policy**: RECORD_AUDIO (data-safety declaration + audio-recording policy), SYSTEM_ALERT_WINDOW (overlay bubble — must be declared), FOREGROUND_SERVICE_SPECIAL_USE (special-use declaration + Play Console rationale), POST_NOTIFICATIONS.
+- **Dead / unfinished code**: `ReelNotesFormat.kt:221` has a dead `onClick = { /* TODO Phase 4: open lightbox */ }` — wire the Lightbox or drop the tap affordance.
+- **Experiments screen cleanup**: many default-OFF experimental toggles (peek deck redesign, hero redesign) — per repo rules, decide winners and hardcode/remove before 1.0, or they ship as settings clutter.
+- **app/AGENTS.md is stale** (says Phase 2 / "no persistence yet" / 6 categories / 11 placeholder stubs — all outdated) — DOX pass recommended.
+- **Update checker** (Support screen) queries GitHub releases — fine for GitHub-distributed builds; consider gating for a store build.
 
 ### Notes / follow-ups
-- Worth a device check: open a reveal on a gesture-nav device — the torn seam should sit at the navbar's top edge with paper filling to the screen bottom (no gap above the gesture bar).
-- The CI log was from an intermediate state; after these fixes the current tree should compile clean.
+- Watch CI for the Density fix + this FX-removal push.
+- Decide: versionCode bump, Play listing work, Experiments close-out, ReelNotes lightbox TODO.
 
 ---
 
 ## Prior requests (archive)
+- Fix CI compile errors (missing `AppPreferences` imports) + reveal tear navbar footprint (`ccf4a3f`).
+- Fix `CategoryEdgeShine` Density argument — `shape.createOutline(size, layoutDirection, this)` (`b57c0f7`).
 - Material theme adopts device colors with category accent shine (`b8e3b7c`, `c151f1d`).
 - AMOLED theme polish — pitch-black cards + edge shine + unified heroes (`b351b42`, `e38a6c3`).
 - Theme-aware tear strip on the reveal (`ddec939`, `b74c7f5`).
