@@ -55,6 +55,16 @@
 
 **Date:** 2026-08-10
 
+### Batches question + empty-state fix + Wildcard browse
+"Why do we have scripts/batches/*.json? Are they in the app or leftover? The nothing-to-show is more frequent now; add a separate wildcard browse in Browse Topics."
+- **Batches explained** (no code change): `scripts/batches/*.json` are dev-time staging batches merged by `scripts/merge_topic_batches.js` into the final `app/src/main/assets/topics/*.json`. Zero build/app references — not in the APK. Leftovers of the content pipeline; kept as the merge source of truth.
+- **Spin empty state** (`SpinScreen.kt`): `poolLoadFailed` + `poolRetryKey` states. A failed/interrupted load now shows a new `DeckLoadFailedHint` ("Couldn't load the deck — Try again") instead of the misleading "Nothing here yet" dead-end; a warm seeded pool is never wiped by a failed refresh. EmptyPoolHint remains only as the genuine-empty safety net. New `loadFailed`/`onRetryPool` params threaded through the 3 SpinDeckSection call sites + Carousel.
+- **Wildcard lane** (`TopicDatabaseScreen.kt`): the browser now always includes a dedicated Wildcard lane (chip + section, 503 topics) via `(CurioCategories.visible + WILDCARD).distinctBy`. New `laneTopics()` helper filters the merged wildcard pool to `categoryId == WILDCARD` only, so the lane shows wildcard.json's hand-curated originals with no overlap/duplication of the ten lanes.
+- All 11 asset files validated parseable (`scripts/check_assets.py`, kept as a repo validation helper).
+
+### Batch cleanup (approved)
+User approved deleting the 100+ staging batches. `scripts/batches/` (137 files, 2.8MB) removed entirely. Replaced with ONE compact duplicate-check file: `scripts/topics_inventory.txt` — 5,838 topics across 11 lanes, `NAME | id` per line, no teasers/instructions, plus a header flagging all 74 duplicate names with per-lane counts (e.g. `1984 (1949) -> books (2)`, `ball lightning -> books, wildcard`). Generated one-off from the final assets; the merge/validation scripts remain for future use.
+
 ### Follow-up: Topic Reveal watermark bottom-padding placeholder
 "The topic reveal page still don't have the bottom padding scaffold placeholder that keeps the watermark from shifting down as the navbar gets hidden."
 - `TopicRevealScreen.kt` — the reveal's `CurioWatermarkBackdrop` now takes `modifier = Modifier.padding(bottom = RevealBottomTearHeight)`. Root cause: tab screens' content Box ends at the navbar top (Scaffold bottomBar + nav-inset), but the reveal has no bar, so its watermark Box ran 80dp lower behind the torn strip → glyphs sat lower than on Spin. The 80dp placeholder (the tear strip's exact navbar footprint; the Scaffold already applies the nav inset) holds the collage at the same level as every tab screen.

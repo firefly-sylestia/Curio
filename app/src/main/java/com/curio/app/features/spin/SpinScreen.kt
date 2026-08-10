@@ -470,19 +470,39 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     var poolLoading by remember(poolIds) {
         mutableStateOf(poolIds.any { TopicJsonLoader.cached(it) == null })
     }
+    // v9.x — a failed load is NOT an empty lane. With valid data an empty
+    // pool AFTER loading means the read failed (interrupted IO, a hiccup
+    // parsing the heavy merged wildcard pool), so the deck shows a retry
+    // hint instead of the misleading "Nothing here yet" dead-end. A warm
+    // seeded pool is never wiped by a failed refresh.
+    var poolLoadFailed by remember(poolIds) { mutableStateOf(false) }
+    var poolRetryKey by remember(poolIds) { mutableIntStateOf(0) }
     val pool by produceState(
         initialValue = poolIds.flatMap { TopicJsonLoader.cached(it).orEmpty() },
-        poolIds
+        poolIds, poolRetryKey
     ) {
         if (pool.isEmpty()) poolLoading = true
+        poolLoadFailed = false
         val merged = mutableListOf<CurioTopic>()
         val seen = mutableSetOf<String>()
+        var anyFailed = false
         poolIds.forEach { id ->
-            runCatching { TopicJsonLoader.load(id) }.getOrElse { emptyList() }
-                .forEach { t -> if (seen.add(t.id)) merged.add(t) }
+            val result = runCatching { TopicJsonLoader.load(id) }
+            if (result.isFailure) {
+                anyFailed = true
+                return@forEach
+            }
+            result.getOrThrow().forEach { t -> if (seen.add(t.id)) merged.add(t) }
         }
-        value = merged
         poolLoading = false
+        if (merged.isNotEmpty()) {
+            value = merged
+        } else if (pool.isEmpty()) {
+            // Empty after loading with valid data = the load failed (or a
+            // lane is truly empty) — offer a retry, never a dead end.
+            poolLoadFailed = true
+        }
+        // else: a failed refresh leaves any warm seeded cards untouched.
     }
 
     // ── Multi-select filter state (per-category, saveable) ────────────
@@ -1068,6 +1088,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         buttonPulse = buttonPulse,
                         fitScale = wideFit,
                         poolLoading = poolLoading,
+                        poolLoadFailed = poolLoadFailed,
+                        onRetryPool = { poolRetryKey++ },
                         onCardTap = onDeckCardTap,
                         onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
@@ -1141,6 +1163,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     buttonPulse = buttonPulse,
                     fitScale = fitScale,
                     poolLoading = poolLoading,
+                    poolLoadFailed = poolLoadFailed,
+                    onRetryPool = { poolRetryKey++ },
                     onCardTap = onDeckCardTap,
                     onCycle = onDeckCycle,
                     onSpinClick = onSpinClick
@@ -1184,6 +1208,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         buttonPulse = buttonPulse,
                         fitScale = fitScale,
                         poolLoading = poolLoading,
+                        poolLoadFailed = poolLoadFailed,
+                        onRetryPool = { poolRetryKey++ },
                         onCardTap = onDeckCardTap,
                         onCycle = onDeckCycle,
                         onSpinClick = onSpinClick
@@ -1296,6 +1322,8 @@ private fun ColumnScope.SpinDeckSection(
     buttonPulse: Float,
     fitScale: Float = 1f,
     poolLoading: Boolean = false,
+    poolLoadFailed: Boolean = false,
+    onRetryPool: () -> Unit = {},
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
     onSpinClick: () -> Unit
@@ -1338,6 +1366,8 @@ private fun ColumnScope.SpinDeckSection(
             roomy = roomy,
             fitScale = fitScale,
             loading = poolLoading,
+            loadFailed = poolLoadFailed,
+            onRetryPool = onRetryPool,
             onCardTap = onCardTap,
             onCycle = onCycle,
             modifier = m.fillMaxWidth()
@@ -1915,6 +1945,8 @@ private fun Carousel(
     roomy: Boolean = false,
     fitScale: Float = 1f,
     loading: Boolean = false,
+    loadFailed: Boolean = false,
+    onRetryPool: () -> Unit = {},
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -1988,6 +2020,8 @@ private fun Carousel(
     ) {
         if (poolSize == 0 && loading) {
             DeckLoadingHint(cat)
+        } else if (poolSize == 0 && loadFailed) {
+            DeckLoadFailedHint(cat, onRetryPool)
         } else if (poolSize == 0) {
             EmptyPoolHint(cat)
         } else {
@@ -2079,6 +2113,63 @@ private fun DeckLoadingHint(cat: CurioCategory) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeckLoadFailedHint(cat: CurioCategory, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+            shadowElevation = 0.dp,
+            border = cat.categoryBorder(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CurioIcon(
+                    CurioIcons.Refresh, null,
+                    tint = cat.categoryInk().copy(alpha = 0.5f),
+                    size = 40.dp
+                )
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "Couldn't load the deck",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "The topics didn't arrive. Give it another try?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = onRetry,
+                    shape = RoundedCornerShape(50),
+                    colors = curioButtonColors(
+                        containerColor = cat.themedButtonFill(),
+                        contentColor = cat.themedButtonInk()
+                    )
+                ) {
+                    Text(
+                        "Try again",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                }
             }
         }
     }

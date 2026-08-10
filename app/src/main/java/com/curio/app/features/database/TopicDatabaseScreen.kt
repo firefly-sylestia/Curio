@@ -67,8 +67,9 @@ import kotlinx.coroutines.withContext
  * Browse Topics — the whole Curio database in one place.
  *
  * Opened from the Home drawer ("Browse Topics"). Renders every topic across
- * the ten real categories (wildcard is a merge, so it isn't a separate lane)
- * with a search bar, per-category filter chips, a small "explored" badge on
+ * the ten real categories PLUS a dedicated Wildcard lane (wildcard.json's
+ * hand-curated curiosities, browsable on their own) with a search bar,
+ * per-category filter chips, a small "explored" badge on
  * topics already marked done, and sort controls for A–Z / Z–A / newest /
  * oldest by year. Tapping any topic opens its full Topic Reveal page, exactly like
  * spinning it.
@@ -114,11 +115,23 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Cache-first initialization matters here: returning to the browser should
     // render the already-parsed catalog immediately instead of flashing the
     // loading state for one composition frame.
-    val visibleCategories = CurioCategories.visible
-        .filter { it.id != CategoryId.WILDCARD }
+    // The ten canonical lanes PLUS a dedicated Wildcard lane. wildcard.json
+    // holds 500+ hand-curated curiosities (categoryId == WILDCARD) that live
+    // in no other lane — the Spin deck's "wildcard" pool merges every lane,
+    // so without its own lane here those topics would never be browsable.
+    // Always present (the browser is an explicit browse-all surface) even if
+    // Wildcard is hidden from the tab pickers in Manage Categories.
+    val visibleCategories = (CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD)))
+        .distinctBy { it.id }
+    // The merged wildcard pool duplicates every canonical topic, so the
+    // Wildcard lane shows ONLY the hand-curated wildcard.json originals —
+    // the ten lanes keep their own topics and the sections never overlap.
+    fun laneTopics(cat: CurioCategory, topics: List<CurioTopic>): List<CurioTopic> =
+        if (cat.id == CategoryId.WILDCARD) topics.filter { it.categoryId == CategoryId.WILDCARD }
+        else topics
     val cachedCatalog = remember(visibleCategories) {
         visibleCategories.mapNotNull { cat ->
-            TopicJsonLoader.cached(cat.id)?.let { topics -> cat to topics }
+            TopicJsonLoader.cached(cat.id)?.let { topics -> cat to laneTopics(cat, topics) }
         }
     }
     val catalogState by produceState<CatalogState>(
@@ -130,11 +143,13 @@ fun TopicDatabaseScreen(navController: NavController) {
         AppPreferences.categoryOrderState
     ) {
         value = withContext(Dispatchers.Default) {
-            // Load only visible canonical categories. The old preloadAll call
-            // parsed every lane, including the derived wildcard pool, before
-            // the database screen could render anything.
+            // Load the canonical lanes; the wildcard lane reuses those caches
+            // (its pool merges every lane, then we keep only its own
+            // curiosities) so the extra lane adds no duplicate parses.
             CatalogState(
-                entries = visibleCategories.map { cat -> cat to TopicJsonLoader.load(cat.id) },
+                entries = visibleCategories.map { cat ->
+                    cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
+                },
                 loading = false
             )
         }

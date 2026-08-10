@@ -5,3 +5,5 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Curie’s personality grew a lot: 150+ new reactions, an anti-repeat memory so she never says the same line twice in a row, and adorable sassy comebacks when you open the same thing over and over.
 • New pet games: she plays chameleon (fades into the background, then pops back somewhere new), dashes after falling sparks, and says peek-a-boo when hiding around buttons.
 • The Tour got a proper bottom dock with big Next and Skip buttons on a solid background, tour dialogue is no longer cut off at two lines, and tapping anywhere on screen advances the tour.
+• Browse Topics gained a dedicated Wildcard lane — the 500+ hand-curated curiosities from wildcard.json are now browsable on their own, with their own filter chip and section.
+• The Spin deck no longer shows the misleading “Nothing here yet” card when a topic load fails — it shows a Try again state instead, and a failed refresh never wipes a warm deck.
