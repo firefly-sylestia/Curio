@@ -1,24 +1,24 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Topic Reveal bottom tear / watermark / morph stability
+## Current Request (COMPLETED): Theme-aware Topic Reveal footer
 
 **Date:** 2026-08-10
 
 ### What the user asked
-Fix the Topic Reveal page bottom tear/placeholder so hiding the bottom navbar does not make the watermark or the shared hero morph animation shift downward.
-
-### Root cause
-`CurioNavHost` hid the actual bottom bar on Reveal, so Scaffold `innerPadding` only reserved the system navigation-bar inset there. Normal tab pages reserve the app bottom nav footprint plus the system nav inset. Padding only `CurioWatermarkBackdrop` in `TopicRevealScreen` did not stabilize the whole destination/shared-transition content bounds, so the watermark coordinate space and the shared hero target could still stretch downward.
+Make the newly added Topic Reveal bottom torn strip useful without increasing its height. The strip and tear should be opaque and theme-aware across Curio, AMOLED, and Material styles, with category tint support. Move topic tags into the top of the footer if possible.
 
 ### Changes made
-- `CurioNavHost.kt` now detects Reveal routes and, on compact bottom-nav layouts, adds a navbar-height placeholder (`RevealBottomBarPlaceholderHeight = 80.dp`) to the NavHost content padding without rendering the actual bottom bar.
-- `TopicRevealScreen.kt` lets the watermark backdrop fill the stabilized content bounds and paints the torn strip down through the reserved 80dp slot plus the system nav inset.
-- `CurioRoutes.kt` and `app/AGENTS.md` were updated so future agents know Reveal is bottom-nav-adjacent for metadata/selection, but the actual bar is hidden and replaced by a same-height torn placeholder.
-- `fastlane/metadata/android/en-US/changelogs/20260918.txt` notes the visual stability fix and stays under the 500-character store limit.
+- Kept the existing fixed 80dp footer geometry and reserved navigation inset unchanged.
+- Made the torn strip fully opaque and selected its surface from the active appearance: category surface for Curio, Material surface container for Material, and AMOLED surface for AMOLED.
+- Reused the same resolved surface for the torn edge so the seam remains visually continuous in each theme.
+- Moved the existing topic tags from the reveal body into a compact single-line footer row, capped at three tags with ellipsis-safe text and no height expansion.
+- Preserved existing reveal actions and interactions.
 
 ### Validation
-- `node scripts/check_braces.js app/src/main/java/com/curio/app/navigation/CurioNavHost.kt app/src/main/java/com/curio/app/navigation/CurioRoutes.kt app/src/main/java/com/curio/app/features/reveal/TopicRevealScreen.kt` — OK.
-- `git diff --check` — OK.
-- `wc -c fastlane/metadata/android/en-US/changelogs/20260918.txt` — 352 chars.
-- Code review subagent found no Compose layout or Kotlin compile blockers; suggested doc/comment cleanup and named placeholder constant, both addressed.
-- Gradle compile/build/lint/test were not run because root AGENTS.md forbids local Gradle commands in this environment.
+- Brace checker passed for TopicRevealScreen.kt.
+- git diff --check passed.
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+- Review the diff before commit/push.
+
+### Follow-up
+Commit and push the functional change using the repository's conventional commit workflow.
