@@ -95,7 +95,10 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -471,8 +474,9 @@ private fun ProfileDialogs(
 ) {
     if (showNameDialog) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = onDismissName,
-            shape = RoundedCornerShape(28.dp),
             title = { Text("Display name", fontWeight = FontWeight.ExtraBold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -486,8 +490,12 @@ private fun ProfileDialogs(
                     )
                 }
             },
-            confirmButton = { TextButton(onClick = onSaveName) { Text("Save", fontWeight = FontWeight.Bold) } },
-            dismissButton = { TextButton(onClick = onDismissName) { Text("Cancel") } }
+            confirmButton = {
+                TextButton(onClick = onSaveName, colors = curioDialogActionButtonColors()) { Text("Save", fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissName, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+            }
         )
     }
 }

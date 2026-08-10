@@ -43,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -118,6 +117,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -125,6 +125,9 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -721,10 +724,11 @@ fun TopicRevealScreen(
         // CurioNavHost.showBottomBar). It tears UP at its top edge — the
         // mirror of the hero's downward tear — so the page reads as one
         // torn sheet end-to-end. Fixed seed → never re-rolls.
+        // v11 — the strip wears the PLAIN tear (no bold/detail lip): a calm
+        // no-design seam that stays theme-aware and keeps the footer's fixed
+        // height, so the tags row below never collides with a deep lip.
         val bottomTornShape = remember(REVEAL_BOTTOM_TEAR_SEED) {
-            // Detail adds a slightly deeper, more expressive lip without
-            // changing the fixed footer height.
-            SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED, bold = true, detail = true)
+            SoftTornBottomShape(REVEAL_BOTTOM_TEAR_SEED)
         }
         // v9.x — the strip and its tear are fully opaque and follow the active
         // appearance. Curio uses the category surface (anchored to the
@@ -758,6 +762,9 @@ fun TopicRevealScreen(
 
         // Compact context row: tags live in the reserved footer now, keeping
         // the reveal body focused without changing the footer's fixed height.
+        // v11 — the chips sit a little LOWER (16dp inset) so they clear the
+        // torn seam entirely, and each chip caps at a third of the row width
+        // with ellipsis so the row never runs off small screens.
         if (!resolved?.tags.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
@@ -765,7 +772,7 @@ fun TopicRevealScreen(
                     .offset(y = RevealBottomTearHeight + navInset)
                     .fillMaxWidth()
                     .height(RevealBottomTearHeight + navInset)
-                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = navInset + 8.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = navInset + 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.Top
             ) {
@@ -802,6 +809,8 @@ fun TopicRevealScreen(
 
     if (showOverlayPermissionDialog) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 showOverlayPermissionDialog = false
                 // v8.1 — dismissing without granting is a "no": record it so
@@ -860,7 +869,9 @@ fun TopicRevealScreen(
                             continueExploreFlow(s)
                         }
                     }
-                }) { Text("Allow") }
+                }) {
+                    Text("Allow", color = curioDialogActionColor())
+                }
             },
             dismissButton = {
                 TextButton(onClick = {
@@ -871,7 +882,7 @@ fun TopicRevealScreen(
                     val s = pendingOverlaySession
                     pendingOverlaySession = null
                     if (s != null) continueExploreFlow(s)
-                }) { Text("Not now") }
+                }) { Text("Not now", color = curioDialogActionColor()) }
             }
         )
     }
@@ -879,19 +890,13 @@ fun TopicRevealScreen(
     if (showExploreDialog && resolved != null) {
         val topic = resolved
         val action = topic.exploreAction
-        // v10 — theme-aware explore dialog: uses the category's readable
-        // accent as the button ink so "Explore in Google" / "Explore in
-        // YouTube" are vivid and visible in every theme (the old default
-        // pink primary washed out on tinted surfaces in dark mode). The
-        // dialog shape uses a generous rounded corner to match the card
-        // language of the page instead of the default sharp rect.
-        val dialogAccent = cat.themedAccent()
-        val dialogButtonColors = ButtonDefaults.textButtonColors(
-            contentColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL)
-                MaterialTheme.colorScheme.primary
-            else dialogAccent
-        )
+        // v11 — the dialog wears the shared Curio dialog theme: the card-
+        // matching 24dp shape, the pastel-aware container, and the readable
+        // action ink (deep rose on light/pastel so the buttons never wash
+        // out, device primary in Material and dark).
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 // A dismiss gesture (tap-outside / back / swipe) with no
                 // action picked = "backed out without exploring" — record
@@ -905,7 +910,6 @@ fun TopicRevealScreen(
                 }
                 showExploreDialog = false
             },
-            shape = RoundedCornerShape(24.dp),
             title = {
                 Text(
                     "Explore ${topic.name}?",
@@ -934,7 +938,7 @@ fun TopicRevealScreen(
                             showExploreDialog = false
                             startExploreSession(topic, buildGoogleSearchUrl(topic))
                         },
-                        colors = dialogButtonColors
+                        colors = curioDialogActionButtonColors()
                     ) { Text("Explore in Google") }
                     TextButton(
                         onClick = {
@@ -942,7 +946,7 @@ fun TopicRevealScreen(
                             showExploreDialog = false
                             startExploreSession(topic, buildYouTubeSearchUrl(topic))
                         },
-                        colors = dialogButtonColors
+                        colors = curioDialogActionButtonColors()
                     ) { Text("Explore in YouTube") }
                 }
             },
@@ -960,6 +964,8 @@ fun TopicRevealScreen(
         val next = pendingConflictSession
         if (old != null && next != null) {
             AlertDialog(
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
                 onDismissRequest = {
                     showConflictDialog = false
                     val s = pendingConflictSession
@@ -990,32 +996,38 @@ fun TopicRevealScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
-                        val s = pendingConflictSession
-                        showConflictDialog = false
-                        pendingConflictSession = null
-                        conflictActiveSession = null
-                        if (s != null) {
-                            // Queue the running session (paused, time banked),
-                            // then start the new explore in its place.
-                            ExploreReminderScheduler.cancel(context)
-                            ExploreSessionStore.queueActiveSession(context)
-                            beginExploreSession(s)
-                        }
-                    }) { Text("Start new explore") }
+                    TextButton(
+                        onClick = {
+                            val s = pendingConflictSession
+                            showConflictDialog = false
+                            pendingConflictSession = null
+                            conflictActiveSession = null
+                            if (s != null) {
+                                // Queue the running session (paused, time banked),
+                                // then start the new explore in its place.
+                                ExploreReminderScheduler.cancel(context)
+                                ExploreSessionStore.queueActiveSession(context)
+                                beginExploreSession(s)
+                            }
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Start new explore") }
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-                        // Save the new topic for later — the current session
-                        // keeps running untouched.
-                        val s = pendingConflictSession
-                        showConflictDialog = false
-                        pendingConflictSession = null
-                        conflictActiveSession = null
-                        if (s != null) {
-                            AppPreferences.pinTopic(context, s.categoryId, s.topicName)
-                        }
-                    }) { Text("Save for later") }
+                    TextButton(
+                        onClick = {
+                            // Save the new topic for later — the current session
+                            // keeps running untouched.
+                            val s = pendingConflictSession
+                            showConflictDialog = false
+                            pendingConflictSession = null
+                            conflictActiveSession = null
+                            if (s != null) {
+                                AppPreferences.pinTopic(context, s.categoryId, s.topicName)
+                            }
+                        },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Save for later") }
                 }
             )
         }

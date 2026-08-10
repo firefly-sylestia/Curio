@@ -1,5 +1,22 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Material theme buttons, pastel dialogs, reveal footer polish
+
+**Date:** 2026-08-10
+
+### What the user asked
+Fix the Spin button and category button in the Material theme (light + dark), make the Material theme fully Material (nothing foreign left), make pastel-light dialogs match the screen tint + card shape (like the Topic Reveal dialog) with darker readable text, and simplify the Topic Reveal bottom strip: plain no-design tear, theme-aware, tags a little lower, no off-screen overflow on small screens, footer height unchanged.
+
+### Changes made
+- **CurioTheme.kt** — added shared dialog theme: `CurioDialogShape` (24dp card-matching), `curioDialogContainerColor()` (light mode blends toward the cream background so dialogs melt into pastel pages; Material/dark keep scheme surfaces), `curioDialogActionColor()` (deep same-hue rose ink in light for readable buttons; device primary in Material/dark), `curioDialogActionButtonColors()`.
+- **SpinScreen.kt** — Material style: Spin dice glyph uses device onPrimary in dark (was white-on-light = invisible), orbit dots use onSurface in light (white dots vanished on the wash), Categories/Filter selected label pairs with the icon's themedButtonInk (was mismatched onPrimaryContainer), unselected pills wear device surfaceContainerHigh + outlineVariant instead of category tint; FilterSheet + CategoryPickerSheet wear device surfaceContainerLow in Material.
+- **TopicRevealScreen.kt** — bottom strip now uses the plain `SoftTornBottomShape(seed)` (no bold/detail lip), stays theme-aware, footer height unchanged (80dp); tag chips moved down (10→16dp inset) so they clear the seam and never run off small screens; all 3 reveal dialogs use the shared dialog theme.
+- **Dialog pass (24 AlertDialogs, 12 files)** — every AlertDialog now passes `containerColor = curioDialogContainerColor()` + `shape = CurioDialogShape`, and action TextButtons use the readable deep-rose ink; AudioQualityDialog radio/border also use it; filled Save-and-switch buttons use `curioDialogActionColor()`.
+
+### Validation
+- All 24 AlertDialog sites updated (grep counts verified), imports verified per file, no duplicate shape params, git diff --check clean.
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Theme-aware Topic Reveal footer
 
 **Date:** 2026-08-10

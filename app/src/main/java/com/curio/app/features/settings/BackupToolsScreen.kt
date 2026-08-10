@@ -42,7 +42,10 @@ import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -121,6 +124,8 @@ fun BackupToolsScreen(navController: NavController) {
     if (legacyPreview != null && legacyPendingUri != null) {
         val preview = legacyPreview!!
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { legacyPreview = null; legacyPendingUri = null },
             title = { Text("Import FieldMind data?", fontWeight = FontWeight.ExtraBold) },
             text = {
@@ -168,44 +173,64 @@ fun BackupToolsScreen(navController: NavController) {
                             }
                         }
                     }
-                }) { Text("Import", fontWeight = FontWeight.Bold) }
+                },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Import", fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
-                TextButton(onClick = { legacyPreview = null; legacyPendingUri = null }) { Text("Cancel") }
+                TextButton(
+                    onClick = { legacyPreview = null; legacyPendingUri = null },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Cancel") }
             }
         )
     }
 
     if (showRestoreConfirm) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { showRestoreConfirm = false },
             title = { Text("Restore backup?", fontWeight = FontWeight.ExtraBold) },
             text = { Text("This replaces all of your current captures and settings with the contents of the backup file. This can't be undone.") },
             confirmButton = {
-                TextButton(onClick = {
-                    showRestoreConfirm = false
-                    restoreLauncher.launch(arrayOf(CurioBackupManager.MIME_TYPE))
-                }) { Text("Continue", fontWeight = FontWeight.Bold) }
+                TextButton(
+                    onClick = {
+                        showRestoreConfirm = false
+                        restoreLauncher.launch(arrayOf(CurioBackupManager.MIME_TYPE))
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Continue", fontWeight = FontWeight.Bold) }
             },
-            dismissButton = { TextButton(onClick = { showRestoreConfirm = false }) { Text("Cancel") } }
+            dismissButton = {
+                TextButton(onClick = { showRestoreConfirm = false }, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+            }
         )
     }
 
     legacyStatus?.let { (success, message) ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { legacyStatus = null },
             title = { Text(if (success) "Done" else "Couldn't do that", fontWeight = FontWeight.ExtraBold) },
             text = { Text(message) },
-            confirmButton = { TextButton(onClick = { legacyStatus = null }) { Text("OK", fontWeight = FontWeight.Bold) } }
+            confirmButton = {
+                TextButton(onClick = { legacyStatus = null }, colors = curioDialogActionButtonColors()) { Text("OK", fontWeight = FontWeight.Bold) }
+            }
         )
     }
 
     backupStatus?.let { (success, message) ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { backupStatus = null },
             title = { Text(if (success) "Done" else "Couldn't do that", fontWeight = FontWeight.ExtraBold) },
             text = { Text(message) },
-            confirmButton = { TextButton(onClick = { backupStatus = null }) { Text("OK", fontWeight = FontWeight.Bold) } }
+            confirmButton = {
+                TextButton(onClick = { backupStatus = null }, colors = curioDialogActionButtonColors()) { Text("OK", fontWeight = FontWeight.Bold) }
+            }
         )
     }
 

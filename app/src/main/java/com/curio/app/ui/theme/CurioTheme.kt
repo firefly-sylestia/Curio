@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -325,3 +328,61 @@ fun CurioTheme(
         content     = content
     )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared dialog styling — one container, shape and action ink for every
+// AlertDialog in the app, so dialogs match the card language (24dp corners)
+// and the pastel-tinted page instead of floating a foreign cream panel.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The card-matching corner radius every AlertDialog wears — the same 24dp
+ * medium token as the cards and the Topic Reveal explore dialog.
+ */
+val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
+
+/**
+ * Theme-aware AlertDialog container. Curio LIGHT mode (pastel and plain)
+ * blends the surface container toward the soft cream background so the
+ * dialog melts into the tinted page instead of floating a deeper yellow-
+ * cream panel; dark and Material keep the scheme's own elevated surface.
+ */
+@Composable
+fun curioDialogContainerColor(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+    if (isCurioDarkTheme()) {
+        return MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+    // v11 — light: a soft near-background sheet that matches the page wash
+    // family (the cream background) instead of the deeper #E4D7BF container.
+    return lerp(
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        MaterialTheme.colorScheme.background,
+        0.60f
+    )
+}
+
+/**
+ * Readable dialog ACTION ink. In light mode the scheme primary is the pale
+ * coral-pink brand color that washes out on a light dialog, so actions flip
+ * to a deep same-hue rose for real contrast; dark and Material keep the
+ * scheme primary.
+ */
+@Composable
+fun curioDialogActionColor(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        return MaterialTheme.colorScheme.primary
+    }
+    if (isCurioDarkTheme()) {
+        return MaterialTheme.colorScheme.primary
+    }
+    val a = toHsl(MaterialTheme.colorScheme.primary)
+    return fromHsl(a.h, a.s.coerceIn(0.35f, 0.60f), 0.36f)
+}
+
+/** TextButton colors for dialog actions — dark readable ink in light mode. */
+@Composable
+fun curioDialogActionButtonColors(): ButtonColors =
+    ButtonDefaults.textButtonColors(contentColor = curioDialogActionColor())

@@ -43,6 +43,9 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 
 /**
  * A cozy one-line speech bubble with a soft curved tail pointing at the pet
@@ -293,6 +296,8 @@ fun CurioPetHeroCard(
         val info = CurioPet.tapInfo(context, lanes)
         val questRoute = CurioQuests.currentQuest()?.navRoute
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 showDialog = false
             },
@@ -342,9 +347,12 @@ fun CurioPetHeroCard(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showDialog = false
-                }) { Text("Okay") }
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Okay") }
             },
             dismissButton = {
                 if (questRoute != null) {
@@ -352,7 +360,8 @@ fun CurioPetHeroCard(
                         onClick = {
                             showDialog = false
                             questRoute.let(onGo)
-                        }
+                        },
+                        colors = curioDialogActionButtonColors()
                     ) { Text("Go to quest") }
                 }
             }

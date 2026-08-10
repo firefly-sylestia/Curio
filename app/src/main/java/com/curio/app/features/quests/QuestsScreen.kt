@@ -100,7 +100,10 @@ import kotlinx.coroutines.delay
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
@@ -667,6 +670,8 @@ private fun PathsCard(
     }
     if (showBadges) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { showBadges = false },
             title = { Text("Badges · $unlockedCount of ${allStages.size} earned") },
             text = {
@@ -693,7 +698,7 @@ private fun PathsCard(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showBadges = false }) { Text("Close") }
+                TextButton(onClick = { showBadges = false }, colors = curioDialogActionButtonColors()) { Text("Close") }
             }
         )
     }

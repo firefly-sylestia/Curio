@@ -1539,7 +1539,14 @@ private fun FilterSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        // v11 — the Material style wears the device surface container (no
+        // foreign category tint on the device palette); Curio/AMOLED keep
+        // the tinted category surface that melts into the washed page.
+        containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+        },
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -3125,6 +3132,14 @@ private fun SpinButton(
     // shrinks WITH the deck (the orbit ring too), floored at 0.75 so the
     // CTA never gets tiny.
     val sizeScale = fitScale.coerceIn(0.75f, 1f)
+    // v11 — Material keeps the device onPrimary as the glyph ink so the dice
+    // stays readable on the (possibly light) primary-based fill in dark mode;
+    // Curio/AMOLED keep the pastel-aware ink.
+    val glyphInk = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && isCurioDarkTheme()) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        pastelFillInk(tint)
+    }
     // Keep the animated orbit/dots at the same radius while making the
     // actual circular button plate a little tighter and more elegant.
     val buttonSize = (if (compact) {
@@ -3200,7 +3215,7 @@ private fun SpinButton(
                 ) { shuffling ->
                     if (shuffling) {
                         ShuffleGlyph(
-                            tint = pastelFillInk(tint),
+                            tint = glyphInk,
                             modifier = Modifier
                                 .size(72.dp)
                                 // Keep the animated die on the same optical
@@ -3222,7 +3237,7 @@ private fun SpinButton(
                         )
                         CurioIcon(
                             CurioIcons.Casino, null,
-                            tint = pastelFillInk(tint),
+                            tint = glyphInk,
                             size = if (landedTopic != null) 52.dp else 60.dp,
                             // Optical correction for the casino glyph's
                             // visible bounds. The parent Box and button are
@@ -3254,7 +3269,13 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
     // in pastel light mode and a light tint in pastel dark mode, so the
     // orbiting dots stay readable on every background. Non-pastel keeps
     // the classic accent-colored dots.
-    val dotColor = pastelFillInk(color)
+    // v11 — Material LIGHT wears the device onSurface so the orbiting dots
+    // stay visible on the light tinted page (white dots vanished on the wash).
+    val dotColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && !isCurioDarkTheme()) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        pastelFillInk(color)
+    }
     AnimatedVisibility(
         visible = active,
         modifier = modifier,
@@ -3501,6 +3522,31 @@ private fun BottomCta(
 }
 
 /**
+ * Unselected deck-control fill — the device surface container in the
+ * Material style (nothing foreign on the device palette), the tinted
+ * category surface otherwise (the page wash's stronger sibling).
+ */
+@Composable
+private fun deckControlSurface(cat: CurioCategory): Color =
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    } else {
+        cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    }
+
+/**
+ * Unselected deck-control border — the device outline hairline in the
+ * Material style, the theme-aware category border otherwise.
+ */
+@Composable
+private fun deckControlBorder(cat: CurioCategory): BorderStroke? =
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    } else {
+        cat.categoryBorder()
+    }
+
+/**
  * Tall vertical pill used by the extra-compact bottom bar (v7.2) — icon
  * over a stacked label, pinned to the left/right screen edge (Categories
  * left, Filter right) so the middle of a very short screen stays clear for
@@ -3518,8 +3564,8 @@ private fun VerticalDeckButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedButtonFill() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-        border = if (selected) null else cat.categoryBorder(),
+        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
+        border = if (selected) null else deckControlBorder(cat),
         shadowElevation = 0.dp,
         modifier = modifier
             .size(width = 54.dp, height = 112.dp)
@@ -3569,8 +3615,8 @@ private fun DeckControlButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = if (selected) cat.themedButtonFill() else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-        border = if (selected) null else cat.categoryBorder(),
+        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
+        border = if (selected) null else deckControlBorder(cat),
         shadowElevation = 0.dp,
         modifier = modifier
             .height(62.dp)
@@ -3600,7 +3646,12 @@ private fun DeckControlButton(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraBold
                 ),
-                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                // v11 — the label pairs with the icon's [themedButtonInk]
+                // (the device onPrimary in Material) instead of the old
+                // onAccent, whose Material value (onPrimaryContainer) left
+                // the text dark-on-primary in light and light-on-primary in
+                // dark — mismatched siblings on the same fill.
+                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -3645,7 +3696,14 @@ private fun CategoryPickerSheet(
         // v6.6 — the full-screen category selection page wears the
         // same category tint wash as the Spin page it sits on, so
         // the picker never flashes a foreign plain background.
-        containerColor = currentCat.categoryBackgroundWash(),
+        // v11 — the Material style wears the device surface container
+        // instead of the category wash (nothing foreign on the device
+        // palette); Curio/AMOLED keep the wash.
+        containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            currentCat.categoryBackgroundWash()
+        },
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {

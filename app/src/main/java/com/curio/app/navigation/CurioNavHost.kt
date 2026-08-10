@@ -72,8 +72,11 @@ import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.delay
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
@@ -831,14 +834,16 @@ fun CurioNavHost(
     // itself has no scrim and leaves every demonstrated control tappable.
     if (routePrefix == CurioRoutes.HOME && TourController.offerPending) {
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { TourController.declineOffer() },
             title = { Text("Take a tiny tour?") },
             text = { Text("Curie can walk you through the main controls. Nothing will start, open, or be saved while you tour.") },
             confirmButton = {
-                TextButton(onClick = { TourController.start() }) { Text("Take the tour") }
+                TextButton(onClick = { TourController.start() }, colors = curioDialogActionButtonColors()) { Text("Take the tour") }
             },
             dismissButton = {
-                TextButton(onClick = { TourController.declineOffer() }) { Text("Maybe later") }
+                TextButton(onClick = { TourController.declineOffer() }, colors = curioDialogActionButtonColors()) { Text("Maybe later") }
             }
         )
     }
@@ -872,6 +877,8 @@ fun CurioNavHost(
             }
         }
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = {
                 showDoneDialog = false
                 confirmSessionCancel = false
@@ -951,19 +958,24 @@ fun CurioNavHost(
                         navController.navigate(
                             CurioRoutes.captureFor(activeSession.categoryId.routeSlug, activeSession.topicName)
                         ) { launchSingleTop = true }
-                    }) { Text("Done and write about it") }
+                    },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Done and write about it") }
                 }
             },
             dismissButton = {
                 if (confirmSessionCancel) {
                     // Back out of the cancel — keep exploring.
-                    TextButton(onClick = { confirmSessionCancel = false }) { Text("Keep exploring") }
+                    TextButton(
+                        onClick = { confirmSessionCancel = false },
+                        colors = curioDialogActionButtonColors()
+                    ) { Text("Keep exploring") }
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = { confirmSessionCancel = true }) {
                             Text("Cancel session", color = MaterialTheme.colorScheme.error)
                         }
-                        TextButton(onClick = { showDoneDialog = false }) { Text("Keep exploring") }
+                        TextButton(onClick = { showDoneDialog = false }, colors = curioDialogActionButtonColors()) { Text("Keep exploring") }
                     }
                 }
             }

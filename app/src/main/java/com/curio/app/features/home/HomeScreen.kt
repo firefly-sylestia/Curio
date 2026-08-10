@@ -110,7 +110,10 @@ import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
@@ -961,17 +964,22 @@ fun HomeScreen(navController: NavController) {
     // ── Unsave-quote confirmation — never remove a bookmark silently ──
     pendingUnsave?.let { quote ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingUnsave = null },
             title = { Text("Remove saved quote?") },
             text = { Text("This removes \u201C${quote.quoteText}\u201D from your Saved shelf. The entry itself stays in the Cabinet.") },
             confirmButton = {
-                TextButton(onClick = {
-                    AppPreferences.removeSavedQuote(context, quote.entryId, quote.quoteText)
-                    pendingUnsave = null
-                }) { Text("Remove") }
+                TextButton(
+                    onClick = {
+                        AppPreferences.removeSavedQuote(context, quote.entryId, quote.quoteText)
+                        pendingUnsave = null
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Remove") }
             },
             dismissButton = {
-                TextButton(onClick = { pendingUnsave = null }) { Text("Keep") }
+                TextButton(onClick = { pendingUnsave = null }, colors = curioDialogActionButtonColors()) { Text("Keep") }
             }
         )
     }
@@ -979,17 +987,22 @@ fun HomeScreen(navController: NavController) {
     // ── Unpin-topic confirmation — never drop a pin silently ──
     pendingUnpin?.let { pinned ->
         AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
             onDismissRequest = { pendingUnpin = null },
             title = { Text("Unpin ${pinned.topicName}?") },
             text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck. You can pin it again anytime.") },
             confirmButton = {
-                TextButton(onClick = {
-                    AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
-                    pendingUnpin = null
-                }) { Text("Unpin") }
+                TextButton(
+                    onClick = {
+                        AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
+                        pendingUnpin = null
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Unpin") }
             },
             dismissButton = {
-                TextButton(onClick = { pendingUnpin = null }) { Text("Keep") }
+                TextButton(onClick = { pendingUnpin = null }, colors = curioDialogActionButtonColors()) { Text("Keep") }
             }
         )
     }
