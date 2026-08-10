@@ -34,3 +34,16 @@ Refine the footer tear so it projects slightly farther and improve the footer ta
 ### Validation
 - Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
 - Run `git diff --check` and the lightweight source checks before commit/push.
+
+## Current Request (IN PROGRESS): Refine explore dialog and expression action
+
+**Date:** 2026-08-10
+
+### Changes made
+- Removed the redundant `Not now` action from the Explore dialog; outside-tap/back dismissal remains available.
+- Grouped Google and YouTube choices together in the dialog action area.
+- Added a theme-aware outlined pill surface to `Express yourself`, including disabled-state contrast.
+
+### Validation
+- Run `git diff --check` and lightweight source checks.
+- Do not run Gradle build/lint/test commands per repository rules.

@@ -904,25 +904,20 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    engaged = true
-                    showExploreDialog = false
-                    startExploreSession(topic, buildGoogleSearchUrl(topic))
-                }) { Text("Explore in Google") }
-            },
-            dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        engaged = true
+                        showExploreDialog = false
+                        startExploreSession(topic, buildGoogleSearchUrl(topic))
+                    }) { Text("Explore in Google") }
                     TextButton(onClick = {
                         engaged = true
                         showExploreDialog = false
                         startExploreSession(topic, buildYouTubeSearchUrl(topic))
                     }) { Text("Explore in YouTube") }
-                    TextButton(onClick = {
-                        showExploreDialog = false
-                        ExploreSessionStore.recordUnexplored(context, cat.id, topic.name)
-                    }) { Text("Not now") }
                 }
-            }
+            },
+            dismissButton = null
         )
     }
 
@@ -1229,12 +1224,15 @@ private fun RevealAlreadyButton(
     // v8.55 — the tier metrics resize it with the pill.
     val baseInk = MaterialTheme.colorScheme.onSurfaceVariant
     val ink = if (enabled) baseInk else baseInk.copy(alpha = 0.40f)
+    val pillAccent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(18.dp),
-        color = Color.Transparent,
+        shape = RoundedCornerShape(50),
+        color = pillAccent.copy(alpha = if (enabled) 0.12f else 0.06f),
+        border = BorderStroke(1.dp, pillAccent.copy(alpha = if (enabled) 0.30f else 0.12f)),
         modifier = modifier
+            .categoryEdgeShine(RoundedCornerShape(50), accent = pillAccent)
             // Give the writing action a real, forgiving tap target across its
             // entire weighted half of the row. The old inner padding made the
             // visible label look wider than the actual touchable surface.
