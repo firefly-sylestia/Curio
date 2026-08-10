@@ -1,5 +1,24 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Pet speech bubbles skip on interaction
+
+**Date:** 2026-08-10
+
+### What the user asked
+When interacting with the floating pet (tapping it, or doing other things in the app), the pet doesn't skip its current dialog to react — the bubble stays and cycles through all queued lines. It should skip in some places (not always): direct interactions should dismiss/skip the current line and answer immediately.
+
+### Changes made
+- **CurioFloatingPet.kt** — added `speakNow(line?)`: interrupts whatever bubble is showing (skips it via re-keying the bubble lifecycle) and clears the queued backlog. A null line dismisses the bubble silently (the pet's motion is the reaction).
+- Taps now call `speakNow` (with or without a line) instead of `queueReaction` — the pet answers the tap immediately and drops queued chatter.
+- Drag end ("Home sweet home!", dizzy line) and long-press ("Home sweet home!") also use `speakNow`.
+- `fireReaction`'s event lines (spin landed, reveal, explore, save, play, level-up) now `speakNow` — real user-driven events skip the current bubble instead of queuing behind it (null lines leave the bubble alone).
+- `queueReaction` (ambient wander/peek/games/typing/custom action chatter) is now CAPPED to the latest 2 lines, so the pet can never cycle through a long backlog of stale lines; it repeats the last one or two then falls quiet.
+- Tour dialogue is untouched (separate `tourStep?.dialogue` path, never interrupted).
+
+### Validation
+- git diff --check clean.
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Material theme buttons, pastel dialogs, reveal footer polish
 
 **Date:** 2026-08-10

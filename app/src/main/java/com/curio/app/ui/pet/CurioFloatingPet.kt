@@ -113,6 +113,10 @@ private val TYPING_SCALE = 0.2f
  *    line and hearts, then a playful dart to a nearby spot. v8.21 — being
  *    DRAGGED is what makes it dizzy now: swirl eyes + a wobbly sway while
  *    it's flung around, then a short groggy recovery with a line.
+ *    v11 — a tap / drag / app event SKIPS whatever bubble is showing and
+ *    answers immediately instead of waiting behind (or cycling through)
+ *    queued chatter; ambient lines still queue, but capped so they never
+ *    pile up.
  *  - CELEBRATES: when its mood flips to EXCITED/PROUD (a new lane, a
  *    level-up, a claim), it hops with a short excited line.
  *  - NAPS: after a long idle it fades back into its flower bed
@@ -198,15 +202,32 @@ fun CurioFloatingPet(
          * Keep one speech line on screen at a time. Reactions can arrive from
          * several independent effects in the same frame (for example an app
          * event plus a custom action); queue later lines instead of replacing
-         * the visible line and restarting its animation.
+         * the visible line and restarting its animation. v11 — the backlog is
+         * CAPPED so ambient chatter can never pile up into a long cycle of
+         * stale lines: the pet repeats at most the latest one or two, then
+         * falls quiet.
          */
         fun queueReaction(line: String) {
             if (reaction == null && reactionQueue.isEmpty()) {
                 reaction = line
                 reactionKey++
             } else {
-                reactionQueue = reactionQueue + line
+                reactionQueue = (reactionQueue + line).takeLast(2)
             }
+        }
+
+        /**
+         * v11 — speak a line RIGHT NOW: interrupts whatever bubble is showing
+         * (skips it) and drops any queued backlog, so a direct interaction (a
+         * tap, a drag, an app event) is answered immediately instead of
+         * waiting behind — and cycling through — ambient chatter. A null line
+         * simply dismisses the current bubble (the pet still reacts with its
+         * motion) without speaking.
+         */
+        fun speakNow(line: String?) {
+            reactionQueue = emptyList()
+            reaction = line
+            reactionKey++
         }
         // v8.26 — the speech bubble fades + rises in and out instead of
         // popping, so line changes feel smooth rather than abrupt.
@@ -339,7 +360,11 @@ fun CurioFloatingPet(
                 // Custom lines are deliberately opt-in. When enabled, an
                 // event with saved lines speaks one of them; an event with
                 // no saved lines keeps Curie's built-in dialogue.
-                queueReaction(
+                // v11 — a real event (spin landed, reveal, save, level-up)
+                // speaks NOW: it skips whatever bubble is showing so the pet
+                // reacts to what the user just did instead of finishing old
+                // chatter first. A null line leaves the current bubble alone.
+                speakNow(
                     if (AppPreferences.customReactionLinesState) {
                         rule.lines.randomOrNull() ?: line
                     } else {
@@ -988,6 +1013,10 @@ fun CurioFloatingPet(
         // then clear. v8.26 — animated both ways so a new line never pops or
         // vanishes abruptly; the ~2.3s hold keeps reactions in the 2-3s range
         // (dizzy, cheers, home drops) so they read at a glance.
+        // v11 — a direct interaction (tap / drag / app event) calls speakNow,
+        // which re-keys this effect: the current hold is cancelled and the new
+        // line fades in at once (or the bubble dismisses), and the queue it
+        // drained from is already cleared — no more cycling stale lines.
         LaunchedEffect(reactionKey) {
             if (reaction != null) {
                 bubbleAnim.snapTo(0f)
@@ -1211,13 +1240,13 @@ fun CurioFloatingPet(
                                 if (dropped) {
                                     squishKey++
                                     heartsKey++
-                                    queueReaction("Home sweet home!")
+                                    speakNow("Home sweet home!")
                                     leavingHome = true
                                 }
                             }
                             if (flung && !leavingHome) {
                                 recovering = true
-                                queueReaction(CurioPet.dizzyLine())
+                                speakNow(CurioPet.dizzyLine())
                             }
                             // v8.26 — throw momentum: a real fling keeps a
                             // LITTLE of its speed on release (capped, and
@@ -1302,16 +1331,20 @@ fun CurioFloatingPet(
                             if (rule.enabled) {
                                 reactionFace = rule.face
                                 reactionFaceKey++
-                                if (Random.nextFloat() < 0.4f) {
+                                // v11 — the tap answers IMMEDIATELY: it skips
+                                // whatever bubble is showing and drops the
+                                // queued chatter (a null line just dismisses
+                                // the bubble — the pet's motion is the
+                                // reaction).
+                                val line = if (Random.nextFloat() < 0.4f) {
                                     val builtInLine = CurioPet.touchReaction(tier)
-                                    queueReaction(
-                                        if (AppPreferences.customReactionLinesState) {
-                                            rule.lines.randomOrNull() ?: builtInLine
-                                        } else {
-                                            builtInLine
-                                        }
-                                    )
-                                }
+                                    if (AppPreferences.customReactionLinesState) {
+                                        rule.lines.randomOrNull() ?: builtInLine
+                                    } else {
+                                        builtInLine
+                                    }
+                                } else null
+                                speakNow(line)
                                 when (tier) {
                                     // v8.21 — tapping never spins it dizzy anymore
                                     // (that's for dragging): boop → play-bow → a
@@ -1352,7 +1385,7 @@ fun CurioFloatingPet(
                             tapStreak = 0 // a fresh start when it comes home
                             squishKey++
                             heartsKey++
-                            queueReaction("Home sweet home!")
+                            speakNow("Home sweet home!")
                             leavingHome = true
                         }
                     )
