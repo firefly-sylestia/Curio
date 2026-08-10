@@ -125,6 +125,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
+import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
