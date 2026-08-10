@@ -1,5 +1,24 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Topic catalog not loaded from startup (0 counts / spurious loading)
+
+**Date:** 2026-08-10
+
+### What the user asked
+The dataset doesn't load reliably: the category picker shows 0 topics per category (counts only appear after opening a category), and some places show a loading state they shouldn't. Topics should be available and loaded from startup.
+
+### Root cause
+Regression from `9ead01a`/`180cbfd`: splash navigation was NOT held hostage by parsing — a concurrent preload raced the 800ms auto-dismiss, so Home rendered with a half-warm cache. `CurioCategoryCard` read only `TopicJsonLoader.cached()?.size ?: 0` inside a latched `remember`, so uncached lanes showed "0 topics" until reopened; Topic Database flashed "Loading topics…" while lanes warmed.
+
+### Changes made
+- **SplashScreen.kt** — splash now HOLDS navigation until the canonical catalog is warm: preload runs on `Dispatchers.Default` while the 800ms branding plays, then `withTimeoutOrNull(6s) { warmCatalog.join() }` before navigating (hard cap; per-lane `load` rethrows `CancellationException` so the timeout actually aborts). Individual lane failures are swallowed so one broken asset never blocks the rest.
+- **CurioCategoryCard.kt** — topic count is now a `produceState` (seeded from cache, reloads on demand, cancellation-aware) instead of a latched `remember` — cards can never pin a stale "0 topics" after e.g. an `onTrimMemory` cache clear.
+- Topic Database / Spin: no changes needed — with the warm cache their loading states only trigger for genuine work.
+
+### Validation
+- Brace check + git diff --check clean; code review passed.
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Topic Reveal plain bottom band
 
 **Date:** 2026-08-10
