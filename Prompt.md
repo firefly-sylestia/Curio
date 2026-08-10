@@ -1,5 +1,22 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): AMOLED Home quest banner → pure black with rose accent
+
+**Date:** 2026-08-10
+
+### What the user asked
+Make the Home quest banner pure black with the rose accent in AMOLED (the last hero still wearing the grey-coral tint).
+
+### Changes made
+- **HomeScreen.kt** — `homeRoseAccent()` AMOLED branch now returns pure `Color.Black` (was `lerp(surfaceContainerHigh, primary, 0.16f)`), matching the Profile/Settings heroes. Text stays white via the existing `homeReadableInk` → AMOLED `onSurface`.
+- The quest hero carries the rose accent on the black plate: new `symbolTint` (`CurioColors.HomeRosewood` in AMOLED, `questInk` otherwise) tints the watermark symbols, and the stat pane's AMOLED gradient is a rose glow (0.30 alpha → subtle rose wash over black) instead of the black-on-black wash.
+- **Cascade (consistent with the pure-black style):** QuestShuffleCard's casino button + eyebrow, the drawer hero, and the sticky top-bar pills all share `homeRoseAccent()` → black, all ink already resolves white/readable.
+- **FirstTimeEmpty fix** — the "Surprise me" button hardcoded `DeepPlum` ink, which vanished on the now-black AMOLED plate; it now uses `homeReadableInk(roseAccent)` (white in AMOLED, readable deep rose in light pastel, onSurface in light non-pastel). All `CurioColors.DeepPlum` references in HomeScreen are gone.
+
+### Validation
+- Brace check + git diff --check clean; code review passed (cascade ink readability, no unused imports).
+- Gradle compile/build/lint/test were not run because the repository explicitly forbids local Gradle commands in this environment.
+
 ## Current Request (COMPLETED): Spin orbit dots white in non-pastel light + loop skips
 
 **Date:** 2026-08-10
