@@ -2,7 +2,7 @@
 // Sets up routing and theme provider
 
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
 import { BottomNav } from './components/BottomNav';
 import { FloatingPet } from './components/FloatingPet';
@@ -38,8 +38,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <div className="min-h-screen">
+      <div className="min-h-screen">
           <Routes>
             {/* Onboarding */}
             <Route path="/onboarding" element={<OnboardingScreen />} />
@@ -66,7 +65,6 @@ const App: React.FC = () => {
           {/* Floating Pet Companion */}
           {showBottomNav && <FloatingPet />}
         </div>
-      </BrowserRouter>
     </ThemeProvider>
   );
 };
