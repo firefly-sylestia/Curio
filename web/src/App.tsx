@@ -28,10 +28,10 @@ const App: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if onboarding is complete on mount
+    // Check if onboarding is complete whenever location changes
     const complete = localStorage.getItem('onboarding_complete') === 'true';
     setIsOnboardingComplete(complete);
-  }, []);
+  }, [location.pathname]);
 
   // Hide bottom nav on onboarding
   const showBottomNav = isOnboardingComplete && location.pathname !== '/onboarding';
