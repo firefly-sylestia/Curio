@@ -278,36 +278,47 @@ export const CurioCategoryCard: React.FC<{
 };
 
 // ─── Curio Paper Card ─────────────────────────────────────────────────
+// Note-paper card matching Android's PaperCard: warm off-white, ruled lines,
+// red margin line (school notebook), Patrick Hand font context, watermark glyphs.
 export const CurioPaperCard: React.FC<{
   children: React.ReactNode;
   variant?: 'ruled' | 'torn' | 'plain' | 'coffee';
   className?: string;
   showMargin?: boolean;
   watermark?: string;
-}> = ({ children, variant = 'ruled', className = '', showMargin = true, watermark }) => {
+  /** Category accent for red margin line tint */
+  accent?: string;
+}> = ({ children, variant = 'ruled', className = '', showMargin = true, watermark, accent: _accent = '#D45050' }) => {
   const { isDark } = useTheme();
+
+  // Paper ink color — warm brown/plum for handwriting on paper (matching Android's notePaperInk)
+  const paperInk = isDark ? 'rgba(228,210,188,0.92)' : 'rgba(45,20,15,0.92)';
+  // Warm paper background (like real notebook paper, never pure white)
+  const paperBg = isDark ? 'rgba(28,22,16,0.92)' : '#FFFDF7';
+  // Red margin line (school notebook style)
+  const marginColor = isDark ? 'rgba(220,120,120,0.28)' : 'rgba(210,70,70,0.25)';
+  // Ruled line color
+  const ruleColor = isDark ? 'rgba(180,160,140,0.10)' : 'rgba(180,160,140,0.18)';
 
   const getBackground = () => {
     if (variant === 'ruled') {
-      return isDark 
-        ? 'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(255,255,255,0.03) 27px, rgba(255,255,255,0.03) 28px)'
-        : 'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(59,10,23,0.04) 27px, rgba(59,10,23,0.04) 28px)';
+      return `repeating-linear-gradient(0deg, transparent, transparent 27px, ${ruleColor} 27px, ${ruleColor} 28px)`;
     }
     if (variant === 'coffee') {
       return isDark 
         ? 'radial-gradient(ellipse at 80% 80%, rgba(139,90,43,0.15) 0%, transparent 50%)'
-        : 'radial-gradient(ellipse at 80% 80%, rgba(139,90,43,0.1) 0%, transparent 50%)';
+        : 'radial-gradient(ellipse at 80% 80%, rgba(139,90,43,0.08) 0%, transparent 50%)';
     }
     return 'none';
   };
 
-  const paperBg = isDark ? 'rgba(30,25,20,0.8)' : '#FFFEF9';
-
   return (
     <div
-      className={`relative ${className}`}
+      className={`relative paper-card ${className}`}
       style={{
-        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+        filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.08))',
+        fontFamily: "'Patrick Hand', cursive",
+        color: paperInk,
       }}
     >
       {/* Torn edge top */}
@@ -330,12 +341,14 @@ export const CurioPaperCard: React.FC<{
           backgroundImage: getBackground(),
         }}
       >
-        {/* Margin line */}
+        {/* Red margin line (school notebook) */}
         {showMargin && variant === 'ruled' && (
           <div
-            className="absolute top-0 bottom-0 left-12 w-px"
+            className="absolute top-0 bottom-0"
             style={{
-              background: isDark ? 'rgba(255,100,100,0.15)' : 'rgba(220,80,80,0.2)',
+              left: 44,
+              width: 1,
+              background: marginColor,
             }}
           />
         )}
@@ -343,21 +356,25 @@ export const CurioPaperCard: React.FC<{
         {/* Watermark glyph */}
         {watermark && (
           <div
-            className="absolute bottom-2 right-2 text-6xl pointer-events-none select-none"
+            className="absolute bottom-2 right-3 pointer-events-none select-none"
             style={{
-              opacity: isDark ? 0.05 : 0.04,
-              color: isDark ? 'white' : '#3B0A17',
+              fontFamily: "'Material Symbols Outlined'",
+              fontSize: 80,
+              opacity: isDark ? 0.04 : 0.03,
+              color: isDark ? '#fff' : '#3B0A17',
             }}
           >
             {watermark}
           </div>
         )}
         
-        {/* Content - inset past the margin line */}
+        {/* Content — inset past the margin line */}
         <div
           className="relative z-10"
           style={{
             paddingLeft: showMargin && variant === 'ruled' ? 52 : 0,
+            fontFamily: "'Patrick Hand', cursive",
+            color: paperInk,
           }}
         >
           {children}

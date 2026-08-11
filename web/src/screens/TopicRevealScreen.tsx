@@ -203,12 +203,8 @@ export const TopicRevealScreen: React.FC = () => {
         </div>
 
         {/* Teaser Card */}
-        <CurioPaperCard variant="ruled" watermark={category.iconGlyph} className="mb-4">
-          <p className="text-sm leading-relaxed"
-            style={{
-              color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(59,10,23,0.85)',
-              fontFamily: 'Patrick Hand, cursive', fontSize: '16px',
-            }}>
+        <CurioPaperCard variant="ruled" watermark={category.iconGlyph} accent={category.accent} className="mb-4">
+          <p className="leading-relaxed" style={{ fontSize: '1.15rem', lineHeight: 1.75 }}>
             {topic.teaser}
           </p>
         </CurioPaperCard>

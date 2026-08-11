@@ -27,11 +27,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Geom font for headings */
+/* Geom font for headings — fall back to system sans-serif */
 @font-face {
   font-family: 'Geom';
   src: local('Geom');
   font-weight: normal;
+}
+
+/* Note paper — Patrick Hand for handwriting on paper cards */
+.note-paper {
+  font-family: 'Patrick Hand', cursive;
+}
+.note-paper input,
+.note-paper textarea {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: inherit;
 }
 
 /* Curio card styles */

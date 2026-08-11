@@ -11,13 +11,18 @@ import { captureRepository, deserializeTags } from '../db/database';
 
 // Format-specific renderers
 
+// Note paper ink for saved views
+const getPaperInk = (isDark: boolean) => isDark ? 'rgba(228,210,188,0.92)' : 'rgba(45,20,15,0.92)';
+
 // Theme-aware inner card helper
 const InnerBox: React.FC<{ children: React.ReactNode; isDark: boolean }> = ({ children, isDark }) => {
   return (
     <div
       className="p-4 rounded-[16px]"
       style={{
-        background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.03)',
+        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+        fontFamily: "'Patrick Hand', cursive",
+        color: getPaperInk(isDark),
       }}
     >
       {children}
@@ -27,18 +32,19 @@ const InnerBox: React.FC<{ children: React.ReactNode; isDark: boolean }> = ({ ch
 
 const SoundBiteRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
   const soundData = data as { durationSeconds: number; notes: string };
+  const ink = getPaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       <div className="flex items-center gap-3">
-        <MaterialIcon name="mic" size={32} />
+        <MaterialIcon name="mic" size={32} style={{ color: ink }} />
         <div>
-          <div className="font-semibold" style={{ color: getTextColor(isDark) }}>Voice Note</div>
-          <div className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{soundData.durationSeconds}s</div>
+          <div className="font-semibold text-lg" style={{ color: ink }}>Voice Note</div>
+          <div className="text-sm opacity-50">{soundData.durationSeconds}s</div>
         </div>
       </div>
       {soundData.notes && (
         <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{soundData.notes}</p>
+          <p className="whitespace-pre-wrap">{soundData.notes}</p>
         </InnerBox>
       )}
     </div>
@@ -47,16 +53,20 @@ const SoundBiteRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ d
 
 const ReelNotesRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
   const reelData = data as { rating: number; review: string };
+  const ink = getPaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       {reelData.rating > 0 && (
-        <div className="text-3xl" style={{ color: '#F59E0B' }}>
-          {'★'.repeat(reelData.rating)}{'☆'.repeat(5 - reelData.rating)}
+        <div className="flex gap-1">
+          {[1,2,3,4,5].map(i => (
+            <MaterialIcon key={i} name="star" size={28} filled={i <= reelData.rating}
+              style={{ color: i <= reelData.rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.10)' }} />
+          ))}
         </div>
       )}
       {reelData.review && (
         <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{reelData.review}</p>
+          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{reelData.review}</p>
         </InnerBox>
       )}
     </div>
@@ -65,28 +75,23 @@ const ReelNotesRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ d
 
 const MarginaliaRenderer: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
   const marginaliaData = data as { journalEntry: string; quotes: Array<{ text: string; context?: string }> };
+  const ink = getPaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       {marginaliaData.journalEntry && (
         <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{marginaliaData.journalEntry}</p>
+          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{marginaliaData.journalEntry}</p>
         </InnerBox>
       )}
       {marginaliaData.quotes.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-semibold" style={{ color: getTextColor(isDark) }}>Favorite Quotes</h4>
+          <h4 className="font-semibold text-sm opacity-60" style={{ color: ink }}>Favorite Quotes</h4>
           {marginaliaData.quotes.map((quote, index) => (
-            <div
-              key={index}
-              className="p-4 rounded-[16px] border-l-4"
-              style={{
-                borderColor: accent,
-                background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)',
-              }}
-            >
-              <p className="italic" style={{ color: getTextColor(isDark) }}>"{quote.text}"</p>
+            <div key={index} className="p-4 rounded-[16px] border-l-4"
+              style={{ borderColor: accent, background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+              <p className="text-lg leading-relaxed">&ldquo;{quote.text}&rdquo;</p>
               {quote.context && (
-                <p className="text-sm mt-2" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>— {quote.context}</p>
+                <p className="text-sm mt-2 opacity-50">— {quote.context}</p>
               )}
             </div>
           ))}
@@ -98,22 +103,20 @@ const MarginaliaRenderer: React.FC<{ data: CaptureData; isDark: boolean; accent:
 
 const GalleryWallRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
   const galleryData = data as { caption: string; images: string[] };
+  const ink = getPaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       {galleryData.caption && (
         <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{galleryData.caption}</p>
+          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{galleryData.caption}</p>
         </InnerBox>
       )}
       {galleryData.images.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {galleryData.images.map((_, index) => (
-            <div
-              key={index}
-              className="aspect-square rounded-[12px] flex items-center justify-center"
-              style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)' }}
-            >
-              <MaterialIcon name="image" size={32} />
+            <div key={index} className="aspect-square rounded-[12px] flex items-center justify-center"
+              style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+              <MaterialIcon name="image" size={32} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
             </div>
           ))}
         </div>
@@ -124,24 +127,31 @@ const GalleryWallRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({
 
 const FieldNotesRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
   const fieldData = data as { observed: string; surprised: string; learnNext: string };
+  const ink = getPaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       {fieldData.observed && (
         <InnerBox isDark={isDark}>
-          <div className="font-semibold mb-2 flex items-center gap-1.5" style={{ color: getTextColor(isDark) }}><MaterialIcon name="search" size={16} /> Observed</div>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{fieldData.observed}</p>
+          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5 opacity-60" style={{ color: ink }}>
+            <MaterialIcon name="visibility" size={16} /> Observed
+          </div>
+          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{fieldData.observed}</p>
         </InnerBox>
       )}
       {fieldData.surprised && (
         <InnerBox isDark={isDark}>
-          <div className="font-semibold mb-2 flex items-center gap-1.5" style={{ color: getTextColor(isDark) }}><MaterialIcon name="sentiment_surprised" size={16} /> Surprised Me</div>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{fieldData.surprised}</p>
+          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5 opacity-60" style={{ color: ink }}>
+            <MaterialIcon name="sentiment_surprised" size={16} /> Surprised Me
+          </div>
+          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{fieldData.surprised}</p>
         </InnerBox>
       )}
       {fieldData.learnNext && (
         <InnerBox isDark={isDark}>
-          <div className="font-semibold mb-2 flex items-center gap-1.5" style={{ color: getTextColor(isDark) }}><MaterialIcon name="menu_book" size={16} /> Want to Learn Next</div>
-          <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{fieldData.learnNext}</p>
+          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5 opacity-60" style={{ color: ink }}>
+            <MaterialIcon name="menu_book" size={16} /> Want to Learn Next
+          </div>
+          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{fieldData.learnNext}</p>
         </InnerBox>
       )}
     </div>
@@ -406,7 +416,7 @@ export const EntryDetailScreen: React.FC = () => {
 
       {/* Content - Paper style */}
       <div className="px-5 py-4 max-w-lg mx-auto">
-        <CurioPaperCard variant="ruled" watermark={category.iconGlyph}>
+        <CurioPaperCard variant="ruled" watermark={category.iconGlyph} accent={category.accent}>
           <FormatRenderer format={entry.format} data={captureData} isDark={isDark} accent={category.accent} />
         </CurioPaperCard>
       </div>
