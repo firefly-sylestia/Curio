@@ -1,7 +1,6 @@
 // Curio Web App - Main App Component
 // Routes, theme, bottom nav, floating pet
 
-import React from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
 import BottomNav from './components/BottomNav';
@@ -17,25 +16,22 @@ import { EntryDetailScreen } from './screens/EntryDetailScreen';
 import { QuestsScreen } from './screens/QuestsScreen';
 import { TopicBrowserScreen } from './screens/TopicBrowserScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
-import { useState, useEffect } from 'react';
+import React from 'react';
 import './index.css';
 
 const App: React.FC = () => {
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(() => {
-    return localStorage.getItem('onboarding_complete') === 'true';
-  });
   const location = useLocation();
-
-  useEffect(() => {
-    const complete = localStorage.getItem('onboarding_complete') === 'true';
-    setIsOnboardingComplete(complete);
-  }, [location.pathname]);
+  // Read localStorage directly during render — avoids stale-state race condition
+  // where navigate sets localStorage but useState hasn't updated yet.
+  const isOnboardingComplete = localStorage.getItem('onboarding_complete') === 'true';
 
   const showBottomNav = isOnboardingComplete && location.pathname !== '/onboarding';
+  // Force remount of routes when onboarding state changes
+  const onboardKey = isOnboardingComplete ? 'done' : 'pending';
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen" key={onboardKey}>
         <Routes>
           <Route path="/onboarding" element={<OnboardingScreen />} />
           <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
