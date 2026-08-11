@@ -2,8 +2,34 @@
 // Premium components matching Android app's design system
 
 import React, { useState, useEffect } from 'react';
-import { useTheme, getTextColor } from '../theme/ThemeContext';
+import { useTheme, getTextColor, getPastelAccent } from '../theme/ThemeContext';
+import { ALL_CATEGORIES } from '../data/categories';
 import type { CurioCategory } from '../types';
+
+// ─── Material Icon ──────────────────────────────────────────────────
+export const MaterialIcon: React.FC<{
+  name: string;
+  size?: number;
+  filled?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}> = ({ name, size = 24, filled = false, className = '', style: outerStyle }) => (
+  <span
+    className={`material-symbols-outlined ${className}`}
+    style={{
+      fontSize: size,
+      fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
+      width: size,
+      height: size,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...outerStyle,
+    }}
+  >
+    {name}
+  </span>
+);
 
 // ─── Animation Constants ──────────────────────────────────────────────
 export const SPRINGS = {
@@ -88,7 +114,7 @@ export const CurioHeroCard: React.FC<{
   subtitle?: string;
   showShimmer?: boolean;
 }> = ({ category, onClick, title = 'SHUFFLE', subtitle, showShimmer = true }) => {
-  const { isAmoled } = useTheme();
+  const { isDark, isAmoled } = useTheme();
   const [isPressed, setIsPressed] = useState(false);
   const [shimmerPos, setShimmerPos] = useState(-100);
 
@@ -96,16 +122,29 @@ export const CurioHeroCard: React.FC<{
   useEffect(() => {
     if (!showShimmer) return;
     const interval = setInterval(() => {
-      setShimmerPos(prev => (prev >= 200 ? -100 : prev + 2));
-    }, 30);
+      setShimmerPos(prev => (prev >= 200 ? -100 : prev + 1.5));
+    }, 35);
     return () => clearInterval(interval);
   }, [showShimmer]);
 
+  // Category → surface gradient (matches Android categoryCardFill → themeSurface)
   const getBackground = () => {
+    const hexToRgb = (hex: string): [number, number, number] => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return [r, g, b];
+    };
+    const [r, g, b] = hexToRgb(category.accent);
+
     if (isAmoled) {
-      return `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, ${category.accent}22 100%)`;
+      return `linear-gradient(180deg, rgba(${r},${g},${b},0.24) 0%, rgba(${r},${g},${b},0.06) 60%, rgba(0,0,0,1) 100%)`;
     }
-    return `linear-gradient(135deg, ${category.accent} 0%, ${category.lightAccent || category.accent}CC 100%)`;
+    const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
+    const top = `rgba(${r},${g},${b},0.92)`;
+    const mid = `rgba(${Math.round(r * 0.55 + surfaceRgb[0] * 0.45)},${Math.round(g * 0.55 + surfaceRgb[1] * 0.45)},${Math.round(b * 0.55 + surfaceRgb[2] * 0.45)},0.75)`;
+    const bottom = `rgba(${Math.round(r * 0.2 + surfaceRgb[0] * 0.8)},${Math.round(g * 0.2 + surfaceRgb[1] * 0.8)},${Math.round(b * 0.2 + surfaceRgb[2] * 0.8)},0.9)`;
+    return `linear-gradient(180deg, ${top} 0%, ${mid} 50%, ${bottom} 100%)`;
   };
 
   return (
@@ -117,29 +156,48 @@ export const CurioHeroCard: React.FC<{
       className="relative w-full h-[220px] rounded-[28px] overflow-hidden text-left transition-transform duration-200"
       style={{
         background: getBackground(),
-        transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+        transform: isPressed ? 'scale(0.97)' : 'scale(1)',
         boxShadow: isPressed 
-          ? `0 4px 16px ${category.accent}44`
-          : `0 8px 32px ${category.accent}33`,
+          ? `0 4px 16px ${category.accent}33`
+          : `0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)`,
+        border: isDark
+          ? `1px solid ${category.accent}28`
+          : `1px solid ${category.accent}18`,
       }}
     >
+      {/* Category accent rule at top */}
+      <div
+        className="absolute top-0 left-3 right-3 h-[2px] rounded-full"
+        style={{ background: category.accent, opacity: 0.5 }}
+      />
+
+      {/* Top-lit crown */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[60px] pointer-events-none"
+        style={{
+          background: `linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)`,
+        }}
+      />
+
       {/* Shimmer effect */}
       {showShimmer && (
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
+            background: `linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.07) 48%, transparent 61%)`,
             transform: `translateX(${shimmerPos}%)`,
           }}
         />
       )}
       
-      {/* Background glyph */}
+      {/* Watermark glyph */}
       <div
-        className="absolute right-4 bottom-4 text-[120px] opacity-10 pointer-events-none"
-        style={{ color: 'white' }}
+        className="absolute right-2 bottom-2 pointer-events-none select-none"
+        style={{
+          color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+        }}
       >
-        {category.iconGlyph}
+        <span className="material-symbols-outlined" style={{ fontSize: 130 }}>{category.iconGlyph}</span>
       </div>
       
       {/* Content */}
@@ -147,25 +205,21 @@ export const CurioHeroCard: React.FC<{
         <div className="flex items-start justify-between">
           <h2
             className="text-3xl font-extrabold text-white"
-            style={{ fontFamily: 'Geom, sans-serif' }}
+            style={{ fontFamily: 'Geom, Inter, sans-serif', textShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
           >
             {title}
           </h2>
-          <div className="w-5 h-5 text-white opacity-60">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-            </svg>
-          </div>
+          <MaterialIcon name="casino" size={22} className="text-white/50" />
         </div>
         
         <div>
           <p
-            className="text-lg text-white/90"
-            style={{ fontFamily: 'Geom, sans-serif' }}
+            className="text-lg text-white/85"
+            style={{ fontFamily: 'Geom, Inter, sans-serif' }}
           >
             the wheel
           </p>
-          <p className="text-sm text-white/70 mt-1">
+          <p className="text-sm text-white/65 mt-1">
             {subtitle || `Shuffle for ${category.displayName}`}
           </p>
         </div>
@@ -218,42 +272,53 @@ export const CurioCategoryCard: React.FC<{
         boxShadow: isSelected ? `0 4px 16px ${category.accent}44` : 'none',
       }}
     >
-      <span style={{ fontSize: iconSize }}>{category.iconGlyph}</span>
+      <span className="material-symbols-outlined" style={{ fontSize: iconSize, width: iconSize, height: iconSize }}>{category.iconGlyph}</span>
     </button>
   );
 };
 
 // ─── Curio Paper Card ─────────────────────────────────────────────────
+// Note-paper card matching Android's PaperCard: warm off-white, ruled lines,
+// red margin line (school notebook), Patrick Hand font context, watermark glyphs.
 export const CurioPaperCard: React.FC<{
   children: React.ReactNode;
   variant?: 'ruled' | 'torn' | 'plain' | 'coffee';
   className?: string;
   showMargin?: boolean;
   watermark?: string;
-}> = ({ children, variant = 'ruled', className = '', showMargin = true, watermark }) => {
+  /** Category accent for red margin line tint */
+  accent?: string;
+}> = ({ children, variant = 'ruled', className = '', showMargin = true, watermark, accent: _accent = '#D45050' }) => {
   const { isDark } = useTheme();
+
+  // Paper ink color — warm brown/plum for handwriting on paper (matching Android's notePaperInk)
+  const paperInk = isDark ? 'rgba(228,210,188,0.92)' : 'rgba(45,20,15,0.92)';
+  // Warm paper background (like real notebook paper, never pure white)
+  const paperBg = isDark ? 'rgba(28,22,16,0.92)' : '#FFFDF7';
+  // Red margin line (school notebook style)
+  const marginColor = isDark ? 'rgba(220,120,120,0.28)' : 'rgba(210,70,70,0.25)';
+  // Ruled line color
+  const ruleColor = isDark ? 'rgba(180,160,140,0.10)' : 'rgba(180,160,140,0.18)';
 
   const getBackground = () => {
     if (variant === 'ruled') {
-      return isDark 
-        ? 'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(255,255,255,0.03) 27px, rgba(255,255,255,0.03) 28px)'
-        : 'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(59,10,23,0.04) 27px, rgba(59,10,23,0.04) 28px)';
+      return `repeating-linear-gradient(0deg, transparent, transparent 27px, ${ruleColor} 27px, ${ruleColor} 28px)`;
     }
     if (variant === 'coffee') {
       return isDark 
         ? 'radial-gradient(ellipse at 80% 80%, rgba(139,90,43,0.15) 0%, transparent 50%)'
-        : 'radial-gradient(ellipse at 80% 80%, rgba(139,90,43,0.1) 0%, transparent 50%)';
+        : 'radial-gradient(ellipse at 80% 80%, rgba(139,90,43,0.08) 0%, transparent 50%)';
     }
     return 'none';
   };
 
-  const paperBg = isDark ? 'rgba(30,25,20,0.8)' : '#FFFEF9';
-
   return (
     <div
-      className={`relative ${className}`}
+      className={`relative paper-card ${className}`}
       style={{
-        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+        filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.08))',
+        fontFamily: "'Patrick Hand', cursive",
+        color: paperInk,
       }}
     >
       {/* Torn edge top */}
@@ -276,12 +341,14 @@ export const CurioPaperCard: React.FC<{
           backgroundImage: getBackground(),
         }}
       >
-        {/* Margin line */}
+        {/* Red margin line (school notebook) */}
         {showMargin && variant === 'ruled' && (
           <div
-            className="absolute top-0 bottom-0 left-12 w-px"
+            className="absolute top-0 bottom-0"
             style={{
-              background: isDark ? 'rgba(255,100,100,0.15)' : 'rgba(220,80,80,0.2)',
+              left: 44,
+              width: 1,
+              background: marginColor,
             }}
           />
         )}
@@ -289,21 +356,25 @@ export const CurioPaperCard: React.FC<{
         {/* Watermark glyph */}
         {watermark && (
           <div
-            className="absolute bottom-2 right-2 text-6xl pointer-events-none select-none"
+            className="absolute bottom-2 right-3 pointer-events-none select-none"
             style={{
-              opacity: isDark ? 0.05 : 0.04,
-              color: isDark ? 'white' : '#3B0A17',
+              fontFamily: "'Material Symbols Outlined'",
+              fontSize: 80,
+              opacity: isDark ? 0.04 : 0.03,
+              color: isDark ? '#fff' : '#3B0A17',
             }}
           >
             {watermark}
           </div>
         )}
         
-        {/* Content - inset past the margin line */}
+        {/* Content — inset past the margin line */}
         <div
           className="relative z-10"
           style={{
             paddingLeft: showMargin && variant === 'ruled' ? 52 : 0,
+            fontFamily: "'Patrick Hand', cursive",
+            color: paperInk,
           }}
         >
           {children}
@@ -621,7 +692,7 @@ export const CurioStatCard: React.FC<{
           className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
           style={{ background: `${color}20` }}
         >
-          <span className="text-lg">{icon}</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 20, color }}>{icon}</span>
         </div>
       )}
       <div
@@ -732,6 +803,76 @@ export const CurioToast: React.FC<{
           ×
         </button>
       </div>
+    </div>
+  );
+};
+
+// ─── CurioWatermarkBackdrop ──────────────────────────────────────────
+/**
+ * Decorative backdrop matching Android's CurioWatermarkBackdrop.
+ * Scatters all category glyphs around the screen edges, each tinted
+ * with its category's accent at low alpha. The active category's glyph
+ * gets a stronger whisper.
+ */
+export const CurioWatermarkBackdrop: React.FC<{
+  activeCatId?: string;
+  alphaScale?: number;
+  topClearance?: number; // px — when set, glyphs stay below this line
+}> = ({ activeCatId, alphaScale = 1, topClearance = 0 }) => {
+  const { isDark, pastelColors } = useTheme();
+
+  const slots = [
+    { glyph: 'person', x: -2, y: 5, size: 72, rot: -12 },
+    { glyph: 'album', x: 55, y: 3, size: 52, rot: 10 },
+    { glyph: 'movie', x: 88, y: 20, size: 64, rot: -8 },
+    { glyph: 'menu_book', x: -4, y: 35, size: 58, rot: 8 },
+    { glyph: 'brush', x: -3, y: 62, size: 66, rot: -6 },
+    { glyph: 'palette', x: -5, y: 82, size: 56, rot: 14 },
+    { glyph: 'science', x: 70, y: 65, size: 62, rot: -12 },
+    { glyph: 'smart_display', x: 82, y: 48, size: 50, rot: 16 },
+    { glyph: 'sports_esports', x: 65, y: 85, size: 54, rot: -10 },
+    { glyph: 'casino', x: 22, y: 78, size: 68, rot: 6 },
+    { glyph: 'edit_note', x: 85, y: 75, size: 48, rot: -14 },
+  ];
+
+  // Alpha per theme (matches Android's watermarkAlpha)
+  const inactiveAlpha = isDark
+    ? (pastelColors ? 0.15 : 0.11)
+    : (pastelColors ? 0.22 : 0.15);
+  const activeAlpha = isDark
+    ? (pastelColors ? 0.28 : 0.22)
+    : (pastelColors ? 0.38 : 0.30);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+      {slots.map((s, i) => {
+        let cat = ALL_CATEGORIES.find(c => c.iconGlyph === s.glyph);
+        if (!cat) cat = ALL_CATEGORIES[i % ALL_CATEGORIES.length];
+        const isActive = cat.iconGlyph === activeCatId || cat.id === activeCatId;
+        const rawAccent = cat.accent;
+        const tint = pastelColors ? getPastelAccent(rawAccent, isDark) : rawAccent;
+        const alpha = (isActive ? activeAlpha : inactiveAlpha) * alphaScale;
+        const topOffset = topClearance > 0 ? topClearance : 0;
+
+        return (
+          <span
+            key={i}
+            className="material-symbols-outlined absolute select-none"
+            style={{
+              left: `${s.x}%`,
+              top: topOffset > 0
+                ? `${topOffset + (100 - topOffset) * (s.y / 100)}px`
+                : `${s.y}%`,
+              fontSize: s.size,
+              color: tint,
+              opacity: alpha,
+              transform: `rotate(${s.rot}deg)`,
+            }}
+          >
+            {s.glyph}
+          </span>
+        );
+      })}
     </div>
   );
 };

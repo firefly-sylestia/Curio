@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
-import { CurioButton } from '../components/SharedComponents';
+import { CurioButton, MaterialIcon } from '../components/SharedComponents';
 
 // ─── Onboarding Step Component ────────────────────────────────────────
 const OnboardingStep: React.FC<{
@@ -30,7 +30,7 @@ const OnboardingStep: React.FC<{
         transform: `translateY(${isVisible ? 0 : 30}px)`,
       }}
     >
-      <div className="text-8xl mb-8">{icon}</div>
+      <div className="mb-8"><MaterialIcon name={icon} size={80} /></div>
       <h1
         className="text-3xl font-bold mb-4"
         style={{ color: getTextColor(isDark), fontFamily: 'Geom, sans-serif' }}
@@ -75,7 +75,7 @@ const CategorySelectionStep: React.FC<{
                 transform: isSelected ? 'scale(1.05)' : 'scale(1)',
               }}
             >
-              <span className="text-2xl">{category.iconGlyph}</span>
+              <MaterialIcon name={category.iconGlyph} size={28} />
               <span
                 className="text-xs font-medium"
                 style={{ color: getTextColor(isDark) }}
@@ -101,22 +101,22 @@ export const OnboardingScreen: React.FC = () => {
 
   const steps = [
     {
-      icon: '🎲',
+      icon: 'casino',
       title: 'Welcome to Curio',
       description: 'Discover fascinating topics from around the world. Spin the wheel and learn something new every day.',
     },
     {
-      icon: '📚',
+      icon: 'book_5',
       title: 'Build Your Cabinet',
       description: 'Save the topics that interest you most. Your personal collection of knowledge grows with every spin.',
     },
     {
-      icon: '🎯',
+      icon: 'emoji_events',
       title: 'Complete Quests',
       description: 'Earn XP and level up by completing daily challenges. Track your progress and unlock achievements.',
     },
     {
-      icon: '🐾',
+      icon: 'pets',
       title: 'Meet Your Companion',
       description: 'Your pet grows with you as you explore. Watch it evolve as you discover more topics.',
     },
@@ -194,7 +194,7 @@ export const OnboardingScreen: React.FC = () => {
           <OnboardingStep
             title="Choose Your Interests"
             description="Select categories you're interested in. You can always change this later."
-            icon="🎯"
+            icon="interests"
           >
             <CategorySelectionStep
               selectedCategories={selectedCategories}

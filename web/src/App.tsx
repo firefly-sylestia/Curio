@@ -1,12 +1,11 @@
 // Curio Web App - Main App Component
-// Sets up routing and theme provider
+// Routes, theme, bottom nav, floating pet
 
-import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
-import { BottomNav } from './components/BottomNav';
+import BottomNav from './components/BottomNav';
 import { FloatingPet } from './components/FloatingPet';
-import { HomeScreen } from './screens/HomeScreen';
+import HomeScreen from './screens/HomeScreen';
 import { SpinScreen } from './screens/SpinScreen';
 import { CabinetScreen } from './screens/CabinetScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
@@ -15,92 +14,60 @@ import { TopicRevealScreen } from './screens/TopicRevealScreen';
 import { SaveCaptureScreen } from './screens/SaveCaptureScreen';
 import { EntryDetailScreen } from './screens/EntryDetailScreen';
 import { QuestsScreen } from './screens/QuestsScreen';
+import { TopicBrowserScreen } from './screens/TopicBrowserScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
-import { getPetSystem } from './data/PetSystem';
-import { getQuestSystem } from './data/QuestSystem';
-import { useState, useEffect } from 'react';
+import React from 'react';
 import './index.css';
 
 const App: React.FC = () => {
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(() => {
-    return localStorage.getItem('onboarding_complete') === 'true';
-  });
   const location = useLocation();
+  // Read localStorage directly during render — avoids stale-state race condition
+  // where navigate sets localStorage but useState hasn't updated yet.
+  const isOnboardingComplete = localStorage.getItem('onboarding_complete') === 'true';
 
-  useEffect(() => {
-    // Check if onboarding is complete on mount
-    const complete = localStorage.getItem('onboarding_complete') === 'true';
-    setIsOnboardingComplete(complete);
-  }, []);
-
-  // Hide bottom nav on onboarding
   const showBottomNav = isOnboardingComplete && location.pathname !== '/onboarding';
+  // Force remount of routes when onboarding state changes
+  const onboardKey = isOnboardingComplete ? 'done' : 'pending';
 
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <div className="min-h-screen">
-          <Routes>
-            {/* Onboarding */}
-            <Route path="/onboarding" element={<OnboardingScreen />} />
-            
-            {/* Main Routes */}
-            <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <OnboardingScreen />} />
-            <Route path="/spin" element={<SpinScreen />} />
-            <Route path="/spin/:categorySlug" element={<SpinScreen />} />
-            <Route path="/cabinet" element={<CabinetScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/settings" element={<SettingsScreen />} />
-            
-            {/* Topic Routes */}
-            <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
-            <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
-            <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />
-            <Route path="/pet-designer" element={<PetDesignerPlaceholder />} />
-            <Route path="/quests" element={<QuestsScreen />} />
-          </Routes>
-          
-          {/* Bottom Navigation */}
-          {showBottomNav && <BottomNav />}
-          
-          {/* Floating Pet Companion */}
-          {showBottomNav && <FloatingPet />}
-        </div>
-      </BrowserRouter>
+      <div className="min-h-screen" key={onboardKey}>
+        <Routes>
+          <Route path="/onboarding" element={<OnboardingScreen />} />
+          <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
+          <Route path="/spin" element={<SpinScreen />} />
+          <Route path="/spin/:categorySlug" element={<SpinScreen />} />
+          <Route path="/cabinet" element={<CabinetScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
+          <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
+          <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />
+          <Route path="/browse" element={<TopicBrowserScreen />} />
+          <Route path="/pet-designer" element={<PetDesignerPlaceholder />} />
+          <Route path="/quests" element={<QuestsScreen />} />
+        </Routes>
+
+        {showBottomNav && <BottomNav />}
+        {showBottomNav && <FloatingPet />}
+      </div>
     </ThemeProvider>
   );
 };
 
-// Pet Designer placeholder
 const PetDesignerPlaceholder: React.FC = () => {
   const { isDark } = useTheme();
-  const [petSystem] = useState(() => getPetSystem());
-  const [questSystem] = useState(() => getQuestSystem());
-  
-  const stage = petSystem.getStage();
-  const level = questSystem.getLevel();
-  const nextStage = petSystem.getNextStageInfo();
-  
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, false) }}>
       <div className="text-center px-6">
-        <div className="text-8xl mb-4">
-          {stage === 'baby' ? '🐣' : stage === 'evolved' ? '🦊' : '🐉'}
+        <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
+          style={{ background: 'linear-gradient(135deg, #FF8FA3 0%, #FFD97D 100%)' }}>
+          <span className="material-symbols-outlined text-4xl" style={{ color: '#fff' }}>pets</span>
         </div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: getTextColor(isDark) }}>
-          {petSystem.getState().name}
-        </h2>
-        <p className="text-lg mb-4" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }}>
-          Stage: {stage.charAt(0).toUpperCase() + stage.slice(1)}
+        <h2 className="text-2xl font-bold mb-2" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Pet Designer</h2>
+        <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
+          Coming soon — customize your companion
         </p>
-        <p className="text-sm mb-6" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-          Level {level} • {nextStage ? `Evolves at level ${nextStage.requiredLevel}` : 'Fully evolved!'}
-        </p>
-        <div className="p-4 rounded-[16px]" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' }}>
-          <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-            Keep exploring and saving to help your pet grow!
-          </p>
-        </div>
       </div>
     </div>
   );

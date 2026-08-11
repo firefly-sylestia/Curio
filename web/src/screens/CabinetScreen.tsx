@@ -5,11 +5,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
+import { ScreenEntrance, StaggerList, usePressable } from '../animations';
 import { 
   CurioChip, 
   CurioEmptyState, 
-  CurioSectionHeader
+  CurioSectionHeader,
+  CurioWatermarkBackdrop,
 } from '../components/SharedComponents';
+import { captureRepository } from '../db/database';
+import type { CaptureEntity } from '../types';
 
 
 // Entry type
@@ -35,22 +39,18 @@ const EntryCard: React.FC<{
   onClick: () => void;
 }> = ({ entry, onClick }) => {
   const { isDark } = useTheme();
-  const [isPressed, setIsPressed] = useState(false);
+  const { handlers, pressStyle } = usePressable();
   const category = getCategoryByIdSafe(entry.categoryId);
 
   return (
     <button
       onClick={onClick}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      className="w-full text-left rounded-2xl overflow-hidden transition-all duration-200"
+      {...handlers}
+      className="w-full text-left rounded-2xl overflow-hidden"
       style={{
         background: isDark ? 'rgba(255,255,255,0.05)' : 'white',
-        transform: isPressed ? 'scale(0.98)' : 'scale(1)',
-        boxShadow: isPressed 
-          ? `0 4px 12px ${category?.accent || '#3B0A17'}33`
-          : '0 2px 8px rgba(0,0,0,0.08)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        ...pressStyle,
       }}
     >
       {/* Category accent bar */}
@@ -66,7 +66,7 @@ const EntryCard: React.FC<{
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: `${category?.accent || '#3B0A17'}15` }}
           >
-            <span className="text-lg">{category?.iconGlyph || '📝'}</span>
+            <span className="material-symbols-outlined text-lg">{category?.iconGlyph || 'edit_note'}</span>
           </div>
           <div className="flex-1 min-w-0">
             <h4
@@ -117,15 +117,24 @@ export const CabinetScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load entries
+  // Load entries from IndexedDB
   useEffect(() => {
     const loadEntries = async () => {
       try {
-        // In a real app, this would load from IndexedDB
-        // For now, use empty array
-        setEntries([]);
+        const all = await captureRepository.getAll();
+        const mapped: CurioCapture[] = all.map((e: CaptureEntity) => ({
+          id: e.id,
+          title: e.title || e.topicName || 'Untitled',
+          content: e.topicTeaser || '',
+          categoryId: e.categoryId,
+          topicName: e.topicName,
+          format: e.format,
+          createdAt: new Date(e.capturedAtMillis).toISOString(),
+        }));
+        setEntries(mapped.reverse());
       } catch (error) {
         console.error('Failed to load entries:', error);
+        setEntries([]);
       } finally {
         setIsLoading(false);
       }
@@ -154,14 +163,17 @@ export const CabinetScreen: React.FC = () => {
   }, {} as Record<string, CurioCapture[]>);
 
   const handleEntryClick = (entry: CurioCapture) => {
-    navigate(`/entry/${entry.id}`);
+    navigate(`/detail/${entry.id}`);
   };
 
   return (
     <div
-      className="min-h-screen pb-24"
+      className="min-h-screen pb-24 relative"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
     >
+      <CurioWatermarkBackdrop alphaScale={0.45} />
+      <ScreenEntrance>
+      <div className="relative z-10">
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 pt-6 pb-4" style={{ background: getBackgroundColor(isDark, isAmoled) }}>
         <div className="flex items-center justify-between mb-4">
@@ -221,7 +233,7 @@ export const CabinetScreen: React.FC = () => {
           </div>
         ) : filteredEntries.length === 0 ? (
           <CurioEmptyState
-            icon="📚"
+            icon="book_5"
             title={searchQuery ? 'No results' : 'No entries yet'}
             description={searchQuery ? 'Try a different search term' : 'Start exploring to build your cabinet'}
             action={!searchQuery ? 'Start exploring' : undefined}
@@ -237,7 +249,7 @@ export const CabinetScreen: React.FC = () => {
                     title={category?.displayName || 'Uncategorized'}
                     action={`${categoryEntries.length} entries`}
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <StaggerList staggerMs={40} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {categoryEntries.map((entry) => (
                       <EntryCard
                         key={entry.id}
@@ -245,13 +257,15 @@ export const CabinetScreen: React.FC = () => {
                         onClick={() => handleEntryClick(entry)}
                       />
                     ))}
-                  </div>
+                  </StaggerList>
                 </div>
               );
             })}
           </div>
         )}
       </div>
+      </div>
+      </ScreenEntrance>
     </div>
   );
 };

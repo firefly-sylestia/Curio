@@ -113,7 +113,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           className="w-12 h-12 rounded-full flex items-center justify-center"
           style={{ backgroundColor: selected ? 'rgba(255,255,255,0.2)' : category.tint }}
         >
-          <span className="text-2xl" style={{ color: getTextColor() }}>
+          <span className="material-symbols-outlined text-2xl" style={{ color: getTextColor() }}>
             {category.iconGlyph}
           </span>
         </div>
@@ -167,7 +167,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           className="w-20 h-20 rounded-full flex items-center justify-center"
           style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
         >
-          <span className="text-4xl text-white">{category.iconGlyph}</span>
+          <span className="material-symbols-outlined text-4xl text-white">{category.iconGlyph}</span>
         </div>
         
         {topicName ? (

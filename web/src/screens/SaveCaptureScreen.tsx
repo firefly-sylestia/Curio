@@ -1,253 +1,154 @@
 // Curio Web App - Save Capture Screen
-// Format-specific editors for saving captures
+// Matches Android: category tint wash, format chips, paper editors with Patrick Hand
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryBySlug } from '../data/categories';
-import { CurioPaperCard, CurioBackButton } from '../components/SharedComponents';
-import type { CurioCategory, CurioTopic, CaptureFormat, CaptureData } from '../types';
+import { CurioPaperCard, CurioBackButton, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
+import type { CurioCategory, CaptureFormat, CaptureData } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
+import { ScreenEntrance } from '../animations';
 
-// Format-specific editors
+// ─── Paper input styles shared across format editors ──────────────────
+const paperInputClass = "w-full bg-transparent resize-none outline-none placeholder:opacity-40";
+const paperLabelClass = "block text-xs font-medium mb-1.5 opacity-50 uppercase tracking-wider";
+
+// ─── Note paper ink color ────────────────────────────────────────────
+const notePaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
+
+// ─── SoundBite Editor (Voice Note) ────────────────────────────────────
 const SoundBiteEditor: React.FC<{
-  data: CaptureData;
-  onChange: (data: CaptureData) => void;
-  category: CurioCategory;
-}> = ({ data, onChange, category }) => {
-  const { isDark } = useTheme();
-  const soundData = data as { durationSeconds: number; notes: string };
+  data: CaptureData; onChange: (data: CaptureData) => void; isDark: boolean;
+}> = ({ data, onChange, isDark }) => {
+  const d = data as { durationSeconds: number; notes: string };
   return (
-    <div className="space-y-4">
+    <div className="space-y-5" style={{ fontFamily: "'Patrick Hand', cursive", color: notePaperInk(isDark) }}>
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Duration (seconds)
-        </label>
-        <input
-          type="number"
-          value={soundData.durationSeconds}
-          onChange={(e) => onChange({ ...soundData, durationSeconds: parseInt(e.target.value) || 0 })}
-          className="w-full px-4 py-3 rounded-[16px] border"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
+        <label className={paperLabelClass} style={{ color: notePaperInk(isDark) }}>Duration (seconds)</label>
+        <input type="number" value={d.durationSeconds}
+          onChange={e => onChange({ ...d, durationSeconds: parseInt(e.target.value) || 0 })}
+          className={`${paperInputClass} text-lg`} />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Notes
-        </label>
-        <textarea
-          value={soundData.notes}
-          onChange={(e) => onChange({ ...soundData, notes: e.target.value })}
+        <label className={paperLabelClass} style={{ color: notePaperInk(isDark) }}>Notes</label>
+        <textarea value={d.notes} onChange={e => onChange({ ...d, notes: e.target.value })}
           placeholder="What did you hear?"
-          rows={4}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
+          rows={4} className={paperInputClass} style={{ fontSize: '1.1rem', lineHeight: '1.7' }} />
       </div>
     </div>
   );
 };
 
+// ─── ReelNotes Editor (Review) ────────────────────────────────────────
 const ReelNotesEditor: React.FC<{
-  data: CaptureData;
-  onChange: (data: CaptureData) => void;
-  category: CurioCategory;
-}> = ({ data, onChange, category }) => {
-  const { isDark } = useTheme();
-  const reelData = data as { rating: number; review: string; favoriteQuote?: number };
+  data: CaptureData; onChange: (data: CaptureData) => void; isDark: boolean;
+}> = ({ data, onChange, isDark }) => {
+  const d = data as { rating: number; review: string };
+  const ink = notePaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-5" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Rating
-        </label>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => onChange({ ...reelData, rating: star })}
-              className="text-3xl transition-transform hover:scale-110"
-              style={{ color: star <= reelData.rating ? '#F59E0B' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(59,10,23,0.25)') }}
-            >
-              {star <= reelData.rating ? '★' : '☆'}
+        <label className={paperLabelClass} style={{ color: ink }}>Rating</label>
+        <div className="flex gap-1.5">
+          {[1, 2, 3, 4, 5].map(star => (
+            <button key={star} onClick={() => onChange({ ...d, rating: star })}
+              className="transition-transform hover:scale-115 active:scale-90">
+              <MaterialIcon name={star <= d.rating ? 'star' : 'star'} size={30}
+                filled={star <= d.rating}
+                style={{ color: star <= d.rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.10)' }} />
             </button>
           ))}
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Review
-        </label>
-        <textarea
-          value={reelData.review}
-          onChange={(e) => onChange({ ...reelData, review: e.target.value })}
-          placeholder="Write your review..."
-          rows={6}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
+        <label className={paperLabelClass} style={{ color: ink }}>Review</label>
+        <textarea value={d.review} onChange={e => onChange({ ...d, review: e.target.value })}
+          placeholder="Write your review here..."
+          rows={6} className={paperInputClass} style={{ fontSize: '1.1rem', lineHeight: '1.7' }} />
       </div>
     </div>
   );
 };
 
+// ─── Marginalia Editor (Journal + Quotes) ─────────────────────────────
 const MarginaliaEditor: React.FC<{
-  data: CaptureData;
-  onChange: (data: CaptureData) => void;
-  category: CurioCategory;
-}> = ({ data, onChange, category }) => {
-  const { isDark } = useTheme();
-  const marginaliaData = data as { journalEntry: string; quotes: Array<{ text: string; context?: string }> };
+  data: CaptureData; onChange: (data: CaptureData) => void; isDark: boolean;
+}> = ({ data, onChange, isDark }) => {
+  const d = data as { journalEntry: string; quotes: Array<{ text: string; context?: string }> };
   const [newQuote, setNewQuote] = useState('');
-  
+  const ink = notePaperInk(isDark);
+
   const addQuote = () => {
     if (newQuote.trim()) {
-      onChange({
-        ...marginaliaData,
-        quotes: [...marginaliaData.quotes, { text: newQuote.trim() }],
-      });
+      onChange({ ...d, quotes: [...d.quotes, { text: newQuote.trim() }] });
       setNewQuote('');
     }
   };
-  
-  const removeQuote = (index: number) => {
-    onChange({
-      ...marginaliaData,
-      quotes: marginaliaData.quotes.filter((_, i) => i !== index),
-    });
-  };
-  
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Journal Entry
-        </label>
-        <textarea
-          value={marginaliaData.journalEntry}
-          onChange={(e) => onChange({ ...marginaliaData, journalEntry: e.target.value })}
-          placeholder="Write your thoughts..."
-          rows={6}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
+        <label className={paperLabelClass} style={{ color: ink }}>Journal Entry</label>
+        <textarea value={d.journalEntry} onChange={e => onChange({ ...d, journalEntry: e.target.value })}
+          placeholder="Write your thoughts about this topic..."
+          rows={6} className={paperInputClass} style={{ fontSize: '1.1rem', lineHeight: '1.7' }} />
       </div>
-      
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Favorite Quotes
-        </label>
-        <div className="space-y-2">
-          {marginaliaData.quotes.map((quote, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-2 p-3 rounded-[12px]"
-              style={{ background: `${category.tint}` }}
-            >
-              <span className="text-lg">"</span>
-              <p className="flex-1 text-sm">{quote.text}</p>
-              <button
-                onClick={() => removeQuote(index)}
-                className="text-red-400 hover:text-red-600"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-        
-        <div className="flex gap-2 mt-3">
-          <input
-            type="text"
-            value={newQuote}
-            onChange={(e) => setNewQuote(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addQuote()}
+        <label className={paperLabelClass} style={{ color: ink }}>Favorite Quotes</label>
+        {d.quotes.length > 0 && (
+          <div className="space-y-2 mb-3">
+            {d.quotes.map((q, i) => (
+              <div key={i} className="flex items-start gap-2 pl-2 border-l-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }}>
+                <span className="text-lg leading-none opacity-50">&ldquo;</span>
+                <p className="flex-1 text-sm leading-relaxed">{q.text}</p>
+                <button onClick={() => onChange({ ...d, quotes: d.quotes.filter((_, j) => j !== i) })}
+                  className="text-red-400/60 hover:text-red-400 text-lg leading-none">&times;</button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input type="text" value={newQuote} onChange={e => setNewQuote(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addQuote()}
             placeholder="Add a quote..."
-            className="flex-1 px-4 py-2 rounded-[12px] border text-sm"
-            style={{
-              borderColor: `${category.accent}44`,
-              background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-              color: getTextColor(isDark),
-            }}
-          />
-          <button
-            onClick={addQuote}
-            className="px-4 py-2 rounded-[12px] text-sm font-medium"
-            style={{
-              background: category.accent,
-              color: 'white',
-            }}
-          >
-            Add
-          </button>
+            className={`${paperInputClass} flex-1 text-sm`}
+            style={{ borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
+          <button onClick={addQuote}
+            className="px-3 py-1 rounded-full text-xs font-medium transition-opacity hover:opacity-80"
+            style={{ background: 'rgba(0,0,0,0.06)', color: ink }}>Add</button>
         </div>
       </div>
     </div>
   );
 };
 
+// ─── GalleryWall Editor (Mood Board) ──────────────────────────────────
 const GalleryWallEditor: React.FC<{
-  data: CaptureData;
-  onChange: (data: CaptureData) => void;
-  category: CurioCategory;
-}> = ({ data, onChange, category }) => {
-  const { isDark } = useTheme();
-  const galleryData = data as { caption: string; images: string[] };
+  data: CaptureData; onChange: (data: CaptureData) => void; isDark: boolean;
+}> = ({ data, onChange, isDark }) => {
+  const d = data as { caption: string; images: string[] };
+  const ink = notePaperInk(isDark);
   return (
-    <div className="space-y-4">
+    <div className="space-y-5" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Caption
-        </label>
-        <textarea
-          value={galleryData.caption}
-          onChange={(e) => onChange({ ...galleryData, caption: e.target.value })}
-          placeholder="Describe your moodboard..."
-          rows={4}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
+        <label className={paperLabelClass} style={{ color: ink }}>Caption</label>
+        <textarea value={d.caption} onChange={e => onChange({ ...d, caption: e.target.value })}
+          placeholder="Describe your mood board..."
+          rows={3} className={paperInputClass} style={{ fontSize: '1.1rem', lineHeight: '1.7' }} />
       </div>
-      
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(false) }}>
-          Images
-        </label>
+        <label className={paperLabelClass} style={{ color: ink }}>Images</label>
         <div className="grid grid-cols-3 gap-2">
-          {galleryData.images.map((_, index) => (
-            <div
-              key={index}
-              className="aspect-square rounded-[12px] flex items-center justify-center"
-              style={{ background: `${category.tint}` }}
-            >
-              <span className="text-2xl">🖼️</span>
+          {d.images.map((_, i) => (
+            <div key={i} className="aspect-square rounded-lg flex items-center justify-center"
+              style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+              <MaterialIcon name="image" size={32} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
             </div>
           ))}
-          <button
-            className="aspect-square rounded-[12px] border-2 border-dashed flex items-center justify-center"
-            style={{ borderColor: `${category.accent}44` }}
-          >
-            <span className="text-2xl">+</span>
+          <button className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center"
+            style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }}>
+            <MaterialIcon name="add" size={28} style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }} />
           </button>
         </div>
       </div>
@@ -255,116 +156,70 @@ const GalleryWallEditor: React.FC<{
   );
 };
 
+// ─── Field Notes Editor ──────────────────────────────────────────────
 const FieldNotesEditor: React.FC<{
-  data: CaptureData;
-  onChange: (data: CaptureData) => void;
-  category: CurioCategory;
-}> = ({ data, onChange, category }) => {
-  const { isDark } = useTheme();
-  const fieldData = data as { observed: string; surprised: string; learnNext: string };
+  data: CaptureData; onChange: (data: CaptureData) => void; isDark: boolean;
+}> = ({ data, onChange, isDark }) => {
+  const d = data as { observed: string; surprised: string; learnNext: string };
+  const ink = notePaperInk(isDark);
+  const fields: Array<{ key: keyof typeof d; icon: string; label: string; placeholder: string }> = [
+    { key: 'observed', icon: 'visibility', label: 'Observed', placeholder: 'What did you observe?' },
+    { key: 'surprised', icon: 'sentiment_surprised', label: 'Surprised Me', placeholder: 'What surprised you?' },
+    { key: 'learnNext', icon: 'menu_book', label: 'Want to Learn Next', placeholder: 'What do you want to learn more about?' },
+  ];
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          🔍 Observed
-        </label>
-        <textarea
-          value={fieldData.observed}
-          onChange={(e) => onChange({ ...fieldData, observed: e.target.value })}
-          placeholder="What did you observe?"
-          rows={3}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          😮 Surprised Me
-        </label>
-        <textarea
-          value={fieldData.surprised}
-          onChange={(e) => onChange({ ...fieldData, surprised: e.target.value })}
-          placeholder="What surprised you?"
-          rows={3}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          📚 Want to Learn Next
-        </label>
-        <textarea
-          value={fieldData.learnNext}
-          onChange={(e) => onChange({ ...fieldData, learnNext: e.target.value })}
-          placeholder="What do you want to learn more about?"
-          rows={3}
-          className="w-full px-4 py-3 rounded-[16px] border resize-none"
-          style={{
-            borderColor: `${category.accent}44`,
-            background: isDark ? 'rgba(255,255,255,0.06)' : 'white',
-            color: getTextColor(isDark),
-          }}
-        />
-      </div>
+    <div className="space-y-5" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
+      {fields.map(f => (
+        <div key={f.key}>
+          <label className={paperLabelClass} style={{ color: ink }}>
+            <MaterialIcon name={f.icon} size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            {f.label}
+          </label>
+          <textarea value={d[f.key]} onChange={e => onChange({ ...d, [f.key]: e.target.value })}
+            placeholder={f.placeholder}
+            rows={3} className={paperInputClass} style={{ fontSize: '1.1rem', lineHeight: '1.7' }} />
+        </div>
+      ))}
     </div>
   );
 };
 
-// Format selector component
+// ─── Format Chip Selector ─────────────────────────────────────────────
 const FormatSelector: React.FC<{
-  selectedFormat: CaptureFormat;
-  onSelect: (format: CaptureFormat) => void;
-  category: CurioCategory;
-}> = ({ selectedFormat, onSelect, category }) => {
-  const formats: Array<{ format: CaptureFormat; label: string; icon: string }> = [
-    { format: 'SoundBite', label: 'Sound Bite', icon: '🎤' },
-    { format: 'ReelNotes', label: 'Reel Notes', icon: '🎬' },
-    { format: 'Marginalia', label: 'Marginalia', icon: '📝' },
-    { format: 'GalleryWall', label: 'Gallery Wall', icon: '🖼️' },
-    { format: 'FieldNotes', label: 'Field Notes', icon: '📋' },
-    { format: 'OpenNotebook', label: 'Open Notebook', icon: '📓' },
+  selected: CaptureFormat; onSelect: (f: CaptureFormat) => void;
+  accent: string; tint?: string;
+}> = ({ selected, onSelect, accent }) => {
+  const formats: Array<{ id: CaptureFormat; label: string; icon: string }> = [
+    { id: 'SoundBite', label: 'Sound Bite', icon: 'mic' },
+    { id: 'ReelNotes', label: 'Reel Notes', icon: 'movie' },
+    { id: 'Marginalia', label: 'Marginalia', icon: 'edit_note' },
+    { id: 'GalleryWall', label: 'Gallery Wall', icon: 'image' },
+    { id: 'FieldNotes', label: 'Field Notes', icon: 'description' },
   ];
-  
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2">
-      {formats.map(({ format, label, icon }) => (
-        <button
-          key={format}
-          onClick={() => onSelect(format)}
-          className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full transition-all"
+    <div className="flex gap-2 overflow-x-auto pb-1">
+      {formats.map(({ id, label, icon }) => (
+        <button key={id} onClick={() => onSelect(id)}
+          className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
           style={{
-            background: selectedFormat === format
-              ? category.accent
-              : `${category.accent}22`,
-            color: selectedFormat === format ? 'white' : category.accent,
-          }}
-        >
-          <span>{icon}</span>
-          <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+            background: selected === id ? accent : `${accent}18`,
+            color: selected === id ? 'white' : accent,
+            border: selected === id ? 'none' : `1px solid ${accent}30`,
+          }}>
+          <MaterialIcon name={icon} size={16} />
+          {label}
         </button>
       ))}
     </div>
   );
 };
 
-// Main SaveCaptureScreen component
+// ─── Main SaveCaptureScreen ───────────────────────────────────────────
 export const SaveCaptureScreen: React.FC = () => {
   const navigate = useNavigate();
   const { categorySlug, topicName } = useParams();
   const { isDark, isAmoled } = useTheme();
   const [category, setCategory] = useState<CurioCategory | null>(null);
-  const [topic, setTopic] = useState<CurioTopic | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<CaptureFormat>('Marginalia');
   const [captureData, setCaptureData] = useState<CaptureData | null>(null);
   const [tags, setTags] = useState<string[]>([]);
@@ -374,332 +229,222 @@ export const SaveCaptureScreen: React.FC = () => {
 
   useEffect(() => {
     if (categorySlug) {
-      const foundCategory = getCategoryBySlug(categorySlug);
-      if (foundCategory) {
-        setCategory(foundCategory);
-        setSelectedFormat(foundCategory.defaultFormat);
-        
-        // Initialize capture data based on format
-        initializeCaptureData(foundCategory.defaultFormat);
-        
-        // Create mock topic
-        setTopic({
-          id: `mock-${categorySlug}`,
-          categoryId: foundCategory.id,
-          subtype: 'Topic',
-          name: topicName?.replace(/-/g, ' ') || 'Unknown Topic',
-          teaser: 'A fascinating topic to explore.',
-          imageUrl: '',
-          actionPrompt: {
-            verb: 'Explore',
-            targetName: 'this topic',
-            durationMinutes: 30,
-            instruction: 'Take time to learn something new.',
-          },
-          aliases: [],
-          relatedTopicIds: [],
-          difficulty: 1,
-          weight: 100,
-          curatedBy: 'human',
-          curatedDate: '2026-01-15',
-        });
+      const found = getCategoryBySlug(categorySlug);
+      if (found) {
+        setCategory(found);
+        setSelectedFormat(found.defaultFormat === 'OpenNotebook' ? 'SoundBite' : found.defaultFormat);
+        initData(found.defaultFormat === 'OpenNotebook' ? 'SoundBite' : found.defaultFormat);
       }
     }
-  }, [categorySlug, topicName]);
+  }, [categorySlug]);
 
-  const initializeCaptureData = (format: CaptureFormat) => {
-    switch (format) {
-      case 'SoundBite':
-        setCaptureData({ durationSeconds: 0, notes: '' });
-        break;
-      case 'ReelNotes':
-        setCaptureData({ rating: 0, review: '' });
-        break;
-      case 'Marginalia':
-        setCaptureData({ journalEntry: '', quotes: [] });
-        break;
-      case 'GalleryWall':
-        setCaptureData({ caption: '', images: [] });
-        break;
-      case 'FieldNotes':
-        setCaptureData({ observed: '', surprised: '', learnNext: '' });
-        break;
-      case 'OpenNotebook':
-        setCaptureData({ subFormat: 'Marginalia', subData: { journalEntry: '', quotes: [] } });
-        break;
-      default:
-        setCaptureData({ journalEntry: '', quotes: [] });
-    }
+  const initData = (fmt: CaptureFormat) => {
+    const defaults: Record<string, CaptureData> = {
+      SoundBite: { durationSeconds: 0, notes: '' },
+      ReelNotes: { rating: 0, review: '' },
+      Marginalia: { journalEntry: '', quotes: [] },
+      GalleryWall: { caption: '', images: [] },
+      FieldNotes: { observed: '', surprised: '', learnNext: '' },
+    };
+    setCaptureData(defaults[fmt] || defaults.Marginalia);
   };
 
-  const handleFormatChange = (format: CaptureFormat) => {
-    setSelectedFormat(format);
-    initializeCaptureData(format);
+  const handleFormatChange = (fmt: CaptureFormat) => {
+    setSelectedFormat(fmt);
+    initData(fmt);
   };
 
   const handleAddTag = () => {
     const clean = tagInput.trim().replace(/^#/, '');
-    if (clean && clean.length <= 24 && tags.length < 12) {
-      setTags([...tags, clean].filter((v, i, a) => a.indexOf(v) === i));
+    if (clean && clean.length <= 24 && tags.length < 12 && !tags.includes(clean)) {
+      setTags([...tags, clean]);
       setTagInput('');
     }
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
+  const canSave = (): boolean => {
+    if (!captureData) return false;
+    switch (selectedFormat) {
+      case 'SoundBite': {
+        const d = captureData as { notes: string };
+        return !!d.notes;
+      }
+      case 'ReelNotes': {
+        const d = captureData as { rating: number; review: string };
+        return !!d.review || d.rating > 0;
+      }
+      case 'Marginalia': {
+        const d = captureData as { journalEntry: string; quotes: Array<{ text: string }> };
+        return !!d.journalEntry || d.quotes.length > 0;
+      }
+      case 'GalleryWall': {
+        const d = captureData as { caption: string };
+        return !!d.caption;
+      }
+      case 'FieldNotes': {
+        const d = captureData as { observed: string; surprised: string; learnNext: string };
+        return !!d.observed || !!d.surprised || !!d.learnNext;
+      }
+      default: return false;
+    }
   };
 
   const handleSave = async () => {
-    if (!topic || !category || !captureData) return;
-    
+    if (!category || !captureData) return;
     setIsSaving(true);
     try {
+      const topicDisplayName = topicName?.replace(/-/g, ' ') || 'Unknown Topic';
       const entry = {
         id: generateId(),
-        topicId: topic.id,
+        topicId: `${category.id.toLowerCase()}-${Date.now()}`,
         categoryId: category.id,
-        topicName: topic.name,
-        topicSubtype: topic.subtype,
-        topicTeaser: topic.teaser,
+        topicName: topicDisplayName,
+        topicSubtype: 'Topic',
+        topicTeaser: 'A fascinating topic to explore.',
         format: selectedFormat,
         capturedAtMillis: Date.now(),
-        title: topic.name,
+        title: topicDisplayName,
         formatDataJson: JSON.stringify(captureData),
         tagsJson: serializeTags(tags),
         isLegacy: false,
       };
-      
       await captureRepository.insert(entry);
-      
-      // Update stats
-      const currentEntries = parseInt(localStorage.getItem('curio-total-topics') || '0');
-      localStorage.setItem('curio-total-topics', (currentEntries + 1).toString());
-      
-      // Add XP
-      const currentXp = parseInt(localStorage.getItem('curio-xp') || '0');
-      localStorage.setItem('curio-xp', (currentXp + 50).toString());
-      
+      const prev = parseInt(localStorage.getItem('curio-total-topics') || '0');
+      localStorage.setItem('curio-total-topics', String(prev + 1));
+      const xp = parseInt(localStorage.getItem('curio-xp') || '0');
+      localStorage.setItem('curio-xp', String(xp + 50));
       setShowSuccess(true);
-      setTimeout(() => {
-        navigate(`/detail/${entry.id}`);
-      }, 1500);
-    } catch (error) {
-      console.error('Failed to save:', error);
+      setTimeout(() => navigate(`/detail/${entry.id}`), 1500);
+    } catch (err) {
+      console.error('Save failed:', err);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const canSave = () => {
-    if (!captureData) return false;
-    
-    switch (selectedFormat) {
-      case 'SoundBite':
-        return (captureData as { notes: string }).notes.length > 0;
-      case 'ReelNotes':
-        return (captureData as { review: string }).review.length > 0 || (captureData as { rating: number }).rating > 0;
-      case 'Marginalia':
-        return (captureData as { journalEntry: string }).journalEntry.length > 0 || (captureData as { quotes: unknown[] }).quotes.length > 0;
-      case 'GalleryWall':
-        return (captureData as { caption: string }).caption.length > 0;
-      case 'FieldNotes':
-        const fieldData = captureData as { observed: string; surprised: string; learnNext: string };
-        return fieldData.observed.length > 0 || fieldData.surprised.length > 0 || fieldData.learnNext.length > 0;
-      default:
-        return false;
-    }
-  };
+  if (!category) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+      <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
+    </div>
+  );
 
-  if (!category || !topic) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
-      >
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
-          <p className="mt-4" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-            Loading...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const tintBg = `${category.accent}0E`;
 
   return (
-    <div
-      className="min-h-screen pb-24"
-      style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
-    >
-      {/* Header */}
-      <header className="px-6 pt-6 pb-4 flex items-center justify-between">
-        <CurioBackButton onClick={() => navigate(-1)} />
-        <h1
-          className="text-lg font-bold"
-          style={{ color: getTextColor(isDark), fontFamily: 'Geom, sans-serif' }}
-        >
-          Save your take
-        </h1>
-        <div className="w-10" />
-      </header>
+    <div className="min-h-screen pb-24 relative" style={{ background: isDark ? `linear-gradient(180deg, ${tintBg}, ${getBackgroundColor(isDark, isAmoled)})` : `linear-gradient(180deg, ${category.tint || tintBg}, ${getBackgroundColor(isDark, isAmoled)})` }}>
+      <CurioWatermarkBackdrop activeCatId={category.id} alphaScale={0.35} />
 
-      {/* Topic Reminder Strip */}
-      <div className="px-6 py-2">
-        <div
-          className="flex items-center gap-3 p-3 rounded-[16px]"
-          style={{
-            background: isDark ? `${category.accent}22` : category.tint,
-          }}
-        >
-          <div
-            className="w-10 h-10 rounded-[12px] flex items-center justify-center"
-            style={{ background: `${category.accent}22` }}
-          >
-            <span className="text-xl">{category.iconGlyph}</span>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm" style={{ color: getTextColor(isDark) }}>
-              {topic.name}
-            </h3>
-            <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }}>
-              {category.displayName}
-            </p>
+      <div className="relative z-10">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-1" style={{ paddingTop: 'env(safe-area-inset-top, 16px)' }}>
+          <CurioBackButton onClick={() => navigate(-1)} />
+          <h1 className="text-base font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>
+            Save your take
+          </h1>
+          <div className="w-10" />
+        </div>
+        <ScreenEntrance>
+        {/* Topic reminder strip */}
+        <div className="px-4 pb-3">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+            style={{
+              background: `${category.accent}14`,
+              border: `1px solid ${category.accent}22`,
+            }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${category.accent}20` }}>
+              <MaterialIcon name={category.iconGlyph} size={22} style={{ color: category.accent }} />
+            </div>
+            <div>
+              <p className="text-sm font-bold" style={{ color: getTextColor(isDark) }}>
+                {topicName?.replace(/-/g, ' ') || 'Unknown Topic'}
+              </p>
+              <p className="text-xs opacity-60" style={{ color: getTextColor(isDark) }}>{category.displayName}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Format Selector */}
-      <div className="px-6 py-4">
-        <FormatSelector
-          selectedFormat={selectedFormat}
-          onSelect={handleFormatChange}
-          category={category}
-        />
-      </div>
-
-      {/* Format Editor - Paper style */}
-      <div className="px-5 py-2 max-w-lg mx-auto">
-        <CurioPaperCard variant={selectedFormat === 'FieldNotes' ? 'plain' : 'ruled'} watermark={category.iconGlyph}>
-          <div className="px-2">
-            {selectedFormat === 'SoundBite' && captureData && (
-              <SoundBiteEditor
-                data={captureData}
-                onChange={setCaptureData}
-                category={category}
-              />
-            )}
-            {selectedFormat === 'ReelNotes' && captureData && (
-              <ReelNotesEditor
-                data={captureData}
-                onChange={setCaptureData}
-                category={category}
-              />
-            )}
-            {selectedFormat === 'Marginalia' && captureData && (
-              <MarginaliaEditor
-                data={captureData}
-                onChange={setCaptureData}
-                category={category}
-              />
-            )}
-            {selectedFormat === 'GalleryWall' && captureData && (
-              <GalleryWallEditor
-                data={captureData}
-                onChange={setCaptureData}
-                category={category}
-              />
-            )}
-            {selectedFormat === 'FieldNotes' && captureData && (
-              <FieldNotesEditor
-                data={captureData}
-                onChange={setCaptureData}
-                category={category}
-              />
-            )}
-          </div>
-        </CurioPaperCard>
-      </div>
-
-      {/* Tags Editor */}
-      <div className="px-6 py-4">
-        <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          Tags
-        </label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-sm"
-              style={{
-                background: `${category.accent}22`,
-                color: category.accent,
-              }}
-            >
-              #{tag}
-              <button
-                onClick={() => handleRemoveTag(tag)}
-                className="ml-1 hover:opacity-70"
-              >
-                ×
-              </button>
-            </span>
-          ))}
+        {/* Format selector */}
+        <div className="px-4 py-2">
+          <p className="text-xs font-semibold mb-2 opacity-60" style={{ color: getTextColor(isDark) }}>
+            How do you want to capture this one?
+          </p>
+          <FormatSelector selected={selectedFormat} onSelect={handleFormatChange}
+            accent={category.accent} />
         </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
-            placeholder="Add a tag..."
-            className="flex-1 px-4 py-2 rounded-[12px] border text-sm"
+
+        {/* Format editor on paper */}
+        <div className="px-4 py-3 max-w-lg mx-auto">
+          {captureData && (
+            <CurioPaperCard variant="ruled" watermark={category.iconGlyph} accent={category.accent}>
+              {selectedFormat === 'SoundBite' && <SoundBiteEditor data={captureData} onChange={setCaptureData} isDark={isDark} />}
+              {selectedFormat === 'ReelNotes' && <ReelNotesEditor data={captureData} onChange={setCaptureData} isDark={isDark} />}
+              {selectedFormat === 'Marginalia' && <MarginaliaEditor data={captureData} onChange={setCaptureData} isDark={isDark} />}
+              {selectedFormat === 'GalleryWall' && <GalleryWallEditor data={captureData} onChange={setCaptureData} isDark={isDark} />}
+              {selectedFormat === 'FieldNotes' && <FieldNotesEditor data={captureData} onChange={setCaptureData} isDark={isDark} />}
+            </CurioPaperCard>
+          )}
+        </div>
+
+        {/* Tags */}
+        <div className="px-4 py-2 max-w-lg mx-auto">
+          <p className="text-xs font-semibold mb-2 opacity-60" style={{ color: getTextColor(isDark) }}>Tags</p>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {tags.map(tag => (
+                <span key={tag} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                  style={{ background: `${category.accent}18`, color: category.accent }}>
+                  #{tag}
+                  <button onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:opacity-70">&times;</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAddTag()}
+              placeholder="Add a tag…" maxLength={24}
+              className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
+              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: getTextColor(isDark),
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
+            <button onClick={handleAddTag}
+              className="px-4 py-2 rounded-full text-xs font-semibold transition-opacity hover:opacity-90"
+              style={{ background: category.accent, color: 'white' }}>Add</button>
+          </div>
+        </div>
+
+        {/* Save button */}
+        <div className="px-4 py-4 max-w-lg mx-auto">
+          <button onClick={handleSave} disabled={!canSave() || isSaving}
+            className="w-full py-4 rounded-2xl font-bold text-base transition-all disabled:opacity-40 active:scale-[0.98]"
             style={{
-              borderColor: `${category.accent}44`,
-              background: 'white',
-            }}
-          />
-          <button
-            onClick={handleAddTag}
-            className="px-4 py-2 rounded-[12px] text-sm font-medium"
-            style={{
-              background: category.accent,
-              color: 'white',
-            }}
-          >
-            Add
+              background: canSave()
+                ? category.accent
+                : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+              color: canSave() ? 'white' : getTextColor(isDark),
+            }}>
+            {isSaving ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.6)', borderTopColor: 'transparent' }} />
+                Saving…
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <MaterialIcon name="check" size={20} />
+                Save entry
+              </span>
+            )}
           </button>
         </div>
+        </ScreenEntrance>
       </div>
 
-      {/* Save Button */}
-      <div className="px-6 py-4">
-        <button
-          onClick={handleSave}
-          disabled={!canSave() || isSaving}
-          className="w-full py-4 rounded-[24px] font-semibold transition-all disabled:opacity-50"
-          style={{
-            background: canSave()
-              ? `linear-gradient(135deg, ${category.accent} 0%, ${category.lightAccent} 100%)`
-              : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-            color: canSave() ? 'white' : getTextColor(isDark),
-          }}
-        >
-          {isSaving ? 'Saving...' : 'Save entry'}
-        </button>
-      </div>
-
-      {/* Success Modal */}
+      {/* Success */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
-          <div
-            className="p-8 rounded-[24px] text-center mx-6"
-            style={{ background: 'white' }}
-          >
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-xl font-bold mb-2" style={{ color: getTextColor(false) }}>
-              Saved!
-            </h2>
-            <p className="text-sm" style={{ color: 'rgba(59,10,23,0.6)' }}>
+          <div className="p-8 rounded-3xl text-center mx-6" style={{ background: isDark ? '#1a1a2e' : 'white' }}>
+            <MaterialIcon name="celebration" size={64} style={{ color: '#FF8FA3' }} />
+            <h2 className="text-xl font-bold mt-3 mb-1" style={{ color: getTextColor(isDark) }}>Saved!</h2>
+            <p className="text-sm opacity-60" style={{ color: getTextColor(isDark) }}>
               Your entry has been added to your cabinet.
             </p>
           </div>
