@@ -1,5 +1,20 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Return-after-absence welcome + evolution ceremony lines
+
+**Date:** 2026-08-11
+
+**What was asked:** Add the return-after-absence welcome and evolution ceremony lines.
+
+**Changes made:**
+- **CurioPet.kt** — new `Event.EVOLVE`; `noteEvolved(context)` (persists `KEY_LAST_EVOLVE_AT`, feeds `CurioPetBrain.observeLevelUp`, fires the EVOLVE event); `evolutionCeremonyLine()` (path-flavored ceremony lines via `currentStage()`/`currentEvoPath()`: Blaze/Tide/Bloom pools for the first evolution, a final-form pool, fallback); `welcomeBackLine(context)` gated on new `KEY_LAST_SEEN_AT` — first-ever appearance records the timestamp quietly, ≥1 day away returns a tiered pool line (1d / 3d / 7d), consumed once per absence; three new line pools (no em dashes per PET_DIALOGUE notes).
+- **CurioQuests.kt `addXp`** — computes `stageBefore`/`stageAfter` via `evolutionStage(level, path).first`; crossing a growth tier fires `noteEvolved` *instead of* `noteLevelUp` (no double-speak, no PROUD interference) — catches the Level-25 final form.
+- **PetDesignerScreen.kt** — `onPathChosen` fires `noteEvolved` after `setEvoPath` (the Level-7 first evolution; ceremony plays while the confetti `EvolutionAnimation` runs).
+- **CurioFloatingPet.kt** — new `LaunchedEffect(CurioPet.awake)` queues the welcome-back line on first appearance (consumed once per absence, nap/wake cycles return null); event-reaction mapping maps EVOLVE → `PetReactionEvents.LEVEL_UP` (reuses the celebratory hop/face rule) while `eventLine` speaks the ceremony line; custom-actions `when` fires LEVEL_UP custom actions for EVOLVE (the ultimate level-up).
+- **docs/PET_DIALOGUE.txt** — new sections 16 (return welcome) and 17 (evolution ceremony); **fastlane 20260919 changelog** bullet added.
+
+**Validation:** brace balance OK, `git diff --check` clean, code review passed (exhaustiveness/scope verified; unused `stage` param removed per review). Known minor: `checkAll` stage-reward XP bypasses `addXp`, so a chain reward crossing Level 25 misses both the ceremony and level-up reaction (pre-existing quirk for level-ups; not a regression). Gradle build left to CI.
+
 ## Current Request (COMPLETED): Fix pet behavior double-fire bugs
 
 **Date:** 2026-08-11

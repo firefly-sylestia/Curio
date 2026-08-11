@@ -34,6 +34,8 @@ object CurioPet {
     private const val KEY_LAST_BUBBLE_SCREEN = "last_bubble_screen"
     private const val KEY_LAST_BUBBLE_AT = "last_bubble_at"
     private const val KEY_LAST_PLAY_AT = "last_play_at"
+    private const val KEY_LAST_EVOLVE_AT = "last_evolve_at"
+    private const val KEY_LAST_SEEN_AT = "pet_last_seen_at"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -168,7 +170,7 @@ object CurioPet {
     // the card with a tap (reacts to the touch); REVEAL_AUTO = the deck
     // auto-opened it after a spin.
     // v9.2 — the pet now reacts to touches, play sessions and level-ups too.
-    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE, TOUCH, PLAY, LEVEL_UP }
+    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE, TOUCH, PLAY, LEVEL_UP, EVOLVE }
 
     var eventCount by mutableIntStateOf(0)
         private set
@@ -315,6 +317,47 @@ object CurioPet {
                 "I can almost do a backflip!", "Level up! I'll pretend that was hard.",
                 "Sparks of power!", "I'm 10% more sparkly now.", "Up up up we go!"
             ))
+            // v13 — the evolution ceremony: a bigger moment than a level-up.
+            Event.EVOLVE -> evolutionCeremonyLine()
+        }
+    }
+
+    /**
+     * v13 — the evolution ceremony: a line the pet says the moment it
+     * crosses into a new growth tier, flavored by its element path.
+     */
+    fun evolutionCeremonyLine(): String {
+        val stage = currentStage()
+        val path = currentEvoPath()
+        return when (stage) {
+            Stage.FIRST_EVO -> when (path) {
+                EvoPath.FIRE -> pickLine(listOf(
+                    "I'm Blaze now! Small, but VERY warm!",
+                    "Fire path! My spark has opinions now!",
+                    "Look at me! A blaze of pure curiosity!"
+                ))
+                EvoPath.WATER -> pickLine(listOf(
+                    "I'm Tide now! Cool, calm, and deep!",
+                    "Water path! I ripple wherever questions lead!",
+                    "Look at me! I flow with every wonder!"
+                ))
+                EvoPath.NATURE -> pickLine(listOf(
+                    "I'm Bloom now! I grow wherever I go!",
+                    "Nature path! Something new sprouts in me!",
+                    "Look at me! I'm blooming with ideas!"
+                ))
+                null -> pickLine(listOf(
+                    "Ta-da! I grew all the way up!",
+                    "Same me, but BIGGER spark!"
+                ))
+            }
+            Stage.FINAL_EVO -> pickLine(listOf(
+                "I'm fully grown! The whole shelf is mine!",
+                "This is it, my final form! Every lane made me!",
+                "I made it all the way! I'm fully me now!",
+                "Look at the grown me! All the sparks came home!"
+            ))
+            Stage.BABY -> "Fresh little me!"
         }
     }
 
@@ -440,6 +483,32 @@ object CurioPet {
         "Good morning! I made the bed… of ideas!", "Hello hello! Fresh topics!",
         "Rise and shine and SPIN and shine!"
     ))
+
+    /**
+     * v13 — return-after-absence welcome: the first time the pet appears
+     * after ≥1 day away it says a welcome-home line instead of jumping
+     * straight into mood chatter. Consumed once per absence (the timestamp
+     * is refreshed when called); a brand-new pet (never seen before) stays
+     * quiet. Longer absences pick warmer pools.
+     */
+    fun welcomeBackLine(context: Context): String? {
+        val p = prefs(context)
+        val now = System.currentTimeMillis()
+        val lastSeen = p.getLong(KEY_LAST_SEEN_AT, 0L)
+        if (lastSeen <= 0L) {
+            p.edit().putLong(KEY_LAST_SEEN_AT, now).apply()
+            return null
+        }
+        val awayMs = now - lastSeen
+        p.edit().putLong(KEY_LAST_SEEN_AT, now).apply()
+        val dayMs = 86_400_000L
+        return when {
+            awayMs < dayMs -> null
+            awayMs >= 7 * dayMs -> pickLine(welcomeBackWeekLines)
+            awayMs >= 3 * dayMs -> pickLine(welcomeBackDaysLines)
+            else -> pickLine(welcomeBackDayLines)
+        }
+    }
 
     // ── Bond (v8.29) — how familiar the pet is allowed to be ───────────
     // The pet starts polite and neutral and only talks like a close friend
@@ -689,6 +758,26 @@ object CurioPet {
         "One more game and then… one more game.",
         "Catch me if you can. Okay, you can. Always can.",
         "Play! Play play play! …I'm calm. PLAY!"
+    )
+    // v13 — return-after-absence welcome pools (see [welcomeBackLine]).
+    private val welcomeBackDayLines = listOf(
+        "I missed you. The shelf waited.",
+        "Welcome back! I kept the topics warm.",
+        "Oh, you're back! I saved you the good lane.",
+        "Missed you! The deck missed you too.",
+        "Back at last! I was just dusting the curiosity."
+    )
+    private val welcomeBackDaysLines = listOf(
+        "You were gone so long the topics started their own club.",
+        "Welcome home! I watered the curiosity while you were away.",
+        "A few days away! I narrated the shelf to myself.",
+        "You're back! I reorganized the deck twice. Okay, once."
+    )
+    private val welcomeBackWeekLines = listOf(
+        "A whole week! I've been practicing my patience.",
+        "You're back! I grew a whole new eagerness while you were gone.",
+        "Seven days! I even missed the sassy ones.",
+        "A week away! I saved you all the good questions."
     )
 
     /** A passive bubble line for the current [mood]. */
@@ -961,6 +1050,19 @@ object CurioPet {
         CurioPetBrain.observeLevelUp(context)
         // v9.2 — leveling up fires the pet's LEVEL_UP reaction.
         reactTo(Event.LEVEL_UP)
+    }
+
+    /**
+     * v13 — the pet evolved: persists the moment and fires the EVOLVE event
+     * so the floating pet performs the ceremony (a celebratory reaction + a
+     * path-flavored line resolved from [currentStage] when it speaks). Called
+     * from CurioQuests when a level crosses a growth tier and from the Pet
+     * Designer when a path is chosen.
+     */
+    fun noteEvolved(context: Context) {
+        prefs(context).edit().putLong(KEY_LAST_EVOLVE_AT, System.currentTimeMillis()).apply()
+        CurioPetBrain.observeLevelUp(context)
+        reactTo(Event.EVOLVE)
     }
 
     fun noteLaneExplored(context: Context) {

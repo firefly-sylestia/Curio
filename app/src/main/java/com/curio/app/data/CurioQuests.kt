@@ -567,15 +567,22 @@ object CurioQuests {
     // ── XP ───────────────────────────────────────────────────────────────
     private fun addXp(context: Context, amount: Int) {
         val levelBefore = levelForXp(xpState)
+        val stageBefore = CurioPet.evolutionStage(levelBefore, CurioPet.currentEvoPath()).first
         xpState += amount
         val levelAfter = levelForXp(xpState)
+        val stageAfter = CurioPet.evolutionStage(levelAfter, CurioPet.currentEvoPath()).first
         write(context)
         checkAll(context)
         // Feed the Curio pet's mood timestamps (spec §10.5): a level-up is
         // the proud moment; any positive XP is a happy one. (The pet only
         // reacts to REAL XP — the 0-XP refresh calls stay quiet.)
         if (amount > 0) {
-            if (levelAfter > levelBefore) CurioPet.noteLevelUp(context)
+            // v13 — crossing into a new growth tier (level 25 with a path
+            // chosen → the final form) is its own ceremony, bigger than a
+            // plain level-up. The level-7 first evolution fires from the
+            // path choice itself, so it isn't detected here.
+            if (stageAfter.ordinal > stageBefore.ordinal) CurioPet.noteEvolved(context)
+            else if (levelAfter > levelBefore) CurioPet.noteLevelUp(context)
             else CurioPet.noteXpEarned(context)
         }
     }

@@ -1127,6 +1127,10 @@ fun PetDesignerScreen(navController: NavController) {
                 EvolutionChoiceDialog(
                     onPathChosen = { path ->
                         AppPreferences.setEvoPath(context, path)
+                        // v13 — the first evolution: the pet celebrates its
+                        // new form (the floating pet speaks the ceremony line
+                        // while the confetti animation plays).
+                        CurioPet.noteEvolved(context)
                         evoDialogOpen = false
                         evoAnimating = true
                     },

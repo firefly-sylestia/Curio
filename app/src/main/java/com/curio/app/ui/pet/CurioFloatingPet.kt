@@ -911,6 +911,9 @@ fun CurioFloatingPet(
                     CurioPet.Event.SAVE -> PetReactionEvents.SAVE
                     CurioPet.Event.PLAY -> PetReactionEvents.PLAY
                     CurioPet.Event.LEVEL_UP -> PetReactionEvents.LEVEL_UP
+                    // v13 — evolution rides the celebratory level-up rule
+                    // (hop + face) while speaking its own ceremony line.
+                    CurioPet.Event.EVOLVE -> PetReactionEvents.LEVEL_UP
                     // v12 — TOUCH is owned entirely by the tap handler (gated
                     // line + tiered motion + TAP actions). Re-firing it here
                     // made EVERY tap speak, overwriting the 40% gated boop
@@ -929,7 +932,22 @@ fun CurioFloatingPet(
                     // (Touch already fires TAP actions in its own handler, so
                     // it isn't re-fired here.)
                     CurioPet.Event.LEVEL_UP -> fireCustomActions(PetActionTrigger.LEVEL_UP)
+                    // v13 — evolution is the ultimate level-up: custom
+                    // level-up actions join the ceremony too.
+                    CurioPet.Event.EVOLVE -> fireCustomActions(PetActionTrigger.LEVEL_UP)
                     else -> Unit
+                }
+            }
+        }
+
+        // ── Return-after-absence welcome (v13) — after ≥1 day away the
+        //    pet greets the user on its first appearance instead of jumping
+        //    straight into mood chatter (consumed once per absence).
+        LaunchedEffect(CurioPet.awake) {
+            if (CurioPet.awake) {
+                CurioPet.welcomeBackLine(context)?.let {
+                    queueReaction(it)
+                    lastTouch = System.currentTimeMillis()
                 }
             }
         }

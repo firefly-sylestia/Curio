@@ -347,6 +347,56 @@ Legend
     • "Gravity vs me: round one, me!"
 
 --------------------------------------------------------------------------------
+16. RETURN-AFTER-ABSENCE WELCOME — the pet greets the user after ≥1 day away
+    Location: CurioPet.kt (welcomeBackLine, welcomeBackDayLines/DaysLines/WeekLines),
+              CurioFloatingPet.kt (LaunchedEffect keyed on CurioPet.awake)
+    Fires once per absence, on the pet's first appearance. New pets stay quiet.
+
+  ~1 day away [picks one]:
+    • "I missed you. The shelf waited." / "Welcome back! I kept the topics warm."
+    • "Oh, you're back! I saved you the good lane." / "Missed you! The deck missed
+       you too." / "Back at last! I was just dusting the curiosity."
+
+  3-6 days away [picks one]:
+    • "You were gone so long the topics started their own club." / "Welcome home!
+       I watered the curiosity while you were away."
+    • "A few days away! I narrated the shelf to myself." / "You're back! I
+       reorganized the deck twice. Okay, once."
+
+  7+ days away [picks one]:
+    • "A whole week! I've been practicing my patience." / "You're back! I grew a
+       whole new eagerness while you were gone."
+    • "Seven days! I even missed the sassy ones." / "A week away! I saved you all
+       the good questions."
+
+--------------------------------------------------------------------------------
+17. EVOLUTION CEREMONY — the pet celebrates crossing into a new growth tier
+    Location: CurioPet.kt (evolutionCeremonyLine, noteEvolved, Event.EVOLVE),
+              CurioFloatingPet.kt (EVOLVE rides the LEVEL_UP reaction rule)
+    First evolution fires from the Pet Designer path choice (Level 7); the final
+    form fires from CurioQuests.addXp when Level 25 is crossed with a path set.
+
+  FIRST EVO — Blaze (Fire) [picks one]:
+    • "I'm Blaze now! Small, but VERY warm!" / "Fire path! My spark has opinions
+       now!" / "Look at me! A blaze of pure curiosity!"
+
+  FIRST EVO — Tide (Water) [picks one]:
+    • "I'm Tide now! Cool, calm, and deep!" / "Water path! I ripple wherever
+       questions lead!" / "Look at me! I flow with every wonder!"
+
+  FIRST EVO — Bloom (Nature) [picks one]:
+    • "I'm Bloom now! I grow wherever I go!" / "Nature path! Something new sprouts
+       in me!" / "Look at me! I'm blooming with ideas!"
+
+  FIRST EVO — no path set (fallback) [picks one]:
+    • "Ta-da! I grew all the way up!" / "Same me, but BIGGER spark!"
+
+  FINAL EVO [picks one]:
+    • "I'm fully grown! The whole shelf is mine!" / "This is it, my final form!
+       Every lane made me!" / "I made it all the way! I'm fully me now!"
+    • "Look at the grown me! All the sparks came home!"
+
+--------------------------------------------------------------------------------
 Notes for future edits
   • Keep one sentence per passive bubble (the pill shows max 2 lines).
   • The TOUR dialogue is NOT capped at 2 lines anymore: PetSpeechBubble
