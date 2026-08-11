@@ -36,6 +36,8 @@ object CurioPet {
     private const val KEY_LAST_PLAY_AT = "last_play_at"
     private const val KEY_LAST_EVOLVE_AT = "last_evolve_at"
     private const val KEY_LAST_SEEN_AT = "pet_last_seen_at"
+    private const val KEY_LAST_QUEST_AT = "last_quest_at"
+    private const val KEY_LAST_STREAK_AT = "last_streak_at"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -170,7 +172,7 @@ object CurioPet {
     // the card with a tap (reacts to the touch); REVEAL_AUTO = the deck
     // auto-opened it after a spin.
     // v9.2 — the pet now reacts to touches, play sessions and level-ups too.
-    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE, TOUCH, PLAY, LEVEL_UP, EVOLVE }
+    enum class Event { SPIN_LANDED, REVEAL_TAPPED, REVEAL_AUTO, EXPLORE, SAVE, TOUCH, PLAY, LEVEL_UP, EVOLVE, QUEST_COMPLETE, STREAK_MILESTONE }
 
     var eventCount by mutableIntStateOf(0)
         private set
@@ -319,7 +321,40 @@ object CurioPet {
             ))
             // v13 — the evolution ceremony: a bigger moment than a level-up.
             Event.EVOLVE -> evolutionCeremonyLine()
+            // v13 — a claimed daily/weekly quest is a reward moment.
+            Event.QUEST_COMPLETE -> pickLine(questCompleteLines)
+            // v13 — a new best streak (day-specific at the flame milestones).
+            Event.STREAK_MILESTONE -> streakMilestoneLine(CurioQuests.bestStreakState)
         }
+    }
+
+    /**
+     * v13 — the streak-milestone line: the flame days (1 / 3 / 7 / 14 / 30)
+     * get their own bigger celebrations; other new-best days get a warm
+     * "still glowing" line.
+     */
+    fun streakMilestoneLine(streak: Int): String = when (streak) {
+        1 -> pickLine(listOf(
+            "The flame is lit!", "Day 1! A brand-new spark!"
+        ))
+        3 -> pickLine(listOf(
+            "Day 3! A real streak is born!", "Three days! The flame has friends!"
+        ))
+        7 -> pickLine(listOf(
+            "Day 7! A whole week of wonder!", "Seven days! The flame is a bonfire now!"
+        ))
+        14 -> pickLine(listOf(
+            "Day 14! Two weeks of fire!", "Fortnight flame! Steady as starlight!"
+        ))
+        30 -> pickLine(listOf(
+            "Day 30! A month of mystery!", "Thirty days! Legendary flame!"
+        ))
+        else -> pickLine(listOf(
+            "Day $streak! The flame grows!",
+            "$streak days in a row! Still glowing strong!",
+            "Streak day $streak! One spark at a time.",
+            "Day $streak! The flame likes this pace."
+        ))
     }
 
     /**
@@ -779,6 +814,16 @@ object CurioPet {
         "Seven days! I even missed the sassy ones.",
         "A week away! I saved you all the good questions."
     )
+    // v13 — lines for claiming a daily/weekly quest (see [noteQuestComplete]).
+    private val questCompleteLines = listOf(
+        "Quest done! Sparkle earned!",
+        "That quest never stood a chance!",
+        "Another quest, conquered!",
+        "Checked off! The list quivers.",
+        "We finished it together. Well, mostly you.",
+        "Quest complete! I'm so proud of our teamwork.",
+        "One more quest bites the dust!"
+    )
 
     /** A passive bubble line for the current [mood]. */
     fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String = when (mood) {
@@ -1063,6 +1108,26 @@ object CurioPet {
         prefs(context).edit().putLong(KEY_LAST_EVOLVE_AT, System.currentTimeMillis()).apply()
         CurioPetBrain.observeLevelUp(context)
         reactTo(Event.EVOLVE)
+    }
+
+    /**
+     * v13 — a daily/weekly quest was claimed (CurioQuests.claimDaily /
+     * claimWeekly): the pet celebrates the reward moment.
+     */
+    fun noteQuestComplete(context: Context) {
+        prefs(context).edit().putLong(KEY_LAST_QUEST_AT, System.currentTimeMillis()).apply()
+        reactTo(Event.QUEST_COMPLETE)
+    }
+
+    /**
+     * v13 — a new best streak was recorded (CurioQuests.onStreakRecorded):
+     * the pet celebrates the milestone, with day-specific lines at the flame
+     * days (1 / 3 / 7 / 14 / 30). The day count is read from
+     * [CurioQuests.bestStreakState] when the line speaks.
+     */
+    fun noteStreakMilestone(context: Context) {
+        prefs(context).edit().putLong(KEY_LAST_STREAK_AT, System.currentTimeMillis()).apply()
+        reactTo(Event.STREAK_MILESTONE)
     }
 
     fun noteLaneExplored(context: Context) {

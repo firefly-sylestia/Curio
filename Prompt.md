@@ -1,5 +1,19 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Quest-completion + streak-milestone pet reactions
+
+**Date:** 2026-08-11
+
+**What was asked:** Add quest-completion and streak-milestone pet reactions so the pet celebrates those too.
+
+**Changes made:**
+- **CurioPet.kt** — Event enum gained `QUEST_COMPLETE` + `STREAK_MILESTONE`; `noteQuestComplete(context)` (persists `KEY_LAST_QUEST_AT`, fires event); `noteStreakMilestone(context)` (persists `KEY_LAST_STREAK_AT`, fires event; day count read from `CurioQuests.bestStreakState` at speak time); `streakMilestoneLine(streak)` with flame-day pools (1/3/7/14/30 get their own bigger lines, other new-best days get `$streak`-aware "still glowing" lines); new `questCompleteLines` pool; `eventLine` branches for both (now exhaustive over 11 values).
+- **CurioQuests.kt** — `claimDaily` + `claimWeekly` fire `noteQuestComplete` **before** `addXp` so a claim that coincidentally crosses a level/growth tier lets the bigger moment (level-up / evolution ceremony) win instead of being swallowed; `onStreakRecorded` fires `noteStreakMilestone` inside the new-best branch (once per new best, never on same-day re-records or post-gap resets).
+- **CurioFloatingPet.kt** — event-reaction mapping: QUEST_COMPLETE → `PetReactionEvents.REVEAL` (sparkle hop), STREAK_MILESTONE → `PetReactionEvents.LEVEL_UP` (spin); custom-actions `when` fires LEVEL_UP actions for both (combined `A, B ->` case).
+- **docs/PET_DIALOGUE.txt** — sections 18 (quest complete) + 19 (streak milestone); **fastlane 20260919 changelog** bullet extended.
+
+**Validation:** brace balance OK, `git diff --check` clean, code review passed (fixed two findings: quest line could swallow a coincidental evolution ceremony → moved hook before addXp; unused `streak` param removed). Known design notes: custom LEVEL_UP actions now play on 4 reward moments (deliberate — only reward-style trigger exists); write-only `KEY_LAST_QUEST_AT`/`KEY_LAST_STREAK_AT` match the existing `KEY_LAST_EVOLVE_AT` pattern. Gradle build left to CI.
+
 ## Current Request (COMPLETED): Return-after-absence welcome + evolution ceremony lines
 
 **Date:** 2026-08-11

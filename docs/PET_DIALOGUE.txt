@@ -397,6 +397,42 @@ Legend
     • "Look at the grown me! All the sparks came home!"
 
 --------------------------------------------------------------------------------
+18. QUEST COMPLETE — the pet celebrates claiming a daily/weekly quest
+    Location: CurioPet.kt (noteQuestComplete, questCompleteLines, Event.QUEST_COMPLETE),
+              CurioQuests.kt (claimDaily / claimWeekly), CurioFloatingPet.kt
+              (rides the REVEAL sparkle reaction)
+    Fires when the user taps Claim on a finished daily or weekly quest.
+
+  [picks one]:
+    • "Quest done! Sparkle earned!" / "That quest never stood a chance!"
+    • "Another quest, conquered!" / "Checked off! The list quivers."
+    • "We finished it together. Well, mostly you." / "Quest complete! I'm so
+       proud of our teamwork." / "One more quest bites the dust!"
+
+--------------------------------------------------------------------------------
+19. STREAK MILESTONE — the pet celebrates a new best streak
+    Location: CurioPet.kt (noteStreakMilestone, streakMilestoneLine, Event.STREAK_MILESTONE),
+              CurioQuests.kt (onStreakRecorded), CurioFloatingPet.kt
+              (rides the LEVEL_UP spin celebration)
+    Fires when the daily streak beats the previous best. Flame days get
+    their own bigger lines; other new-best days get warm "still glowing"
+    lines. At most one per day.
+
+  Day 1 [picks one]:
+    • "The flame is lit!" / "Day 1! A brand-new spark!"
+  Day 3 [picks one]:
+    • "Day 3! A real streak is born!" / "Three days! The flame has friends!"
+  Day 7 [picks one]:
+    • "Day 7! A whole week of wonder!" / "Seven days! The flame is a bonfire now!"
+  Day 14 [picks one]:
+    • "Day 14! Two weeks of fire!" / "Fortnight flame! Steady as starlight!"
+  Day 30 [picks one]:
+    • "Day 30! A month of mystery!" / "Thirty days! Legendary flame!"
+  Other new-best days [picks one]:
+    • "Day {N}! The flame grows!" / "{N} days in a row! Still glowing strong!"
+    • "Streak day {N}! One spark at a time." / "Day {N}! The flame likes this pace."
+
+--------------------------------------------------------------------------------
 Notes for future edits
   • Keep one sentence per passive bubble (the pill shows max 2 lines).
   • The TOUR dialogue is NOT capped at 2 lines anymore: PetSpeechBubble

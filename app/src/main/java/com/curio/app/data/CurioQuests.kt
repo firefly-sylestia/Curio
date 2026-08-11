@@ -726,6 +726,8 @@ object CurioQuests {
         if (streak > bestStreakState) {
             bestStreakState = streak
             write(context)
+            // v13 — a new best streak deserves its own celebration.
+            CurioPet.noteStreakMilestone(context)
         }
         checkAll(context)
     }
@@ -760,6 +762,10 @@ object CurioQuests {
         dailyAwardedState = dailyAwardedState + quest.id
         lifetimeState = lifetimeState.copy(dailyCompleted = lifetimeState.dailyCompleted + 1)
         write(context)
+        // v13 — the quest celebration fires BEFORE addXp so a claim that
+        // happens to cross a level or growth tier lets the bigger moment
+        // (level-up / evolution ceremony) win instead of being swallowed.
+        CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
     }
 
@@ -896,6 +902,9 @@ object CurioQuests {
         if (weeklyProgress(quest) < quest.target) return
         weeklyAwardedState = weeklyAwardedState + quest.id
         write(context)
+        // v13 — fires before addXp so a coincidental level-up / evolution
+        // ceremony takes precedence over the quest line.
+        CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
     }
 
