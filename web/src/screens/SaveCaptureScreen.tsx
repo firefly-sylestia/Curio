@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryBySlug } from '../data/categories';
-import { CurioPaperCard, CurioBackButton } from '../components/SharedComponents';
+import { CurioPaperCard, CurioBackButton, MaterialIcon } from '../components/SharedComponents';
 import type { CurioCategory, CurioTopic, CaptureFormat, CaptureData } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
 
@@ -240,7 +240,7 @@ const GalleryWallEditor: React.FC<{
               className="aspect-square rounded-[12px] flex items-center justify-center"
               style={{ background: `${category.tint}` }}
             >
-              <span className="text-2xl">🖼️</span>
+              <MaterialIcon name="image" size={32} />
             </div>
           ))}
           <button
@@ -266,7 +266,7 @@ const FieldNotesEditor: React.FC<{
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          🔍 Observed
+          <MaterialIcon name="search" size={16} /> Observed
         </label>
         <textarea
           value={fieldData.observed}
@@ -284,7 +284,7 @@ const FieldNotesEditor: React.FC<{
       
       <div>
         <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          😮 Surprised Me
+          <MaterialIcon name="sentiment_surprised" size={16} /> Surprised Me
         </label>
         <textarea
           value={fieldData.surprised}
@@ -302,7 +302,7 @@ const FieldNotesEditor: React.FC<{
       
       <div>
         <label className="block text-sm font-medium mb-2" style={{ color: getTextColor(isDark) }}>
-          📚 Want to Learn Next
+          <MaterialIcon name="menu_book" size={16} /> Want to Learn Next
         </label>
         <textarea
           value={fieldData.learnNext}
@@ -328,12 +328,12 @@ const FormatSelector: React.FC<{
   category: CurioCategory;
 }> = ({ selectedFormat, onSelect, category }) => {
   const formats: Array<{ format: CaptureFormat; label: string; icon: string }> = [
-    { format: 'SoundBite', label: 'Sound Bite', icon: '🎤' },
-    { format: 'ReelNotes', label: 'Reel Notes', icon: '🎬' },
-    { format: 'Marginalia', label: 'Marginalia', icon: '📝' },
-    { format: 'GalleryWall', label: 'Gallery Wall', icon: '🖼️' },
-    { format: 'FieldNotes', label: 'Field Notes', icon: '📋' },
-    { format: 'OpenNotebook', label: 'Open Notebook', icon: '📓' },
+    { format: 'SoundBite', label: 'Sound Bite', icon: 'mic' },
+    { format: 'ReelNotes', label: 'Reel Notes', icon: 'movie' },
+    { format: 'Marginalia', label: 'Marginalia', icon: 'edit_note' },
+    { format: 'GalleryWall', label: 'Gallery Wall', icon: 'image' },
+    { format: 'FieldNotes', label: 'Field Notes', icon: 'description' },
+    { format: 'OpenNotebook', label: 'Open Notebook', icon: 'menu_book' },
   ];
   
   return (
@@ -350,7 +350,7 @@ const FormatSelector: React.FC<{
             color: selectedFormat === format ? 'white' : category.accent,
           }}
         >
-          <span>{icon}</span>
+          <MaterialIcon name={icon} size={18} />
           <span className="text-sm font-medium whitespace-nowrap">{label}</span>
         </button>
       ))}
@@ -555,7 +555,7 @@ export const SaveCaptureScreen: React.FC = () => {
             className="w-10 h-10 rounded-[12px] flex items-center justify-center"
             style={{ background: `${category.accent}22` }}
           >
-            <span className="text-xl">{category.iconGlyph}</span>
+            <MaterialIcon name={category.iconGlyph} size={24} />
           </div>
           <div>
             <h3 className="font-semibold text-sm" style={{ color: getTextColor(isDark) }}>
@@ -695,7 +695,7 @@ export const SaveCaptureScreen: React.FC = () => {
             className="p-8 rounded-[24px] text-center mx-6"
             style={{ background: 'white' }}
           >
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="text-6xl mb-4"><MaterialIcon name="celebration" size={64} /></div>
             <h2 className="text-xl font-bold mb-2" style={{ color: getTextColor(false) }}>
               Saved!
             </h2>

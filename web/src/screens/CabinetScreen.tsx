@@ -66,7 +66,7 @@ const EntryCard: React.FC<{
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: `${category?.accent || '#3B0A17'}15` }}
           >
-            <span className="text-lg">{category?.iconGlyph || '📝'}</span>
+            <span className="material-symbols-outlined text-lg">{category?.iconGlyph || 'edit_note'}</span>
           </div>
           <div className="flex-1 min-w-0">
             <h4
@@ -221,7 +221,7 @@ export const CabinetScreen: React.FC = () => {
           </div>
         ) : filteredEntries.length === 0 ? (
           <CurioEmptyState
-            icon="📚"
+            icon="book_5"
             title={searchQuery ? 'No results' : 'No entries yet'}
             description={searchQuery ? 'Try a different search term' : 'Start exploring to build your cabinet'}
             action={!searchQuery ? 'Start exploring' : undefined}

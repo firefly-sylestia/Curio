@@ -7,7 +7,7 @@ import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContex
 import { getCategoryBySlug } from '../data/categories';
 import { loadTopicsForCategory } from '../data/topics';
 import { getExploreSessionSystem } from '../data/ExploreSession';
-import { CurioPaperCard, CurioMoodboardCard, CurioBackButton } from '../components/SharedComponents';
+import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon } from '../components/SharedComponents';
 import type { CurioTopic, CurioCategory } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
 
@@ -132,11 +132,11 @@ export const TopicRevealScreen: React.FC = () => {
     );
   }
 
-  const actionEmoji = 
-    topic.actionPrompt.verb === 'Listen' ? '🎵' :
-    topic.actionPrompt.verb === 'Watch' ? '🎬' :
-    topic.actionPrompt.verb === 'Read' ? '📖' :
-    topic.actionPrompt.verb === 'Explore' ? '🔍' : '✨';
+  const actionIcon = 
+    topic.actionPrompt.verb === 'Listen' ? 'headphones' :
+    topic.actionPrompt.verb === 'Watch' ? 'play_circle' :
+    topic.actionPrompt.verb === 'Read' ? 'menu_book' :
+    topic.actionPrompt.verb === 'Explore' ? 'travel_explore' : 'auto_awesome';
 
   return (
     <div
@@ -154,7 +154,7 @@ export const TopicRevealScreen: React.FC = () => {
             color: isDark ? 'white' : category.accent,
           }}
         >
-          {category.iconGlyph}
+          <MaterialIcon name={category.iconGlyph} size={160} />
         </div>
       </div>
 
@@ -214,7 +214,7 @@ export const TopicRevealScreen: React.FC = () => {
                 color: 'white',
               }}
             >
-              {category.iconGlyph} {category.displayName}
+              <MaterialIcon name={category.iconGlyph} size={14} /> {category.displayName}
             </div>
             
             {/* Watermark glyph */}
@@ -222,7 +222,7 @@ export const TopicRevealScreen: React.FC = () => {
               className="absolute -bottom-6 -right-4 text-[100px] opacity-20 pointer-events-none"
               style={{ color: 'white' }}
             >
-              {category.iconGlyph}
+              <MaterialIcon name={category.iconGlyph} size={100} filled />
             </div>
           </div>
           
@@ -249,7 +249,7 @@ export const TopicRevealScreen: React.FC = () => {
               className="text-xs"
               style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
             >
-              ⏱️ {topic.actionPrompt.durationMinutes} min • difficulty {topic.difficulty}/5
+              <MaterialIcon name="schedule" size={14} /> {topic.actionPrompt.durationMinutes} min • difficulty {topic.difficulty}/5
             </span>
           </div>
           
@@ -266,7 +266,7 @@ export const TopicRevealScreen: React.FC = () => {
         <div className="mb-6">
           <CurioPaperCard variant="ruled" watermark={category.iconGlyph} className="mb-2">
             <div className="flex items-center gap-2 mb-2 pl-2">
-              <span className="text-xl">{actionEmoji}</span>
+              <MaterialIcon name={actionIcon} size={24} />
               <h3
                 className="font-semibold"
                 style={{ color: getTextColor(isDark), fontFamily: 'Patrick Hand, cursive' }}
@@ -304,7 +304,7 @@ export const TopicRevealScreen: React.FC = () => {
                 border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(59,10,23,0.1)'}`,
               }}
             >
-              🎧 Start Exploring ({topic.actionPrompt.durationMinutes} min)
+              <MaterialIcon name={actionIcon} size={16} /> Start Exploring ({topic.actionPrompt.durationMinutes} min)
             </button>
           ) : (
             <div
@@ -312,7 +312,7 @@ export const TopicRevealScreen: React.FC = () => {
               style={{ background: `${category.accent}18`, border: `1px solid ${category.accent}30` }}
             >
               <div className="text-sm font-medium mb-1" style={{ color: category.accent }}>
-                ✨ Exploring... ({exploreSession.getFormattedElapsed()})
+                <MaterialIcon name="auto_awesome" size={14} /> Exploring... ({exploreSession.getFormattedElapsed()})
               </div>
               <div
                 className="text-xs"
@@ -337,7 +337,7 @@ export const TopicRevealScreen: React.FC = () => {
               boxShadow: `0 8px 24px ${category.accent}33`,
             }}
           >
-            {isSaving ? 'Saving...' : '💾 Save to Cabinet'}
+            {isSaving ? 'Saving...' : (<><MaterialIcon name="save" size={16} /> Save to Cabinet</>)}
           </button>
           
           <button
@@ -349,7 +349,7 @@ export const TopicRevealScreen: React.FC = () => {
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(59,10,23,0.15)'}`,
             }}
           >
-            🎲 Spin Again
+            <MaterialIcon name="casino" size={16} /> Spin Again
           </button>
         </div>
 

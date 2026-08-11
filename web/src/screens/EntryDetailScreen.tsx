@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryById } from '../data/categories';
-import { CurioPaperCard, CurioMoodboardCard, CurioBackButton } from '../components/SharedComponents';
+import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon } from '../components/SharedComponents';
 import type { CurioEntry, CaptureData, CaptureFormat } from '../types';
 import { captureRepository, deserializeTags } from '../db/database';
 
@@ -30,7 +30,7 @@ const SoundBiteRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ d
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <span className="text-3xl">🎤</span>
+        <MaterialIcon name="mic" size={32} />
         <div>
           <div className="font-semibold" style={{ color: getTextColor(isDark) }}>Voice Note</div>
           <div className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{soundData.durationSeconds}s</div>
@@ -113,7 +113,7 @@ const GalleryWallRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({
               className="aspect-square rounded-[12px] flex items-center justify-center"
               style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)' }}
             >
-              <span className="text-2xl">🖼️</span>
+              <MaterialIcon name="image" size={32} />
             </div>
           ))}
         </div>
@@ -128,19 +128,19 @@ const FieldNotesRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ 
     <div className="space-y-4">
       {fieldData.observed && (
         <InnerBox isDark={isDark}>
-          <div className="font-semibold mb-2" style={{ color: getTextColor(isDark) }}>🔍 Observed</div>
+          <div className="font-semibold mb-2 flex items-center gap-1.5" style={{ color: getTextColor(isDark) }}><MaterialIcon name="search" size={16} /> Observed</div>
           <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{fieldData.observed}</p>
         </InnerBox>
       )}
       {fieldData.surprised && (
         <InnerBox isDark={isDark}>
-          <div className="font-semibold mb-2" style={{ color: getTextColor(isDark) }}>😮 Surprised Me</div>
+          <div className="font-semibold mb-2 flex items-center gap-1.5" style={{ color: getTextColor(isDark) }}><MaterialIcon name="sentiment_surprised" size={16} /> Surprised Me</div>
           <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{fieldData.surprised}</p>
         </InnerBox>
       )}
       {fieldData.learnNext && (
         <InnerBox isDark={isDark}>
-          <div className="font-semibold mb-2" style={{ color: getTextColor(isDark) }}>📚 Want to Learn Next</div>
+          <div className="font-semibold mb-2 flex items-center gap-1.5" style={{ color: getTextColor(isDark) }}><MaterialIcon name="menu_book" size={16} /> Want to Learn Next</div>
           <p className="whitespace-pre-wrap" style={{ color: getTextColor(isDark) }}>{fieldData.learnNext}</p>
         </InnerBox>
       )}
@@ -176,13 +176,13 @@ const FormatRenderer: React.FC<{ format: CaptureFormat; data: CaptureData; isDar
 // Format icon helper
 const getFormatIcon = (format: CaptureFormat): string => {
   switch (format) {
-    case 'SoundBite': return '🎤';
-    case 'ReelNotes': return '🎬';
-    case 'Marginalia': return '📝';
-    case 'GalleryWall': return '🖼️';
-    case 'FieldNotes': return '📋';
-    case 'OpenNotebook': return '📓';
-    default: return '📄';
+    case 'SoundBite': return 'mic';
+    case 'ReelNotes': return 'movie';
+    case 'Marginalia': return 'edit_note';
+    case 'GalleryWall': return 'image';
+    case 'FieldNotes': return 'description';
+    case 'OpenNotebook': return 'menu_book';
+    default: return 'article';
   }
 };
 
@@ -288,7 +288,7 @@ export const EntryDetailScreen: React.FC = () => {
         style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
       >
         <div className="text-center">
-          <span className="text-6xl">📝</span>
+          <MaterialIcon name="edit_note" size={64} />
           <h2 className="text-xl font-bold mt-4" style={{ color: getTextColor(isDark) }}>
             Entry not found
           </h2>
@@ -323,7 +323,7 @@ export const EntryDetailScreen: React.FC = () => {
               background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
             }}
           >
-            <span style={{ color: getTextColor(isDark) }}>✏️</span>
+            <MaterialIcon name="edit" size={20} style={{ color: getTextColor(isDark) }} />
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
@@ -332,7 +332,7 @@ export const EntryDetailScreen: React.FC = () => {
               background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
             }}
           >
-            <span style={{ color: '#EF4444' }}>🗑️</span>
+            <MaterialIcon name="delete" size={20} style={{ color: '#EF4444' }} />
           </button>
         </div>
       </header>
@@ -347,7 +347,7 @@ export const EntryDetailScreen: React.FC = () => {
                 background: `${category.accent}18`,
               }}
             >
-              <span className="text-2xl">{category.iconGlyph}</span>
+              <MaterialIcon name={category.iconGlyph} size={28} />
             </div>
             <div className="flex-1 min-w-0">
               <h1
@@ -367,7 +367,7 @@ export const EntryDetailScreen: React.FC = () => {
                 color: category.accent,
               }}
             >
-              {getFormatIcon(entry.format)} {entry.format}
+              <MaterialIcon name={getFormatIcon(entry.format)} size={14} /> {entry.format}
             </span>
           </div>
         </CurioMoodboardCard>
@@ -376,7 +376,7 @@ export const EntryDetailScreen: React.FC = () => {
       {/* Meta Info */}
       <div className="px-6 py-2">
         <div className="flex items-center gap-4 text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-          <span>{getFormatIcon(entry.format)} {entry.format}</span>
+          <span className="flex items-center gap-1"><MaterialIcon name={getFormatIcon(entry.format)} size={14} /> {entry.format}</span>
           <span>·</span>
           <span>{formatDate(entry.capturedAtMillis)}</span>
         </div>

@@ -5,6 +5,31 @@ import React, { useState, useEffect } from 'react';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
 import type { CurioCategory } from '../types';
 
+// ─── Material Icon ──────────────────────────────────────────────────
+export const MaterialIcon: React.FC<{
+  name: string;
+  size?: number;
+  filled?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}> = ({ name, size = 24, filled = false, className = '', style: outerStyle }) => (
+  <span
+    className={`material-symbols-outlined ${className}`}
+    style={{
+      fontSize: size,
+      fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
+      width: size,
+      height: size,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...outerStyle,
+    }}
+  >
+    {name}
+  </span>
+);
+
 // ─── Animation Constants ──────────────────────────────────────────────
 export const SPRINGS = {
   snappy: 'cubic-bezier(0.2, 0.9, 0.3, 1)',
@@ -139,7 +164,7 @@ export const CurioHeroCard: React.FC<{
         className="absolute right-4 bottom-4 text-[120px] opacity-10 pointer-events-none"
         style={{ color: 'white' }}
       >
-        {category.iconGlyph}
+        <span className="material-symbols-outlined text-[120px] opacity-100">{category.iconGlyph}</span>
       </div>
       
       {/* Content */}
@@ -218,7 +243,7 @@ export const CurioCategoryCard: React.FC<{
         boxShadow: isSelected ? `0 4px 16px ${category.accent}44` : 'none',
       }}
     >
-      <span style={{ fontSize: iconSize }}>{category.iconGlyph}</span>
+      <span className="material-symbols-outlined" style={{ fontSize: iconSize, width: iconSize, height: iconSize }}>{category.iconGlyph}</span>
     </button>
   );
 };
@@ -621,7 +646,7 @@ export const CurioStatCard: React.FC<{
           className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
           style={{ background: `${color}20` }}
         >
-          <span className="text-lg">{icon}</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 20, color }}>{icon}</span>
         </div>
       )}
       <div

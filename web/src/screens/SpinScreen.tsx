@@ -1,5 +1,5 @@
-// Curio Web App - Spin Screen (Premium Version)
-// Matches Android app's fan-deck carousel with orbit ring animation
+// Curio Web App - Spin Screen
+// Fan-deck carousel with orbit ring animation and proper Material icons
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -8,210 +8,165 @@ import { ALL_CATEGORIES, getCategoryBySlug } from '../data/categories';
 import { getRandomTopic } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
 import type { CurioCategory, CurioTopic } from '../types';
+import { MaterialIcon } from '../components/SharedComponents';
 
-// Orbit ring dots configuration
 const ORBIT_DOTS = 12;
-const ORBIT_RADIUS = 140; // px from center
+const SPIN_MIN = 2200;
+const SPIN_MAX = 3200;
 
-// Spin duration range (ms)
-const SPIN_MIN = 2800;
-const SPIN_MAX = 3600;
-
-// Peek card component
-const PeekCard: React.FC<{
-  topic: CurioTopic | null;
-  category: CurioCategory;
-  position: 'top' | 'bottom';
-  scale: number;
-  opacity: number;
-}> = ({ topic, category, position, scale, opacity }) => {
-  const { isDark } = useTheme();
-  
-  if (!topic) return null;
-  
-  return (
-    <div
-      className="absolute left-1/2 transform -translate-x-1/2 transition-all duration-300"
-      style={{
-        [position]: position === 'top' ? -60 : undefined,
-        bottom: position === 'bottom' ? -60 : undefined,
-        width: 280,
-        height: 80,
-        transform: `translateX(-50%) scale(${scale})`,
-        opacity,
-        zIndex: position === 'top' ? 1 : 0,
-      }}
-    >
-      <div
-        className="w-full h-full rounded-2xl p-3 flex items-center gap-3"
-        style={{
-          background: isDark
-            ? `linear-gradient(135deg, ${category.accent}33 0%, ${category.accent}11 100%)`
-            : `linear-gradient(135deg, ${category.tint} 0%, white 100%)`,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        }}
-      >
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: `${category.accent}22` }}
-        >
-          <span className="text-lg">{category.iconGlyph}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>
-            {topic.name}
-          </div>
-          <div className="text-xs truncate" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-            {topic.subtype}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Hero ticket card
+// ─── Hero Ticket Card ─────────────────────────────────────────────────
 const HeroTicket: React.FC<{
   topic: CurioTopic | null;
   category: CurioCategory;
-  isShuffling: boolean;
+  isSpinning: boolean;
+  spinPhase: 'idle' | 'spinning' | 'landed';
   onClick: () => void;
-}> = ({ topic, category, isShuffling, onClick }) => {
-  const { isDark, heroGradient } = useTheme();
-  
-  const getBackground = () => {
-    if (heroGradient) {
-      if (isDark) {
-        return `linear-gradient(135deg, ${category.accent}44 0%, ${category.accent}22 50%, ${category.lightAccent}11 100%)`;
-      }
-      return `linear-gradient(135deg, ${category.accent} 0%, ${category.lightAccent} 100%)`;
+}> = ({ topic, category, isSpinning, spinPhase, onClick }) => {
+  const { heroGradient } = useTheme();
+  const [isPressed, setIsPressed] = useState(false);
+  const [shimmerPos, setShimmerPos] = useState(-100);
+
+  useEffect(() => {
+    if (spinPhase !== 'spinning' && !isSpinning) {
+      const interval = setInterval(() => {
+        setShimmerPos(prev => (prev >= 200 ? -100 : prev + 1.5));
+      }, 30);
+      return () => clearInterval(interval);
     }
-    return isDark ? category.accent : category.tint;
+  }, [spinPhase, isSpinning]);
+
+  const getBg = () => {
+    if (heroGradient) {
+      const base = `linear-gradient(145deg, ${category.accent} 0%,`;
+      const mid = ` ${category.accent}DD 30%,`;
+      const end = ` ${category.lightAccent || category.accent}88 100%)`;
+      return base + mid + end;
+    }
+    return category.accent;
   };
-  
+
   return (
-    <div
-      className="relative w-[286px] h-[310px] rounded-3xl overflow-hidden cursor-pointer transition-transform duration-300"
-      style={{
-        background: getBackground(),
-        boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-        transform: isShuffling ? 'scale(0.98)' : 'scale(1)',
-        zIndex: 10,
-      }}
+    <button
       onClick={onClick}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      disabled={isSpinning}
+      className="relative w-[280px] h-[340px] rounded-[32px] overflow-hidden text-left transition-all duration-500"
+      style={{
+        background: getBg(),
+        transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+        boxShadow: `0 12px 48px ${category.accent}44, 0 2px 8px rgba(0,0,0,0.1)`,
+        cursor: isSpinning ? 'default' : 'pointer',
+        border: `2px solid ${category.accent}88`,
+      }}
     >
-      {/* Category accent bar */}
+      {/* Shimmer */}
+      {spinPhase !== 'spinning' && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%)',
+            transform: `translateX(${shimmerPos}%)`,
+          }}
+        />
+      )}
+
+      {/* Edge shine */}
       <div
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ background: category.accent }}
+        className="absolute top-0 left-4 right-4 h-[1px]"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' }}
       />
-      
+
+      {/* Watermark glyph */}
+      <div
+        className="absolute right-3 bottom-3 pointer-events-none select-none"
+        style={{ color: 'rgba(255,255,255,0.12)' }}
+      >
+        <MaterialIcon name={category.iconGlyph} size={120} />
+      </div>
+
       {/* Content */}
-      <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-        {topic ? (
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-6 text-center">
+        {spinPhase === 'spinning' ? (
+          <div className="flex flex-col items-center gap-3">
+            <MaterialIcon name="casino" size={48} className="text-white/70 animate-spin" />
+            <p className="text-white/60 text-sm font-medium">Spinning...</p>
+          </div>
+        ) : topic ? (
           <>
             {/* Category badge */}
             <div
-              className="px-3 py-1 rounded-full text-xs font-medium mb-4"
-              style={{
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-              }}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-5"
+              style={{ background: 'rgba(255,255,255,0.18)', color: 'white' }}
             >
+              <MaterialIcon name={category.iconGlyph} size={14} />
               {topic.subtype}
             </div>
-            
+
             {/* Topic name */}
             <h2
-              className="text-2xl font-bold text-white mb-2"
-              style={{ fontFamily: 'Geom, sans-serif' }}
+              className="text-2xl font-extrabold text-white leading-tight mb-3 px-2"
+              style={{ fontFamily: 'Geom, Inter, sans-serif', textShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
             >
               {topic.name}
             </h2>
-            
+
             {/* Teaser */}
-            <p className="text-sm text-white/80 line-clamp-3">
+            <p className="text-sm text-white/80 line-clamp-2 leading-relaxed px-2">
               {topic.teaser}
             </p>
-            
-            {/* Action hint */}
-            <div className="mt-4 text-xs text-white/60">
-              {isShuffling ? 'Spinning...' : 'Tap to explore'}
+
+            {/* Tap hint */}
+            <div className="mt-5 flex items-center gap-1.5 text-xs text-white/50">
+              <MaterialIcon name="touch_app" size={16} />
+              Tap to explore
             </div>
           </>
         ) : (
           <>
-            {/* Empty state */}
-            <div className="text-6xl mb-4">🎰</div>
+            <MaterialIcon name="casino" size={56} className="text-white/70 mb-4" />
             <h2
-              className="text-xl font-bold text-white"
-              style={{ fontFamily: 'Geom, sans-serif' }}
+              className="text-xl font-bold text-white mb-2"
+              style={{ fontFamily: 'Geom, Inter, sans-serif' }}
             >
               {category.displayName}
             </h2>
-            <p className="text-sm text-white/70 mt-2">
-              Tap to spin
-            </p>
+            <p className="text-sm text-white/70">Tap the button below to spin</p>
           </>
         )}
       </div>
-      
-      {/* Watermark glyph */}
-      <div
-        className="absolute bottom-4 right-4 text-6xl opacity-10"
-        style={{ color: 'white' }}
-      >
-        {category.iconGlyph}
-      </div>
-    </div>
+    </button>
   );
 };
 
-// Orbit ring animation
-const OrbitRing: React.FC<{
-  active: boolean;
-  color: string;
-}> = ({ active, color }) => {
+// ─── Orbit Ring ───────────────────────────────────────────────────────
+const OrbitRing: React.FC<{ active: boolean; color: string }> = ({ active, color }) => {
   const [rotation, setRotation] = useState(0);
-  
+
   useEffect(() => {
-    if (!active) {
-      setRotation(0);
-      return;
-    }
-    
-    const interval = setInterval(() => {
-      setRotation(r => (r + 2) % 360);
-    }, 16);
-    
+    if (!active) { setRotation(0); return; }
+    const interval = setInterval(() => setRotation(r => (r + 3) % 360), 16);
     return () => clearInterval(interval);
   }, [active]);
-  
+
   return (
-    <div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        transform: `rotate(${rotation}deg)`,
-      }}
-    >
+    <div className="absolute inset-0 pointer-events-none" style={{ transform: `rotate(${rotation}deg)` }}>
       {Array.from({ length: ORBIT_DOTS }).map((_, i) => {
         const angle = (i / ORBIT_DOTS) * Math.PI * 2;
-        const x = Math.cos(angle) * ORBIT_RADIUS + 50; // 50% center
-        const y = Math.sin(angle) * ORBIT_RADIUS + 50;
-        const delay = i * 0.1;
-        
+        const x = 50 + Math.cos(angle) * 48;
+        const y = 50 + Math.sin(angle) * 48;
         return (
           <div
             key={i}
-            className="absolute w-2 h-2 rounded-full"
+            className="absolute rounded-full transition-all duration-500"
             style={{
-              left: `${x}%`,
-              top: `${y}%`,
+              left: `${x}%`, top: `${y}%`,
+              width: active ? 6 : 3, height: active ? 6 : 3,
               transform: 'translate(-50%, -50%)',
               background: color,
-              opacity: active ? 0.6 : 0.2,
-              transition: `opacity 0.3s ease ${delay}s`,
-              animation: active ? `pulse 1.5s ease-in-out infinite ${delay}s` : 'none',
+              opacity: active ? 0.8 : 0.15,
+              animation: active ? `orbitPulse 1.6s ease-in-out ${i * 0.12}s infinite` : 'none',
             }}
           />
         );
@@ -220,303 +175,286 @@ const OrbitRing: React.FC<{
   );
 };
 
-// Spin button
+// ─── Spin Button ──────────────────────────────────────────────────────
 const SpinButton: React.FC<{
-  isShuffling: boolean;
+  isSpinning: boolean;
   onClick: () => void;
   color: string;
-}> = ({ isShuffling, onClick, color }) => {
-  
+  iconName: string;
+}> = ({ isSpinning, onClick, color, iconName }) => {
+  const [isPressed, setIsPressed] = useState(false);
+
   return (
     <button
       onClick={onClick}
-      disabled={isShuffling}
-      className="relative z-20 transition-all duration-300"
+      disabled={isSpinning}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      className="relative z-20 flex items-center justify-center rounded-full transition-all duration-300"
       style={{
-        width: isShuffling ? 100 : 118,
-        height: isShuffling ? 100 : 118,
-        borderRadius: '50%',
-        background: `linear-gradient(135deg, ${color} 0%, ${color}CC 100%)`,
-        boxShadow: `0 8px 32px ${color}44`,
-        transform: isShuffling ? 'scale(0.92)' : 'scale(1)',
+        width: isSpinning ? 96 : 112,
+        height: isSpinning ? 96 : 112,
+        background: `linear-gradient(135deg, ${color} 0%, ${color}DD 100%)`,
+        boxShadow: isSpinning
+          ? `0 4px 16px ${color}33`
+          : `0 8px 32px ${color}55, 0 2px 8px rgba(0,0,0,0.15)`,
+        transform: isPressed ? 'scale(0.9)' : 'scale(1)',
+        cursor: isSpinning ? 'default' : 'pointer',
       }}
     >
-      <div className="flex items-center justify-center h-full">
-        <span
-          className="text-4xl text-white"
-          style={{
-            animation: isShuffling ? 'tumble 1.6s linear infinite' : 'none',
-          }}
-        >
-          🎲
-        </span>
-      </div>
+      <MaterialIcon
+        name={isSpinning ? 'hourglass_top' : iconName}
+        size={isSpinning ? 36 : 44}
+        className="text-white"
+        filled={!isSpinning}
+      />
     </button>
   );
 };
 
-// Category pill button
+// ─── Category Pill ────────────────────────────────────────────────────
 const CategoryPill: React.FC<{
   category: CurioCategory;
   isSelected: boolean;
   onClick: () => void;
 }> = ({ category, isSelected, onClick }) => {
   const { isDark } = useTheme();
-  
+  const [isPressed, setIsPressed] = useState(false);
+
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 rounded-full transition-all"
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200"
       style={{
-        background: isSelected
-          ? category.accent
-          : isDark
-            ? `${category.accent}33`
-            : category.tint,
-        color: isSelected
-          ? 'white'
-          : isDark
-            ? category.lightAccent
-            : category.accent,
-        boxShadow: isSelected ? `0 4px 12px ${category.accent}44` : 'none',
+        background: isSelected ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+        color: isSelected ? 'white' : isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)',
+        boxShadow: isSelected ? `0 4px 16px ${category.accent}44` : 'none',
+        transform: isPressed ? 'scale(0.94)' : 'scale(1)',
       }}
     >
-      <span className="text-lg">{category.iconGlyph}</span>
-      <span className="text-sm font-medium whitespace-nowrap">{category.displayName}</span>
+      <MaterialIcon name={category.iconGlyph} size={18} />
+      {category.displayName}
     </button>
   );
 };
 
-// Main SpinScreen component
+// ─── Main SpinScreen ──────────────────────────────────────────────────
 export const SpinScreen: React.FC = () => {
   const navigate = useNavigate();
   const { categorySlug } = useParams();
   const { isDark, isAmoled } = useTheme();
   const [questSystem] = useState(() => getQuestSystem());
-  
+
   const [selectedCategories, setSelectedCategories] = useState<CurioCategory[]>([]);
-  const [isShuffling, setIsShuffling] = useState(false);
   const [currentTopic, setCurrentTopic] = useState<CurioTopic | null>(null);
+  const [spinPhase, setSpinPhase] = useState<'idle' | 'spinning' | 'landed'>('idle');
   const [showPicker, setShowPicker] = useState(false);
-  
-  // Initialize from URL or default
+
+  // Init from URL or default
   useEffect(() => {
     if (categorySlug) {
-      const category = getCategoryBySlug(categorySlug);
-      if (category) {
-        setSelectedCategories([category]);
-      }
+      const cat = getCategoryBySlug(categorySlug);
+      if (cat) setSelectedCategories([cat]);
     } else if (selectedCategories.length === 0) {
-      // Default to first category
       setSelectedCategories([ALL_CATEGORIES[0]]);
     }
   }, [categorySlug]);
-  
+
   const activeCategory = selectedCategories[0] || ALL_CATEGORIES[0];
-  
+
   const toggleCategory = (category: CurioCategory) => {
     setSelectedCategories(prev => {
       const exists = prev.find(c => c.id === category.id);
-      if (exists) {
-        return prev.filter(c => c.id !== category.id);
-      }
-      if (prev.length >= 3) {
-        return [category];
-      }
+      if (exists) return prev.filter(c => c.id !== category.id);
+      if (prev.length >= 3) return [category];
       return [...prev, category];
     });
   };
-  
+
   const handleSpin = useCallback(async () => {
-    if (selectedCategories.length === 0 || isShuffling) return;
-    
-    setIsShuffling(true);
-    
-    // Get random topic
-    const categoryIds = selectedCategories.map(c => c.id);
-    const topic = await getRandomTopic(categoryIds[0]);
-    
-    // Random spin duration
+    if (selectedCategories.length === 0 || spinPhase === 'spinning') return;
+    setSpinPhase('spinning');
+    setCurrentTopic(null);
+
+    const catId = selectedCategories[Math.floor(Math.random() * selectedCategories.length)].id;
     const duration = SPIN_MIN + Math.random() * (SPIN_MAX - SPIN_MIN);
-    
-    // Simulate spinning animation
-    await new Promise(resolve => setTimeout(resolve, duration));
-    
+
+    // Fetch topic while spinning
+    const topic = await getRandomTopic(catId);
+
+    // Wait for spin to finish
+    await new Promise(r => setTimeout(r, duration));
+
     setCurrentTopic(topic);
-    setIsShuffling(false);
-    
-    // Track in quest system
-    if (topic) {
-      questSystem.onSpin(categoryIds[0]);
-    }
-  }, [selectedCategories, isShuffling, questSystem]);
-  
+    setSpinPhase('landed');
+
+    if (topic) questSystem.onSpin(catId);
+
+    // Reset to idle after a beat
+    setTimeout(() => setSpinPhase('idle'), 2000);
+  }, [selectedCategories, spinPhase, questSystem]);
+
   const handleTopicOpen = () => {
-    if (currentTopic) {
-      navigate(`/reveal/${activeCategory.id.toLowerCase()}/${currentTopic.id}`);
+    if (currentTopic && spinPhase === 'landed') {
+      navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`);
     }
   };
-  
+
   return (
     <div
       className="min-h-screen pb-24 relative overflow-hidden"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
     >
-      {/* Watermark backdrop */}
+      {/* Subtle backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {ALL_CATEGORIES.slice(0, 8).map((cat, i) => (
           <div
             key={cat.id}
-            className="absolute text-8xl opacity-[0.03]"
+            className="absolute opacity-[0.03]"
             style={{
-              left: `${10 + (i % 4) * 25}%`,
-              top: `${10 + Math.floor(i / 4) * 50}%`,
+              left: `${8 + (i % 4) * 26}%`,
+              top: `${8 + Math.floor(i / 4) * 48}%`,
               transform: `rotate(${-15 + i * 10}deg)`,
               color: isDark ? 'white' : cat.accent,
             }}
           >
-            {cat.iconGlyph}
+            <MaterialIcon name={cat.iconGlyph} size={100} />
           </div>
         ))}
       </div>
-      
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-96px)] px-4">
-        {/* Deck section */}
+
+      {/* Main */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-96px)] px-4 pt-4">
+        {/* Deck area */}
         <div className="relative flex flex-col items-center">
-          {/* Top peek card */}
-          <PeekCard
-            topic={currentTopic}
-            category={activeCategory}
-            position="top"
-            scale={0.9}
-            opacity={0.6}
-          />
-          
-          {/* Hero ticket with orbit ring */}
-          <div className="relative">
-            <OrbitRing active={isShuffling} color={activeCategory.accent} />
-            <HeroTicket
-              topic={currentTopic}
-              category={activeCategory}
-              isShuffling={isShuffling}
-              onClick={handleTopicOpen}
-            />
+          {/* Top peek */}
+          {currentTopic && (
+            <div
+              className="w-[240px] h-16 rounded-2xl mb-[-20px] flex items-center gap-2 px-3 transition-all duration-500"
+              style={{
+                background: isDark
+                  ? `linear-gradient(135deg, ${activeCategory.accent}22, ${activeCategory.accent}08)`
+                  : `linear-gradient(135deg, ${activeCategory.tint}, rgba(255,255,255,0.8))`,
+                opacity: spinPhase !== 'idle' ? 0 : 0.5,
+                transform: `scale(0.9) translateY(${spinPhase === 'landed' ? -8 : 0}px)`,
+              }}
+            >
+              <MaterialIcon name={activeCategory.iconGlyph} size={20} style={{ opacity: 0.6 }} />
+              <div className="text-xs font-medium truncate" style={{ color: getTextColor(isDark), opacity: 0.6 }}>
+                {currentTopic.name}
+              </div>
+            </div>
+          )}
+
+          {/* Hero ticket + orbit */}
+          <div className="relative my-4">
+            <div className="relative w-[300px] h-[360px] flex items-center justify-center">
+              <OrbitRing active={spinPhase === 'spinning'} color={activeCategory.accent} />
+              <HeroTicket
+                topic={currentTopic}
+                category={activeCategory}
+                isSpinning={spinPhase === 'spinning'}
+                spinPhase={spinPhase}
+                onClick={handleTopicOpen}
+              />
+            </div>
           </div>
-          
-          {/* Bottom peek card */}
-          <PeekCard
-            topic={currentTopic}
-            category={activeCategory}
-            position="bottom"
-            scale={0.9}
-            opacity={0.6}
-          />
-          
+
           {/* Spin button */}
-          <div className="mt-8">
+          <div className="-mt-2 mb-6">
             <SpinButton
-              isShuffling={isShuffling}
+              isSpinning={spinPhase === 'spinning'}
               onClick={handleSpin}
               color={activeCategory.accent}
+              iconName={activeCategory.iconGlyph}
             />
           </div>
         </div>
-        
-        {/* Category selector */}
-        <div className="mt-8 w-full max-w-md">
-          <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
-            {ALL_CATEGORIES.filter(c => c.isReady).slice(0, 6).map((category) => (
+
+        {/* Category pills */}
+        <div className="w-full max-w-lg">
+          <div className="flex gap-2 overflow-x-auto pb-2 justify-center flex-wrap">
+            {ALL_CATEGORIES.filter(c => c.isReady).slice(0, 8).map(cat => (
               <CategoryPill
-                key={category.id}
-                category={category}
-                isSelected={selectedCategories.some(c => c.id === category.id)}
-                onClick={() => toggleCategory(category)}
+                key={cat.id}
+                category={cat}
+                isSelected={selectedCategories.some(c => c.id === cat.id)}
+                onClick={() => toggleCategory(cat)}
               />
             ))}
           </div>
-          
-          {/* More categories button */}
+
           <button
             onClick={() => setShowPicker(true)}
-            className="mt-4 w-full py-2 rounded-full text-sm font-medium transition-all"
+            className="mt-3 w-full py-2.5 rounded-full text-sm font-medium transition-all"
             style={{
-              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-              color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)',
+              background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+              color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)',
             }}
           >
-            All Categories →
+            All categories →
           </button>
         </div>
       </div>
-      
-      {/* Full category picker modal */}
+
+      {/* Category picker modal */}
       {showPicker && (
-        <div className="fixed inset-0 bg-black/50 z-[70] flex items-end justify-center">
+        <div className="fixed inset-0 bg-black/50 z-[70] flex items-end justify-center" onClick={() => setShowPicker(false)}>
           <div
             className="w-full max-w-lg rounded-t-3xl p-6 max-h-[70vh] overflow-y-auto"
             style={{ background: isDark ? '#1a1a2e' : 'white' }}
+            onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3
-                className="text-lg font-bold"
-                style={{ color: getTextColor(isDark), fontFamily: 'Geom, sans-serif' }}
-              >
+              <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>
                 Choose Categories
               </h3>
               <button
                 onClick={() => setShowPicker(false)}
-                className="text-2xl"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xl"
                 style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
               >
                 ×
               </button>
             </div>
-            
             <div className="grid grid-cols-3 gap-3">
-              {ALL_CATEGORIES.filter(c => c.isReady).map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    toggleCategory(category);
-                    setShowPicker(false);
-                  }}
-                  className="p-3 rounded-2xl transition-all"
-                  style={{
-                    background: selectedCategories.some(c => c.id === category.id)
-                      ? category.accent
-                      : isDark
-                        ? `${category.accent}22`
-                        : category.tint,
-                    color: selectedCategories.some(c => c.id === category.id)
-                      ? 'white'
-                      : isDark
-                        ? category.lightAccent
-                        : category.accent,
-                  }}
-                >
-                  <span className="text-2xl">{category.iconGlyph}</span>
-                  <div className="text-xs font-medium mt-1">{category.displayName}</div>
-                </button>
-              ))}
+              {ALL_CATEGORIES.filter(c => c.isReady).map(cat => {
+                const sel = selectedCategories.some(c => c.id === cat.id);
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => { toggleCategory(cat); setShowPicker(false); }}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all duration-200"
+                    style={{
+                      background: sel ? cat.accent : isDark ? `${cat.accent}22` : cat.tint,
+                      color: sel ? 'white' : isDark ? cat.lightAccent : cat.accent,
+                    }}
+                  >
+                    <MaterialIcon name={cat.iconGlyph} size={28} />
+                    <span className="text-xs font-medium">{cat.displayName}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
       )}
-      
-      {/* CSS Animations */}
+
+      {/* Animations */}
       <style>{`
-        @keyframes pulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-          50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+        @keyframes orbitPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+          50% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; }
         }
-        @keyframes tumble {
-          0% { transform: rotate(0deg) translateY(0); }
-          25% { transform: rotate(90deg) translateY(-4px); }
-          50% { transform: rotate(180deg) translateY(0); }
-          75% { transform: rotate(270deg) translateY(4px); }
-          100% { transform: rotate(360deg) translateY(0); }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
+        .animate-spin { animation: spin 1s linear infinite; }
       `}</style>
     </div>
   );
