@@ -8,6 +8,7 @@ import { ALL_CATEGORIES } from '../data/categories';
 import { CurioPaperCard, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import type { CurioCategory, CaptureFormat, CaptureData } from '../types';
 import { captureRepository, deserializeTags } from '../db/database';
+import { ScreenEntrance } from '../animations';
 
 // ─── Paper ink for saved views ──────────────────────────────────────
 const getPaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
@@ -249,6 +250,7 @@ export const EntryDetailScreen: React.FC = () => {
       </div>
 
       {/* ── Body ──────────────────────────────────────────────────────── */}
+      <ScreenEntrance>
       <div className="relative z-10 px-5 max-w-lg mx-auto">
         {/* Category label */}
         <div className="flex items-center gap-2.5 py-3 mt-1">
@@ -286,6 +288,7 @@ export const EntryDetailScreen: React.FC = () => {
           {format === 'FieldNotes' && <FieldNotesRender data={captureData} isDark={isDark} accent={category.accent} />}
         </div>
       </div>
+      </ScreenEntrance>
 
       {/* Delete dialog */}
       {deleteVisible && (

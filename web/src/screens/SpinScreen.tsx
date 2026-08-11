@@ -9,6 +9,7 @@ import { getRandomTopic } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
 import type { CurioCategory, CurioTopic } from '../types';
 import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
+import { usePressable } from '../animations';
 
 const ORBIT_DOTS = 12;
 const SPIN_MIN = 2200;
@@ -273,21 +274,21 @@ const OrbitRing: React.FC<{ active: boolean; color: string }> = ({ active, color
 
 // ─── Spin Button ──────────────────────────────────────────────────────
 const SpinButton: React.FC<{ isSpinning: boolean; hasLanded: boolean; onClick: () => void; color: string }> = ({ isSpinning, hasLanded, onClick, color }) => {
-  const [isPressed, setIsPressed] = useState(false);
+  const { handlers, pressStyle } = usePressable(0.88);
   const btnSize = isSpinning ? 90 : 108;
   const diceSize = isSpinning ? 48 : 56;
   return (
     <button onClick={onClick} disabled={isSpinning}
-      onMouseDown={() => setIsPressed(true)} onMouseUp={() => setIsPressed(false)} onMouseLeave={() => setIsPressed(false)}
-      className="relative z-20 flex items-center justify-center rounded-full transition-all duration-300"
+      {...handlers}
+      className="relative z-20 flex items-center justify-center rounded-full"
       style={{
         width: btnSize, height: btnSize,
         background: `radial-gradient(circle at 40% 32%, ${color}EE, ${color} 55%, ${color}88 100%)`,
         boxShadow: isSpinning
           ? `0 4px 12px ${color}33, inset 0 0 0 1px rgba(255,255,255,0.08)`
           : `0 8px 28px ${color}40, 0 2px 6px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.1)`,
-        transform: isPressed ? 'scale(0.88)' : 'scale(1)',
         cursor: isSpinning ? 'default' : 'pointer',
+        ...pressStyle,
       }}>
       <CssDice size={diceSize} tumbling={isSpinning} ink="white" />
       {hasLanded && !isSpinning && (
@@ -301,13 +302,16 @@ const SpinButton: React.FC<{ isSpinning: boolean; hasLanded: boolean; onClick: (
 // ─── Category Pill ────────────────────────────────────────────────────
 const CategoryPill: React.FC<{ category: CurioCategory; isSelected: boolean; onClick: () => void }> = ({ category, isSelected, onClick }) => {
   const { isDark } = useTheme();
+  const { handlers, pressStyle } = usePressable(0.95);
   return (
     <button onClick={onClick}
-      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 active:scale-95"
+      {...handlers}
+      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0"
       style={{
         background: isSelected ? category.accent : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
         color: isSelected ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)',
         boxShadow: isSelected ? `0 4px 14px ${category.accent}40` : 'none',
+        ...pressStyle,
       }}>
       <MaterialIcon name={category.iconGlyph} size={18} />
       {category.displayName}
@@ -537,28 +541,11 @@ export const SpinScreen: React.FC = () => {
           0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
           50% { transform: translate(-50%, -50%) scale(1.6); opacity: 1; }
         }
-        @keyframes diceTumble {
-          0%   { transform: rotate(0deg) translateY(0); }
-          25%  { transform: rotate(90deg) translateY(-2px); }
-          50%  { transform: rotate(180deg) translateY(0); }
-          75%  { transform: rotate(270deg) translateY(2px); }
-          100% { transform: rotate(360deg) translateY(0); }
-        }
-        @keyframes diceBreathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.04); }
-        }
-        @keyframes confettiFly {
-          0%   { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-          100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); }
-        }
         @keyframes reelFade {
           0%   { opacity: 0.5; transform: translateY(4px); }
           100% { opacity: 1; transform: translateY(0); }
         }
         .animate-reelFade { animation: reelFade 0.35s ease-out; }
-        .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
-        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
       `}</style>
     </div>
   );

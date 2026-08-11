@@ -9,6 +9,7 @@ import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
 import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
+import { ScreenEntrance, StaggerList, usePressable } from '../animations';
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ const HomeScreen: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop topClearance={276} />
+      <ScreenEntrance>
       {/* ── Rose Hero Banner with torn bottom edge ────────────────── */}
       <div className="relative w-full" style={{ height: 276 }}>
         {/* White under-sheet lip */}
@@ -153,31 +155,15 @@ const HomeScreen: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <StaggerList staggerMs={55} className="space-y-2">
             {recents.map(e => {
               const cat = ALL_CATEGORIES.find(c => c.id === e.categoryId);
-              return (
-                <button key={e.id}
-                  onClick={() => navigate(`/detail/${e.id}`)}
-                  className="w-full text-left flex items-center gap-3 p-3 rounded-xl transition-all active:scale-[0.98]"
-                  style={{
-                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(59,10,23,0.015)',
-                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.03)'}`,
-                  }}>
-                  <MaterialIcon name={cat?.iconGlyph || 'edit_note'} size={22} style={{ color: cat?.accent || '#999' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{e.name}</p>
-                    <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
-                      {cat?.displayName} · {e.subtype} · {e.daysAgo === 0 ? 'today' : e.daysAgo === 1 ? 'yesterday' : `${e.daysAgo}d ago`}
-                    </p>
-                  </div>
-                  <MaterialIcon name="chevron_right" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(59,10,23,0.3)' }} />
-                </button>
-              );
+              return <RecentEntry key={e.id} entry={e} cat={cat} isDark={isDark} onClick={() => navigate(`/detail/${e.id}`)} />;
             })}
-          </div>
+          </StaggerList>
         )}
       </div>
+      </ScreenEntrance>
     </div>
   );
 };
@@ -189,5 +175,28 @@ const Stat: React.FC<{ inline?: boolean; icon: string; value: string; label: str
     <span className="text-[10px] text-white/75">{label}</span>
   </div>
 );
+
+const RecentEntry: React.FC<{ entry: { id: string; name: string; categoryId: string; subtype: string; daysAgo: number }; cat: any; isDark: boolean; onClick: () => void }> = ({ entry, cat, isDark, onClick }) => {
+  const { handlers, pressStyle } = usePressable();
+  return (
+    <button onClick={onClick}
+      {...handlers}
+      className="w-full text-left flex items-center gap-3 p-3 rounded-xl"
+      style={{
+        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(59,10,23,0.015)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.03)'}`,
+        ...pressStyle,
+      }}>
+      <MaterialIcon name={cat?.iconGlyph || 'edit_note'} size={22} style={{ color: cat?.accent || '#999' }} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{entry.name}</p>
+        <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
+          {cat?.displayName} · {entry.subtype} · {entry.daysAgo === 0 ? 'today' : entry.daysAgo === 1 ? 'yesterday' : `${entry.daysAgo}d ago`}
+        </p>
+      </div>
+      <MaterialIcon name="chevron_right" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(59,10,23,0.3)' }} />
+    </button>
+  );
+};
 
 export default HomeScreen;

@@ -9,6 +9,7 @@ import { loadTopicsForCategory } from '../data/topics';
 import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import type { CurioTopic, CurioCategory } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
+import { MorphEntrance, ContentEntrance } from '../animations';
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -133,7 +134,8 @@ export const TopicRevealScreen: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 px-5 pt-6 max-w-lg mx-auto">
-        {/* Hero Card — same gradient as Spin ticket */}
+        {/* Hero Card — MorphEntrance for dramatic reveal */}
+        <MorphEntrance>
         <div className="relative w-full h-[260px] rounded-[30px] overflow-hidden mb-5"
           style={{
             background: heroBg,
@@ -178,7 +180,9 @@ export const TopicRevealScreen: React.FC = () => {
             </div>
           </div>
         </div>
+        </MorphEntrance>
 
+        <ContentEntrance>
         {/* Action Row — Express yourself + Start exploring */}
         <div className="flex gap-3 mb-5">
           <button onClick={handleExpressYourself}
@@ -222,6 +226,7 @@ export const TopicRevealScreen: React.FC = () => {
             {action.instruction}
           </p>
         </CurioMoodboardCard>
+        </ContentEntrance>
       </div>
     </div>
   );

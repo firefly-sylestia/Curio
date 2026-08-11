@@ -8,6 +8,7 @@ import { getCategoryBySlug } from '../data/categories';
 import { CurioPaperCard, CurioBackButton, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import type { CurioCategory, CaptureFormat, CaptureData } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
+import { ScreenEntrance } from '../animations';
 
 // ─── Paper input styles shared across format editors ──────────────────
 const paperInputClass = "w-full bg-transparent resize-none outline-none placeholder:opacity-40";
@@ -342,7 +343,7 @@ export const SaveCaptureScreen: React.FC = () => {
           </h1>
           <div className="w-10" />
         </div>
-
+        <ScreenEntrance>
         {/* Topic reminder strip */}
         <div className="px-4 pb-3">
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
@@ -434,6 +435,7 @@ export const SaveCaptureScreen: React.FC = () => {
             )}
           </button>
         </div>
+        </ScreenEntrance>
       </div>
 
       {/* Success */}

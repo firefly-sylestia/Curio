@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
+import { ScreenEntrance, StaggerList, usePressable } from '../animations';
 import { 
   CurioChip, 
   CurioEmptyState, 
@@ -38,22 +39,18 @@ const EntryCard: React.FC<{
   onClick: () => void;
 }> = ({ entry, onClick }) => {
   const { isDark } = useTheme();
-  const [isPressed, setIsPressed] = useState(false);
+  const { handlers, pressStyle } = usePressable();
   const category = getCategoryByIdSafe(entry.categoryId);
 
   return (
     <button
       onClick={onClick}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      className="w-full text-left rounded-2xl overflow-hidden transition-all duration-200"
+      {...handlers}
+      className="w-full text-left rounded-2xl overflow-hidden"
       style={{
         background: isDark ? 'rgba(255,255,255,0.05)' : 'white',
-        transform: isPressed ? 'scale(0.98)' : 'scale(1)',
-        boxShadow: isPressed 
-          ? `0 4px 12px ${category?.accent || '#3B0A17'}33`
-          : '0 2px 8px rgba(0,0,0,0.08)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        ...pressStyle,
       }}
     >
       {/* Category accent bar */}
@@ -175,6 +172,7 @@ export const CabinetScreen: React.FC = () => {
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
     >
       <CurioWatermarkBackdrop alphaScale={0.45} />
+      <ScreenEntrance>
       <div className="relative z-10">
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 pt-6 pb-4" style={{ background: getBackgroundColor(isDark, isAmoled) }}>
@@ -251,7 +249,7 @@ export const CabinetScreen: React.FC = () => {
                     title={category?.displayName || 'Uncategorized'}
                     action={`${categoryEntries.length} entries`}
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <StaggerList staggerMs={40} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {categoryEntries.map((entry) => (
                       <EntryCard
                         key={entry.id}
@@ -259,7 +257,7 @@ export const CabinetScreen: React.FC = () => {
                         onClick={() => handleEntryClick(entry)}
                       />
                     ))}
-                  </div>
+                  </StaggerList>
                 </div>
               );
             })}
@@ -267,6 +265,7 @@ export const CabinetScreen: React.FC = () => {
         )}
       </div>
       </div>
+      </ScreenEntrance>
     </div>
   );
 };

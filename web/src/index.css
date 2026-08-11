@@ -105,7 +105,8 @@ body {
   background: rgba(0, 0, 0, 0.3);
 }
 
-/* Animations */
+/* Animations — see web/src/animations.ts for the full CurioMotion system */
+
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -131,6 +132,15 @@ body {
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Responsive breakpoints */
