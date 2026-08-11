@@ -1,5 +1,5 @@
 // Curio Web App - Bottom Navigation
-// Matches Android app's glass bottom bar
+// Matches Android: Home, Spin, Cabinet + hamburger menu drawer trigger
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -45,7 +45,7 @@ const NavItem: React.FC<{
   );
 };
 
-export const BottomNav: React.FC = () => {
+export const BottomNav: React.FC<{ onMenuOpen: () => void }> = ({ onMenuOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, isAmoled } = useTheme();
@@ -54,8 +54,6 @@ export const BottomNav: React.FC = () => {
     { icon: 'home', label: 'Home', path: '/' },
     { icon: 'casino', label: 'Spin', path: '/spin' },
     { icon: 'book_5', label: 'Cabinet', path: '/cabinet' },
-    { icon: 'travel_explore', label: 'Browse', path: '/browse' },
-    { icon: 'person', label: 'Profile', path: '/profile' },
   ];
 
   return (
@@ -70,11 +68,23 @@ export const BottomNav: React.FC = () => {
         borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(59,10,23,0.08)'}`,
       }}
     >
-      <div className="flex items-center justify-around px-1 py-1.5 max-w-lg mx-auto">
+      <div className="flex items-center justify-between px-1 py-1.5 max-w-lg mx-auto">
+        {/* Menu (hamburger) */}
+        <button
+          onClick={onMenuOpen}
+          className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl transition-all duration-200 min-w-[56px]"
+        >
+          <MaterialIcon name="menu" size={22}
+            style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)' }} />
+          <span className="text-[10px] font-semibold"
+            style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)' }}>
+            Menu
+          </span>
+        </button>
+
         {navItems.map((item) => {
           const isActive = location.pathname === item.path ||
             (item.path !== '/' && location.pathname.startsWith(item.path));
-
           return (
             <NavItem
               key={item.path}
@@ -85,6 +95,9 @@ export const BottomNav: React.FC = () => {
             />
           );
         })}
+
+        {/* Spacer for balance */}
+        <div className="min-w-[56px]" />
       </div>
     </div>
   );

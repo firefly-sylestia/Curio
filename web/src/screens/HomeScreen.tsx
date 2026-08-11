@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
+import { useMenu } from '../App';
 import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
 import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
@@ -12,6 +13,7 @@ import { captureRepository } from '../db/database';
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
   const { isDark, isAmoled } = useTheme();
+  const { openMenu } = useMenu();
   const [questSystem] = useState(() => getQuestSystem());
   const [stats, setStats] = useState({ streak: 0, saved: 0, topics: '6,480+' });
   const [recents, setRecents] = useState<Array<{ id: string; name: string; categoryId: string; subtype: string; daysAgo: number }>>([]);
@@ -70,17 +72,12 @@ const HomeScreen: React.FC = () => {
 
         {/* Content */}
         <div className="relative z-10 px-5 pt-14 pb-4 flex flex-col h-full">
-          {/* Sticky pills row */}
+          {/* Sticky pills row — menu opens drawer */}
           <div className="absolute top-3 right-4 flex gap-2 z-20">
-            <button onClick={() => navigate('/settings')}
+            <button onClick={openMenu}
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
               <MaterialIcon name="menu" size={20} style={{ color: '#fff' }} />
-            </button>
-            <button onClick={() => navigate('/profile')}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-              <MaterialIcon name="person" size={20} style={{ color: '#fff' }} />
             </button>
           </div>
 
