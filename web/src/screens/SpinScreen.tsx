@@ -1,5 +1,5 @@
 // Curio Web App - Spin Screen
-// Layout matches Android: deck → spin button → Categories · Filter bottom bar
+// Matches Android: 2 peek cards (above/below hero), receding deck colors, bottom Categories·Filter
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -24,26 +24,23 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 // ─── CSS Dice ─────────────────────────────────────────────────────────
 const CssDice: React.FC<{ size: number; tumbling: boolean; ink: string }> = ({ size, tumbling, ink }) => {
-  const pipSize = size * 0.16;
-  const gap = size * 0.22;
-  const mid = size * 0.39;
+  const pipSize = size * 0.16; const gap = size * 0.22; const mid = size * 0.39;
   const pip = (x: number, y: number) => (
     <div key={`${x}-${y}`} className="absolute rounded-full"
       style={{ width: pipSize, height: pipSize, left: x - pipSize / 2, top: y - pipSize / 2,
         background: tumbling ? 'rgba(255,255,255,0.9)' : ink, transition: 'background 0.3s' }} />
   );
   return (
-    <div className="relative rounded-[18%]"
-      style={{ width: size, height: size,
-        background: tumbling ? 'rgba(255,255,255,0.15)' : `${ink}10`,
-        border: tumbling ? '2px solid rgba(255,255,255,0.25)' : `2px solid ${ink}30`,
-        animation: tumbling ? 'curio-dice-tumble 1.6s linear infinite' : 'curio-dice-breathe 3s ease-in-out infinite' }}>
+    <div className="relative rounded-[18%]" style={{ width: size, height: size,
+      background: tumbling ? 'rgba(255,255,255,0.15)' : `${ink}10`,
+      border: tumbling ? '2px solid rgba(255,255,255,0.25)' : `2px solid ${ink}30`,
+      animation: tumbling ? 'curio-dice-tumble 1.6s linear infinite' : 'curio-dice-breathe 3s ease-in-out infinite' }}>
       {pip(gap, gap)}{pip(size - gap, gap)}{pip(mid, mid)}{pip(gap, size - gap)}{pip(size - gap, size - gap)}
     </div>
   );
 };
 
-// ─── Confetti Burst ───────────────────────────────────────────────────
+// ─── Confetti ─────────────────────────────────────────────────────────
 const ConfettiBurst: React.FC<{ trigger: number; color: string }> = ({ trigger, color }) => {
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; rot: number; size: number; delay: number }>>([]);
   useEffect(() => {
@@ -53,8 +50,7 @@ const ConfettiBurst: React.FC<{ trigger: number; color: string }> = ({ trigger, 
       rot: Math.random() * 720 - 360, size: 4 + Math.random() * 7, delay: Math.random() * 0.12,
     }));
     setParticles(p);
-    const t = setTimeout(() => setParticles([]), 1100);
-    return () => clearTimeout(t);
+    setTimeout(() => setParticles([]), 1100);
   }, [trigger]);
   if (particles.length === 0) return null;
   return (
@@ -72,7 +68,7 @@ const ConfettiBurst: React.FC<{ trigger: number; color: string }> = ({ trigger, 
   );
 };
 
-// ─── Hero Ticket Card — matching Android HeroTicketCard ───────────────
+// ─── Hero Ticket Card ─────────────────────────────────────────────────
 const HeroTicket: React.FC<{
   topic: CurioTopic | null; category: CurioCategory;
   isSpinning: boolean; spinPhase: 'idle' | 'spinning' | 'landed' | 'opening';
@@ -82,36 +78,40 @@ const HeroTicket: React.FC<{
   const [contentKey, setContentKey] = useState(0);
   const [shimmerPos, setShimmerPos] = useState(-100);
 
-  // Reel content on spin
   useEffect(() => {
     if (spinPhase !== 'spinning') return;
-    const interval = setInterval(() => setContentKey(k => k + 1), 260);
-    return () => clearInterval(interval);
+    const iv = setInterval(() => setContentKey(k => k + 1), 260);
+    return () => clearInterval(iv);
   }, [spinPhase]);
 
-  // Shimmer sweep (idle/landed)
   useEffect(() => {
     if (spinPhase === 'spinning') return;
-    const interval = setInterval(() => setShimmerPos(prev => (prev >= 200 ? -100 : prev + 1.2)), 35);
-    return () => clearInterval(interval);
+    const iv = setInterval(() => setShimmerPos(p => (p >= 200 ? -100 : p + 1.2)), 35);
+    return () => clearInterval(iv);
   }, [spinPhase]);
 
   const baseAccent = pastelColors && !isDark ? getPastelCardFill(category.accent, isDark) : category.accent;
   const [r, g, b] = hexToRgb(baseAccent);
-  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
+  const surfaceRgb = isDark ? [18, 18, 35] : [247, 240, 228];
 
-  // Gradient: crown → mid blend → surface base
-  const top = pastelColors && !isDark ? `rgba(${r},${g},${b},0.88)` : `rgba(${r},${g},${b},0.92)`;
-  const mid = `rgba(${Math.round(r * 0.42 + surfaceRgb[0] * 0.58)},${Math.round(g * 0.42 + surfaceRgb[1] * 0.58)},${Math.round(b * 0.42 + surfaceRgb[2] * 0.58)},0.65)`;
-  const bottom = `rgba(${Math.round(r * 0.10 + surfaceRgb[0] * 0.90)},${Math.round(g * 0.10 + surfaceRgb[1] * 0.90)},${Math.round(b * 0.10 + surfaceRgb[2] * 0.90)},0.92)`;
+  // Rich opaque gradient — deep accent at top, still visibly tinted at bottom
+  const midR = Math.round(r * 0.48 + surfaceRgb[0] * 0.52);
+  const midG = Math.round(g * 0.48 + surfaceRgb[1] * 0.52);
+  const midB = Math.round(b * 0.48 + surfaceRgb[2] * 0.52);
+  const botR = Math.round(r * 0.22 + surfaceRgb[0] * 0.78);
+  const botG = Math.round(g * 0.22 + surfaceRgb[1] * 0.78);
+  const botB = Math.round(b * 0.22 + surfaceRgb[2] * 0.78);
+  const topColor = `rgb(${r},${g},${b})`;
+  const midColor = `rgb(${midR},${midG},${midB})`;
+  const botColor = `rgb(${botR},${botG},${botB})`;
 
   const hasLanded = spinPhase === 'landed' || spinPhase === 'opening';
 
   return (
     <button onClick={onClick} disabled={isSpinning}
-      className="relative w-[270px] h-[296px] rounded-[30px] overflow-hidden text-left flex-shrink-0"
+      className="relative w-[286px] h-[310px] rounded-[30px] overflow-hidden text-left flex-shrink-0"
       style={{
-        background: `linear-gradient(180deg, ${top} 0%, ${mid} 50%, ${bottom} 100%)`,
+        background: `linear-gradient(180deg, ${topColor} 0%, ${midColor} 50%, ${botColor} 100%)`,
         boxShadow: hasLanded
           ? `0 12px 40px ${category.accent}30, 0 4px 12px rgba(0,0,0,0.08)`
           : '0 8px 28px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
@@ -120,24 +120,22 @@ const HeroTicket: React.FC<{
         transform: spinPhase === 'opening' ? 'scale(1.03)' : isSpinning ? 'scale(0.97)' : 'scale(1)',
         transition: 'transform 0.4s cubic-bezier(0.2,0.8,0.3,1), box-shadow 0.4s ease',
       }}>
-      {/* Category accent rule at top */}
+      {/* Accent rule */}
       <div className="absolute top-0 left-3 right-3 h-[2px] rounded-full" style={{ background: category.accent, opacity: 0.45 }} />
       {/* Top-lit crown */}
       <div className="absolute top-0 left-0 right-0 h-[60px] pointer-events-none"
         style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%)' }} />
-      {/* Shimmer sweep */}
+      {/* Shimmer */}
       {spinPhase !== 'spinning' && (
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.05) 48%, transparent 61%)',
-            transform: `translateX(${shimmerPos}%)` }} />
+          style={{ background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.05) 48%, transparent 61%)', transform: `translateX(${shimmerPos}%)` }} />
       )}
-      {/* Large watermark glyph */}
+      {/* Watermark glyph */}
       <div className="absolute right-2 bottom-2 pointer-events-none select-none"
         style={{ color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}>
         <MaterialIcon name={category.iconGlyph} size={130} />
       </div>
 
-      {/* Content area */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-5 text-center">
         {spinPhase === 'spinning' ? (
           <div className="flex flex-col items-center gap-3 animate-reelFade" key={contentKey}>
@@ -146,34 +144,28 @@ const HeroTicket: React.FC<{
               <MaterialIcon name={category.iconGlyph} size={11} /> {topic?.subtype || 'Topic'}
             </div>
             <div className="text-[19px] font-extrabold text-white leading-tight px-2"
-              style={{ fontFamily: 'Geom, Inter, sans-serif', textShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>{topic?.name || '...'}</div>
+              style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{topic?.name || '...'}</div>
             <div className="w-12 h-1 rounded-full bg-white/20" />
             <p className="text-white/45 text-[10px] tracking-widest uppercase">Spinning</p>
           </div>
         ) : topic ? (
           <>
-            {/* Subtype badge */}
             <div className="flex items-center gap-1 px-3 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase mb-4"
               style={{ background: 'rgba(255,255,255,0.15)', color: 'white', backdropFilter: 'blur(4px)' }}>
               <MaterialIcon name={category.iconGlyph} size={11} /> {topic.subtype}
             </div>
-            {/* Opening state */}
             {spinPhase === 'opening' ? (
               <div className="flex flex-col items-center gap-3">
-                <h2 className="text-[20px] font-extrabold text-white leading-tight"
-                  style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{topic.name}</h2>
+                <h2 className="text-[20px] font-extrabold text-white leading-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{topic.name}</h2>
                 <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
                   style={{ borderColor: 'rgba(255,255,255,0.4)', borderTopColor: 'transparent' }} />
-                <p className="text-white/60 text-xs tracking-wide">Opening...</p>
+                <p className="text-white/60 text-xs">Opening...</p>
               </div>
             ) : (
               <>
-                {/* Topic name */}
                 <h2 className="text-[20px] font-extrabold text-white leading-tight mb-1.5 px-2"
                   style={{ fontFamily: 'Geom, Inter, sans-serif', textShadow: '0 1px 6px rgba(0,0,0,0.12)' }}>{topic.name}</h2>
-                {/* Teaser */}
                 <p className="text-[12px] text-white/70 leading-relaxed line-clamp-3 px-1">{topic.teaser}</p>
-                {/* Tap hint */}
                 <div className="mt-4 flex items-center gap-1.5 text-[10px] text-white/45 tracking-wide uppercase">
                   <MaterialIcon name="touch_app" size={13} /> Tap to open
                 </div>
@@ -192,38 +184,44 @@ const HeroTicket: React.FC<{
   );
 };
 
-// ─── Peek Card ────────────────────────────────────────────────────────
-const PeekCard: React.FC<{ slot: number; topic: CurioTopic | null; category: CurioCategory; isSpinning: boolean }> = ({ slot, topic, category, isSpinning }) => {
+// ─── Peek Card (receded, opaque) ──────────────────────────────────────
+const PeekCard: React.FC<{ slot: -1 | 1; topic: CurioTopic | null; category: CurioCategory; isSpinning: boolean }> = ({ slot, topic, category, isSpinning }) => {
   const { isDark } = useTheme();
   if (!topic) return null;
-  const isTop = slot < 0;
-  const isFar = Math.abs(slot) === 2;
-  const w = isFar ? 248 : 286;
-  const h = isFar ? 70 : 86;
-  const corner = isFar ? 14 : 18;
-  const yOff = (() => { switch (slot) { case -2: return -152; case -1: return -118; case 1: return 126; default: return 160; } })();
+  const isTop = slot === -1;
+  const w = 318; const h = 102; const corner = 18;
+  const yOff = isTop ? -134 : 134;
 
   const [r, g, b] = hexToRgb(category.accent);
-  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
-  const depth = isFar ? 0.52 : 0.40;
+  const surfaceRgb = isDark ? [18, 18, 35] : [247, 240, 228];
+  const depth = 0.48;
   const dr = Math.round(r * (1 - depth) + surfaceRgb[0] * depth);
   const dg = Math.round(g * (1 - depth) + surfaceRgb[1] * depth);
   const db = Math.round(b * (1 - depth) + surfaceRgb[2] * depth);
+  const dr2 = Math.round(dr * 0.72 + surfaceRgb[0] * 0.28);
+  const dg2 = Math.round(dg * 0.72 + surfaceRgb[1] * 0.28);
+  const db2 = Math.round(db * 0.72 + surfaceRgb[2] * 0.28);
 
   return (
     <div className="absolute left-1/2 flex items-center"
-      style={{ width: w, height: h, borderRadius: corner, top: isTop ? yOff : undefined, bottom: !isTop ? yOff : undefined,
-        transform: 'translateX(-50%)', zIndex: isTop ? 1 : 0,
-        background: `linear-gradient(180deg, rgba(${dr},${dg},${db},0.9), rgba(${Math.round(dr*0.75+surfaceRgb[0]*0.25)},${Math.round(dg*0.75+surfaceRgb[1]*0.25)},${Math.round(db*0.75+surfaceRgb[2]*0.25)},0.88))`,
-        boxShadow: '0 2px 6px rgba(0,0,0,0.04)', border: isDark ? `1px solid ${category.accent}1F` : `1px solid ${category.accent}12`,
-        opacity: isSpinning ? 0.35 : 0.6, transition: 'opacity 0.35s ease' }}>
-      <div className="absolute left-3 top-0 bottom-0 w-[2px] rounded-full" style={{ background: category.accent, opacity: 0.3 }} />
-      <div className="flex items-center gap-3 px-4 flex-1 min-w-0 pl-6">
-        <MaterialIcon name={category.iconGlyph} size={isFar ? 16 : 20} className="flex-shrink-0"
-          style={{ color: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(59,10,23,0.5)' }} />
+      style={{ width: w, height: h, borderRadius: corner,
+        top: isTop ? yOff : undefined, bottom: !isTop ? yOff : undefined,
+        transform: 'translateX(-50%)',
+        background: `linear-gradient(180deg, rgb(${dr},${dg},${db}), rgb(${dr2},${dg2},${db2}))`,
+        boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+        border: isDark ? `1px solid ${category.accent}1F` : `1px solid ${category.accent}12`,
+        opacity: isSpinning ? 0.35 : 0.55, transition: 'opacity 0.35s ease',
+        zIndex: isTop ? 1 : 0 }}>
+      {/* Left accent strip */}
+      <div className="absolute left-3 top-0 bottom-0 w-[3px] rounded-full" style={{ background: category.accent, opacity: 0.2 }} />
+      <div className="flex items-center gap-3 px-5 flex-1 min-w-0 pl-7">
+        <MaterialIcon name={category.iconGlyph} size={22} className="flex-shrink-0"
+          style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.45)' }} />
         <div className="flex-1 min-w-0">
-          <div className="text-[12px] font-semibold truncate" style={{ color: isDark ? 'rgba(255,255,255,0.78)' : 'rgba(59,10,23,0.78)' }}>{topic.name}</div>
-          <div className="text-[10px] truncate" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(59,10,23,0.35)' }}>{topic.subtype}</div>
+          <div className="text-[14px] font-semibold truncate leading-tight"
+            style={{ color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(59,10,23,0.72)' }}>{topic.name}</div>
+          <div className="text-[11px] truncate mt-0.5"
+            style={{ color: isDark ? 'rgba(255,255,255,0.32)' : 'rgba(59,10,23,0.32)' }}>{topic.subtype}</div>
         </div>
       </div>
     </div>
@@ -237,68 +235,68 @@ const OrbitRing: React.FC<{ active: boolean; color: string }> = ({ active, color
   useEffect(() => {
     if (!active) { setRotation(0); return; }
     let last = performance.now();
-    const tick = (now: number) => { const delta = now - last; last = now; setRotation(r => (r + delta * 0.15) % 360); frameRef.current = requestAnimationFrame(tick); };
+    const tick = (now: number) => { setRotation(r => (r + (now - last) * 0.15) % 360); last = now; frameRef.current = requestAnimationFrame(tick); };
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [active]);
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ transform: `rotate(${rotation}deg)` }}>
       {Array.from({ length: ORBIT_DOTS }).map((_, i) => {
-        const angle = (i / ORBIT_DOTS) * Math.PI * 2;
-        const x = 50 + Math.cos(angle) * 47;
-        const y = 50 + Math.sin(angle) * 47;
+        const a = (i / ORBIT_DOTS) * Math.PI * 2;
         return <div key={i} className="absolute rounded-full"
-          style={{ left: `${x}%`, top: `${y}%`, width: active ? 4 : 2.5, height: active ? 4 : 2.5,
-            transform: 'translate(-50%, -50%)', background: color, opacity: active ? 0.6 : 0.08,
+          style={{ left: `${50 + Math.cos(a) * 47}%`, top: `${50 + Math.sin(a) * 47}%`,
+            width: active ? 4 : 2.5, height: active ? 4 : 2.5, transform: 'translate(-50%,-50%)',
+            background: color, opacity: active ? 0.6 : 0.08,
             animation: active ? `curio-orbit-pulse 1.3s ease-in-out ${i * 0.09}s infinite` : 'none' }} />;
       })}
     </div>
   );
 };
 
-// ─── Spin Button (big dice) ───────────────────────────────────────────
+// ─── Spin Button (solid opaque fill, orbit ring wraps around it) ──────
 const SpinButton: React.FC<{ isSpinning: boolean; hasLanded: boolean; onClick: () => void; color: string }> = ({ isSpinning, hasLanded, onClick, color }) => {
   const { handlers, pressStyle } = usePressable(0.88);
   const btnSize = isSpinning ? 90 : 108;
   const diceSize = isSpinning ? 48 : 56;
+  const [r, g, b] = hexToRgb(color);
+  const darkR = Math.round(r * 0.55);
+  const darkG = Math.round(g * 0.55);
+  const darkB = Math.round(b * 0.55);
   return (
-    <button onClick={onClick} disabled={isSpinning}
-      {...handlers}
-      className="relative z-20 flex items-center justify-center rounded-full touch-action-manipulation"
-      style={{
-        width: btnSize, height: btnSize,
-        background: `radial-gradient(circle at 40% 32%, ${color}EE, ${color} 55%, ${color}88 100%)`,
-        boxShadow: isSpinning
-          ? `0 4px 12px ${color}33, inset 0 0 0 1px rgba(255,255,255,0.08)`
-          : `0 8px 28px ${color}40, 0 2px 6px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.1)`,
-        cursor: isSpinning ? 'default' : 'pointer',
-        ...pressStyle,
-      }}>
-      <CssDice size={diceSize} tumbling={isSpinning} ink="white" />
+    <div className="relative flex items-center justify-center" style={{ width: btnSize + 28, height: btnSize + 28 }}>
+      {/* Orbit ring — wraps the spin button, matching Android */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
+        <OrbitRing active={isSpinning} color={color} />
+      </div>
+      {/* Glow pulse when landed */}
       {hasLanded && !isSpinning && (
-        <div className="absolute inset-0 rounded-full pointer-events-none animate-pulse-slow"
-          style={{ boxShadow: `0 0 20px ${color}33, 0 0 40px ${color}15` }} />
+        <div className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ zIndex: 0, boxShadow: `0 0 22px ${color}44, 0 0 48px ${color}20`, animation: 'curio-breathe 1.8s ease-in-out infinite' }} />
       )}
-    </button>
+      {/* The button itself */}
+      <button onClick={onClick} disabled={isSpinning} {...handlers}
+        className="relative flex items-center justify-center rounded-full touch-action-manipulation"
+        style={{ width: btnSize, height: btnSize, zIndex: 1,
+          background: `radial-gradient(circle at 40% 32%, rgb(${Math.round(r*1.15)},${Math.round(g*1.15)},${Math.round(b*1.15)}) 0%, ${color} 50%, rgb(${darkR},${darkG},${darkB}) 100%)`,
+          boxShadow: isSpinning ? `0 4px 16px ${color}40, inset 0 0 0 1px rgba(255,255,255,0.08)`
+            : `0 8px 32px ${color}50, 0 2px 8px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(255,255,255,0.12)`,
+          cursor: isSpinning ? 'default' : 'pointer', ...pressStyle }}>
+        <CssDice size={diceSize} tumbling={isSpinning} ink="white" />
+      </button>
+    </div>
   );
 };
 
-// ─── Bottom Control Pill (Categories / Filter) ───────────────────────
-const BottomPill: React.FC<{
-  icon: string; label: string; isActive: boolean; accent: string; onClick: () => void;
-}> = ({ icon, label, isActive, accent, onClick }) => {
+// ─── Bottom Control Pill ──────────────────────────────────────────────
+const BottomPill: React.FC<{ icon: string; label: string; isActive: boolean; accent: string; onClick: () => void }> = ({ icon, label, isActive, accent, onClick }) => {
   const { isDark } = useTheme();
   const { handlers, pressStyle } = usePressable(0.96);
   return (
     <button onClick={onClick} {...handlers}
       className="flex-1 flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl font-semibold text-sm touch-action-manipulation"
-      style={{
-        background: isActive ? accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-        color: isActive ? 'white' : isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)',
-        ...pressStyle,
-      }}>
-      <MaterialIcon name={icon} size={22} />
-      {label}
+      style={{ background: isActive ? accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+        color: isActive ? 'white' : isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)', ...pressStyle }}>
+      <MaterialIcon name={icon} size={22} />{label}
     </button>
   );
 };
@@ -306,8 +304,8 @@ const BottomPill: React.FC<{
 // ─── Filter Sheet ─────────────────────────────────────────────────────
 const FilterSheet: React.FC<{
   isOpen: boolean; onClose: () => void; category: CurioCategory;
-  subtypes: string[]; selectedSubtype: string | null; setSelectedSubtype: (s: string | null) => void;
-}> = ({ isOpen, onClose, category, subtypes, selectedSubtype, setSelectedSubtype }) => {
+  subtypes: string[]; sel: string | null; setSel: (s: string | null) => void;
+}> = ({ isOpen, onClose, category, subtypes, sel, setSel }) => {
   const { isDark } = useTheme();
   if (!isOpen) return null;
   return (
@@ -316,23 +314,16 @@ const FilterSheet: React.FC<{
         style={{ background: isDark ? '#1a1a2e' : 'white' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Filter</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)' }}>×</button>
+          <button onClick={onClose} className="text-2xl" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)' }}>×</button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => { setSelectedSubtype(null); onClose(); }}
-            className="px-3.5 py-2 rounded-full text-sm font-medium transition-all"
-            style={{ background: selectedSubtype === null ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-              color: selectedSubtype === null ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>
-            All
-          </button>
+          <button onClick={() => { setSel(null); onClose(); }} className="px-3.5 py-2 rounded-full text-sm font-medium"
+            style={{ background: !sel ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+              color: !sel ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>All</button>
           {subtypes.map(st => (
-            <button key={st} onClick={() => { setSelectedSubtype(st === selectedSubtype ? null : st); onClose(); }}
-              className="px-3.5 py-2 rounded-full text-sm font-medium transition-all"
-              style={{ background: selectedSubtype === st ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-                color: selectedSubtype === st ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>
-              {st}
-            </button>
+            <button key={st} onClick={() => { setSel(st === sel ? null : st); onClose(); }} className="px-3.5 py-2 rounded-full text-sm font-medium"
+              style={{ background: sel === st ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                color: sel === st ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>{st}</button>
           ))}
         </div>
       </div>
@@ -341,25 +332,18 @@ const FilterSheet: React.FC<{
 };
 
 // ─── Category Picker Sheet ────────────────────────────────────────────
-const CategoryPickerSheet: React.FC<{
-  isOpen: boolean; onClose: () => void; activeId: string; onSelect: (cat: CurioCategory) => void;
-}> = ({ isOpen, onClose, activeId, onSelect }) => {
+const CatPickerSheet: React.FC<{ isOpen: boolean; onClose: () => void; activeId: string; onSelect: (c: CurioCategory) => void }> = ({ isOpen, onClose, activeId, onSelect }) => {
   const { isDark } = useTheme();
   if (!isOpen) return null;
-  const visible = ALL_CATEGORIES.filter(c => c.isReady);
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="w-full max-w-lg rounded-t-3xl p-5 max-h-[65vh] overflow-y-auto"
         style={{ background: isDark ? '#1a1a2e' : 'white' }} onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>What are we exploring?</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)' }}>×</button>
-        </div>
+        <h3 className="text-lg font-bold mb-4" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>What are we exploring?</h3>
         <div className="grid grid-cols-2 gap-2">
-          {visible.map(cat => (
+          {ALL_CATEGORIES.filter(c => c.isReady).map(cat => (
             <button key={cat.id} onClick={() => { onSelect(cat); onClose(); }}
-              className="flex items-center gap-2.5 p-3 rounded-2xl text-left transition-all"
+              className="flex items-center gap-2.5 p-3 rounded-2xl text-left"
               style={{ background: cat.id === activeId ? `${cat.accent}18` : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
                 border: cat.id === activeId ? `1px solid ${cat.accent}40` : `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
               <MaterialIcon name={cat.iconGlyph} size={28} style={{ color: cat.accent }} />
@@ -373,9 +357,6 @@ const CategoryPickerSheet: React.FC<{
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Main SpinScreen
-// ═══════════════════════════════════════════════════════════════════════════
-
 export const SpinScreen: React.FC = () => {
   const navigate = useNavigate();
   const { categorySlug } = useParams();
@@ -389,195 +370,98 @@ export const SpinScreen: React.FC = () => {
   const [spinPhase, setSpinPhase] = useState<'idle' | 'spinning' | 'landed' | 'opening'>('idle');
   const [confettiTrigger, setConfettiTrigger] = useState(0);
 
-  // Bottom bar
   const [showFilter, setShowFilter] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
   const [subtypes, setSubtypes] = useState<string[]>([]);
 
-  // Init category from URL
-  useEffect(() => {
-    if (categorySlug) {
-      const cat = getCategoryBySlug(categorySlug);
-      if (cat) setActiveCategory(cat);
-    }
-  }, [categorySlug]);
+  useEffect(() => { if (categorySlug) { const c = getCategoryBySlug(categorySlug); if (c) setActiveCategory(c); } }, [categorySlug]);
 
-  // Build deck hand
   const buildHand = useCallback(async (catId: string) => {
     const topics: CurioTopic[] = [];
-    for (let i = 0; i < 6; i++) {
-      const t = await getRandomTopic(catId as any);
-      if (t && !topics.find(x => x.id === t.id)) topics.push(t);
-    }
-    const subs = new Set(topics.map(t => t.subtype));
-    setSubtypes(Array.from(subs).sort().slice(0, 20));
+    for (let i = 0; i < 4; i++) { const t = await getRandomTopic(catId as any); if (t && !topics.find(x => x.id === t.id)) topics.push(t); }
+    setSubtypes(Array.from(new Set(topics.map(t => t.subtype))).sort().slice(0, 20));
     return topics;
   }, []);
 
-  useEffect(() => {
-    setDeckIndex(0);
-    setCurrentTopic(null);
-    setSpinPhase('idle');
-    setSelectedSubtype(null);
-    buildHand(activeCategory.id).then(setDeckHand);
-  }, [activeCategory.id, buildHand]);
+  useEffect(() => { setDeckIndex(0); setCurrentTopic(null); setSpinPhase('idle'); setSelectedSubtype(null); buildHand(activeCategory.id).then(setDeckHand); }, [activeCategory.id, buildHand]);
 
-  // Auto-open on land
   useEffect(() => {
     if (spinPhase !== 'landed' || !currentTopic) return;
-    const timer = setTimeout(() => {
-      setSpinPhase('opening');
-      setTimeout(() => {
-        navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`);
-      }, 400);
-    }, 1200);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => { setSpinPhase('opening'); setTimeout(() => navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`), 400); }, 1200);
+    return () => clearTimeout(t);
   }, [spinPhase, currentTopic, navigate]);
 
   const handleSpin = useCallback(async () => {
     if (spinPhase === 'spinning' || spinPhase === 'opening') return;
-    setSpinPhase('spinning');
-    setCurrentTopic(null);
-
-    const duration = SPIN_MIN + Math.random() * (SPIN_MAX - SPIN_MIN);
+    setSpinPhase('spinning'); setCurrentTopic(null);
+    const dur = SPIN_MIN + Math.random() * (SPIN_MAX - SPIN_MIN);
     const start = performance.now();
-
-    const reel = () => {
-      const elapsed = performance.now() - start;
-      if (elapsed >= duration) return;
-      const progress = elapsed / duration;
-      const eased = Math.sin(progress * Math.PI / 2);
-      const interval = 150 + (320 * eased);
-      setDeckIndex(prev => (prev + 1) % (deckHand.length || 1));
-      setTimeout(reel, interval);
-    };
+    const reel = () => { const e = performance.now() - start; if (e >= dur) return; const p = e / dur; setTimeout(() => { setDeckIndex(i => (i + 1) % (deckHand.length || 1)); reel(); }, 150 + 320 * Math.sin(p * Math.PI / 2)); };
     reel();
-    await new Promise(r => setTimeout(r, duration));
-
+    await new Promise(r => setTimeout(r, dur));
     const topic = await getRandomTopic(activeCategory.id as any);
-    if (topic) {
-      setDeckHand(prev => [topic, ...prev.filter(t => t.id !== topic.id)].slice(0, 6));
-      setDeckIndex(0);
-    }
-    setCurrentTopic(topic);
-    setSpinPhase('landed');
-    setConfettiTrigger(c => c + 1);
+    if (topic) { setDeckHand(p => [topic, ...p.filter(t => t.id !== topic.id)].slice(0, 4)); setDeckIndex(0); }
+    setCurrentTopic(topic); setSpinPhase('landed'); setConfettiTrigger(c => c + 1);
     if (topic) questSystem.onSpin(activeCategory.id);
   }, [spinPhase, deckHand, activeCategory, questSystem, navigate]);
 
   const handleTopicOpen = () => {
-    if (currentTopic && (spinPhase === 'landed' || spinPhase === 'idle')) {
-      setSpinPhase('opening');
-      setTimeout(() => {
-        navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`);
-      }, 400);
-    }
+    if (currentTopic && (spinPhase === 'landed' || spinPhase === 'idle')) { setSpinPhase('opening'); setTimeout(() => navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`), 400); }
   };
 
   const getFanTopic = (slot: number): CurioTopic | null => {
     if (deckHand.length === 0) return null;
-    const idx = ((deckIndex + slot) % deckHand.length + deckHand.length) % deckHand.length;
-    return deckHand[idx] || null;
+    return deckHand[((deckIndex + slot) % deckHand.length + deckHand.length) % deckHand.length] || null;
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
-      {/* ── 1. Deck Section (fills available space, centered) ───────── */}
-      <div className="flex-1 flex flex-col items-center justify-end px-4"
-        style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }}>
-        <div className="relative flex flex-col items-center" style={{ height: 500 }}>
-          {/* Top peek cards */}
-          <div className="relative w-[310px] h-[180px]">
-            <PeekCard slot={-2} topic={getFanTopic(-2)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
+      {/* ── 1. Deck Section ──────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col items-center justify-end px-4" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }}>
+        <div className="relative flex flex-col items-center" style={{ height: 444 }}>
+          {/* Top peek (slot -1) */}
+          <div className="relative w-[340px] h-[120px]">
             <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
           </div>
-
-          {/* Hero card + orbit + confetti */}
-          <div className="relative w-[290px] h-[310px] -mt-2 flex items-center justify-center">
-            <OrbitRing active={spinPhase === 'spinning'} color={activeCategory.accent} />
-            <ConfettiBurst trigger={confettiTrigger} color={activeCategory.accent} />
-            <HeroTicket
-              topic={currentTopic || getFanTopic(0)}
-              category={activeCategory}
-              isSpinning={spinPhase === 'spinning'}
-              spinPhase={spinPhase}
-              onClick={handleTopicOpen}
-            />
+          {/* Hero card — no orbit ring behind it, clean standalone */}
+          <div className="relative w-[306px] h-[330px] -mt-3 flex items-center justify-center">
+            <div className="relative" style={{ zIndex: 1 }}>
+              <ConfettiBurst trigger={confettiTrigger} color={activeCategory.accent} />
+              <HeroTicket topic={currentTopic || getFanTopic(0)} category={activeCategory}
+                isSpinning={spinPhase === 'spinning'} spinPhase={spinPhase} onClick={handleTopicOpen} />
+            </div>
           </div>
-
-          {/* Bottom peek cards */}
-          <div className="relative w-[310px] h-[160px] -mt-4">
+          {/* Bottom peek (slot +1) */}
+          <div className="relative w-[340px] h-[120px] -mt-3">
             <PeekCard slot={1} topic={getFanTopic(1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
-            <PeekCard slot={2} topic={getFanTopic(2)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
           </div>
         </div>
-
-        {/* ── 2. Spin Button (big dice) ──────────────────────────────── */}
+        {/* ── 2. Spin Button ─────────────────────────────────────────── */}
         <div className="mb-4">
-          <SpinButton
-            isSpinning={spinPhase === 'spinning'}
-            hasLanded={spinPhase === 'landed'}
-            onClick={handleSpin}
-            color={activeCategory.accent}
-          />
+          <SpinButton isSpinning={spinPhase === 'spinning'} hasLanded={spinPhase === 'landed'} onClick={handleSpin} color={activeCategory.accent} />
         </div>
       </div>
 
-      {/* ── 3. Bottom Bar — Categories · Filter ──────────────────────── */}
+      {/* ── 3. Bottom Bar: Categories · Filter ───────────────────────── */}
       <div className="w-full px-4 pb-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}>
         <div className="flex gap-2.5">
-          <BottomPill
-            icon={activeCategory.iconGlyph}
-            label={activeCategory.displayName}
-            isActive={true}
-            accent={activeCategory.accent}
-            onClick={() => setShowPicker(true)}
-          />
-          <BottomPill
-            icon="tune"
-            label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'}
-            isActive={!!selectedSubtype}
-            accent={activeCategory.accent}
-            onClick={() => setShowFilter(true)}
-          />
+          <BottomPill icon={activeCategory.iconGlyph} label={activeCategory.displayName} isActive={true} accent={activeCategory.accent} onClick={() => setShowPicker(true)} />
+          <BottomPill icon="tune" label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'} isActive={!!selectedSubtype} accent={activeCategory.accent} onClick={() => setShowFilter(true)} />
         </div>
       </div>
 
-      {/* Sheets */}
-      <FilterSheet isOpen={showFilter} onClose={() => setShowFilter(false)}
-        category={activeCategory} subtypes={subtypes} selectedSubtype={selectedSubtype} setSelectedSubtype={setSelectedSubtype} />
-      <CategoryPickerSheet isOpen={showPicker} onClose={() => setShowPicker(false)}
-        activeId={activeCategory.id} onSelect={setActiveCategory} />
+      <FilterSheet isOpen={showFilter} onClose={() => setShowFilter(false)} category={activeCategory} subtypes={subtypes} sel={selectedSubtype} setSel={setSelectedSubtype} />
+      <CatPickerSheet isOpen={showPicker} onClose={() => setShowPicker(false)} activeId={activeCategory.id} onSelect={setActiveCategory} />
 
-      {/* Animation keyframes */}
       <style>{`
-        @keyframes curio-dice-tumble {
-          0%   { transform: rotate(0deg) translateY(0); }
-          25%  { transform: rotate(90deg) translateY(-2px); }
-          50%  { transform: rotate(180deg) translateY(0); }
-          75%  { transform: rotate(270deg) translateY(2px); }
-          100% { transform: rotate(360deg) translateY(0); }
-        }
-        @keyframes curio-dice-breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.04); }
-        }
-        @keyframes curio-orbit-pulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-          50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.9; }
-        }
-        @keyframes curio-confetti-fly {
-          0%   { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-          100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); }
-        }
-        @keyframes reelFade {
-          0%   { opacity: 0.5; transform: translateY(4px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes curio-dice-tumble { 0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg)} 25%{transform:rotateX(90deg) rotateY(45deg) rotateZ(180deg)} 50%{transform:rotateX(180deg) rotateY(90deg) rotateZ(360deg)} 75%{transform:rotateX(270deg) rotateY(135deg) rotateZ(540deg)} 100%{transform:rotateX(360deg) rotateY(180deg) rotateZ(720deg)} }
+        @keyframes curio-dice-breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+        @keyframes curio-orbit-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.4} 50%{transform:translate(-50%,-50%) scale(1.6);opacity:0.95} }
+        @keyframes curio-confetti-fly { 0%{opacity:1;transform:translate(0,0) rotate(0deg)} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--rot))} }
+        @keyframes reelFade { 0%{opacity:0.5;transform:translateY(4px)} 100%{opacity:1;transform:translateY(0)} }
         .animate-reelFade { animation: reelFade 0.35s ease-out; }
       `}</style>
     </div>
