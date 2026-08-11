@@ -343,6 +343,16 @@ export const BROWSER_HERO_SYMBOLS: TornHeroSymbol[] = [
   { glyph: 'language', biasX: 0.93, biasY: 0.76, size: 44, rotation: 9, alpha: 0.12 },
 ];
 
+/** Drawer hero watermark symbols — same construction as Home, seed 0xD2A7E */
+export const DRAWER_HERO_SYMBOLS: TornHeroSymbol[] = [
+  { glyph: 'casino', biasX: 0.08, biasY: 0.16, size: 42, rotation: -11, alpha: 0.10 },
+  { glyph: 'auto_awesome', biasX: 0.92, biasY: 0.16, size: 42, rotation: 11, alpha: 0.10 },
+  { glyph: 'star', biasX: 0.44, biasY: 0.38, size: 46, rotation: -7, alpha: 0.12 },
+  { glyph: 'local_fire_department', biasX: 0.56, biasY: 0.38, size: 46, rotation: 7, alpha: 0.12 },
+  { glyph: 'psychology', biasX: 0.07, biasY: 0.85, size: 52, rotation: -13, alpha: 0.13 },
+  { glyph: 'menu_book', biasX: 0.93, biasY: 0.85, size: 52, rotation: 13, alpha: 0.13 },
+];
+
 /** Detail hero watermark symbols for a given category icon glyph */
 export function makeDetailHeroSymbols(catGlyph: string): TornHeroSymbol[] {
   return [

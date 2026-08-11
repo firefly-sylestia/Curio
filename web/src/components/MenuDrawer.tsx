@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { MaterialIcon } from './SharedComponents';
+import { TornHero, DRAWER_HERO_SYMBOLS } from './TornHero';
 
 const MenuRow: React.FC<{
   icon: string;
@@ -82,31 +83,26 @@ export const MenuDrawer: React.FC<{
           boxShadow: '4px 0 24px rgba(0,0,0,0.12)',
         }}
       >
-        {/* Rose hero banner */}
-        <div className="relative w-full overflow-hidden flex-shrink-0"
-          style={{ background: heroFill, minHeight: 160, paddingTop: 'env(safe-area-inset-top, 16px)' }}>
-          {/* Watermark glyphs */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.1]">
-            <MaterialIcon name="casino" size={80} className="absolute" style={{ right: -10, top: 20, transform: 'rotate(12deg)' }} />
-            <MaterialIcon name="auto_awesome" size={60} className="absolute" style={{ left: -5, bottom: 30, transform: 'rotate(-8deg)' }} />
-          </div>
-
-          {/* Torn bottom edge */}
-          <div className="absolute -bottom-px left-0 right-0 h-4" style={{ background: isDark ? '#1a1a2e' : '#FFFBF5' }}>
-            <svg viewBox="0 0 300 16" preserveAspectRatio="none" className="w-full h-full">
-              <path d="M0,0 Q15,12 30,2 T60,4 T90,1 T120,5 T150,2 T180,6 T210,3 T240,5 T270,1 T300,3 L300,16 L0,16 Z"
-                fill={heroFill} />
-            </svg>
-          </div>
-
-          {/* Hero content */}
-          <div className="relative z-10 px-5 pt-8 pb-10">
-            <p className="text-white/70 text-xs font-medium mb-1">Welcome back</p>
-            <h2 className="text-xl font-extrabold text-white" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
-              Hi Explorer
-            </h2>
-            <p className="text-white/60 text-xs mt-1.5">Spin it. Explore it. Capture it.</p>
-          </div>
+        {/* Torn rose hero — matching Android HomeDrawerContent (186dp, seed 0xD2A7E) */}
+        <div className="flex-shrink-0">
+          <TornHero
+            height={186}
+            fill={heroFill}
+            ink="#fff"
+            tearSeed={0xD2A7E}
+            bold={true}
+            symbols={DRAWER_HERO_SYMBOLS}
+            isDark={isDark}
+            sheetColor={isDark ? '#1a1a2e' : '#FFFBF5'}
+          >
+            <div className="flex flex-col h-full px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top, 8px) + 40px)' }}>
+              <p className="text-white/70 text-xs font-medium mb-1">Welcome back</p>
+              <h2 className="text-xl font-extrabold text-white" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
+                Hi Explorer
+              </h2>
+              <p className="text-white/60 text-xs mt-1.5">Spin it. Explore it. Capture it.</p>
+            </div>
+          </TornHero>
         </div>
 
         {/* Menu items */}

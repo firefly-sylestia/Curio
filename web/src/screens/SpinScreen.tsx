@@ -426,7 +426,7 @@ export const SpinScreen: React.FC = () => {
       <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
       {/* ── 1. Fan Deck Section (Android: 444dp container) ──────────── */}
-      <div className="flex-1 flex flex-col items-center justify-end px-4" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }}>
+      <div className="flex-1 flex flex-col items-center justify-end px-4 pb-8" style={{ paddingTop: 'env(safe-area-inset-top, 8px)', paddingBottom: '12px' }}>
         <div className="relative flex items-center justify-center" style={{ width: 380, height: 444 }}>
           {/* Top peek (slot -1) fanned above hero */}
           <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />

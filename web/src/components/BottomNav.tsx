@@ -8,8 +8,8 @@ import { MaterialIcon } from './SharedComponents';
 
 const tabs = [
   { path: '/', label: 'Home', icon: 'cottage' },
-  { path: '/spin', label: 'Spin', icon: 'casino' },
-  { path: '/cabinet', label: 'Cabinet', icon: 'book_5' },
+  { path: '/spin', label: 'Shuffle', icon: 'auto_awesome' },
+  { path: '/cabinet', label: 'Cabinet', icon: 'inventory_2' },
 ];
 
 const BottomNav: React.FC = () => {
