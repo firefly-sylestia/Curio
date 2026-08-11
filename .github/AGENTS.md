@@ -26,7 +26,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 `android.yml` runs on pushes and pull requests targeting `main`, plus manual dispatch. It:
 
-- Validates all topic catalogs with `python3 scripts/validate_topics.py`.
+- Validates all topic catalogs with the self-contained Gradle `validateTopics` task (wired into `preBuild`); no external scripts are shipped in the repo.
 - Runs the Gradle `lintDebug`, `validateTopics`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain — **release build only**, no debug APK is produced (debug remains available for local development via the app's debug build type).
 - Uploads lint reports plus the release-variant APKs (universal + per-ABI splits) for 14 days. Lint-report upload is best-effort and silently skips the artifact when Gradle fails before producing reports; the Gradle check remains authoritative.
 - Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies **every** release APK's signature is not the debug key. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes.
@@ -81,7 +81,7 @@ The release workflow requires the signing secrets; the Android CI workflow consu
 
 - Validate changed YAML with a YAML parser or GitHub's workflow checks when available.
 - Run `git diff --check` and inspect the rendered template structure.
-- Run `python3 scripts/validate_topics.py` when repository changes touch the Curio data or CI validation path.
+- The Gradle `validateTopics` task is the CI-authoritative topic validation. Authoring/validation scripts under `scripts/` are untracked (kept on disk only) — see the `.gitignore` note.
 - Confirm no secrets, generated APKs, or release keystores are tracked.
 
 ## Child DOX Index

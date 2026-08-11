@@ -56,3 +56,9 @@ node_modules
 __pycache__/
 *.pyc
 /result
+
+# Authoring/validation scripts — kept on disk for local work but never
+# shipped in commits (user preference). CI validation uses the self-contained
+# Gradle validateTopics task instead (see app/build.gradle.kts).
+/scripts/*.py
+/scripts/*.js

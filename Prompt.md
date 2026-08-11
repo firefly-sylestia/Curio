@@ -1,5 +1,19 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): stop shipping authoring scripts in commits
+
+**Date:** 2026-08-11
+
+**What was asked:** Don't ship .py files (and per follow-up, .js files) in commits.
+
+**Changes made:**
+- Untracked 20 scripts (`git rm --cached`, kept on disk): all 17 `.py` (batch/enrich/validate authoring tools) + 3 `.js` (`check_braces.js`, `merge_topic_batches.js`, `validate_topics.js`). `.sh` setup script and `topics_inventory.txt` stay tracked.
+- `.gitignore`: added `/scripts/*.py` + `/scripts/*.js` (anchored to scripts/ so no legit files elsewhere get hidden) with a note explaining the rule.
+- **CI rewiring:** removed the redundant `python3 scripts/validate_topics.py` step from `.github/workflows/android.yml` — both CI workflows already run the self-contained Gradle `validateTopics` task (explicitly + via `preBuild`), so topic validation coverage is unchanged.
+- Doc updates: `.github/AGENTS.md` (validation bullets now reference the Gradle task + untracked-scripts note), `.github/PULL_REQUEST_TEMPLATE.md`, `CONTRIBUTING.md`, `app/AGENTS.md` (check_braces note).
+
+**Validation:** staged set = 20 deletions + 6 doc/config edits; `git diff --cached --check` clean; no leftover workflow python refs; code review passed (CI parity confirmed, .gitignore scoping safe). Provenance notes in SCHEMA.md/app-AGENTS.md intentionally left (historical, accurate). Gradle build left to CI.
+
 ## Current Request (COMPLETED): release tags drive the build versionName
 
 **Date:** 2026-08-11
