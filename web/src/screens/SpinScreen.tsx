@@ -92,18 +92,20 @@ const HeroTicket: React.FC<{
 
   const baseAccent = pastelColors && !isDark ? getPastelCardFill(category.accent, isDark) : category.accent;
   const [r, g, b] = hexToRgb(baseAccent);
-  const surfaceRgb = isDark ? [18, 18, 35] : [247, 240, 228];
+  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 245];
 
-  // Rich opaque gradient — deep accent at top, still visibly tinted at bottom
-  const midR = Math.round(r * 0.48 + surfaceRgb[0] * 0.52);
-  const midG = Math.round(g * 0.48 + surfaceRgb[1] * 0.52);
-  const midB = Math.round(b * 0.48 + surfaceRgb[2] * 0.52);
-  const botR = Math.round(r * 0.22 + surfaceRgb[0] * 0.78);
-  const botG = Math.round(g * 0.22 + surfaceRgb[1] * 0.78);
-  const botB = Math.round(b * 0.22 + surfaceRgb[2] * 0.78);
-  const topColor = `rgb(${r},${g},${b})`;
-  const midColor = `rgb(${midR},${midG},${midB})`;
-  const botColor = `rgb(${botR},${botG},${botB})`;
+  // Android cardGradient: 2-stop vertical gradient
+  // Stop 1 (top): categoryCardFill → lerp(accent, Black, dark?0.28:0.10)
+  const deepen = isDark ? 0.28 : 0.10;
+  const s1r = Math.round(r * (1 - deepen));
+  const s1g = Math.round(g * (1 - deepen));
+  const s1b = Math.round(b * (1 - deepen));
+  // Stop 2 (bottom): lerp(stop1, surface, 0.30)
+  const s2r = Math.round(s1r * 0.70 + surfaceRgb[0] * 0.30);
+  const s2g = Math.round(s1g * 0.70 + surfaceRgb[1] * 0.30);
+  const s2b = Math.round(s1b * 0.70 + surfaceRgb[2] * 0.30);
+  const topColor = `rgb(${s1r},${s1g},${s1b})`;
+  const botColor = `rgb(${s2r},${s2g},${s2b})`;
 
   const hasLanded = spinPhase === 'landed' || spinPhase === 'opening';
 
@@ -111,7 +113,7 @@ const HeroTicket: React.FC<{
     <button onClick={onClick} disabled={isSpinning}
       className="relative w-[286px] h-[310px] rounded-[28px] overflow-hidden text-left flex-shrink-0"
       style={{
-        background: `linear-gradient(180deg, ${topColor} 0%, ${midColor} 50%, ${botColor} 100%)`,
+        background: `linear-gradient(180deg, ${topColor} 0%, ${botColor} 100%)`,
         boxShadow: hasLanded
           ? `0 8px 32px ${category.accent}40, 0 2px 8px rgba(0,0,0,0.12)`
           : '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)',
@@ -122,9 +124,9 @@ const HeroTicket: React.FC<{
       }}>
       {/* Accent rule */}
       <div className="absolute top-0 left-3 right-3 h-[2px] rounded-full" style={{ background: category.accent, opacity: 0.45 }} />
-      {/* Top-lit crown */}
-      <div className="absolute top-0 left-0 right-0 h-[60px] pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%)' }} />
+      {/* Top-lit crown — matching Android's enhanced diagonal crown lift */}
+      <div className="absolute top-0 left-0 right-0 h-[80px] pointer-events-none"
+        style={{ background: isDark ? 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)' : 'linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)' }} />
       {/* Shimmer */}
       {spinPhase !== 'spinning' && (
         <div className="absolute inset-0 pointer-events-none"
@@ -194,7 +196,7 @@ const PeekCard: React.FC<{ slot: -1 | 1; topic: CurioTopic | null; category: Cur
   const yOff = slot === -1 ? -134 : 146;
 
   const [r, g, b] = hexToRgb(category.accent);
-  const surfaceRgb = isDark ? [18, 18, 35] : [247, 240, 228];
+  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 245];
   // Level-darkened: near peeks step one shade down from the hero (0.40 blend)
   const depth = 0.40;
   const dr = Math.round(r * (1 - depth) + surfaceRgb[0] * depth);
