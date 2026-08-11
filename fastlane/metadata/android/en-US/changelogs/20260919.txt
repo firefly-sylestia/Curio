@@ -1,3 +1,4 @@
+• Chain-quest stage rewards now flow through the XP system — a reward that pushes you past a level-up or evolution threshold always triggers the pet's big ceremony, so celebrations never get missed.
 • Curie speaks in two voices now: as a Baby she talks in tiny telegraphic bursts ("Boop!", "New thing!") and grows into the full, warm personality when she evolves — and play and spin moments are motion-first, so she hops and bounces far more than she chatters (and rapid celebration taps no longer spin her into a loop).
 • The pet check-in now shows the catchphrases Curie has coined herself — her own sayings appear word-for-word in the hero-card dialog instead of just a number.
 • The Pet Designer gained a dedicated "Quest complete" reaction (animation, face and lines) and a matching custom-action trigger, so you can craft exactly how Curie celebrates your quest claims.

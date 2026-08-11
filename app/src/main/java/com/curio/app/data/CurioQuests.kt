@@ -458,8 +458,10 @@ object CurioQuests {
         ensureDaily(context)
         ensureWeekly(context)
         // Re-award any stage the counters already satisfy (post-migration
-        // catch-up, also heals a killed write).
-        checkAll(context)
+        // catch-up, also heals a killed write). Persist explicitly — no
+        // pet reactions fire during restore.
+        awardChainStages()
+        write(context)
     }
 
     private fun prefs(context: Context) =
@@ -568,22 +570,33 @@ object CurioQuests {
     private fun addXp(context: Context, amount: Int) {
         val levelBefore = levelForXp(xpState)
         val stageBefore = CurioPet.evolutionStage(levelBefore, CurioPet.currentEvoPath()).first
+        // Chain-stage rewards count toward level/stage detection — award
+        // them BEFORE reading the after-state so a level-up or evolution
+        // crossing from a chain quest can never be missed.
+        awardChainStages()
         xpState += amount
         val levelAfter = levelForXp(xpState)
         val stageAfter = CurioPet.evolutionStage(levelAfter, CurioPet.currentEvoPath()).first
         write(context)
-        checkAll(context)
         // Feed the Curio pet's mood timestamps (spec §10.5): a level-up is
-        // the proud moment; any positive XP is a happy one. (The pet only
-        // reacts to REAL XP — the 0-XP refresh calls stay quiet.)
+        // the proud moment; any positive XP is a happy one. Chain-stage XP
+        // alone (a 0-XP refresh call) only speaks when a level or growth
+        // tier was actually crossed — otherwise it stays quiet so it can't
+        // stomp an earlier event (e.g. a streak milestone).
+        val evolved = stageAfter.ordinal > stageBefore.ordinal
+        val leveledUp = levelAfter > levelBefore
         if (amount > 0) {
             // v13 — crossing into a new growth tier (level 25 with a path
             // chosen → the final form) is its own ceremony, bigger than a
             // plain level-up. The level-7 first evolution fires from the
             // path choice itself, so it isn't detected here.
-            if (stageAfter.ordinal > stageBefore.ordinal) CurioPet.noteEvolved(context)
-            else if (levelAfter > levelBefore) CurioPet.noteLevelUp(context)
-            else CurioPet.noteXpEarned(context)
+            when {
+                evolved -> CurioPet.noteEvolved(context)
+                leveledUp -> CurioPet.noteLevelUp(context)
+                else -> CurioPet.noteXpEarned(context)
+            }
+        } else if (evolved || leveledUp) {
+            if (evolved) CurioPet.noteEvolved(context) else CurioPet.noteLevelUp(context)
         }
     }
 
@@ -725,11 +738,14 @@ object CurioQuests {
     fun onStreakRecorded(context: Context, streak: Int) {
         if (streak > bestStreakState) {
             bestStreakState = streak
-            write(context)
-            // v13 — a new best streak deserves its own celebration.
+            // v13 — a new best streak deserves its own celebration. Fire
+            // before addXp so a coincidental level-up crossing (from chain
+            // XP) can rightfully win over the streak line.
             CurioPet.noteStreakMilestone(context)
         }
-        checkAll(context)
+        // Route through addXp(0): chain-stage XP granted by this record is
+        // folded into level/evolution detection, and everything persists.
+        addXp(context, 0)
     }
 
     // ── Daily quest progress (XP is CLAIMED on the Quests page — v8.3) ──
@@ -909,9 +925,8 @@ object CurioQuests {
     }
 
     // ── Chain checks — award each stage's XP once when its target hits ──
-    private fun checkAll(context: Context) {
+    private fun awardChainStages() {
         var changed = true
-        var awarded = false
         while (changed) {
             changed = false
             allStages().forEach { stage ->
@@ -919,12 +934,11 @@ object CurioQuests {
                     awardedStagesState = awardedStagesState + stage.id
                     xpState += stage.xpReward
                     changed = true
-                    awarded = true
                 }
             }
         }
-        // Only persist when something changed — hooks call this on every tap.
-        if (awarded) write(context)
+        // No persistence here — callers own the write (addXp always writes;
+        // the restore path writes explicitly). Hooks call this on every tap.
     }
 
     /** Every stage across every chain, in display order. */

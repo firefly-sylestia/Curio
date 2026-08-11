@@ -1,18 +1,18 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Show coined catchphrases in the pet check-in dialog
+## Current Request (COMPLETED): Route chain-quest stage rewards through addXp
 
 **Date:** 2026-08-11
 
-**What was asked:** Show the pet's coined catchphrases in the hero-card check-in dialog instead of just the count.
+**What was asked:** Route chain-quest stage rewards through `addXp` so level-ups and evolutions never get missed (fixes the known quirk where `checkAll` grants stage XP outside the level/evolution detection path).
 
-**Changes made:**
-- **CurioPetBrain.kt** — replaced `coinedCount(context): Int` with `coinedSayings(context): List<String>` (defensive `.toList()` copy of `readCoined`).
-- **CurioPet.kt** — `TapInfo.coinedSayings: Int` → `coinedPhrases: List<String>`; `tapInfo()` populates via `CurioPetBrain.coinedSayings(context)`. `tapInfo` is only used by the check-in dialog.
-- **CurioPetCompanion.kt** — the check-in dialog now shows an "Its own sayings:" header + the phrases joined with " · " in italic `bodySmall` in the accent color (new `FontStyle` import); the section hides when the pet hasn't coined anything yet.
-- **docs/PET_DIALOGUE.txt** — section 12 updated; **fastlane changelog** bullet added.
+**Changes made (CurioQuests.kt):**
+- `checkAll(context)` → `awardChainStages(): Int` — awards any satisfied chain stages, returns the total XP granted, and NO LONGER persists (callers own the write).
+- `addXp` — calls `awardChainStages()` BEFORE reading the after-state, so stage XP is folded into level/evolution detection. Real XP (amount > 0) keeps the full reaction chain (evolved > level-up > xp-earned); a 0-XP refresh (amount == 0) only speaks when a level or growth tier was actually crossed, so it can't stomp an earlier event like a streak milestone.
+- `onStreakRecorded` — fires `noteStreakMilestone` (if new best) then routes through `addXp(context, 0)` (was `write` + `checkAll`), so chain XP from a streak record is detected and everything persists via addXp's write.
+- Seed/restore path — calls `awardChainStages()` + explicit `write(context)` (no pet reactions on restore).
 
-**Validation:** brace balance OK, `git diff --check` clean, code review passed (no test source sets exist; no leftover `coinedCount` refs). Gradle build left to CI.
+**Validation:** brace balance OK, `git diff --check` clean, code review passed, no remaining `checkAll` refs. Gradle build left to CI.
 
 ## Current Request (COMPLETED): Dedicated quest-complete trigger in the Pet Designer
 
