@@ -128,11 +128,17 @@ export const ProfileScreen: React.FC = () => {
         isDark={isDark}
       >
         <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px]">
-          {/* Sticky back pill */}
-          <button onClick={() => navigate(-1)} className="absolute top-0 left-5 w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', marginTop: 'env(safe-area-inset-top, 12px)' }}>
-            <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
-          </button>
+          {/* Pill row: back left, settings right */}
+          <div className="absolute top-0 left-0 right-0 flex justify-between px-5 items-center" style={{ marginTop: 'env(safe-area-inset-top, 12px)' }}>
+            <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
+            </button>
+            <button onClick={() => navigate('/settings')} className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              <MaterialIcon name="settings" size={20} style={{ color: '#fff' }} />
+            </button>
+          </div>
           {/* Avatar + name */}
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
@@ -162,7 +168,7 @@ export const ProfileScreen: React.FC = () => {
 
           {/* Pet */}
           <div className="mb-6">
-            <CurioSectionHeader title="Your Companion" action="View" onAction={() => navigate('/')} />
+            <CurioSectionHeader title="Your Companion" action="Customize" onAction={() => navigate('/pet-designer')} />
             <PetDisplay pet={pet} />
           </div>
 

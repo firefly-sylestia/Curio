@@ -150,7 +150,7 @@ export const CabinetScreen: React.FC = () => {
                   style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
               </div>
             ) : filtered.length === 0 ? (
-              <CurioEmptyState icon="book_5" title={searchQuery ? 'No results' : 'No entries yet'}
+              <CurioEmptyState icon="inventory_2" title={searchQuery ? 'No results' : 'No entries yet'}
                 description={searchQuery ? 'Try a different search term' : 'Start exploring to build your cabinet'}
                 action={!searchQuery ? 'Start exploring' : undefined}
                 onAction={!searchQuery ? () => navigate('/spin') : undefined} />

@@ -109,12 +109,12 @@ const HeroTicket: React.FC<{
 
   return (
     <button onClick={onClick} disabled={isSpinning}
-      className="relative w-[286px] h-[310px] rounded-[30px] overflow-hidden text-left flex-shrink-0"
+      className="relative w-[286px] h-[310px] rounded-[28px] overflow-hidden text-left flex-shrink-0"
       style={{
         background: `linear-gradient(180deg, ${topColor} 0%, ${midColor} 50%, ${botColor} 100%)`,
         boxShadow: hasLanded
-          ? `0 12px 40px ${category.accent}30, 0 4px 12px rgba(0,0,0,0.08)`
-          : '0 8px 28px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+          ? `0 8px 32px ${category.accent}40, 0 2px 8px rgba(0,0,0,0.12)`
+          : '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)',
         cursor: isSpinning ? 'default' : 'pointer',
         border: isDark ? `1px solid ${category.accent}30` : `1px solid ${category.accent}1A`,
         transform: spinPhase === 'opening' ? 'scale(1.03)' : isSpinning ? 'scale(0.97)' : 'scale(1)',
@@ -426,7 +426,7 @@ export const SpinScreen: React.FC = () => {
       <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
       {/* ── 1. Fan Deck Section (Android: 444dp container) ──────────── */}
-      <div className="flex-1 flex flex-col items-center justify-end px-4 pb-8" style={{ paddingTop: 'env(safe-area-inset-top, 8px)', paddingBottom: '12px' }}>
+      <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ paddingTop: 'env(safe-area-inset-top, 8px)', paddingBottom: '20px' }}>
         <div className="relative flex items-center justify-center" style={{ width: 380, height: 444 }}>
           {/* Top peek (slot -1) fanned above hero */}
           <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
@@ -446,7 +446,7 @@ export const SpinScreen: React.FC = () => {
       </div>
 
       {/* ── 3. Bottom Bar: Categories · Filter ───────────────────────── */}
-      <div className="w-full px-4 pb-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}>
+      <div className="w-full px-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)' }}>
         <div className="flex gap-2.5">
           <BottomPill icon={activeCategory.iconGlyph} label={activeCategory.displayName} isActive={true} accent={activeCategory.accent} onClick={() => setShowPicker(true)} />
           <BottomPill icon="tune" label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'} isActive={!!selectedSubtype} accent={activeCategory.accent} onClick={() => setShowFilter(true)} />
