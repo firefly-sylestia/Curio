@@ -26,12 +26,17 @@ import com.curio.app.data.AppPreferences
  *    "category accent shine"), so buttons/cards stay Material while the
  *    category still glows on the rim.
  * No-op in the default Curio style.
+ *
+ * @param intensity Scales the hairline + top-shine alphas (1f = full shine,
+ *   lower = a quieter whisper — used for the main Spin card's subtle
+ *   category tint).
  */
 @Composable
-fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null): Modifier {
+fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null, intensity: Float = 1f): Modifier {
     val style = AppPreferences.themeStyleState
     if (style != AppPreferences.THEME_STYLE_AMOLED && style != AppPreferences.THEME_STYLE_MATERIAL) return this
     val amoled = style == AppPreferences.THEME_STYLE_AMOLED
+    val effective = intensity.coerceIn(0f, 1f)
     return this.drawWithCache {
         // The draw scope itself implements Density — `density` alone would
         // resolve to the scale factor (Float), which createOutline rejects.
@@ -45,8 +50,8 @@ fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null): Modifier {
         // AMOLED sits on pitch black, so the shine can stay quieter; Material
         // surfaces are mid-tone device colors, so the accent rim needs a touch
         // more presence to read as a rim light.
-        val hairlineAlpha = if (accent != null) (if (amoled) 0.26f else 0.30f) else (if (amoled) 0.10f else 0.14f)
-        val topAlpha = if (accent != null) (if (amoled) 0.45f else 0.52f) else (if (amoled) 0.22f else 0.30f)
+        val hairlineAlpha = (if (accent != null) (if (amoled) 0.26f else 0.30f) else (if (amoled) 0.10f else 0.14f)) * effective
+        val topAlpha = (if (accent != null) (if (amoled) 0.45f else 0.52f) else (if (amoled) 0.22f else 0.30f)) * effective
         val hairlineW = 1.dp.toPx()
         val shineW = 1.4.dp.toPx()
         val shineBand = 18.dp.toPx()

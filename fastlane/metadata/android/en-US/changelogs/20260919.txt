@@ -3,7 +3,7 @@
 • Ten new lanes: Songs, Series, Anime, Manga, Manhwa, Games, Mythology, Sports, Food & Drink, and Internet Culture — ~640 hand-curated topics, each with its own color, icon and explore action.
 • The Spin filter sheet gained a Franchise row — filter Films/Anime decks by MCU, Star Wars, DC, Harry Potter, Lord of the Rings, Pixar, Studio Ghibli or Disney (tagged across 76 films).
 • Scientists and Discoveries topics are fully tagged now — the Topic Reveal tag strip never runs empty on those lanes.
-• The Material theme is on hold — the Settings option is greyed out with a “coming soon” note. AMOLED’s main Spin card gets its sleek category-color edge back: a black-glass shine and accent rim in the deck’s color.
+• The Material theme is on hold — the Settings option is greyed out with a “coming soon” note. AMOLED’s main Spin card keeps its sleek black-glass look: a quiet category-color shine tinted in the deck’s color.
 • The pet answers you right away: tapping it (or landing a spin, saving, or leveling up) skips whatever bubble it was showing and reacts immediately — and its chatter no longer queues up into an endless cycle of stale lines.
 • The “Express yourself” button on Topic Reveal now has a solid background that matches the page’s cards, so it reads as a real button next to the filled Explore CTA in every theme.
 • The Material theme is properly Material now: the Spin dice, orbit dots and the Categories/Filter pills wear the device palette with readable labels in light and dark, and dialogs match the card shape with the pastel page tint — action buttons are darker and easier to read in pastel light mode. Topic Reveal's bottom strip uses a calm plain tear with the tags tucked safely below it.

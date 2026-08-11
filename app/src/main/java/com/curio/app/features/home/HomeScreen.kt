@@ -345,12 +345,6 @@ fun HomeScreen(navController: NavController) {
             // cleaner pink-rose hue carries through the greeting, stat icons
             // and hero watermark instead of falling back to a brown raw accent.
             val questInk = homeReadableInk(heroFill)
-            // v13 — AMOLED: the banner is pure black, so the rose accent
-            // shows through the hero's watermark symbols + stat pane (the
-            // Profile/Settings treatment) instead of disappearing into the
-            // plate. Every other style keeps the banner's own ink.
-            val symbolTint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                CurioColors.HomeRosewood else questInk
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -412,8 +406,8 @@ fun HomeScreen(navController: NavController) {
                             HomeHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
                         )
                         heroPairs.forEachIndexed { i, pair ->
-                            HomeHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, symbolTint)
-                            HomeHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, symbolTint)
+                            HomeHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, questInk)
+                            HomeHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, questInk)
                         }
                         Column(
                             modifier = Modifier
@@ -491,24 +485,14 @@ fun HomeScreen(navController: NavController) {
                                 // shape itself — Surface does not clip its
                                 // content, so a plain background() would bleed
                                 // square corners past the rounded border.
-                                // v13 — AMOLED: the pane is black, so the
-                                // gradient softens the rose accent into it
-                                // (top a strong rose, bottom a subtle glow)
-                                // instead of a black-on-black wash.
-                                val statPane = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                                    listOf(
-                                        symbolTint.copy(alpha = 0.30f),
-                                        lerp(heroFill, symbolTint, 0.12f).copy(alpha = 0.16f)
-                                    )
-                                } else {
-                                    listOf(
-                                        heroFill.copy(alpha = 0.12f),
-                                        lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
-                                    )
-                                }
                                 Box(
                                     modifier = Modifier.background(
-                                        Brush.verticalGradient(statPane),
+                                        Brush.verticalGradient(
+                                            listOf(
+                                                heroFill.copy(alpha = 0.12f),
+                                                lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                            )
+                                        ),
                                         RoundedCornerShape(20.dp)
                                     )
                                 ) {
@@ -1430,12 +1414,8 @@ private fun homeRoseAccent(): Color {
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
         return MaterialTheme.colorScheme.primary
     }
-    // v13 — AMOLED heroes are PROPER pitch black now: the old grey-coral
-    // tint (lerp(surfaceContainerHigh, primary, 0.16f)) is gone — the rose
-    // accent lives on the black plate via the hero's watermark symbols and
-    // stat pane instead (see the quest hero's symbolTint).
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return Color.Black
+        return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
     }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
@@ -1508,15 +1488,10 @@ private fun FirstTimeEmpty(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // v13 — the button fill follows homeRoseAccent (black
-                        // in AMOLED), so its ink resolves like every other
-                        // accent fill (white on black) instead of the hard
-                        // DeepPlum that vanished on the AMOLED plate.
-                        val buttonInk = homeReadableInk(roseAccent)
                         CurioIcon(
                             CurioIcons.Casino,
                             null,
-                            tint = buttonInk,
+                            tint = CurioColors.DeepPlum,
                             size = 16.dp,
                             // Match the shared icon lift plus the casino
                             // glyph's half-dp extra correction.
@@ -1525,7 +1500,7 @@ private fun FirstTimeEmpty(
                         Text(
                             "Surprise me",
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = buttonInk
+                            color = CurioColors.DeepPlum
                         )
                     }
                 }

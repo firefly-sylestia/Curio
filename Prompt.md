@@ -1,5 +1,22 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): AMOLED revert (main card + hero colors) + franchise filter + versionCode fix
+
+**Date:** 2026-08-11
+
+**What was asked:** (1) Revert the spin-screen change that changed the main card gradient (linked c5500fd) but NOT the spin button / category button colors; (2) revert the hero colors (linked 153970c4); (3) review two PR comments: the franchise filter `.take(4)` hiding lower-count franchises, and the store notes sitting in 20260919.txt while versionCode was still 20260918.
+
+**Commit survey finding:** c5500fd's SpinScreen changes were only the spin button + deck pills (both KEPT per the user's instruction). The main-card changes actually live in b351b42 (fill went black) and 6d2f135 (accent edge-shine + border). User chose: keep the black-glass main card but with a SUBTLE category shine tint ("not full, a little").
+
+**Changes made:**
+- **CategoryEdgeShine.kt** — added `intensity: Float = 1f` param (clamped 0..1) scaling hairline/top-shine alphas; default keeps every other call site identical.
+- **SpinScreen.kt** — AMOLED main card edge shine at intensity 0.55f and border accent alpha 0.35 → 0.16 (quiet category tint on black glass). Removed the `.take(4)` cap on the franchise filter row — all 8 FranchiseTags (MCU, Star Wars, DC, Harry Potter, LOTR, Pixar, Studio Ghibli, Disney) are now always exposed; eras/genres caps untouched.
+- **HomeScreen.kt** — reverted 153970c4's hero colors: `homeRoseAccent()` AMOLED back to grey-coral `lerp(surfaceContainerHigh, primary, 0.16f)`, watermark symbols back to `questInk` (symbolTint removed), stat pane back to the plain heroFill gradient, "Surprise me" button ink back to `CurioColors.DeepPlum`.
+- **app/build.gradle.kts** + **app/AGENTS.md** — versionCode 20260918 → 20260919 (matches the existing 20260919.txt store notes).
+- **Changelog 20260919.txt** — main-card line updated to describe the quiet shine.
+
+**Validation:** braces + git diff --check clean; spin button / deck pills confirmed untouched (0 diff matches); code review passed (intensity clamp added, franchise render path verified wrapping, no stray 20260918 refs left). Gradle build left to CI per repo rules.
+
 ## Current Request (COMPLETED): exploration-only instructions + per-category shades
 
 **Date:** 2026-08-11

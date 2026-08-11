@@ -1449,7 +1449,7 @@ private data class FilterGroups(
  * Franchise tags — set aside as their OWN filter row (MCU, Star Wars, …)
  * instead of burying them among genres, so film/anime/comics decks can be
  * filtered by universe. Kept to the recognizable blockbusters; the sheet
- * caps the row at a handful of chips anyway.
+ * always exposes every supported franchise (8 chips), no count cap.
  */
 private val FranchiseTags = setOf(
     "MCU", "Star Wars", "DC", "Harry Potter", "Lord of the Rings",
@@ -1518,10 +1518,11 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
         .take(3)
     // Franchise chips — the blockbuster universe tags get their own row
     // (MCU, Star Wars, …) instead of competing with genres for the top-4.
+    // No .take cap: every supported franchise is exposed so lower-count
+    // universes (Harry Potter, LOTR, Star Wars…) stay selectable.
     val franchises = counts.keys
         .filter { it in FranchiseTags }
         .sortedByDescending { counts[it] ?: 0 }
-        .take(4)
         .sorted()
     val genres = counts.keys
         .filter {
@@ -2536,12 +2537,14 @@ private fun HeroTicketCard(
                 .clip(RoundedCornerShape(30.dp))
                 .then(
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                        // v13 — the near-black ticket wears the same black-glass
-                        // CATEGORY SHINE as the settings cards and deck pills: an
-                        // accent hairline around the edge plus a soft accent band
-                        // at the top, so the main card reads as sleek black glass
-                        // rimmed with its category color (not just a flat plate).
-                        Modifier.categoryEdgeShine(RoundedCornerShape(30.dp), accent)
+                        // v14 — the near-black ticket keeps a QUIET category
+                        // shine — the same black-glass treatment as the deck
+                        // pills but at half intensity, so the main card reads
+                        // as sleek black glass with just a hint of its
+                        // category color (not a loud full rim).
+                        Modifier.categoryEdgeShine(
+                            RoundedCornerShape(30.dp), accent, intensity = 0.55f
+                        )
                     } else Modifier
                 )
         ) {
@@ -2556,15 +2559,13 @@ private fun HeroTicketCard(
                 // accent outline (the accent rim-light stays OFF by default).
                 // ON drops the hairline lower and the accent is drawn as a
                 // soft gradient rim-light inside (the drawBehind below).
-                // v13 — AMOLED: the near-black ticket would sink into the
-                // pure-black page. The categoryEdgeShine above is the main
-                // accent carrier, so this hairline stays a quiet whisper
-                // (0.35) that seats the card without stacking a second loud
-                // rim — sleek black glass rimmed with its category color.
+                // v14 — AMOLED: the quiet edge-shine above carries the
+                // category tint, so this hairline stays a soft whisper
+                // (0.16) that seats the card without stacking a loud rim.
                 border = BorderStroke(
                     1.dp,
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                        accent.copy(alpha = 0.35f)
+                        accent.copy(alpha = 0.16f)
                     else
                         ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
                 ),

@@ -68,7 +68,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.0.0"`, `versionCode = 20260918`
+- `versionName = "1.0.0"`, `versionCode = 20260919`
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
