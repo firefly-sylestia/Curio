@@ -1296,5 +1296,378 @@
       "1920s"
     ],
     "tier": 1
+  },
+  {
+    "id": "sport-cricket-1877",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Cricket (1877)",
+    "teaser": "The first international cricket match was Australia vs England in Melbourne — the game lasted 4 days and Australia won by 45 runs, but the real story is that both teams wore top hats.",
+    "imageUrl": "",
+    "byline": "Melbourne Cricket Ground",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cricket: The Ashes rivalry documentary",
+      "durationMinutes": 45,
+      "instruction": "Watch a short Ashes documentary to understand why cricket is basically baseballs eccentric British cousin — the rules are deliberately complicated to keep outsiders out."
+    },
+    "tags": [
+      "Cricket",
+      "1870s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-judo-1964",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Judo (1964 Olympics)",
+    "teaser": "Judo became an Olympic sport in Tokyo 1964 — the Japanese team won 3 of 4 gold medals, and the only non-Japanese winner was a Dutchman who beat a Japanese Judoka for the first time ever.",
+    "imageUrl": "",
+    "byline": "International Judo Federation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Anton Geesinks 1964 Olympic final",
+      "durationMinutes": 10,
+      "instruction": "Watch Anton Geesinks gold medal match — a 6 foot 8 Dutchman defeating a Japanese champion in a sport Japan invented. The crowd went silent."
+    },
+    "tags": [
+      "Judo",
+      "Olympics",
+      "1960s",
+      "Japanese"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-surfing-ancient",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Surfing (Ancient Hawaii)",
+    "teaser": "Surfing was invented by ancient Hawaiians — kings surfed on boards up to 16 feet long, and commoners were banned from the best waves. Captain Cook watched them in 1778 and called it the noblest exercise.",
+    "imageUrl": "",
+    "byline": "Hawaiian surfing tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ancient Hawaiian surfing history",
+      "durationMinutes": 20,
+      "instruction": "Watch a history of Hawaiian surfing to see how royalty rode 16-foot boards while commoners watched from the beach — surfing was class warfare on water."
+    },
+    "tags": [
+      "Surfing",
+      "Hawaii",
+      "Ancient",
+      "Polynesian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-fencing-renaissance",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Fencing (Renaissance Italy)",
+    "teaser": "Fencing masters in Renaissance Italy killed each other to protect their secrets — the first fencing manual (1536) was written by a Venetian who had survived 12 duels.",
+    "imageUrl": "",
+    "byline": "Venetian fencing tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The history of fencing from duels to Olympics",
+      "durationMinutes": 25,
+      "instruction": "Watch how fencing went from life-or-death duels in Italian back alleys to a sport where people poke each other with thin metal sticks for points."
+    },
+    "tags": [
+      "Fencing",
+      "Renaissance",
+      "Italian",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-rock-climbing-el-cap",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Free Solo Climbing (El Capitan)",
+    "teaser": "Alex Honnold climbed El Capitan (3,000 ft) without ropes in 2017 — the climb took 3 hours 56 minutes, and he had to rehearse every handhold for months. One slip equals death.",
+    "imageUrl": "",
+    "byline": "Alex Honnold",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Free Solo documentary excerpt",
+      "durationMinutes": 15,
+      "instruction": "Watch the crux move of Free Solo — when Honnolds foot slips and he catches himself with one finger on a 3,000-foot wall. Your palms will sweat."
+    },
+    "tags": [
+      "Climbing",
+      "Free Solo",
+      "Documentary",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-sumo-ancient",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Sumo Wrestling (Ancient Japan)",
+    "teaser": "Sumo has been performed for 1,500 years as a Shinto ritual — the ring (dohyo) is considered sacred ground, and the salt thrown before matches is for purification, not showmanship.",
+    "imageUrl": "",
+    "byline": "Japan Sumo Association",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sumo tournament opening ceremony",
+      "durationMinutes": 10,
+      "instruction": "Watch the opening ceremony of a sumo tournament — the salt tossing, the roof raising, the stomping — it is a Shinto ritual that happens to involve 400-pound men."
+    },
+    "tags": [
+      "Sumo",
+      "Japan",
+      "Shinto",
+      "Ancient"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-polo-ancient-persia",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Polo (Ancient Persia)",
+    "teaser": "Polo was invented in Persia 2,500 years ago — it was so dangerous that Persian emperors used it as battle training, and one king died falling off his horse during a match.",
+    "imageUrl": "",
+    "byline": "Persian polo tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Polos ancient Persian origins",
+      "durationMinutes": 15,
+      "instruction": "Watch a documentary on polos Persian origins to see how a battle-training exercise became a sport for the ultra-rich — the horses are worth more than most houses."
+    },
+    "tags": [
+      "Polo",
+      "Persia",
+      "Ancient",
+      "Equestrian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-marathon-ancient-greece",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Marathon (Ancient Greece)",
+    "teaser": "The marathon was invented because a soldier ran 26 miles from Marathon to Athens to announce a victory — then died. The modern distance (26.2 miles) was not standardized until 1921.",
+    "imageUrl": "",
+    "byline": "Ancient Greek tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The real story of the marathon",
+      "durationMinutes": 20,
+      "instruction": "Watch how the marathon went from a soldiers death run to a global sport — the original distance was 25 miles, then 26.2, then back to 26, then 26.2 again."
+    },
+    "tags": [
+      "Marathon",
+      "Greece",
+      "Ancient",
+      "Running"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-skateboarding-1950s",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Skateboarding (1950s California)",
+    "teaser": "Skateboarding was invented by surfers who wanted to surf on land when the waves were flat — the first boards were roller skate wheels nailed to planks.",
+    "imageUrl": "",
+    "byline": "California surf culture",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Skateboarding history: from surf planks to Olympics",
+      "durationMinutes": 25,
+      "instruction": "Watch how surfers in 1950s California nailed roller skate wheels to planks and accidentally invented a sport that would become an Olympic event 70 years later."
+    },
+    "tags": [
+      "Skateboarding",
+      "California",
+      "1950s",
+      "Surfing"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-capoeira-brazil",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Capoeira (Brazilian Martial Art)",
+    "teaser": "Capoeira was invented by enslaved Africans in Brazil — it looks like dancing but is actually fighting, and masters disguised it as entertainment to avoid punishment.",
+    "imageUrl": "",
+    "byline": "Afro-Brazilian tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Capoeira: the dance that hides a fight",
+      "durationMinutes": 20,
+      "instruction": "Watch a capoeira roda (circle) to see how enslaved Africans turned fighting into dancing to survive — every kick is a strike, every flip is an escape."
+    },
+    "tags": [
+      "Capoeira",
+      "Brazil",
+      "Martial Arts",
+      "Afro-Brazilian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-kabaddi-india",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Kabaddi (Ancient India)",
+    "teaser": "Kabaddi is a contact sport where one player raids the opposing team while holding their breath — they must tag opponents and return without breathing. It has been played in India for 4,000 years.",
+    "imageUrl": "",
+    "byline": "Indian kabaddi tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pro Kabaddi League highlight reel",
+      "durationMinutes": 10,
+      "instruction": "Watch a Pro Kabaddi raid — one player crosses into enemy territory, tags opponents, and races back while holding their breath. It is like tag meets rugby meets breath-holding."
+    },
+    "tags": [
+      "Kabaddi",
+      "India",
+      "Ancient",
+      "Contact Sport"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-bobsled-1890s",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Bobsled (1890s Switzerland)",
+    "teaser": "Bobsled was invented by wealthy English tourists in St. Moritz — they got bored of sleigh rides and decided to race each other down frozen roads in modified sleds.",
+    "imageUrl": "",
+    "byline": "Swiss bobsled tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bobsled: from tourist toy to Olympic sport",
+      "durationMinutes": 15,
+      "instruction": "Watch a bobsled run from the drivers perspective — 150 km/h in a fiberglass tube on ice, with G-forces that make your vision go grey."
+    },
+    "tags": [
+      "Bobsled",
+      "Switzerland",
+      "Winter Sports",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-archery-mongolia",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Mongolian Archery",
+    "teaser": "Mongolian archers can shoot accurately from horseback at full gallop — Genghis Khans army conquered Asia with this skill, and modern Mongolians still compete in the Naadam festival.",
+    "imageUrl": "",
+    "byline": "Mongolian archery tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Naadam festival archery competition",
+      "durationMinutes": 15,
+      "instruction": "Watch Naadam archers shoot from horseback at full gallop — this is the same skill that built the largest land empire in history."
+    },
+    "tags": [
+      "Archery",
+      "Mongolia",
+      "Naadam",
+      "Horseback"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-sepak-takraw",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Sepak Takraw (Southeast Asia)",
+    "teaser": "Sepak Takraw is volleyball played with feet — players perform bicycle kicks and scorpion spikes over a net, and the acrobatics make gymnastics look tame.",
+    "imageUrl": "",
+    "byline": "Southeast Asian sepak takraw",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sepak Takraw trick shots compilation",
+      "durationMinutes": 8,
+      "instruction": "Watch sepak Takraw highlights — it is like volleyball but everyone is a martial artist, and the bicycle kicks defy physics."
+    },
+    "tags": [
+      "Sepak Takraw",
+      "Southeast Asia",
+      "Volleyball",
+      "Acrobatic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-curling-scotland",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Curling (15th Century Scotland)",
+    "teaser": "Curling was invented when Scottish monks skipped stones across frozen ponds — the sport name comes from the curling sound the stone makes on ice, and it has been called chess on ice.",
+    "imageUrl": "",
+    "byline": "Scottish curling tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Curling: the Olympic sport nobody understands",
+      "durationMinutes": 15,
+      "instruction": "Watch a curling match to see why people sweep ice in front of a stone — the physics of curling are surprisingly complex and the strategy is genuinely deep."
+    },
+    "tags": [
+      "Curling",
+      "Scotland",
+      "Winter Sports",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-extreme-ironing",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Extreme Ironing",
+    "teaser": "Extreme Ironing is a sport where people iron clothes in dangerous locations — on mountains, underwater, while skydiving. It started in 1997 as a joke and now has a world championship.",
+    "imageUrl": "",
+    "byline": "Extreme Ironing Bureau",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Extreme Ironing world championship highlights",
+      "durationMinutes": 10,
+      "instruction": "Watch someone iron a shirt while skydiving — it is the most ridiculous sport ever invented, and somehow it has a world championship."
+    },
+    "tags": [
+      "Extreme Sports",
+      "Novelty",
+      "1990s",
+      "British"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "sport-cheese-rolling",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Cheese Rolling (Coopers Hill)",
+    "teaser": "Every year in Gloucestershire, people chase a 9-pound wheel of Double Gloucester cheese down a steep hill at 70 mph — broken bones are common, and the cheese usually wins.",
+    "imageUrl": "",
+    "byline": "Coopers Hill Cheese-Rolling",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Coopers Hill Cheese Rolling highlight reel",
+      "durationMinutes": 8,
+      "instruction": "Watch people tumble down a 1:1 hill chasing cheese at 70 mph — it has been going on for 200 years and nobody knows why."
+    },
+    "tags": [
+      "Cheese Rolling",
+      "Gloucestershire",
+      "Novelty",
+      "British"
+    ],
+    "tier": 2
   }
 ]
