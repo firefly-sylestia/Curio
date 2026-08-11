@@ -16,6 +16,12 @@ jobs:
     name: Build and publish signed release APKs
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      # The tag (e.g. "v1.2.3") drives the build's versionName (tag minus the
+      # leading "v"). Consumed by app/build.gradle.kts at configuration time,
+      # so BOTH the APK metadata and the printReleaseVersion task used for the
+      # release APK filenames report the tag version.
+      RELEASE_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: Check out Curio
@@ -106,7 +112,10 @@ jobs:
         run: |
           set -euo pipefail
           # printReleaseVersion prints "versionName:versionCode" (app/build.gradle.kts).
-          version=$(./gradlew -q printReleaseVersion | grep -m1 -E '^[0-9][0-9.]*:[0-9]+$' || true)
+          # versionName may carry a prerelease suffix (v1.2.3-alpha -> 1.2.3-alpha),
+          # so allow letters/hyphens AFTER a leading digit (stray gradle warning
+          # lines like "foo:123" still can't match).
+          version=$(./gradlew -q printReleaseVersion | grep -m1 -E '^[0-9][0-9a-zA-Z.-]*:[0-9]+$' || true)
           if [ -z "$version" ]; then
             echo "::error::Could not read the app version from Gradle (printReleaseVersion)."
             exit 1

@@ -1,5 +1,18 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): release tags drive the build versionName
+
+**Date:** 2026-08-11
+
+**What was asked:** When a release tag is pushed, the release build should use the tag's version (without the leading `v`) instead of the hardcoded `1.0.0`.
+
+**Changes made:**
+- **app/build.gradle.kts** — new `envReleaseVersion` val reads the `RELEASE_VERSION` env var, strips a leading `v` (`removePrefix`), and falls back to `"1.0.0"`; `versionName = envReleaseVersion ?: "1.0.0"`. Declared before the `android` block (safe at configuration time). `versionCode` stays date-based (store changelogs are keyed to it).
+- **.github/workflows/release.yml** — job-level `env: RELEASE_VERSION: ${{ github.ref_name }}` so every Gradle invocation in the job (assembleRelease AND printReleaseVersion) sees the tag; loosened the version-parse grep to `^[0-9][0-9a-zA-Z.-]*:[0-9]+$` so prerelease tags (`v1.2.3-alpha` → `1.2.3-alpha`) still parse while stray warning lines can't match.
+- **.github/AGENTS.md + app/AGENTS.md** — documented the tag-driven versionName contract.
+
+**Behavior:** tag `v1.2.3` → APK versionName `1.2.3`, APK names `Curio-1.2.3-{versionCode}-{abi}-…`. Local dev + PR CI don't set `RELEASE_VERSION` → default `1.0.0`. No local Gradle run (repo forbids builds); YAML/diff validated; code review passed (regex tightened, same-day versionCode note flagged for future Play distribution).
+
 ## Current Request (COMPLETED): AMOLED revert (main card + hero colors) + franchise filter + versionCode fix
 
 **Date:** 2026-08-11

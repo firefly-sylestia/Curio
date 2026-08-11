@@ -40,6 +40,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 - Decodes the repository keystore, runs `validateTopics assembleRelease`, and verifies the signature of **every** produced APK is not the Android debug key using the available Android build-tools.
 - Produces a **universal APK plus per-ABI APKs** (armeabi-v7a, arm64-v8a, x86, x86_64) via the ABI splits in `app/build.gradle.kts`, so each device can install the smallest file that matches its CPU.
 - Renames every APK to a device-friendly name — `Curio-{versionName}-{versionCode}-{abi}-Android{min}+.apk` (Android 8.0+ = `minSdk 26`) — using version numbers read from the `printReleaseVersion` Gradle task (single source of truth: `defaultConfig`), and publishes a release body that explains which APK fits which device.
+- **Tag version is the build version:** the workflow exports the tag (e.g. `v1.2.3`) as `RELEASE_VERSION`, and `app/build.gradle.kts` uses it as `versionName` with the leading `v` stripped (`1.2.3`; prerelease suffixes like `-alpha` survive). Local dev and PR CI don't set the env var, so the default `1.0.0` applies there. `versionCode` stays the date-based value — only the version name follows the tag.
 - Publishes the release APKs through a GitHub Release, marking `alpha`, `beta`, and `rc` tags as prereleases.
 - Never falls back to debug signing for a published release.
 
