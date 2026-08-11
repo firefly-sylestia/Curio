@@ -26,31 +26,31 @@ object TourController {
             route = CurioRoutes.HOME,
             routePrefix = CurioRoutes.HOME,
             landmarkId = "quest",
-            dialogue = "Let’s take a tiny tour. Tap the shuffle button and I’ll show you around.",
-            nextHint = "A safe demo — nothing starts yet."
+            dialogue = "Let\u2019s take a tiny tour! I\u2019ll walk you through everything.",
+            nextHint = "Tap the Shuffle button when you\u2019re ready."
         ),
         Step(
             id = "spin-button",
             route = CurioRoutes.SPIN,
             routePrefix = CurioRoutes.SPIN,
             landmarkId = "spin",
-            dialogue = "Here is the deck. Tap Spin and I’ll take you to the next stop without spinning it.",
-            nextHint = "The action is only being demonstrated."
+            dialogue = "Here\u2019s the deck \u2014 every spin lands a fresh topic. Tap it and we\u2019ll keep going!",
+            nextHint = "Every spin deals a fresh topic."
         ),
         Step(
             id = "express-yourself",
             route = CurioRoutes.revealForBrowse("artists", "David Bowie"),
             routePrefix = CurioRoutes.REVEAL.substringBefore("/"),
             landmarkId = "express-yourself",
-            dialogue = "When something sparks a thought, you can tap Express yourself to write it down. This tour won’t open it — tap Next when you’re ready.",
-            nextHint = "The note stays closed on the tour."
+            dialogue = "When something sparks a thought, tap Express yourself to write it down \u2014 your keepsakes collect in the Cabinet.",
+            nextHint = "Your notes land in the Cabinet."
         ),
         Step(
             id = "cabinet",
             route = CurioRoutes.CABINET,
             routePrefix = CurioRoutes.CABINET,
             landmarkId = "grid",
-            dialogue = "This is the Cabinet — every keepsake you save lands here.",
+            dialogue = "This is the Cabinet \u2014 every keepsake you save lands here.",
             nextHint = "Everything you keep collects here."
         ),
         Step(
@@ -58,7 +58,7 @@ object TourController {
             route = CurioRoutes.DATABASE,
             routePrefix = CurioRoutes.DATABASE,
             landmarkId = "search",
-            dialogue = "Browse Topics is the whole catalog — every artist, film, book, and discovery, ready to explore.",
+            dialogue = "Browse Topics is the whole catalog \u2014 every artist, film, book, and discovery, ready to explore.",
             nextHint = "Search and explore any lane."
         ),
         Step(
@@ -66,7 +66,7 @@ object TourController {
             route = CurioRoutes.PROFILE,
             routePrefix = CurioRoutes.PROFILE,
             landmarkId = "avatar",
-            dialogue = "Profile is where your journey lives — XP, badges, and your streak.",
+            dialogue = "Profile is where your journey lives \u2014 XP, badges, and your streak.",
             nextHint = "Your progress lives here."
         ),
         Step(
@@ -74,7 +74,7 @@ object TourController {
             route = CurioRoutes.QUESTS,
             routePrefix = CurioRoutes.QUESTS,
             landmarkId = "daily",
-            dialogue = "Quests give you a tiny daily goal — the fastest way to grow.",
+            dialogue = "Quests give you a tiny daily goal \u2014 the fastest way to grow.",
             nextHint = "A little curiosity every day."
         ),
         Step(
@@ -82,8 +82,8 @@ object TourController {
             route = CurioRoutes.SETTINGS,
             routePrefix = CurioRoutes.SETTINGS,
             landmarkId = "appearance",
-            dialogue = "And this is Settings — where you make Curio yours: theme, permissions, your pet. That’s everything — you’re all set to explore!",
-            nextHint = "That’s the whole tour."
+            dialogue = "And this is Settings \u2014 where you make Curio yours: theme, permissions, your pet. That\u2019s everything \u2014 you\u2019re all set!",
+            nextHint = "That\u2019s the whole tour."
         ),
     )
 
