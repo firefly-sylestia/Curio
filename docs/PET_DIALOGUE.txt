@@ -241,6 +241,9 @@ Legend
     • "Personality: {name} — {tagline}"    (taglines below)
     • "Next growth: {hint}"                (e.g. "Reach Level 3 to grow.")
     • "Next quest: {quest title}"
+    • "Its own sayings:" + the coined catchphrases shown verbatim (v14,
+      italic, accent color — from CurioPetBrain.coinedSayings; hidden when
+      the pet hasn't coined any yet)
     • Buttons: "Okay" / "Go to quest"
 
   PERSONALITY TAGLINES (CurioPet.kt, persona enum):

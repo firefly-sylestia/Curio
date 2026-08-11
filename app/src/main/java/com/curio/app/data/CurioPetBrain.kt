@@ -116,8 +116,9 @@ object CurioPetBrain {
         prefs(context).edit().putString(KEY_COINED, JSONArray(coined).toString()).apply()
     }
 
-    /** How many catchphrases the pet has developed so far (UI/curiosity). */
-    fun coinedCount(context: Context): Int = readCoined(context).size
+    /** The catchphrases the pet has developed so far, shown verbatim in
+     *  the check-in dialog (empty = it hasn't found its own words yet). */
+    fun coinedSayings(context: Context): List<String> = readCoined(context).toList()
 
     // ── Observation — every real action feeds the model ────────────────
     /** A screen visit (called from [CurioPet.bubbleFor]): histogram + decay. */

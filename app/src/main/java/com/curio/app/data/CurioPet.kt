@@ -1174,9 +1174,9 @@ object CurioPet {
         val persona: Persona,
         val nextStageLabel: String,
         val nextQuestTitle: String?,
-        // v8.43 — catchphrases the learning brain coined from the user's
-        // habits (0 = the pet hasn't found its own words yet).
-        val coinedSayings: Int
+        // v14 — the catchphrases the learning brain coined from the user's
+        // habits (empty = the pet hasn't found its own words yet).
+        val coinedPhrases: List<String>
     )
 
     fun tapInfo(context: Context, lanes: Set<String>): TapInfo {
@@ -1187,7 +1187,7 @@ object CurioPet {
             persona = persona(context),
             nextStageLabel = nextStageHint(stage),
             nextQuestTitle = CurioQuests.currentQuest()?.title,
-            coinedSayings = CurioPetBrain.coinedCount(context)
+            coinedPhrases = CurioPetBrain.coinedSayings(context)
         )
     }
 

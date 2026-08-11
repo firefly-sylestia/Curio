@@ -1,5 +1,19 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Show coined catchphrases in the pet check-in dialog
+
+**Date:** 2026-08-11
+
+**What was asked:** Show the pet's coined catchphrases in the hero-card check-in dialog instead of just the count.
+
+**Changes made:**
+- **CurioPetBrain.kt** — replaced `coinedCount(context): Int` with `coinedSayings(context): List<String>` (defensive `.toList()` copy of `readCoined`).
+- **CurioPet.kt** — `TapInfo.coinedSayings: Int` → `coinedPhrases: List<String>`; `tapInfo()` populates via `CurioPetBrain.coinedSayings(context)`. `tapInfo` is only used by the check-in dialog.
+- **CurioPetCompanion.kt** — the check-in dialog now shows an "Its own sayings:" header + the phrases joined with " · " in italic `bodySmall` in the accent color (new `FontStyle` import); the section hides when the pet hasn't coined anything yet.
+- **docs/PET_DIALOGUE.txt** — section 12 updated; **fastlane changelog** bullet added.
+
+**Validation:** brace balance OK, `git diff --check` clean, code review passed (no test source sets exist; no leftover `coinedCount` refs). Gradle build left to CI.
+
 ## Current Request (COMPLETED): Dedicated quest-complete trigger in the Pet Designer
 
 **Date:** 2026-08-11
