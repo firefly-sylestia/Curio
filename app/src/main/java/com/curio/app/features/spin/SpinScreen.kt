@@ -2335,25 +2335,59 @@ private fun HeroTicketCard(
     // crown so the pale fill doesn't wash to white.
     val dark = isCurioDarkTheme()
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     val ticketBrush = if (isMixed) {
-        CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+        // v15 — AMOLED mixed deck: each vivid accent stop darkens into a
+        // quiet multi-hue glass, capped with pure OLED black — the mix
+        // identity stays readable but the card reads as dark glass.
+        if (isAmoled) {
+            val glass = gradient.mapIndexed { i, stop ->
+                lerp(stop, Color.Black, if (i == 0) 0.62f else 0.76f)
+            }
+            Brush.verticalGradient(glass + Color.Black)
+        } else {
+            CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+        }
     } else if (heroBlendOn) {
         // v10 — dual-accent blend: category accent meets a warm golden
         // companion in a multi-stop vertical gradient (works across all
-        // theme styles — Curio, Material, AMOLED).
+        // theme styles — Curio, Material, AMOLED; its AMOLED branches keep
+        // the warm-gold black glass when the user opts into the blend).
         Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
     } else if (heroGradientOn) {
-        val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
-        val base = lerp(gradient.last(), Color.Black, 0.06f)
-        val stops = if (gradient.size > 2) {
-            listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
+        // v15 — the enhanced diagonal sweep keeps working in AMOLED: it
+        // runs on dark-glass stops (a soft accent crown → OLED black) so
+        // the toggle still visibly upgrades the card while staying sleek.
+        val stops = if (isAmoled) {
+            listOf(
+                lerp(Color.Black, accent, 0.30f),
+                lerp(Color.Black, accent, 0.10f),
+                Color.Black
+            )
         } else {
-            CurioGradients.hslGradientStops(crown, base, 3)
+            val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+            val base = lerp(gradient.last(), Color.Black, 0.06f)
+            if (gradient.size > 2) {
+                listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
+            } else {
+                CurioGradients.hslGradientStops(crown, base, 3)
+            }
         }
         Brush.linearGradient(
             stops,
             start = Offset(0f, 0f),
             end = Offset(wPx, hPx)
+        )
+    } else if (isAmoled) {
+        // v15 — AMOLED: sleek vertical black glass. The deck's category
+        // color glows softly in from the top edge and melts to pure OLED
+        // black at the base, so the main card clearly wears its accent
+        // while the lower card stays true black (the old 8–18% trace read
+        // as plain black on device).
+        Brush.verticalGradient(
+            0f to lerp(Color.Black, accent, 0.24f),
+            0.55f to lerp(Color.Black, accent, 0.08f),
+            1f to Color.Black
         )
     } else {
         Brush.verticalGradient(gradient)
@@ -2537,13 +2571,14 @@ private fun HeroTicketCard(
                 .clip(RoundedCornerShape(30.dp))
                 .then(
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                        // v14 — the near-black ticket keeps a QUIET category
-                        // shine — the same black-glass treatment as the deck
-                        // pills but at half intensity, so the main card reads
-                        // as sleek black glass with just a hint of its
-                        // category color (not a loud full rim).
+                        // v15 — the black-glass ticket carries the deck's
+                        // category color as a rim light: the edge shine
+                        // brightened from 0.55 → 0.75 so the accent reads
+                        // clearly on the OLED black, but stays below the
+                        // full-shine settings cards so the main card keeps
+                        // its sleek, clean look.
                         Modifier.categoryEdgeShine(
-                            RoundedCornerShape(30.dp), accent, intensity = 0.55f
+                            RoundedCornerShape(30.dp), accent, intensity = 0.75f
                         )
                     } else Modifier
                 )
@@ -2559,15 +2594,24 @@ private fun HeroTicketCard(
                 // accent outline (the accent rim-light stays OFF by default).
                 // ON drops the hairline lower and the accent is drawn as a
                 // soft gradient rim-light inside (the drawBehind below).
-                // v14 — AMOLED: the quiet edge-shine above carries the
-                // category tint, so this hairline stays a soft whisper
-                // (0.16) that seats the card without stacking a loud rim.
+                // v15 — the hairline seats the card without a bright ring:
+                // AMOLED wears the deck accent at a quiet 0.20 (the edge
+                // shine above is the primary accent carrier), and plain
+                // dark mode drops the white hairline to a whisper 0.10 so
+                // it never reads as a bright outline on the deep fills.
                 border = BorderStroke(
                     1.dp,
-                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                        accent.copy(alpha = 0.16f)
-                    else
-                        ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
+                    // Order matters: `dark` intentionally precedes
+                    // `heroBorderOn`, so dark mode ALWAYS gets the whisper
+                    // 0.10 hairline (the border toggle only lifts it in
+                    // light mode — the dark rim-light is drawn separately
+                    // inside the card).
+                    when {
+                        isAmoled -> accent.copy(alpha = 0.20f)
+                        dark -> ink.copy(alpha = 0.10f)
+                        heroBorderOn -> ink.copy(alpha = 0.14f)
+                        else -> ink.copy(alpha = 0.18f)
+                    }
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -2593,8 +2637,16 @@ private fun HeroTicketCard(
                                     drawRoundRect(
                                         brush = Brush.verticalGradient(
                                             listOf(
-                                                lerp(ink, Color.White, if (dark) 0.20f else 0.30f),
-                                                lerp(ink, accent, 0.14f)
+                                                // v15 — dark mode: the old
+                                                // white-lerp rim drew a solid
+                                                // bright ring around the card;
+                                                // dark tones fade toward the
+                                                // fill at soft alpha so the
+                                                // machined edge stays subtle.
+                                                if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
+                                                else lerp(ink, Color.White, 0.30f),
+                                                if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
+                                                else lerp(ink, accent, 0.14f)
                                             )
                                         ),
                                         topLeft = Offset(borderW / 2f, borderW / 2f),

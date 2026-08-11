@@ -1,5 +1,23 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): AMOLED polish — main Spin card black glass, dialogs, Profile coral accents, enhanced-gradient default
+
+**Date:** 2026-08-11
+
+**What was asked:** Improve the AMOLED option. (1) The shuffle MAIN card should carry a slight, sleek category-color accent. (2) Follow-up: the enhanced main-card gradient toggle should keep working in AMOLED and be ON by default; the main-card border in dark mode looks too bright — fix. (3) Dialogs should wear the sleek AMOLED look. (4) Profile options below the Settings row have a weird reddish (coral) accent in AMOLED — fix.
+
+**Changes made:**
+- **SpinScreen.kt (HeroTicketCard)** — sleek AMOLED black-glass main card: single decks get `lerp(Black, accent, 0.24)` crown → `0.08` → pure OLED black (the old 8–18% trace read as plain black); mixed decks darken each vivid accent stop (`lerp(stop, Black, 0.62/0.76)`) + black base. The enhanced-gradient toggle now WORKS in AMOLED (dark-glass diagonal stops `0.30/0.10/Black`), and heroBlend keeps its tuned AMOLED branches; AMOLED-only vertical glass is the fallback when the toggle is off. Edge shine 0.55 → 0.75. Border: AMOLED accent 0.20, plain dark white hairline 0.18 → 0.10 (bright-ring fix), light unchanged. The heroBorderOn drawBehind rim in dark mode no longer draws a solid white ring — dark tones at soft alpha (0.30/0.16).
+- **TopicRevealScreen.kt (hero)** — pixel-mirror of the ticket so the shared-element morph stays identical in AMOLED: same dark-glass stops for heroGradientOn/fallback, same dark rim fix.
+- **AppPreferences.kt** — `heroGradientState` default `false → true` (+ `isHeroGradientEnabled` default true): the enhanced main-card gradient now ships ON by default, still toggleable in Experiments.
+- **CurioTheme.kt** — `curioDialogContainerColor()`: AMOLED → pure `Color.Black` (was #181818 grey); `curioDialogActionColor()`: AMOLED → `onSurface` white (was coral primary — the red accent). Filled dialog buttons (white container + deep-plum onPrimary content) stay readable.
+- **CurioSettingsCard.kt** — `CurioCardHeader` chip: AMOLED swaps coral for a neutral glass plate (`surfaceVariant` + `onSurface` icon) — fixes the Lanes/Achievements header chips app-wide (Profile + Settings).
+- **ProfileScreen.kt** — `ProgressAndAchievementsCard`: AMOLED swaps the coral XP progress bar / Quests plate / quest chip for clean white-glass equivalents.
+- **PetDesignerScreen.kt** — the custom Import-PNG dialog container joins the AMOLED pure-black glass (was the grey #181818 `surfaceContainerHigh`).
+- **fastlane 20260919 changelog** — bullet updated to cover the full AMOLED polish + enhanced-gradient default.
+
+**Validation:** brace/paren/bracket balance clean, `git diff --check` clean; code review passed. Gradle build left to CI (repository forbids local Gradle commands).
+
 ## Current Request (COMPLETED): Third, mature voice register for the fully-grown pet
 
 **Date:** 2026-08-11

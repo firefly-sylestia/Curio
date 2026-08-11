@@ -222,9 +222,10 @@ object AppPreferences {
     // deck's front hero card wears four independently-toggleable upgrades:
     // an enhanced top-lit gradient fill, an accent-tinted border, a soft
     // ambient shadow, and enhanced typography (bolder title, bigger
-    // subtitle). Each defaults OFF; the current hero card stays unchanged
-    // until the experiment settles.
-    var heroGradientState by mutableStateOf(false)
+    // subtitle). v15 — the enhanced gradient is promoted to the shipped
+    // default (ON, still toggleable in Experiments); the other upgrades
+    // stay OFF.
+    var heroGradientState by mutableStateOf(true)
         private set
     // v10 — promoted from experiment to always-on: the accent border on the
     // hero card is now the shipped default.
@@ -553,9 +554,9 @@ object AppPreferences {
     }
 
     // ── Main card (hero ticket) redesign (v7.13 experimental) ──────────
-    /** Whether the enhanced hero-card gradient fill is on (default off). */
+    /** Whether the enhanced hero-card gradient fill is on (v15 — default on). */
     fun isHeroGradientEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HERO_GRADIENT, false)
+        prefs(context).getBoolean(KEY_HERO_GRADIENT, true)
 
     fun setHeroGradientEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_GRADIENT, enabled).apply()

@@ -351,6 +351,11 @@ val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
  */
 @Composable
 fun curioDialogContainerColor(): Color {
+    // v15 — AMOLED dialogs wear the sleek pure-black glass (the scheme's
+    // #181818 container reads grey next to the app's true-black cards).
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return Color.Black
+    }
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
         return MaterialTheme.colorScheme.surfaceContainerHigh
     }
@@ -370,10 +375,14 @@ fun curioDialogContainerColor(): Color {
  * Readable dialog ACTION ink. In light mode the scheme primary is the pale
  * coral-pink brand color that washes out on a light dialog, so actions flip
  * to a deep same-hue rose for real contrast; dark and Material keep the
- * scheme primary.
+ * scheme primary. v15 — AMOLED uses clean white (the scheme primary is the
+ * coral brand color that would read as a red accent on pure black).
  */
 @Composable
 fun curioDialogActionColor(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return MaterialTheme.colorScheme.onSurface
+    }
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
         return MaterialTheme.colorScheme.primary
     }

@@ -59,12 +59,26 @@ fun CurioSettingsCard(
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 
-/** Icon-chip card header — coral glyph chip + title + subtitle. */
+/** Icon-chip card header — coral glyph chip + title + subtitle (v15: AMOLED swaps the coral chip for a neutral glass plate). */
 @Composable
 fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Surface(shape = RoundedCornerShape(14.dp), color = CurioColors.CoralBlush.copy(alpha = 0.16f), modifier = Modifier.size(38.dp)) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { CurioIcon(icon, null, tint = CurioColors.CoralBlush, size = 20.dp) }
+        // v15 — AMOLED: the brand coral reads as a weird red accent on pure
+        // black, so the header chip becomes a sleek neutral glass plate.
+        val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+        Surface(
+            shape = RoundedCornerShape(14.dp),
+            color = if (isAmoled) MaterialTheme.colorScheme.surfaceVariant
+                    else CurioColors.CoralBlush.copy(alpha = 0.16f),
+            modifier = Modifier.size(38.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                CurioIcon(
+                    icon, null,
+                    tint = if (isAmoled) MaterialTheme.colorScheme.onSurface else CurioColors.CoralBlush,
+                    size = 20.dp
+                )
+            }
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
