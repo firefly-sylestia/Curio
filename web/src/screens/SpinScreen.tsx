@@ -184,44 +184,50 @@ const HeroTicket: React.FC<{
   );
 };
 
-// ─── Peek Card (receded, opaque) ──────────────────────────────────────
+// ─── Peek Card (matching Android: 360×116dp near, 19dp corner, receding) ─
 const PeekCard: React.FC<{ slot: -1 | 1; topic: CurioTopic | null; category: CurioCategory; isSpinning: boolean }> = ({ slot, topic, category, isSpinning }) => {
   const { isDark } = useTheme();
   if (!topic) return null;
-  const isTop = slot === -1;
-  const w = 318; const h = 102; const corner = 18;
-  const yOff = isTop ? -134 : 134;
+  // Match Android near-peek: 360×116dp, corner 19dp
+  const w = 360; const h = 116; const corner = 19;
+  // Android yOff: -134 for top near, +146 for bottom near
+  const yOff = slot === -1 ? -134 : 146;
 
   const [r, g, b] = hexToRgb(category.accent);
   const surfaceRgb = isDark ? [18, 18, 35] : [247, 240, 228];
-  const depth = 0.48;
+  // Level-darkened: near peeks step one shade down from the hero (0.40 blend)
+  const depth = 0.40;
   const dr = Math.round(r * (1 - depth) + surfaceRgb[0] * depth);
   const dg = Math.round(g * (1 - depth) + surfaceRgb[1] * depth);
   const db = Math.round(b * (1 - depth) + surfaceRgb[2] * depth);
-  const dr2 = Math.round(dr * 0.72 + surfaceRgb[0] * 0.28);
-  const dg2 = Math.round(dg * 0.72 + surfaceRgb[1] * 0.28);
-  const db2 = Math.round(db * 0.72 + surfaceRgb[2] * 0.28);
+  // Subtle second stop for gradient depth
+  const dr2 = Math.round(dr * 0.78 + surfaceRgb[0] * 0.22);
+  const dg2 = Math.round(dg * 0.78 + surfaceRgb[1] * 0.22);
+  const db2 = Math.round(db * 0.78 + surfaceRgb[2] * 0.22);
 
   return (
-    <div className="absolute left-1/2 flex items-center"
-      style={{ width: w, height: h, borderRadius: corner,
-        top: isTop ? yOff : undefined, bottom: !isTop ? yOff : undefined,
-        transform: 'translateX(-50%)',
+    <div className="absolute left-1/2 flex items-center overflow-hidden"
+      style={{
+        width: w, height: h, borderRadius: corner,
+        top: `calc(50% + ${yOff}px)`,
+        transform: 'translate(-50%, -50%)',
         background: `linear-gradient(180deg, rgb(${dr},${dg},${db}), rgb(${dr2},${dg2},${db2}))`,
-        boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-        border: isDark ? `1px solid ${category.accent}1F` : `1px solid ${category.accent}12`,
-        opacity: isSpinning ? 0.35 : 0.55, transition: 'opacity 0.35s ease',
-        zIndex: isTop ? 1 : 0 }}>
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        border: isDark ? `1px solid ${category.accent}18` : `1px solid ${category.accent}10`,
+        opacity: isSpinning ? 0.35 : 0.55,
+        transition: 'opacity 0.35s ease',
+        zIndex: slot === -1 ? 2 : 5,
+      }}>
       {/* Left accent strip */}
-      <div className="absolute left-3 top-0 bottom-0 w-[3px] rounded-full" style={{ background: category.accent, opacity: 0.2 }} />
+      <div className="absolute left-[12px] top-0 bottom-0 w-[3px] rounded-full" style={{ background: category.accent, opacity: 0.18 }} />
       <div className="flex items-center gap-3 px-5 flex-1 min-w-0 pl-7">
-        <MaterialIcon name={category.iconGlyph} size={22} className="flex-shrink-0"
-          style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.45)' }} />
+        <MaterialIcon name={category.iconGlyph} size={24} className="flex-shrink-0"
+          style={{ color: isDark ? 'rgba(255,255,255,0.42)' : 'rgba(59,10,23,0.38)' }} />
         <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-semibold truncate leading-tight"
-            style={{ color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(59,10,23,0.72)' }}>{topic.name}</div>
-          <div className="text-[11px] truncate mt-0.5"
-            style={{ color: isDark ? 'rgba(255,255,255,0.32)' : 'rgba(59,10,23,0.32)' }}>{topic.subtype}</div>
+          <div className="text-[15px] font-semibold truncate leading-tight"
+            style={{ color: isDark ? 'rgba(255,255,255,0.68)' : 'rgba(59,10,23,0.68)' }}>{topic.name}</div>
+          <div className="text-[12px] truncate mt-0.5"
+            style={{ color: isDark ? 'rgba(255,255,255,0.30)' : 'rgba(59,10,23,0.28)' }}>{topic.subtype}</div>
         </div>
       </div>
     </div>
@@ -419,25 +425,19 @@ export const SpinScreen: React.FC = () => {
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
-      {/* ── 1. Deck Section ──────────────────────────────────────────── */}
+      {/* ── 1. Fan Deck Section (Android: 444dp container) ──────────── */}
       <div className="flex-1 flex flex-col items-center justify-end px-4" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }}>
-        <div className="relative flex flex-col items-center" style={{ height: 444 }}>
-          {/* Top peek (slot -1) */}
-          <div className="relative w-[340px] h-[120px]">
-            <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
+        <div className="relative flex items-center justify-center" style={{ width: 380, height: 444 }}>
+          {/* Top peek (slot -1) fanned above hero */}
+          <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
+          {/* Hero card (slot 0) at center, z-index above peeks */}
+          <div className="relative" style={{ zIndex: 10 }}>
+            <ConfettiBurst trigger={confettiTrigger} color={activeCategory.accent} />
+            <HeroTicket topic={currentTopic || getFanTopic(0)} category={activeCategory}
+              isSpinning={spinPhase === 'spinning'} spinPhase={spinPhase} onClick={handleTopicOpen} />
           </div>
-          {/* Hero card — no orbit ring behind it, clean standalone */}
-          <div className="relative w-[306px] h-[330px] -mt-3 flex items-center justify-center">
-            <div className="relative" style={{ zIndex: 1 }}>
-              <ConfettiBurst trigger={confettiTrigger} color={activeCategory.accent} />
-              <HeroTicket topic={currentTopic || getFanTopic(0)} category={activeCategory}
-                isSpinning={spinPhase === 'spinning'} spinPhase={spinPhase} onClick={handleTopicOpen} />
-            </div>
-          </div>
-          {/* Bottom peek (slot +1) */}
-          <div className="relative w-[340px] h-[120px] -mt-3">
-            <PeekCard slot={1} topic={getFanTopic(1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
-          </div>
+          {/* Bottom peek (slot +1) fanned below hero */}
+          <PeekCard slot={1} topic={getFanTopic(1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
         </div>
         {/* ── 2. Spin Button ─────────────────────────────────────────── */}
         <div className="mb-4">
