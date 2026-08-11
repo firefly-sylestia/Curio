@@ -8,8 +8,10 @@ import { ALL_CATEGORIES } from '../data/categories';
 import { 
   CurioChip, 
   CurioEmptyState, 
-  CurioSectionHeader
+  CurioSectionHeader,
 } from '../components/SharedComponents';
+import { captureRepository } from '../db/database';
+import type { CaptureEntity } from '../types';
 
 
 // Entry type
@@ -117,15 +119,24 @@ export const CabinetScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load entries
+  // Load entries from IndexedDB
   useEffect(() => {
     const loadEntries = async () => {
       try {
-        // In a real app, this would load from IndexedDB
-        // For now, use empty array
-        setEntries([]);
+        const all = await captureRepository.getAll();
+        const mapped: CurioCapture[] = all.map((e: CaptureEntity) => ({
+          id: e.id,
+          title: e.title || e.topicName || 'Untitled',
+          content: e.topicTeaser || '',
+          categoryId: e.categoryId,
+          topicName: e.topicName,
+          format: e.format,
+          createdAt: new Date(e.capturedAtMillis).toISOString(),
+        }));
+        setEntries(mapped.reverse());
       } catch (error) {
         console.error('Failed to load entries:', error);
+        setEntries([]);
       } finally {
         setIsLoading(false);
       }
@@ -154,7 +165,7 @@ export const CabinetScreen: React.FC = () => {
   }, {} as Record<string, CurioCapture[]>);
 
   const handleEntryClick = (entry: CurioCapture) => {
-    navigate(`/entry/${entry.id}`);
+    navigate(`/detail/${entry.id}`);
   };
 
   return (

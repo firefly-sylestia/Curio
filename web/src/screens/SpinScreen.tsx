@@ -137,15 +137,16 @@ const HeroTicket: React.FC<{
 
   const [r, g, b] = hexToRgb(category.accent);
   const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
-  const top = `rgba(${r},${g},${b},0.94)`;
-  const mid = `rgba(${Math.round(r * 0.55 + surfaceRgb[0] * 0.45)},${Math.round(g * 0.55 + surfaceRgb[1] * 0.45)},${Math.round(b * 0.55 + surfaceRgb[2] * 0.45)},0.72)`;
-  const bottom = `rgba(${Math.round(r * 0.22 + surfaceRgb[0] * 0.78)},${Math.round(g * 0.22 + surfaceRgb[1] * 0.78)},${Math.round(b * 0.22 + surfaceRgb[2] * 0.78)},0.88)`;
+  // Lighter gradient that truly blends into the page background like Android
+  const top = `rgba(${r},${g},${b},0.92)`;
+  const mid = `rgba(${Math.round(r * 0.42 + surfaceRgb[0] * 0.58)},${Math.round(g * 0.42 + surfaceRgb[1] * 0.58)},${Math.round(b * 0.42 + surfaceRgb[2] * 0.58)},0.65)`;
+  const bottom = `rgba(${Math.round(r * 0.10 + surfaceRgb[0] * 0.90)},${Math.round(g * 0.10 + surfaceRgb[1] * 0.90)},${Math.round(b * 0.10 + surfaceRgb[2] * 0.90)},0.92)`;
 
   return (
     <button
       onClick={onClick}
       disabled={isSpinning}
-      className="relative w-[286px] h-[310px] rounded-[28px] overflow-hidden text-left flex-shrink-0"
+      className="relative w-[286px] h-[310px] rounded-[32px] overflow-hidden text-left flex-shrink-0"
       style={{
         background: `linear-gradient(180deg, ${top} 0%, ${mid} 50%, ${bottom} 100%)`,
         boxShadow: isSpinning
