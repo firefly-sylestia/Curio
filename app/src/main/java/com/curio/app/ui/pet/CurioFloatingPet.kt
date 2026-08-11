@@ -322,7 +322,9 @@ fun CurioFloatingPet(
             routineKey++
             recentRoutineIds = (listOf(routine.id) + recentRoutineIds).distinct().take(5)
             lastTouch = System.currentTimeMillis()
-            routine.line?.let(::queueReaction)
+            // v14 — a BABY speaks no routine lines: the routine plays as
+            // pure motion so the baby never utters adult sentences.
+            if (CurioPet.currentStage() != CurioPet.Stage.BABY) routine.line?.let(::queueReaction)
         }
 
         /**
@@ -791,7 +793,9 @@ fun CurioFloatingPet(
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
-                    queueReaction(CurioPet.chameleonLine())
+                    // v14 — motion first: the game mostly plays silent and
+                    // speaks its line only sometimes.
+                    if (Random.nextFloat() < 0.35f) queueReaction(CurioPet.chameleonLine())
                     squishKey++
                     chameleonAlpha.snapTo(1f)
                     chameleonAlpha.animateTo(0.12f, tween(420, easing = FastOutSlowInEasing))
@@ -821,7 +825,9 @@ fun CurioFloatingPet(
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
-                    queueReaction(CurioPet.sparkLine())
+                    // v14 — motion first: the game mostly plays silent and
+                    // speaks its line only sometimes.
+                    if (Random.nextFloat() < 0.35f) queueReaction(CurioPet.sparkLine())
                     val sx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
                     val sy = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
                     walkTo(Offset(sx, sy), stepMs = 12, steps = 34)
@@ -994,8 +1000,10 @@ fun CurioFloatingPet(
         // spin cheers onto other pages.
         LaunchedEffect(CurioPet.spinning) {
             if (CurioPet.spinning && autoWander && watching) {
+                // v14 — during the spin the pet reacts with motion ALWAYS
+                // and cheers out loud only sometimes: words stay special.
                 celebrateKey++
-                queueReaction(CurioPet.spinCheer())
+                if (Random.nextFloat() < 0.45f) queueReaction(CurioPet.spinCheer())
                 lastTouch = System.currentTimeMillis()
             }
         }
@@ -1399,7 +1407,11 @@ fun CurioFloatingPet(
                                         // v8.35 — the biggest taps add a
                                         // celebratory twirl.
                                         celebrateKey++
-                                        spinKey++
+                                        // v14 — spin once when the streak FIRST
+                                        // reaches the celebration tier; further
+                                        // rapid taps keep the happy motion but
+                                        // never restart a spin loop.
+                                        if (tapStreak == 3) spinKey++
                                     }
                                 }
                                 // v8.21 — hearts for the playful/celebrate taps

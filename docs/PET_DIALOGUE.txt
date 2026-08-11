@@ -433,6 +433,43 @@ Legend
     • "Streak day {N}! One spark at a time." / "Day {N}! The flame likes this pace."
 
 --------------------------------------------------------------------------------
+20. VOICE SYSTEM (v14) — the pet speaks in two registers by growth stage
+    Location: CurioPet.kt — every line source routes through
+              currentStage() == Stage.BABY (see the v14 BABY voice block)
+
+  BABY (Baby Spark — before Level 7 / path choice): telegraphic speech,
+  modeled on human 18-24 month child language (telegraphic stage) and
+  pet-directed speech research. Rules:
+    • 1-3 words per line. Content words only: drop articles, auxiliaries,
+      prepositions, tense markers ("Play ball!", not "I want to play").
+    • Concrete nouns/verbs/adjectives a baby knows (bed, spark, up, big).
+    • Exclamation-led and onomatopoeia-heavy ("Wheee!", "Boop!", "Ooh?").
+    • Same few lines all day: no time-of-day or bond variants, and the
+      learning brain's stats-grounded sentences are bypassed (bubbleFor).
+    • Baby pools: babyMoodLine / babyEventLine / babyTouchLine /
+      babyStreakLine / babySpinCheerLines / babyPeekLines /
+      babyChameleonLines / babySparkLines / babyMorningLines /
+      babyWelcomeBack*Lines / babySassyLines.
+
+  EVOLVED (Evolved / Fully Grown — Level 7+ with a path): the full rich
+  library above (section 1-19 pools). Natural-language writing rules
+  (character-dialogue research):
+    • Short-to-medium bursts; mix sentence lengths for rhythm.
+    • Use natural contractions and fragments — never robotic/expository.
+    • Ground feelings in sensory or situational details instead of
+      announcing them ("The deck knows what it's doing.", not
+      "I predict a good outcome").
+    • One consistent idiolect: witty, self-aware, warm.
+
+  MOTION-FIRST (v14) — play and spin moments prefer reaction over words:
+    • Spin screen: the pet always hops while the deck reels; the cheer
+      line shows only ~45% of the time.
+    • Self-started games (chameleon, spark-catch): motion always, line
+      only ~35% of the time.
+    • Rapid celebration taps: the twirl spin plays ONCE per streak (the
+      tap that first reaches tier 3), never as a repeating loop.
+
+--------------------------------------------------------------------------------
 Notes for future edits
   • Keep one sentence per passive bubble (the pill shows max 2 lines).
   • The TOUR dialogue is NOT capped at 2 lines anymore: PetSpeechBubble

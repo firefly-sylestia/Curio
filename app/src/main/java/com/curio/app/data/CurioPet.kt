@@ -260,7 +260,13 @@ object CurioPet {
     /** A short, cute line for the pet's reaction to [event]. */
     fun eventLine(event: Event): String {
         // v9.x — a burst of the same action earns one adorably sassy line.
-        if (isEventBurst(event)) return pickLine(sassyLines)
+        // v14 — the BABY's comeback is tiny and repetitive, not witty.
+        if (isEventBurst(event)) {
+            return pickLine(if (currentStage() == Stage.BABY) babySassyLines else sassyLines)
+        }
+        // v14 — the BABY voice is telegraphic: small exclamation-led pools
+        // per event instead of the evolved forms' full sentences.
+        if (currentStage() == Stage.BABY) return babyEventLine(event)
         return when (event) {
             Event.SPIN_LANDED -> pickLine(listOf(
                 "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!",
@@ -511,7 +517,10 @@ object CurioPet {
     }
 
     /** A short morning greeting (v8.14) — shown when the pet appears in the morning. */
-    fun morningGreeting(): String = pickLine(listOf(
+    fun morningGreeting(): String =
+        // v14 — the BABY greets the morning in two words.
+        if (currentStage() == Stage.BABY) pickLine(babyMorningLines)
+        else pickLine(listOf(
         "Good morning!", "Morning! Ready for a spin?", "Rise and shine!",
         "Fresh day, fresh topics!", "Sun's up — the deck is waiting!",
         "A brand-new day to explore!", "Morning stretch. Okay, we go!",
@@ -537,11 +546,13 @@ object CurioPet {
         val awayMs = now - lastSeen
         p.edit().putLong(KEY_LAST_SEEN_AT, now).apply()
         val dayMs = 86_400_000L
+        // v14 — the BABY's welcome is telegraphic too.
+        val baby = currentStage() == Stage.BABY
         return when {
             awayMs < dayMs -> null
-            awayMs >= 7 * dayMs -> pickLine(welcomeBackWeekLines)
-            awayMs >= 3 * dayMs -> pickLine(welcomeBackDaysLines)
-            else -> pickLine(welcomeBackDayLines)
+            awayMs >= 7 * dayMs -> pickLine(if (baby) babyWelcomeBackWeekLines else welcomeBackWeekLines)
+            awayMs >= 3 * dayMs -> pickLine(if (baby) babyWelcomeBackDaysLines else welcomeBackDaysLines)
+            else -> pickLine(if (baby) babyWelcomeBackDayLines else welcomeBackDayLines)
         }
     }
 
@@ -825,52 +836,142 @@ object CurioPet {
         "One more quest bites the dust!"
     )
 
+    // ═══════════════════════════════════════════════════════════════════
+    // v14 — BABY voice (telegraphic, ~18-24 month equivalent)
+    // Research-informed (child telegraphic speech + pet-directed speech):
+    // 1-3 word utterances, content words only (no articles/auxiliaries),
+    // concrete nouns & verbs, exclamation-led, heavy on onomatopoeia. The
+    // baby says FEW things; the evolved forms speak the full rich library
+    // above. Routed by currentStage() in every line source below.
+    // ═══════════════════════════════════════════════════════════════════
+    private val babySassyLines = listOf("Again?", "Same same!", "Ooh ooh!", "You! Again!")
+    private val babyProudLines = listOf("Big!", "Grew!", "Up up!", "Warm!")
+    private val babyExcitedLines = listOf("New! New!", "Ooh ooh!", "Wow!", "Look look!")
+    private val babyHappyLines = listOf("Happy!", "Good!", "Yay!", "Sparkle!")
+    private val babyCuriousLines = listOf("What?", "Look?", "Ooh?", "New thing!")
+    private val babySleepyLines = listOf("Tired…", "Nighty…", "Zzz…", "Sleepy…")
+    private val babyFocusedLines = listOf("Shh…", "Quiet…", "Work work.")
+    private val babyBouncyLines = listOf("Bounce!", "Wheee!", "More more!")
+    private val babyShyLines = listOf("…Hi.", "*peek*", "Small…", "…Hid")
+    private val babyGrumpyLines = listOf("Hmph!", "No!", "…Grumps", "Grumble!")
+    private val babyPlayfulLines = listOf("Play!", "Again!", "Boop boop!", "Fun fun!")
+    private val babySpinCheerLines = listOf(
+        "Go go!", "Spin spin!", "Round!", "Wheee!", "Faster!", "Ooh ooh!"
+    )
+    private val babyPeekLines = listOf("Boo!", "Peek!", "Hid!", "Here!")
+    private val babyChameleonLines = listOf("Gone!", "Poof!", "Bye bye!", "…Here!")
+    private val babySparkLines = listOf("Spark!", "Mine!", "Got!", "Shiny shiny!")
+    private val babyMorningLines = listOf("Morn!", "Hi hi!", "Day!", "Up up!")
+    private val babyWelcomeBackDayLines = listOf(
+        "You back!", "Missed you!", "Here again!", "Yay you!"
+    )
+    private val babyWelcomeBackDaysLines = listOf(
+        "Many days! Missed you!", "You go long! Missed!", "Home home!"
+    )
+    private val babyWelcomeBackWeekLines = listOf(
+        "Whole week! Missed you!", "Long long! You here now!", "Week! Big hug!"
+    )
+
+    /** v14 — a BABY mood bubble: 1-3 words, concrete, exclamation-led. */
+    private fun babyMoodLine(mood: Mood): String = when (mood) {
+        Mood.PROUD -> pickLine(babyProudLines)
+        Mood.EXCITED -> pickLine(babyExcitedLines)
+        Mood.HAPPY -> pickLine(babyHappyLines)
+        Mood.CURIOUS -> pickLine(babyCuriousLines)
+        Mood.FOCUSED -> pickLine(babyFocusedLines)
+        Mood.BOUNCY -> pickLine(babyBouncyLines)
+        Mood.SHY -> pickLine(babyShyLines)
+        Mood.GRUMPY -> pickLine(babyGrumpyLines)
+        Mood.PLAYFUL -> pickLine(babyPlayfulLines)
+        Mood.SLEEPY -> pickLine(babySleepyLines)
+    }
+
+    /** v14 — a BABY reaction line for [event]. */
+    private fun babyEventLine(event: Event): String = when (event) {
+        Event.SPIN_LANDED -> pickLine(listOf("Ooh!", "Landed!", "Round round!", "Spin done!"))
+        Event.REVEAL_TAPPED -> pickLine(listOf("You!", "Ta-da!", "Look!", "Good pick!"))
+        Event.REVEAL_AUTO -> pickLine(listOf("Oh!", "It did!", "Ta-da!", "Surprise!"))
+        Event.EXPLORE -> pickLine(listOf("Go go!", "See!", "Bye bye!", "New!"))
+        Event.SAVE -> pickLine(listOf("Keep!", "Mine!", "Snap!", "Save save!"))
+        Event.TOUCH -> pickLine(listOf("Boop!", "Hehe!", "Soft!", "Again!"))
+        Event.PLAY -> pickLine(listOf("Wheee!", "Fun!", "Again!", "Zoom!"))
+        Event.LEVEL_UP -> pickLine(listOf("Big!", "Up!", "Grow!", "Yay!"))
+        Event.EVOLVE -> "Fresh me!"
+        Event.QUEST_COMPLETE -> pickLine(listOf("Done!", "Yay!", "Win win!", "Good good!"))
+        Event.STREAK_MILESTONE -> babyStreakLine(CurioQuests.bestStreakState)
+    }
+
+    /** v14 — a BABY streak line: the flame in tiny words. */
+    private fun babyStreakLine(streak: Int): String = when (streak) {
+        1 -> pickLine(listOf("Fire!", "Warm warm!"))
+        3 -> pickLine(listOf("Day 3! Big!", "Three days! Warm!"))
+        7 -> pickLine(listOf("Day 7! Big fire!", "Week! Wow!"))
+        14 -> pickLine(listOf("Day 14! Fire fire!", "Many days!"))
+        30 -> pickLine(listOf("Day 30! Big big!", "So many days!"))
+        else -> pickLine(listOf("Day $streak! Warm!", "Day $streak! Fire!", "More days!"))
+    }
+
+    /** v14 — a BABY tap answer: boop → bounce → tiny celebration. */
+    private fun babyTouchLine(tier: Int): String = when {
+        tier >= 3 -> pickLine(listOf("Wheee!", "Yay yay!", "More more!", "Boop boop boop!"))
+        tier >= 2 -> pickLine(listOf("Hehe!", "Zoom!", "Again!", "Bounce!"))
+        else -> pickLine(listOf("Boop!", "Soft!", "Hehe!", "…Again?"))
+    }
+
     /** A passive bubble line for the current [mood]. */
-    fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String = when (mood) {
+    fun lineFor(context: Context, mood: Mood, lanes: Set<String>): String {
+        // v14 — the BABY voice: limited telegraphic pools, no time-of-day
+        // or bond variants (a baby says the same few things all day).
+        if (currentStage() == Stage.BABY) return babyMoodLine(mood)
         // Inlined so the level reads live, not baked at first access.
-        Mood.PROUD -> pickLine(listOf(
-            "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. I grew a little!",
-            "Shiny! We leveled up together.",
-            "Do you feel that? That's growth!",
-            "I can practically do a backflip at level ${CurioQuests.levelForXp(CurioQuests.xpState)}.",
-            "Another level! My sparkle has sparkles.",
-            "Level ${CurioQuests.levelForXp(CurioQuests.xpState)} — the deck is impressed. So am I."
-        ))
-        Mood.EXCITED -> pickLine(excitedLines)
-        Mood.HAPPY -> when (timeOfDay()) {
-            // v8.29 — strangers hear the polite lines; friends+ hear the
-            // warmer twins.
-            TimeOfDay.MORNING -> pickLine(if (isWarm()) warmMorningLines else morningLines)
-            TimeOfDay.AFTERNOON -> pickLine(if (isWarm()) warmAfternoonLines else afternoonLines)
-            TimeOfDay.EVENING -> pickLine(if (isWarm()) warmEveningLines else eveningLines)
-            TimeOfDay.NIGHT -> pickLine(if (isWarm()) warmNightLines else nightLines)
-        }
-        Mood.CURIOUS -> {
-            val lane = leastExploredLane(context, lanes)
-            if (lane != null) {
-                pickLine(curiousLines.map { it.replace("__LANE__", lane.displayName) })
-            } else {
-                "Spin something new today?"
+        return when (mood) {
+            Mood.PROUD -> pickLine(listOf(
+                "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. I grew a little!",
+                "Shiny! We leveled up together.",
+                "Do you feel that? That's growth!",
+                "I can practically do a backflip at level ${CurioQuests.levelForXp(CurioQuests.xpState)}.",
+                "Another level! My sparkle has sparkles.",
+                "Level ${CurioQuests.levelForXp(CurioQuests.xpState)} — the deck is impressed. So am I."
+            ))
+            Mood.EXCITED -> pickLine(excitedLines)
+            Mood.HAPPY -> when (timeOfDay()) {
+                // v8.29 — strangers hear the polite lines; friends+ hear the
+                // warmer twins.
+                TimeOfDay.MORNING -> pickLine(if (isWarm()) warmMorningLines else morningLines)
+                TimeOfDay.AFTERNOON -> pickLine(if (isWarm()) warmAfternoonLines else afternoonLines)
+                TimeOfDay.EVENING -> pickLine(if (isWarm()) warmEveningLines else eveningLines)
+                TimeOfDay.NIGHT -> pickLine(if (isWarm()) warmNightLines else nightLines)
             }
+            Mood.CURIOUS -> {
+                val lane = leastExploredLane(context, lanes)
+                if (lane != null) {
+                    pickLine(curiousLines.map { it.replace("__LANE__", lane.displayName) })
+                } else {
+                    "Spin something new today?"
+                }
+            }
+            Mood.FOCUSED -> pickLine(focusedLines)
+            Mood.BOUNCY -> pickLine(bouncyLines)
+            Mood.SHY -> pickLine(shyLines)
+            Mood.GRUMPY -> pickLine(grumpyLines)
+            Mood.PLAYFUL -> pickLine(playfulLines)
+            Mood.SLEEPY -> pickLine(sleepyLines)
         }
-        Mood.FOCUSED -> pickLine(focusedLines)
-        Mood.BOUNCY -> pickLine(bouncyLines)
-        Mood.SHY -> pickLine(shyLines)
-        Mood.GRUMPY -> pickLine(grumpyLines)
-        Mood.PLAYFUL -> pickLine(playfulLines)
-        Mood.SLEEPY -> pickLine(sleepyLines)
     }
 
     /** A short cheer while the Spin deck is reeling (v8.13). */
-    fun spinCheer(): String = pickLine(listOf(
-        "Go, go, go!", "Spinny spin!", "Ooh, where will it land?",
-        "Come on, good one!", "Round and round!", "I can't watch. Okay, I'm watching.",
-        "Spinning! Spinning! Don't fall!", "The deck is showing off!",
-        "Ooh ooh ooh — I can't look. Looking!", "Gravity, do your thing!",
-        "Round and round and ROUND!", "Pick a good one, deck!",
-        "I'm cheering so hard I'm vibrating!", "Almost… almost… it's choosing!",
-        "Go deck go! You can do the thing!", "Tiny heart, big spin energy!"
-    ))
+    fun spinCheer(): String =
+        // v14 — the BABY cheers in short bursts.
+        if (currentStage() == Stage.BABY) pickLine(babySpinCheerLines)
+        else pickLine(listOf(
+            "Go, go, go!", "Spinny spin!", "Ooh, where will it land?",
+            "Come on, good one!", "Round and round!", "I can't watch. Okay, I'm watching.",
+            "Spinning! Spinning! Don't fall!", "The deck is showing off!",
+            "Ooh ooh ooh — I can't look. Looking!", "Gravity, do your thing!",
+            "Round and round and ROUND!", "Pick a good one, deck!",
+            "I'm cheering so hard I'm vibrating!", "Almost… almost… it's choosing!",
+            "Go deck go! You can do the thing!", "Tiny heart, big spin energy!"
+        ))
 
     /**
      * A short burst when the user touches/pets the floating pet (v8.11).
@@ -880,39 +981,43 @@ object CurioPet {
      * flung around), so tapping never spins it anymore — rapid taps just
      * escalate from boop to play-bow to a big happy bounce.
      */
-    fun touchReaction(tier: Int): String = when {
-        // v8.29 — intimacy scales with the bond: "Best friends!" and "You're
-        // my favorite!" only at CLOSE; FRIEND gets loving-but-restrained;
-        // strangers just celebrate happily.
-        tier >= 3 -> when {
-            bond() == Bond.CLOSE -> pickLine(listOf(
-                "Yay!", "I love boops!", "Best friends!", "Squee!",
-                "More, more, more!", "You're my favorite!", "Party time!",
-                "You're my favorite person-pet duo!", "Squee! Okay, more!",
-                "This is my favorite spot AND you found it."
-            ))
-            isWarm() -> pickLine(listOf(
-                "Yay!", "I love boops!", "Squee!", "More, more, more!",
-                "Party time!", "Hehe!", "Boop buddy!", "We're so good at this!",
-                "Hehe, you know my spot!", "Best boop partner!"
+    fun touchReaction(tier: Int): String {
+        // v14 — the BABY voice answers taps with tiny exclamations.
+        if (currentStage() == Stage.BABY) return babyTouchLine(tier)
+        return when {
+            // v8.29 — intimacy scales with the bond: "Best friends!" and "You're
+            // my favorite!" only at CLOSE; FRIEND gets loving-but-restrained;
+            // strangers just celebrate happily.
+            tier >= 3 -> when {
+                bond() == Bond.CLOSE -> pickLine(listOf(
+                    "Yay!", "I love boops!", "Best friends!", "Squee!",
+                    "More, more, more!", "You're my favorite!", "Party time!",
+                    "You're my favorite person-pet duo!", "Squee! Okay, more!",
+                    "This is my favorite spot AND you found it."
+                ))
+                isWarm() -> pickLine(listOf(
+                    "Yay!", "I love boops!", "Squee!", "More, more, more!",
+                    "Party time!", "Hehe!", "Boop buddy!", "We're so good at this!",
+                    "Hehe, you know my spot!", "Best boop partner!"
+                ))
+                else -> pickLine(listOf(
+                    "Yay!", "Squee!", "More, more, more!", "Party time!", "Wheee!",
+                    "Boop!", "Hehe!", "Ooh!", "That's fun!", "Yippee!"
+                ))
+            }
+            tier >= 2 -> pickLine(listOf(
+                "Hehehe!", "More, more!", "This is fun!", "Tag, you're it!",
+                "Catch me!", "Bouncy bouncy!", "Again, again!", "Wiggle wiggle!",
+                "Boop attack!", "I'm too bouncy to stop!", "Zoom zoom zoom!",
+                "Poke poke poke!", "We're playing, right? We're playing!"
             ))
             else -> pickLine(listOf(
-                "Yay!", "Squee!", "More, more, more!", "Party time!", "Wheee!",
-                "Boop!", "Hehe!", "Ooh!", "That's fun!", "Yippee!"
+                "Boop!", "Hehe!", "Wheee!", "Ooh!", "That tickles!", "Hihi!",
+                "Boop boop!", "Again!", "You found me!", "Poke!", "Hi hi hi!",
+                "Soft paws!", "Mrow!", "Pfft!", "Blep!", "Mmm, pats!",
+                "Squeak!", "That's my ear!", "Hehehe!", "Boop rights! You earned them!"
             ))
         }
-        tier >= 2 -> pickLine(listOf(
-            "Hehehe!", "More, more!", "This is fun!", "Tag, you're it!",
-            "Catch me!", "Bouncy bouncy!", "Again, again!", "Wiggle wiggle!",
-            "Boop attack!", "I'm too bouncy to stop!", "Zoom zoom zoom!",
-            "Poke poke poke!", "We're playing, right? We're playing!"
-        ))
-        else -> pickLine(listOf(
-            "Boop!", "Hehe!", "Wheee!", "Ooh!", "That tickles!", "Hihi!",
-            "Boop boop!", "Again!", "You found me!", "Poke!", "Hi hi hi!",
-            "Soft paws!", "Mrow!", "Pfft!", "Blep!", "Mmm, pats!",
-            "Squeak!", "That's my ear!", "Hehehe!", "Boop rights! You earned them!"
-        ))
     }
 
     /**
@@ -994,7 +1099,10 @@ object CurioPet {
     // falling sparks. All through [pickLine] so games never repeat lines.
 
     /** The pet ducks behind a button, then pops out (hide-and-peek). */
-    fun peekLine(): String = pickLine(listOf(
+    fun peekLine(): String =
+        // v14 — the BABY plays peek in one or two words.
+        if (currentStage() == Stage.BABY) pickLine(babyPeekLines)
+        else pickLine(listOf(
         "Peek-a-boo!", "I see you!", "Hidden! …Found! Dang.",
         "Boo! …It's me. Cute boo.", "Peek! …peek! …PEEK!",
         "You can't see me. You saw me.", "Now you see me! …Me again!",
@@ -1004,7 +1112,10 @@ object CurioPet {
     ))
 
     /** The pet fades into the background like a chameleon, then pops back. */
-    fun chameleonLine(): String = pickLine(listOf(
+    fun chameleonLine(): String =
+        // v14 — the BABY fades with a tiny word.
+        if (currentStage() == Stage.BABY) pickLine(babyChameleonLines)
+        else pickLine(listOf(
         "Chameleon mode… ON!", "Can you see me? …Wait, no, don't answer!",
         "I'm part of the wallpaper now.", "Vanish! …Reappear! Ta-da!",
         "Fade to… me again!", "I blend in. It's a talent.",
@@ -1014,7 +1125,10 @@ object CurioPet {
     ))
 
     /** The pet darts after a falling spark and catches it. */
-    fun sparkLine(): String = pickLine(listOf(
+    fun sparkLine(): String =
+        // v14 — the BABY chases sparks with one small shout.
+        if (currentStage() == Stage.BABY) pickLine(babySparkLines)
+        else pickLine(listOf(
         "A spark! Mine!", "Catch the spark!", "Ooh, shiny falling thing!",
         "Sparkle dash!", "Got it! …Almost got it! …Got it!",
         "Falling stars are FASTER than me. Impressive.", "Zooms!",
@@ -1043,8 +1157,14 @@ object CurioPet {
         // answers until the brain has enough signal (spec §10.6 fallback).
         CurioPetBrain.observeActivity(context, timeOfDay())
         val currentMood = mood(context, lanes, screen)
-        return CurioPetBrain.say(context, currentMood, lanes)
-            ?: lineFor(context, currentMood, lanes)
+        // v14 — the BABY voice is telegraphic: it can't compose the brain's
+        // stats-grounded sentences, so it always speaks from its own pools.
+        return if (currentStage() == Stage.BABY) {
+            lineFor(context, currentMood, lanes)
+        } else {
+            CurioPetBrain.say(context, currentMood, lanes)
+                ?: lineFor(context, currentMood, lanes)
+        }
     }
 
     /** What tapping the pet reveals: mood, personality, growth status. */

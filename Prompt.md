@@ -1,5 +1,20 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Two-voice pet dialogue rework (baby vs evolved) + motion-first tuning
+
+**Date:** 2026-08-11
+
+**What was asked:** Rework the dialogue: baby should talk limited/telegraphic with its own personality (not like the adult), play should be less words / more reaction, fix the tap-spin loop, spinning should react more / talk less, and the evolved form should have a distinct voice — grounded in human natural-language research.
+
+**Research:** Web research on child telegraphic speech (18-24mo: 1-3 word utterances, content words only, no articles/auxiliaries, exclamation + onomatopoeia led), pet-directed speech (parentese), and natural character-dialogue principles (short bursts, contractions, sensory grounding, idiolect consistency).
+
+**Changes made:**
+- **CurioPet.kt — v14 BABY voice (telegraphic)**: ~20 baby pools (10 moods, 11 events, 3 tap tiers, spin cheer, peek/chameleon/spark games, morning, 3 welcome tiers, sassy) + `babyMoodLine` / `babyEventLine` / `babyTouchLine` / `babyStreakLine`. Every line source routes on `currentStage() == Stage.BABY`: `eventLine` (baby sassy + babyEventLine), `lineFor` (block body), `touchReaction` (block body), `spinCheer`, `peekLine`, `chameleonLine`, `sparkLine`, `morningGreeting`, `welcomeBackLine` (baby pools per absence tier), and `bubbleFor` bypasses `CurioPetBrain.say` for the baby (learning continues via observeActivity; only speech is routed). The evolved forms keep the full existing library (now explicitly the "evolved register").
+- **CurioFloatingPet.kt**: (a) tap tier-3 spin fix — `spinKey++` only when `tapStreak == 3` (the first tap reaching the celebration tier), so rapid taps never restart a spin loop; (b) spin cheer — `celebrateKey++` always, `queueReaction(spinCheer)` only ~45% (react more, talk less); (c) chameleon + spark games — motion always, line only ~35%; (d) Pet Life routine lines suppressed for the baby (motion only) so it never utters adult routine sentences.
+- **docs/PET_DIALOGUE.txt** — new section 20 (VOICE SYSTEM: baby telegraphic rules, evolved natural-language rules, motion-first principles); **fastlane changelog** bullet added.
+
+**Validation:** brace balance OK, `git diff --check` clean, code review passed (found + fixed: routine lines leaked the adult voice to the baby; when-branch indentation after block conversions). Gradle build left to CI.
+
 ## Current Request (COMPLETED): Quest-completion + streak-milestone pet reactions
 
 **Date:** 2026-08-11
