@@ -113,7 +113,7 @@ export const CurioHeroCard: React.FC<{
   subtitle?: string;
   showShimmer?: boolean;
 }> = ({ category, onClick, title = 'SHUFFLE', subtitle, showShimmer = true }) => {
-  const { isAmoled } = useTheme();
+  const { isDark, isAmoled } = useTheme();
   const [isPressed, setIsPressed] = useState(false);
   const [shimmerPos, setShimmerPos] = useState(-100);
 
@@ -121,16 +121,29 @@ export const CurioHeroCard: React.FC<{
   useEffect(() => {
     if (!showShimmer) return;
     const interval = setInterval(() => {
-      setShimmerPos(prev => (prev >= 200 ? -100 : prev + 2));
-    }, 30);
+      setShimmerPos(prev => (prev >= 200 ? -100 : prev + 1.5));
+    }, 35);
     return () => clearInterval(interval);
   }, [showShimmer]);
 
+  // Category → surface gradient (matches Android categoryCardFill → themeSurface)
   const getBackground = () => {
+    const hexToRgb = (hex: string): [number, number, number] => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return [r, g, b];
+    };
+    const [r, g, b] = hexToRgb(category.accent);
+
     if (isAmoled) {
-      return `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, ${category.accent}22 100%)`;
+      return `linear-gradient(180deg, rgba(${r},${g},${b},0.24) 0%, rgba(${r},${g},${b},0.06) 60%, rgba(0,0,0,1) 100%)`;
     }
-    return `linear-gradient(135deg, ${category.accent} 0%, ${category.lightAccent || category.accent}CC 100%)`;
+    const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
+    const top = `rgba(${r},${g},${b},0.92)`;
+    const mid = `rgba(${Math.round(r * 0.55 + surfaceRgb[0] * 0.45)},${Math.round(g * 0.55 + surfaceRgb[1] * 0.45)},${Math.round(b * 0.55 + surfaceRgb[2] * 0.45)},0.75)`;
+    const bottom = `rgba(${Math.round(r * 0.2 + surfaceRgb[0] * 0.8)},${Math.round(g * 0.2 + surfaceRgb[1] * 0.8)},${Math.round(b * 0.2 + surfaceRgb[2] * 0.8)},0.9)`;
+    return `linear-gradient(180deg, ${top} 0%, ${mid} 50%, ${bottom} 100%)`;
   };
 
   return (
@@ -142,29 +155,48 @@ export const CurioHeroCard: React.FC<{
       className="relative w-full h-[220px] rounded-[28px] overflow-hidden text-left transition-transform duration-200"
       style={{
         background: getBackground(),
-        transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+        transform: isPressed ? 'scale(0.97)' : 'scale(1)',
         boxShadow: isPressed 
-          ? `0 4px 16px ${category.accent}44`
-          : `0 8px 32px ${category.accent}33`,
+          ? `0 4px 16px ${category.accent}33`
+          : `0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)`,
+        border: isDark
+          ? `1px solid ${category.accent}28`
+          : `1px solid ${category.accent}18`,
       }}
     >
+      {/* Category accent rule at top */}
+      <div
+        className="absolute top-0 left-3 right-3 h-[2px] rounded-full"
+        style={{ background: category.accent, opacity: 0.5 }}
+      />
+
+      {/* Top-lit crown */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[60px] pointer-events-none"
+        style={{
+          background: `linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)`,
+        }}
+      />
+
       {/* Shimmer effect */}
       {showShimmer && (
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
+            background: `linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.07) 48%, transparent 61%)`,
             transform: `translateX(${shimmerPos}%)`,
           }}
         />
       )}
       
-      {/* Background glyph */}
+      {/* Watermark glyph */}
       <div
-        className="absolute right-4 bottom-4 text-[120px] opacity-10 pointer-events-none"
-        style={{ color: 'white' }}
+        className="absolute right-2 bottom-2 pointer-events-none select-none"
+        style={{
+          color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+        }}
       >
-        <span className="material-symbols-outlined text-[120px] opacity-100">{category.iconGlyph}</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 130 }}>{category.iconGlyph}</span>
       </div>
       
       {/* Content */}
@@ -172,25 +204,21 @@ export const CurioHeroCard: React.FC<{
         <div className="flex items-start justify-between">
           <h2
             className="text-3xl font-extrabold text-white"
-            style={{ fontFamily: 'Geom, sans-serif' }}
+            style={{ fontFamily: 'Geom, Inter, sans-serif', textShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
           >
             {title}
           </h2>
-          <div className="w-5 h-5 text-white opacity-60">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-            </svg>
-          </div>
+          <MaterialIcon name="casino" size={22} className="text-white/50" />
         </div>
         
         <div>
           <p
-            className="text-lg text-white/90"
-            style={{ fontFamily: 'Geom, sans-serif' }}
+            className="text-lg text-white/85"
+            style={{ fontFamily: 'Geom, Inter, sans-serif' }}
           >
             the wheel
           </p>
-          <p className="text-sm text-white/70 mt-1">
+          <p className="text-sm text-white/65 mt-1">
             {subtitle || `Shuffle for ${category.displayName}`}
           </p>
         </div>
