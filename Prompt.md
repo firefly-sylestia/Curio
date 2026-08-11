@@ -1,5 +1,22 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Pet games + dialogue upgrade — interactive mini-games, memory lines, tuning
+
+**Date:** 2026-08-11
+
+**What was asked:** Improve pet games and dialogue. User picked all bundles: real interactive mini-games, context-aware dialogue, rare & special moments, chatter/game-frequency settings, baby language growth + game rewards, better non-looping dialogue, and hide-and-seek/camouflage that leave the screen at random places.
+
+**Changes made:**
+- **AppPreferences.kt (v16)** — `petChatterState` (quiet/cozy/talkative), `petGameFrequencyState` (relaxed/normal/eager), `petBirthdayEpochDay` (first-launch hatch day, set once), weekly-save memory (`noteWeeklySave`/`weeklySaveSummary`, 7-day window).
+- **CurioPet.kt (v16)** — `shouldSpeak()` chatter-scales every speak chance; `gameFrequencyMultiplier()` scales game starts; `noteLaneFocus`/`noteSavedLane` + lane-aware spin-landed/cheer pools; `factLine()` memory lines (weekly saves, streak, season, weekday/weekend, last topic, hatch-day); `findMePromptLine`/`foundMeLine`/`caughtItLine`/`gotAwayLine`/`peekWinLine`/new `missedMeLine` with all three voice registers; persisted anti-repeat bag (write-through); `notePlay` now also feeds `CurioQuests.notePetPlay` (PLAY daily quest).
+- **CurioFloatingPet.kt (v16)** — real interactive games: SPARK-CATCH now renders a pulsing tappable `SparkGlow` (tap to win before the pet catches it; caughtIt/gotAway lines); HIDE-AND-SEEK leaves the screen through a random edge and peeks back half-in from a different edge (tap the sliver to win → peekWinLine; timeout → missedMeLine); CHAMELEON v2 fades to a ghost, walks off a random edge, re-enters from a different edge (was in-screen teleport). Tap-catch mid-peek guard in the tap handler; shared `lastGameAt` cooldown so games never stack; wander-loop self-heal restores a pet stranded by mid-game navigation; chatter gates converted to `shouldSpeak`; game/play starts scaled by `gameFrequencyMultiplier`; spin-cheer/peek gates chatter-aware.
+- **CurioQuests.kt** — `DailyKind.PLAY` + core `d-play-1` (Play with your pet) + bonus `d-b-play-2` in the daily pool; `notePetPlay()` hook; creations role now includes PLAY.
+- **Call sites** — SpinScreen feeds `CurioPet.noteLaneFocus(displayName)` per deck; SaveCaptureScreen feeds `noteSavedLane(displayName, topic)` on new saves (weekly memory + last-topic lines).
+- **SettingsSectionScreen.kt** — Appearance gained two segmented rows: Pet chatter (Quiet/Cozy/Talkative) and Pet games (Relaxed/Normal/Eager).
+- **Docs** — PET_DIALOGUE.txt v16 section; fastlane 20260919 changelog bullet; this log.
+
+**Validation:** comment-stripped brace/paren/bracket balance clean on all 6 edited Kotlin files; `git diff --check` clean; DailyKind exhaustiveness verified (dailyGoRoute has `else -> null`). Gradle build left to CI (repository forbids local Gradle commands).
+
 ## Current Request (COMPLETED): AMOLED polish — main Spin card black glass, dialogs, Profile coral accents, enhanced-gradient default
 
 **Date:** 2026-08-11

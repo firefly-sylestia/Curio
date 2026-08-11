@@ -348,7 +348,8 @@ object CurioQuests {
     //    Warm-up (easy one-action), discovery (a new lane via the passport),
     //    creation (save/reflect). DISCOVERY completes when the passport's
     //    least-engaged lane is explored (spec §6.2).
-    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY }
+    // v16 — PLAY: the user played with the pet (any real play moment counts).
+    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY, PLAY }
 
     data class DailyQuest(
         val id: String,
@@ -376,6 +377,8 @@ object CurioQuests {
         DailyQuest("d-pin-1", "Pin a topic for later", 15, DailyKind.PIN, 1),
         DailyQuest("d-profile-1", "Visit your profile", 15, DailyKind.PROFILE, 1),
         DailyQuest("d-like-1", "Like a topic", 15, DailyKind.LIKE, 1),
+        // v16 — a warm creation quest: a real play session with the pet.
+        DailyQuest("d-play-1", "Play with your pet", 15, DailyKind.PLAY, 1),
         // Discovery role — "New Lane": explore the passport's least-engaged
         // lane (its stamp becomes EXPLORED). The UI titles it with the lane
         // name and routes its CTA to that lane's Spin deck (spec §6.3).
@@ -388,7 +391,8 @@ object CurioQuests {
         DailyQuest("d-b-quote-2", "Bookmark 2 quotes", 25, DailyKind.QUOTE, 2, bonus = true),
         DailyQuest("d-b-pin-2", "Pin 2 topics for later", 25, DailyKind.PIN, 2, bonus = true),
         DailyQuest("d-b-like-3", "Like 3 topics", 25, DailyKind.LIKE, 3, bonus = true),
-        DailyQuest("d-b-profile-2", "Visit your profile twice", 20, DailyKind.PROFILE, 2, bonus = true)
+        DailyQuest("d-b-profile-2", "Visit your profile twice", 20, DailyKind.PROFILE, 2, bonus = true),
+        DailyQuest("d-b-play-2", "Play with your pet twice", 25, DailyKind.PLAY, 2, bonus = true)
     )
 
     /**
@@ -406,7 +410,7 @@ object CurioQuests {
         }
         val creations = DailyPool.filter {
             !it.bonus && (it.kind == DailyKind.SAVE || it.kind == DailyKind.QUOTE ||
-                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE)
+                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE || it.kind == DailyKind.PLAY)
         }
         val discovery = DailyPool.firstOrNull { it.kind == DailyKind.DISCOVERY }
         fun pick(list: List<DailyQuest>): DailyQuest {
@@ -749,6 +753,11 @@ object CurioQuests {
     }
 
     // ── Daily quest progress (XP is CLAIMED on the Quests page — v8.3) ──
+    /** The user played with the pet (v16) — counts the PLAY daily quest. */
+    fun notePetPlay(context: Context) {
+        bumpDaily(context, DailyKind.PLAY)
+    }
+
     private fun bumpDaily(context: Context, kind: DailyKind) {
         val today = todayEpochDay().toInt()
         if (dailyDateState != today) {

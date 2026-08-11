@@ -571,6 +571,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // v6 — mirror the landed topic to AppPreferences whenever it changes
     // (landed on spin end, cleared on the next spin start), so it survives
     // ANY navigation — including popping the Spin back-stack entry.
+    // v16 — the pet remembers which lane the deck is showing so its spin
+    // cheers and landed-topic lines can name the lane.
+    LaunchedEffect(activeCategory.id) {
+        CurioPet.noteLaneFocus(activeCategory.displayName)
+    }
     LaunchedEffect(activeCategory.id, landedTopicName) {
         AppPreferences.setLandedTopic(context, activeCategory.id, landedTopicName)
     }

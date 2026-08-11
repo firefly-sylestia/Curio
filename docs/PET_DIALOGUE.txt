@@ -491,6 +491,47 @@ Legend
       tap that first reaches tier 3), never as a repeating loop.
 
 --------------------------------------------------------------------------------
+v16 — INTERACTIVE GAMES, MEMORY LINES & TUNING (2026-08)
+   Location: app/src/main/java/com/curio/app/ui/pet/CurioFloatingPet.kt
+            (game state machine), app/src/main/java/com/curio/app/data/CurioPet.kt
+            (line pools), app/src/main/java/com/curio/app/data/AppPreferences.kt
+            (chatter + game-frequency settings)
+
+  GAMES ARE REAL NOW — the pet isn't just showing off, it's PLAYING with you:
+    • SPARK-CATCH: a visible, pulsing spark drops at a random spot. The pet
+      dashes to grab it — TAP the spark first to win the round together
+      (caughtItLine); if the pet gets there first it catches it itself; if
+      the dash is interrupted (grab / navigation) the spark gets away
+      (gotAwayLine).
+    • HIDE-AND-SEEK: the pet dashes OFF-SCREEN through a random edge, hides,
+      then peeks back from a DIFFERENT edge half-in/half-out. Tap the
+      visible sliver while it peeks to catch it (peekWinLine); miss it and
+      it teases you (missedMeLine) before slipping back in.
+    • CHAMELEON (v2): fades to a faint ghost, walks off a random edge, hides
+      off-screen, then re-enters from a DIFFERENT edge (findMePromptLine
+      before it goes, celebrateKey on return). No more teleporting around
+      the same screen.
+
+  CHATTER + GAME-FREQUENCY SETTINGS (Settings → Appearance):
+    • Pet chatter — Quiet / Cozy / Talkative: scales every speak chance
+      (0.35× / 1× / 1.35×) via CurioPet.shouldSpeak().
+    • Pet games — Relaxed / Normal / Eager: scales how often the pet starts
+      games + its self-started play zoom via gameFrequencyMultiplier()
+      (0.55× / 1× / 1.5×). Games also share a cooldown so they never stack.
+
+  MEMORY LINES (factLine, evolved voice only) — the pet references real
+  facts instead of generic chatter:
+    • Weekly saves: "You saved 3 songs keepsakes this week!" (from
+      AppPreferences.weeklySaveSummary — fed by SaveCapture noteSavedLane).
+    • Streak: "Day 12 streak — the flame is steady."
+    • Season / weekday-weekend / the last saved topic.
+    • Hatch-day anniversary: once a year, the birthday line wins.
+
+  LANE-AWARE LINES — the Spin screen feeds noteLaneFocus(displayName), so
+  spin-landed lines and cheers name the actual deck ("Back to Films — the
+  deck knows you!", "Come on, Albums!").
+
+--------------------------------------------------------------------------------
 Notes for future edits
   • Keep one sentence per passive bubble (the pill shows max 2 lines).
   • The TOUR dialogue is NOT capped at 2 lines anymore: PetSpeechBubble

@@ -205,13 +205,31 @@ object CurioPet {
         eventCount++
     }
 
-    // ── Anti-repeat bag (v9.x) ────────────────────────────────────────
+    // ── Anti-repeat bag (v9.x) — v16 persisted across sessions ────────
     // The pet never says the same line twice in a row: [pickLine] skips
     // anything spoken recently and only falls back to the full pool once
-    // every option has been used. Kept in memory per process — plenty to
-    // make short-term chatter feel endless instead of looping.
+    // every option has been used. v16 — the bag survives process restarts
+    // (seeded from prefs at launch and written through), so lines can't
+    // loop across days either.
     private val saidLines = ArrayDeque<String>()
-    private const val SAID_LINES_CAP = 16
+    private const val SAID_LINES_CAP = 40
+    private const val KEY_SAID_LINES = "pet_said_lines"
+
+    @Volatile
+    private var appContext: Context? = null
+
+    /** Attach the app context once (MainActivity) so dialogue can persist. */
+    fun attach(context: Context) {
+        if (appContext == null) appContext = context.applicationContext
+    }
+
+    /** Seeds the anti-repeat bag from the last session (called at launch). */
+    fun seedDialogueMemory(context: Context) {
+        val raw = prefs(context).getString(KEY_SAID_LINES, null) ?: return
+        saidLines.clear()
+        raw.split('|').filter { it.isNotBlank() }.takeLast(SAID_LINES_CAP)
+            .forEach { saidLines.addLast(it) }
+    }
 
     /** Picks a line from [options], avoiding anything said recently. */
     fun pickLine(options: List<String>): String {
@@ -220,7 +238,58 @@ object CurioPet {
         val chosen = (if (fresh.isNotEmpty()) fresh else options).random()
         saidLines.addLast(chosen)
         while (saidLines.size > SAID_LINES_CAP) saidLines.removeFirst()
+        // v16 — write-through so the bag survives restarts (best effort).
+        appContext?.let { ctx ->
+            runCatching {
+                prefs(ctx).edit()
+                    .putString(KEY_SAID_LINES, saidLines.joinToString("|"))
+                    .apply()
+            }
+        }
         return chosen
+    }
+
+    // ── Chatter + game-frequency tuning (v16) ─────────────────────────
+    /** True when a line should be spoken for a base probability (settings-aware). */
+    fun shouldSpeak(base: Float): Boolean {
+        val mult = when (AppPreferences.petChatterState) {
+            "talkative" -> 1.35f
+            "quiet" -> 0.35f
+            else -> 1f
+        }
+        return kotlin.random.Random.nextFloat() < (base * mult).coerceIn(0f, 1f)
+    }
+
+    /** Multiplier for how often the pet starts games on its own. */
+    fun gameFrequencyMultiplier(): Float = when (AppPreferences.petGameFrequencyState) {
+        "relaxed" -> 0.55f
+        "eager" -> 1.5f
+        else -> 1f
+    }
+
+    // ── Screen context (v16) — what the pet can reference in lines ────
+    @Volatile
+    var lastLaneName: String? = null
+        private set
+    @Volatile
+    var lastSavedLaneName: String? = null
+        private set
+    @Volatile
+    var lastSavedTopicName: String? = null
+        private set
+
+    /** The Spin screen reports the active deck's lane name. */
+    fun noteLaneFocus(lane: String?) {
+        lastLaneName = lane
+    }
+
+    /** A capture was saved in [lane] about [topic] (persisted weekly too). */
+    fun noteSavedLane(context: Context, lane: String?, topic: String?) {
+        lastSavedLaneName = lane
+        lastSavedTopicName = topic
+        // v16 — persist the weekly lane counts so factLine can say "you
+        // saved 3 songs keepsakes this week!"
+        lane?.let { AppPreferences.noteWeeklySave(context, it) }
     }
 
     // ── Playful-annoyed (v9.x) ────────────────────────────────────────
@@ -279,13 +348,27 @@ object CurioPet {
             Stage.FIRST_EVO -> Unit
         }
         return when (event) {
-            Event.SPIN_LANDED -> pickLine(listOf(
-                "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!",
-                "Spin-spin-spin! …I mean, ooh.", "That landing had drama!",
-                "The wheel spoke!", "Destiny, served on a card!",
-                "I saw that one coming… nope, I didn't.", "Round and round it goes!",
-                "Where it stops, nobody knows… except the deck."
-            ))
+            Event.SPIN_LANDED -> {
+                // v16 — the pet references the actual deck when it can.
+                val lane = lastLaneName
+                if (lane != null && kotlin.random.Random.nextFloat() < 0.5f) {
+                    pickLine(listOf(
+                        "Back to $lane — the deck knows you!",
+                        "Ooh, $lane again. Good taste.",
+                        "$lane called, and the deck answered!",
+                        "The $lane shelf grows tonight!",
+                        "Another $lane spin — the stamp's almost there!"
+                    ))
+                } else {
+                    pickLine(listOf(
+                        "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!",
+                        "Spin-spin-spin! …I mean, ooh.", "That landing had drama!",
+                        "The wheel spoke!", "Destiny, served on a card!",
+                        "I saw that one coming… nope, I didn't.", "Round and round it goes!",
+                        "Where it stops, nobody knows… except the deck."
+                    ))
+                }
+            }
             // v8.30 — the USER's tap gets a touch reaction, never "it opened
             // itself".
             Event.REVEAL_TAPPED -> pickLine(listOf(
@@ -310,15 +393,29 @@ object CurioPet {
                 "Pack snacks. Bring tales."
             ))
             // v8.29 — "Mine now… I mean, ours!" only after the bond is FRIEND+.
-            Event.SAVE -> if (isWarm()) pickLine(listOf(
-                "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!",
-                "Our shelf grows!", "A treasure for the shelf!", "We collect memories!",
-                "One more spark for our collection!", "It's OURS now. Officially."
-            )) else pickLine(listOf(
-                "Keepsake saved!", "Tucked away safely!", "It's yours to keep!",
-                "Captured for later!", "Snap! Saved!", "Another keepsake!",
-                "The shelf grows!", "Well kept, spark keeper!"
-            ))
+            Event.SAVE -> {
+                val savedLane = lastSavedLaneName
+                val base = if (isWarm()) listOf(
+                    "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!",
+                    "Our shelf grows!", "A treasure for the shelf!", "We collect memories!",
+                    "One more spark for our collection!", "It's OURS now. Officially."
+                ) else listOf(
+                    "Keepsake saved!", "Tucked away safely!", "It's yours to keep!",
+                    "Captured for later!", "Snap! Saved!", "Another keepsake!",
+                    "The shelf grows!", "Well kept, spark keeper!"
+                )
+                // v16 — reference the lane the capture was saved in.
+                if (savedLane != null && kotlin.random.Random.nextFloat() < 0.5f) {
+                    pickLine(listOf(
+                        "One more for the $savedLane shelf!",
+                        "Saved to $savedLane — our collection grows!",
+                        "$savedLane keepsakes, assemble!",
+                        "Tucked away with the $savedLane treasures!"
+                    ))
+                } else {
+                    pickLine(base)
+                }
+            }
             // v9.2 — the pet answers the touch / play / level-up moments too.
             Event.TOUCH -> pickLine(listOf(
                 "Boop!", "Hehe — again!", "That's my favorite spot.", "Boop boop!",
@@ -450,6 +547,8 @@ object CurioPet {
             .putLong(KEY_LAST_PLAY_AT, System.currentTimeMillis())
             .apply()
         CurioPetBrain.observePlay(context)
+        // v16 — every real play also feeds the PLAY daily quest.
+        CurioQuests.notePetPlay(context)
         // v9.2 — a play session starts the pet's PLAY reaction.
         // v12 — some plays (the post-tap dart, the autonomous games, the
         // Pet Life routine) bring their own line; `react = false` still
@@ -899,17 +998,27 @@ object CurioPet {
         "Whole week! Missed you!", "Long long! You here now!", "Week! Big hug!"
     )
 
+    /** v16 — the baby's vocabulary grows with its level. */
+    private fun babyGrownWords(): List<String> {
+        val lvl = CurioQuests.levelForXp(CurioQuests.xpState)
+        return when {
+            lvl >= 6 -> listOf("Look look! Big word: SPARKLE!", "I know more words now!", "Bigger me, more words!")
+            lvl >= 4 -> listOf("Two words!", "I talk MORE now!", "New word: DECK!")
+            else -> emptyList()
+        }
+    }
+
     /** v14 — a BABY mood bubble: 1-3 words, concrete, exclamation-led. */
     private fun babyMoodLine(mood: Mood): String = when (mood) {
-        Mood.PROUD -> pickLine(babyProudLines)
-        Mood.EXCITED -> pickLine(babyExcitedLines)
-        Mood.HAPPY -> pickLine(babyHappyLines)
+        Mood.PROUD -> pickLine(babyProudLines + babyGrownWords())
+        Mood.EXCITED -> pickLine(babyExcitedLines + babyGrownWords())
+        Mood.HAPPY -> pickLine(babyHappyLines + babyGrownWords())
         Mood.CURIOUS -> pickLine(babyCuriousLines)
         Mood.FOCUSED -> pickLine(babyFocusedLines)
         Mood.BOUNCY -> pickLine(babyBouncyLines)
         Mood.SHY -> pickLine(babyShyLines)
         Mood.GRUMPY -> pickLine(babyGrumpyLines)
-        Mood.PLAYFUL -> pickLine(babyPlayfulLines)
+        Mood.PLAYFUL -> pickLine(babyPlayfulLines + babyGrownWords())
         Mood.SLEEPY -> pickLine(babySleepyLines)
     }
 
@@ -1214,15 +1323,26 @@ object CurioPet {
         when (currentStage()) {
             Stage.BABY -> pickLine(babySpinCheerLines)
             Stage.FINAL_EVO -> pickLine(matureSpinCheerLines)
-            Stage.FIRST_EVO -> pickLine(listOf(
-                "Go, go, go!", "Spinny spin!", "Ooh, where will it land?",
-                "Come on, good one!", "Round and round!", "I can't watch. Okay, I'm watching.",
-                "Spinning! Spinning! Don't fall!", "The deck is showing off!",
-                "Ooh ooh ooh — I can't look. Looking!", "Gravity, do your thing!",
-                "Round and round and ROUND!", "Pick a good one, deck!",
-                "I'm cheering so hard I'm vibrating!", "Almost… almost… it's choosing!",
-                "Go deck go! You can do the thing!", "Tiny heart, big spin energy!"
-            ))
+            Stage.FIRST_EVO -> {
+                // v16 — the cheer sometimes calls the lane by name.
+                val lane = lastLaneName
+                if (lane != null && kotlin.random.Random.nextFloat() < 0.3f) {
+                    pickLine(listOf(
+                        "Come on, $lane!", "Give us a good one, $lane!",
+                        "$lane, show off!", "The $lane deck has taste!"
+                    ))
+                } else {
+                    pickLine(listOf(
+                        "Go, go, go!", "Spinny spin!", "Ooh, where will it land?",
+                        "Come on, good one!", "Round and round!", "I can't watch. Okay, I'm watching.",
+                        "Spinning! Spinning! Don't fall!", "The deck is showing off!",
+                        "Ooh ooh ooh — I can't look. Looking!", "Gravity, do your thing!",
+                        "Round and round and ROUND!", "Pick a good one, deck!",
+                        "I'm cheering so hard I'm vibrating!", "Almost… almost… it's choosing!",
+                        "Go deck go! You can do the thing!", "Tiny heart, big spin energy!"
+                    ))
+                }
+            }
         }
 
     /**
@@ -1406,6 +1526,83 @@ object CurioPet {
             ))
         }
 
+    // ── Interactive game lines (v16) — play WITH the user ─────────────
+    // The spark-catch and chameleon games now involve the user: the spark
+    // can be tapped, the hidden pet can be found. Each moment gets its own
+    // small pool, routed by growth stage like everything else.
+
+    /** The pet dares the user to find it (chameleon hide). */
+    fun findMePromptLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Find!", "Here!", "Peek! Find!"))
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "Find me when you're ready.", "I'll wait somewhere new."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Find me!", "Peek! …FIND ME!", "Gone! …Almost. Find me!",
+            "I'm hiding. Find me — it's a talent showcase!"
+        ))
+    }
+
+    /** The user found the hidden pet. */
+    fun foundMeLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Found!", "You! Here!", "Boo! You!"))
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "You found me. Impressive patience.", "Found. I was exactly where I wasn't."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "You found me!", "Boo! Caught!", "Found! I'm impressed.",
+            "Camouflage: failed. Adorable: still intact."
+        ))
+    }
+
+    /** The user caught the falling spark. */
+    fun caughtItLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Got!", "Spark! We got!", "Yay!"))
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "Caught it together. Well done.", "The spark chose us."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Got it! Teamwork!", "We caught the spark!", "You have quick paws too!",
+            "The spark never stood a chance against US."
+        ))
+    }
+
+    /** The spark got away (timeout). */
+    fun gotAwayLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Bye spark…", "…Got? No.", "Next!"))
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "It got away. Sparks are like that.", "Patience. Another one will fall."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "It got away… next time!", "So close! It saw us coming.",
+            "Falling sparks are sneaky. Rematch?"
+        ))
+    }
+
+    /** The user caught the pet mid-peek. */
+    fun peekWinLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Boo! You!", "Hid! Found!", "Hehe!"))
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "You caught me mid-peek. Fair play.", "Peek, caught. The classic."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Boo! You caught me!", "Got me! Hehe!", "Peek-a-boo — you win!",
+            "Sneak interrupted! Well played."
+        ))
+    }
+
+    /** The user missed the peeking pet (hide-and-seek timeout). */
+    fun missedMeLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Here!…Missed!", "Peek! You missed!", "Boo…no. Hehe!"))
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "You looked away. I was right there.", "Nearly. Better luck next peek."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Peek-a-boo — you blinked!", "Missed me! The edge is a classic.",
+            "Right in front of you! Hehe.", "I even waved. Almost."
+        ))
+    }
+
     /**
      * One bubble per screen visit: returns a line the first time [screen]
      * is composed, then stays quiet for a cooldown (or until tapped).
@@ -1426,6 +1623,13 @@ object CurioPet {
         // answers until the brain has enough signal (spec §10.6 fallback).
         CurioPetBrain.observeActivity(context, timeOfDay())
         val currentMood = mood(context, lanes, screen)
+        // v16 — a memory-flavored line sometimes replaces the mood bubble so
+        // the pet references real facts (weekly saves, the streak, seasons,
+        // the hatch-day anniversary). Evolved voice only — the baby speaks
+        // telegraphic pools and the mature voice keeps its calm register.
+        if (currentStage() == Stage.FIRST_EVO && kotlin.random.Random.nextFloat() < 0.3f) {
+            factLine(context)?.let { return it }
+        }
         // v14 — the BABY voice is telegraphic and the fully grown voice is
         // its own mature register: neither composes the brain's stats
         // sentences, so both always speak from their own pools.
@@ -1434,6 +1638,100 @@ object CurioPet {
             Stage.FIRST_EVO -> CurioPetBrain.say(context, currentMood, lanes)
                 ?: lineFor(context, currentMood, lanes)
         }
+    }
+
+    // ── Memory + rare moments (v16) — the pet references real facts ────
+    private val weekdayLines = listOf(
+        "A weekday grind? The deck's ready for it.",
+        "Midweek wonder — always a good time to peek.",
+        "The week's half-spent. The shelf's half-full.",
+        "Another working day, another working lane."
+    )
+    private val weekendLines = listOf(
+        "Weekend! The deck is extra polished.",
+        "Slow morning, curious day. Perfect spin weather.",
+        "The weekend shelf is calling.",
+        "No hurry today. Let the deck choose slowly."
+    )
+    private val seasonSpringLines = listOf(
+        "Spring air! Everything feels like a new topic.",
+        "Fresh green outside. Fresh lanes inside."
+    )
+    private val seasonSummerLines = listOf(
+        "Summer glow! Long days for long reads.",
+        "Warm outside — good spin weather."
+    )
+    private val seasonAutumnLines = listOf(
+        "Autumn crisp! Cozy lane weather.",
+        "The light's golden. So are the topics."
+    )
+    private val seasonWinterLines = listOf(
+        "Winter cozy! Perfect for tucking into a topic.",
+        "Cold out. Warm shelf in."
+    )
+    private val hatchDayLines = listOf(
+        "It's my hatch day! I've been curious for a whole year.",
+        "One year of exploring together. The shelf remembers!",
+        "Happy hatch day to me — thank you for every lane!"
+    )
+
+    private fun season(): Int =
+        java.util.Calendar.getInstance().get(java.util.Calendar.MONTH) / 3 + 1 // 1..4
+
+    /**
+     * v16 — a memory-flavored line from real facts: weekly saves, an active
+     * streak, the season, weekday/weekend, the last saved topic, or the
+     * pet's hatch-day anniversary. Returns null when there's nothing to say.
+     */
+    fun factLine(context: Context): String? {
+        // The hatch day only comes around once a year — make it count.
+        if (kotlin.random.Random.nextFloat() < 0.5f) {
+            val birthday = AppPreferences.petBirthdayEpochDay(context)
+            val today = java.util.Calendar.getInstance().timeInMillis / 86_400_000L
+            if (today == birthday) return pickLine(hatchDayLines)
+        }
+        if (CurioQuests.bestStreakState >= 3 && kotlin.random.Random.nextFloat() < 0.25f) {
+            val streak = CurioQuests.bestStreakState
+            return pickLine(listOf(
+                "Day $streak streak — the flame is steady.",
+                "A $streak-day flame. Impressive patience.",
+                "Streak $streak! The spark keeps its promise."
+            ))
+        }
+        val weekly = AppPreferences.weeklySaveSummary(context)
+        if (weekly.isNotEmpty()) {
+            val (lane, count) = weekly.first()
+            if (count >= 2) {
+                return pickLine(listOf(
+                    "You saved $count $lane keepsakes this week!",
+                    "$count for the $lane shelf this week — it's thriving.",
+                    "The $lane shelf grew $count times this week alone."
+                ))
+            }
+        }
+        if (kotlin.random.Random.nextFloat() < 0.3f) {
+            val seasonPool = when (season()) {
+                1 -> seasonSpringLines
+                2 -> seasonSummerLines
+                3 -> seasonAutumnLines
+                else -> seasonWinterLines
+            }
+            return pickLine(seasonPool)
+        }
+        if (kotlin.random.Random.nextFloat() < 0.3f) {
+            val day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
+            val isWeekend = day == java.util.Calendar.SATURDAY || day == java.util.Calendar.SUNDAY
+            return pickLine(if (isWeekend) weekendLines else weekdayLines)
+        }
+        val topic = lastSavedTopicName
+        if (topic != null && kotlin.random.Random.nextFloat() < 0.4f) {
+            return pickLine(listOf(
+                "\"$topic\" is still my favorite keeper.",
+                "Last keeper: $topic. A good one.",
+                "I think about \"$topic\" sometimes. It's a keeper."
+            ))
+        }
+        return null
     }
 
     /** What tapping the pet reveals: mood, personality, growth status. */

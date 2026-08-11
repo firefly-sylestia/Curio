@@ -222,6 +222,50 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setPetBrainEnabled(context, it)
             }
         }
+        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
+        // the bubble more often, Quiet says less.
+        SettingsRowPulse(highlightKey == "appearance-pet-chatter") {
+            CompactSegmentedRow(
+                "Pet chatter",
+                listOf("Quiet", "Cozy", "Talkative"),
+                when (AppPreferences.petChatterState) {
+                    "quiet" -> 0
+                    "talkative" -> 2
+                    else -> 1
+                }
+            ) { index ->
+                AppPreferences.setPetChatter(
+                    context,
+                    when (index) {
+                        0 -> "quiet"
+                        2 -> "talkative"
+                        else -> "cozy"
+                    }
+                )
+            }
+        }
+        // v16 — how often the pet starts its games on its own: Relaxed,
+        // Normal (default), or Eager.
+        SettingsRowPulse(highlightKey == "appearance-pet-games") {
+            CompactSegmentedRow(
+                "Pet games",
+                listOf("Relaxed", "Normal", "Eager"),
+                when (AppPreferences.petGameFrequencyState) {
+                    "relaxed" -> 0
+                    "eager" -> 2
+                    else -> 1
+                }
+            ) { index ->
+                AppPreferences.setPetGameFrequency(
+                    context,
+                    when (index) {
+                        0 -> "relaxed"
+                        2 -> "eager"
+                        else -> "normal"
+                    }
+                )
+            }
+        }
         CurioSettingsDivider()
         // v8.16 — whether a landed topic's reveal opens itself as soon as
         // the deck settles. Default OFF: the deck just lands and the front

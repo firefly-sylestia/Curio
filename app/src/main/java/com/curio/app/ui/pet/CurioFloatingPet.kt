@@ -5,6 +5,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -33,9 +37,11 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -71,6 +77,7 @@ import kotlin.random.Random
 
 private val FLOAT_SIZE = 72.dp
 private val EDGE_MARGIN = 14.dp
+private val SPARK_PX = 44.dp
 private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 // v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
 // v8.21 — a smaller box so the hearts read as tiny, and they fade out fully.
@@ -247,6 +254,16 @@ fun CurioFloatingPet(
         var tapStreak by remember { mutableIntStateOf(0) }
         var lastTapAt by remember { mutableStateOf(0L) }
         var playDartTarget by remember { mutableStateOf<Offset?>(null) }
+        // v16 — interactive games: a catchable spark, off-screen hiding, and
+        // a shared cooldown so the games never stack on top of each other.
+        var sparkTarget by remember { mutableStateOf<Offset?>(null) }
+        var sparkKey by remember { mutableIntStateOf(0) }
+        var sparkWon by remember { mutableStateOf(false) }
+        var offScreen by remember { mutableStateOf(false) }
+        var chameleonFindMe by remember { mutableStateOf(false) }
+        var hideSeekActive by remember { mutableStateOf(false) }
+        var peekCaught by remember { mutableStateOf(false) }
+        var lastGameAt by remember { mutableStateOf(0L) }
         // v8.16 — landmark pokes keep a cooldown so the pet interacts often
         // but never spams the same thing every beat. v9.x — the window grew
         // from 4s to 12s so button pokes read as occasional, not hovering.
@@ -560,6 +577,20 @@ fun CurioFloatingPet(
                     delay(240)
                     continue
                 }
+                // v16 — self-heal a game interrupted by navigation: the
+                // game's coroutine died with the old effect, so snap the
+                // pet back fully visible instead of leaving it off-screen.
+                if (offScreen || hideSeekActive || chameleonFindMe) {
+                    offScreen = false
+                    hideSeekActive = false
+                    chameleonFindMe = false
+                    peekCaught = false
+                    chameleonAlpha.snapTo(1f)
+                }
+                if (sparkTarget != null) {
+                    sparkTarget = null
+                    sparkKey++
+                }
                 // Wait for the next wander beat, but answer a pending tap
                 // dart within ~200ms instead of the full 3-7s pause.
                 val waitMs = Random.nextLong(2800, 7000)
@@ -719,7 +750,7 @@ fun CurioFloatingPet(
                     squishKey++
                     // v9.x — hide-and-peek talks sometimes: a soft peek-a-boo
                     // line instead of always playing the crouch in silence.
-                    if (Random.nextFloat() < 0.55f) queueReaction(CurioPet.peekLine())
+                    if (CurioPet.shouldSpeak(0.55f)) queueReaction(CurioPet.peekLine())
                     delay(720)
                     peeking = false
                     squishKey++
@@ -745,7 +776,7 @@ fun CurioFloatingPet(
                     val tx = (maxW / 2f).coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
                     walkTo(Offset(tx, edgeY), stepMs = 24, steps = 40)
                     peeking = true
-                    if (Random.nextFloat() < 0.55f) queueReaction(CurioPet.peekLine())
+                    if (CurioPet.shouldSpeak(0.55f)) queueReaction(CurioPet.peekLine())
                     delay(900)
                     peeking = false
                     squishKey++
@@ -792,55 +823,223 @@ fun CurioFloatingPet(
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
-                // v9.x — CHAMELEON GAME: the pet occasionally fades into the
-                // background (a faint outline), waits a beat, then pops back
-                // somewhere new with a flourish. Never while glued to the
-                // deck or mid-spin.
-                if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.05f) {
+                // v16 — HIDE-AND-SEEK: the pet dashes OFF-SCREEN through a
+                // random edge, hides for a beat, then peeks back from a
+                // DIFFERENT edge — half in, half out. Tap it while it's
+                // peeking to catch it and win the round.
+                if (!watching && !CurioPet.spinning && !offScreen &&
+                    System.currentTimeMillis() - lastGameAt > 45_000L &&
+                    Random.nextFloat() < 0.05f * CurioPet.gameFrequencyMultiplier()
+                ) {
+                    lastGameAt = System.currentTimeMillis()
+                    CurioPet.notePlay(context, react = false)
+                    if (CurioPet.shouldSpeak(0.4f)) queueReaction(CurioPet.peekLine())
+                    squishKey++
+                    val exitEdge = Random.nextInt(4)
+                    val exitX = when (exitEdge) {
+                        0 -> -petPx - marginPx
+                        1 -> maxW + marginPx
+                        else -> marginPx + Random.nextFloat() * (maxW - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    val exitY = when (exitEdge) {
+                        2 -> -petPx - marginPx
+                        3 -> maxH + marginPx
+                        else -> marginPx + Random.nextFloat() * (maxH - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    walkTo(Offset(exitX, exitY), stepMs = 13, steps = 54)
+                    if (dragged || gliding) {
+                        continue
+                    }
+                    offScreen = true
+                    delay(1300)
+                    // Peek back from a different edge, mostly hidden, so a
+                    // tappable sliver of the pet pokes back into view.
+                    val enterEdge = (exitEdge + 1 + Random.nextInt(3)) % 4
+                    val peekX = when (enterEdge) {
+                        0 -> -petPx * 0.42f
+                        1 -> maxW - petPx * 0.58f
+                        else -> marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    val peekY = when (enterEdge) {
+                        2 -> -petPx * 0.42f
+                        3 -> maxH - petPx * 0.58f
+                        else -> marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    pos = Offset(peekX, peekY)
+                    facing = when (enterEdge) {
+                        0 -> 1f
+                        1 -> -1f
+                        else -> facing
+                    }
+                    peeking = true
+                    hideSeekActive = true
+                    peekCaught = false
+                    squishKey++
+                    var waited = 0L
+                    while (waited < 2600L && !peekCaught && !dragged && CurioPet.awake) {
+                        delay(120)
+                        waited += 120
+                    }
+                    peeking = false
+                    if (peekCaught) {
+                        // Caught mid-peek — a shared win.
+                        squishKey++
+                        celebrateKey++
+                        heartsKey++
+                        if (CurioPet.shouldSpeak(0.8f)) queueReaction(CurioPet.peekWinLine())
+                    } else {
+                        // Missed: slip fully back in and strut away.
+                        if (CurioPet.shouldSpeak(0.4f) && !dragged) queueReaction(CurioPet.missedMeLine())
+                        walkTo(
+                            Offset(
+                                peekX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                                peekY.coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                            ),
+                            stepMs = 16,
+                            steps = 42
+                        )
+                    }
+                    offScreen = false
+                    hideSeekActive = false
+                    squishKey++
+                    lastTouch = System.currentTimeMillis()
+                    continue
+                }
+                // v9.x — CHAMELEON GAME: the pet fades into the background
+                // and LEAVES the screen through a random edge (v16), hides
+                // off-screen, then slips back in from a different edge with
+                // a flourish. Never while glued to the deck, mid-spin, or
+                // already hiding.
+                if (!watching && !CurioPet.spinning && !offScreen && !hideSeekActive &&
+                    System.currentTimeMillis() - lastGameAt > 60_000L &&
+                    Random.nextFloat() < 0.05f * CurioPet.gameFrequencyMultiplier()
+                ) {
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
-                    // v14 — motion first: the game mostly plays silent and
-                    // speaks its line only sometimes.
-                    if (Random.nextFloat() < 0.35f) queueReaction(CurioPet.chameleonLine())
+                    // v14 — motion first; v16 — the speak chance follows the
+                    // chatter setting.
+                    if (CurioPet.shouldSpeak(0.5f)) queueReaction(CurioPet.findMePromptLine())
                     squishKey++
                     chameleonAlpha.snapTo(1f)
                     chameleonAlpha.animateTo(0.12f, tween(420, easing = FastOutSlowInEasing))
-                    delay(760)
-                    // v9.x — if the user grabbed the pet while it was hidden,
-                    // never teleport it mid-drag: pop back visible and let
-                    // the drag win (the wander loop is NOT cancelled by a
-                    // drag, so this guard is the only thing that stops a
-                    // surprise jump under the finger).
-                    if (dragged) {
+                    delay(320)
+                    // Slip out through a random edge as a faint ghost, then
+                    // fade the rest of the way at the border.
+                    chameleonFindMe = true
+                    val exitEdge = Random.nextInt(4)
+                    val exitX = when (exitEdge) {
+                        0 -> -petPx - marginPx
+                        1 -> maxW + marginPx
+                        else -> marginPx + Random.nextFloat() * (maxW - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    val exitY = when (exitEdge) {
+                        2 -> -petPx - marginPx
+                        3 -> maxH + marginPx
+                        else -> marginPx + Random.nextFloat() * (maxH - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    walkTo(Offset(exitX, exitY), stepMs = 12, steps = 60)
+                    // v9.x — if the user grabbed the pet mid-hide, pop back
+                    // visible and let the drag win (a surprise jump under
+                    // the finger is worse than a ruined game).
+                    if (dragged || gliding) {
                         chameleonAlpha.snapTo(1f)
+                        chameleonFindMe = false
                         continue
                     }
-                    val nx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
-                    val ny = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
-                    pos = Offset(nx, ny)
-                    facing = if (Random.nextFloat() < 0.5f) -1f else 1f
-                    chameleonAlpha.animateTo(1f, tween(360, easing = FastOutSlowInEasing))
+                    chameleonAlpha.animateTo(0f, tween(260))
+                    offScreen = true
+                    delay(1500)
+                    // Re-enter from a DIFFERENT edge at a random spot along it.
+                    val enterEdge = (exitEdge + 1 + Random.nextInt(3)) % 4
+                    val enterX = when (enterEdge) {
+                        0 -> -petPx - marginPx
+                        1 -> maxW + marginPx
+                        else -> marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    val enterY = when (enterEdge) {
+                        2 -> -petPx - marginPx
+                        3 -> maxH + marginPx
+                        else -> marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                    }
+                    pos = Offset(enterX, enterY)
+                    chameleonAlpha.snapTo(0f)
+                    chameleonAlpha.animateTo(1f, tween(300))
+                    // Slip inward so the return reads as an arrival, not a
+                    // teleport.
+                    walkTo(
+                        Offset(
+                            enterX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                            enterY.coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                        ),
+                        stepMs = 16,
+                        steps = 44
+                    )
+                    offScreen = false
+                    chameleonFindMe = false
                     squishKey++
                     celebrateKey++
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
-                // v9.x — SPARK-CATCH GAME: a quick eager dash to a fresh spot
-                // to "grab" a falling spark, with a celebration on arrival.
-                if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.06f) {
+                // v9.x — SPARK-CATCH GAME: the pet chases a REAL, catchable
+                // spark (v16 — now visible and TAPPABLE). The pet dashes to
+                // grab it; the user can tap the spark first to win the round
+                // together.
+                if (!watching && !CurioPet.spinning && !offScreen && !hideSeekActive &&
+                    System.currentTimeMillis() - lastGameAt > 35_000L &&
+                    Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
+                ) {
+                    lastGameAt = System.currentTimeMillis()
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
-                    // v14 — motion first: the game mostly plays silent and
-                    // speaks its line only sometimes.
-                    if (Random.nextFloat() < 0.35f) queueReaction(CurioPet.sparkLine())
+                    // v14 — motion first; v16 — the speak chance follows the
+                    // chatter setting.
+                    if (CurioPet.shouldSpeak(0.35f)) queueReaction(CurioPet.sparkLine())
                     val sx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
                     val sy = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
-                    walkTo(Offset(sx, sy), stepMs = 12, steps = 34)
-                    squishKey++
-                    celebrateKey++
-                    heartsKey++
+                    sparkTarget = Offset(sx, sy)
+                    sparkWon = false
+                    sparkKey++
+                    // Dash in small steps so a quick tap can beat the pet.
+                    val start = pos
+                    val dx = sx - start.x
+                    val dy = sy - start.y
+                    val dist = hypot(dx, dy)
+                    val steps = (dist / with(density) { 20.dp.toPx() }).toInt().coerceIn(14, 56)
+                    for (i in 1..steps) {
+                        if (sparkWon || dragged || gliding || !CurioPet.awake) break
+                        pos = Offset(
+                            (start.x + dx * i / steps).coerceIn(
+                                marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)
+                            ),
+                            (start.y + dy * i / steps).coerceIn(
+                                marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx)
+                            )
+                        )
+                        facing = if (dx >= 0f) 1f else -1f
+                        moving = true
+                        delay(13)
+                    }
+                    moving = false
+                    if (sparkWon) {
+                        // The user tapped it first — the pet celebrates the
+                        // shared win.
+                        squishKey++
+                        celebrateKey++
+                        heartsKey++
+                        if (CurioPet.shouldSpeak(0.8f)) queueReaction(CurioPet.caughtItLine())
+                    } else if (!dragged && !gliding && CurioPet.awake) {
+                        // The pet got there first and catches it itself.
+                        squishKey++
+                        celebrateKey++
+                        if (CurioPet.shouldSpeak(0.6f)) queueReaction(CurioPet.caughtItLine())
+                    } else if (CurioPet.shouldSpeak(0.5f)) {
+                        queueReaction(CurioPet.gotAwayLine())
+                    }
+                    sparkTarget = null
+                    sparkKey++
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
@@ -848,7 +1047,7 @@ fun CurioFloatingPet(
                 // bow + a "catch me!" line, then it zooms off. v8.12 — how
                 // often it does this comes from its GROWING PERSONALITY
                 // (bouncy pets play a lot, sparky ones are shy).
-                if (Random.nextFloat() < CurioPet.playfulBias(context)) {
+                if (Random.nextFloat() < CurioPet.playfulBias(context) * CurioPet.gameFrequencyMultiplier()) {
                     // v12 — the routine speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
@@ -1011,7 +1210,7 @@ fun CurioFloatingPet(
                 // v14 — during the spin the pet reacts with motion ALWAYS
                 // and cheers out loud only sometimes: words stay special.
                 celebrateKey++
-                if (Random.nextFloat() < 0.45f) queueReaction(CurioPet.spinCheer())
+                if (CurioPet.shouldSpeak(0.45f)) queueReaction(CurioPet.spinCheer())
                 lastTouch = System.currentTimeMillis()
             }
         }
@@ -1375,6 +1574,17 @@ fun CurioFloatingPet(
                     detectTapGestures(
                         onTap = {
                             lastTouch = System.currentTimeMillis()
+                            // v16 — catching the pet mid-hide-and-seek is a
+                            // win, not a boop: the peek round ends in a
+                            // celebration instead of the normal tap tiers.
+                            if (peeking && hideSeekActive) {
+                                peekCaught = true
+                                CurioPet.notePlay(context, react = false)
+                                squishKey++
+                                heartsKey++
+                                speakNow(CurioPet.peekWinLine())
+                                fireCustomActions(PetActionTrigger.TAP)
+                            } else {
                             // Every pet feeds the persona (v8.12).
                             CurioPet.noteTouch(context)
                             // Escalation: quick repeated taps push the pet
@@ -1439,6 +1649,7 @@ fun CurioFloatingPet(
                                 val ty = (pos.y + Random.nextFloat() * 120f - 60f)
                                     .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
                                 playDartTarget = Offset(tx, ty)
+                            }
                             }
                         },
                         onLongPress = {
@@ -1507,6 +1718,31 @@ fun CurioFloatingPet(
                 }
             )
         }
+        // v16 — the spark the pet is chasing: a pulsing, catchable sparkle.
+        // Tap it to win the round before the pet gets there.
+        if (sparkTarget != null && autoWander && CurioPet.awake) {
+            val target = sparkTarget!!
+            SparkGlow(
+                accent = accentColor,
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            (target.x - with(density) { SPARK_PX.toPx() } / 2f).roundToInt(),
+                            (target.y - with(density) { SPARK_PX.toPx() } / 2f).roundToInt()
+                        )
+                    }
+                    .size(SPARK_PX)
+                    .pointerInput(sparkKey) {
+                        detectTapGestures(onTap = {
+                            if (sparkTarget != null && !sparkWon) {
+                                sparkWon = true
+                                lastTouch = System.currentTimeMillis()
+                            }
+                        })
+                    }
+            )
+        }
+
         // v8.13 — hearts rise ABOVE the pet in their own offset sibling
         // (like the bubble), so they never cover the face. Bottom of the
         // hearts box hugs the pet's head; hearts float up and fade.
@@ -1634,6 +1870,66 @@ fun CurioFloatingPet(
  * blinking caret) and a little hand that sweeps across the keys, lighting
  * them up as it taps. Calm, premium, readable — not the old flashing strip.
  */
+/**
+ * v16 — the catchable spark the pet chases: a pulsing four-point sparkle
+ * with a hot white core and a soft accent halo, drawn in its own small
+ * box so it can be tapped to win the game before the pet gets there.
+ */
+@Composable
+private fun SparkGlow(accent: Color, modifier: Modifier = Modifier) {
+    val pulse = rememberInfiniteTransition(label = "sparkPulse")
+    val scale by pulse.animateFloat(
+        initialValue = 0.72f,
+        targetValue = 1.22f,
+        animationSpec = infiniteRepeatable(
+            tween(560, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
+        label = "sparkScale"
+    )
+    val spin by pulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            tween(2400, easing = LinearEasing),
+            RepeatMode.Restart
+        ),
+        label = "sparkSpin"
+    )
+    Canvas(modifier = modifier) {
+        val c = center
+        val r = size.minDimension / 2f
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    accent.copy(alpha = 0.55f),
+                    accent.copy(alpha = 0.14f),
+                    Color.Transparent
+                ),
+                center = c,
+                radius = r * 1.3f
+            ),
+            radius = r * 1.3f,
+            center = c
+        )
+        rotate(spin) {
+            val spike = r * 1.02f * scale
+            val thin = r * 0.15f
+            drawRect(
+                color = accent.copy(alpha = 0.9f),
+                topLeft = Offset(c.x - thin, c.y - spike),
+                size = Size(thin * 2f, spike * 2f)
+            )
+            drawRect(
+                color = accent.copy(alpha = 0.9f),
+                topLeft = Offset(c.x - spike, c.y - thin),
+                size = Size(spike * 2f, thin * 2f)
+            )
+        }
+        drawCircle(Color.White.copy(alpha = 0.95f), radius = r * 0.2f * scale, center = c)
+    }
+}
+
 @Composable
 private fun TypingKeyboard(
     visible: Boolean,
