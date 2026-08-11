@@ -1,5 +1,19 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Dedicated quest-complete trigger in the Pet Designer
+
+**Date:** 2026-08-11
+
+**What was asked:** Add a dedicated quest-complete reaction trigger in the Pet Designer so users can customize it.
+
+**Changes made:**
+- **PetDesign.kt** — `PetReactionEvents.QUEST_COMPLETE` const added to `ALL` (auto-renders a "Quest complete" card in the Built-in reactions grid, auto-included in `PetDefinition.actionEventIds`) + `label` / `trigger` ("When you claim a daily or weekly quest") / `defaultLine` ("Quest done!"). `DEFAULT_REACTIONS` gains a distinct default rule (HOP + happy eyes, smile, blush, sparkles — different from REVEAL's star eyes). `PetActionTrigger.QUEST_COMPLETE = "questcomplete"` added to `ALL` + `label`, so users can author custom actions that fire on quest claims (plain chip in the trigger picker; no param special-case needed).
+- **CurioFloatingPet.kt** — event-reaction mapping: QUEST_COMPLETE now uses its own `PetReactionEvents.QUEST_COMPLETE` rule (was REVEAL); custom-actions `when`: quest claims fire the dedicated `PetActionTrigger.QUEST_COMPLETE` trigger (was LEVEL_UP), while STREAK_MILESTONE keeps riding LEVEL_UP.
+- **Compatibility** — `reactionFor` falls back to `DEFAULT_REACTIONS`, so existing saved designs + evolved designs get the new default automatically; the "questcomplete" action kind is forward/backward tolerant (unknown kinds never fire, per the trigger's doc).
+- **docs/PET_DIALOGUE.txt** — section 18 notes the designer customization; **fastlane changelog** bullet added.
+
+**Validation:** brace balance OK, `git diff --check` clean, code review passed (only cosmetic nits; the custom-action behavior change — quest claims no longer fire LEVEL_UP actions — is the intended dedicated-trigger behavior). Gradle build left to CI.
+
 ## Current Request (COMPLETED): Two-voice pet dialogue rework (baby vs evolved) + motion-first tuning
 
 **Date:** 2026-08-11

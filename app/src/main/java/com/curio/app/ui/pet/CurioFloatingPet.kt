@@ -920,8 +920,8 @@ fun CurioFloatingPet(
                     // v13 — evolution rides the celebratory level-up rule
                     // (hop + face) while speaking its own ceremony line.
                     CurioPet.Event.EVOLVE -> PetReactionEvents.LEVEL_UP
-                    // v13 — a claimed quest sparkles like a fresh reveal.
-                    CurioPet.Event.QUEST_COMPLETE -> PetReactionEvents.REVEAL
+                    // v14 — quest claims use their own customizable rule.
+                    CurioPet.Event.QUEST_COMPLETE -> PetReactionEvents.QUEST_COMPLETE
                     // v13 — a new best streak gets the spin celebration.
                     CurioPet.Event.STREAK_MILESTONE -> PetReactionEvents.LEVEL_UP
                     // v12 — TOUCH is owned entirely by the tap handler (gated
@@ -945,9 +945,10 @@ fun CurioFloatingPet(
                     // v13 — evolution is the ultimate level-up: custom
                     // level-up actions join the ceremony too.
                     CurioPet.Event.EVOLVE -> fireCustomActions(PetActionTrigger.LEVEL_UP)
-                    // v13 — quest claims and streak milestones are reward
-                    // moments: they ride the celebratory level-up actions too.
-                    CurioPet.Event.QUEST_COMPLETE,
+                    // v14 — quest claims fire their own dedicated custom
+                    // action trigger; streak milestones keep riding the
+                    // celebratory level-up actions.
+                    CurioPet.Event.QUEST_COMPLETE -> fireCustomActions(PetActionTrigger.QUEST_COMPLETE)
                     CurioPet.Event.STREAK_MILESTONE -> fireCustomActions(PetActionTrigger.LEVEL_UP)
                     else -> Unit
                 }

@@ -400,8 +400,11 @@ Legend
 18. QUEST COMPLETE — the pet celebrates claiming a daily/weekly quest
     Location: CurioPet.kt (noteQuestComplete, questCompleteLines, Event.QUEST_COMPLETE),
               CurioQuests.kt (claimDaily / claimWeekly), CurioFloatingPet.kt
-              (rides the REVEAL sparkle reaction)
+              (its own customizable rule), PetDesign.kt (PetReactionEvents.QUEST_COMPLETE)
     Fires when the user taps Claim on a finished daily or weekly quest.
+    v14 — fully customizable in the Pet Designer: a "Quest complete"
+    reaction card (animation + face + lines) under Built-in reactions, and
+    a "Quest complete" trigger chip for user-defined custom actions.
 
   [picks one]:
     • "Quest done! Sparkle earned!" / "That quest never stood a chance!"
