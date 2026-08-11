@@ -13,6 +13,40 @@ import {
 import { TornHero, SETTINGS_HERO_SYMBOLS } from '../components/TornHero';
 import { ScreenEntrance } from '../animations';
 
+// ─── Segmented Row (matching Android's segmented control) ─────────────
+const SegmentedRow: React.FC<{
+  label: string;
+  description?: string;
+  options: { value: string; label: string }[];
+  selected: string;
+  onChange: (value: string) => void;
+}> = ({ label, description, options, selected, onChange }) => {
+  const { isDark } = useTheme();
+  return (
+    <div className="py-3">
+      {(label || description) && (
+        <div className="mb-2.5">
+          {label && <div className="text-sm font-medium" style={{ color: getTextColor(isDark) }}>{label}</div>}
+          {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{description}</div>}
+        </div>
+      )}
+      <div className="flex rounded-xl p-0.5" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)' }}>
+        {options.map(opt => (
+          <button key={opt.value} onClick={() => onChange(opt.value)}
+            className="flex-1 py-2 px-3 rounded-[10px] text-xs font-semibold transition-all"
+            style={{
+              background: selected === opt.value ? (isDark ? 'rgba(255,255,255,0.15)' : '#fff') : 'transparent',
+              color: selected === opt.value ? getTextColor(isDark) : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)'),
+              boxShadow: selected === opt.value ? (isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.08)') : 'none',
+            }}>
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const SETTINGS_HERO_HEIGHT = 180;
 const SETTINGS_TEAR_SEED = 0x5EED; // Android's SETTINGS_HERO_TEAR_SEED
 const ROSE_WOOD = '#C46B7C';
@@ -70,11 +104,26 @@ export const SettingsScreen: React.FC = () => {
   const [settings, setSettings] = useState({
     darkMode: isDark, pastelColors: false, heroGradient: true,
     notifications: true, soundEffects: true, autoSave: true, showPet: true, showQuests: true,
+    voiceToText: localStorage.getItem('curio-voice-to-text') === 'true',
   });
+  const [petChatter, setPetChatter] = useState(localStorage.getItem('curio-pet-chatter') || 'cozy');
+  const [petGames, setPetGames] = useState(localStorage.getItem('curio-pet-games') || 'normal');
+
   const handleSettingChange = (key: string, value: boolean) => {
     setSettings(prev => ({ ...prev, [key]: value }));
     if (key === 'darkMode') setDarkMode(value);
     else if (key === 'pastelColors') setPastelColors(value);
+    else if (key === 'voiceToText') localStorage.setItem('curio-voice-to-text', value ? 'true' : 'false');
+  };
+
+  const handlePetChatter = (val: string) => {
+    setPetChatter(val);
+    localStorage.setItem('curio-pet-chatter', val);
+  };
+
+  const handlePetGames = (val: string) => {
+    setPetGames(val);
+    localStorage.setItem('curio-pet-games', val);
   };
 
   return (
@@ -131,11 +180,43 @@ export const SettingsScreen: React.FC = () => {
             </div>
           </div>
           <div className="mb-6">
+            <CurioSectionHeader title="Pet" />
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+              <div className="px-4 py-2"><CurioToggle checked={settings.showPet} onChange={(v) => handleSettingChange('showPet', v)} label="Show Pet" description="Display your companion on screen" /></div>
+              <div className="px-4">
+                <SegmentedRow
+                  label="Pet Chatter"
+                  description="How often your pet speaks"
+                  options={[
+                    { value: 'quiet', label: 'Quiet' },
+                    { value: 'cozy', label: 'Cozy' },
+                    { value: 'talkative', label: 'Talkative' },
+                  ]}
+                  selected={petChatter}
+                  onChange={handlePetChatter}
+                />
+              </div>
+              <div className="px-4 pb-2">
+                <SegmentedRow
+                  label="Pet Games"
+                  description="How often your pet wants to play"
+                  options={[
+                    { value: 'relaxed', label: 'Relaxed' },
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'eager', label: 'Eager' },
+                  ]}
+                  selected={petGames}
+                  onChange={handlePetGames}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mb-6">
             <CurioSectionHeader title="Features" />
             <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
-              <div className="px-4 py-2"><CurioToggle checked={settings.showPet} onChange={(v) => handleSettingChange('showPet', v)} label="Show Pet" description="Display your companion" /></div>
-              <div className="px-4 pb-2"><CurioToggle checked={settings.showQuests} onChange={(v) => handleSettingChange('showQuests', v)} label="Show Quests" description="Display quest progress" /></div>
-              <div className="px-4 pb-2"><CurioToggle checked={settings.soundEffects} onChange={(v) => handleSettingChange('soundEffects', v)} label="Sound Effects" description="Play sounds on interactions" /></div>
+              <div className="px-4 py-2"><CurioToggle checked={settings.showQuests} onChange={(v) => handleSettingChange('showQuests', v)} label="Show Quests" description="Display quest progress" /></div>
+              <div className="px-4 py-2"><CurioToggle checked={settings.soundEffects} onChange={(v) => handleSettingChange('soundEffects', v)} label="Sound Effects" description="Play sounds on interactions" /></div>
+              <div className="px-4 pb-2"><CurioToggle checked={settings.voiceToText} onChange={(v) => handleSettingChange('voiceToText', v)} label="Voice-to-Text" description="Use voice input for entry notes" /></div>
             </div>
           </div>
           <div className="mb-6">
