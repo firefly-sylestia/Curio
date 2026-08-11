@@ -1,0 +1,1652 @@
+[
+  {
+    "id": "manga-akira",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Akira (1982)",
+    "teaser": "Otomo's manga took 10 years to draw and required him to redraw the ending after the anime — the manga's 'Neo-Tokyo' is a warning about the atomic age, and the 'AKIRA' prophecy is the plot.",
+    "imageUrl": "",
+    "byline": "Katsuhiro Otomo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Akira (1982) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the motorcycle geometry — the slide is drawn frame-by-frame. The manga's genius is that the bike is the story's first character."
+    },
+    "tags": [
+      "Cyberpunk",
+      "Action",
+      "Sci-Fi",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-ghost-in-the-shell",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Ghost in the Shell (1989)",
+    "teaser": "Shirow's manga is denser and more philosophical than the anime — the 'ghost' (soul) vs 'shell' (body) question is the plot, and the manga's sex scenes were censored in Western editions.",
+    "imageUrl": "",
+    "byline": "Masamune Shirow",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ghost in the Shell (1989) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the philosophy — the 'ghost' question is the plot, not the action. The manga's genius is that the cyborg is the reader."
+    },
+    "tags": [
+      "Cyberpunk",
+      "Philosophical",
+      "Sci-Fi",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-gantz",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Gantz (2000)",
+    "teaser": "The manga that made shock-value mainstream — the 'Gantz' sphere forces dead people to fight aliens, and the manga's real subject is the value of a human life measured in points.",
+    "imageUrl": "",
+    "byline": "Hiroya Oku",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gantz (2000) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the rules — the Gantz ball's point system is the plot. The manga's genius is that the 'score' is the horror."
+    },
+    "tags": [
+      "Sci-Fi",
+      "Action",
+      "Gore",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-tokyo-ghoul",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Tokyo Ghoul (2011)",
+    "teaser": "Ishida's debut manga about a half-ghoul — the 'CCG' (Ghoul Investigators) is a commentary on state violence, and the manga's art style shifts with the protagonist's identity crisis.",
+    "imageUrl": "",
+    "byline": "Sui Ishida",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tokyo Ghoul (2011) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the identity question — Kaneki is neither human nor ghoul. The manga's genius is that the 'mask' is the character."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Horror",
+      "Psychological",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-parasyte",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Parasyte (1989)",
+    "teaser": "The manga about an alien parasite that fails to take over its host's brain — the show's thesis is that humanity is the parasite, and the 'parasite in the right hand' is a literal metaphor.",
+    "imageUrl": "",
+    "byline": "Hitoshi Iwaaki",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Parasyte (1989) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the hand — the parasite in Migi's right hand is the co-protagonist. The manga's genius is that the alien is more human than the humans."
+    },
+    "tags": [
+      "Horror",
+      "Sci-Fi",
+      "Psychological",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-pluto",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Pluto (2003)",
+    "teaser": "Urasawa's reimagining of Astro Boy's 'The Greatest Robot on Earth' — the manga asks what makes a robot a person, and the 'Pluto' of the title is a robot who can't cry.",
+    "imageUrl": "",
+    "byline": "Naoki Urasawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pluto (2003) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the robot rights question — the murder mystery is a human rights story. The manga's genius is that the killer is the most human character."
+    },
+    "tags": [
+      "Mystery",
+      "Sci-Fi",
+      "Thriller",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-20th-century-boys",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "20th Century Boys (1999)",
+    "teaser": "The 'Friend' cult conspiracy manga — the childhood memory of a symbol becomes the end of the world, and the manga's genius is that the villain is a childhood friend you can't remember.",
+    "imageUrl": "",
+    "byline": "Naoki Urasawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "20th Century Boys (1999) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the symbol — the 'Friend' mark is the plot. The manga's genius is that the mystery is about memory."
+    },
+    "tags": [
+      "Mystery",
+      "Thriller",
+      "Sci-Fi",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-billy-bat",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Billy Bat (2008)",
+    "teaser": "The manga about a comic book character who may be real — the 'Billy Bat' is a bat that appears throughout history, and the manga's genius is that the fictional character is the anchor.",
+    "imageUrl": "",
+    "byline": "Naoki Urasawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Billy Bat (2008) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the bat — the symbol appears in every era. The manga's genius is that the comic is the key."
+    },
+    "tags": [
+      "Mystery",
+      "Thriller",
+      "Alternate History",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-berserk-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Berserk (Vol 1) (1989)",
+    "teaser": "The manga's first volume is the 'Black Swordsman' arc — it's deliberately edgy and rough; the manga doesn't find its voice until the Golden Age arc, where the tragedy is earned.",
+    "imageUrl": "",
+    "byline": "Kentaro Miura",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Berserk (Vol 1) (1989) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the tone — it's a grindhouse fantasy that gets deeper. The manga's genius is that the Eclipse is the center; everything before is setup."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Horror",
+      "Tragedy",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-vagabond-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Vagabond (Vol 1) (1998)",
+    "teaser": "Inoue paused the manga to study ink painting — the first volume's sword fights are already masterworks, and the 'way of the sword' is the plot.",
+    "imageUrl": "",
+    "byline": "Takehiko Inoue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vagabond (Vol 1) (1998) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the inkwork — the fights are drawn with brush strokes. The manga's genius is that the real battle is Musashi's inner one."
+    },
+    "tags": [
+      "Historical",
+      "Martial Arts",
+      "Drama",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-kingdom-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Kingdom (Vol 1) (2006)",
+    "teaser": "The unification-of-China epic — the battle formations are drawn from real Chinese war history, and the manga's thesis is that history is made by the forgotten.",
+    "imageUrl": "",
+    "byline": "Yasuhisa Hara",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kingdom (Vol 1) (2006) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the formations — the strategy is real. The manga's genius is that the slave protagonist is the 'forgotten' history."
+    },
+    "tags": [
+      "Historical",
+      "War",
+      "Strategy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-slam-dunk-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Slam Dunk (Vol 1) (1990)",
+    "teaser": "The basketball manga that sparked a real basketball boom in Japan — the first volume is comedy about a delinquent who joins the team for a girl.",
+    "imageUrl": "",
+    "byline": "Takehiko Inoue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Slam Dunk (Vol 1) (1990) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the comedy — Sakuragi is a joke who becomes real. The manga's genius is that the fundamentals arc is the drama."
+    },
+    "tags": [
+      "Sports",
+      "Coming of Age",
+      "Basketball",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-gto-great-teacher-onizuka",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "GTO: Great Teacher Onizuka (1997)",
+    "teaser": "The ex-delinquent teacher manga — Onizuka's teaching method is 'win them over by being more delinquent', and the manga's real subject is how adults fail children.",
+    "imageUrl": "",
+    "byline": "Tohru Fujisawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "GTO: Great Teacher Onizuka (1997) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the teaching method — Onizuka solves problems by joining them. The manga's genius is that the teacher is the student."
+    },
+    "tags": [
+      "Comedy",
+      "Drama",
+      "School",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-rurouni-kenshin",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Rurouni Kenshin (1994)",
+    "teaser": "The wandering-samurai manga about a killer who swore off killing — the 'reverse blade' sword is the thesis: strength without killing.",
+    "imageUrl": "",
+    "byline": "Nobuhiro Watsuki",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rurouni Kenshin (1994) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the reverse blade — the sword is the character. The manga's genius is that the redemption arc is the plot."
+    },
+    "tags": [
+      "Historical",
+      "Action",
+      "Samurai",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-rurouni-kenshin-trust-betrayal",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Rurouni Kenshin: Trust & Betrayal (1999)",
+    "teaser": "The prequel OVA that shows the 'Battousai' the main series only references — the ending is considered one of the most devastating in anime history.",
+    "imageUrl": "",
+    "byline": "Nobuhiro Watsuki",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rurouni Kenshin: Trust & Betrayal (1999) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Watch the first episode and notice the tone — it's a tragedy before the comedy. The OVA's genius is that the killer's past is the main series' shadow."
+    },
+    "tags": [
+      "Historical",
+      "Drama",
+      "Tragedy",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-kenshin-the-legend-ends",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Kenshin: The Legend Ends (1999)",
+    "teaser": "The trilogy's conclusion — the 'Enishi' arc resolves the Battousai's past, and the manga's genius is that the villain is the protagonist's mirror.",
+    "imageUrl": "",
+    "byline": "Nobuhiro Watsuki",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kenshin: The Legend Ends (1999) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Enishi arc and notice the mirror — the villain is Kenshin's past. The manga's genius is that the 'legend' ends with a choice."
+    },
+    "tags": [
+      "Historical",
+      "Action",
+      "Drama",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-20th-century-boys-vol-2",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "20th Century Boys (Vol 2) (1999)",
+    "teaser": "The conspiracy deepens — the childhood friends realize the 'Friend' was in their group, and the manga's genius is that the villain is a memory.",
+    "imageUrl": "",
+    "byline": "Naoki Urasawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "20th Century Boys (Vol 2) (1999) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the second volume and notice the suspects — every childhood friend is a candidate. The manga's genius is that the mystery is about trust."
+    },
+    "tags": [
+      "Mystery",
+      "Thriller",
+      "Sci-Fi",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-berserk-golden-age-arc",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Berserk: Golden Age Arc (1990)",
+    "teaser": "The arc that made Berserk a masterpiece — the Eclipse is considered the darkest moment in manga, and the arc's genius is that the tragedy is earned by the friendship it destroys.",
+    "imageUrl": "",
+    "byline": "Kentaro Miura",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Berserk: Golden Age Arc (1990) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Golden Age arc slowly — the horror is earned by the trust. The manga's genius is that the brand is the price."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Tragedy",
+      "Action",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-vagabond-the-duel",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Vagabond: The Duel (1998)",
+    "teaser": "The 'Musashi vs Kojiro' duel that Inoue spent years on — the fight is drawn as a meditation, and the manga's genius is that the duel is internal.",
+    "imageUrl": "",
+    "byline": "Takehiko Inoue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vagabond: The Duel (1998) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the duel and notice the stillness — the fight is a meditation. The manga's genius is that the swords are the characters."
+    },
+    "tags": [
+      "Historical",
+      "Martial Arts",
+      "Drama",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-one-punch-man-manga",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "One Punch Man (Manga) (2015)",
+    "teaser": "The webcomic's re-draw by Murata is considered the best-drawn manga of its generation — the art quality is film-level, and the story's satire is in the 'S-class' ranking system.",
+    "imageUrl": "",
+    "byline": "ONE / Yusuke Murata",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "One Punch Man (Manga) (2015) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the art — Murata's detail is the selling point. The manga's genius is that the joke is the plot."
+    },
+    "tags": [
+      "Action",
+      "Comedy",
+      "Superhero",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-goodnight-punpun-vol-2",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Goodnight Punpun (Vol 2) (2007)",
+    "teaser": "The second volume follows Punpun through adolescence — the bird-doodle design stays, and the manga's genius is that the crude bird is how he sees himself.",
+    "imageUrl": "",
+    "byline": "Inio Asano",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Goodnight Punpun (Vol 2) (2007) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the second volume and notice the bird — the doodle is the self-image. The manga's genius is that the realism around him is the contrast."
+    },
+    "tags": [
+      "Drama",
+      "Psychological",
+      "Coming of Age",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-solanin",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Solanin (2005)",
+    "teaser": "The manga about a post-grad couple who decide to quit their jobs — the 'Solanin' of the title is a flower that blooms in ruins, and the manga's genius is that the mundane IS the drama.",
+    "imageUrl": "",
+    "byline": "Inio Asano",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Solanin (2005) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the quiet — nothing dramatic happens. The manga's genius is that the decision to quit is the climax."
+    },
+    "tags": [
+      "Drama",
+      "Slice of Life",
+      "Music",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-nijigahara-holograph",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Nijigahara Holograph (2003)",
+    "teaser": "Asano's most cryptic work — a town's collective trauma told in disconnected fragments, and the manga's genius is that the 'holograph' is the memory.",
+    "imageUrl": "",
+    "byline": "Inio Asano",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nijigahara Holograph (2003) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read it twice — the fragments connect on the second pass. The manga's genius is that the timeline is a spiral."
+    },
+    "tags": [
+      "Psychological",
+      "Mystery",
+      "Horror",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-the-summit-of-the-gods",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "The Summit of the Gods (2000)",
+    "teaser": "The mountaineering manga about the mystery of George Mallory's disappearance — Taniguchi's art is photorealistic, and the manga's genius is that the climb is the character.",
+    "imageUrl": "",
+    "byline": "Jiro Taniguchi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Summit of the Gods (2000) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the art — the mountains are real. The manga's genius is that the obsession is the plot."
+    },
+    "tags": [
+      "Adventure",
+      "Drama",
+      "Mountain",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-a-distant-neighborhood",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "A Distant Neighborhood (1998)",
+    "teaser": "A middle-aged man time-travels to his teenage self — the manga's genius is that the nostalgia is the plot, and Taniguchi's quiet art makes the ache visible.",
+    "imageUrl": "",
+    "byline": "Jiro Taniguchi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Distant Neighborhood (1998) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the pacing — the time travel is subtle. The manga's genius is that the past is a place you visit, not change."
+    },
+    "tags": [
+      "Drama",
+      "Slice of Life",
+      "Time Travel",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-buddha",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Buddha (1972)",
+    "teaser": "Tezuka's 8-volume biography of Siddhartha — the 'God of Manga' drew the Buddha with flaws, and the manga's genius is that enlightenment is a process.",
+    "imageUrl": "",
+    "byline": "Osamu Tezuka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Buddha (1972) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the humanity — the Buddha is not divine yet. The manga's genius is that the path is the story."
+    },
+    "tags": [
+      "Historical",
+      "Biography",
+      "Spiritual",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-phoenix",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Phoenix (1967)",
+    "teaser": "Tezuka's unfinished magnum opus — each volume is set in a different era and connected by the immortal Phoenix, and the manga's genius is that the bird is the reader.",
+    "imageUrl": "",
+    "byline": "Osamu Tezuka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Phoenix (1967) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the eras — each story is a cycle. The manga's genius is that the Phoenix is immortality itself."
+    },
+    "tags": [
+      "Sci-Fi",
+      "Philosophical",
+      "Epic",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-astro-boy",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Astro Boy (1952)",
+    "teaser": "The manga that created modern anime — Tezuka's robot boy was the first manga to have a serialized anime adaptation, and the 'Pinocchio with a heart' premise is the genre's foundation.",
+    "imageUrl": "",
+    "byline": "Osamu Tezuka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Astro Boy (1952) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the innocence — the robot boy's kindness is the thesis. The manga's genius is that the machine is the most human."
+    },
+    "tags": [
+      "Sci-Fi",
+      "Adventure",
+      "Classic",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-dragon-ball-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Dragon Ball (Vol 1) (1984)",
+    "teaser": "The first volume is a martial-arts comedy — Goku is a kid with a tail hunting dragon balls with a girl, and the manga's genius is that the power scale didn't exist yet.",
+    "imageUrl": "",
+    "byline": "Akira Toriyama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dragon Ball (Vol 1) (1984) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the comedy — it's a gag manga. The manga's genius is that the shift to action is the plot."
+    },
+    "tags": [
+      "Action",
+      "Adventure",
+      "Shonen",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-one-piece-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "One Piece (Vol 1) (1997)",
+    "teaser": "The first volume introduces the Straw Hats — Oda's hidden-detail style is already present, and the manga's genius is that the treasure is the premise, not the plot.",
+    "imageUrl": "",
+    "byline": "Eiichiro Oda",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "One Piece (Vol 1) (1997) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the cover — Oda hides details everywhere. The manga's genius is that the 'romance dawn' is the theme."
+    },
+    "tags": [
+      "Adventure",
+      "Shonen",
+      "Pirate",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-naruto-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Naruto (Vol 1) (1999)",
+    "teaser": "The first volume is the academy arc — the 'demon fox' in Naruto is the plot, and the manga's genius is that the outcast is the hero.",
+    "imageUrl": "",
+    "byline": "Masashi Kishimoto",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Naruto (Vol 1) (1999) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the loneliness — Naruto's pranks are a cry for attention. The manga's genius is that the fox is the character."
+    },
+    "tags": [
+      "Action",
+      "Shonen",
+      "Ninja",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-death-note-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Death Note (Vol 1) (2003)",
+    "teaser": "The first volume introduces the rules and the game — the manga's genius is that Light is the villain from page one, and the 'L' introduction is the plot's engine.",
+    "imageUrl": "",
+    "byline": "Tsugumi Ohba",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Death Note (Vol 1) (2003) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the rules — each one exists to make the game fair. The manga's genius is that the notebook is the character."
+    },
+    "tags": [
+      "Thriller",
+      "Psychological",
+      "Mystery",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-bleach-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Bleach (Vol 1) (2001)",
+    "teaser": "The first volume introduces Ichigo and Rukia — the 'soul reaper' premise, and Kubo's panel whitespace is already the signature.",
+    "imageUrl": "",
+    "byline": "Tite Kubo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bleach (Vol 1) (2001) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the whitespace — Kubo uses it like a composer. The manga's genius is that the sword is the character."
+    },
+    "tags": [
+      "Action",
+      "Supernatural",
+      "Shonen",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-fullmetal-alchemist-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Fullmetal Alchemist (Vol 1) (2001)",
+    "teaser": "The first volume establishes the 'equivalent exchange' law — the manga's genius is that the law is broken by the ending, and the brothers' search is the plot.",
+    "imageUrl": "",
+    "byline": "Hiromu Arakawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fullmetal Alchemist (Vol 1) (2001) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the law — equivalent exchange is the thesis. The manga's genius is that the law is the trap."
+    },
+    "tags": [
+      "Adventure",
+      "Dark Fantasy",
+      "Steampunk",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-attack-on-titan-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Attack on Titan (Vol 1) (2009)",
+    "teaser": "The first volume's walled-city premise — Isayama's art was considered rough, and the manga's genius is that the roughness is the dread.",
+    "imageUrl": "",
+    "byline": "Hajime Isayama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Attack on Titan (Vol 1) (2009) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the walls — the height is the plot. The manga's genius is that the basement is the center."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Action",
+      "Dystopian",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-tokyo-revengers-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Tokyo Revengers (Vol 1) (2017)",
+    "teaser": "The first volume establishes the time-travel rules — the manga's genius is that each trip costs something, and the 'delinquent youth' fashion is authentic to the era.",
+    "imageUrl": "",
+    "byline": "Ken Wakui",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tokyo Revengers (Vol 1) (2017) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the cost — the time travel has rules. The manga's genius is that the saving is the plot."
+    },
+    "tags": [
+      "Action",
+      "Drama",
+      "Gang",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-blue-lock-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Blue Lock (Vol 1) (2018)",
+    "teaser": "The first volume's 'ego' philosophy — the manga's genius is that soccer is a battle, and the 300-striker death-game is the plot.",
+    "imageUrl": "",
+    "byline": "Muneyuki Kaneshiro",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Blue Lock (Vol 1) (2018) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the ego framing — the psychological duels are the game. The manga's genius is that the 'egoist' is the hero."
+    },
+    "tags": [
+      "Sports",
+      "Psychological",
+      "Soccer",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-haikyuu-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Haikyuu!! (Vol 1) (2012)",
+    "teaser": "The first volume's 'short protagonist' — the manga's genius is that height is a metaphor, and the 'garbage war' rivalry is the engine.",
+    "imageUrl": "",
+    "byline": "Haruichi Furudate",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Haikyuu!! (Vol 1) (2012) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the height — the short protagonist is the thesis. The manga's genius is that the limits are the plot."
+    },
+    "tags": [
+      "Sports",
+      "Coming of Age",
+      "Volleyball",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-kaguya-sama-love-is-war-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Kaguya-sama: Love Is War (Vol 1) (2015)",
+    "teaser": "The first volume's mind-game framing — the manga's genius is that the 'war' is a love confession, and the narrator's 4D-chess framing is the joke.",
+    "imageUrl": "",
+    "byline": "Aka Akasaka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kaguya-sama: Love Is War (Vol 1) (2015) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the framing — the narration is the comedy. The manga's genius is that the mind-games are vulnerability."
+    },
+    "tags": [
+      "Romance",
+      "Comedy",
+      "Psychological",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-chainsaw-man-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Chainsaw Man (Vol 1) (2018)",
+    "teaser": "The first volume's 'contract' framing — the manga's genius is that the chainsaw is a literal deal with the devil, and the film references are the style.",
+    "imageUrl": "",
+    "byline": "Tatsuki Fujimoto",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chainsaw Man (Vol 1) (2018) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the contracts — each devil deal has a cost. The manga's genius is that the 'film editing' is the pacing."
+    },
+    "tags": [
+      "Action",
+      "Dark Comedy",
+      "Horror",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-frieren-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Frieren (Vol 1) (2020)",
+    "teaser": "The first volume's post-adventure framing — the manga's genius is that the quest is already over, and the 'belief magic' is the theme.",
+    "imageUrl": "",
+    "byline": "Kanehito Yamada",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Frieren (Vol 1) (2020) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the time-skips — decades pass in pages. The manga's genius is that memory is the magic."
+    },
+    "tags": [
+      "Fantasy",
+      "Drama",
+      "Slice of Life",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-made-in-abyss-vol-1",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Made in Abyss (Vol 1) (2012)",
+    "teaser": "The first volume's curse system — the manga's genius is that depth has a price, and the cute art is the trap.",
+    "imageUrl": "",
+    "byline": "Akihito Tsukushi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Made in Abyss (Vol 1) (2012) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the curse — every descent costs. The manga's genius is that the Abyss is the character."
+    },
+    "tags": [
+      "Adventure",
+      "Dark Fantasy",
+      "Sci-Fi",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-vagabond-vol-2",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Vagabond (Vol 2) (1998)",
+    "teaser": "The second volume introduces the Yoshioka — the manga's genius is that the rivals are the teachers, and the inkwork continues to be the star.",
+    "imageUrl": "",
+    "byline": "Takehiko Inoue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vagabond (Vol 2) (1998) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the second volume and notice the rivals — each fight is a lesson. The manga's genius is that the way is the plot."
+    },
+    "tags": [
+      "Historical",
+      "Martial Arts",
+      "Drama",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-one-piece",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "One Piece (1997)",
+    "teaser": "Oda planned the ending decades ago and the manga is so detail-dense that fans have found characters hidden in backgrounds years before they appear. Volume 1's cover has a message that only made sense 20 years later.",
+    "imageUrl": "",
+    "byline": "Eiichiro Oda",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "One Piece (1997) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first chapter twice: once for the story, once hunting for Oda's hidden doodles. Then check the cover of volume 1 — there's a promise hidden in the drawing."
+    },
+    "tags": [
+      "Adventure",
+      "Shonen",
+      "Pirate",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-naruto",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Naruto (1999)",
+    "teaser": "Kishimoto designed Naruto's spiky hair because he couldn't draw good hair — and the character's loneliness is autobiographical. The ramen he always eats is real: Ichiraku Ramen was modeled on a shop near the studio.",
+    "imageUrl": "",
+    "byline": "Masashi Kishimoto",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Naruto (1999) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the fight with Zabuza — it's where the series stops being a kids' cartoon. Pay attention to the hands: Kishimoto draws hands so expressive they carry whole conversations."
+    },
+    "tags": [
+      "Action",
+      "Shonen",
+      "Ninja",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-bleach",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Bleach (2001)",
+    "teaser": "Kubo is left-handed and draws with a special mirror technique — his panel layouts are so stylish they're studied in art schools, and the series' fashion sense comes from his love of punk and designer clothes.",
+    "imageUrl": "",
+    "byline": "Tite Kubo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bleach (2001) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first chapter and notice the panel rhythm — Kubo uses whitespace like a composer. The sword designs (zanpakuto) each tell the owner's character; compare Ichigo's to Byakuya's."
+    },
+    "tags": [
+      "Action",
+      "Supernatural",
+      "Shonen",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-dragon-ball",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Dragon Ball (1984)",
+    "teaser": "Toriyama invented the Super Saiyan because his editor said the manga was getting boring — and the power level scale started as a joke about the villain's scouters.",
+    "imageUrl": "",
+    "byline": "Akira Toriyama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dragon Ball (1984) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice Goku is a martial-arts comedy, not an action epic. Then jump to the 23rd Budokai and watch how the fights turned from slapstick to physics."
+    },
+    "tags": [
+      "Action",
+      "Adventure",
+      "Shonen",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-attack-on-titan",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Attack on Titan (2009)",
+    "teaser": "Isayama's hometown inspired the walled city, and the reveal about the basement was planned from chapter 1 — the manga's final chapter drew record global attention and split the fandom.",
+    "imageUrl": "",
+    "byline": "Hajime Isayama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Attack on Titan (2009) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first chapter and notice the foreshadowing in the wall's height and the Titans' smiles. The story's real subject is freedom and who gets to define it — the monsters are never just monsters."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Action",
+      "Dystopian",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-death-note",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Death Note (2003)",
+    "teaser": "The artist and writer never met in person — Ohba sent scripts and Obata drew, and the iconic rules of the Death Note were invented to make the mind-games fair.",
+    "imageUrl": "",
+    "byline": "Tsugumi Ohba",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Death Note (2003) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first two chapters and track every rule the notebook introduces — each one exists to make the game solvable. Notice when Light stops being the hero: it's earlier than you think."
+    },
+    "tags": [
+      "Thriller",
+      "Psychological",
+      "Mystery",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-fullmetal-alchemist",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Fullmetal Alchemist (2001)",
+    "teaser": "Arakawa grew up on a dairy farm and wrote the alchemy rules to mirror real chemistry — the manga's equivalent-exchange law is literally conservation of mass with fantasy dressing.",
+    "imageUrl": "",
+    "byline": "Hiromu Arakawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fullmetal Alchemist (2001) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Nina chapter — it's the moral thesis of the whole series in one gut-punch. Then notice how often equivalent exchange is actually broken; the series is about what it costs."
+    },
+    "tags": [
+      "Adventure",
+      "Dark Fantasy",
+      "Steampunk",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-jujutsu-kaisen",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Jujutsu Kaisen (2018)",
+    "teaser": "Akutami's power system (cursed energy) is explained in a classroom scene that fans still analyze — and the manga's author planned the ending from the first arc.",
+    "imageUrl": "",
+    "byline": "Gege Akutami",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jujutsu Kaisen (2018) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Shibuya Incident arc for the series' true identity — it's a horror manga wearing a shonen's clothes. Notice how many named characters die off-panel: the author refuses drama, which is the drama."
+    },
+    "tags": [
+      "Action",
+      "Supernatural",
+      "Dark Fantasy",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-demon-slayer",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Demon Slayer (2016)",
+    "teaser": "Gotouge wrote the manga while working a part-time job and the anime's episode 19 became the most-discussed episode of the decade — the manga's gentle ending was planned from the start.",
+    "imageUrl": "",
+    "byline": "Koyoharu Gotouge",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Demon Slayer (2016) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the final battle and notice how the demons are mourned as humans — the series' kindness is its secret weapon. The swords' colors tell you the user's breathing style; spot the mistake in the anime version."
+    },
+    "tags": [
+      "Action",
+      "Historical",
+      "Dark Fantasy",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-chainsaw-man",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Chainsaw Man (2018)",
+    "teaser": "Fujimoto drew the manga while binge-watching Western films — the panels are framed like movie shots, and the series' most famous scene was inspired by a real dog video.",
+    "imageUrl": "",
+    "byline": "Tatsuki Fujimoto",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chainsaw Man (2018) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first arc and notice the film references — the pacing is edited like a Tarantino movie. The chainsaw sounds are drawn, not written: count how the panel borders change when Denji transforms."
+    },
+    "tags": [
+      "Action",
+      "Dark Comedy",
+      "Horror",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-my-hero-academia",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "My Hero Academia (2014)",
+    "teaser": "Horikoshi is a Western comic nerd — the hero rankings mirror American comics' power scaling, and the series' symbolism (All Might's smile, the embers) is drawn with a purpose.",
+    "imageUrl": "",
+    "byline": "Kohei Horikoshi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "My Hero Academia (2014) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Sports Festival arc — it's the series' thesis on what makes a hero when powers are unfair. Notice how often Deku wins by understanding others' powers better than they do."
+    },
+    "tags": [
+      "Action",
+      "Superhero",
+      "Shonen",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-vinland-saga",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Vinland Saga (2005)",
+    "teaser": "The author spent years researching Viking history and the manga's farm arc — where the protagonist becomes a pacifist — is based on the real Thorfinn Karlsefni's documented life.",
+    "imageUrl": "",
+    "byline": "Makoto Yukimura",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vinland Saga (2005) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the farm arc slowly — it's the point of the whole series, not a filler. The violence in the early volumes exists to make the peace meaningful; notice how the art changes once the fighting stops."
+    },
+    "tags": [
+      "Historical",
+      "Drama",
+      "Viking",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-berserk",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Berserk (1989)",
+    "teaser": "Miura died at 54 with the manga unfinished — his friend Kouji Mori finished the story from their shared notes, and the Eclipse is widely called the darkest moment in manga history.",
+    "imageUrl": "",
+    "byline": "Kentaro Miura",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Berserk (1989) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Golden Age arc and understand Guts' rage before the Eclipse — the horror is earned. The brand's meaning changes once you know who put it there."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Horror",
+      "Tragedy",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-monster",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Monster (1994)",
+    "teaser": "Urasawa drew every character with real German street fashion and the manga's antagonist was inspired by a real German doctor — the series asks what a person becomes when they choose evil.",
+    "imageUrl": "",
+    "byline": "Naoki Urasawa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Monster (1994) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the kindness of the hero — it's the setup for the moral question. The villain's name is a diagnosis, not a title."
+    },
+    "tags": [
+      "Thriller",
+      "Psychological",
+      "Mystery",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-jojo-s-bizarre-adventure",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "JoJo's Bizarre Adventure (1987)",
+    "teaser": "Araki's art is displayed in the Louvre, and each part of JoJo is a new genre — the series' power system (Stands) was invented because the author wanted fights that were more strategic than physical.",
+    "imageUrl": "",
+    "byline": "Hirohiko Araki",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "JoJo's Bizarre Adventure (1987) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read Part 3's beginning and understand how Stands changed manga fights forever — the strategy is the fight. Araki's fashion is drawn from real magazines; spot the designer references."
+    },
+    "tags": [
+      "Action",
+      "Adventure",
+      "Supernatural",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-hunter-x-hunter",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Hunter x Hunter (1998)",
+    "teaser": "Togashi's Chimera Ant arc is considered the greatest shonen arc ever written, and the author's health issues famously pause the manga mid-arc — the nen system is the most analyzed power system in manga.",
+    "imageUrl": "",
+    "byline": "Yoshihiro Togashi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hunter x Hunter (1998) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the Chimera Ant arc and notice how the villain's humanity is the point — the ants are more human than the hunters. The nen system rewards planning over power; the fights are chess matches."
+    },
+    "tags": [
+      "Adventure",
+      "Strategy",
+      "Shonen",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-frieren-beyond-journey-s-end",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Frieren: Beyond Journey's End (2020)",
+    "teaser": "The manga starts after the hero's quest is already over — the elven mage Frieren outlives her party and the series is about memory and what people leave behind.",
+    "imageUrl": "",
+    "byline": "Kanehito Yamada",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Frieren: Beyond Journey's End (2020) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first chapter and notice the time-skip trick — decades pass in a page. The series' magic system runs on belief: magic becomes real when people believe it, which is the whole theme."
+    },
+    "tags": [
+      "Fantasy",
+      "Drama",
+      "Slice of Life",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-oyasumi-punpun",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Oyasumi Punpun (2007)",
+    "teaser": "The protagonist is drawn as a crudely doodled bird while everyone around him is detailed — the visual metaphor is the story, and the manga's ending is one of the most discussed in the medium.",
+    "imageUrl": "",
+    "byline": "Inio Asano",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Oyasumi Punpun (2007) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice Punpun's design — the crude bird is how he sees himself. The manga is a study of how childhood trauma quietly decides adult choices."
+    },
+    "tags": [
+      "Drama",
+      "Psychological",
+      "Coming of Age",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-gintama",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Gintama (2003)",
+    "teaser": "A samurai comedy set in an Edo occupied by aliens — Sorachi's humor is so absurd that the series' serious arcs hit harder because of the joke structure.",
+    "imageUrl": "",
+    "byline": "Hideaki Sorachi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gintama (2003) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume expecting comedy, then hit the Benizakura arc and watch the tone shift. The series' humor is the armor; the serious arcs are the wound."
+    },
+    "tags": [
+      "Comedy",
+      "Action",
+      "Historical",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-blue-lock",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Blue Lock (2018)",
+    "teaser": "A soccer manga where 300 strikers compete in a death-game to become the world's best egoist — the author studied real football tactics and the 'ego' philosophy is the actual plot.",
+    "imageUrl": "",
+    "byline": "Muneyuki Kaneshiro",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Blue Lock (2018) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the manga treats soccer like a battle — the psychological duels are the real game. The 'ego' concept is a real sports psychology idea."
+    },
+    "tags": [
+      "Sports",
+      "Psychological",
+      "Soccer",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-haikyuu",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Haikyuu!! (2012)",
+    "teaser": "Furudate played volleyball and drew every rotation correctly — the manga's rallies are choreographed so you can follow the ball's physics, and the 'low height' protagonist is the point.",
+    "imageUrl": "",
+    "byline": "Haruichi Furudate",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Haikyuu!! (2012) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first match against the Seijoh team and track the ball's trajectory — every pass is drawn with correct physics. The series is about height as a metaphor for limits."
+    },
+    "tags": [
+      "Sports",
+      "Coming of Age",
+      "Volleyball",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-tokyo-revengers",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Tokyo Revengers (2017)",
+    "teaser": "The time-travel gang manga was inspired by the author's own delinquent youth in Tokyo's '90s — the fashion is authentic to the era and the fights are drawn from real street-brawl choreography.",
+    "imageUrl": "",
+    "byline": "Ken Wakui",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tokyo Revengers (2017) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the time-travel rules — every trip costs something. The series' real subject is whether you can save people who don't want to be saved."
+    },
+    "tags": [
+      "Action",
+      "Drama",
+      "Gang",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-vagabond",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Vagabond (1998)",
+    "teaser": "Inoue paused the manga to paint — his brushwork in the sword fights is considered the finest in the medium, and the series is a fictionalized biography of Miyamoto Musashi.",
+    "imageUrl": "",
+    "byline": "Takehiko Inoue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vagabond (1998) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the 'way of the sword' scenes and watch the art — the fights are drawn with ink strokes that move like the blade. The series' real battle is Musashi's inner one; the duels are externalized."
+    },
+    "tags": [
+      "Historical",
+      "Martial Arts",
+      "Drama",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-kingdom",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Kingdom (2006)",
+    "teaser": "A retelling of the unification of China through the eyes of a slave who becomes a general — the manga's battle formations are drawn from real Chinese war history and the author's research trips.",
+    "imageUrl": "",
+    "byline": "Yasuhisa Hara",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kingdom (2006) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first siege arc and track the formations — the strategy is real. The series' thesis is that history is made by the people the history books forget."
+    },
+    "tags": [
+      "Historical",
+      "War",
+      "Strategy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-the-promised-neverland",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "The Promised Neverland (2016)",
+    "teaser": "The author planned the entire manga before writing a single chapter — the first arc's escape is a perfect puzzle that the reader can actually solve.",
+    "imageUrl": "",
+    "byline": "Kaiu Shirai",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Promised Neverland (2016) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first arc and try to solve the escape yourself — every rule is seeded in the first chapters. The manga's twist is that the horror is the system, not the monsters."
+    },
+    "tags": [
+      "Thriller",
+      "Mystery",
+      "Horror",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-slam-dunk",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Slam Dunk (1990)",
+    "teaser": "Inoue's basketball manga is credited with a real spike in Japanese basketball participation — the final match against Sannoh has no music in the anime because the manga's panels are that powerful.",
+    "imageUrl": "",
+    "byline": "Takehiko Inoue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Slam Dunk (1990) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the final match against Sannoh and notice the silent panel — the manga's most famous moment has no dialogue. The series is about effort, not talent: watch Sakuragi's fundamentals grow."
+    },
+    "tags": [
+      "Sports",
+      "Coming of Age",
+      "Basketball",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-noragami",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Noragami (2010)",
+    "teaser": "The gods in Noragami are based on real Shinto beliefs and the manga's 'gods die without worshippers' concept is a genuine theological idea drawn from Japanese folk religion.",
+    "imageUrl": "",
+    "byline": "Adachitoka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Noragami (2010) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the shrine — gods are sustained by belief, and the series treats faith as a real currency. The fights are theology made physical."
+    },
+    "tags": [
+      "Supernatural",
+      "Action",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-fire-force",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Fire Force (2015)",
+    "teaser": "Ohkubo (of Soul Eater fame) draws fire as a living character — the 'infernals' are humans who burned alive, and the series' real mystery is the First Pillar.",
+    "imageUrl": "",
+    "byline": "Atsushi Ohkubo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fire Force (2015) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first arc and notice the fire's personality — it's drawn as an emotion, not an element. The series' secret is that the 'devil' is the system itself."
+    },
+    "tags": [
+      "Action",
+      "Supernatural",
+      "Sci-Fi",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-dorohedoro",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Dorohedoro (2000)",
+    "teaser": "The author draws everything with ink and screen tone in a style so dense that fans call it 'the manga that looks like a fever dream' — the worldbuilding is anarchic and everything has a rule.",
+    "imageUrl": "",
+    "byline": "Q Hayashida",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dorohedoro (2000) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and just surrender to the world — the rules reveal themselves. The series is about who gets to decide what's magic and what's crime."
+    },
+    "tags": [
+      "Dark Fantasy",
+      "Gore",
+      "Comedy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-made-in-abyss",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Made in Abyss (2012)",
+    "teaser": "Tsukushi self-published the first chapters at Comiket before getting a publisher — the Abyss's curse mechanic is the series' thesis: depth has a price, and curiosity pays it.",
+    "imageUrl": "",
+    "byline": "Akihito Tsukushi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Made in Abyss (2012) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first volume and notice the curse system — every descent has a cost, and the series never forgets it. The cute art is the trap; the Abyss is the real character."
+    },
+    "tags": [
+      "Adventure",
+      "Dark Fantasy",
+      "Sci-Fi",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-kaguya-sama-love-is-war",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "Kaguya-sama: Love Is War (2015)",
+    "teaser": "The rom-com is structured as a mind-game — each chapter is a battle of psychological warfare between two people too proud to confess, and the author later wrote the darker Oshi no Ko.",
+    "imageUrl": "",
+    "byline": "Aka Akasaka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kaguya-sama: Love Is War (2015) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first few chapters as a strategy game — the narrator's '4D chess' framing is the joke. The series' genius is that the mind-games are actually about vulnerability."
+    },
+    "tags": [
+      "Romance",
+      "Comedy",
+      "Psychological",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "manga-to-your-eternity",
+    "categoryId": "MANGA",
+    "subtype": "Manga",
+    "name": "To Your Eternity (2016)",
+    "teaser": "Oima (A Silent Voice's author) asks what it means to be human through an immortal shapeshifter — the manga's first chapter is a single, devastating relationship.",
+    "imageUrl": "",
+    "byline": "Yoshitoki Oima",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "To Your Eternity (2016) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Read the first chapter alone — it's a complete tragedy in one sitting. The series' thesis is that identity is formed by the people you lose."
+    },
+    "tags": [
+      "Fantasy",
+      "Drama",
+      "Philosophical",
+      "2010s"
+    ],
+    "tier": 1
+  }
+]

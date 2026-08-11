@@ -212,6 +212,31 @@ Do not create historical design/status documents for routine changes. Keep durab
 - Store changelogs use `versionCode` (integer) — see `fastlane/AGENTS.md`
 - In-app changelog: detailed (unlimited). Store changelog: brief (≤500 chars)
 
+## Web App (web/)
+
+The `web/` directory contains a standalone React + TypeScript web application that mirrors the Android app's UI and functionality. It is a separate project from the Android app and is NOT included in the Android build.
+
+**Tech stack:**
+- React 18 with TypeScript
+- Vite for build tooling
+- Tailwind CSS for styling
+- IndexedDB for local storage (mirrors Room database)
+- React Router for navigation
+
+**Key features:**
+- Full UI parity with Android app (Home, Spin, Cabinet, Profile, Settings)
+- 21 categories with matching colors and themes
+- Theme system (Curio/AMOLED/Material styles)
+- Local data persistence via IndexedDB
+- No authentication required
+
+**To run the web app:**
+```bash
+cd web
+npm install
+npm run dev
+```
+
 ## Child DOX Index
 
 - [app/AGENTS.md](app/AGENTS.md) — Active Curio Android app module

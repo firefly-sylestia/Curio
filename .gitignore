@@ -62,3 +62,7 @@ __pycache__/
 # Gradle validateTopics task instead (see app/build.gradle.kts).
 /scripts/*.py
 /scripts/*.js
+
+# Web app (separate React project, not part of Android build)
+/web/dist
+/web/.vite
