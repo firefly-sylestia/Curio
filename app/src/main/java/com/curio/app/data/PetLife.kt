@@ -39,7 +39,10 @@ object PetLifeDirector {
         PetLifeRoutine("tiny-stumble", "stumble", PetViewAngle.THREE_QUARTER, "Whoops! Nailed it."),
         PetLifeRoutine("look-up", "look_up", PetViewAngle.LOOKING_UP, "The ceiling has thoughts too."),
         PetLifeRoutine("backstage", "backturn", PetViewAngle.BACK, "Just checking my best side."),
-        PetLifeRoutine("victory-pose", "victory", PetViewAngle.THREE_QUARTER, "That deserves a pose!")
+        PetLifeRoutine("victory-pose", "victory", PetViewAngle.THREE_QUARTER, "That deserves a pose!"),
+        PetLifeRoutine("glance-side", "glance", PetViewAngle.SIDE, "Just taking it all in."),
+        PetLifeRoutine("wave-bright", "wave", PetViewAngle.THREE_QUARTER, "A bright little hello!"),
+        PetLifeRoutine("stretch-yawn", "stretch", PetViewAngle.FRONT, "A stretch and a yawn. Perfect combo."),
     )
 
     private val home = listOf(
@@ -47,14 +50,18 @@ object PetLifeDirector {
         PetLifeRoutine("room-tour", "backturn", PetViewAngle.BACK, "Come see what I found."),
         PetLifeRoutine("window-watch", "look_up", PetViewAngle.LOOKING_UP, "The view is lovely today."),
         PetLifeRoutine("cozy-turn", "sidepeek", PetViewAngle.SIDE, "One tiny house inspection."),
-        PetLifeRoutine("home-dance", "victory", PetViewAngle.THREE_QUARTER, "Dance break in the house!")
+        PetLifeRoutine("home-dance", "victory", PetViewAngle.THREE_QUARTER, "Dance break in the house!"),
+        PetLifeRoutine("home-purr", "stretch", PetViewAngle.FRONT, "The shelf hums. I hum with it."),
+        PetLifeRoutine("home-nap", "sidepeek", PetViewAngle.CURLED, "Just resting my eyes…"),
     )
 
     private val spin = listOf(
         PetLifeRoutine("deck-anticipation", "look_up", PetViewAngle.LOOKING_UP, "Come on… pick a good one."),
         PetLifeRoutine("deck-side-peek", "sidepeek", PetViewAngle.SIDE, "I can almost see the answer."),
         PetLifeRoutine("deck-stretch", "stretch", PetViewAngle.LOOKING_DOWN, "Ready, set, spin!"),
-        PetLifeRoutine("deck-victory", "victory", PetViewAngle.THREE_QUARTER, "That landing had style!")
+        PetLifeRoutine("deck-victory", "victory", PetViewAngle.THREE_QUARTER, "That landing had style!"),
+        PetLifeRoutine("deck-bounce", "stumble", PetViewAngle.THREE_QUARTER, "Bounce bounce! Go deck!"),
+        PetLifeRoutine("deck-glance", "glance", PetViewAngle.SIDE, "The wheel is thinking…"),
     )
 
     private val quests = listOf(

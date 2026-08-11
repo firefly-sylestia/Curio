@@ -323,7 +323,8 @@ object CurioPet {
         "You again! Hehe — okay, I'm invested now.",
         "I've cheered so much my sparkle needs a snack break.",
         "Is that a new thing? …It's the same thing. I don't care. MORE!",
-        "My excitement is now legally yours. Proceed."
+        "My excitement is now legally yours. Proceed.",
+        "Third time's the charm! Fourth time's my favorite."
     )
 
     /** A short, cute line for the pet's reaction to [event]. */
@@ -784,7 +785,11 @@ object CurioPet {
         "Fresh territory! My paws are ready.",
         "Somewhere we've never been!",
         "The curiosity tingles!",
-        "This is the good stuff!"
+        "This is the good stuff!",
+        "New! My favorite kind of thing!",
+        "I love this part — the first peek at something unknown.",
+        "Unexplored! My tail is wagging. Metaphorically.",
+        "A new corner of the world! Let's go!"
     )
     private val happyLines = listOf(
         "Nice! XP banked. Keep going?",
@@ -796,7 +801,10 @@ object CurioPet {
         "Happy little sparks!",
         "The deck approves. So do I.",
         "Another lovely moment for the shelf!",
-        "You make this easy, you know."
+        "You make this easy, you know.",
+        "We're good at this, you and me.",
+        "Another sparkle for the collection!",
+        "That's the kind of day I like."
     )
     // v8.14 — the HAPPY mood wears the hour's voice: morning energy, cozy
     // evening, hushed night.
@@ -808,7 +816,9 @@ object CurioPet {
         "Bright morning, bright ideas.",
         "First spin of the day is the best spin.",
         "Good morning to us! Mainly you.",
-        "The sun and I both say: explore something!"
+        "The sun and I both say: explore something!",
+        "Dawn light and a fresh deck — perfect combo.",
+        "Morning! The shelf woke up early too."
     )
     private val afternoonLines = listOf(
         "Afternoon wander? Let's go.",
@@ -818,7 +828,9 @@ object CurioPet {
         "The afternoon light makes everything look wise.",
         "Quick break for a discovery?",
         "Noon snack: a topic, ideally.",
-        "Halfway through the day — let's add a spark."
+        "Halfway through the day — let's add a spark.",
+        "Afternoon hours fly when you're curious.",
+        "The deck is wide awake. Me too."
     )
     private val eveningLines = listOf(
         "Evening! Cozy hour, warm lamp.",
@@ -828,7 +840,9 @@ object CurioPet {
         "The lamp's on. The deck's ready. You?",
         "Golden hour for golden facts!",
         "Warm light, warm topics.",
-        "One little discovery before the day tucks in?"
+        "One little discovery before the day tucks in?",
+        "Evening is the shelf's favorite hour.",
+        "The golden glow and a fresh spin — best combo."
     )
     private val nightLines = listOf(
         "Shh, night mode. One quiet spin?",
@@ -838,7 +852,8 @@ object CurioPet {
         "Quiet now… the facts are whispering.",
         "Under the stars, even facts glow softly.",
         "Just one more, then blankets. Deal?",
-        "The moon is out. Curiosity can't sleep."
+        "The moon is out. Curiosity can't sleep.",
+        "Night thoughts are the deepest ones."
     )
     // v8.29 — the warmer twins only speak once the bond is FRIEND or closer.
     private val warmMorningLines = listOf(
@@ -846,22 +861,27 @@ object CurioPet {
         "Morning! I missed this.",
         "Morning! I dreamed about our shelf.",
         "Good morning, my favorite explorer!",
-        "Morning! Same spot, same us. Perfect."
+        "Morning! Same spot, same us. Perfect.",
+        "The sun came back. So did you. Double win.",
+        "Morning! I was saving the best topic for us."
     )
     private val warmAfternoonLines = listOf(
         "Afternoon! You always pick the best topics.",
         "Afternoon, friend. The shelf is waiting.",
-        "You're here! The deck did a happy shuffle."
+        "You're here! The deck did a happy shuffle.",
+        "Afternoon and you — the shelf's favorite combination."
     )
     private val warmEveningLines = listOf(
         "Evening! Cozy hour, and I'm glad you're here.",
         "Evening, friend. Best part of the day.",
-        "The lamp's on and so is our shelf."
+        "The lamp's on and so is our shelf.",
+        "Evening with you — the shelf's warmest setting."
     )
     private val warmNightLines = listOf(
         "Past my bedtime… but for you, I'll stay.",
         "Night, friend. I'll keep the shelf warm.",
-        "One quiet spin, then I'll curl up. Promise."
+        "One quiet spin, then I'll curl up. Promise.",
+        "Late hours are better with company."
     )
     private val curiousLines = listOf(
         "We haven't tried __LANE__ yet. Want a new stamp?",
@@ -870,7 +890,9 @@ object CurioPet {
         "__LANE__ is right there, unexplored!",
         "What's in __LANE__? Only one way to know.",
         "My paws are itching for __LANE__.",
-        "__LANE__ looks interesting… just saying."
+        "__LANE__ looks interesting… just saying.",
+        "I keep glancing at __LANE__. It's right there.",
+        "__LANE__ is the one lane we haven't met. Let's fix that."
     )
     private val sleepyLines = listOf(
         "I'll keep your seat warm. Come spin when you're ready.",
@@ -880,7 +902,8 @@ object CurioPet {
         "Zzz… I mean, I'm listening!",
         "The deck is nice, but blankets are nicer.",
         "One more yawn and I'm a pillow.",
-        "I'll be here. Probably. Definitely. Zzz…"
+        "I'll be here. Probably. Definitely. Zzz…",
+        "Sleep is just a very long pause between discoveries."
     )
     // v8.13 — the new moods' lines: focused keeps out of the way while the
     // user writes; bouncy rides the post-play high.
@@ -892,7 +915,8 @@ object CurioPet {
         "Thinking face! Mine too. Keep going.",
         "Every thought you save is a tiny treasure.",
         "I'm guarding this sentence personally.",
-        "Deep focus mode. Paws: sealed."
+        "Deep focus mode. Paws: sealed.",
+        "The words are finding their shape. I can feel it."
     )
     private val bouncyLines = listOf(
         "Phew, that was fun. Again soon?",
@@ -901,7 +925,8 @@ object CurioPet {
         "My paws won't stop wiggling!",
         "That was AMAZING. Phew. More please!",
         "I'm chasing my own tail in my head.",
-        "Game energy: still 100%!"
+        "Game energy: still 100%!",
+        "Playtime high: still buzzing."
     )
     // v9.2 — lines for the three new emotions.
     private val shyLines = listOf(
@@ -911,7 +936,8 @@ object CurioPet {
         "*peeks out one eye* …Hi.",
         "I'm warming up. Slowly. Cutely.",
         "Don't mind me, just being small.",
-        "You saw me. That's… that's fine. Probably."
+        "You saw me. That's… that's fine. Probably.",
+        "*tiny wave* …Hi."
     )
     private val grumpyLines = listOf(
         "Hmph. The deck hasn't moved in a while…",
@@ -920,7 +946,8 @@ object CurioPet {
         "My sparkles need exercise.",
         "I'm practicing my serious face. How is it?",
         "I counted the tiles. Twice.",
-        "Someone should spin something. Not naming names. It's me. I'm naming you."
+        "Someone should spin something. Not naming names. It's me. I'm naming you.",
+        "The shelf is too quiet. Fix it."
     )
     private val playfulLines = listOf(
         "That game left me sparkling! Again?",
@@ -929,7 +956,8 @@ object CurioPet {
         "I've still got zoomies, round two?",
         "One more game and then… one more game.",
         "Catch me if you can. Okay, you can. Always can.",
-        "Play! Play play play! …I'm calm. PLAY!"
+        "Play! Play play play! …I'm calm. PLAY!",
+        "Boop counter is at zero. Let's fix that."
     )
     // v13 — return-after-absence welcome pools (see [welcomeBackLine]).
     private val welcomeBackDayLines = listOf(
@@ -937,7 +965,8 @@ object CurioPet {
         "Welcome back! I kept the topics warm.",
         "Oh, you're back! I saved you the good lane.",
         "Missed you! The deck missed you too.",
-        "Back at last! I was just dusting the curiosity."
+        "Back at last! I was just dusting the curiosity.",
+        "You're back! The shelf did a happy wiggle."
     )
     private val welcomeBackDaysLines = listOf(
         "You were gone so long the topics started their own club.",
@@ -949,7 +978,8 @@ object CurioPet {
         "A whole week! I've been practicing my patience.",
         "You're back! I grew a whole new eagerness while you were gone.",
         "Seven days! I even missed the sassy ones.",
-        "A week away! I saved you all the good questions."
+        "A week away! I saved you all the good questions.",
+        "Seven days! The shelf and I had a long talk about you."
     )
     // v13 — lines for claiming a daily/weekly quest (see [noteQuestComplete]).
     private val questCompleteLines = listOf(
@@ -959,7 +989,8 @@ object CurioPet {
         "Checked off! The list quivers.",
         "We finished it together. Well, mostly you.",
         "Quest complete! I'm so proud of our teamwork.",
-        "One more quest bites the dust!"
+        "One more quest bites the dust!",
+        "The quest list just got shorter. We're unstoppable."
     )
 
     // ═══════════════════════════════════════════════════════════════════
@@ -970,32 +1001,98 @@ object CurioPet {
     // baby says FEW things; the evolved forms speak the full rich library
     // above. Routed by currentStage() in every line source below.
     // ═══════════════════════════════════════════════════════════════════
-    private val babySassyLines = listOf("Again?", "Same same!", "Ooh ooh!", "You! Again!")
-    private val babyProudLines = listOf("Big!", "Grew!", "Up up!", "Warm!")
-    private val babyExcitedLines = listOf("New! New!", "Ooh ooh!", "Wow!", "Look look!")
-    private val babyHappyLines = listOf("Happy!", "Good!", "Yay!", "Sparkle!")
-    private val babyCuriousLines = listOf("What?", "Look?", "Ooh?", "New thing!")
-    private val babySleepyLines = listOf("Tired…", "Nighty…", "Zzz…", "Sleepy…")
-    private val babyFocusedLines = listOf("Shh…", "Quiet…", "Work work.")
-    private val babyBouncyLines = listOf("Bounce!", "Wheee!", "More more!")
-    private val babyShyLines = listOf("…Hi.", "*peek*", "Small…", "…Hid")
-    private val babyGrumpyLines = listOf("Hmph!", "No!", "…Grumps", "Grumble!")
-    private val babyPlayfulLines = listOf("Play!", "Again!", "Boop boop!", "Fun fun!")
-    private val babySpinCheerLines = listOf(
-        "Go go!", "Spin spin!", "Round!", "Wheee!", "Faster!", "Ooh ooh!"
+    private val babySassyLines = listOf(
+        "Again?", "Same same!", "Ooh ooh!", "You! Again!",
+        "More? MORE?", "You keep! I like!", "Again again!",
+        "Same! Good!", "You! Boop! Again!", "One more! Just one!"
     )
-    private val babyPeekLines = listOf("Boo!", "Peek!", "Hid!", "Here!")
-    private val babyChameleonLines = listOf("Gone!", "Poof!", "Bye bye!", "…Here!")
-    private val babySparkLines = listOf("Spark!", "Mine!", "Got!", "Shiny shiny!")
-    private val babyMorningLines = listOf("Morn!", "Hi hi!", "Day!", "Up up!")
+    private val babyProudLines = listOf(
+        "Big!", "Grew!", "Up up!", "Warm!",
+        "Spark! BIG!", "More me!", "Tall! Taller!",
+        "Big me! New me!", "Glow glow!", "Proud!"
+    )
+    private val babyExcitedLines = listOf(
+        "New! New!", "Ooh ooh!", "Wow!", "Look look!",
+        "Sparkly!", "Mine see!", "Ooooh! OOOH!",
+        "Yay yay yay!", "Want! Want!", "Fresh fresh!"
+    )
+    private val babyHappyLines = listOf(
+        "Happy!", "Good!", "Yay!", "Sparkle!",
+        "Warm warm!", "Nice!", "Soft!",
+        "Good good!", "Happy me!", "Glow!"
+    )
+    private val babyCuriousLines = listOf(
+        "What?", "Look?", "Ooh?", "New thing!",
+        "Huh?", "Where?", "That?",
+        "What this?", "Ooh what?", "Peek peek!"
+    )
+    private val babySleepyLines = listOf(
+        "Tired…", "Nighty…", "Zzz…", "Sleepy…",
+        "Yawn…", "Soft…", "Bed bed…",
+        "Nap nap…", "Shhh…", "Moon moon…"
+    )
+    private val babyFocusedLines = listOf(
+        "Shh…", "Quiet…", "Work work.",
+        "Shhh… hush.", "Thinking…", "Paws still…",
+        "Write write…", "Good words…", "Shh shh…"
+    )
+    private val babyBouncyLines = listOf(
+        "Bounce!", "Wheee!", "More more!",
+        "Zoom zoom!", "Jump!", "Up up up!",
+        "Wiggle!", "Hop hop!", "Faster faster!"
+    )
+    private val babyShyLines = listOf(
+        "…Hi.", "*peek*", "Small…", "…Hid",
+        "Shy shy…", "*tuck*", "…Hello.",
+        "Peek… shy!", "Tiny hi…", "*blush*"
+    )
+    private val babyGrumpyLines = listOf(
+        "Hmph!", "No!", "…Grumps", "Grumble!",
+        "Grrr!", "Hmph hmph!", "…Meh.",
+        "Not now!", "Grumpy grumpy!", "Harrumph!"
+    )
+    private val babyPlayfulLines = listOf(
+        "Play!", "Again!", "Boop boop!", "Fun fun!",
+        "Chase!", "Gotcha!", "Tag!",
+        "Zoom! Zoom!", "Catch me!", "Boop attack!"
+    )
+    private val babySpinCheerLines = listOf(
+        "Go go!", "Spin spin!", "Round!", "Wheee!", "Faster!", "Ooh ooh!",
+        "Go go go!", "Round round!", "Fast fast!",
+        "Whirl!", "Whooo!", "Spin spin spin!"
+    )
+    private val babyPeekLines = listOf(
+        "Boo!", "Peek!", "Hid!", "Here!",
+        "Peek boo!", "Surprise!", "Found me!",
+        "Popped!", "Here me!", "Boo boo!"
+    )
+    private val babyChameleonLines = listOf(
+        "Gone!", "Poof!", "Bye bye!", "…Here!",
+        "Poof poof!", "Where? Where?",
+        "Now here!", "Sneaky!", "Poof back!"
+    )
+    private val babySparkLines = listOf(
+        "Spark!", "Mine!", "Got!", "Shiny shiny!",
+        "Catch catch!", "Star star!", "Fast fast!",
+        "Zoom spark!", "Pounce!", "Spark mine!"
+    )
+    private val babyMorningLines = listOf(
+        "Morn!", "Hi hi!", "Day!", "Up up!",
+        "Sun sun!", "Bright!", "Morning!",
+        "Rise!", "New day!", "Hello sun!"
+    )
     private val babyWelcomeBackDayLines = listOf(
-        "You back!", "Missed you!", "Here again!", "Yay you!"
+        "You back!", "Missed you!", "Here again!", "Yay you!",
+        "Back back!", "Happy you!", "Miss miss!",
+        "Yay yay! Home!"
     )
     private val babyWelcomeBackDaysLines = listOf(
-        "Many days! Missed you!", "You go long! Missed!", "Home home!"
+        "Many days! Missed you!", "You go long! Missed!", "Home home!",
+        "Long gone! Happy now!", "Miss miss miss!", "Back! Yay!"
     )
     private val babyWelcomeBackWeekLines = listOf(
-        "Whole week! Missed you!", "Long long! You here now!", "Week! Big hug!"
+        "Whole week! Missed you!", "Long long! You here now!", "Week! Big hug!",
+        "So long! Miss! Miss!", "Hug hug! Home home!", "Week gone! You back!"
     )
 
     /** v16 — the baby's vocabulary grows with its level. */
@@ -1066,80 +1163,109 @@ object CurioPet {
     private val matureSassyLines = listOf(
         "The same door, again?", "I have seen this card before. It has not changed.",
         "Repetition builds mastery. You are testing it.", "Ah. This again. How nostalgic.",
-        "Some curiosities are worth revisiting."
+        "Some curiosities are worth revisiting.", "Again, you say? The deck sighs. I smile.",
+        "Three times today. I am keeping count. You are not subtle.",
+        "I have learned not to be surprised. I am still charmed.",
+        "The deck has committed this card to memory. So have I."
     )
     private val matureProudLines = listOf(
         "Growth comes quietly, then all at once.", "Another level. The path keeps its promises.",
-        "I have carried every lane here with me.", "The shelf has noticed, and so have I."
+        "I have carried every lane here with me.", "The shelf has noticed, and so have I.",
+        "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. I remember when we were strangers.",
+        "Every step up, the view gets a little wider.",
+        "The shelf is heavy with things we learned. Good heavy."
     )
     private val matureExcitedLines = listOf(
         "Oh. A good kind of spark.", "Even I lean forward for this one.",
-        "There it is. The old excitement.", "The deck has my attention now."
+        "There it is. The old excitement.", "The deck has my attention now.",
+        "Ah. That familiar flutter. I thought I had outgrown it.",
+        "A new lane. Even the wise feel a tug."
     )
     private val matureHappyLines = listOf(
         "This is a good day to be curious.", "Contentment, with a little wonder in it.",
-        "Warm, steady, and quietly glad.", "Some days simply fit."
+        "Warm, steady, and quietly glad.", "Some days simply fit.",
+        "A good moment. Nothing more was needed.",
+        "The shelf hums. I hum with it.",
+        "Quiet joy is still joy."
     )
     private val matureCuriousLines = listOf(
         "Knowledge calls when you are still.", "A new question. Good. Questions keep us young.",
-        "I have room for one more wonder.", "Let us look closer."
+        "I have room for one more wonder.", "Let us look closer.",
+        "There is always a question behind the question. That is the good part.",
+        "Curiosity does not age. It deepens."
     )
     private val matureFocusedLines = listOf(
         "Now that is a riddle worth sitting with.", "Quiet. The answer is almost here.",
-        "Focus is a kind of love.", "Patience. The details are arriving."
+        "Focus is a kind of love.", "Patience. The details are arriving.",
+        "The words are working. I will be quiet until they finish.",
+        "Some thoughts need room, not haste."
     )
     private val matureBouncyLines = listOf(
         "Even at my age, gravity has not won.", "The spark is willing, and the body agrees.",
-        "A little bounce. The shelf allows it.", "Lightness finds me now and then."
+        "A little bounce. The shelf allows it.", "Lightness finds me now and then.",
+        "One must remember how to be small and fast."
     )
     private val matureShyLines = listOf(
         "Ah. You caught me mid-thought.", "I was somewhere else. A pleasant somewhere.",
-        "Do not mind me. I was reminiscing.", "Hm. I was not expecting an audience."
+        "Do not mind me. I was reminiscing.", "Hm. I was not expecting an audience.",
+        "One does not always wish to be found. But I am glad it was you."
     )
     private val matureGrumpyLines = listOf(
         "Even the wise have their grumpy hours.", "The deck can wait a moment.",
-        "I am resting my opinions.", "Hmph. The shelf is too loud today."
+        "I am resting my opinions.", "Hmph. The shelf is too loud today.",
+        "Some afternoons are best left to the pillows.",
+        "I have decided to be unavailable. Briefly."
     )
     private val maturePlayfulLines = listOf(
         "Very well. One round for old time's sake.", "You wish to play? The old spark agrees.",
-        "Come then. I still remember the moves.", "A game. How very young of me. I accept."
+        "Come then. I still remember the moves.", "A game. How very young of me. I accept.",
+        "Age is a suggestion, not a rule."
     )
     private val matureSleepyLines = listOf(
         "The shelf grows quiet. So do I.", "Sleep calls. Even the wise answer.",
-        "Rest now. The questions will keep.", "Tired, but satisfied. A good kind."
+        "Rest now. The questions will keep.", "Tired, but satisfied. A good kind.",
+        "The night is gentle. I will meet it halfway."
     )
     private val matureSpinCheerLines = listOf(
         "Steady now. Let it choose.", "The deck deliberates. Patience.",
         "Round and round. It knows the way.", "Whatever lands, there is a story in it.",
-        "The wheel remembers every lane."
+        "The wheel remembers every lane.", "I trust the spin. You should too."
     )
     private val maturePeekLines = listOf(
         "I was here all along. Mostly.", "You looked. I was there. A classic.",
-        "Hidden, but never gone.", "A little absence makes a fine hello."
+        "Hidden, but never gone.", "A little absence makes a fine hello.",
+        "Patience, and then a hello. That is the game."
     )
     private val matureChameleonLines = listOf(
         "I am the wall now. It suits me.", "Camouflage is patience with a costume.",
-        "Gone, as it were. Back, as I am.", "Stillness is its own disguise."
+        "Gone, as it were. Back, as I am.", "Stillness is its own disguise.",
+        "To be unseen for a moment is its own peace."
     )
     private val matureSparkLines = listOf(
         "A spark. Let us see who is faster.", "Some things are worth the chase.",
-        "Catch. Then we discuss it.", "The tiny ones move quickest. A lesson."
+        "Catch. Then we discuss it.", "The tiny ones move quickest. A lesson.",
+        "A spark across the dark. The oldest kind of hope."
     )
     private val matureMorningLines = listOf(
         "Morning. The world kept turning without us.", "A new day for old curiosities.",
-        "Sun's up. The deck stirs. So do I.", "Good morning. I saved you the first wonder."
+        "Sun's up. The deck stirs. So do I.", "Good morning. I saved you the first wonder.",
+        "Dawn is still the most honest hour.", "A fresh page. The shelf approves."
     )
     private val matureWelcomeBackDayLines = listOf(
         "You were gone. I kept the shelf warm.", "Welcome back. The topics missed your eyes.",
-        "A day away. The deck and I managed.", "There you are. I was beginning to narrate to myself."
+        "A day away. The deck and I managed.", "There you are. I was beginning to narrate to myself.",
+        "One day. The shelf noticed."
     )
     private val matureWelcomeBackDaysLines = listOf(
         "A few days away. The curiosity missed you.", "Welcome home. I watered the questions in your absence.",
-        "The shelf feels right again with you here.", "You were gone long enough for the deck to reorganize itself."
+        "The shelf feels right again with you here.",
+        "You were gone long enough for the deck to reorganize itself.",
+        "The topics rearranged themselves while you were away."
     )
     private val matureWelcomeBackWeekLines = listOf(
         "A whole week. The topics began to worry.", "Welcome back. I have been practicing my patience, as promised.",
-        "Seven days is a long time for a curious mind.", "You return, and the shelf exhales."
+        "Seven days is a long time for a curious mind.", "You return, and the shelf exhales.",
+        "A week. The shelf kept your seat."
     )
 
     /** v14.1 — a MATURE mood bubble: calm, reflective, mentor-like. */

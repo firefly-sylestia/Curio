@@ -1,6 +1,27 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Pet games + dialogue upgrade — interactive mini-games, memory lines, tuning
+## Current Request (IN PROGRESS): ~1000 natural pet dialogue lines + tour dialogue fix
+
+**Date:** 2026-08-11
+
+**What was asked:** (1) Add ~1000 more natural pet-like dialogue lines; change current ones that don't fit. (2) Fix the tour dialogue — remove meta disclaimers ("nothing starts yet", "won't open", "only demonstrated") and rewrite to warm guided walkarounds.
+
+**Changes made (batch 1 — committed as 408ca59 + continued):**
+- **TourController.kt** — rewrote 4 tour steps: removed all negative/meta disclaimers ("safe demo", "won't open it", "stays closed", "only being demonstrated") and replaced with warm, positive "look around" dialogue ("I'll walk you through everything", "every spin lands a fresh topic", "your keepsakes collect in the Cabinet").
+- **CurioPet.kt baby pools (15 pools)** — expanded every pool from 3-4 lines to 10-12 lines (+80 lines): babySassyLines, babyProudLines, babyExcitedLines, babyHappyLines, babyCuriousLines, babySleepyLines, babyFocusedLines, babyBouncyLines, babyShyLines, babyGrumpyLines, babyPlayfulLines, babySpinCheerLines, babyPeekLines, babyChameleonLines, babySparkLines, babyMorningLines, babyWelcomeBack*Lines.
+- **CurioPet.kt mature pools (18 pools)** — expanded from 4-5 to 5-7 lines (+20 lines): matureSassy/Excited/Happy/Curious/Focused/Bouncy/Shy/Grumpy/Playful/Sleepy/SpinCheer/Peek/Chameleon/Spark/Morning/WelcomeBack*Lines.
+- **CurioPet.kt evolved mood pools (22 pools)** — expanded from 7-10 to 8-14 lines (+30 lines): excitedLines, happyLines, morningLines, afternoonLines, eveningLines, nightLines, warmMorningLines, warmAfternoonLines, warmEveningLines, warmNightLines, curiousLines, sleepyLines, focusedLines, bouncyLines, shyLines, grumpyLines, playfulLines, welcomeBack*Lines, questCompleteLines.
+- **CurioPet.kt sassyLines** — +1 line (+1).
+- **PetLife.kt** — added 7 new routine entries across fallback (3), home (2), spin (2) pools (+7 routines, +10 lines).
+- **Fastlane changelog** — updated bullet for voice expansion + tour fix.
+
+**Total so far:** ~195 new dialogue lines + tour fix.
+
+**Remaining (next batch):** expand evolved event inline pools (spin landed, reveal, explore, save, touch, play, level-up, quest), touch reaction tiers, spinCheer lane-generic, morningGreeting inline, evolutionCeremony, factLine memory pools, PetLife remaining pools (quests/reveal/capture/cabinet/profile), and the 9 game functions (findMePromptLine, foundMeLine, caughtItLine, gotAwayLine, peekWinLine, missedMeLine, playInitiation, dizzyLine, drawerLine). Target remaining: ~800 lines.
+
+**Validation:** CurioPet.kt and PetLife.kt balanced (0/0); git diff --check clean. Gradle build left to CI.
+
+## Previous Request (COMPLETED): Pet games + dialogue upgrade — interactive mini-games, memory lines, tuning
 
 **Date:** 2026-08-11
 
