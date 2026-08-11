@@ -11,7 +11,7 @@
       "verb": "Read",
       "targetName": "Pizza Margherita (1889) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Pizza Margherita got its name and where it's from — the 'three colors' are the flag (Naples, Italy). Then watch how it's made and notice the dough — the 48-hour ferment is the flavor."
+      "instruction": "Pizza Margherita isn't just food — it's history. the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Italian",
@@ -33,7 +33,7 @@
       "verb": "Read",
       "targetName": "Sushi",
       "durationMinutes": 30,
-      "instruction": "Read how Sushi got its name and where it's from — the 'fermentation' became the art (Japan). Then watch how it's made and notice the rice — the vinegar seasoning is the craft."
+      "instruction": "Sushi carries centuries of tradition — it started as a preservation method — fish fermented in rice for months — before becoming Japan's most famous art form. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Japanese",
@@ -54,7 +54,7 @@
       "verb": "Read",
       "targetName": "Ramen (1910) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Ramen got its name and where it's from — the 'soup' is the science (Japan). Then watch how it's made and notice the broth — the 'tonkotsu' is the time."
+      "instruction": "The hidden story of Ramen: the Chinese noodle soup was reinvented by Japan into a cultural obsession. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Japanese",
@@ -76,7 +76,7 @@
       "verb": "Read",
       "targetName": "Tacos al Pastor (1960) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Tacos al Pastor got its name and where it's from — the 'fusion' is the origin (Mexico City). Then watch how it's made — the sweet is the counterpoint."
+      "instruction": "The hidden story of Tacos al Pastor: Lebanese immigrants brought shawarma to Mexico. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Mexican",
@@ -98,7 +98,7 @@
       "verb": "Read",
       "targetName": "Pad Thai (1938) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Pad Thai got its name and where it's from — the 'nationalism' is the origin (Thailand). Then watch how it's made and notice the tamarind — the sour is the balance."
+      "instruction": "Pad Thai carries centuries of tradition — it was invented as part of a government campaign. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Thai",
@@ -120,7 +120,7 @@
       "verb": "Read",
       "targetName": "Croissant (1839) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Croissant got its name and where it's from — the 'butter' is the architecture (France). Then watch how it's made and notice the layers — the 27 folds are the craft."
+      "instruction": "Croissant has a surprising past — the crescent shape may have originated in Austria. Explore its history and watch how it spread across the world."
     },
     "tags": [
       "French",
@@ -142,7 +142,7 @@
       "verb": "Read",
       "targetName": "French Fries",
       "durationMinutes": 30,
-      "instruction": "Read how French Fries got its name and where it's from — the 'French' is the mistake (Belgium). Then watch how it's made and notice the crisp — the rest is the secret."
+      "instruction": "Why is French Fries so beloved? the 'French' fry is actually Belgian. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Belgian",
@@ -163,7 +163,7 @@
       "verb": "Read",
       "targetName": "Pasta Carbonara",
       "durationMinutes": 30,
-      "instruction": "Read how Pasta Carbonara got its name and where it's from — the 'no cream' is the purity (Rome, Italy). Then watch how it's made and notice the egg — the sauce is the technique."
+      "instruction": "Pasta Carbonara has a surprising past — the Roman classic has no cream. Explore its history and watch how it spread across the world."
     },
     "tags": [
       "Italian",
@@ -184,7 +184,7 @@
       "verb": "Read",
       "targetName": "Risotto",
       "durationMinutes": 30,
-      "instruction": "Read how Risotto got its name and where it's from — the 'slow' is the flavor (Milan, Italy). Then watch how it's made and notice the stirring — the 18 minutes are the craft."
+      "instruction": "Why is Risotto so beloved? the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Italian",
@@ -205,7 +205,7 @@
       "verb": "Read",
       "targetName": "Paella",
       "durationMinutes": 30,
-      "instruction": "Read how Paella got its name and where it's from — the 'pan' is the name (Valencia, Spain). Then watch how it's made and notice the socarrat — the crispy bottom is the goal."
+      "instruction": "Paella isn't just food — it's history. the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Spanish",
@@ -226,7 +226,7 @@
       "verb": "Read",
       "targetName": "Pho (1900) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Pho got its name and where it's from — the 'French' is the history (Vietnam). Then watch how it's made and notice the spices — the star anise is the signature."
+      "instruction": "Learn the story behind Pho — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Vietnamese",
@@ -248,7 +248,7 @@
       "verb": "Read",
       "targetName": "Biryani",
       "durationMinutes": 30,
-      "instruction": "Read how Biryani got its name and where it's from — the 'layers' are the history (India). Then watch how it's made and notice the layering — the seal is the flavor."
+      "instruction": "Discover why Biryani matters to its culture — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Indian",
@@ -269,7 +269,7 @@
       "verb": "Read",
       "targetName": "Butter Chicken (1950) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Butter Chicken got its name and where it's from — the 'leftover' was the invention (Delhi, India). Then watch how it's made and notice the tandoor — the smoke is the flavor."
+      "instruction": "The hidden story of Butter Chicken: leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Indian",
@@ -291,7 +291,7 @@
       "verb": "Read",
       "targetName": "Dim Sum",
       "durationMinutes": 30,
-      "instruction": "Read how Dim Sum got its name and where it's from — the 'tea' is the ritual (Guangdong, China). Then watch how it's made and notice the wrapper — the translucent skin is the craft."
+      "instruction": "Dim Sum has a surprising past — small dishes served with tea, originally from teahouses on the Silk Road. Explore its history and watch how it spread across the world."
     },
     "tags": [
       "Chinese",
@@ -312,7 +312,7 @@
       "verb": "Read",
       "targetName": "Peking Duck (1330) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Peking Duck got its name and where it's from — the 'skin' is the dish (Beijing, China). Then watch how it's made and notice the crisp — the air-dry is the secret."
+      "instruction": "Peking Duck isn't just food — it's history. the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Chinese",
@@ -334,7 +334,7 @@
       "verb": "Read",
       "targetName": "Hot Pot",
       "durationMinutes": 30,
-      "instruction": "Read how Hot Pot got its name and where it's from — the 'communal' is the meal (China). Then watch how it's made and notice the numbness — the Sichuan peppercorn is the signature."
+      "instruction": "The hidden story of Hot Pot: the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Chinese",
@@ -355,7 +355,7 @@
       "verb": "Read",
       "targetName": "Mapo Tofu",
       "durationMinutes": 30,
-      "instruction": "Read how Mapo Tofu got its name and where it's from — the 'grandmother' is the brand (Sichuan, China). Then watch how it's made and notice the doubanjiang — the fermented bean paste is the depth."
+      "instruction": "Learn the story behind Mapo Tofu — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Chinese",
@@ -376,7 +376,7 @@
       "verb": "Read",
       "targetName": "Kimchi",
       "durationMinutes": 30,
-      "instruction": "Read how Kimchi got its name and where it's from — the 'science' is the tradition (Korea). Then watch how it's made and notice the fermentation — the 3-day room-temperature ferment is the flavor."
+      "instruction": "Kimchi has a surprising past — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar. Explore its history and watch how it spread across the world."
     },
     "tags": [
       "Korean",
@@ -397,7 +397,7 @@
       "verb": "Read",
       "targetName": "Bibimbap",
       "durationMinutes": 30,
-      "instruction": "Read how Bibimbap got its name and where it's from — the 'colors' are the balance (Korea). Then watch how it's made and notice the gochujang — the paste is the sauce."
+      "instruction": "The hidden story of Bibimbap: the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Korean",
@@ -418,7 +418,7 @@
       "verb": "Read",
       "targetName": "Bulgogi",
       "durationMinutes": 30,
-      "instruction": "Read how Bulgogi got its name and where it's from — the 'fire' is the name (Korea). Then watch how it's made and notice the marinade — the pear is the tenderizer."
+      "instruction": "Bulgogi carries centuries of tradition — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Korean",
@@ -439,7 +439,7 @@
       "verb": "Read",
       "targetName": "Sashimi",
       "durationMinutes": 30,
-      "instruction": "Read how Sashimi got its name and where it's from — the 'nothing' is the everything (Japan). Then watch how it's made and notice the cut — the knife angle is the texture."
+      "instruction": "Discover why Sashimi matters to its culture — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Japanese",
@@ -460,7 +460,7 @@
       "verb": "Read",
       "targetName": "Tempura",
       "durationMinutes": 30,
-      "instruction": "Read how Tempura got its name and where it's from — the 'Portuguese' is the origin (Japan). Then watch how it's made and notice the batter — the cold water is the crisp."
+      "instruction": "The hidden story of Tempura: the cold-batter technique and the 'kakiage' style are the craft. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Japanese",
@@ -481,7 +481,7 @@
       "verb": "Read",
       "targetName": "Miso Soup",
       "durationMinutes": 30,
-      "instruction": "Read how Miso Soup got its name and where it's from — the 'two' ingredients are the whole (Japan). Then watch how it's made and notice the dashi — the kombu and bonito are the umami."
+      "instruction": "Miso Soup isn't just food — it's history. the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Japanese",
@@ -502,7 +502,7 @@
       "verb": "Read",
       "targetName": "Katsu Curry",
       "durationMinutes": 30,
-      "instruction": "Read how Katsu Curry got its name and where it's from — the 'British' is the origin (Japan). Then watch how it's made and notice the panko — the flaky breadcrumb is the crisp."
+      "instruction": "Learn the story behind Katsu Curry — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Japanese",
@@ -523,7 +523,7 @@
       "verb": "Read",
       "targetName": "Okonomiyaki",
       "durationMinutes": 30,
-      "instruction": "Read how Okonomiyaki got its name and where it's from — the 'you-like-it' is the name (Japan). Then watch how it's made and notice the cabbage — the shred is the texture."
+      "instruction": "The real story of Okonomiyaki: the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard. Read about its origins and watch a food historian explain why it became iconic."
     },
     "tags": [
       "Japanese",
@@ -544,7 +544,7 @@
       "verb": "Read",
       "targetName": "Takoyaki (1935) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Takoyaki got its name and where it's from — the 'pan' is the invention (Osaka, Japan). Then watch how it's made and notice the molten center — the batter is the texture."
+      "instruction": "Takoyaki carries centuries of tradition — the special pan and the batter's dance are the craft, and the dish is the city's soul. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Japanese",
@@ -566,7 +566,7 @@
       "verb": "Read",
       "targetName": "Yakitori",
       "durationMinutes": 30,
-      "instruction": "Read how Yakitori got its name and where it's from — the 'parts' are the craft (Japan). Then watch how it's made and notice the tare — the glaze is the flavor."
+      "instruction": "Yakitori isn't just food — it's history. every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Japanese",
@@ -587,7 +587,7 @@
       "verb": "Read",
       "targetName": "Onigiri",
       "durationMinutes": 30,
-      "instruction": "Read how Onigiri got its name and where it's from — the 'simple' is the design (Japan). Then watch how it's made and notice the fillings — the umeboshi is the classic."
+      "instruction": "Onigiri isn't just food — it's history. a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Japanese",
@@ -608,7 +608,7 @@
       "verb": "Read",
       "targetName": "Curry Rice",
       "durationMinutes": 30,
-      "instruction": "Read how Curry Rice got its name and where it's from — the 'British' became the 'Japanese' (Japan). Then watch how it's made and notice the sweetness — the apple and honey are the Japanese touch."
+      "instruction": "Discover why Curry Rice matters to its culture — the 'curry rice' is the most popular home-cooked meal in Japan. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Japanese",
@@ -629,7 +629,7 @@
       "verb": "Read",
       "targetName": "Wagyu",
       "durationMinutes": 30,
-      "instruction": "Read how Wagyu got its name and where it's from — the 'marbling' is the craft (Japan). Then watch how it's made and notice the melt — the fat is the flavor."
+      "instruction": "Why is Wagyu so beloved? the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Japanese",
@@ -650,7 +650,7 @@
       "verb": "Read",
       "targetName": "Poutine (1950) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Poutine got its name and where it's from — the 'mess' is the joy (Quebec, Canada). Then watch how it's made and notice the curds — the squeak is the freshness."
+      "instruction": "Why is Poutine so beloved? the cheese curds must squeak, and the 'poutine' has become Canada's national dish. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Canadian",
@@ -672,7 +672,7 @@
       "verb": "Read",
       "targetName": "Fish and Chips (1860) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Fish and Chips got its name and where it's from — the 'paper' is the ritual (England). Then watch how it's made and notice the beer — the carbonation is the crisp."
+      "instruction": "Fish and Chips isn't just food — it's history. the fried fish in beer batter and the chips, wrapped in paper. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "British",
@@ -694,7 +694,7 @@
       "verb": "Read",
       "targetName": "Sunday Roast",
       "durationMinutes": 30,
-      "instruction": "Read how Sunday Roast got its name and where it's from — the 'Sunday' is the ritual (England). Then watch how it's made and notice the fat — the pre-heated oil is the crisp."
+      "instruction": "Discover why Sunday Roast matters to its culture — beef, Yorkshire pudding, roast potatoes, gravy. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "British",
@@ -715,7 +715,7 @@
       "verb": "Read",
       "targetName": "Full English Breakfast",
       "durationMinutes": 30,
-      "instruction": "Read how Full English Breakfast got its name and where it's from — the 'full' is the point (England). Then watch how it's made and notice the balance — the beans are the counterpoint."
+      "instruction": "Full English Breakfast isn't just food — it's history. eggs, bacon, sausage, beans, toast. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "British",
@@ -736,7 +736,7 @@
       "verb": "Read",
       "targetName": "Shepherd's Pie",
       "durationMinutes": 30,
-      "instruction": "Read how Shepherd's Pie got its name and where it's from — the 'shepherd' is the name (England). Then watch how it's made and notice the topping — the potato is the crust."
+      "instruction": "Learn the story behind Shepherd's Pie — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "British",
@@ -757,7 +757,7 @@
       "verb": "Read",
       "targetName": "Cornish Pasty",
       "durationMinutes": 30,
-      "instruction": "Read how Cornish Pasty got its name and where it's from — the 'pastry' is the fork (Cornwall, England). Then watch how it's made and notice the edge — the handle was the design."
+      "instruction": "Discover why Cornish Pasty matters to its culture — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "British",
@@ -778,7 +778,7 @@
       "verb": "Read",
       "targetName": "Haggis",
       "durationMinutes": 30,
-      "instruction": "Read how Haggis got its name and where it's from — the 'offal' is the thrift (Scotland). Then watch how it's made — the turnip is the counterpoint."
+      "instruction": "Haggis isn't just food — it's history. the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Scottish",
@@ -799,7 +799,7 @@
       "verb": "Read",
       "targetName": "Scotch Egg",
       "durationMinutes": 30,
-      "instruction": "Read how Scotch Egg got its name and where it's from — the 'egg' is the core (England). Then watch how it's made and notice the yolk — the runny center is the upgrade."
+      "instruction": "Scotch Egg carries centuries of tradition — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "British",
@@ -820,7 +820,7 @@
       "verb": "Read",
       "targetName": "Chicken Tikka Masala (1960) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Chicken Tikka Masala got its name and where it's from — the 'Glasgow' is the origin (Glasgow, Scotland). Then watch how it's made and notice the cream — the 'masala' is the marriage."
+      "instruction": "Chicken Tikka Masala carries centuries of tradition — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "British Indian",
@@ -842,7 +842,7 @@
       "verb": "Read",
       "targetName": "Naan",
       "durationMinutes": 30,
-      "instruction": "Read how Naan got its name and where it's from — the 'oven' is the technique (India). Then watch how it's made and notice the blisters — the tandoor is the flavor."
+      "instruction": "Learn the story behind Naan — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Indian",
@@ -863,7 +863,7 @@
       "verb": "Read",
       "targetName": "Samosa",
       "durationMinutes": 30,
-      "instruction": "Read how Samosa got its name and where it's from — the 'triangle' is the history (India). Then watch how it's made and notice the crust — the flaky layers are the craft."
+      "instruction": "Samosa carries centuries of tradition — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Indian",
@@ -884,7 +884,7 @@
       "verb": "Read",
       "targetName": "Dosa",
       "durationMinutes": 30,
-      "instruction": "Read how Dosa got its name and where it's from — the 'batter' is the science (South India). Then watch how it's made and notice the crisp — the ferment is the flavor."
+      "instruction": "Discover why Dosa matters to its culture — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Indian",
@@ -905,7 +905,7 @@
       "verb": "Read",
       "targetName": "Biryani (Hyderabadi) (1857) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Biryani (Hyderabadi) got its name and where it's from — the 'royal' is the method (Hyderabad, India). Then watch how it's made and notice the layering — the raw meat is the technique."
+      "instruction": "Discover why Biryani matters to its culture — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Indian",
@@ -927,7 +927,7 @@
       "verb": "Read",
       "targetName": "Kebab",
       "durationMinutes": 30,
-      "instruction": "Read how Kebab got its name and where it's from — the 'skewer' is the technology (Middle East). Then watch how it's made and notice the charcoal — the smoke is the flavor."
+      "instruction": "Why is Kebab so beloved? the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Middle Eastern",
@@ -948,7 +948,7 @@
       "verb": "Read",
       "targetName": "Shawarma",
       "durationMinutes": 30,
-      "instruction": "Read how Shawarma got its name and where it's from — the 'spit' is the theater (Levant). Then watch how it's made and notice the tang — the toum is the signature."
+      "instruction": "The real story of Shawarma: the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual. Read about its origins and watch a food historian explain why it became iconic."
     },
     "tags": [
       "Middle Eastern",
@@ -969,7 +969,7 @@
       "verb": "Read",
       "targetName": "Falafel",
       "durationMinutes": 30,
-      "instruction": "Read how Falafel got its name and where it's from — the 'street' is the ritual (Egypt). Then watch how it's made and notice the texture — the chickpea is the base."
+      "instruction": "Falafel carries centuries of tradition — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Middle Eastern",
@@ -990,7 +990,7 @@
       "verb": "Read",
       "targetName": "Hummus",
       "durationMinutes": 30,
-      "instruction": "Read how Hummus got its name and where it's from — the 'simple' is the debate (Levant). Then watch how it's made and notice the tahini — the sesame is the depth."
+      "instruction": "Why is Hummus so beloved? the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Middle Eastern",
@@ -1011,7 +1011,7 @@
       "verb": "Read",
       "targetName": "Baklava",
       "durationMinutes": 30,
-      "instruction": "Read how Baklava got its name and where it's from — the 'claim' is the culture (Ottoman). Then watch how it's made and notice the filo — the layers are the technique."
+      "instruction": "Learn the story behind Baklava — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Middle Eastern",
@@ -1032,7 +1032,7 @@
       "verb": "Read",
       "targetName": "Kunafa",
       "durationMinutes": 30,
-      "instruction": "Read how Kunafa got its name and where it's from — the 'syrup' is the balance (Levant). Then watch how it's made and notice the cheese — the pull is the moment."
+      "instruction": "The real story of Kunafa: the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment. Read about its origins and watch a food historian explain why it became iconic."
     },
     "tags": [
       "Middle Eastern",
@@ -1053,7 +1053,7 @@
       "verb": "Read",
       "targetName": "Arepas",
       "durationMinutes": 30,
-      "instruction": "Read how Arepas got its name and where it's from — the 'ancient' is the staple (Venezuela/Colombia). Then watch how it's made and notice the corn — the masa is the base."
+      "instruction": "Learn the story behind Arepas — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Latin American",
@@ -1074,7 +1074,7 @@
       "verb": "Read",
       "targetName": "Ceviche",
       "durationMinutes": 30,
-      "instruction": "Read how Ceviche got its name and where it's from — the 'cooking' is the chemistry (Peru). Then watch how it's made and notice the lime — the acid is the cook."
+      "instruction": "Discover why Ceviche matters to its culture — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Peruvian",
@@ -1095,7 +1095,7 @@
       "verb": "Read",
       "targetName": "Empanadas",
       "durationMinutes": 30,
-      "instruction": "Read how Empanadas got its name and where it's from — the 'bread' is the name (Spain/Latin America). Then watch how it's made and notice the crimp — the repulgue is the signature."
+      "instruction": "Empanadas isn't just food — it's history. from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Latin American",
@@ -1116,7 +1116,7 @@
       "verb": "Read",
       "targetName": "Feijoada",
       "durationMinutes": 30,
-      "instruction": "Read how Feijoada got its name and where it's from — the 'Saturday' is the ritual (Brazil). Then watch how it's made and notice the beans — the slow cook is the depth."
+      "instruction": "Why is Feijoada so beloved? the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Brazilian",
@@ -1137,7 +1137,7 @@
       "verb": "Read",
       "targetName": "Churros",
       "durationMinutes": 30,
-      "instruction": "Read how Churros got its name and where it's from — the 'stick' is the design (Spain). Then watch how it's made — the thick dipping chocolate is the ritual."
+      "instruction": "The hidden story of Churros: the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Spanish",
@@ -1158,7 +1158,7 @@
       "verb": "Read",
       "targetName": "Gazpacho",
       "durationMinutes": 30,
-      "instruction": "Read how Gazpacho got its name and where it's from — the 'cold' is the design (Andalusia, Spain). Then watch how it's made and notice the vinegar — the sharpness is the balance."
+      "instruction": "Gazpacho carries centuries of tradition — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin. Read its history and watch how it's celebrated today."
     },
     "tags": [
       "Spanish",
@@ -1179,7 +1179,7 @@
       "verb": "Read",
       "targetName": "Tiramisu (1960) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Tiramisu got its name and where it's from — the 'pick-me-up' is the name (Treviso, Italy). Then watch how it's made and notice the coffee — the soak is the flavor."
+      "instruction": "Learn the story behind Tiramisu — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Italian",
@@ -1201,7 +1201,7 @@
       "verb": "Read",
       "targetName": "Cheesecake",
       "durationMinutes": 30,
-      "instruction": "Read how Cheesecake got its name and where it's from — the 'ancient' is the origin (Ancient Greece). Then watch how it's made and notice the density — the cream cheese is the texture."
+      "instruction": "The hidden story of Cheesecake: the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Dessert",
@@ -1222,7 +1222,7 @@
       "verb": "Read",
       "targetName": "Ice Cream",
       "durationMinutes": 30,
-      "instruction": "Read how Ice Cream got its name and where it's from — the 'Chinese' is the origin (China). Then watch how it's made and notice the density — the churn is the texture."
+      "instruction": "Ice Cream isn't just food — it's history. milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Dessert",
@@ -1243,7 +1243,7 @@
       "verb": "Read",
       "targetName": "Chocolate (3000) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Chocolate got its name and where it's from — the 'bitter' was the beginning (Mesoamerica). Then watch how it's made and notice the origin — the bean's terroir is the flavor."
+      "instruction": "The hidden story of Chocolate: the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "Dessert",
@@ -1265,7 +1265,7 @@
       "verb": "Read",
       "targetName": "Bread (Sourdough)",
       "durationMinutes": 30,
-      "instruction": "Read how Bread (Sourdough) got its name and where it's from — the 'accident' was the invention (Ancient Egypt). Then watch how it's made and notice the starter — the wild yeast is the flavor."
+      "instruction": "The real story of Bread: the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades. Read about its origins and watch a food historian explain why it became iconic."
     },
     "tags": [
       "Bread",
@@ -1286,7 +1286,7 @@
       "verb": "Read",
       "targetName": "Bagel",
       "durationMinutes": 30,
-      "instruction": "Read how Bagel got its name and where it's from — the 'boil' is the craft (Poland). Then watch how it's made and notice the boil — the crust is the signature."
+      "instruction": "Bagel isn't just food — it's history. the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Bread",
@@ -1307,7 +1307,7 @@
       "verb": "Read",
       "targetName": "Pretzel",
       "durationMinutes": 30,
-      "instruction": "Read how Pretzel got its name and where it's from — the 'knot' is the legend (Germany). Then watch how it's made and notice the crust — the lye is the flavor."
+      "instruction": "Why is Pretzel so beloved? the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Bread",
@@ -1328,7 +1328,7 @@
       "verb": "Read",
       "targetName": "Macaron",
       "durationMinutes": 30,
-      "instruction": "Read how Macaron got its name and where it's from — the 'foot' is the signature (France). Then watch how it's made and notice the foot — the ruffled base is the craft."
+      "instruction": "The real story of Macaron: the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master. Read about its origins and watch a food historian explain why it became iconic."
     },
     "tags": [
       "French",
@@ -1349,7 +1349,7 @@
       "verb": "Read",
       "targetName": "Pancakes",
       "durationMinutes": 30,
-      "instruction": "Read how Pancakes got its name and where it's from — the 'universal' is the form (Global). Then watch how it's made and notice the first side — the bubbles are the timing."
+      "instruction": "Pancakes isn't just food — it's history. from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Breakfast",
@@ -1370,7 +1370,7 @@
       "verb": "Read",
       "targetName": "Hamburger (1900) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Hamburger got its name and where it's from — the 'argument' is the origin (USA). Then watch how it's made and notice the crust — the maillard is the flavor."
+      "instruction": "Learn the story behind Hamburger — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "American",
@@ -1392,7 +1392,7 @@
       "verb": "Read",
       "targetName": "Hot Dog",
       "durationMinutes": 30,
-      "instruction": "Read how Hot Dog got its name and where it's from — the 'joke' is the name (USA). Then watch how it's made and notice the snap — the casing is the texture."
+      "instruction": "Why is Hot Dog so beloved? the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "American",
@@ -1413,7 +1413,7 @@
       "verb": "Read",
       "targetName": "Fried Chicken",
       "durationMinutes": 30,
-      "instruction": "Read how Fried Chicken got its name and where it's from — the 'brine' is the science (American South). Then watch how it's made and notice the crust — the seasoning is the identity."
+      "instruction": "Learn the story behind Fried Chicken — the 'brine' is the moisture, and the dish's roots include West African frying techniques. Watch a short documentary or food history video to see how it evolved from its origins."
     },
     "tags": [
       "Southern",
@@ -1434,7 +1434,7 @@
       "verb": "Read",
       "targetName": "Buffalo Wings (1964) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Buffalo Wings got its name and where it's from — the 'bar' is the origin (Buffalo, NY). Then watch how it's made and notice the butter — the fat is the balance."
+      "instruction": "Discover why Buffalo Wings matters to its culture — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "American",
@@ -1456,7 +1456,7 @@
       "verb": "Read",
       "targetName": "Mac and Cheese",
       "durationMinutes": 30,
-      "instruction": "Read how Mac and Cheese got its name and where it's from — the 'Jefferson' is the history (USA). Then watch how it's made and notice the crust — the breadcrumb is the texture."
+      "instruction": "The hidden story of Mac and Cheese: Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation. Watch a food documentary to see the human side of this dish."
     },
     "tags": [
       "American",
@@ -1477,7 +1477,7 @@
       "verb": "Read",
       "targetName": "Chili",
       "durationMinutes": 30,
-      "instruction": "Read how Chili got its name and where it's from — the 'no beans' is the debate (Texas). Then watch how it's made and notice the beef — the meat is the bowl."
+      "instruction": "Why is Chili so beloved? no beans in the classic version, and the 'chili cook-off' is a Texas institution. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "American",
@@ -1498,7 +1498,7 @@
       "verb": "Read",
       "targetName": "Gumbo",
       "durationMinutes": 30,
-      "instruction": "Read how Gumbo got its name and where it's from — the 'blend' is the history (Louisiana). Then watch how it's made and notice the dark color — the burn is the flavor."
+      "instruction": "Gumbo isn't just food — it's history. the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Cajun",
@@ -1519,7 +1519,7 @@
       "verb": "Read",
       "targetName": "Jambalaya",
       "durationMinutes": 30,
-      "instruction": "Read how Jambalaya got its name and where it's from — the 'paella' is the cousin (Louisiana). Then watch how it's made and notice the smoke — the sausage is the flavor."
+      "instruction": "Why is Jambalaya so beloved? the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base. Watch a cultural deep-dive to understand its significance."
     },
     "tags": [
       "Cajun",
@@ -1540,7 +1540,7 @@
       "verb": "Read",
       "targetName": "Tacos",
       "durationMinutes": 30,
-      "instruction": "Read how Tacos got its name and where it's from — the 'street' is the culture (Mexico). Then watch how it's made and notice the tortilla — the handmade corn is the base."
+      "instruction": "Discover why Tacos matters to its culture — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Mexican",
@@ -1561,7 +1561,7 @@
       "verb": "Read",
       "targetName": "Burrito",
       "durationMinutes": 30,
-      "instruction": "Read how Burrito got its name and where it's from — the 'donkey' is the name (Mexico). Then watch how it's made and notice the foil — the wrap is the ritual."
+      "instruction": "Burrito isn't just food — it's history. the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Mexican",
@@ -1582,7 +1582,7 @@
       "verb": "Read",
       "targetName": "Guacamole",
       "durationMinutes": 30,
-      "instruction": "Read how Guacamole got its name and where it's from — the 'Aztec' is the origin (Mexico). Then watch how it's made and notice the texture — the stone bowl is the craft."
+      "instruction": "Guacamole has a surprising past — the 'ahuacamolli' is Aztec in origin, and the lime and salt are the technique. Explore its history and watch how it spread across the world."
     },
     "tags": [
       "Mexican",
@@ -1603,7 +1603,7 @@
       "verb": "Read",
       "targetName": "Mole",
       "durationMinutes": 30,
-      "instruction": "Read how Mole got its name and where it's from — the '20' ingredients are the craft (Mexico). Then watch how it's made and notice the chocolate — the bitterness is the depth."
+      "instruction": "Discover why Mole matters to its culture — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual. Search for its history and watch how different regions make it their own."
     },
     "tags": [
       "Mexican",
@@ -1624,7 +1624,7 @@
       "verb": "Read",
       "targetName": "Chiles en Nogada (1821) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Read how Chiles en Nogada got its name and where it's from — the 'independence' is the history (Puebla, Mexico). Then watch how it's made and notice the colors — the flag is the dish."
+      "instruction": "Chiles en Nogada isn't just food — it's history. created for Mexico's independence in 1821, and the dish's colors are the flag. Search for its origins and watch how it shaped a culture."
     },
     "tags": [
       "Mexican",
