@@ -6,7 +6,7 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
 import { BottomNav } from './components/BottomNav';
 import { FloatingPet } from './components/FloatingPet';
-import { HomeScreen } from './screens/HomeScreen';
+import HomeScreen from './screens/HomeScreen';
 import { SpinScreen } from './screens/SpinScreen';
 import { CabinetScreen } from './screens/CabinetScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
@@ -15,6 +15,7 @@ import { TopicRevealScreen } from './screens/TopicRevealScreen';
 import { SaveCaptureScreen } from './screens/SaveCaptureScreen';
 import { EntryDetailScreen } from './screens/EntryDetailScreen';
 import { QuestsScreen } from './screens/QuestsScreen';
+import { TopicBrowserScreen } from './screens/TopicBrowserScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { getPetSystem } from './data/PetSystem';
 import { getQuestSystem } from './data/QuestSystem';
@@ -55,6 +56,7 @@ const App: React.FC = () => {
             <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
             <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
             <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />
+            <Route path="/browse" element={<TopicBrowserScreen />} />
             <Route path="/pet-designer" element={<PetDesignerPlaceholder />} />
             <Route path="/quests" element={<QuestsScreen />} />
           </Routes>

@@ -1,243 +1,198 @@
 // Curio Web App - Home Screen
-// Premium design with hero card, category grid, quick actions, and progress stats
+// Matches Android: rose hero banner, quest block, recents feed
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
-import { getRandomTopic } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
-import {
-  CurioHeroCard,
-  CurioCategoryCard,
-  CurioStatCard,
-  CurioSectionHeader,
-  MaterialIcon,
-} from '../components/SharedComponents';
-import type { CurioCategory } from '../types';
+import { MaterialIcon } from '../components/SharedComponents';
+import { captureRepository } from '../db/database';
 
-// ─── Streak Pill ──────────────────────────────────────────────────────
-const StreakPill: React.FC<{ streak: number; bestStreak: number }> = ({ streak, bestStreak }) => {
-  const { isDark } = useTheme();
-  return (
-    <div
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-      style={{ background: isDark ? 'rgba(255,143,163,0.12)' : 'rgba(255,143,163,0.08)' }}
-    >
-      <MaterialIcon name="local_fire_department" size={18} style={{ color: '#FF8FA3' }} />
-      <span className="text-sm font-bold" style={{ color: '#FF8FA3', fontFamily: 'Geom, Inter, sans-serif' }}>
-        {streak}
-      </span>
-      {bestStreak > 0 && (
-        <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
-          best {bestStreak}
-        </span>
-      )}
-    </div>
-  );
-};
-
-// ─── Quick Action Card ────────────────────────────────────────────────
-const QuickActionCard: React.FC<{
-  icon: string;
-  title: string;
-  subtitle: string;
-  onClick: () => void;
-  color?: string;
-}> = ({ icon, title, subtitle, onClick, color = '#3B0A17' }) => {
-  const { isDark } = useTheme();
-  const [isPressed, setIsPressed] = useState(false);
-
-  return (
-    <button
-      onClick={onClick}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      className="flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-200 text-left"
-      style={{
-        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)',
-        transform: isPressed ? 'scale(0.97)' : 'scale(1)',
-        border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(59,10,23,0.04)',
-      }}
-    >
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: `${color}18` }}
-      >
-        <MaterialIcon name={icon} size={20} style={{ color }} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>
-          {title}
-        </div>
-        <div className="text-xs truncate" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
-          {subtitle}
-        </div>
-      </div>
-    </button>
-  );
-};
-
-// ─── Main HomeScreen ──────────────────────────────────────────────────
-export const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
   const { isDark, isAmoled } = useTheme();
   const [questSystem] = useState(() => getQuestSystem());
-
-  const [selectedCategory, setSelectedCategory] = useState<CurioCategory | null>(null);
-  const [stats, setStats] = useState({ entries: 0, streak: 0, bestStreak: 0, spins: 0 });
+  const [stats, setStats] = useState({ streak: 0, saved: 0, topics: '6,480+' });
+  const [recents, setRecents] = useState<Array<{ id: string; name: string; categoryId: string; subtype: string; daysAgo: number }>>([]);
   const [greeting, setGreeting] = useState('');
+  const [displayName] = useState(() => localStorage.getItem('curio-display-name') || 'Explorer');
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good morning');
-    else if (hour < 17) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening');
   }, []);
 
   useEffect(() => {
-    const state = questSystem.getState();
-    setStats({
-      entries: state.lifetime?.saves || 0,
-      streak: state.bestStreak || 0,
-      bestStreak: state.bestStreak || 0,
-      spins: state.lifetime?.spins || 0,
-    });
+    const load = async () => {
+      try {
+        const entries = await captureRepository.getAll();
+        const recent = entries.reverse().slice(0, 5).map(e => ({
+          id: e.id,
+          name: e.topicName,
+          categoryId: e.categoryId,
+          subtype: e.topicSubtype,
+          daysAgo: Math.floor((Date.now() - e.capturedAtMillis) / 86400000),
+        }));
+        setRecents(recent);
+        setStats(s => ({ ...s, saved: entries.length }));
+      } catch {}
+    };
+    const qs = questSystem.getState();
+    setStats({ streak: qs.bestStreak || 0, saved: 0, topics: '6,480+' });
+    load();
   }, [questSystem]);
 
   const handleShuffle = async () => {
-    const catId = selectedCategory?.id || 'WILDCARD';
-    const topic = await getRandomTopic(catId);
-    if (topic) {
-      questSystem.onSpin(catId);
-      navigate(`/reveal/${catId}/${topic.id}`);
-    }
+    const cats = ALL_CATEGORIES.filter(c => c.isReady);
+    const pick = cats[Math.floor(Math.random() * cats.length)];
+    navigate(`/spin/${pick.id.toLowerCase()}`);
   };
 
-  const handleCategorySelect = (cat: CurioCategory) => {
-    setSelectedCategory(prev => prev?.id === cat.id ? null : cat);
-  };
-
-  const activeCategory = selectedCategory || ALL_CATEGORIES[0];
+  const heroAccent = '#C46B7C'; // Rose-wood like Android
 
   return (
-    <div
-      className="min-h-screen pb-24"
-      style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
-    >
-      {/* Watermark backdrop */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {ALL_CATEGORIES.slice(0, 6).map((cat, i) => (
-          <div
-            key={cat.id}
-            className="absolute opacity-[0.02]"
-            style={{
-              left: `${5 + (i % 3) * 33}%`,
-              top: `${12 + Math.floor(i / 3) * 40}%`,
-              transform: `rotate(${-20 + i * 14}deg)`,
-              color: isDark ? 'white' : cat.accent,
-            }}
-          >
-            <MaterialIcon name={cat.iconGlyph} size={100} />
+    <div className="min-h-screen pb-24" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+      {/* ── Rose Hero Banner ──────────────────────────────────────── */}
+      <div className="relative w-full overflow-hidden"
+        style={{
+          background: `linear-gradient(180deg, ${heroAccent} 0%, ${heroAccent}DD 100%)`,
+          minHeight: 260,
+          paddingTop: 'env(safe-area-inset-top)',
+        }}>
+        {/* Watermark glyphs */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.08]">
+          <MaterialIcon name="casino" size={120} className="absolute" style={{ right: -20, top: 40, transform: 'rotate(12deg)' }} />
+          <MaterialIcon name="auto_awesome" size={100} className="absolute" style={{ left: -10, top: 140, transform: 'rotate(-8deg)' }} />
+          <MaterialIcon name="local_fire_department" size={90} className="absolute" style={{ right: 60, bottom: 20, transform: 'rotate(6deg)' }} />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 px-5 pt-14 pb-4 flex flex-col h-full">
+          {/* Sticky pills row */}
+          <div className="absolute top-3 right-4 flex gap-2 z-20">
+            <button onClick={() => navigate('/settings')}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              <MaterialIcon name="menu" size={20} style={{ color: '#fff' }} />
+            </button>
+            <button onClick={() => navigate('/profile')}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              <MaterialIcon name="person" size={20} style={{ color: '#fff' }} />
+            </button>
           </div>
-        ))}
+
+          {/* Greeting */}
+          <p className="text-white/80 text-sm font-medium mb-1">{greeting}</p>
+          <h1 className="text-3xl font-extrabold text-white mb-5" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
+            {displayName}
+          </h1>
+
+          <div className="flex-1" />
+
+          {/* Stat bar */}
+          <div className="flex items-center rounded-2xl p-3"
+            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
+            <Stat inline icon="local_fire_department" value={`${stats.streak}`} label="Streak" />
+            <div className="w-px h-8 mx-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
+            <Stat inline icon="inventory_2" value={`${stats.saved}`} label="Cabinet" />
+            <div className="w-px h-8 mx-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
+            <Stat inline icon="auto_awesome" value={stats.topics} label="Topics" />
+          </div>
+        </div>
       </div>
 
-      {/* Main content */}
-      <div className="relative z-10 px-4 pt-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p
-              className="text-sm mb-0.5"
-              style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)' }}
-            >
-              {greeting}
+      {/* ── Quest Block ──────────────────────────────────────────────── */}
+      <div className="px-4 -mt-2 relative z-10">
+        <button onClick={handleShuffle}
+          className="w-full flex items-center gap-3 p-4 rounded-2xl transition-all active:scale-[0.98]"
+          style={{
+            background: isDark ? 'rgba(255,255,255,0.04)' : 'white',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.05)'}`,
+          }}>
+          {/* Pet bed placeholder */}
+          <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: `${heroAccent}20` }}>
+            <MaterialIcon name="pets" size={22} style={{ color: heroAccent }} />
+          </div>
+          <div className="flex-1 text-left min-w-0">
+            <p className="text-[10px] font-extrabold tracking-widest uppercase mb-0.5"
+              style={{ color: heroAccent, letterSpacing: '1.6px' }}>Today's Quest</p>
+            <p className="text-lg font-extrabold truncate" style={{ color: getTextColor(isDark) }}>Shuffle the deck</p>
+            <p className="text-xs truncate" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)' }}>
+              A fresh mix of ideas, picked for you
             </p>
-            <h1
-              className="text-[26px] font-extrabold leading-tight"
-              style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}
-            >
-              Discover Curio
-            </h1>
           </div>
-          <StreakPill streak={stats.streak} bestStreak={stats.bestStreak} />
+          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: heroAccent }}>
+            <MaterialIcon name="casino" size={24} style={{ color: '#fff' }} />
+          </div>
+        </button>
+      </div>
+
+      {/* ── Recents ──────────────────────────────────────────────── */}
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-bold" style={{ color: getTextColor(isDark) }}>Recents</h3>
+          {recents.length > 0 && (
+            <button onClick={() => navigate('/cabinet')}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)', color: getTextColor(isDark) }}>
+              View all
+              <MaterialIcon name="chevron_right" size={14} />
+            </button>
+          )}
         </div>
 
-        {/* Hero Card */}
-        <div className="mb-6">
-          <CurioHeroCard
-            category={activeCategory}
-            onClick={handleShuffle}
-            subtitle={selectedCategory ? `Shuffle ${selectedCategory.displayName}` : 'Tap to discover something new'}
-          />
-        </div>
-
-        {/* Category Chips */}
-        <div className="mb-6">
-          <CurioSectionHeader title="Categories" action="See all" onAction={() => navigate('/spin')} />
-          <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {ALL_CATEGORIES.filter(c => c.isReady).slice(0, 8).map(cat => (
-              <CurioCategoryCard
-                key={cat.id}
-                category={cat}
-                isSelected={selectedCategory?.id === cat.id}
-                onClick={() => handleCategorySelect(cat)}
-                size="small"
-              />
-            ))}
+        {recents.length === 0 ? (
+          <div className="text-center py-10 rounded-2xl"
+            style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(59,10,23,0.015)' }}>
+            <MaterialIcon name="auto_awesome" size={36} style={{ color: heroAccent, opacity: 0.6 }} />
+            <p className="mt-3 text-sm font-medium" style={{ color: getTextColor(isDark) }}>
+              Your journey starts here
+            </p>
+            <p className="mt-1 text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
+              Shuffle the deck to discover your first topic
+            </p>
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-6">
-          <CurioSectionHeader title="Quick Actions" />
-          <div className="grid grid-cols-2 gap-3">
-            <QuickActionCard
-              icon="casino"
-              title="Spin"
-              subtitle="Random topic"
-              onClick={() => navigate('/spin')}
-              color="#FF8FA3"
-            />
-            <QuickActionCard
-              icon="book_5"
-              title="Cabinet"
-              subtitle="Saved entries"
-              onClick={() => navigate('/cabinet')}
-              color="#4338CA"
-            />
-            <QuickActionCard
-              icon="emoji_events"
-              title="Quests"
-              subtitle="Daily goals"
-              onClick={() => navigate('/quests')}
-              color="#047857"
-            />
-            <QuickActionCard
-              icon="pets"
-              title="Companion"
-              subtitle="Your pet"
-              onClick={() => navigate('/pet-designer')}
-              color="#B45309"
-            />
+        ) : (
+          <div className="space-y-2">
+            {recents.map(e => {
+              const cat = ALL_CATEGORIES.find(c => c.id === e.categoryId);
+              return (
+                <button key={e.id}
+                  onClick={() => navigate(`/detail/${e.id}`)}
+                  className="w-full text-left flex items-center gap-3 p-3 rounded-xl transition-all active:scale-[0.98]"
+                  style={{
+                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(59,10,23,0.015)',
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.03)'}`,
+                  }}>
+                  <MaterialIcon name={cat?.iconGlyph || 'edit_note'} size={22} style={{ color: cat?.accent || '#999' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{e.name}</p>
+                    <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
+                      {cat?.displayName} · {e.subtype} · {e.daysAgo === 0 ? 'today' : e.daysAgo === 1 ? 'yesterday' : `${e.daysAgo}d ago`}
+                    </p>
+                  </div>
+                  <MaterialIcon name="chevron_right" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(59,10,23,0.3)' }} />
+                </button>
+              );
+            })}
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="mb-6">
-          <CurioSectionHeader title="Your Progress" />
-          <div className="grid grid-cols-4 gap-3">
-            <CurioStatCard label="Entries" value={stats.entries} icon="edit_note" color="#4338CA" />
-            <CurioStatCard label="Spins" value={stats.spins} icon="casino" color="#FF8FA3" />
-            <CurioStatCard label="Streak" value={stats.streak} icon="local_fire_department" color="#B45309" />
-            <CurioStatCard label="Best" value={stats.bestStreak} icon="trophy" color="#047857" />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
+
+const Stat: React.FC<{ inline?: boolean; icon: string; value: string; label: string }> = ({ inline, icon, value, label }) => (
+  <div className="flex flex-col items-center" style={inline ? { flex: 1 } : {}}>
+    <MaterialIcon name={icon} size={16} style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 2 }} />
+    <span className="text-sm font-extrabold text-white">{value}</span>
+    <span className="text-[10px] text-white/75">{label}</span>
+  </div>
+);
 
 export default HomeScreen;
