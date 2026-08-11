@@ -9,12 +9,13 @@ import { CurioPaperCard, MaterialIcon, CurioWatermarkBackdrop } from '../compone
 import type { CurioCategory, CaptureFormat, CaptureData } from '../types';
 import { captureRepository, deserializeTags } from '../db/database';
 import { ScreenEntrance } from '../animations';
+import { TornHero, makeDetailHeroSymbols } from '../components/TornHero';
 
 // ─── Paper ink for saved views ──────────────────────────────────────
 const getPaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
 
 // ─── Hero height ─────────────────────────────────────────────────────
-const HERO_H = 360;
+const HERO_H = 400;
 
 // ─── Format Renderers (Patrick Hand, paper ink, paper bg) ────────────
 const SavedPaperCard: React.FC<{ children: React.ReactNode; isDark: boolean; accent: string }> = ({ children, isDark, accent }) => (
@@ -160,6 +161,8 @@ export const EntryDetailScreen: React.FC = () => {
   const format = (entry.format || 'Marginalia') as CaptureFormat;
   const heroFill = category.accent;
   const heroInk = '#fff';
+  // Deterministic tear seed from entry id hash
+  const tearSeed = (entry.id || 'detail').split('').reduce((a: number, c: string) => a * 31 + c.charCodeAt(0), 0x0BADC0DE);
 
   const formatDate = (millis: number) => {
     const d = new Date(millis);
@@ -173,79 +176,51 @@ export const EntryDetailScreen: React.FC = () => {
       <CurioWatermarkBackdrop activeCatId={category.id} topClearance={HERO_H + 30} alphaScale={0.45} />
 
       {/* ── Torn Hero Banner ──────────────────────────────────────── */}
-      <div className="relative w-full" style={{ height: HERO_H + 16 }}>
-        {/* White under-sheet */}
-        <div className="absolute left-0 right-0 h-4 z-10" style={{ top: HERO_H - 4, background: isDark ? '#17131D' : '#FFFDF9' }}>
-          <svg viewBox="0 0 400 16" preserveAspectRatio="none" className="w-full h-full">
-            <path d="M0,0 Q18,10 36,3 T72,5 T108,2 T144,6 T180,1 T216,4 T252,2 T288,5 T324,1 T360,4 T400,2 L400,16 L0,16 Z"
-              fill={heroFill} />
-          </svg>
-        </div>
-
-        {/* Torn edge shadow */}
-        <div className="absolute left-0 right-0 z-0" style={{ top: 1, height: HERO_H, background: isDark ? 'rgba(255,253,249,0.08)' : 'rgba(0,0,0,0.15)' }}>
-          <svg viewBox="0 0 400 400" preserveAspectRatio="none" className="w-full h-full">
-            <path d="M0,0 L400,0 L400,380 Q382,392 364,383 T346,386 T328,381 T310,388 T292,384 T274,387 T256,382 T238,386 T220,383 T202,389 T184,384 T166,387 T148,382 T130,386 T112,383 T94,389 T76,384 T58,387 T40,382 T22,386 T4,383 L0,380 Z"
-              fill={isDark ? 'rgba(255,253,249,0.94)' : 'rgba(0,0,0,0.12)'} />
-          </svg>
-        </div>
-
-        {/* Solid hero color + torn bottom */}
-        <div className="absolute left-0 right-0 z-20" style={{ height: HERO_H, background: heroFill }}>
-          <svg viewBox="0 0 400 400" preserveAspectRatio="none" className="absolute bottom-0 left-0 right-0" style={{ height: 20, transform: 'translateY(100%)' }}>
-            <path d="M0,0 Q18,10 36,3 T72,5 T108,2 T144,6 T180,1 T216,4 T252,2 T288,5 T324,1 T360,4 T400,2 L400,20 L0,20 Z"
-              fill={heroFill} />
-          </svg>
-
-          {/* Hero watermark symbols */}
-          <div className="absolute inset-0 pointer-events-none">
-            {['person', 'album', 'movie', 'edit_note', 'brush', 'science', 'casino', 'menu_book', 'palette', 'smart_display'].map((s, i) => {
-              const x = [5, 88, 50, 92, 8, 55, 90, 15, 92, 10][i];
-              const y = [10, 8, 25, 55, 60, 70, 75, 80, 45, 35][i];
-              const r = [-8, 10, -5, 12, -10, -6, 8, -12, 7, -4][i];
-              return <span key={i} className="material-symbols-outlined absolute select-none"
-                style={{ left: `${x}%`, top: `${y}%`, fontSize: [36, 40, 44, 38, 42, 48, 40, 36, 42, 44][i],
-                  color: 'rgba(255,255,255,0.12)', transform: `rotate(${r}deg)` }}>{s}</span>;
-            })}
-          </div>
-
-          {/* Centered content */}
-          <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ paddingTop: 72 }}>
-            <MaterialIcon name={category.iconGlyph} size={64} style={{ color: 'rgba(255,255,255,0.92)' }} />
-            <div className="h-3" />
-            <h1 className="text-2xl font-extrabold text-center leading-tight px-4"
-              style={{ color: heroInk, fontFamily: 'Geom, Inter, sans-serif', maxWidth: 300 }}>
-              {entry.topicName || 'Untitled'}
-            </h1>
-            <div className="h-4" />
-            {/* Frosted date/mood/type bar */}
-            <div className="flex items-center rounded-2xl px-4 py-2.5 gap-3"
-              style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.22)' }}>
-              <FrostedSegment icon="calendar_today" title={formatDate(entry.capturedAtMillis)} subtitle="Date" tiny={tiny} />
-              <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.25)' }} />
-              <FrostedSegment icon="category" title={format} subtitle="Type" />
-            </div>
+      <TornHero
+        height={HERO_H}
+        fill={heroFill}
+        ink={heroInk}
+        tearSeed={tearSeed}
+        detail={true}
+        symbols={makeDetailHeroSymbols(category.iconGlyph)}
+        isDark={isDark}
+      >
+        <div className="flex flex-col items-center justify-center h-full px-7" style={{ paddingTop: 80, paddingBottom: 16 }}>
+          <MaterialIcon name={category.iconGlyph} size={64} style={{ color: 'rgba(255,255,255,0.92)' }} />
+          <div className="h-3" />
+          <h1 className="text-2xl font-extrabold text-center leading-tight px-4"
+            style={{ color: heroInk, fontFamily: 'Geom, Inter, sans-serif', maxWidth: 300 }}>
+            {entry.topicName || 'Untitled'}
+          </h1>
+          <div className="h-4" />
+          {/* Frosted date/type bar */}
+          <div className="flex items-center rounded-2xl px-4 py-2.5 gap-3"
+            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.22)' }}>
+            <FrostedSegment icon="calendar_today" title={formatDate(entry.capturedAtMillis)} subtitle="Date" tiny={tiny} />
+            <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.25)' }} />
+            <FrostedSegment icon="category" title={format} subtitle="Type" />
           </div>
         </div>
+      </TornHero>
 
-        {/* Sticky back + more */}
-        <div className="absolute top-0 left-0 right-0 z-30 flex justify-between px-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center"
+      {/* Sticky back + actions */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex justify-between px-4"
+        style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
+        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+          <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
+        </button>
+        <div className="flex gap-2">
+          <button onClick={() => navigate(`/capture/${category.id.toLowerCase()}/${(entry.topicName || 'topic').replace(/\s+/g, '-')}`)}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-            <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
+            <MaterialIcon name="edit" size={20} style={{ color: '#fff' }} />
           </button>
-          <div className="flex gap-2">
-            <button onClick={() => navigate(`/capture/${category.id.toLowerCase()}/${(entry.topicName || 'topic').replace(/\s+/g, '-')}`)}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-              <MaterialIcon name="edit" size={20} style={{ color: '#fff' }} />
-            </button>
-            <button onClick={() => setDeleteVisible(true)}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-              <MaterialIcon name="delete" size={20} style={{ color: '#FF6B6B' }} />
-            </button>
-          </div>
+          <button onClick={() => setDeleteVisible(true)}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+            <MaterialIcon name="delete" size={20} style={{ color: '#FF6B6B' }} />
+          </button>
         </div>
       </div>
 

@@ -1,12 +1,11 @@
 // Curio Web App - Main App Component
-// Sets up routing, theme, bottom nav, and menu drawer
+// Routes, theme, bottom nav, floating pet
 
 import React from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
-import { BottomNav } from './components/BottomNav';
+import BottomNav from './components/BottomNav';
 import { FloatingPet } from './components/FloatingPet';
-import MenuDrawer from './components/MenuDrawer';
 import HomeScreen from './screens/HomeScreen';
 import { SpinScreen } from './screens/SpinScreen';
 import { CabinetScreen } from './screens/CabinetScreen';
@@ -18,18 +17,13 @@ import { EntryDetailScreen } from './screens/EntryDetailScreen';
 import { QuestsScreen } from './screens/QuestsScreen';
 import { TopicBrowserScreen } from './screens/TopicBrowserScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import './index.css';
-
-// Menu drawer context
-export const MenuContext = createContext<{ openMenu: () => void }>({ openMenu: () => {} });
-export const useMenu = () => useContext(MenuContext);
 
 const App: React.FC = () => {
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(() => {
     return localStorage.getItem('onboarding_complete') === 'true';
   });
-  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -41,31 +35,26 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <MenuContext.Provider value={{ openMenu: () => setMenuOpen(true) }}>
-        <div className="min-h-screen">
-          <Routes>
-            <Route path="/onboarding" element={<OnboardingScreen />} />
-            <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
-            <Route path="/spin" element={<SpinScreen />} />
-            <Route path="/spin/:categorySlug" element={<SpinScreen />} />
-            <Route path="/cabinet" element={<CabinetScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/settings" element={<SettingsScreen />} />
-            <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
-            <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
-            <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />
-            <Route path="/browse" element={<TopicBrowserScreen />} />
-            <Route path="/pet-designer" element={<PetDesignerPlaceholder />} />
-            <Route path="/quests" element={<QuestsScreen />} />
-          </Routes>
+      <div className="min-h-screen">
+        <Routes>
+          <Route path="/onboarding" element={<OnboardingScreen />} />
+          <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
+          <Route path="/spin" element={<SpinScreen />} />
+          <Route path="/spin/:categorySlug" element={<SpinScreen />} />
+          <Route path="/cabinet" element={<CabinetScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
+          <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
+          <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />
+          <Route path="/browse" element={<TopicBrowserScreen />} />
+          <Route path="/pet-designer" element={<PetDesignerPlaceholder />} />
+          <Route path="/quests" element={<QuestsScreen />} />
+        </Routes>
 
-          {showBottomNav && <BottomNav onMenuOpen={() => setMenuOpen(true)} />}
-          {showBottomNav && <FloatingPet />}
-
-          {/* Menu drawer */}
-          <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-        </div>
-      </MenuContext.Provider>
+        {showBottomNav && <BottomNav />}
+        {showBottomNav && <FloatingPet />}
+      </div>
     </ThemeProvider>
   );
 };
