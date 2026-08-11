@@ -303,6 +303,46 @@ export const HOME_HERO_SYMBOLS: TornHeroSymbol[] = [
   { glyph: 'travel_explore', biasX: 0.94, biasY: 0.20, size: 44, rotation: 6, alpha: 0.11 },
 ];
 
+/** Profile hero watermark symbols */
+export const PROFILE_HERO_SYMBOLS: TornHeroSymbol[] = [
+  { glyph: 'person', biasX: 0.08, biasY: 0.18, size: 40, rotation: -10, alpha: 0.10 },
+  { glyph: 'star', biasX: 0.92, biasY: 0.18, size: 40, rotation: 10, alpha: 0.10 },
+  { glyph: 'auto_awesome', biasX: 0.48, biasY: 0.38, size: 44, rotation: -6, alpha: 0.12 },
+  { glyph: 'emoji_events', biasX: 0.52, biasY: 0.38, size: 44, rotation: 6, alpha: 0.12 },
+  { glyph: 'workspace_premium', biasX: 0.06, biasY: 0.82, size: 50, rotation: -12, alpha: 0.13 },
+  { glyph: 'local_fire_department', biasX: 0.94, biasY: 0.82, size: 50, rotation: 12, alpha: 0.13 },
+];
+
+/** Settings hero watermark symbols */
+export const SETTINGS_HERO_SYMBOLS: TornHeroSymbol[] = [
+  { glyph: 'settings', biasX: 0.09, biasY: 0.22, size: 36, rotation: -8, alpha: 0.09 },
+  { glyph: 'tune', biasX: 0.91, biasY: 0.22, size: 36, rotation: 8, alpha: 0.09 },
+  { glyph: 'palette', biasX: 0.47, biasY: 0.42, size: 40, rotation: -5, alpha: 0.11 },
+  { glyph: 'auto_awesome', biasX: 0.53, biasY: 0.42, size: 40, rotation: 5, alpha: 0.11 },
+  { glyph: 'build', biasX: 0.07, biasY: 0.78, size: 44, rotation: -10, alpha: 0.12 },
+  { glyph: 'psychology', biasX: 0.93, biasY: 0.78, size: 44, rotation: 10, alpha: 0.12 },
+];
+
+/** Cabinet hero watermark symbols */
+export const CABINET_HERO_SYMBOLS: TornHeroSymbol[] = [
+  { glyph: 'inventory_2', biasX: 0.08, biasY: 0.20, size: 38, rotation: -9, alpha: 0.10 },
+  { glyph: 'book_5', biasX: 0.92, biasY: 0.20, size: 38, rotation: 9, alpha: 0.10 },
+  { glyph: 'edit_note', biasX: 0.46, biasY: 0.40, size: 42, rotation: -7, alpha: 0.12 },
+  { glyph: 'menu_book', biasX: 0.54, biasY: 0.40, size: 42, rotation: 7, alpha: 0.12 },
+  { glyph: 'archive', biasX: 0.06, biasY: 0.80, size: 48, rotation: -11, alpha: 0.13 },
+  { glyph: 'auto_stories', biasX: 0.94, biasY: 0.80, size: 48, rotation: 11, alpha: 0.13 },
+];
+
+/** Browser hero watermark symbols */
+export const BROWSER_HERO_SYMBOLS: TornHeroSymbol[] = [
+  { glyph: 'travel_explore', biasX: 0.10, biasY: 0.22, size: 36, rotation: -7, alpha: 0.09 },
+  { glyph: 'search', biasX: 0.90, biasY: 0.22, size: 36, rotation: 7, alpha: 0.09 },
+  { glyph: 'category', biasX: 0.45, biasY: 0.44, size: 40, rotation: -6, alpha: 0.11 },
+  { glyph: 'auto_awesome', biasX: 0.55, biasY: 0.44, size: 40, rotation: 6, alpha: 0.11 },
+  { glyph: 'map', biasX: 0.07, biasY: 0.76, size: 44, rotation: -9, alpha: 0.12 },
+  { glyph: 'language', biasX: 0.93, biasY: 0.76, size: 44, rotation: 9, alpha: 0.12 },
+];
+
 /** Detail hero watermark symbols for a given category icon glyph */
 export function makeDetailHeroSymbols(catGlyph: string): TornHeroSymbol[] {
   return [
