@@ -354,7 +354,7 @@ const SoundBiteEditor: React.FC<{
 
   return (
     <div className="space-y-5">
-      {/* Voice Recorder */}
+      {/* Voice Recorder — standalone, no paper card */}
       <VoiceRecorder accent={accent} isDark={isDark}
         onStateChange={setRecorderState}
         onAudioReady={setAudioData} />
@@ -370,44 +370,46 @@ const SoundBiteEditor: React.FC<{
           <div className="flex-1 h-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
             <div className="h-full rounded-full transition-all" style={{ width: '100%', background: accent }} />
           </div>
-          <span className="text-xs font-mono opacity-60" style={{ color: ink }}>
+          <span className="text-xs font-mono opacity-60" style={{ color: getTextColor(isDark) }}>
             {String(Math.floor(audioData.durationSeconds / 60)).padStart(2, '0')}:{String(audioData.durationSeconds % 60).padStart(2, '0')}
           </span>
         </div>
       )}
       <audio ref={audioRef} src={audioData?.dataUrl} className="hidden" />
 
-      {/* Title */}
-      <div>
-        <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Title</label>
-        <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-          placeholder="What's this recording about?"
-          className={`${paperInputClass} text-lg font-semibold`}
-          style={{ fontFamily: paperFont, color: ink, borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />
-      </div>
+      {/* Title + Note — in paper card with Patrick Hand */}
+      <PaperCard isDark={isDark} accent={accent}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Title</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+              placeholder="What's this recording about?"
+              className={`${paperInputClass} text-lg font-semibold`}
+              style={{ fontFamily: paperFont, color: ink, borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Note</label>
+            <textarea value={note} onChange={e => setNote(e.target.value)}
+              placeholder="Write down your thoughts..."
+              rows={4} className={paperInputClass} style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
+          </div>
+        </div>
+      </PaperCard>
 
-      {/* Note */}
-      <div>
-        <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Note</label>
-        <textarea value={note} onChange={e => setNote(e.target.value)}
-          placeholder="Write down your thoughts..."
-          rows={4} className={paperInputClass} style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-      </div>
-
-      {/* Mood */}
+      {/* Mood — standalone */}
       <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
 
       {/* Quotes */}
       <div>
-        <label className="block text-xs font-semibold mb-1.5 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>
+        <label className="block text-xs font-semibold mb-1.5 opacity-40 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>
           <MaterialIcon name="format_quote" size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Quotes
         </label>
         {quotes.length > 0 && (
           <div className="space-y-2 mb-3">
             {quotes.map((q, i) => (
-              <div key={i} className="flex items-start gap-2 pl-3 border-l-2" style={{ borderColor: accent }}>
-                <span className="text-lg leading-none opacity-40" style={{ fontFamily: paperFont }}>&ldquo;</span>
-                <p className="flex-1 text-sm leading-relaxed" style={{ fontFamily: paperFont, color: ink }}>{q.text}</p>
+              <div key={i} className="flex items-start gap-2 pl-3 border-l-2 rounded" style={{ borderColor: accent, background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
+                <span className="text-lg leading-none opacity-40">&ldquo;</span>
+                <p className="flex-1 text-sm leading-relaxed" style={{ color: getTextColor(isDark) }}>{q.text}</p>
                 <button onClick={() => setQuotes(quotes.filter((_, j) => j !== i))}
                   className="text-red-400/60 hover:text-red-400 text-lg leading-none">&times;</button>
               </div>
@@ -440,29 +442,31 @@ const ReelNotesEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (v
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
   const ink = getPaperInk(isDark);
   return (
-    <PaperCard isDark={isDark} accent={accent}>
-      <div className="space-y-5">
-        <div>
-          <label className="block text-xs font-semibold mb-2 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Rating</label>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map(star => (
-              <button key={star} onClick={() => setRating(star)}
-                className="transition-transform hover:scale-115 active:scale-90">
-                <MaterialIcon name="star" size={28} filled={star <= rating}
-                  style={{ color: star <= rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }} />
-              </button>
-            ))}
-          </div>
+    <div className="space-y-5">
+      {/* Stars — standalone, not in paper card */}
+      <div>
+        <label className="block text-xs font-semibold mb-2 opacity-40 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>Rating</label>
+        <div className="flex gap-1.5">
+          {[1, 2, 3, 4, 5].map(star => (
+            <button key={star} onClick={() => setRating(star)}
+              className="transition-transform hover:scale-115 active:scale-90">
+              <MaterialIcon name="star" size={32} filled={star <= rating}
+                style={{ color: star <= rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }} />
+            </button>
+          ))}
         </div>
+      </div>
+      {/* Review — in paper card with Patrick Hand */}
+      <PaperCard isDark={isDark} accent={accent}>
         <div>
           <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Review</label>
           <textarea value={review} onChange={e => setReview(e.target.value)}
             placeholder="Write your review here..." rows={5} className={paperInputClass}
             style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
         </div>
-        <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-      </div>
-    </PaperCard>
+      </PaperCard>
+      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
+    </div>
   );
 };
 
@@ -476,15 +480,15 @@ const MarginaliaEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (
   const addQuote = () => { if (newQuote.trim()) { setQuotes([...quotes, { text: newQuote.trim() }]); setNewQuote(''); } };
   const ink = getPaperInk(isDark);
   return (
-    <PaperCard isDark={isDark} accent={accent}>
-      <div className="space-y-5">
+    <div className="space-y-5">
+      <PaperCard isDark={isDark} accent={accent}>
         <div>
           <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Journal Entry</label>
           <textarea value={journalEntry} onChange={e => setJournalEntry(e.target.value)}
             placeholder="Write your thoughts about this topic..." rows={5} className={paperInputClass}
             style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
         </div>
-        <div>
+        <div className="mt-4">
           <label className="block text-xs font-semibold mb-1.5 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Favorite Quotes</label>
           {quotes.length > 0 && (
             <div className="space-y-2 mb-3">
@@ -506,9 +510,9 @@ const MarginaliaEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (
               style={{ background: accent, color: 'white' }}>Add</button>
           </div>
         </div>
-        <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-      </div>
-    </PaperCard>
+      </PaperCard>
+      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
+    </div>
   );
 };
 
@@ -519,32 +523,32 @@ const GalleryWallEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: 
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
   const ink = getPaperInk(isDark);
   return (
-    <PaperCard isDark={isDark} accent={accent}>
-      <div className="space-y-5">
+    <div className="space-y-5">
+      <PaperCard isDark={isDark} accent={accent}>
         <div>
           <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Caption</label>
           <textarea value={caption} onChange={e => setCaption(e.target.value)}
             placeholder="Describe your mood board..." rows={3} className={paperInputClass}
             style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
         </div>
-        <div>
-          <label className="block text-xs font-semibold mb-2 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Images</label>
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-lg flex items-center justify-center"
-                style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
-                <MaterialIcon name="image" size={28} style={{ color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }} />
-              </div>
-            ))}
-            <div className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center"
-              style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
-              <MaterialIcon name="add" size={24} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
+      </PaperCard>
+      <div>
+        <label className="block text-xs font-semibold mb-2 opacity-40 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>Images</label>
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="aspect-square rounded-lg flex items-center justify-center"
+              style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
+              <MaterialIcon name="image" size={28} style={{ color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }} />
             </div>
+          ))}
+          <div className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center"
+            style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+            <MaterialIcon name="add" size={24} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
           </div>
         </div>
-        <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
       </div>
-    </PaperCard>
+      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
+    </div>
   );
 };
 
@@ -564,14 +568,16 @@ const FieldNotesEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (
   return (
     <div className="space-y-4">
       {fields.map(f => (
-        <PaperCard key={f.k} isDark={isDark} accent={accent}>
-          <div className="flex items-center gap-1.5 text-xs font-semibold mb-2 opacity-50 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>
+        <div key={f.k}>
+          <div className="flex items-center gap-1.5 text-xs font-semibold mb-2 opacity-50 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>
             <MaterialIcon name={f.icon} size={14} /> {f.label}
           </div>
-          <textarea value={f.v} onChange={e => f.set(e.target.value)}
-            placeholder={f.ph} rows={3} className={paperInputClass}
-            style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-        </PaperCard>
+          <PaperCard isDark={isDark} accent={accent}>
+            <textarea value={f.v} onChange={e => f.set(e.target.value)}
+              placeholder={f.ph} rows={3} className={paperInputClass}
+              style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
+          </PaperCard>
+        </div>
       ))}
       <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
     </div>
@@ -706,11 +712,6 @@ export const SaveCaptureScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Mood Chips ───────────────────────────────────────────── */}
-        <div className="px-4 pb-3">
-          <MoodChips mood={null} onChange={() => {}} accent={category.accent} isDark={isDark} />
-        </div>
-
         {/* ── "How do you want to capture this one?" ────────────────── */}
         <div className="px-4 pb-3">
           <p className="text-sm font-semibold mb-2.5" style={{ color: getTextColor(isDark) }}>
@@ -735,9 +736,7 @@ export const SaveCaptureScreen: React.FC = () => {
         {/* ── Format Body ──────────────────────────────────────────── */}
         <div className="px-4 py-2 max-w-lg mx-auto" key={formatKey}>
           {selectedFormat === 'SoundBite' && (
-            <PaperCard isDark={isDark} accent={category.accent} paperColor="cream" paperStyle="ruled">
-              <SoundBiteEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
-            </PaperCard>
+            <SoundBiteEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
           )}
           {selectedFormat === 'ReelNotes' && (
             <ReelNotesEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
