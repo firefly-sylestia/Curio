@@ -9,6 +9,7 @@ import {
   CurioChip, 
   CurioEmptyState, 
   CurioSectionHeader,
+  CurioWatermarkBackdrop,
 } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
 import type { CaptureEntity } from '../types';
@@ -170,9 +171,11 @@ export const CabinetScreen: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen pb-24"
+      className="min-h-screen pb-24 relative"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
     >
+      <CurioWatermarkBackdrop alphaScale={0.45} />
+      <div className="relative z-10">
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 pt-6 pb-4" style={{ background: getBackgroundColor(isDark, isAmoled) }}>
         <div className="flex items-center justify-between mb-4">
@@ -262,6 +265,7 @@ export const CabinetScreen: React.FC = () => {
             })}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

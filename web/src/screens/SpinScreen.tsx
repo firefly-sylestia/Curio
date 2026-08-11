@@ -4,12 +4,12 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
+import { useTheme, getBackgroundColor, getTextColor, getPastelCardFill } from '../theme/ThemeContext';
 import { ALL_CATEGORIES, getCategoryBySlug } from '../data/categories';
 import { getRandomTopic } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
 import type { CurioCategory, CurioTopic } from '../types';
-import { MaterialIcon } from '../components/SharedComponents';
+import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 
 const ORBIT_DOTS = 12;
 const SPIN_MIN = 2400;
@@ -117,7 +117,7 @@ const HeroTicket: React.FC<{
   spinPhase: 'idle' | 'spinning' | 'landed';
   onClick: () => void;
 }> = ({ topic, category, isSpinning, spinPhase, onClick }) => {
-  const { isDark } = useTheme();
+  const { isDark, pastelColors } = useTheme();
   const [shimmerPos, setShimmerPos] = useState(-100);
   const [contentKey, setContentKey] = useState(0);
 
@@ -135,10 +135,13 @@ const HeroTicket: React.FC<{
     return () => clearInterval(interval);
   }, [spinPhase]);
 
-  const [r, g, b] = hexToRgb(category.accent);
+  const baseAccent = pastelColors && !isDark ? getPastelCardFill(category.accent, isDark) : category.accent;
+  const [r, g, b] = hexToRgb(baseAccent);
   const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
-  // Lighter gradient that truly blends into the page background like Android
-  const top = `rgba(${r},${g},${b},0.92)`;
+  // Pastel light: airy pale fill; otherwise: deep category gradient
+  const top = pastelColors && !isDark
+    ? `rgba(${r},${g},${b},0.88)`
+    : `rgba(${r},${g},${b},0.92)`;
   const mid = `rgba(${Math.round(r * 0.42 + surfaceRgb[0] * 0.58)},${Math.round(g * 0.42 + surfaceRgb[1] * 0.58)},${Math.round(b * 0.42 + surfaceRgb[2] * 0.58)},0.65)`;
   const bottom = `rgba(${Math.round(r * 0.10 + surfaceRgb[0] * 0.90)},${Math.round(g * 0.10 + surfaceRgb[1] * 0.90)},${Math.round(b * 0.10 + surfaceRgb[2] * 0.90)},0.92)`;
 
@@ -474,15 +477,7 @@ export const SpinScreen: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 relative overflow-hidden"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      {/* Watermark backdrop */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {ALL_CATEGORIES.slice(0, 8).map((cat, i) => (
-          <div key={cat.id} className="absolute opacity-[0.025]"
-            style={{ left: `${8+(i%4)*26}%`, top: `${8+Math.floor(i/4)*48}%`, transform: `rotate(${-15+i*10}deg)`, color: isDark ? 'white' : cat.accent }}>
-            <MaterialIcon name={cat.iconGlyph} size={110} />
-          </div>
-        ))}
-      </div>
+      <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
       {/* Main stage */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-96px)] px-4 pt-2">

@@ -2,7 +2,8 @@
 // Premium components matching Android app's design system
 
 import React, { useState, useEffect } from 'react';
-import { useTheme, getTextColor } from '../theme/ThemeContext';
+import { useTheme, getTextColor, getPastelAccent } from '../theme/ThemeContext';
+import { ALL_CATEGORIES } from '../data/categories';
 import type { CurioCategory } from '../types';
 
 // ─── Material Icon ──────────────────────────────────────────────────
@@ -785,6 +786,76 @@ export const CurioToast: React.FC<{
           ×
         </button>
       </div>
+    </div>
+  );
+};
+
+// ─── CurioWatermarkBackdrop ──────────────────────────────────────────
+/**
+ * Decorative backdrop matching Android's CurioWatermarkBackdrop.
+ * Scatters all category glyphs around the screen edges, each tinted
+ * with its category's accent at low alpha. The active category's glyph
+ * gets a stronger whisper.
+ */
+export const CurioWatermarkBackdrop: React.FC<{
+  activeCatId?: string;
+  alphaScale?: number;
+  topClearance?: number; // px — when set, glyphs stay below this line
+}> = ({ activeCatId, alphaScale = 1, topClearance = 0 }) => {
+  const { isDark, pastelColors } = useTheme();
+
+  const slots = [
+    { glyph: 'person', x: -2, y: 5, size: 72, rot: -12 },
+    { glyph: 'album', x: 55, y: 3, size: 52, rot: 10 },
+    { glyph: 'movie', x: 88, y: 20, size: 64, rot: -8 },
+    { glyph: 'menu_book', x: -4, y: 35, size: 58, rot: 8 },
+    { glyph: 'brush', x: -3, y: 62, size: 66, rot: -6 },
+    { glyph: 'palette', x: -5, y: 82, size: 56, rot: 14 },
+    { glyph: 'science', x: 70, y: 65, size: 62, rot: -12 },
+    { glyph: 'smart_display', x: 82, y: 48, size: 50, rot: 16 },
+    { glyph: 'sports_esports', x: 65, y: 85, size: 54, rot: -10 },
+    { glyph: 'casino', x: 22, y: 78, size: 68, rot: 6 },
+    { glyph: 'edit_note', x: 85, y: 75, size: 48, rot: -14 },
+  ];
+
+  // Alpha per theme (matches Android's watermarkAlpha)
+  const inactiveAlpha = isDark
+    ? (pastelColors ? 0.15 : 0.11)
+    : (pastelColors ? 0.22 : 0.15);
+  const activeAlpha = isDark
+    ? (pastelColors ? 0.28 : 0.22)
+    : (pastelColors ? 0.38 : 0.30);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+      {slots.map((s, i) => {
+        let cat = ALL_CATEGORIES.find(c => c.iconGlyph === s.glyph);
+        if (!cat) cat = ALL_CATEGORIES[i % ALL_CATEGORIES.length];
+        const isActive = cat.iconGlyph === activeCatId || cat.id === activeCatId;
+        const rawAccent = cat.accent;
+        const tint = pastelColors ? getPastelAccent(rawAccent, isDark) : rawAccent;
+        const alpha = (isActive ? activeAlpha : inactiveAlpha) * alphaScale;
+        const topOffset = topClearance > 0 ? topClearance : 0;
+
+        return (
+          <span
+            key={i}
+            className="material-symbols-outlined absolute select-none"
+            style={{
+              left: `${s.x}%`,
+              top: topOffset > 0
+                ? `${topOffset + (100 - topOffset) * (s.y / 100)}px`
+                : `${s.y}%`,
+              fontSize: s.size,
+              color: tint,
+              opacity: alpha,
+              transform: `rotate(${s.rot}deg)`,
+            }}
+          >
+            {s.glyph}
+          </span>
+        );
+      })}
     </div>
   );
 };

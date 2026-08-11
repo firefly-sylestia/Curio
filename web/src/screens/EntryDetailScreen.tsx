@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryById } from '../data/categories';
-import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon } from '../components/SharedComponents';
+import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import type { CurioEntry, CaptureData, CaptureFormat } from '../types';
 import { captureRepository, deserializeTags } from '../db/database';
 
@@ -309,9 +309,11 @@ export const EntryDetailScreen: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen pb-24"
+      className="min-h-screen pb-24 relative"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
     >
+      <CurioWatermarkBackdrop activeCatId={category.id} alphaScale={0.45} />
+      <div className="relative z-10">
       {/* Header */}
       <header className="px-6 pt-6 pb-4 flex items-center justify-between">
         <CurioBackButton onClick={() => navigate(-1)} />
@@ -461,6 +463,7 @@ export const EntryDetailScreen: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

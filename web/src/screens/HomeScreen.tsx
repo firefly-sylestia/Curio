@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
-import { MaterialIcon } from '../components/SharedComponents';
+import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
 
 const HomeScreen: React.FC = () => {
@@ -52,7 +52,8 @@ const HomeScreen: React.FC = () => {
   const heroAccent = '#C46B7C'; // Rose-wood like Android
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+      <CurioWatermarkBackdrop topClearance={260} />
       {/* ── Rose Hero Banner ──────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden"
         style={{

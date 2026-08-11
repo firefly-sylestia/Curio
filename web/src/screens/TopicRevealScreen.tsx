@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryBySlug } from '../data/categories';
 import { loadTopicsForCategory } from '../data/topics';
-import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon } from '../components/SharedComponents';
+import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import type { CurioTopic, CurioCategory } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
 
@@ -102,6 +102,7 @@ export const TopicRevealScreen: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 relative"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+      <CurioWatermarkBackdrop activeCatId={category.id} />
       {/* Sticky top bar */}
       <div className="sticky top-0 z-20 px-4 pt-4 pb-3"
         style={{
