@@ -1,481 +1,318 @@
 // Curio Web App - Entry Detail Screen
-// Displays saved capture details with edit and delete options
+// Matches Android: torn hero with frosted date bar, paper note cards, Quick fact
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
-import { getCategoryById } from '../data/categories';
-import { CurioPaperCard, CurioMoodboardCard, CurioBackButton, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
-import type { CurioEntry, CaptureData, CaptureFormat } from '../types';
+import { ALL_CATEGORIES } from '../data/categories';
+import { CurioPaperCard, MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
+import type { CurioCategory, CaptureFormat, CaptureData } from '../types';
 import { captureRepository, deserializeTags } from '../db/database';
 
-// Format-specific renderers
+// ─── Paper ink for saved views ──────────────────────────────────────
+const getPaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
 
-// Note paper ink for saved views
-const getPaperInk = (isDark: boolean) => isDark ? 'rgba(228,210,188,0.92)' : 'rgba(45,20,15,0.92)';
+// ─── Hero height ─────────────────────────────────────────────────────
+const HERO_H = 360;
 
-// Theme-aware inner card helper
-const InnerBox: React.FC<{ children: React.ReactNode; isDark: boolean }> = ({ children, isDark }) => {
-  return (
-    <div
-      className="p-4 rounded-[16px]"
-      style={{
-        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-        fontFamily: "'Patrick Hand', cursive",
-        color: getPaperInk(isDark),
-      }}
-    >
+// ─── Format Renderers (Patrick Hand, paper ink, paper bg) ────────────
+const SavedPaperCard: React.FC<{ children: React.ReactNode; isDark: boolean; accent: string }> = ({ children, isDark, accent }) => (
+  <CurioPaperCard variant="ruled" accent={accent}>
+    <div style={{ fontFamily: "'Patrick Hand', cursive", color: getPaperInk(isDark), fontSize: '1.1rem', lineHeight: 1.75 }}>
       {children}
     </div>
-  );
-};
+  </CurioPaperCard>
+);
 
-const SoundBiteRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
-  const soundData = data as { durationSeconds: number; notes: string };
-  const ink = getPaperInk(isDark);
+const SoundBiteRender: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
+  const d = data as { durationSeconds: number; notes: string };
   return (
-    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
-      <div className="flex items-center gap-3">
-        <MaterialIcon name="mic" size={32} style={{ color: ink }} />
+    <SavedPaperCard isDark={isDark} accent={accent}>
+      <div className="flex items-center gap-3 mb-4">
+        <MaterialIcon name="mic" size={28} />
         <div>
-          <div className="font-semibold text-lg" style={{ color: ink }}>Voice Note</div>
-          <div className="text-sm opacity-50">{soundData.durationSeconds}s</div>
+          <div className="font-semibold text-lg">Voice Note</div>
+          <div className="text-sm opacity-50">{(d.durationSeconds || 0)}s</div>
         </div>
       </div>
-      {soundData.notes && (
-        <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap">{soundData.notes}</p>
-        </InnerBox>
-      )}
-    </div>
+      {d.notes && <p className="whitespace-pre-wrap">{d.notes}</p>}
+    </SavedPaperCard>
   );
 };
 
-const ReelNotesRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
-  const reelData = data as { rating: number; review: string };
-  const ink = getPaperInk(isDark);
+const ReelNotesRender: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
+  const d = data as { rating: number; review: string };
   return (
-    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
-      {reelData.rating > 0 && (
-        <div className="flex gap-1">
+    <SavedPaperCard isDark={isDark} accent={accent}>
+      {d.rating > 0 && (
+        <div className="flex gap-1.5 mb-3">
           {[1,2,3,4,5].map(i => (
-            <MaterialIcon key={i} name="star" size={28} filled={i <= reelData.rating}
-              style={{ color: i <= reelData.rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.10)' }} />
+            <MaterialIcon key={i} name="star" size={26} filled={i <= d.rating}
+              style={{ color: i <= d.rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }} />
           ))}
         </div>
       )}
-      {reelData.review && (
-        <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{reelData.review}</p>
-        </InnerBox>
-      )}
-    </div>
+      {d.review && <p className="whitespace-pre-wrap">{d.review}</p>}
+    </SavedPaperCard>
   );
 };
 
-const MarginaliaRenderer: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
-  const marginaliaData = data as { journalEntry: string; quotes: Array<{ text: string; context?: string }> };
+const MarginaliaRender: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
+  const d = data as { journalEntry: string; quotes: Array<{ text: string; context?: string }> };
   const ink = getPaperInk(isDark);
   return (
-    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
-      {marginaliaData.journalEntry && (
-        <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{marginaliaData.journalEntry}</p>
-        </InnerBox>
-      )}
-      {marginaliaData.quotes.length > 0 && (
-        <div className="space-y-3">
-          <h4 className="font-semibold text-sm opacity-60" style={{ color: ink }}>Favorite Quotes</h4>
-          {marginaliaData.quotes.map((quote, index) => (
-            <div key={index} className="p-4 rounded-[16px] border-l-4"
-              style={{ borderColor: accent, background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
-              <p className="text-lg leading-relaxed">&ldquo;{quote.text}&rdquo;</p>
-              {quote.context && (
-                <p className="text-sm mt-2 opacity-50">— {quote.context}</p>
-              )}
+    <SavedPaperCard isDark={isDark} accent={accent}>
+      {d.journalEntry && <p className="whitespace-pre-wrap mb-4">{d.journalEntry}</p>}
+      {d.quotes.length > 0 && (
+        <div className="space-y-3 mt-4 pt-3 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+          <p className="text-sm font-semibold opacity-60" style={{ color: ink }}>Favorite Quotes</p>
+          {d.quotes.map((q, i) => (
+            <div key={i} className="pl-3 border-l-2" style={{ borderColor: accent }}>
+              <p className="text-lg leading-relaxed">&ldquo;{q.text}&rdquo;</p>
+              {q.context && <p className="text-sm mt-1 opacity-50">— {q.context}</p>}
             </div>
           ))}
         </div>
       )}
+    </SavedPaperCard>
+  );
+};
+
+const FieldNotesRender: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
+  const d = data as { observed: string; surprised: string; learnNext: string };
+  const ink = getPaperInk(isDark);
+  const sections = [
+    { k: 'observed', icon: 'visibility', label: 'Observed', v: d.observed },
+    { k: 'surprised', icon: 'sentiment_surprised', label: 'Surprised Me', v: d.surprised },
+    { k: 'learnNext', icon: 'menu_book', label: 'Want to Learn Next', v: d.learnNext },
+  ].filter(s => s.v);
+  if (sections.length === 0) return null;
+  return (
+    <div className="space-y-3">
+      {sections.map(s => (
+        <SavedPaperCard key={s.k} isDark={isDark} accent={accent}>
+          <div className="flex items-center gap-1.5 text-sm font-semibold mb-2 opacity-60" style={{ color: ink }}>
+            <MaterialIcon name={s.icon} size={16} /> {s.label}
+          </div>
+          <p className="whitespace-pre-wrap">{s.v}</p>
+        </SavedPaperCard>
+      ))}
     </div>
   );
 };
 
-const GalleryWallRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
-  const galleryData = data as { caption: string; images: string[] };
-  const ink = getPaperInk(isDark);
+const GalleryWallRender: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
+  const d = data as { caption: string; images: string[] };
   return (
-    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
-      {galleryData.caption && (
-        <InnerBox isDark={isDark}>
-          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{galleryData.caption}</p>
-        </InnerBox>
-      )}
-      {galleryData.images.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          {galleryData.images.map((_, index) => (
-            <div key={index} className="aspect-square rounded-[12px] flex items-center justify-center"
+    <SavedPaperCard isDark={isDark} accent={accent}>
+      {d.caption && <p className="whitespace-pre-wrap mb-4">{d.caption}</p>}
+      {d.images.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          {d.images.map((_, i) => (
+            <div key={i} className="aspect-square rounded-lg flex items-center justify-center"
               style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
-              <MaterialIcon name="image" size={32} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
+              <MaterialIcon name="image" size={32} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)' }} />
             </div>
           ))}
         </div>
       )}
-    </div>
+    </SavedPaperCard>
   );
 };
 
-const FieldNotesRenderer: React.FC<{ data: CaptureData; isDark: boolean }> = ({ data, isDark }) => {
-  const fieldData = data as { observed: string; surprised: string; learnNext: string };
-  const ink = getPaperInk(isDark);
-  return (
-    <div className="space-y-4" style={{ fontFamily: "'Patrick Hand', cursive", color: ink }}>
-      {fieldData.observed && (
-        <InnerBox isDark={isDark}>
-          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5 opacity-60" style={{ color: ink }}>
-            <MaterialIcon name="visibility" size={16} /> Observed
-          </div>
-          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{fieldData.observed}</p>
-        </InnerBox>
-      )}
-      {fieldData.surprised && (
-        <InnerBox isDark={isDark}>
-          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5 opacity-60" style={{ color: ink }}>
-            <MaterialIcon name="sentiment_surprised" size={16} /> Surprised Me
-          </div>
-          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{fieldData.surprised}</p>
-        </InnerBox>
-      )}
-      {fieldData.learnNext && (
-        <InnerBox isDark={isDark}>
-          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5 opacity-60" style={{ color: ink }}>
-            <MaterialIcon name="menu_book" size={16} /> Want to Learn Next
-          </div>
-          <p className="whitespace-pre-wrap" style={{ fontSize: '1.1rem', lineHeight: 1.7 }}>{fieldData.learnNext}</p>
-        </InnerBox>
-      )}
-    </div>
-  );
-};
-
-// Format renderer dispatcher
-const FormatRenderer: React.FC<{ format: CaptureFormat; data: CaptureData; isDark: boolean; accent: string }> = ({ format, data, isDark, accent }) => {
-  switch (format) {
-    case 'SoundBite':
-      return <SoundBiteRenderer data={data} isDark={isDark} />;
-    case 'ReelNotes':
-      return <ReelNotesRenderer data={data} isDark={isDark} />;
-    case 'Marginalia':
-      return <MarginaliaRenderer data={data} isDark={isDark} accent={accent} />;
-    case 'GalleryWall':
-      return <GalleryWallRenderer data={data} isDark={isDark} />;
-    case 'FieldNotes':
-      return <FieldNotesRenderer data={data} isDark={isDark} />;
-    default:
-      return (
-        <div
-          className="p-4 rounded-[16px]"
-          style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.03)' }}
-        >
-          Format not supported
-        </div>
-      );
-  }
-};
-
-// Format icon helper
-const getFormatIcon = (format: CaptureFormat): string => {
-  switch (format) {
-    case 'SoundBite': return 'mic';
-    case 'ReelNotes': return 'movie';
-    case 'Marginalia': return 'edit_note';
-    case 'GalleryWall': return 'image';
-    case 'FieldNotes': return 'description';
-    case 'OpenNotebook': return 'menu_book';
-    default: return 'article';
-  }
-};
-
+// ─── Main EntryDetailScreen ───────────────────────────────────────────
 export const EntryDetailScreen: React.FC = () => {
   const navigate = useNavigate();
   const { entryId } = useParams();
   const { isDark, isAmoled } = useTheme();
-  const [entry, setEntry] = useState<CurioEntry | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [entry, setEntry] = useState<any>(null);
+  const [category, setCategory] = useState<CurioCategory | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleteVisible, setDeleteVisible] = useState(false);
 
   useEffect(() => {
-    loadEntry();
-  }, [entryId]);
-
-  const loadEntry = async () => {
     if (!entryId) return;
-    
-    setIsLoading(true);
-    try {
-      const entity = await captureRepository.getById(entryId);
-      if (entity) {
-        const parsedEntry: CurioEntry = {
-          id: entity.id,
-          topic: {
-            id: entity.topicId,
-            categoryId: entity.categoryId as any,
-            subtype: entity.topicSubtype,
-            name: entity.topicName,
-            teaser: entity.topicTeaser,
-            imageUrl: '',
-            actionPrompt: { verb: '', targetName: '', durationMinutes: 0, instruction: '' },
-            aliases: [],
-            relatedTopicIds: [],
-            difficulty: 1,
-            weight: 100,
-            curatedBy: 'human',
-            curatedDate: '',
-          },
-          format: entity.format,
-          captureData: JSON.parse(entity.formatDataJson),
-          title: entity.title,
-          capturedAtMillis: entity.capturedAtMillis,
-          tags: deserializeTags(entity.tagsJson),
-          isLegacy: entity.isLegacy,
-        };
-        setEntry(parsedEntry);
-      }
-    } catch (error) {
-      console.error('Failed to load entry:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    (async () => {
+      setLoading(true);
+      try {
+        const e = await captureRepository.getById(entryId);
+        if (e) {
+          setEntry(e);
+          const cat = ALL_CATEGORIES.find(c => c.id === e.categoryId);
+          setCategory(cat || ALL_CATEGORIES[0]);
+        }
+      } catch {} finally { setLoading(false); }
+    })();
+  }, [entryId]);
 
   const handleDelete = async () => {
     if (!entry) return;
-    
-    try {
-      await captureRepository.delete(entry.id);
-      
-      // Update stats
-      const currentEntries = parseInt(localStorage.getItem('curio-total-topics') || '0');
-      localStorage.setItem('curio-total-topics', Math.max(0, currentEntries - 1).toString());
-      
-      navigate('/cabinet');
-    } catch (error) {
-      console.error('Failed to delete entry:', error);
-    }
+    await captureRepository.delete(entry.id);
+    navigate('/cabinet');
   };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}><div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} /></div>;
+  if (!entry || !category) return <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}><p style={{ color: getTextColor(isDark) }}>Entry not found</p></div>;
+
+  const captureData = entry.formatDataJson ? JSON.parse(entry.formatDataJson) : {};
+  const tags = entry.tagsJson ? deserializeTags(entry.tagsJson) : [];
+  const format = (entry.format || 'Marginalia') as CaptureFormat;
+  const heroFill = category.accent;
+  const heroInk = '#fff';
 
   const formatDate = (millis: number) => {
-    return new Date(millis).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const d = new Date(millis);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
-
-  if (isLoading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
-      >
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
-          <p className="mt-4" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-            Loading entry...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!entry) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
-      >
-        <div className="text-center">
-          <MaterialIcon name="edit_note" size={64} />
-          <h2 className="text-xl font-bold mt-4" style={{ color: getTextColor(isDark) }}>
-            Entry not found
-          </h2>
-          <button
-            onClick={() => navigate('/cabinet')}
-            className="mt-4 px-6 py-2 rounded-full"
-            style={{ background: '#FF8FA3', color: 'white' }}
-          >
-            Back to Cabinet
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const category = getCategoryById(entry.topic.categoryId);
-  const captureData = entry.captureData;
+  const daysAgo = Math.floor((Date.now() - (entry.capturedAtMillis || 0)) / 86400000);
+  const tiny = daysAgo === 0 ? new Date(entry.capturedAtMillis).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : daysAgo === 1 ? 'yesterday' : `${daysAgo}d ago`;
 
   return (
-    <div
-      className="min-h-screen pb-24 relative"
-      style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
-    >
-      <CurioWatermarkBackdrop activeCatId={category.id} alphaScale={0.45} />
-      <div className="relative z-10">
-      {/* Header */}
-      <header className="px-6 pt-6 pb-4 flex items-center justify-between">
-        <CurioBackButton onClick={() => navigate(-1)} />
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/capture/${category.id.toLowerCase()}/${entry.topic.name.toLowerCase().replace(/\s+/g, '-')}`)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{
-              background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-            }}
-          >
-            <MaterialIcon name="edit" size={20} style={{ color: getTextColor(isDark) }} />
-          </button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{
-              background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-            }}
-          >
-            <MaterialIcon name="delete" size={20} style={{ color: '#EF4444' }} />
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen pb-24 relative" style={{ background: `${category.accent}0A` }}>
+      <CurioWatermarkBackdrop activeCatId={category.id} topClearance={HERO_H + 30} alphaScale={0.45} />
 
-      {/* Topic Header - Moodboard style */}
-      <div className="px-5 pt-2 pb-4 max-w-lg mx-auto">
-        <CurioMoodboardCard accent={category.accent}>
-          <div className="flex items-center gap-3 mb-2">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{
-                background: `${category.accent}18`,
-              }}
-            >
-              <MaterialIcon name={category.iconGlyph} size={28} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1
-                className="text-xl font-bold truncate"
-                style={{ color: getTextColor(isDark), fontFamily: 'Geom, sans-serif' }}
-              >
-                {entry.topic.name}
-              </h1>
-              <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }}>
-                {category.displayName} · {entry.topic.subtype}
-              </p>
-            </div>
-            <span
-              className="text-xs px-2 py-1 rounded-full flex-shrink-0"
-              style={{
-                background: `${category.accent}18`,
-                color: category.accent,
-              }}
-            >
-              <MaterialIcon name={getFormatIcon(entry.format)} size={14} /> {entry.format}
-            </span>
+      {/* ── Torn Hero Banner ──────────────────────────────────────── */}
+      <div className="relative w-full" style={{ height: HERO_H + 16 }}>
+        {/* White under-sheet */}
+        <div className="absolute left-0 right-0 h-4 z-10" style={{ top: HERO_H - 4, background: isDark ? '#17131D' : '#FFFDF9' }}>
+          <svg viewBox="0 0 400 16" preserveAspectRatio="none" className="w-full h-full">
+            <path d="M0,0 Q18,10 36,3 T72,5 T108,2 T144,6 T180,1 T216,4 T252,2 T288,5 T324,1 T360,4 T400,2 L400,16 L0,16 Z"
+              fill={heroFill} />
+          </svg>
+        </div>
+
+        {/* Torn edge shadow */}
+        <div className="absolute left-0 right-0 z-0" style={{ top: 1, height: HERO_H, background: isDark ? 'rgba(255,253,249,0.08)' : 'rgba(0,0,0,0.15)' }}>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="none" className="w-full h-full">
+            <path d="M0,0 L400,0 L400,380 Q382,392 364,383 T346,386 T328,381 T310,388 T292,384 T274,387 T256,382 T238,386 T220,383 T202,389 T184,384 T166,387 T148,382 T130,386 T112,383 T94,389 T76,384 T58,387 T40,382 T22,386 T4,383 L0,380 Z"
+              fill={isDark ? 'rgba(255,253,249,0.94)' : 'rgba(0,0,0,0.12)'} />
+          </svg>
+        </div>
+
+        {/* Solid hero color + torn bottom */}
+        <div className="absolute left-0 right-0 z-20" style={{ height: HERO_H, background: heroFill }}>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="none" className="absolute bottom-0 left-0 right-0" style={{ height: 20, transform: 'translateY(100%)' }}>
+            <path d="M0,0 Q18,10 36,3 T72,5 T108,2 T144,6 T180,1 T216,4 T252,2 T288,5 T324,1 T360,4 T400,2 L400,20 L0,20 Z"
+              fill={heroFill} />
+          </svg>
+
+          {/* Hero watermark symbols */}
+          <div className="absolute inset-0 pointer-events-none">
+            {['person', 'album', 'movie', 'edit_note', 'brush', 'science', 'casino', 'menu_book', 'palette', 'smart_display'].map((s, i) => {
+              const x = [5, 88, 50, 92, 8, 55, 90, 15, 92, 10][i];
+              const y = [10, 8, 25, 55, 60, 70, 75, 80, 45, 35][i];
+              const r = [-8, 10, -5, 12, -10, -6, 8, -12, 7, -4][i];
+              return <span key={i} className="material-symbols-outlined absolute select-none"
+                style={{ left: `${x}%`, top: `${y}%`, fontSize: [36, 40, 44, 38, 42, 48, 40, 36, 42, 44][i],
+                  color: 'rgba(255,255,255,0.12)', transform: `rotate(${r}deg)` }}>{s}</span>;
+            })}
           </div>
-        </CurioMoodboardCard>
-      </div>
 
-      {/* Meta Info */}
-      <div className="px-6 py-2">
-        <div className="flex items-center gap-4 text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-          <span className="flex items-center gap-1"><MaterialIcon name={getFormatIcon(entry.format)} size={14} /> {entry.format}</span>
-          <span>·</span>
-          <span>{formatDate(entry.capturedAtMillis)}</span>
+          {/* Centered content */}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ paddingTop: 72 }}>
+            <MaterialIcon name={category.iconGlyph} size={64} style={{ color: 'rgba(255,255,255,0.92)' }} />
+            <div className="h-3" />
+            <h1 className="text-2xl font-extrabold text-center leading-tight px-4"
+              style={{ color: heroInk, fontFamily: 'Geom, Inter, sans-serif', maxWidth: 300 }}>
+              {entry.topicName || 'Untitled'}
+            </h1>
+            <div className="h-4" />
+            {/* Frosted date/mood/type bar */}
+            <div className="flex items-center rounded-2xl px-4 py-2.5 gap-3"
+              style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.22)' }}>
+              <FrostedSegment icon="calendar_today" title={formatDate(entry.capturedAtMillis)} subtitle="Date" tiny={tiny} />
+              <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.25)' }} />
+              <FrostedSegment icon="category" title={format} subtitle="Type" />
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky back + more */}
+        <div className="absolute top-0 left-0 right-0 z-30 flex justify-between px-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+            <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
+          </button>
+          <div className="flex gap-2">
+            <button onClick={() => navigate(`/capture/${category.id.toLowerCase()}/${(entry.topicName || 'topic').replace(/\s+/g, '-')}`)}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              <MaterialIcon name="edit" size={20} style={{ color: '#fff' }} />
+            </button>
+            <button onClick={() => setDeleteVisible(true)}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              <MaterialIcon name="delete" size={20} style={{ color: '#FF6B6B' }} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tags */}
-      {entry.tags.length > 0 && (
-        <div className="px-6 py-2">
-          <div className="flex flex-wrap gap-2">
-            {entry.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 rounded-full text-sm"
-                style={{
-                  background: `${category.accent}22`,
-                  color: category.accent,
-                }}
-              >
-                #{tag}
-              </span>
+      {/* ── Body ──────────────────────────────────────────────────────── */}
+      <div className="relative z-10 px-5 max-w-lg mx-auto">
+        {/* Category label */}
+        <div className="flex items-center gap-2.5 py-3 mt-1">
+          <MaterialIcon name={category.iconGlyph} size={22} style={{ color: category.accent }} />
+          <span className="text-lg font-extrabold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>{category.displayName}</span>
+        </div>
+
+        {/* Quick fact */}
+        {entry.topicTeaser && (
+          <div className="mb-4">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <MaterialIcon name="auto_awesome" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)' }} />
+              <span className="text-xs font-semibold opacity-60" style={{ color: getTextColor(isDark) }}>Quick fact</span>
+            </div>
+            <p className="text-sm leading-relaxed opacity-80" style={{ color: getTextColor(isDark) }}>{entry.topicTeaser}</p>
+          </div>
+        )}
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {tags.map((tag: string) => (
+              <span key={tag} className="px-2.5 py-1 rounded-full text-xs font-medium"
+                style={{ background: `${category.accent}18`, color: category.accent }}>#{tag}</span>
             ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Content - Paper style */}
-      <div className="px-5 py-4 max-w-lg mx-auto">
-        <CurioPaperCard variant="ruled" watermark={category.iconGlyph} accent={category.accent}>
-          <FormatRenderer format={entry.format} data={captureData} isDark={isDark} accent={category.accent} />
-        </CurioPaperCard>
+        {/* Format body */}
+        <div className="mt-3">
+          {format === 'SoundBite' && <SoundBiteRender data={captureData} isDark={isDark} accent={category.accent} />}
+          {format === 'ReelNotes' && <ReelNotesRender data={captureData} isDark={isDark} accent={category.accent} />}
+          {format === 'Marginalia' && <MarginaliaRender data={captureData} isDark={isDark} accent={category.accent} />}
+          {format === 'GalleryWall' && <GalleryWallRender data={captureData} isDark={isDark} accent={category.accent} />}
+          {format === 'FieldNotes' && <FieldNotesRender data={captureData} isDark={isDark} accent={category.accent} />}
+        </div>
       </div>
 
-      {/* Topic Teaser */}
-      {entry.topic.teaser && (
-        <div className="px-6 py-4">
-          <h3 className="font-semibold mb-2" style={{ color: getTextColor(isDark) }}>
-            About this topic
-          </h3>
-          <p
-            className="text-sm leading-relaxed"
-            style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)' }}
-          >
-            {entry.topic.teaser}
-          </p>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
-          <div
-            className="p-6 rounded-[24px] mx-6 max-w-sm w-full"
-            style={{ background: isDark ? '#1a1a2e' : 'white' }}
-          >
-            <h3 className="text-lg font-bold mb-2" style={{ color: getTextColor(isDark) }}>
-              Delete this entry?
-            </h3>
-            <p className="text-sm mb-6" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }}>
-              This action cannot be undone. Your saved entry will be permanently removed.
-            </p>
+      {/* Delete dialog */}
+      {deleteVisible && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70">
+          <div className="p-6 rounded-3xl mx-6 max-w-sm w-full" style={{ background: isDark ? '#1a1a2e' : 'white' }}>
+            <h3 className="text-lg font-bold mb-2" style={{ color: getTextColor(isDark) }}>Delete this entry?</h3>
+            <p className="text-sm mb-6 opacity-60" style={{ color: getTextColor(isDark) }}>This capture will be permanently removed from your Cabinet.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3 rounded-[16px] font-medium"
-                style={{
-                  background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                  color: getTextColor(isDark),
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 py-3 rounded-[16px] font-medium text-white"
-                style={{
-                  background: '#EF4444',
-                }}
-              >
-                Delete
-              </button>
+              <button onClick={() => setDeleteVisible(false)} className="flex-1 py-3 rounded-2xl font-medium"
+                style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)', color: getTextColor(isDark) }}>Cancel</button>
+              <button onClick={handleDelete} className="flex-1 py-3 rounded-2xl font-medium text-white"
+                style={{ background: '#EF4444' }}>Delete</button>
             </div>
           </div>
         </div>
       )}
-    </div>
     </div>
   );
 };
+
+const FrostedSegment: React.FC<{ icon: string; title: string; subtitle: string; tiny?: string }> = ({ icon, title, subtitle, tiny }) => (
+  <div className="flex flex-col items-center flex-1">
+    <MaterialIcon name={icon} size={16} style={{ color: 'rgba(255,255,255,0.9)' }} />
+    <span className="text-xs font-bold mt-0.5 text-white">{title}</span>
+    <span className="text-[10px] text-white/80">{subtitle}</span>
+    {tiny && <span className="text-[9px] text-white/70">{tiny}</span>}
+  </div>
+);
 
 export default EntryDetailScreen;

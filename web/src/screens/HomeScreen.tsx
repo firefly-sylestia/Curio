@@ -55,48 +55,45 @@ const HomeScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <CurioWatermarkBackdrop topClearance={260} />
-      {/* ── Rose Hero Banner ──────────────────────────────────────── */}
-      <div className="relative w-full overflow-hidden"
-        style={{
-          background: `linear-gradient(180deg, ${heroAccent} 0%, ${heroAccent}DD 100%)`,
-          minHeight: 260,
-          paddingTop: 'env(safe-area-inset-top)',
-        }}>
-        {/* Watermark glyphs */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.08]">
-          <MaterialIcon name="casino" size={120} className="absolute" style={{ right: -20, top: 40, transform: 'rotate(12deg)' }} />
-          <MaterialIcon name="auto_awesome" size={100} className="absolute" style={{ left: -10, top: 140, transform: 'rotate(-8deg)' }} />
-          <MaterialIcon name="local_fire_department" size={90} className="absolute" style={{ right: 60, bottom: 20, transform: 'rotate(6deg)' }} />
+      <CurioWatermarkBackdrop topClearance={276} />
+      {/* ── Rose Hero Banner with torn bottom edge ────────────────── */}
+      <div className="relative w-full" style={{ height: 276 }}>
+        {/* White under-sheet lip */}
+        <div className="absolute left-0 right-0 h-3 z-10" style={{ top: 256, background: isDark ? '#17131D' : '#FFFDF9' }}>
+          <svg viewBox="0 0 400 12" preserveAspectRatio="none" className="w-full h-full">
+            <path d="M0,0 Q15,8 30,2 T60,4 T90,1 T120,5 T150,2 T180,4 T210,1 T240,5 T270,2 T300,4 T330,1 T360,5 T390,2 L400,0 Z" fill={heroAccent} />
+          </svg>
         </div>
-
-        {/* Content */}
-        <div className="relative z-10 px-5 pt-14 pb-4 flex flex-col h-full">
-          {/* Sticky pills row — menu opens drawer */}
-          <div className="absolute top-3 right-4 flex gap-2 z-20">
-            <button onClick={openMenu}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-              <MaterialIcon name="menu" size={20} style={{ color: '#fff' }} />
-            </button>
+        {/* Solid rose banner */}
+        <div className="absolute inset-0 z-20" style={{ background: heroAccent, paddingTop: 'env(safe-area-inset-top)' }}>
+          {/* Torn bottom */}
+          <svg viewBox="0 0 400 20" preserveAspectRatio="none" className="absolute bottom-0 left-0 right-0" style={{ height: 20, transform: 'translateY(100%)' }}>
+            <path d="M0,0 Q15,10 30,2 T60,5 T90,1 T120,6 T150,2 T180,4 T210,1 T240,5 T270,2 T300,4 T330,1 T360,6 T390,2 L400,0 Z" fill={heroAccent} />
+          </svg>
+          {/* Watermark */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.07]">
+            <MaterialIcon name="casino" size={110} className="absolute" style={{ right: -15, top: 35, transform: 'rotate(12deg)' }} />
+            <MaterialIcon name="auto_awesome" size={90} className="absolute" style={{ left: -8, top: 130, transform: 'rotate(-8deg)' }} />
+            <MaterialIcon name="local_fire_department" size={80} className="absolute" style={{ right: 50, bottom: 30, transform: 'rotate(6deg)' }} />
           </div>
-
-          {/* Greeting */}
-          <p className="text-white/80 text-sm font-medium mb-1">{greeting}</p>
-          <h1 className="text-3xl font-extrabold text-white mb-5" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
-            {displayName}
-          </h1>
-
-          <div className="flex-1" />
-
-          {/* Stat bar */}
-          <div className="flex items-center rounded-2xl p-3"
-            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
-            <Stat inline icon="local_fire_department" value={`${stats.streak}`} label="Streak" />
-            <div className="w-px h-8 mx-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
-            <Stat inline icon="inventory_2" value={`${stats.saved}`} label="Cabinet" />
-            <div className="w-px h-8 mx-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
-            <Stat inline icon="auto_awesome" value={stats.topics} label="Topics" />
+          {/* Content */}
+          <div className="relative z-10 px-5 pt-12 flex flex-col h-full">
+            <div className="absolute top-3 right-4 z-20">
+              <button onClick={openMenu} className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
+                <MaterialIcon name="menu" size={20} style={{ color: '#fff' }} />
+              </button>
+            </div>
+            <p className="text-white/80 text-sm font-medium mb-1">{greeting}</p>
+            <h1 className="text-3xl font-extrabold text-white mb-5" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{displayName}</h1>
+            <div className="flex-1" />
+            <div className="flex items-center rounded-2xl p-3 mb-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <Stat inline icon="local_fire_department" value={`${stats.streak}`} label="Streak" />
+              <div className="w-px h-8 mx-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
+              <Stat inline icon="inventory_2" value={`${stats.saved}`} label="Cabinet" />
+              <div className="w-px h-8 mx-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
+              <Stat inline icon="auto_awesome" value={stats.topics} label="Topics" />
+            </div>
           </div>
         </div>
       </div>
