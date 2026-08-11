@@ -2,7 +2,7 @@
 // Sets up routing and theme provider
 
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
 import { BottomNav } from './components/BottomNav';
 import { FloatingPet } from './components/FloatingPet';
@@ -44,7 +44,7 @@ const App: React.FC = () => {
             <Route path="/onboarding" element={<OnboardingScreen />} />
             
             {/* Main Routes */}
-            <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <OnboardingScreen />} />
+            <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
             <Route path="/spin" element={<SpinScreen />} />
             <Route path="/spin/:categorySlug" element={<SpinScreen />} />
             <Route path="/cabinet" element={<CabinetScreen />} />
