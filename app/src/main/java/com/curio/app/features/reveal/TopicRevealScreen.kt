@@ -1403,8 +1403,16 @@ private fun HeroCard(
                             drawRoundRect(
                                 brush = Brush.verticalGradient(
                                     listOf(
-                                        lerp(ink, Color.White, if (dark) 0.20f else 0.30f),
-                                        lerp(ink, accent, 0.14f)
+                                        // v15 — dark mode: the old white-lerp
+                                        // rim drew a solid bright ring around
+                                        // the card; dark tones fade toward the
+                                        // fill at soft alpha so the machined
+                                        // edge stays subtle (mirror of the
+                                        // Spin ticket).
+                                        if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
+                                        else lerp(ink, Color.White, 0.30f),
+                                        if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
+                                        else lerp(ink, accent, 0.14f)
                                     )
                                 ),
                                 topLeft = Offset(borderW / 2f, borderW / 2f),
@@ -1423,20 +1431,38 @@ private fun HeroCard(
             val density = LocalDensity.current
             val wPx = with(density) { maxWidth.toPx() }
             val hPx = with(density) { maxHeight.toPx() }
+            // v15 — AMOLED mirror of the Spin ticket's black glass, so the
+            // shared-element morph stays pixel-identical (the ticket carries
+            // the accent glow; the reveal hero must match it exactly).
+            val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
             val heroBrush = if (heroBlendOn) {
                 // v10 — dual-accent blend: category accent meets a warm
                 // golden companion in a multi-stop vertical gradient
                 // (works across all theme styles).
                 Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
             } else if (heroGradientOn) {
-                val crown = lerp(heroGradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
-                val base = lerp(heroGradient.last(), Color.Black, 0.06f)
-                val stops = if (heroGradient.size > 2) {
-                    listOf(crown) + heroGradient.drop(1).dropLast(1) + listOf(base)
+                val stops = if (isAmoled) {
+                    listOf(
+                        lerp(Color.Black, accent, 0.30f),
+                        lerp(Color.Black, accent, 0.10f),
+                        Color.Black
+                    )
                 } else {
-                    CurioGradients.hslGradientStops(crown, base, 3)
+                    val crown = lerp(heroGradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+                    val base = lerp(heroGradient.last(), Color.Black, 0.06f)
+                    if (heroGradient.size > 2) {
+                        listOf(crown) + heroGradient.drop(1).dropLast(1) + listOf(base)
+                    } else {
+                        CurioGradients.hslGradientStops(crown, base, 3)
+                    }
                 }
                 Brush.linearGradient(stops, start = Offset(0f, 0f), end = Offset(wPx, hPx))
+            } else if (isAmoled) {
+                Brush.verticalGradient(
+                    0f to lerp(Color.Black, accent, 0.24f),
+                    0.55f to lerp(Color.Black, accent, 0.08f),
+                    1f to Color.Black
+                )
             } else {
                 Brush.verticalGradient(heroGradient)
             }

@@ -68,7 +68,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.0.0"`, `versionCode = 20260918`
+- `versionName = "1.0.0"` (default; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
@@ -232,7 +232,7 @@ These patterns and anti-patterns were learned the hard way (CI compile failures,
 
 ### Static validation when Gradle is unavailable
 - This environment has no Android SDK → no local `./gradlew` commands. Pre-CI validation = only static checks:
-  1. **Delimiter balance**: `node scripts/check_braces.js` — repo-homed Kotlin/KTS checker that strips comments/strings and verifies `{}[]()` balance (run it on the whole repo, or pass specific files). This replaced the ad-hoc scripts that used to be written to /tmp mid-session.
+  1. **Delimiter balance**: `node scripts/check_braces.js` — local-only Kotlin/KTS checker (kept on disk, untracked — scripts are never shipped in commits) that strips comments/strings and verifies `{}[]()` balance (run it on the whole repo, or pass specific files). This replaced the ad-hoc scripts that used to be written to /tmp mid-session.
   2. **`git diff --check`** — catches whitespace errors.
   3. **Import hygiene**: after removing a usage, `grep` the file for the removed symbol to confirm no remaining references (CI catches stale imports as compile errors).
   4. **Code review**: spawn a `code-reviewer-glm` or `code-reviewer-deepseek` agent with the full file list and the key risky patterns to check.

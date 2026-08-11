@@ -323,7 +323,10 @@ data class PetDesign(
             "EXPLORE" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.OPEN, mouth = MouthStyle.SMILE)),
             "SAVE" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true)),
             "PLAY" to PetReaction(anim = ReactionAnim.BOUNCE, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
-            "LEVEL_UP" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true))
+            "LEVEL_UP" to PetReaction(anim = ReactionAnim.SPIN, face = PetFace(eyes = EyeStyle.STAR, mouth = MouthStyle.WIDE, blush = true, sparkles = true)),
+            // v14 — a claimed quest: a happy hop with a blush and sparkles
+            // (distinct from REVEAL's star-eyed rule).
+            "QUEST_COMPLETE" to PetReaction(anim = ReactionAnim.HOP, face = PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true, sparkles = true))
         )
 
         val DEFAULT = PetDesign(DEFAULT_PALETTE, DEFAULT_BODY, DEFAULT_CURLED, DEFAULT_GRID_SIZE, DEFAULT_FACES, DEFAULT_REACTIONS)
@@ -1304,8 +1307,10 @@ object PetReactionEvents {
     const val SAVE = "SAVE"
     const val PLAY = "PLAY"
     const val LEVEL_UP = "LEVEL_UP"
+    // v14 — quest claims are their own customizable reaction now.
+    const val QUEST_COMPLETE = "QUEST_COMPLETE"
 
-    val ALL = listOf(TOUCH, SPIN_LANDED, REVEAL, EXPLORE, SAVE, PLAY, LEVEL_UP)
+    val ALL = listOf(TOUCH, SPIN_LANDED, REVEAL, EXPLORE, SAVE, PLAY, LEVEL_UP, QUEST_COMPLETE)
 
     fun label(event: String): String = when (event) {
         TOUCH -> "Petting / boops"
@@ -1315,6 +1320,7 @@ object PetReactionEvents {
         SAVE -> "Keepsake saved"
         PLAY -> "Playtime"
         LEVEL_UP -> "Level up"
+        QUEST_COMPLETE -> "Quest complete"
         else -> event
     }
 
@@ -1328,6 +1334,7 @@ object PetReactionEvents {
         SAVE -> "When you save a keepsake"
         PLAY -> "During playtime"
         LEVEL_UP -> "When you level up"
+        QUEST_COMPLETE -> "When you claim a daily or weekly quest"
         else -> event
     }
 
@@ -1342,6 +1349,7 @@ object PetReactionEvents {
         SAVE -> "Kept safe forever!"
         PLAY -> "Wheee!"
         LEVEL_UP -> "We leveled up!"
+        QUEST_COMPLETE -> "Quest done!"
         else -> "Yay!"
     }
 }
@@ -1372,11 +1380,12 @@ data class PetActionTrigger(
         const val REVEAL = "reveal"
         const val SAVE = "save"
         const val LEVEL_UP = "levelup"
+        const val QUEST_COMPLETE = "questcomplete"
         const val TIME = "time"
         const val IDLE = "idle"
 
         /** All kinds in editor order (constant so chips render in order). */
-        val ALL = listOf(TAP, LONG_PRESS, APP_OPEN, REVEAL, SAVE, LEVEL_UP, TIME, IDLE)
+        val ALL = listOf(TAP, LONG_PRESS, APP_OPEN, REVEAL, SAVE, LEVEL_UP, QUEST_COMPLETE, TIME, IDLE)
 
         /** Short "when does this fire" label for chips and cards. */
         fun label(kind: String): String = when (kind) {
@@ -1386,6 +1395,7 @@ data class PetActionTrigger(
             REVEAL -> "Topic revealed"
             SAVE -> "Keepsake saved"
             LEVEL_UP -> "Level up"
+            QUEST_COMPLETE -> "Quest complete"
             TIME -> "At a set time"
             IDLE -> "After idle"
             else -> kind

@@ -27,6 +27,16 @@ val envKeyStorePassword: String? = System.getenv("KEYSTORE_PASSWORD")?.trim()?.t
 val envKeyAlias: String? = System.getenv("KEY_ALIAS")?.trim()?.takeIf { it.isNotEmpty() }
 val envKeyPassword: String? = System.getenv("KEY_PASSWORD")?.trim()?.takeIf { it.isNotEmpty() }
 
+// Release tags drive the shipped version name: the release workflow passes
+// the git tag (e.g. "v1.2.3") as RELEASE_VERSION and we strip the leading
+// "v" so the build's versionName matches the tag ("1.2.3"). Local dev and
+// PR CI don't set the env var, so the default "1.0.0" stays. versionCode
+// remains the date-based value (store changelogs are keyed to it).
+val envReleaseVersion: String? = System.getenv("RELEASE_VERSION")
+    ?.trim()
+    ?.removePrefix("v")
+    ?.takeIf { it.isNotEmpty() }
+
 // Only create release signing if ALL four secrets are present and non-empty.
 // GitHub Actions exports missing secrets as empty strings, so .takeIf { it.isNotEmpty() }
 // converts them back to null. Without this guard, AGP would create a signing config
@@ -47,8 +57,8 @@ android {
         applicationId = "com.curio.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 20260918
-        versionName = "1.0.0"
+        versionCode = 20260919
+        versionName = envReleaseVersion ?: "1.0.0"
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.
@@ -190,7 +200,9 @@ dependencies {
 //
 // Prints "versionName:versionCode" (single line) so the release workflow can
 // name the split APKs without duplicating version numbers. The source of truth
-// stays `defaultConfig` above — bump the version there and CI follows.
+// stays `defaultConfig` above — on a release tag the workflow's RELEASE_VERSION
+// env var overrides versionName (tag minus the leading "v"), so the printed
+// name:code always matches the APK metadata.
 //
 // Consumed by .github/workflows/release.yml, which greps the line matching
 // ^[0-9][0-9.]*:[0-9]+$ (Gradle may also print warnings to stdout).

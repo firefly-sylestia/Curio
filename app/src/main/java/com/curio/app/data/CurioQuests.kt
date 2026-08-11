@@ -348,7 +348,8 @@ object CurioQuests {
     //    Warm-up (easy one-action), discovery (a new lane via the passport),
     //    creation (save/reflect). DISCOVERY completes when the passport's
     //    least-engaged lane is explored (spec §6.2).
-    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY }
+    // v16 — PLAY: the user played with the pet (any real play moment counts).
+    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY, PLAY }
 
     data class DailyQuest(
         val id: String,
@@ -376,6 +377,8 @@ object CurioQuests {
         DailyQuest("d-pin-1", "Pin a topic for later", 15, DailyKind.PIN, 1),
         DailyQuest("d-profile-1", "Visit your profile", 15, DailyKind.PROFILE, 1),
         DailyQuest("d-like-1", "Like a topic", 15, DailyKind.LIKE, 1),
+        // v16 — a warm creation quest: a real play session with the pet.
+        DailyQuest("d-play-1", "Play with your pet", 15, DailyKind.PLAY, 1),
         // Discovery role — "New Lane": explore the passport's least-engaged
         // lane (its stamp becomes EXPLORED). The UI titles it with the lane
         // name and routes its CTA to that lane's Spin deck (spec §6.3).
@@ -388,7 +391,8 @@ object CurioQuests {
         DailyQuest("d-b-quote-2", "Bookmark 2 quotes", 25, DailyKind.QUOTE, 2, bonus = true),
         DailyQuest("d-b-pin-2", "Pin 2 topics for later", 25, DailyKind.PIN, 2, bonus = true),
         DailyQuest("d-b-like-3", "Like 3 topics", 25, DailyKind.LIKE, 3, bonus = true),
-        DailyQuest("d-b-profile-2", "Visit your profile twice", 20, DailyKind.PROFILE, 2, bonus = true)
+        DailyQuest("d-b-profile-2", "Visit your profile twice", 20, DailyKind.PROFILE, 2, bonus = true),
+        DailyQuest("d-b-play-2", "Play with your pet twice", 25, DailyKind.PLAY, 2, bonus = true)
     )
 
     /**
@@ -406,7 +410,7 @@ object CurioQuests {
         }
         val creations = DailyPool.filter {
             !it.bonus && (it.kind == DailyKind.SAVE || it.kind == DailyKind.QUOTE ||
-                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE)
+                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE || it.kind == DailyKind.PLAY)
         }
         val discovery = DailyPool.firstOrNull { it.kind == DailyKind.DISCOVERY }
         fun pick(list: List<DailyQuest>): DailyQuest {
@@ -458,8 +462,10 @@ object CurioQuests {
         ensureDaily(context)
         ensureWeekly(context)
         // Re-award any stage the counters already satisfy (post-migration
-        // catch-up, also heals a killed write).
-        checkAll(context)
+        // catch-up, also heals a killed write). Persist explicitly — no
+        // pet reactions fire during restore.
+        awardChainStages()
+        write(context)
     }
 
     private fun prefs(context: Context) =
@@ -567,16 +573,34 @@ object CurioQuests {
     // ── XP ───────────────────────────────────────────────────────────────
     private fun addXp(context: Context, amount: Int) {
         val levelBefore = levelForXp(xpState)
+        val stageBefore = CurioPet.evolutionStage(levelBefore, CurioPet.currentEvoPath()).first
+        // Chain-stage rewards count toward level/stage detection — award
+        // them BEFORE reading the after-state so a level-up or evolution
+        // crossing from a chain quest can never be missed.
+        awardChainStages()
         xpState += amount
         val levelAfter = levelForXp(xpState)
+        val stageAfter = CurioPet.evolutionStage(levelAfter, CurioPet.currentEvoPath()).first
         write(context)
-        checkAll(context)
         // Feed the Curio pet's mood timestamps (spec §10.5): a level-up is
-        // the proud moment; any positive XP is a happy one. (The pet only
-        // reacts to REAL XP — the 0-XP refresh calls stay quiet.)
+        // the proud moment; any positive XP is a happy one. Chain-stage XP
+        // alone (a 0-XP refresh call) only speaks when a level or growth
+        // tier was actually crossed — otherwise it stays quiet so it can't
+        // stomp an earlier event (e.g. a streak milestone).
+        val evolved = stageAfter.ordinal > stageBefore.ordinal
+        val leveledUp = levelAfter > levelBefore
         if (amount > 0) {
-            if (levelAfter > levelBefore) CurioPet.noteLevelUp(context)
-            else CurioPet.noteXpEarned(context)
+            // v13 — crossing into a new growth tier (level 25 with a path
+            // chosen → the final form) is its own ceremony, bigger than a
+            // plain level-up. The level-7 first evolution fires from the
+            // path choice itself, so it isn't detected here.
+            when {
+                evolved -> CurioPet.noteEvolved(context)
+                leveledUp -> CurioPet.noteLevelUp(context)
+                else -> CurioPet.noteXpEarned(context)
+            }
+        } else if (evolved || leveledUp) {
+            if (evolved) CurioPet.noteEvolved(context) else CurioPet.noteLevelUp(context)
         }
     }
 
@@ -718,12 +742,22 @@ object CurioQuests {
     fun onStreakRecorded(context: Context, streak: Int) {
         if (streak > bestStreakState) {
             bestStreakState = streak
-            write(context)
+            // v13 — a new best streak deserves its own celebration. Fire
+            // before addXp so a coincidental level-up crossing (from chain
+            // XP) can rightfully win over the streak line.
+            CurioPet.noteStreakMilestone(context)
         }
-        checkAll(context)
+        // Route through addXp(0): chain-stage XP granted by this record is
+        // folded into level/evolution detection, and everything persists.
+        addXp(context, 0)
     }
 
     // ── Daily quest progress (XP is CLAIMED on the Quests page — v8.3) ──
+    /** The user played with the pet (v16) — counts the PLAY daily quest. */
+    fun notePetPlay(context: Context) {
+        bumpDaily(context, DailyKind.PLAY)
+    }
+
     private fun bumpDaily(context: Context, kind: DailyKind) {
         val today = todayEpochDay().toInt()
         if (dailyDateState != today) {
@@ -753,6 +787,10 @@ object CurioQuests {
         dailyAwardedState = dailyAwardedState + quest.id
         lifetimeState = lifetimeState.copy(dailyCompleted = lifetimeState.dailyCompleted + 1)
         write(context)
+        // v13 — the quest celebration fires BEFORE addXp so a claim that
+        // happens to cross a level or growth tier lets the bigger moment
+        // (level-up / evolution ceremony) win instead of being swallowed.
+        CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
     }
 
@@ -889,13 +927,15 @@ object CurioQuests {
         if (weeklyProgress(quest) < quest.target) return
         weeklyAwardedState = weeklyAwardedState + quest.id
         write(context)
+        // v13 — fires before addXp so a coincidental level-up / evolution
+        // ceremony takes precedence over the quest line.
+        CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
     }
 
     // ── Chain checks — award each stage's XP once when its target hits ──
-    private fun checkAll(context: Context) {
+    private fun awardChainStages() {
         var changed = true
-        var awarded = false
         while (changed) {
             changed = false
             allStages().forEach { stage ->
@@ -903,12 +943,11 @@ object CurioQuests {
                     awardedStagesState = awardedStagesState + stage.id
                     xpState += stage.xpReward
                     changed = true
-                    awarded = true
                 }
             }
         }
-        // Only persist when something changed — hooks call this on every tap.
-        if (awarded) write(context)
+        // No persistence here — callers own the write (addXp always writes;
+        // the restore path writes explicitly). Hooks call this on every tap.
     }
 
     /** Every stage across every chain, in display order. */

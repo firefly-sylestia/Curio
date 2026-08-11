@@ -195,6 +195,30 @@ object CurioIcons {
             "science", "biotech", "lightbulb", "functions", "psychology",
             "bubble_chart", "explore", "hub", "online_prediction", "genetics"
         )
+        CategoryFamily.ANIME_COMICS -> listOf(
+            "smart_display", "movie_filter", "auto_stories", "import_contacts", "menu_book",
+            "play_circle", "theaters", "video_library", "library_books", "star"
+        )
+        CategoryFamily.GAMES -> listOf(
+            "sports_esports", "videogame_asset", "casino", "diamond", "bolt",
+            "workspace_premium", "star", "rocket_launch", "auto_awesome", "explore"
+        )
+        CategoryFamily.MYTHOLOGY -> listOf(
+            "auto_awesome", "star", "nightlight", "public", "spa",
+            "diamond", "bolt", "explore", "rocket_launch", "psychology"
+        )
+        CategoryFamily.SPORTS -> listOf(
+            "sports_soccer", "flag", "workspace_premium", "local_fire_department", "star",
+            "bolt", "public", "explore", "rocket_launch", "spa"
+        )
+        CategoryFamily.FOOD -> listOf(
+            "restaurant", "local_cafe", "local_fire_department", "spa", "star",
+            "auto_awesome", "diamond", "public", "bolt", "explore"
+        )
+        CategoryFamily.INTERNET -> listOf(
+            "public", "hub", "bolt", "star", "auto_awesome",
+            "explore", "rocket_launch", "diamond", "spa", "nightlight"
+        )
         CategoryFamily.WILDCARD -> listOf(
             "casino", "auto_awesome", "explore", "bolt", "star",
             "nightlight", "public", "spa", "diamond", "rocket_launch"

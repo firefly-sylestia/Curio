@@ -40,27 +40,60 @@ object CurioColors {
     // the cream paper surface. Each deep accent pairs with a light 300-level
     // "ink" twin for accent-colored text/icons on the midnight dark surfaces
     // (resolved theme-aware via categoryInk()).
-    val CategoryIndigo   = Color(0xFF4338CA)  // Music — Artists / Albums
+    val CategoryIndigo   = Color(0xFF4338CA)  // Music — Artists
+    val CategoryAlbum    = Color(0xFF5F4DCB)  // Music — Albums (indigo twin, a touch lighter + warmer)
+    val CategorySong     = Color(0xFF0E7490)  // Music — Songs (cyan — distinct from the indigo family)
     val CategoryRose     = Color(0xFFBE123C)  // Movies — Directors / Films
+    val CategorySeries   = Color(0xFFBE185D)  // Movies — Series (pink-magenta, distinct from rose)
     val CategoryAmber    = Color(0xFFB45309)  // Books — Authors / Books
     val CategoryTeal     = Color(0xFF0F766E)  // Visual Art — Painters / Artworks
     val CategorySky      = Color(0xFF0369A1)  // Science — Scientists / Discoveries
+    val CategoryViolet   = Color(0xFF7E22CE)  // Anime & Comics — Anime
+    val CategoryManga    = Color(0xFF5B21B6)  // Anime & Comics — Manga (deeper violet)
+    val CategoryManhwa   = Color(0xFF9333EA)  // Anime & Comics — Manhwa (brighter orchid purple)
+    val CategoryFuchsia  = Color(0xFFA21CAF)  // Games
+    val CategoryOrange   = Color(0xFFC2410C)  // Mythology
+    val CategoryEmerald  = Color(0xFF047857)  // Sports
+    val CategoryRed      = Color(0xFFB91C1C)  // Food
+    val CategoryBlue     = Color(0xFF1D4ED8)  // Internet culture
     val CategoryCoral    = CoralBlush  // Wildcard — the app's brand primary, not a deep accent
 
     /** Light 300-level twins for accent-colored ink on dark surfaces. */
     val CategoryIndigoInk = Color(0xFFA5B4FC)
+    val CategoryAlbumInk  = Color(0xFFA5B4FC)  // albums share the indigo twin — family coherence
+    val CategorySongInk   = Color(0xFF67E8F9)  // cyan-300
     val CategoryRoseInk   = Color(0xFFFDA4AF)
+    val CategorySeriesInk = Color(0xFFF9A8D4)  // pink-300
     val CategoryAmberInk  = Color(0xFFFCD34D)
     val CategoryTealInk   = Color(0xFF5EEAD4)
     val CategorySkyInk    = Color(0xFF7DD3FC)
+    val CategoryVioletInk = Color(0xFFC4B5FD)
+    val CategoryMangaInk  = Color(0xFFA78BFA)  // violet-400
+    val CategoryManhwaInk = Color(0xFFD8B4FE)  // purple-300
+    val CategoryFuchsiaInk = Color(0xFFF0ABFC)
+    val CategoryEmeraldInk = Color(0xFF6EE7B7)
+    val CategoryOrangeInk  = Color(0xFFFDBA74)
+    val CategoryRedInk     = Color(0xFFFCA5A5)
+    val CategoryBlueInk    = Color(0xFF93C5FD)
     val CategoryCoralInk  = Color(0xFFFFC2CE)  // light coral twin for dark-surface ink
 
     /** Tinted (20% alpha) washes of the researched category accents. */
     val CategoryIndigoTint = CategoryIndigo.copy(alpha = 0.20f)
+    val CategoryAlbumTint  = CategoryAlbum.copy(alpha = 0.20f)
+    val CategorySongTint   = CategorySong.copy(alpha = 0.20f)
     val CategoryRoseTint   = CategoryRose.copy(alpha = 0.20f)
+    val CategorySeriesTint = CategorySeries.copy(alpha = 0.20f)
     val CategoryAmberTint  = CategoryAmber.copy(alpha = 0.20f)
     val CategoryTealTint   = CategoryTeal.copy(alpha = 0.20f)
     val CategorySkyTint    = CategorySky.copy(alpha = 0.20f)
+    val CategoryVioletTint = CategoryViolet.copy(alpha = 0.20f)
+    val CategoryMangaTint  = CategoryManga.copy(alpha = 0.20f)
+    val CategoryManhwaTint = CategoryManhwa.copy(alpha = 0.20f)
+    val CategoryFuchsiaTint = CategoryFuchsia.copy(alpha = 0.20f)
+    val CategoryEmeraldTint = CategoryEmerald.copy(alpha = 0.20f)
+    val CategoryOrangeTint  = CategoryOrange.copy(alpha = 0.20f)
+    val CategoryRedTint     = CategoryRed.copy(alpha = 0.20f)
+    val CategoryBlueTint    = CategoryBlue.copy(alpha = 0.20f)
     val CategoryCoralTint  = CategoryCoral.copy(alpha = 0.20f)
 
     /**

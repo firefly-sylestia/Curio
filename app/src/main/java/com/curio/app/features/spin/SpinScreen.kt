@@ -571,6 +571,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // v6 — mirror the landed topic to AppPreferences whenever it changes
     // (landed on spin end, cleared on the next spin start), so it survives
     // ANY navigation — including popping the Spin back-stack entry.
+    // v16 — the pet remembers which lane the deck is showing so its spin
+    // cheers and landed-topic lines can name the lane.
+    LaunchedEffect(activeCategory.id) {
+        CurioPet.noteLaneFocus(activeCategory.displayName)
+    }
     LaunchedEffect(activeCategory.id, landedTopicName) {
         AppPreferences.setLandedTopic(context, activeCategory.id, landedTopicName)
     }
@@ -1441,7 +1446,19 @@ private data class FilterGroups(
     val types: List<String>,
     val genres: List<String>,
     val eras: List<String>,
-    val origins: List<String>
+    val origins: List<String>,
+    val franchises: List<String>
+)
+
+/**
+ * Franchise tags — set aside as their OWN filter row (MCU, Star Wars, …)
+ * instead of burying them among genres, so film/anime/comics decks can be
+ * filtered by universe. Kept to the recognizable blockbusters; the sheet
+ * always exposes every supported franchise (8 chips), no count cap.
+ */
+private val FranchiseTags = setOf(
+    "MCU", "Star Wars", "DC", "Harry Potter", "Lord of the Rings",
+    "Pixar", "Studio Ghibli", "Disney"
 )
 
 /** Common nationality/origin tags — anything else is treated as a genre. */
@@ -1482,7 +1499,7 @@ private val NationalityTags = setOf(
  * are the most-used tags, each capped so the sheet stays tidy.
  */
 private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
-    if (pool.isEmpty()) return FilterGroups(emptyList(), emptyList(), emptyList(), emptyList())
+    if (pool.isEmpty()) return FilterGroups(emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
     val types = pool.map { it.subtype }.distinct().sorted()
     val counts = pool.flatMap { it.tags }.groupingBy { it }.eachCount()
     // Era chips: pick whichever family is more prevalent in this category —
@@ -1504,11 +1521,22 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
         .filter { it in NationalityTags }
         .sortedByDescending { counts[it] ?: 0 }
         .take(3)
+    // Franchise chips — the blockbuster universe tags get their own row
+    // (MCU, Star Wars, …) instead of competing with genres for the top-4.
+    // No .take cap: every supported franchise is exposed so lower-count
+    // universes (Harry Potter, LOTR, Star Wars…) stay selectable.
+    val franchises = counts.keys
+        .filter { it in FranchiseTags }
+        .sortedByDescending { counts[it] ?: 0 }
+        .sorted()
     val genres = counts.keys
-        .filter { !decadeRe.matches(it) && !centuryRe.matches(it) && it !in NationalityTags }
+        .filter {
+            !decadeRe.matches(it) && !centuryRe.matches(it) &&
+                it !in NationalityTags && it !in FranchiseTags
+        }
         .sortedByDescending { counts[it] ?: 0 }
         .take(4)
-    return FilterGroups(types = types, genres = genres, eras = eras, origins = origins)
+    return FilterGroups(types = types, genres = genres, eras = eras, origins = origins, franchises = franchises)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1642,7 +1670,8 @@ private fun FilterSheet(
             val hasAny = subtypes.size > 1 ||
                 groups.genres.isNotEmpty() ||
                 groups.eras.isNotEmpty() ||
-                groups.origins.isNotEmpty()
+                groups.origins.isNotEmpty() ||
+                groups.franchises.isNotEmpty()
             if (!hasAny) {
                 Text(
                     text = "No filters for this category yet.",
@@ -1752,6 +1781,29 @@ private fun FilterSheet(
                                 ),
                                 onClick = {
                                     draftFilters = if (origin in draftFilters) draftFilters - origin else draftFilters + origin
+                                }
+                            )
+                        }
+                    }
+                    if (groups.franchises.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SectionLabel(
+                                "Franchise",
+                                Modifier.padding(top = if (subtypes.size > 1) 6.dp else 6.dp, bottom = 2.dp)
+                            )
+                        }
+                        items(groups.franchises) { franchise ->
+                            CompactChip(
+                                label = franchise,
+                                selected = franchise in draftFilters,
+                                accent = cat.themedAccent(),
+                                ink = cat.onAccent(),
+                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                chipBorder = cat.categoryBorder(
+                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                ),
+                                onClick = {
+                                    draftFilters = if (franchise in draftFilters) draftFilters - franchise else draftFilters + franchise
                                 }
                             )
                         }
@@ -2288,25 +2340,59 @@ private fun HeroTicketCard(
     // crown so the pale fill doesn't wash to white.
     val dark = isCurioDarkTheme()
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     val ticketBrush = if (isMixed) {
-        CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+        // v15 — AMOLED mixed deck: each vivid accent stop darkens into a
+        // quiet multi-hue glass, capped with pure OLED black — the mix
+        // identity stays readable but the card reads as dark glass.
+        if (isAmoled) {
+            val glass = gradient.mapIndexed { i, stop ->
+                lerp(stop, Color.Black, if (i == 0) 0.62f else 0.76f)
+            }
+            Brush.verticalGradient(glass + Color.Black)
+        } else {
+            CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
+        }
     } else if (heroBlendOn) {
         // v10 — dual-accent blend: category accent meets a warm golden
         // companion in a multi-stop vertical gradient (works across all
-        // theme styles — Curio, Material, AMOLED).
+        // theme styles — Curio, Material, AMOLED; its AMOLED branches keep
+        // the warm-gold black glass when the user opts into the blend).
         Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
     } else if (heroGradientOn) {
-        val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
-        val base = lerp(gradient.last(), Color.Black, 0.06f)
-        val stops = if (gradient.size > 2) {
-            listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
+        // v15 — the enhanced diagonal sweep keeps working in AMOLED: it
+        // runs on dark-glass stops (a soft accent crown → OLED black) so
+        // the toggle still visibly upgrades the card while staying sleek.
+        val stops = if (isAmoled) {
+            listOf(
+                lerp(Color.Black, accent, 0.30f),
+                lerp(Color.Black, accent, 0.10f),
+                Color.Black
+            )
         } else {
-            CurioGradients.hslGradientStops(crown, base, 3)
+            val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+            val base = lerp(gradient.last(), Color.Black, 0.06f)
+            if (gradient.size > 2) {
+                listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
+            } else {
+                CurioGradients.hslGradientStops(crown, base, 3)
+            }
         }
         Brush.linearGradient(
             stops,
             start = Offset(0f, 0f),
             end = Offset(wPx, hPx)
+        )
+    } else if (isAmoled) {
+        // v15 — AMOLED: sleek vertical black glass. The deck's category
+        // color glows softly in from the top edge and melts to pure OLED
+        // black at the base, so the main card clearly wears its accent
+        // while the lower card stays true black (the old 8–18% trace read
+        // as plain black on device).
+        Brush.verticalGradient(
+            0f to lerp(Color.Black, accent, 0.24f),
+            0.55f to lerp(Color.Black, accent, 0.08f),
+            1f to Color.Black
         )
     } else {
         Brush.verticalGradient(gradient)
@@ -2490,12 +2576,15 @@ private fun HeroTicketCard(
                 .clip(RoundedCornerShape(30.dp))
                 .then(
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                        // v13 — the near-black ticket wears the same black-glass
-                        // CATEGORY SHINE as the settings cards and deck pills: an
-                        // accent hairline around the edge plus a soft accent band
-                        // at the top, so the main card reads as sleek black glass
-                        // rimmed with its category color (not just a flat plate).
-                        Modifier.categoryEdgeShine(RoundedCornerShape(30.dp), accent)
+                        // v15 — the black-glass ticket carries the deck's
+                        // category color as a rim light: the edge shine
+                        // brightened from 0.55 → 0.75 so the accent reads
+                        // clearly on the OLED black, but stays below the
+                        // full-shine settings cards so the main card keeps
+                        // its sleek, clean look.
+                        Modifier.categoryEdgeShine(
+                            RoundedCornerShape(30.dp), accent, intensity = 0.75f
+                        )
                     } else Modifier
                 )
         ) {
@@ -2510,17 +2599,24 @@ private fun HeroTicketCard(
                 // accent outline (the accent rim-light stays OFF by default).
                 // ON drops the hairline lower and the accent is drawn as a
                 // soft gradient rim-light inside (the drawBehind below).
-                // v13 — AMOLED: the near-black ticket would sink into the
-                // pure-black page. The categoryEdgeShine above is the main
-                // accent carrier, so this hairline stays a quiet whisper
-                // (0.35) that seats the card without stacking a second loud
-                // rim — sleek black glass rimmed with its category color.
+                // v15 — the hairline seats the card without a bright ring:
+                // AMOLED wears the deck accent at a quiet 0.20 (the edge
+                // shine above is the primary accent carrier), and plain
+                // dark mode drops the white hairline to a whisper 0.10 so
+                // it never reads as a bright outline on the deep fills.
                 border = BorderStroke(
                     1.dp,
-                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                        accent.copy(alpha = 0.35f)
-                    else
-                        ink.copy(alpha = if (heroBorderOn) 0.14f else 0.18f)
+                    // Order matters: `dark` intentionally precedes
+                    // `heroBorderOn`, so dark mode ALWAYS gets the whisper
+                    // 0.10 hairline (the border toggle only lifts it in
+                    // light mode — the dark rim-light is drawn separately
+                    // inside the card).
+                    when {
+                        isAmoled -> accent.copy(alpha = 0.20f)
+                        dark -> ink.copy(alpha = 0.10f)
+                        heroBorderOn -> ink.copy(alpha = 0.14f)
+                        else -> ink.copy(alpha = 0.18f)
+                    }
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -2546,8 +2642,16 @@ private fun HeroTicketCard(
                                     drawRoundRect(
                                         brush = Brush.verticalGradient(
                                             listOf(
-                                                lerp(ink, Color.White, if (dark) 0.20f else 0.30f),
-                                                lerp(ink, accent, 0.14f)
+                                                // v15 — dark mode: the old
+                                                // white-lerp rim drew a solid
+                                                // bright ring around the card;
+                                                // dark tones fade toward the
+                                                // fill at soft alpha so the
+                                                // machined edge stays subtle.
+                                                if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
+                                                else lerp(ink, Color.White, 0.30f),
+                                                if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
+                                                else lerp(ink, accent, 0.14f)
                                             )
                                         ),
                                         topLeft = Offset(borderW / 2f, borderW / 2f),

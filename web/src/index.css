@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Patrick+Hand&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Curio Web App - Global Styles */
+
+:root {
+  --curio-cream: #F7F0E4;
+  --curio-surface: #FFFBF5;
+  --curio-on-surface: #3B0A17;
+  --curio-primary: #FF8FA3;
+  --curio-on-primary: #3B0A17;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--curio-cream);
+  color: var(--curio-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Geom font for headings */
+@font-face {
+  font-family: 'Geom';
+  src: local('Geom');
+  font-weight: normal;
+}
+
+/* Curio card styles */
+.curio-card {
+  @apply rounded-curio bg-white shadow-curio;
+}
+
+.curio-card-lg {
+  @apply rounded-curio-lg bg-white shadow-curio-lg;
+}
+
+/* Category gradient backgrounds */
+.cat-gradient-indigo { background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%); }
+.cat-gradient-rose { background: linear-gradient(135deg, #BE123C 0%, #F43F5E 100%); }
+.cat-gradient-amber { background: linear-gradient(135deg, #B45309 0%, #F59E0B 100%); }
+.cat-gradient-teal { background: linear-gradient(135deg, #0F766E 0%, #14B8A6 100%); }
+.cat-gradient-sky { background: linear-gradient(135deg, #0369A1 0%, #38BDF8 100%); }
+.cat-gradient-violet { background: linear-gradient(135deg, #7E22CE 0%, #A855F7 100%); }
+.cat-gradient-fuchsia { background: linear-gradient(135deg, #A21CAF 0%, #D946EF 100%); }
+.cat-gradient-orange { background: linear-gradient(135deg, #C2410C 0%, #F97316 100%); }
+.cat-gradient-emerald { background: linear-gradient(135deg, #047857 0%, #10B981 100%); }
+.cat-gradient-red { background: linear-gradient(135deg, #B91C1C 0%, #EF4444 100%); }
+.cat-gradient-blue { background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%); }
+.cat-gradient-coral { background: linear-gradient(135deg, #FF8FA3 0%, #FB7185 100%); }
+
+/* Curio button */
+.curio-btn {
+  @apply px-6 py-3 rounded-curio-sm font-semibold transition-all duration-200;
+}
+
+.curio-btn-primary {
+  @apply curio-btn bg-cat-coral text-deep-plum hover:opacity-90;
+}
+
+.curio-btn-secondary {
+  @apply curio-btn bg-gray-100 text-gray-700;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Animations */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Responsive breakpoints */
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .lg\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Safe area for mobile */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Touch action for better mobile performance */
+.touch-action-manipulation {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}

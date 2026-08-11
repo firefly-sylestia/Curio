@@ -970,14 +970,18 @@ private fun ProgressAndAchievementsCard(
                 overflow = TextOverflow.Ellipsis
             )
         }
+        // v15 — AMOLED: the coral progress bar and quest plate read as a
+        // weird red accent on pure black; they swap to clean white glass.
+        val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
         LinearProgressIndicator(
             progress = { progress.coerceIn(0f, 1f) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(50)),
-            color = CurioColors.CoralBlush,
-            trackColor = CurioColors.CoralBlush.copy(alpha = 0.14f)
+            color = if (amoled) MaterialTheme.colorScheme.onSurface else CurioColors.CoralBlush,
+            trackColor = if (amoled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                         else CurioColors.CoralBlush.copy(alpha = 0.14f)
         )
         Text(
             text = if (isMaxLevel) "Maximum level reached. Keep exploring for more XP."
@@ -989,7 +993,8 @@ private fun ProgressAndAchievementsCard(
         )
         Surface(
             onClick = onOpenQuests,
-            color = CurioColors.CoralBlush.copy(alpha = 0.09f),
+            color = if (amoled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                    else CurioColors.CoralBlush.copy(alpha = 0.09f),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -1002,7 +1007,10 @@ private fun ProgressAndAchievementsCard(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))),
+                        .background(
+                            if (amoled) Brush.verticalGradient(listOf(Color(0xFF232323), Color(0xFF141414)))
+                            else Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(CurioIcons.EmojiEvents, null, tint = Color.White, size = 20.dp)

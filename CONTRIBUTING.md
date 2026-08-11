@@ -35,7 +35,7 @@ Curio is a single-module Android app:
 ### Topic content
 
 - Topic data lives in `app/src/main/assets/topics/{category}.json` — read `app/CURIO_DATA_PLAN.md` (the data contract) and `app/src/main/assets/topics/SCHEMA.md` before editing.
-- Validate any content change with `python3 scripts/validate_topics.py` (IDs must be unique, schema must pass).
+- Validate any content change with `./gradlew validateTopics` — the CI-authoritative check (IDs must be unique, schema must pass). Topic authoring helpers under `scripts/` are kept on disk locally but are untracked and never shipped in commits.
 
 ## Pull requests
 

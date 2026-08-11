@@ -60,6 +60,11 @@ object AppPreferences {
     private const val KEY_DISPLAY_NAME = "display_name"
     private const val KEY_THEME_MODE = "theme_mode"        // "light", "dark", "system"
     private const val KEY_THEME_STYLE = "theme_style"      // "default", "amoled", "material"
+    private const val KEY_PET_CHATTER = "pet_chatter"     // "talkative", "cozy", "quiet"
+    private const val KEY_PET_GAME_FREQUENCY = "pet_game_frequency" // "relaxed", "normal", "eager"
+    private const val KEY_PET_BIRTHDAY = "pet_birthday_epoch_day"
+    private const val KEY_SAVES_WEEK_START = "saves_week_start_epoch_day"
+    private const val KEY_SAVES_WEEK_COUNTS = "saves_week_counts"
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
     private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
@@ -222,9 +227,10 @@ object AppPreferences {
     // deck's front hero card wears four independently-toggleable upgrades:
     // an enhanced top-lit gradient fill, an accent-tinted border, a soft
     // ambient shadow, and enhanced typography (bolder title, bigger
-    // subtitle). Each defaults OFF; the current hero card stays unchanged
-    // until the experiment settles.
-    var heroGradientState by mutableStateOf(false)
+    // subtitle). v15 — the enhanced gradient is promoted to the shipped
+    // default (ON, still toggleable in Experiments); the other upgrades
+    // stay OFF.
+    var heroGradientState by mutableStateOf(true)
         private set
     // v10 — promoted from experiment to always-on: the accent border on the
     // hero card is now the shipped default.
@@ -332,6 +338,14 @@ object AppPreferences {
     // builds a personality from the user's real activity and develops its
     // own catchphrases. Off = classic rule-based lines only.
     var petBrainEnabledState by mutableStateOf(true)
+        private set
+    // v16 — how talkative the pet is: "talkative" (lines ~1.4x), "cozy"
+    // (default, unchanged), "quiet" (lines ~0.35x — mostly motion).
+    var petChatterState by mutableStateOf("cozy")
+        private set
+    // v16 — how often the pet starts games on its own: "relaxed" (~0.55x),
+    // "normal" (default), "eager" (~1.5x).
+    var petGameFrequencyState by mutableStateOf("normal")
         private set
     // v8.16 — whether the Spin deck auto-opens the landed topic's reveal the
     // moment the wheel settles. v8.21 — DEFAULT ON: the reveal opens by
@@ -444,6 +458,8 @@ object AppPreferences {
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
+        petChatterState = getPetChatter(context)
+        petGameFrequencyState = getPetGameFrequency(context)
         autoOpenRevealState = isAutoOpenReveal(context)
         customReactionLinesState = isCustomReactionLinesEnabled(context)
         pinnedTopicsState = getPinnedTopics(context)
@@ -553,9 +569,76 @@ object AppPreferences {
     }
 
     // ── Main card (hero ticket) redesign (v7.13 experimental) ──────────
-    /** Whether the enhanced hero-card gradient fill is on (default off). */
+    /** Whether the enhanced hero-card gradient fill is on (v15 — default on). */
     fun isHeroGradientEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HERO_GRADIENT, false)
+        prefs(context).getBoolean(KEY_HERO_GRADIENT, true)
+
+    // ── Pet chatter + game frequency (v16) ─────────────────────────────
+    /** Talkative / cozy / quiet — how often the pet speaks lines. */
+    fun getPetChatter(context: Context): String =
+        prefs(context).getString(KEY_PET_CHATTER, "cozy") ?: "cozy"
+
+    fun setPetChatter(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_PET_CHATTER, mode).apply()
+        petChatterState = mode
+    }
+
+    /** Relaxed / normal / eager — how often the pet starts games. */
+    fun getPetGameFrequency(context: Context): String =
+        prefs(context).getString(KEY_PET_GAME_FREQUENCY, "normal") ?: "normal"
+
+    fun setPetGameFrequency(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_PET_GAME_FREQUENCY, mode).apply()
+        petGameFrequencyState = mode
+    }
+
+    // ── Pet birthday (v16) — first-launch epoch day, set once ──────────
+    /** The epoch day the app first ran — the pet's "hatch day". */
+    fun petBirthdayEpochDay(context: Context): Long {
+        val p = prefs(context)
+        val existing = p.getLong(KEY_PET_BIRTHDAY, 0L)
+        if (existing > 0L) return existing
+        val today = java.util.Calendar.getInstance().timeInMillis / 86_400_000L
+        p.edit().putLong(KEY_PET_BIRTHDAY, today).apply()
+        return today
+    }
+
+    // ── Weekly-save memory (v16) — "you saved 3 songs this week" ───────
+    /** Records a save in [categoryName]; counts roll within a 7-day window. */
+    fun noteWeeklySave(context: Context, categoryName: String) {
+        val p = prefs(context)
+        val window = p.getLong(KEY_SAVES_WEEK_START, 0L)
+        val today = java.util.Calendar.getInstance().timeInMillis / 86_400_000L
+        if (window == 0L || today - window >= 7L) {
+            p.edit()
+                .putLong(KEY_SAVES_WEEK_START, today)
+                .putString(KEY_SAVES_WEEK_COUNTS, "")
+                .apply()
+        }
+        val raw = p.getString(KEY_SAVES_WEEK_COUNTS, "") ?: ""
+        val counts = raw.split('|').filter { it.isNotEmpty() }.associate {
+            val i = it.indexOf('=')
+            if (i > 0) it.substring(0, i) to (it.substring(i + 1).toIntOrNull() ?: 0) else it to 1
+        }.toMutableMap()
+        counts[categoryName] = (counts[categoryName] ?: 0) + 1
+        p.edit().putString(
+            KEY_SAVES_WEEK_COUNTS,
+            counts.entries.joinToString("|") { "${it.key}=${it.value}" }
+        ).apply()
+    }
+
+    /** The top lane saved this week (name → count), for pet memory lines. */
+    fun weeklySaveSummary(context: Context): List<Pair<String, Int>> {
+        val p = prefs(context)
+        val window = p.getLong(KEY_SAVES_WEEK_START, 0L)
+        val today = java.util.Calendar.getInstance().timeInMillis / 86_400_000L
+        if (window == 0L || today - window >= 7L) return emptyList()
+        val raw = p.getString(KEY_SAVES_WEEK_COUNTS, "") ?: ""
+        return raw.split('|').filter { it.isNotEmpty() }.mapNotNull { part ->
+            val i = part.indexOf('=')
+            if (i > 0) part.substring(0, i) to (part.substring(i + 1).toIntOrNull() ?: 0) else null
+        }.sortedByDescending { it.second }.take(1)
+    }
 
     fun setHeroGradientEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_GRADIENT, enabled).apply()

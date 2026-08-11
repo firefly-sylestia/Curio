@@ -321,6 +321,16 @@ fun SaveCaptureScreen(
                                 // Feed the category passport — a saved capture
                                 // masters the lane's stamp (spec §6.1).
                                 CurioPassport.noteSave(context, entry.topic.categoryId)
+                                // v16 — the pet remembers this keepsake + lane
+                                // for its memory lines ("you saved 3 songs this
+                                // week").
+                                CurioPet.noteSavedLane(
+                                    context,
+                                    CurioCategories.all
+                                        .firstOrNull { it.id == entry.topic.categoryId }
+                                        ?.displayName ?: entry.topic.categoryId.name.lowercase(),
+                                    resolvedTopic.name
+                                )
                                 // The pet celebrates a new keepsake (spec §10.6).
                                 CurioPet.reactTo(CurioPet.Event.SAVE)
                             }

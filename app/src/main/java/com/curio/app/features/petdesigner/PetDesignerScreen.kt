@@ -1127,6 +1127,10 @@ fun PetDesignerScreen(navController: NavController) {
                 EvolutionChoiceDialog(
                     onPathChosen = { path ->
                         AppPreferences.setEvoPath(context, path)
+                        // v13 — the first evolution: the pet celebrates its
+                        // new form (the floating pet speaks the ceremony line
+                        // while the confetti animation plays).
+                        CurioPet.noteEvolved(context)
                         evoDialogOpen = false
                         evoAnimating = true
                     },
@@ -1892,7 +1896,13 @@ private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) 
         // Consume taps inside the card so they don't dismiss the dialog.
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            // v15 — AMOLED: the custom dialog container joins the sleek
+            // pure-black glass (the #181818 container read grey next to
+            // the app's true-black cards and AlertDialogs).
+            color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                Color.Black
+            else
+                MaterialTheme.colorScheme.surfaceContainerHigh,
             modifier = Modifier
                 .padding(20.dp)
                 .fillMaxWidth()

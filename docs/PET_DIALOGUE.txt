@@ -241,6 +241,9 @@ Legend
     • "Personality: {name} — {tagline}"    (taglines below)
     • "Next growth: {hint}"                (e.g. "Reach Level 3 to grow.")
     • "Next quest: {quest title}"
+    • "Its own sayings:" + the coined catchphrases shown verbatim (v14,
+      italic, accent color — from CurioPetBrain.coinedSayings; hidden when
+      the pet hasn't coined any yet)
     • Buttons: "Okay" / "Go to quest"
 
   PERSONALITY TAGLINES (CurioPet.kt, persona enum):
@@ -345,6 +348,188 @@ Legend
     • "One tiny spark, one big pounce!" / "I caught a star! Sort of!"
     • "Chase chase chase—caught!" / "The spark didn't stand a chance."
     • "Gravity vs me: round one, me!"
+
+--------------------------------------------------------------------------------
+16. RETURN-AFTER-ABSENCE WELCOME — the pet greets the user after ≥1 day away
+    Location: CurioPet.kt (welcomeBackLine, welcomeBackDayLines/DaysLines/WeekLines),
+              CurioFloatingPet.kt (LaunchedEffect keyed on CurioPet.awake)
+    Fires once per absence, on the pet's first appearance. New pets stay quiet.
+
+  ~1 day away [picks one]:
+    • "I missed you. The shelf waited." / "Welcome back! I kept the topics warm."
+    • "Oh, you're back! I saved you the good lane." / "Missed you! The deck missed
+       you too." / "Back at last! I was just dusting the curiosity."
+
+  3-6 days away [picks one]:
+    • "You were gone so long the topics started their own club." / "Welcome home!
+       I watered the curiosity while you were away."
+    • "A few days away! I narrated the shelf to myself." / "You're back! I
+       reorganized the deck twice. Okay, once."
+
+  7+ days away [picks one]:
+    • "A whole week! I've been practicing my patience." / "You're back! I grew a
+       whole new eagerness while you were gone."
+    • "Seven days! I even missed the sassy ones." / "A week away! I saved you all
+       the good questions."
+
+--------------------------------------------------------------------------------
+17. EVOLUTION CEREMONY — the pet celebrates crossing into a new growth tier
+    Location: CurioPet.kt (evolutionCeremonyLine, noteEvolved, Event.EVOLVE),
+              CurioFloatingPet.kt (EVOLVE rides the LEVEL_UP reaction rule)
+    First evolution fires from the Pet Designer path choice (Level 7); the final
+    form fires from CurioQuests.addXp when Level 25 is crossed with a path set.
+
+  FIRST EVO — Blaze (Fire) [picks one]:
+    • "I'm Blaze now! Small, but VERY warm!" / "Fire path! My spark has opinions
+       now!" / "Look at me! A blaze of pure curiosity!"
+
+  FIRST EVO — Tide (Water) [picks one]:
+    • "I'm Tide now! Cool, calm, and deep!" / "Water path! I ripple wherever
+       questions lead!" / "Look at me! I flow with every wonder!"
+
+  FIRST EVO — Bloom (Nature) [picks one]:
+    • "I'm Bloom now! I grow wherever I go!" / "Nature path! Something new sprouts
+       in me!" / "Look at me! I'm blooming with ideas!"
+
+  FIRST EVO — no path set (fallback) [picks one]:
+    • "Ta-da! I grew all the way up!" / "Same me, but BIGGER spark!"
+
+  FINAL EVO [picks one]:
+    • "I'm fully grown! The whole shelf is mine!" / "This is it, my final form!
+       Every lane made me!" / "I made it all the way! I'm fully me now!"
+    • "Look at the grown me! All the sparks came home!"
+
+--------------------------------------------------------------------------------
+18. QUEST COMPLETE — the pet celebrates claiming a daily/weekly quest
+    Location: CurioPet.kt (noteQuestComplete, questCompleteLines, Event.QUEST_COMPLETE),
+              CurioQuests.kt (claimDaily / claimWeekly), CurioFloatingPet.kt
+              (its own customizable rule), PetDesign.kt (PetReactionEvents.QUEST_COMPLETE)
+    Fires when the user taps Claim on a finished daily or weekly quest.
+    v14 — fully customizable in the Pet Designer: a "Quest complete"
+    reaction card (animation + face + lines) under Built-in reactions, and
+    a "Quest complete" trigger chip for user-defined custom actions.
+
+  [picks one]:
+    • "Quest done! Sparkle earned!" / "That quest never stood a chance!"
+    • "Another quest, conquered!" / "Checked off! The list quivers."
+    • "We finished it together. Well, mostly you." / "Quest complete! I'm so
+       proud of our teamwork." / "One more quest bites the dust!"
+
+--------------------------------------------------------------------------------
+19. STREAK MILESTONE — the pet celebrates a new best streak
+    Location: CurioPet.kt (noteStreakMilestone, streakMilestoneLine, Event.STREAK_MILESTONE),
+              CurioQuests.kt (onStreakRecorded), CurioFloatingPet.kt
+              (rides the LEVEL_UP spin celebration)
+    Fires when the daily streak beats the previous best. Flame days get
+    their own bigger lines; other new-best days get warm "still glowing"
+    lines. At most one per day.
+
+  Day 1 [picks one]:
+    • "The flame is lit!" / "Day 1! A brand-new spark!"
+  Day 3 [picks one]:
+    • "Day 3! A real streak is born!" / "Three days! The flame has friends!"
+  Day 7 [picks one]:
+    • "Day 7! A whole week of wonder!" / "Seven days! The flame is a bonfire now!"
+  Day 14 [picks one]:
+    • "Day 14! Two weeks of fire!" / "Fortnight flame! Steady as starlight!"
+  Day 30 [picks one]:
+    • "Day 30! A month of mystery!" / "Thirty days! Legendary flame!"
+  Other new-best days [picks one]:
+    • "Day {N}! The flame grows!" / "{N} days in a row! Still glowing strong!"
+    • "Streak day {N}! One spark at a time." / "Day {N}! The flame likes this pace."
+
+--------------------------------------------------------------------------------
+20. VOICE SYSTEM (v14/v14.1) — the pet speaks in three registers by growth stage
+    Location: CurioPet.kt — every line source routes through currentStage()
+              (Stage.BABY / Stage.FIRST_EVO / Stage.FINAL_EVO)
+
+  BABY (Baby Spark — before Level 7 / path choice): telegraphic speech,
+  modeled on human 18-24 month child language (telegraphic stage) and
+  pet-directed speech research. Rules:
+    • 1-3 words per line. Content words only: drop articles, auxiliaries,
+      prepositions, tense markers ("Play ball!", not "I want to play").
+    • Concrete nouns/verbs/adjectives a baby knows (bed, spark, up, big).
+    • Exclamation-led and onomatopoeia-heavy ("Wheee!", "Boop!", "Ooh?").
+    • Same few lines all day: no time-of-day or bond variants, and the
+      learning brain's stats-grounded sentences are bypassed (bubbleFor).
+    • Baby pools: babyMoodLine / babyEventLine / babyTouchLine /
+      babyStreakLine / babySpinCheerLines / babyPeekLines /
+      babyChameleonLines / babySparkLines / babyMorningLines /
+      babyWelcomeBack*Lines / babySassyLines.
+
+  EVOLVED (Evolved — Level 7 with a path, FIRST_EVO): the full rich
+  library above (section 1-19 pools). Natural-language writing rules
+  (character-dialogue research):
+    • Short-to-medium bursts; mix sentence lengths for rhythm.
+    • Use natural contractions and fragments — never robotic/expository.
+    • Ground feelings in sensory or situational details instead of
+      announcing them ("The deck knows what it's doing.", not
+      "I predict a good outcome").
+    • One consistent idiolect: witty, self-aware, warm.
+
+  MATURE (Fully Grown — Level 25, FINAL_EVO): a third, older register,
+  distinct from the first evolution. The pet has settled into itself:
+    • Longer, compound sentences with a reflective, philosophical bent
+      ("Growth comes quietly, then all at once.").
+    • Mentor-like observations about knowledge, time, and the shelf;
+      dry, gentle humor instead of eager sass.
+    • Calm sensory grounding — quiet, steady, warm; never cold.
+    • Bypasses the learning brain like the BABY (bubbleFor) and speaks
+      only from its own pools: matureMoodLine / matureEventLine /
+      matureTouchLine / matureStreakLine / matureSpinCheerLines /
+      maturePeekLines / matureChameleonLines / matureSparkLines /
+      matureMorningLines / matureWelcomeBack*Lines / matureSassyLines /
+      matureRoutineLine (Pet Life routines swap their youthful lines for
+      the calm register; unknown routine ids stay silent).
+
+  MOTION-FIRST (v14) — play and spin moments prefer reaction over words:
+    • Spin screen: the pet always hops while the deck reels; the cheer
+      line shows only ~45% of the time.
+    • Self-started games (chameleon, spark-catch): motion always, line
+      only ~35% of the time.
+    • Rapid celebration taps: the twirl spin plays ONCE per streak (the
+      tap that first reaches tier 3), never as a repeating loop.
+
+--------------------------------------------------------------------------------
+v16 — INTERACTIVE GAMES, MEMORY LINES & TUNING (2026-08)
+   Location: app/src/main/java/com/curio/app/ui/pet/CurioFloatingPet.kt
+            (game state machine), app/src/main/java/com/curio/app/data/CurioPet.kt
+            (line pools), app/src/main/java/com/curio/app/data/AppPreferences.kt
+            (chatter + game-frequency settings)
+
+  GAMES ARE REAL NOW — the pet isn't just showing off, it's PLAYING with you:
+    • SPARK-CATCH: a visible, pulsing spark drops at a random spot. The pet
+      dashes to grab it — TAP the spark first to win the round together
+      (caughtItLine); if the pet gets there first it catches it itself; if
+      the dash is interrupted (grab / navigation) the spark gets away
+      (gotAwayLine).
+    • HIDE-AND-SEEK: the pet dashes OFF-SCREEN through a random edge, hides,
+      then peeks back from a DIFFERENT edge half-in/half-out. Tap the
+      visible sliver while it peeks to catch it (peekWinLine); miss it and
+      it teases you (missedMeLine) before slipping back in.
+    • CHAMELEON (v2): fades to a faint ghost, walks off a random edge, hides
+      off-screen, then re-enters from a DIFFERENT edge (findMePromptLine
+      before it goes, celebrateKey on return). No more teleporting around
+      the same screen.
+
+  CHATTER + GAME-FREQUENCY SETTINGS (Settings → Appearance):
+    • Pet chatter — Quiet / Cozy / Talkative: scales every speak chance
+      (0.35× / 1× / 1.35×) via CurioPet.shouldSpeak().
+    • Pet games — Relaxed / Normal / Eager: scales how often the pet starts
+      games + its self-started play zoom via gameFrequencyMultiplier()
+      (0.55× / 1× / 1.5×). Games also share a cooldown so they never stack.
+
+  MEMORY LINES (factLine, evolved voice only) — the pet references real
+  facts instead of generic chatter:
+    • Weekly saves: "You saved 3 songs keepsakes this week!" (from
+      AppPreferences.weeklySaveSummary — fed by SaveCapture noteSavedLane).
+    • Streak: "Day 12 streak — the flame is steady."
+    • Season / weekday-weekend / the last saved topic.
+    • Hatch-day anniversary: once a year, the birthday line wins.
+
+  LANE-AWARE LINES — the Spin screen feeds noteLaneFocus(displayName), so
+  spin-landed lines and cheers name the actual deck ("Back to Films — the
+  deck knows you!", "Come on, Albums!").
 
 --------------------------------------------------------------------------------
 Notes for future edits

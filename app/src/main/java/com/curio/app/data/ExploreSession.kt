@@ -58,16 +58,25 @@ data class ExploreSession(
  * reading…); wildcard falls back to the topic's own verb.
  */
 fun ExploreSession.reflectionQuestion(): String = when (categoryId) {
-    CategoryId.ARTISTS, CategoryId.ALBUMS ->
+    CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS ->
         "Finished listening? What track or lyric landed hardest?"
-    CategoryId.DIRECTORS, CategoryId.FILMS ->
+    CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.SERIES, CategoryId.ANIME ->
         "Finished watching? What scene or shot stayed with you?"
-    CategoryId.AUTHORS, CategoryId.BOOKS ->
+    CategoryId.AUTHORS, CategoryId.BOOKS, CategoryId.MANGA, CategoryId.MANHWA,
+    CategoryId.MYTHOLOGY ->
         "Finished reading? What idea do you want to keep?"
     CategoryId.PAINTERS, CategoryId.ARTWORKS ->
         "Finished looking? What detail caught your eye first?"
     CategoryId.SCIENTISTS, CategoryId.DISCOVERIES ->
         "Finished exploring? What fact surprised you most?"
+    CategoryId.GAMES ->
+        "Finished watching? What moment or decision stuck with you?"
+    CategoryId.SPORTS ->
+        "Finished watching? What play or moment do you want to remember?"
+    CategoryId.FOOD ->
+        "Done reading? What food story surprised you most?"
+    CategoryId.INTERNET ->
+        "Done watching? What detail made the rabbit hole worth it?"
     CategoryId.WILDCARD -> when (verb.lowercase()) {
         "listen" -> "Finished listening? What caught your ear?"
         "watch" -> "Finished watching? What caught your eye?"

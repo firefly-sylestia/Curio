@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -336,12 +337,19 @@ fun CurioPetHeroCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    // v8.43 — the pet's own developed sayings (learning brain).
-                    if (info.coinedSayings > 0) {
+                    // v14 — the pet's own developed sayings, shown verbatim
+                    // (the learning brain coins these from the user's habits).
+                    if (info.coinedPhrases.isNotEmpty()) {
                         Text(
-                            "Its own sayings: ${info.coinedSayings}",
+                            "Its own sayings:",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            info.coinedPhrases.joinToString(" · "),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

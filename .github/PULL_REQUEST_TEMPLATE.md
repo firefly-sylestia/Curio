@@ -23,7 +23,7 @@
 
 ## Validation
 
-- [ ] I ran `python3 scripts/validate_topics.py` when topic data was affected.
+- [ ] Topic data was validated (`./gradlew validateTopics` — the CI-authoritative check) when topic files were affected.
 - [ ] I ran relevant safe static checks.
 - [ ] I tested the affected flow on an Android device or emulator.
 - [ ] I checked loading, empty, error, and long-content states where relevant.
