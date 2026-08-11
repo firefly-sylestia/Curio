@@ -26,10 +26,10 @@ and the `CurioTopic` data class (`CurioTopic.kt`).
 | `anime.json` | `ANIME` | Anime | Watch |
 | `manga.json` | `MANGA` | Manga | Read |
 | `manhwa.json` | `MANHWA` | Manhwa | Read |
-| `games.json` | `GAMES` | Game | Play |
+| `games.json` | `GAMES` | Game | Watch |
 | `mythology.json` | `MYTHOLOGY` | Myth / Legend / Tale / Tall Tale | Read |
 | `sports.json` | `SPORTS` | Sport / Legend | Watch |
-| `food.json` | `FOOD` | Dish / Recipe | Cook |
+| `food.json` | `FOOD` | Dish / Recipe | Read |
 | `internet.json` | `INTERNET` | Meme / Viral / Slang / Creepypasta | Watch |
 | `wildcard.json` | `WILDCARD` | Curiosity / Mystery / Phenomenon / Ritual / etc. | varies |
 
@@ -79,7 +79,7 @@ There is **no root wrapper object**. The file is a bare JSON array. The
 | `teaser` | string | ✅ | 1–2 sentences, ≤ 450 chars. The "one quirky fact" surfaced on Topic Reveal (CURIO_SPEC §6). NOT a Wikipedia bio — find a surprising angle. |
 | `imageUrl` | string | ✅ | Empty string `""` for now (image strategy deferred to a later phase). |
 | `byline` | string | ❌ | Creator tag shown as a pill on the Topic Reveal hero card (`Artist · The Beatles`, `Author · George Orwell`, `Discovered by · Alexander Fleming`). Albums → artist, Books → author, Films → director, Artworks → painter, Discoveries → discoverer. Optional, default `""`. Populated by `scripts/enrich_topics.py` + `scripts/enrich_discoveries_bylines.py`. |
-| `exploreAction.verb` | string | ✅ | `Listen` \| `Watch` \| `Read` \| `Look at` \| `Try` \| `Visit` \| `Make` \| `Explore` \| `Play` (Games) \| `Cook` (Food). Drives the icon glyph on the action card. See table above for per-category defaults. |
+| `exploreAction.verb` | string | ✅ | Exploration verbs only — `Listen` \| `Watch` \| `Read` \| `Look at` \| `Explore` \| `Visit` \| `Learn` \| `Discover`. **Never a making/doing verb** (`Cook`, `Play`, `Make`, `Try`, `Build`, `Write`, `Fold`) — every instruction must be about exploring (reading/watching/learning), not doing. Drives the icon glyph on the action card. See table above for per-category defaults. |
 | `exploreAction.targetName` | string | ✅ | The exact artifact to consume. `Vespertine (2001) end-to-end`, not `an album by Björk`. |
 | `exploreAction.durationMinutes` | int | ✅ | Realistic human time-to-engage. ≤ 60 unless the artifact genuinely demands more. |
 | `exploreAction.instruction` | string | ✅ | ≤ 600 chars (matches the `validateTopics` Gradle task cap). Must pass the **quality bar** below. |

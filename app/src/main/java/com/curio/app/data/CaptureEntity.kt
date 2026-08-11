@@ -171,8 +171,8 @@ fun CaptureEntity.toEntry(): CurioEntry {
                 CategoryId.MANHWA, CategoryId.MYTHOLOGY -> "Read"
                 CategoryId.PAINTERS, CategoryId.ARTWORKS -> "View"
                 CategoryId.SCIENTISTS, CategoryId.DISCOVERIES -> "Explore"
-                CategoryId.GAMES -> "Play"
-                CategoryId.FOOD -> "Cook"
+                CategoryId.GAMES -> "Watch"
+                CategoryId.FOOD -> "Read"
                 CategoryId.WILDCARD -> "Discover"
             },
             targetName = topicName,

@@ -5172,9 +5172,9 @@
     "teaser": "The British statistician who invented modern experimental design, ANOVA, and maximum likelihood — and united Darwin's selection with Mendel's genetics. He also showed why a cup of tea can be a scientific experiment.",
     "imageUrl": "",
     "exploreAction": {
-      "verb": "Design",
+      "verb": "Read",
       "targetName": "Fisher's experimental design",
-      "instruction": "Learn Fisher's principles of randomization and replication from his famous tea-tasting experiment. Write why controlled experiments need randomization and how his methods underpin modern clinical trials.",
+      "instruction": "Read about Fisher's principles of randomization and replication from his famous tea-tasting experiment. Write why controlled experiments need randomization and how his methods underpin modern clinical trials.",
       "durationMinutes": 20
     },
     "tags": [
@@ -5229,7 +5229,7 @@
     "teaser": "The German biologist and artist who coined 'ecology' and drew radiant illustrations of radiolarians and jellyfish that still amaze. He popularized Darwin in Germany and coined the phrase 'ontogeny recapitulates phylogeny.'",
     "imageUrl": "",
     "exploreAction": {
-      "verb": "Draw",
+      "verb": "Look at",
       "targetName": "Haeckel's Kunstformen der Natur",
       "instruction": "Look through Haeckel's Art Forms in Nature illustrations and pick one plate, like a radiolarian or medusa. Write what the creature is and why his scientific art helped spread evolutionary ideas.",
       "durationMinutes": 20
@@ -5324,7 +5324,7 @@
     "teaser": "The Iranian mathematician who became the first woman to win the Fields Medal, the 'Nobel of mathematics,' for her work on curved surfaces and their geometric structure. She said math is like finding your way in a dark forest.",
     "imageUrl": "",
     "exploreAction": {
-      "verb": "Fold",
+      "verb": "Read",
       "targetName": "Mirzakhani's hyperbolic surfaces",
       "instruction": "Learn what hyperbolic geometry is and how Mirzakhani counted the ways to slice a surface. Write why her work on 'the moduli space of Riemann surfaces' earned the Fields Medal in 2014.",
       "durationMinutes": 25
@@ -6952,9 +6952,9 @@
     "teaser": "The American painter who gave up art for invention and built the electric telegraph, sending 'What hath God wrought?' from Washington to Baltimore in 1844. His Morse code of dots and dashes bound the world together.",
     "imageUrl": "",
     "exploreAction": {
-      "verb": "Dot",
+      "verb": "Read",
       "targetName": "Morse code",
-      "instruction": "Learn Morse code and why he assigned shorter codes to frequent letters like E and T. Write your own name in Morse and explain how the telegraph relay extended signals across continents.",
+      "instruction": "Learn Morse code and why frequent letters like E and T got shorter codes. Try decoding your own name in Morse and explain how the telegraph relay extended signals across continents.",
       "durationMinutes": 15
     },
     "tags": [
@@ -8026,9 +8026,9 @@
     "teaser": "The German physicist who solved Einstein's field equations for a point mass while serving on the Russian front in 1916 — finding the exact solution for what we now call a black hole. He died months later, aged 42.",
     "imageUrl": "",
     "exploreAction": {
-      "verb": "Solve",
+      "verb": "Read",
       "targetName": "Schwarzschild's black hole solution",
-      "instruction": "Learn how Schwarzschild derived the first exact solution to Einstein's equations and its event horizon. Write what the Schwarzschild radius is and how his wartime paper predicted black holes.",
+      "instruction": "Read how Schwarzschild derived the first exact solution to Einstein's equations and its event horizon. Write what the Schwarzschild radius is and how his wartime paper predicted black holes.",
       "durationMinutes": 20
     },
     "tags": [

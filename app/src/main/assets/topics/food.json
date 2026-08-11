@@ -8,10 +8,10 @@
     "imageUrl": "",
     "byline": "Naples, Italy",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Pizza Margherita (1889) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Make it from scratch and notice the dough — the 48-hour ferment is the flavor. The dish's genius is that the 'three colors' are the flag."
+      "instruction": "Read how Pizza Margherita got its name and where it's from — the 'three colors' are the flag (Naples, Italy). Then watch how it's made and notice the dough — the 48-hour ferment is the flavor."
     },
     "tags": [
       "Italian",
@@ -30,10 +30,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Sushi",
       "durationMinutes": 30,
-      "instruction": "Try a piece of aged nigiri and notice the rice — the vinegar seasoning is the craft. The dish's genius is that the 'fermentation' became the art."
+      "instruction": "Read how Sushi got its name and where it's from — the 'fermentation' became the art (Japan). Then watch how it's made and notice the rice — the vinegar seasoning is the craft."
     },
     "tags": [
       "Japanese",
@@ -51,10 +51,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Ramen (1910) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Slurp the noodles and notice the broth — the 'tonkotsu' is the time. The dish's genius is that the 'soup' is the science."
+      "instruction": "Read how Ramen got its name and where it's from — the 'soup' is the science (Japan). Then watch how it's made and notice the broth — the 'tonkotsu' is the time."
     },
     "tags": [
       "Japanese",
@@ -73,10 +73,10 @@
     "imageUrl": "",
     "byline": "Mexico City",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Tacos al Pastor (1960) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try one with pineapple — the sweet is the counterpoint. The dish's genius is that the 'fusion' is the origin."
+      "instruction": "Read how Tacos al Pastor got its name and where it's from — the 'fusion' is the origin (Mexico City). Then watch how it's made — the sweet is the counterpoint."
     },
     "tags": [
       "Mexican",
@@ -95,10 +95,10 @@
     "imageUrl": "",
     "byline": "Thailand",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Pad Thai (1938) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Make it and notice the tamarind — the sour is the balance. The dish's genius is that the 'nationalism' is the origin."
+      "instruction": "Read how Pad Thai got its name and where it's from — the 'nationalism' is the origin (Thailand). Then watch how it's made and notice the tamarind — the sour is the balance."
     },
     "tags": [
       "Thai",
@@ -117,10 +117,10 @@
     "imageUrl": "",
     "byline": "France",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Croissant (1839) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Bite into a fresh one and notice the layers — the 27 folds are the craft. The pastry's genius is that the 'butter' is the architecture."
+      "instruction": "Read how Croissant got its name and where it's from — the 'butter' is the architecture (France). Then watch how it's made and notice the layers — the 27 folds are the craft."
     },
     "tags": [
       "French",
@@ -139,10 +139,10 @@
     "imageUrl": "",
     "byline": "Belgium",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "French Fries",
       "durationMinutes": 30,
-      "instruction": "Try the double-fry method and notice the crisp — the rest is the secret. The dish's genius is that the 'French' is the mistake."
+      "instruction": "Read how French Fries got its name and where it's from — the 'French' is the mistake (Belgium). Then watch how it's made and notice the crisp — the rest is the secret."
     },
     "tags": [
       "Belgian",
@@ -160,10 +160,10 @@
     "imageUrl": "",
     "byline": "Rome, Italy",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Pasta Carbonara",
       "durationMinutes": 30,
-      "instruction": "Make it and notice the egg — the sauce is the technique. The dish's genius is that the 'no cream' is the purity."
+      "instruction": "Read how Pasta Carbonara got its name and where it's from — the 'no cream' is the purity (Rome, Italy). Then watch how it's made and notice the egg — the sauce is the technique."
     },
     "tags": [
       "Italian",
@@ -181,10 +181,10 @@
     "imageUrl": "",
     "byline": "Milan, Italy",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Risotto",
       "durationMinutes": 30,
-      "instruction": "Cook it and notice the stirring — the 18 minutes are the craft. The dish's genius is that the 'slow' is the flavor."
+      "instruction": "Read how Risotto got its name and where it's from — the 'slow' is the flavor (Milan, Italy). Then watch how it's made and notice the stirring — the 18 minutes are the craft."
     },
     "tags": [
       "Italian",
@@ -202,10 +202,10 @@
     "imageUrl": "",
     "byline": "Valencia, Spain",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Paella",
       "durationMinutes": 30,
-      "instruction": "Cook it and notice the socarrat — the crispy bottom is the goal. The dish's genius is that the 'pan' is the name."
+      "instruction": "Read how Paella got its name and where it's from — the 'pan' is the name (Valencia, Spain). Then watch how it's made and notice the socarrat — the crispy bottom is the goal."
     },
     "tags": [
       "Spanish",
@@ -223,10 +223,10 @@
     "imageUrl": "",
     "byline": "Vietnam",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Pho (1900) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Make the broth and notice the spices — the star anise is the signature. The dish's genius is that the 'French' is the history."
+      "instruction": "Read how Pho got its name and where it's from — the 'French' is the history (Vietnam). Then watch how it's made and notice the spices — the star anise is the signature."
     },
     "tags": [
       "Vietnamese",
@@ -245,10 +245,10 @@
     "imageUrl": "",
     "byline": "India",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Biryani",
       "durationMinutes": 30,
-      "instruction": "Cook the dum method and notice the layering — the seal is the flavor. The dish's genius is that the 'layers' are the history."
+      "instruction": "Read how Biryani got its name and where it's from — the 'layers' are the history (India). Then watch how it's made and notice the layering — the seal is the flavor."
     },
     "tags": [
       "Indian",
@@ -266,10 +266,10 @@
     "imageUrl": "",
     "byline": "Delhi, India",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Butter Chicken (1950) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Make the marinade and notice the tandoor — the smoke is the flavor. The dish's genius is that the 'leftover' was the invention."
+      "instruction": "Read how Butter Chicken got its name and where it's from — the 'leftover' was the invention (Delhi, India). Then watch how it's made and notice the tandoor — the smoke is the flavor."
     },
     "tags": [
       "Indian",
@@ -288,10 +288,10 @@
     "imageUrl": "",
     "byline": "Guangdong, China",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Dim Sum",
       "durationMinutes": 30,
-      "instruction": "Try a bamboo steamer of har gow and notice the wrapper — the translucent skin is the craft. The dish's genius is that the 'tea' is the ritual."
+      "instruction": "Read how Dim Sum got its name and where it's from — the 'tea' is the ritual (Guangdong, China). Then watch how it's made and notice the wrapper — the translucent skin is the craft."
     },
     "tags": [
       "Chinese",
@@ -309,10 +309,10 @@
     "imageUrl": "",
     "byline": "Beijing, China",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Peking Duck (1330) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try the skin with the pancakes and notice the crisp — the air-dry is the secret. The dish's genius is that the 'skin' is the dish."
+      "instruction": "Read how Peking Duck got its name and where it's from — the 'skin' is the dish (Beijing, China). Then watch how it's made and notice the crisp — the air-dry is the secret."
     },
     "tags": [
       "Chinese",
@@ -331,10 +331,10 @@
     "imageUrl": "",
     "byline": "China",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Hot Pot",
       "durationMinutes": 30,
-      "instruction": "Try the Sichuan broth and notice the numbness — the Sichuan peppercorn is the signature. The dish's genius is that the 'communal' is the meal."
+      "instruction": "Read how Hot Pot got its name and where it's from — the 'communal' is the meal (China). Then watch how it's made and notice the numbness — the Sichuan peppercorn is the signature."
     },
     "tags": [
       "Chinese",
@@ -352,10 +352,10 @@
     "imageUrl": "",
     "byline": "Sichuan, China",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Mapo Tofu",
       "durationMinutes": 30,
-      "instruction": "Cook it and notice the doubanjiang — the fermented bean paste is the depth. The dish's genius is that the 'grandmother' is the brand."
+      "instruction": "Read how Mapo Tofu got its name and where it's from — the 'grandmother' is the brand (Sichuan, China). Then watch how it's made and notice the doubanjiang — the fermented bean paste is the depth."
     },
     "tags": [
       "Chinese",
@@ -373,10 +373,10 @@
     "imageUrl": "",
     "byline": "Korea",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Kimchi",
       "durationMinutes": 30,
-      "instruction": "Make it and notice the fermentation — the 3-day room-temperature ferment is the flavor. The dish's genius is that the 'science' is the tradition."
+      "instruction": "Read how Kimchi got its name and where it's from — the 'science' is the tradition (Korea). Then watch how it's made and notice the fermentation — the 3-day room-temperature ferment is the flavor."
     },
     "tags": [
       "Korean",
@@ -394,10 +394,10 @@
     "imageUrl": "",
     "byline": "Korea",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Bibimbap",
       "durationMinutes": 30,
-      "instruction": "Mix it fully and notice the gochujang — the paste is the sauce. The dish's genius is that the 'colors' are the balance."
+      "instruction": "Read how Bibimbap got its name and where it's from — the 'colors' are the balance (Korea). Then watch how it's made and notice the gochujang — the paste is the sauce."
     },
     "tags": [
       "Korean",
@@ -415,10 +415,10 @@
     "imageUrl": "",
     "byline": "Korea",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Bulgogi",
       "durationMinutes": 30,
-      "instruction": "Grill it and notice the marinade — the pear is the tenderizer. The dish's genius is that the 'fire' is the name."
+      "instruction": "Read how Bulgogi got its name and where it's from — the 'fire' is the name (Korea). Then watch how it's made and notice the marinade — the pear is the tenderizer."
     },
     "tags": [
       "Korean",
@@ -436,10 +436,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Sashimi",
       "durationMinutes": 30,
-      "instruction": "Try a high-grade piece and notice the cut — the knife angle is the texture. The dish's genius is that the 'nothing' is the everything."
+      "instruction": "Read how Sashimi got its name and where it's from — the 'nothing' is the everything (Japan). Then watch how it's made and notice the cut — the knife angle is the texture."
     },
     "tags": [
       "Japanese",
@@ -457,10 +457,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Tempura",
       "durationMinutes": 30,
-      "instruction": "Try the shrimp and notice the batter — the cold water is the crisp. The dish's genius is that the 'Portuguese' is the origin."
+      "instruction": "Read how Tempura got its name and where it's from — the 'Portuguese' is the origin (Japan). Then watch how it's made and notice the batter — the cold water is the crisp."
     },
     "tags": [
       "Japanese",
@@ -478,10 +478,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Miso Soup",
       "durationMinutes": 30,
-      "instruction": "Make it and notice the dashi — the kombu and bonito are the umami. The dish's genius is that the 'two' ingredients are the whole."
+      "instruction": "Read how Miso Soup got its name and where it's from — the 'two' ingredients are the whole (Japan). Then watch how it's made and notice the dashi — the kombu and bonito are the umami."
     },
     "tags": [
       "Japanese",
@@ -499,10 +499,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Katsu Curry",
       "durationMinutes": 30,
-      "instruction": "Try the katsu and notice the panko — the flaky breadcrumb is the crisp. The dish's genius is that the 'British' is the origin."
+      "instruction": "Read how Katsu Curry got its name and where it's from — the 'British' is the origin (Japan). Then watch how it's made and notice the panko — the flaky breadcrumb is the crisp."
     },
     "tags": [
       "Japanese",
@@ -520,10 +520,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Okonomiyaki",
       "durationMinutes": 30,
-      "instruction": "Make it and notice the cabbage — the shred is the texture. The dish's genius is that the 'you-like-it' is the name."
+      "instruction": "Read how Okonomiyaki got its name and where it's from — the 'you-like-it' is the name (Japan). Then watch how it's made and notice the cabbage — the shred is the texture."
     },
     "tags": [
       "Japanese",
@@ -541,10 +541,10 @@
     "imageUrl": "",
     "byline": "Osaka, Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Takoyaki (1935) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try them fresh and notice the molten center — the batter is the texture. The dish's genius is that the 'pan' is the invention."
+      "instruction": "Read how Takoyaki got its name and where it's from — the 'pan' is the invention (Osaka, Japan). Then watch how it's made and notice the molten center — the batter is the texture."
     },
     "tags": [
       "Japanese",
@@ -563,10 +563,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Yakitori",
       "durationMinutes": 30,
-      "instruction": "Try the thigh skewer and notice the tare — the glaze is the flavor. The dish's genius is that the 'parts' are the craft."
+      "instruction": "Read how Yakitori got its name and where it's from — the 'parts' are the craft (Japan). Then watch how it's made and notice the tare — the glaze is the flavor."
     },
     "tags": [
       "Japanese",
@@ -584,10 +584,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Onigiri",
       "durationMinutes": 30,
-      "instruction": "Make one and notice the fillings — the umeboshi is the classic. The dish's genius is that the 'simple' is the design."
+      "instruction": "Read how Onigiri got its name and where it's from — the 'simple' is the design (Japan). Then watch how it's made and notice the fillings — the umeboshi is the classic."
     },
     "tags": [
       "Japanese",
@@ -605,10 +605,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Curry Rice",
       "durationMinutes": 30,
-      "instruction": "Cook the roux and notice the sweetness — the apple and honey are the Japanese touch. The dish's genius is that the 'British' became the 'Japanese'."
+      "instruction": "Read how Curry Rice got its name and where it's from — the 'British' became the 'Japanese' (Japan). Then watch how it's made and notice the sweetness — the apple and honey are the Japanese touch."
     },
     "tags": [
       "Japanese",
@@ -626,10 +626,10 @@
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Wagyu",
       "durationMinutes": 30,
-      "instruction": "Try a slice of A5 and notice the melt — the fat is the flavor. The dish's genius is that the 'marbling' is the craft."
+      "instruction": "Read how Wagyu got its name and where it's from — the 'marbling' is the craft (Japan). Then watch how it's made and notice the melt — the fat is the flavor."
     },
     "tags": [
       "Japanese",
@@ -647,10 +647,10 @@
     "imageUrl": "",
     "byline": "Quebec, Canada",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Poutine (1950) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try it fresh and notice the curds — the squeak is the freshness. The dish's genius is that the 'mess' is the joy."
+      "instruction": "Read how Poutine got its name and where it's from — the 'mess' is the joy (Quebec, Canada). Then watch how it's made and notice the curds — the squeak is the freshness."
     },
     "tags": [
       "Canadian",
@@ -669,10 +669,10 @@
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Fish and Chips (1860) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try the batter and notice the beer — the carbonation is the crisp. The dish's genius is that the 'paper' is the ritual."
+      "instruction": "Read how Fish and Chips got its name and where it's from — the 'paper' is the ritual (England). Then watch how it's made and notice the beer — the carbonation is the crisp."
     },
     "tags": [
       "British",
@@ -691,10 +691,10 @@
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Sunday Roast",
       "durationMinutes": 30,
-      "instruction": "Try the roast potatoes and notice the fat — the pre-heated oil is the crisp. The dish's genius is that the 'Sunday' is the ritual."
+      "instruction": "Read how Sunday Roast got its name and where it's from — the 'Sunday' is the ritual (England). Then watch how it's made and notice the fat — the pre-heated oil is the crisp."
     },
     "tags": [
       "British",
@@ -712,10 +712,10 @@
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Full English Breakfast",
       "durationMinutes": 30,
-      "instruction": "Try the components and notice the balance — the beans are the counterpoint. The dish's genius is that the 'full' is the point."
+      "instruction": "Read how Full English Breakfast got its name and where it's from — the 'full' is the point (England). Then watch how it's made and notice the balance — the beans are the counterpoint."
     },
     "tags": [
       "British",
@@ -733,10 +733,10 @@
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Shepherd's Pie",
       "durationMinutes": 30,
-      "instruction": "Make it and notice the topping — the potato is the crust. The dish's genius is that the 'shepherd' is the name."
+      "instruction": "Read how Shepherd's Pie got its name and where it's from — the 'shepherd' is the name (England). Then watch how it's made and notice the topping — the potato is the crust."
     },
     "tags": [
       "British",
@@ -754,10 +754,10 @@
     "imageUrl": "",
     "byline": "Cornwall, England",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Cornish Pasty",
       "durationMinutes": 30,
-      "instruction": "Try the crimp and notice the edge — the handle was the design. The dish's genius is that the 'pastry' is the fork."
+      "instruction": "Read how Cornish Pasty got its name and where it's from — the 'pastry' is the fork (Cornwall, England). Then watch how it's made and notice the edge — the handle was the design."
     },
     "tags": [
       "British",
@@ -775,10 +775,10 @@
     "imageUrl": "",
     "byline": "Scotland",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Haggis",
       "durationMinutes": 30,
-      "instruction": "Try it with neeps and tatties — the turnip is the counterpoint. The dish's genius is that the 'offal' is the thrift."
+      "instruction": "Read how Haggis got its name and where it's from — the 'offal' is the thrift (Scotland). Then watch how it's made — the turnip is the counterpoint."
     },
     "tags": [
       "Scottish",
@@ -796,10 +796,10 @@
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Scotch Egg",
       "durationMinutes": 30,
-      "instruction": "Try the soft-boiled version and notice the yolk — the runny center is the upgrade. The dish's genius is that the 'egg' is the core."
+      "instruction": "Read how Scotch Egg got its name and where it's from — the 'egg' is the core (England). Then watch how it's made and notice the yolk — the runny center is the upgrade."
     },
     "tags": [
       "British",
@@ -817,10 +817,10 @@
     "imageUrl": "",
     "byline": "Glasgow, Scotland",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Chicken Tikka Masala (1960) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try the sauce and notice the cream — the 'masala' is the marriage. The dish's genius is that the 'Glasgow' is the origin."
+      "instruction": "Read how Chicken Tikka Masala got its name and where it's from — the 'Glasgow' is the origin (Glasgow, Scotland). Then watch how it's made and notice the cream — the 'masala' is the marriage."
     },
     "tags": [
       "British Indian",
@@ -839,10 +839,10 @@
     "imageUrl": "",
     "byline": "India",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Naan",
       "durationMinutes": 30,
-      "instruction": "Try it fresh and notice the blisters — the tandoor is the flavor. The dish's genius is that the 'oven' is the technique."
+      "instruction": "Read how Naan got its name and where it's from — the 'oven' is the technique (India). Then watch how it's made and notice the blisters — the tandoor is the flavor."
     },
     "tags": [
       "Indian",
@@ -860,10 +860,10 @@
     "imageUrl": "",
     "byline": "India",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Samosa",
       "durationMinutes": 30,
-      "instruction": "Try one fresh and notice the crust — the flaky layers are the craft. The dish's genius is that the 'triangle' is the history."
+      "instruction": "Read how Samosa got its name and where it's from — the 'triangle' is the history (India). Then watch how it's made and notice the crust — the flaky layers are the craft."
     },
     "tags": [
       "Indian",
@@ -881,10 +881,10 @@
     "imageUrl": "",
     "byline": "South India",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Dosa",
       "durationMinutes": 30,
-      "instruction": "Try the masala dosa and notice the crisp — the ferment is the flavor. The dish's genius is that the 'batter' is the science."
+      "instruction": "Read how Dosa got its name and where it's from — the 'batter' is the science (South India). Then watch how it's made and notice the crisp — the ferment is the flavor."
     },
     "tags": [
       "Indian",
@@ -902,10 +902,10 @@
     "imageUrl": "",
     "byline": "Hyderabad, India",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Biryani (Hyderabadi) (1857) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try the kacchi method and notice the layering — the raw meat is the technique. The dish's genius is that the 'royal' is the method."
+      "instruction": "Read how Biryani (Hyderabadi) got its name and where it's from — the 'royal' is the method (Hyderabad, India). Then watch how it's made and notice the layering — the raw meat is the technique."
     },
     "tags": [
       "Indian",
@@ -924,10 +924,10 @@
     "imageUrl": "",
     "byline": "Middle East",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Kebab",
       "durationMinutes": 30,
-      "instruction": "Try the shish and notice the charcoal — the smoke is the flavor. The dish's genius is that the 'skewer' is the technology."
+      "instruction": "Read how Kebab got its name and where it's from — the 'skewer' is the technology (Middle East). Then watch how it's made and notice the charcoal — the smoke is the flavor."
     },
     "tags": [
       "Middle Eastern",
@@ -945,10 +945,10 @@
     "imageUrl": "",
     "byline": "Levant",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Shawarma",
       "durationMinutes": 30,
-      "instruction": "Try the garlic sauce and notice the tang — the toum is the signature. The dish's genius is that the 'spit' is the theater."
+      "instruction": "Read how Shawarma got its name and where it's from — the 'spit' is the theater (Levant). Then watch how it's made and notice the tang — the toum is the signature."
     },
     "tags": [
       "Middle Eastern",
@@ -966,10 +966,10 @@
     "imageUrl": "",
     "byline": "Egypt",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Falafel",
       "durationMinutes": 30,
-      "instruction": "Try the tahini and notice the texture — the chickpea is the base. The dish's genius is that the 'street' is the ritual."
+      "instruction": "Read how Falafel got its name and where it's from — the 'street' is the ritual (Egypt). Then watch how it's made and notice the texture — the chickpea is the base."
     },
     "tags": [
       "Middle Eastern",
@@ -987,10 +987,10 @@
     "imageUrl": "",
     "byline": "Levant",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Hummus",
       "durationMinutes": 30,
-      "instruction": "Try it fresh and notice the tahini — the sesame is the depth. The dish's genius is that the 'simple' is the debate."
+      "instruction": "Read how Hummus got its name and where it's from — the 'simple' is the debate (Levant). Then watch how it's made and notice the tahini — the sesame is the depth."
     },
     "tags": [
       "Middle Eastern",
@@ -1008,10 +1008,10 @@
     "imageUrl": "",
     "byline": "Ottoman",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Baklava",
       "durationMinutes": 30,
-      "instruction": "Try the pistachio version and notice the filo — the layers are the technique. The dish's genius is that the 'claim' is the culture."
+      "instruction": "Read how Baklava got its name and where it's from — the 'claim' is the culture (Ottoman). Then watch how it's made and notice the filo — the layers are the technique."
     },
     "tags": [
       "Middle Eastern",
@@ -1029,10 +1029,10 @@
     "imageUrl": "",
     "byline": "Levant",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Kunafa",
       "durationMinutes": 30,
-      "instruction": "Try it warm and notice the cheese — the pull is the moment. The dish's genius is that the 'syrup' is the balance."
+      "instruction": "Read how Kunafa got its name and where it's from — the 'syrup' is the balance (Levant). Then watch how it's made and notice the cheese — the pull is the moment."
     },
     "tags": [
       "Middle Eastern",
@@ -1050,10 +1050,10 @@
     "imageUrl": "",
     "byline": "Venezuela/Colombia",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Arepas",
       "durationMinutes": 30,
-      "instruction": "Try the stuffed version and notice the corn — the masa is the base. The dish's genius is that the 'ancient' is the staple."
+      "instruction": "Read how Arepas got its name and where it's from — the 'ancient' is the staple (Venezuela/Colombia). Then watch how it's made and notice the corn — the masa is the base."
     },
     "tags": [
       "Latin American",
@@ -1071,10 +1071,10 @@
     "imageUrl": "",
     "byline": "Peru",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Ceviche",
       "durationMinutes": 30,
-      "instruction": "Try the leche de tigre and notice the lime — the acid is the cook. The dish's genius is that the 'cooking' is the chemistry."
+      "instruction": "Read how Ceviche got its name and where it's from — the 'cooking' is the chemistry (Peru). Then watch how it's made and notice the lime — the acid is the cook."
     },
     "tags": [
       "Peruvian",
@@ -1092,10 +1092,10 @@
     "imageUrl": "",
     "byline": "Spain/Latin America",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Empanadas",
       "durationMinutes": 30,
-      "instruction": "Try the Argentine version and notice the crimp — the repulgue is the signature. The dish's genius is that the 'bread' is the name."
+      "instruction": "Read how Empanadas got its name and where it's from — the 'bread' is the name (Spain/Latin America). Then watch how it's made and notice the crimp — the repulgue is the signature."
     },
     "tags": [
       "Latin American",
@@ -1113,10 +1113,10 @@
     "imageUrl": "",
     "byline": "Brazil",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Feijoada",
       "durationMinutes": 30,
-      "instruction": "Try the full spread and notice the beans — the slow cook is the depth. The dish's genius is that the 'Saturday' is the ritual."
+      "instruction": "Read how Feijoada got its name and where it's from — the 'Saturday' is the ritual (Brazil). Then watch how it's made and notice the beans — the slow cook is the depth."
     },
     "tags": [
       "Brazilian",
@@ -1134,10 +1134,10 @@
     "imageUrl": "",
     "byline": "Spain",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Churros",
       "durationMinutes": 30,
-      "instruction": "Try the chocolate — the thick dipping chocolate is the ritual. The dish's genius is that the 'stick' is the design."
+      "instruction": "Read how Churros got its name and where it's from — the 'stick' is the design (Spain). Then watch how it's made — the thick dipping chocolate is the ritual."
     },
     "tags": [
       "Spanish",
@@ -1155,10 +1155,10 @@
     "imageUrl": "",
     "byline": "Andalusia, Spain",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Gazpacho",
       "durationMinutes": 30,
-      "instruction": "Try it very cold and notice the vinegar — the sharpness is the balance. The dish's genius is that the 'cold' is the design."
+      "instruction": "Read how Gazpacho got its name and where it's from — the 'cold' is the design (Andalusia, Spain). Then watch how it's made and notice the vinegar — the sharpness is the balance."
     },
     "tags": [
       "Spanish",
@@ -1176,10 +1176,10 @@
     "imageUrl": "",
     "byline": "Treviso, Italy",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Tiramisu (1960) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try the mascarpone and notice the coffee — the soak is the flavor. The dish's genius is that the 'pick-me-up' is the name."
+      "instruction": "Read how Tiramisu got its name and where it's from — the 'pick-me-up' is the name (Treviso, Italy). Then watch how it's made and notice the coffee — the soak is the flavor."
     },
     "tags": [
       "Italian",
@@ -1198,10 +1198,10 @@
     "imageUrl": "",
     "byline": "Ancient Greece",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Cheesecake",
       "durationMinutes": 30,
-      "instruction": "Try the New York style and notice the density — the cream cheese is the texture. The dish's genius is that the 'ancient' is the origin."
+      "instruction": "Read how Cheesecake got its name and where it's from — the 'ancient' is the origin (Ancient Greece). Then watch how it's made and notice the density — the cream cheese is the texture."
     },
     "tags": [
       "Dessert",
@@ -1219,10 +1219,10 @@
     "imageUrl": "",
     "byline": "China",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Ice Cream",
       "durationMinutes": 30,
-      "instruction": "Try a high-quality gelato and notice the density — the churn is the texture. The dish's genius is that the 'Chinese' is the origin."
+      "instruction": "Read how Ice Cream got its name and where it's from — the 'Chinese' is the origin (China). Then watch how it's made and notice the density — the churn is the texture."
     },
     "tags": [
       "Dessert",
@@ -1240,10 +1240,10 @@
     "imageUrl": "",
     "byline": "Mesoamerica",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Chocolate (3000) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try a dark bar and notice the origin — the bean's terroir is the flavor. The food's genius is that the 'bitter' was the beginning."
+      "instruction": "Read how Chocolate got its name and where it's from — the 'bitter' was the beginning (Mesoamerica). Then watch how it's made and notice the origin — the bean's terroir is the flavor."
     },
     "tags": [
       "Dessert",
@@ -1262,10 +1262,10 @@
     "imageUrl": "",
     "byline": "Ancient Egypt",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Bread (Sourdough)",
       "durationMinutes": 30,
-      "instruction": "Make a sourdough and notice the starter — the wild yeast is the flavor. The bread's genius is that the 'accident' was the invention."
+      "instruction": "Read how Bread (Sourdough) got its name and where it's from — the 'accident' was the invention (Ancient Egypt). Then watch how it's made and notice the starter — the wild yeast is the flavor."
     },
     "tags": [
       "Bread",
@@ -1283,10 +1283,10 @@
     "imageUrl": "",
     "byline": "Poland",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Bagel",
       "durationMinutes": 30,
-      "instruction": "Try a fresh bagel and notice the boil — the crust is the signature. The bread's genius is that the 'boil' is the craft."
+      "instruction": "Read how Bagel got its name and where it's from — the 'boil' is the craft (Poland). Then watch how it's made and notice the boil — the crust is the signature."
     },
     "tags": [
       "Bread",
@@ -1304,10 +1304,10 @@
     "imageUrl": "",
     "byline": "Germany",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Pretzel",
       "durationMinutes": 30,
-      "instruction": "Try the lye version and notice the crust — the lye is the flavor. The bread's genius is that the 'knot' is the legend."
+      "instruction": "Read how Pretzel got its name and where it's from — the 'knot' is the legend (Germany). Then watch how it's made and notice the crust — the lye is the flavor."
     },
     "tags": [
       "Bread",
@@ -1325,10 +1325,10 @@
     "imageUrl": "",
     "byline": "France",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Macaron",
       "durationMinutes": 30,
-      "instruction": "Try one and notice the foot — the ruffled base is the craft. The pastry's genius is that the 'foot' is the signature."
+      "instruction": "Read how Macaron got its name and where it's from — the 'foot' is the signature (France). Then watch how it's made and notice the foot — the ruffled base is the craft."
     },
     "tags": [
       "French",
@@ -1346,10 +1346,10 @@
     "imageUrl": "",
     "byline": "Global",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Pancakes",
       "durationMinutes": 30,
-      "instruction": "Make a stack and notice the first side — the bubbles are the timing. The dish's genius is that the 'universal' is the form."
+      "instruction": "Read how Pancakes got its name and where it's from — the 'universal' is the form (Global). Then watch how it's made and notice the first side — the bubbles are the timing."
     },
     "tags": [
       "Breakfast",
@@ -1367,10 +1367,10 @@
     "imageUrl": "",
     "byline": "USA",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Hamburger (1900) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try a smash burger and notice the crust — the maillard is the flavor. The dish's genius is that the 'argument' is the origin."
+      "instruction": "Read how Hamburger got its name and where it's from — the 'argument' is the origin (USA). Then watch how it's made and notice the crust — the maillard is the flavor."
     },
     "tags": [
       "American",
@@ -1389,10 +1389,10 @@
     "imageUrl": "",
     "byline": "USA",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Hot Dog",
       "durationMinutes": 30,
-      "instruction": "Try one with mustard and notice the snap — the casing is the texture. The dish's genius is that the 'joke' is the name."
+      "instruction": "Read how Hot Dog got its name and where it's from — the 'joke' is the name (USA). Then watch how it's made and notice the snap — the casing is the texture."
     },
     "tags": [
       "American",
@@ -1410,10 +1410,10 @@
     "imageUrl": "",
     "byline": "American South",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Fried Chicken",
       "durationMinutes": 30,
-      "instruction": "Try the brine method and notice the crust — the seasoning is the identity. The dish's genius is that the 'brine' is the science."
+      "instruction": "Read how Fried Chicken got its name and where it's from — the 'brine' is the science (American South). Then watch how it's made and notice the crust — the seasoning is the identity."
     },
     "tags": [
       "Southern",
@@ -1431,10 +1431,10 @@
     "imageUrl": "",
     "byline": "Buffalo, NY",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Buffalo Wings (1964) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try the classic sauce and notice the butter — the fat is the balance. The dish's genius is that the 'bar' is the origin."
+      "instruction": "Read how Buffalo Wings got its name and where it's from — the 'bar' is the origin (Buffalo, NY). Then watch how it's made and notice the butter — the fat is the balance."
     },
     "tags": [
       "American",
@@ -1453,10 +1453,10 @@
     "imageUrl": "",
     "byline": "USA",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Mac and Cheese",
       "durationMinutes": 30,
-      "instruction": "Try the baked version and notice the crust — the breadcrumb is the texture. The dish's genius is that the 'Jefferson' is the history."
+      "instruction": "Read how Mac and Cheese got its name and where it's from — the 'Jefferson' is the history (USA). Then watch how it's made and notice the crust — the breadcrumb is the texture."
     },
     "tags": [
       "American",
@@ -1474,10 +1474,10 @@
     "imageUrl": "",
     "byline": "Texas",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Chili",
       "durationMinutes": 30,
-      "instruction": "Try the no-bean version and notice the beef — the meat is the bowl. The dish's genius is that the 'no beans' is the debate."
+      "instruction": "Read how Chili got its name and where it's from — the 'no beans' is the debate (Texas). Then watch how it's made and notice the beef — the meat is the bowl."
     },
     "tags": [
       "American",
@@ -1495,10 +1495,10 @@
     "imageUrl": "",
     "byline": "Louisiana",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Gumbo",
       "durationMinutes": 30,
-      "instruction": "Try the roux and notice the dark color — the burn is the flavor. The dish's genius is that the 'blend' is the history."
+      "instruction": "Read how Gumbo got its name and where it's from — the 'blend' is the history (Louisiana). Then watch how it's made and notice the dark color — the burn is the flavor."
     },
     "tags": [
       "Cajun",
@@ -1516,10 +1516,10 @@
     "imageUrl": "",
     "byline": "Louisiana",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Jambalaya",
       "durationMinutes": 30,
-      "instruction": "Try the andouille and notice the smoke — the sausage is the flavor. The dish's genius is that the 'paella' is the cousin."
+      "instruction": "Read how Jambalaya got its name and where it's from — the 'paella' is the cousin (Louisiana). Then watch how it's made and notice the smoke — the sausage is the flavor."
     },
     "tags": [
       "Cajun",
@@ -1537,10 +1537,10 @@
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Tacos",
       "durationMinutes": 30,
-      "instruction": "Try the carnitas version and notice the tortilla — the handmade corn is the base. The dish's genius is that the 'street' is the culture."
+      "instruction": "Read how Tacos got its name and where it's from — the 'street' is the culture (Mexico). Then watch how it's made and notice the tortilla — the handmade corn is the base."
     },
     "tags": [
       "Mexican",
@@ -1558,10 +1558,10 @@
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Burrito",
       "durationMinutes": 30,
-      "instruction": "Try the mission style and notice the foil — the wrap is the ritual. The dish's genius is that the 'donkey' is the name."
+      "instruction": "Read how Burrito got its name and where it's from — the 'donkey' is the name (Mexico). Then watch how it's made and notice the foil — the wrap is the ritual."
     },
     "tags": [
       "Mexican",
@@ -1579,10 +1579,10 @@
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Guacamole",
       "durationMinutes": 30,
-      "instruction": "Try the molcajete version and notice the texture — the stone bowl is the craft. The dish's genius is that the 'Aztec' is the origin."
+      "instruction": "Read how Guacamole got its name and where it's from — the 'Aztec' is the origin (Mexico). Then watch how it's made and notice the texture — the stone bowl is the craft."
     },
     "tags": [
       "Mexican",
@@ -1600,10 +1600,10 @@
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Mole",
       "durationMinutes": 30,
-      "instruction": "Try the mole poblano and notice the chocolate — the bitterness is the depth. The dish's genius is that the '20' ingredients are the craft."
+      "instruction": "Read how Mole got its name and where it's from — the '20' ingredients are the craft (Mexico). Then watch how it's made and notice the chocolate — the bitterness is the depth."
     },
     "tags": [
       "Mexican",
@@ -1621,10 +1621,10 @@
     "imageUrl": "",
     "byline": "Puebla, Mexico",
     "exploreAction": {
-      "verb": "Cook",
+      "verb": "Read",
       "targetName": "Chiles en Nogada (1821) end-to-end",
       "durationMinutes": 30,
-      "instruction": "Try it and notice the colors — the flag is the dish. The recipe's genius is that the 'independence' is the history."
+      "instruction": "Read how Chiles en Nogada got its name and where it's from — the 'independence' is the history (Puebla, Mexico). Then watch how it's made and notice the colors — the flag is the dish."
     },
     "tags": [
       "Mexican",

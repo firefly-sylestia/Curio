@@ -70,11 +70,11 @@ fun ExploreSession.reflectionQuestion(): String = when (categoryId) {
     CategoryId.SCIENTISTS, CategoryId.DISCOVERIES ->
         "Finished exploring? What fact surprised you most?"
     CategoryId.GAMES ->
-        "Finished playing? What moment or decision stuck with you?"
+        "Finished watching? What moment or decision stuck with you?"
     CategoryId.SPORTS ->
         "Finished watching? What play or moment do you want to remember?"
     CategoryId.FOOD ->
-        "Done cooking? What flavor surprised you most?"
+        "Done reading? What food story surprised you most?"
     CategoryId.INTERNET ->
         "Done watching? What detail made the rabbit hole worth it?"
     CategoryId.WILDCARD -> when (verb.lowercase()) {

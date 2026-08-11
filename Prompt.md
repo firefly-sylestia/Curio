@@ -1,8 +1,24 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): 10 new topic categories + franchise filter + science-tag enrichment
+## Current Request (COMPLETED): exploration-only instructions + per-category shades
 
-**Date:** 2026-08-10
+**Date:** 2026-08-11
+
+**What was asked:** Some explore instructions told users to MAKE things (cook, play, fold, build) instead of exploring. Also: each new category should get its own distinct shade, Artists vs Albums should differ just a little, and every new color needs light/dark/pastel variants.
+
+**User answers (ask_user):**
+- Food → read/watch history + origin; Games → fun fact + read + watch on YouTube, "if they like it they can play something like that".
+- Scope: ALL categories.
+- Shades: clearly distinct hues for new categories; artists/albums just a little.
+
+**What shipped (commit 9eb550a → follow-up):**
+- `scripts/rewrite_explore_instructions.py` — idempotent (verb-guarded) rewrite of **170 instructions**: 77 food (Cook→Read, history + origin + watch), 65 games (Play→Watch, fun fact + YouTube + optional similar game), ~28 strays across painters/scientists/wildcard/internet (Try/Make/Design/Draw/Solve/Fold/Craft/Build/Write/Play/Cook → Read/Watch/Look at). SCHEMA.md verb contract updated to forbid making verbs.
+- CurioColors.kt — per-category accents: CategoryAlbum #5F4DCB (subtle indigo twin for Albums vs Artists #4338CA), CategorySong #0E7490 cyan, CategorySeries #BE185D magenta, CategoryManga #5B21B6 deep violet, CategoryManhwa #9333EA orchid — each with ink twin + 20% tint; pastel auto-derives from accent hue, dark washes per existing family tuning.
+- Category.kt — ALBUMS/SONGS/SERIES/MANGA/MANHWA entries use the new tokens.
+- CaptureEntity.kt fallback verbs GAMES→Watch, FOOD→Read; ExploreSession reflectionQuestion "Finished playing?"→"Finished watching?", "Done cooking?"→"Done reading?".
+- Validation: 6480 topics / 0 errors; braces + diff clean; JSON diffs scoped to exploreAction only (trailing newline restored).
+
+**Notes:** Mixed-deck curated blend tables only cover the six original accents — new shades fall back to runtime HSL blends (acceptable; revisit if a Songs+Series deck looks off). Idempotency guard = `verb != Cook/Play` early return.
 
 ### What the user asked
 Expand the topic database with fun stuff (franchises etc.), add an MCU-like franchise filter (not too many), add new categories — Anime, Songs, Manga, Manhwa — and suggest more.

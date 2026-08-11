@@ -1,3 +1,5 @@
+• Every explore instruction is now about exploring, not doing: Food topics read about the dish's history and where it's from (then watch how it's made), Games topics serve a fun fact + read + watch on YouTube, and stragglers across Scientists, Painters and Wildcard no longer tell you to cook, play, fold, or build — it's read, watch, and learn everywhere.
+• Each new lane got its own shade: Anime violet, Manga deep violet, Manhwa orchid, Songs cyan, Series magenta — with light/dark/pastel variants for every one. Artists and Albums now differ by just a hint, so the picker no longer shows twins.
 • Ten new lanes: Songs, Series, Anime, Manga, Manhwa, Games, Mythology, Sports, Food & Drink, and Internet Culture — ~640 hand-curated topics, each with its own color, icon and explore action.
 • The Spin filter sheet gained a Franchise row — filter Films/Anime decks by MCU, Star Wars, DC, Harry Potter, Lord of the Rings, Pixar, Studio Ghibli or Disney (tagged across 76 films).
 • Scientists and Discoveries topics are fully tagged now — the Topic Reveal tag strip never runs empty on those lanes.

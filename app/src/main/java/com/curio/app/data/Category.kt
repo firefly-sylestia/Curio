@@ -226,9 +226,9 @@ object CurioCategories {
         CurioCategory(
             id            = CategoryId.ALBUMS,
             displayName   = "Albums",
-            accent        = CurioColors.CategoryIndigo,
-            lightAccent   = CurioColors.CategoryIndigoInk,
-            tint          = CurioColors.CategoryIndigoTint,
+            accent        = CurioColors.CategoryAlbum,
+            lightAccent   = CurioColors.CategoryAlbumInk,
+            tint          = CurioColors.CategoryAlbumTint,
             iconGlyph     = "album",
             family        = CategoryFamily.MUSIC,
             defaultFormat = CaptureFormat.ReelNotes
@@ -321,9 +321,9 @@ object CurioCategories {
         CurioCategory(
             id            = CategoryId.SONGS,
             displayName   = "Songs",
-            accent        = CurioColors.CategoryIndigo,
-            lightAccent   = CurioColors.CategoryIndigoInk,
-            tint          = CurioColors.CategoryIndigoTint,
+            accent        = CurioColors.CategorySong,
+            lightAccent   = CurioColors.CategorySongInk,
+            tint          = CurioColors.CategorySongTint,
             iconGlyph     = "queue_music",
             family        = CategoryFamily.MUSIC,
             defaultFormat = CaptureFormat.SoundBite
@@ -332,9 +332,9 @@ object CurioCategories {
         CurioCategory(
             id            = CategoryId.SERIES,
             displayName   = "Series",
-            accent        = CurioColors.CategoryRose,
-            lightAccent   = CurioColors.CategoryRoseInk,
-            tint          = CurioColors.CategoryRoseTint,
+            accent        = CurioColors.CategorySeries,
+            lightAccent   = CurioColors.CategorySeriesInk,
+            tint          = CurioColors.CategorySeriesTint,
             iconGlyph     = "tv",
             family        = CategoryFamily.MOVIES,
             defaultFormat = CaptureFormat.Marginalia
@@ -353,9 +353,9 @@ object CurioCategories {
         CurioCategory(
             id            = CategoryId.MANGA,
             displayName   = "Manga",
-            accent        = CurioColors.CategoryViolet,
-            lightAccent   = CurioColors.CategoryVioletInk,
-            tint          = CurioColors.CategoryVioletTint,
+            accent        = CurioColors.CategoryManga,
+            lightAccent   = CurioColors.CategoryMangaInk,
+            tint          = CurioColors.CategoryMangaTint,
             iconGlyph     = "auto_stories",
             family        = CategoryFamily.ANIME_COMICS,
             defaultFormat = CaptureFormat.Marginalia
@@ -363,9 +363,9 @@ object CurioCategories {
         CurioCategory(
             id            = CategoryId.MANHWA,
             displayName   = "Manhwa",
-            accent        = CurioColors.CategoryViolet,
-            lightAccent   = CurioColors.CategoryVioletInk,
-            tint          = CurioColors.CategoryVioletTint,
+            accent        = CurioColors.CategoryManhwa,
+            lightAccent   = CurioColors.CategoryManhwaInk,
+            tint          = CurioColors.CategoryManhwaTint,
             iconGlyph     = "import_contacts",
             family        = CategoryFamily.ANIME_COMICS,
             defaultFormat = CaptureFormat.Marginalia

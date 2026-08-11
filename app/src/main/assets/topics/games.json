@@ -8,10 +8,10 @@
     "imageUrl": "",
     "byline": "Atari",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Pong (1972) end-to-end",
       "durationMinutes": 15,
-      "instruction": "Play one round and notice the physics — the ball's angle is the whole game. The genius is that the simplicity is the design."
+      "instruction": "Fun fact: the simplicity is the design. Read about Pong, then watch it on YouTube and notice the physics — the ball's angle is the whole game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Arcade",
@@ -30,10 +30,10 @@
     "imageUrl": "",
     "byline": "Taito",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Space Invaders (1978) end-to-end",
       "durationMinutes": 20,
-      "instruction": "Play and notice the speed-up — the CPU is the game designer. The genius is that the 'invaders' march is the countdown."
+      "instruction": "Fun fact: the 'invaders' march is the countdown. Read about Space Invaders, then watch it on YouTube and notice the speed-up — the CPU is the game designer. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Arcade",
@@ -52,10 +52,10 @@
     "imageUrl": "",
     "byline": "Namco",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Pac-Man (1980) end-to-end",
       "durationMinutes": 20,
-      "instruction": "Play one maze and notice the ghost personalities — each one has a real AI pattern. The genius is that the maze is a single line."
+      "instruction": "Fun fact: the maze is a single line. Read about Pac-Man, then watch it on YouTube and notice the ghost personalities — each one has a real AI pattern. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Arcade",
@@ -74,10 +74,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Donkey Kong (1981) end-to-end",
       "durationMinutes": 20,
-      "instruction": "Play the first level and notice the barrel physics — the timing is the game. The genius is that the jump is the whole vocabulary."
+      "instruction": "Fun fact: the jump is the whole vocabulary. Read about Donkey Kong, then watch it on YouTube and notice the barrel physics — the timing is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Arcade",
@@ -96,10 +96,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Super Mario Bros. (1985) end-to-end",
       "durationMinutes": 60,
-      "instruction": "Play level 1-1 and notice the teaching — every hazard is introduced safely first. The genius is that the level is a lesson."
+      "instruction": "Fun fact: the level is a lesson. Read about Super Mario Bros., then watch it on YouTube and notice the teaching — every hazard is introduced safely first. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Platformer",
@@ -118,10 +118,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "The Legend of Zelda (1986) end-to-end",
       "durationMinutes": 90,
-      "instruction": "Play the first dungeon and notice the openness — you can go anywhere. The genius is that the exploration is the plot."
+      "instruction": "Fun fact: the exploration is the plot. Read about The Legend of Zelda, then watch it on YouTube and notice the openness — you can go anywhere. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Adventure",
@@ -140,10 +140,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Metroid (1986) end-to-end",
       "durationMinutes": 90,
-      "instruction": "Play the first area and notice the locked doors — the backtracking is the design. The genius is that the reveal is the reward."
+      "instruction": "Fun fact: the reveal is the reward. Read about Metroid, then watch it on YouTube and notice the locked doors — the backtracking is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action",
@@ -162,10 +162,10 @@
     "imageUrl": "",
     "byline": "Square",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Final Fantasy VII (1997) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the opening and notice the scale — the game is a film in 1997 terms. The genius is that the story is the combat."
+      "instruction": "Fun fact: the story is the combat. Read about Final Fantasy VII, then watch it on YouTube and notice the scale — the game is a film in 1997 terms. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -184,10 +184,10 @@
     "imageUrl": "",
     "byline": "Square",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Chrono Trigger (1995) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play the first few hours and notice the pacing — no random battles, no filler. The genius is that the time travel is the structure."
+      "instruction": "Fun fact: the time travel is the structure. Read about Chrono Trigger, then watch it on YouTube and notice the pacing — no random battles, no filler. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -206,10 +206,10 @@
     "imageUrl": "",
     "byline": "Sega",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Sonic the Hedgehog (1991) end-to-end",
       "durationMinutes": 60,
-      "instruction": "Play the Green Hill Zone and notice the speed — the level is a rollercoaster. The genius is that the speed is the character."
+      "instruction": "Fun fact: the speed is the character. Read about Sonic the Hedgehog, then watch it on YouTube and notice the speed — the level is a rollercoaster. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Platformer",
@@ -228,10 +228,10 @@
     "imageUrl": "",
     "byline": "Capcom",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Street Fighter II (1991) end-to-end",
       "durationMinutes": 60,
-      "instruction": "Play as Ryu and learn the special moves — the quarter-circle is the grammar. The genius is that the roster is the game."
+      "instruction": "Fun fact: the roster is the game. Read about Street Fighter II, then watch it on YouTube and learn the special moves — the quarter-circle is the grammar. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Fighting",
@@ -250,10 +250,10 @@
     "imageUrl": "",
     "byline": "Midway",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Mortal Kombat (1992) end-to-end",
       "durationMinutes": 45,
-      "instruction": "Play one match and notice the digitized realism — real actors, real motion. The genius is that the controversy IS the marketing."
+      "instruction": "Fun fact: the controversy IS the marketing. Read about Mortal Kombat, then watch it on YouTube and notice the digitized realism — real actors, real motion. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Fighting",
@@ -272,10 +272,10 @@
     "imageUrl": "",
     "byline": "id Software",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Doom (1993) end-to-end",
       "durationMinutes": 90,
-      "instruction": "Play the first episode and notice the level design — the geometry is the combat. The genius is that the shareware was the marketing."
+      "instruction": "Fun fact: the shareware was the marketing. Read about Doom, then watch it on YouTube and notice the level design — the geometry is the combat. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -294,10 +294,10 @@
     "imageUrl": "",
     "byline": "id Software",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Quake (1996) end-to-end",
       "durationMinutes": 90,
-      "instruction": "Play the first level and notice the 3D — the verticality is new. The genius is that the rocket jump is the speedrun."
+      "instruction": "Fun fact: the rocket jump is the speedrun. Read about Quake, then watch it on YouTube and notice the 3D — the verticality is new. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -316,10 +316,10 @@
     "imageUrl": "",
     "byline": "Valve",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Half-Life (1998) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play the first 30 minutes and notice the scripted events — no cutscenes, all in-world. The genius is that the story is the environment."
+      "instruction": "Fun fact: the story is the environment. Read about Half-Life, then watch it on YouTube and notice the scripted events — no cutscenes, all in-world. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -338,10 +338,10 @@
     "imageUrl": "",
     "byline": "Valve",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Portal (2007) end-to-end",
       "durationMinutes": 90,
-      "instruction": "Play the first chambers and notice the teaching — each test is a lesson. The genius is that the puzzle is the character."
+      "instruction": "Fun fact: the puzzle is the character. Read about Portal, then watch it on YouTube and notice the teaching — each test is a lesson. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Puzzle",
@@ -360,10 +360,10 @@
     "imageUrl": "",
     "byline": "Valve",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Counter-Strike (2000) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play a round and notice the economy — the buy system is the strategy. The genius is that the tension is the design."
+      "instruction": "Fun fact: the tension is the design. Read about Counter-Strike, then watch it on YouTube and notice the economy — the buy system is the strategy. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -382,10 +382,10 @@
     "imageUrl": "",
     "byline": "Valve",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Team Fortress 2 (2007) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play as two different classes and notice the difference — the classes are the game. The genius is that the personality is the balance."
+      "instruction": "Fun fact: the personality is the balance. Read about Team Fortress 2, then watch it on YouTube and notice the difference — the classes are the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -404,10 +404,10 @@
     "imageUrl": "",
     "byline": "Mojang",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Minecraft (2011) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play the first night and notice the survival loop — dig, build, survive. The genius is that the block is the entire vocabulary."
+      "instruction": "Fun fact: the block is the entire vocabulary. Read about Minecraft, then watch it on YouTube and notice the survival loop — dig, build, survive. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Sandbox",
@@ -426,10 +426,10 @@
     "imageUrl": "",
     "byline": "Alexey Pajitnov",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Tetris (1984) end-to-end",
       "durationMinutes": 45,
-      "instruction": "Play for ten minutes and notice the piece selection — the randomness is the challenge. The genius is that the geometry is the game."
+      "instruction": "Fun fact: the geometry is the game. Read about Tetris, then watch it on YouTube and notice the piece selection — the randomness is the challenge. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Puzzle",
@@ -448,10 +448,10 @@
     "imageUrl": "",
     "byline": "Game Freak",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Pokémon Red and Blue (1996) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the first town and notice the design — the 'catch' is the hook. The genius is that the trading is the multiplayer."
+      "instruction": "Fun fact: the trading is the multiplayer. Read about Pokémon Red and Blue, then watch it on YouTube and notice the design — the 'catch' is the hook. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -470,10 +470,10 @@
     "imageUrl": "",
     "byline": "Rare",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "GoldenEye 007 (1997) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play the Facility level and notice the level design — the mission is the stealth. The genius is that the multiplayer was an afterthought."
+      "instruction": "Fun fact: the multiplayer was an afterthought. Read about GoldenEye 007, then watch it on YouTube and notice the level design — the mission is the stealth. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -492,10 +492,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Super Mario 64 (1996) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play the first level and notice the camera — the controls are the design. The genius is that the 3D is the learning."
+      "instruction": "Fun fact: the 3D is the learning. Read about Super Mario 64, then watch it on YouTube and notice the camera — the controls are the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Platformer",
@@ -514,10 +514,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "The Legend of Zelda: Ocarina of Time (1998) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the first temple and notice the lock-on — the combat is the design. The genius is that the time travel is the structure."
+      "instruction": "Fun fact: the time travel is the structure. Read about The Legend of Zelda: Ocarina of Time, then watch it on YouTube and notice the lock-on — the combat is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Adventure",
@@ -536,10 +536,10 @@
     "imageUrl": "",
     "byline": "Capcom",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Resident Evil (1996) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play the mansion and notice the resource management — the ammo IS the tension. The genius is that the horror is the economy."
+      "instruction": "Fun fact: the horror is the economy. Read about Resident Evil, then watch it on YouTube and notice the resource management — the ammo IS the tension. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Survival Horror",
@@ -558,10 +558,10 @@
     "imageUrl": "",
     "byline": "Konami",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Silent Hill (1999) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play the first town and notice the fog — the limitation is the design. The genius is that the horror is the psychology."
+      "instruction": "Fun fact: the horror is the psychology. Read about Silent Hill, then watch it on YouTube and notice the fog — the limitation is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Survival Horror",
@@ -580,10 +580,10 @@
     "imageUrl": "",
     "byline": "Konami",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Metal Gear Solid (1998) end-to-end",
       "durationMinutes": 150,
-      "instruction": "Play the first mission and notice the stealth — the radar is the game. The genius is that the boss fights are the philosophy."
+      "instruction": "Fun fact: the boss fights are the philosophy. Read about Metal Gear Solid, then watch it on YouTube and notice the stealth — the radar is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Stealth",
@@ -602,10 +602,10 @@
     "imageUrl": "",
     "byline": "Bungie",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Halo: Combat Evolved (2001) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play the first level and notice the shield — the health design is the game. The genius is that the 'ring' is the level."
+      "instruction": "Fun fact: the 'ring' is the level. Read about Halo: Combat Evolved, then watch it on YouTube and notice the shield — the health design is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -624,10 +624,10 @@
     "imageUrl": "",
     "byline": "Rockstar",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Grand Theft Auto III (2001) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the first hour and notice the freedom — the city IS the game. The genius is that the radio is the character."
+      "instruction": "Fun fact: the radio is the character. Read about Grand Theft Auto III, then watch it on YouTube and notice the freedom — the city IS the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Open World",
@@ -646,10 +646,10 @@
     "imageUrl": "",
     "byline": "Rockstar",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Grand Theft Auto V (2013) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first heist and notice the planning — the structure is the design. The genius is that the three characters are the game's three genres."
+      "instruction": "Fun fact: the three characters are the game's three genres. Read about Grand Theft Auto V, then watch it on YouTube and notice the planning — the structure is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Open World",
@@ -668,10 +668,10 @@
     "imageUrl": "",
     "byline": "Bethesda",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "The Elder Scrolls V: Skyrim (2011) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the opening and notice the freedom — the world is the game. The genius is that the mods are the longevity."
+      "instruction": "Fun fact: the mods are the longevity. Read about The Elder Scrolls V: Skyrim, then watch it on YouTube and notice the freedom — the world is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -690,10 +690,10 @@
     "imageUrl": "",
     "byline": "Obsidian",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Fallout: New Vegas (2010) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first town and notice the factions — every choice has a cost. The genius is that the writing is the combat."
+      "instruction": "Fun fact: the writing is the combat. Read about Fallout: New Vegas, then watch it on YouTube and notice the factions — every choice has a cost. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -712,10 +712,10 @@
     "imageUrl": "",
     "byline": "BioWare",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Mass Effect 2 (2010) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the character recruitment missions — the loyalty is the mechanic. The genius is that the ending is the consequence."
+      "instruction": "Fun fact: the ending is the consequence. Read about Mass Effect 2, then watch it on YouTube — the loyalty is the mechanic. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -734,10 +734,10 @@
     "imageUrl": "",
     "byline": "CD Projekt Red",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "The Witcher 3: Wild Hunt (2015) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the Bloody Baron quest and notice the choices — every answer has a cost. The genius is that the side quests are the story."
+      "instruction": "Fun fact: the side quests are the story. Read about The Witcher 3: Wild Hunt, then watch it on YouTube and notice the choices — every answer has a cost. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -756,10 +756,10 @@
     "imageUrl": "",
     "byline": "FromSoftware",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Dark Souls (2011) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the Undead Burg and notice the level design — the shortcut is the reward. The genius is that the lore is the exploration."
+      "instruction": "Fun fact: the lore is the exploration. Read about Dark Souls, then watch it on YouTube and notice the level design — the shortcut is the reward. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action RPG",
@@ -778,10 +778,10 @@
     "imageUrl": "",
     "byline": "FromSoftware",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Bloodborne (2015) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first area and notice the regain — the aggression is the design. The genius is that the horror is the genre."
+      "instruction": "Fun fact: the horror is the genre. Read about Bloodborne, then watch it on YouTube and notice the regain — the aggression is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action RPG",
@@ -800,10 +800,10 @@
     "imageUrl": "",
     "byline": "FromSoftware",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Elden Ring (2022) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the opening area and notice the discovery — the map rewards curiosity. The genius is that the open world is the dungeon."
+      "instruction": "Fun fact: the open world is the dungeon. Read about Elden Ring, then watch it on YouTube and notice the discovery — the map rewards curiosity. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action RPG",
@@ -822,10 +822,10 @@
     "imageUrl": "",
     "byline": "Santa Monica Studio",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "God of War (2018) (2018) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the opening and notice the camera — one continuous shot. The genius is that the axe is the character."
+      "instruction": "Fun fact: the axe is the character. Read about God of War (2018), then watch it on YouTube and notice the camera — one continuous shot. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action",
@@ -844,10 +844,10 @@
     "imageUrl": "",
     "byline": "Naughty Dog",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "The Last of Us (2013) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the first hour and notice the opening — the prologue is the thesis. The genius is that the story is the gameplay."
+      "instruction": "Fun fact: the story is the gameplay. Read about The Last of Us, then watch it on YouTube and notice the opening — the prologue is the thesis. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action",
@@ -866,10 +866,10 @@
     "imageUrl": "",
     "byline": "Naughty Dog",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Uncharted 2: Among Thieves (2009) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play the train sequence and notice the set-piece design — the action IS the story. The genius is that the spectacle is the craft."
+      "instruction": "Fun fact: the spectacle is the craft. Read about Uncharted 2: Among Thieves, then watch it on YouTube and notice the set-piece design — the action IS the story. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action",
@@ -888,10 +888,10 @@
     "imageUrl": "",
     "byline": "Rockstar",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Red Dead Redemption 2 (2018) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the opening chapter and notice the detail — the world is alive. The genius is that the tragedy is the structure."
+      "instruction": "Fun fact: the tragedy is the structure. Read about Red Dead Redemption 2, then watch it on YouTube and notice the detail — the world is alive. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Open World",
@@ -910,10 +910,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "The Legend of Zelda: Breath of the Wild (2017) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the opening plateau and notice the freedom — the physics IS the game. The genius is that the climb is the answer."
+      "instruction": "Fun fact: the climb is the answer. Read about The Legend of Zelda: Breath of the Wild, then watch it on YouTube and notice the freedom — the physics IS the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Open World",
@@ -932,10 +932,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Super Mario Odyssey (2017) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the first kingdom and notice the hat — the capture mechanic is the design. The genius is that the power-up is the character."
+      "instruction": "Fun fact: the power-up is the character. Read about Super Mario Odyssey, then watch it on YouTube and notice the hat — the capture mechanic is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Platformer",
@@ -954,10 +954,10 @@
     "imageUrl": "",
     "byline": "Maddy Makes Games",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Celeste (2018) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play the first chapter and notice the theme — the mountain is the metaphor. The genius is that the difficulty is the therapy."
+      "instruction": "Fun fact: the difficulty is the therapy. Read about Celeste, then watch it on YouTube and notice the theme — the mountain is the metaphor. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Platformer",
@@ -976,10 +976,10 @@
     "imageUrl": "",
     "byline": "Team Cherry",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Hollow Knight (2017) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first area and notice the map — the exploration is the game. The genius is that the world is the story."
+      "instruction": "Fun fact: the world is the story. Read about Hollow Knight, then watch it on YouTube and notice the map — the exploration is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Metroidvania",
@@ -998,10 +998,10 @@
     "imageUrl": "",
     "byline": "Toby Fox",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Undertale (2015) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play the first area and notice the mercy — the pacifist path is the design. The genius is that the violence is the choice."
+      "instruction": "Fun fact: the violence is the choice. Read about Undertale, then watch it on YouTube and notice the mercy — the pacifist path is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -1020,10 +1020,10 @@
     "imageUrl": "",
     "byline": "Supergiant Games",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Hades (2020) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play your first few runs and notice the story — the deaths are the content. The genius is that the roguelike IS the narrative."
+      "instruction": "Fun fact: the roguelike IS the narrative. Read about Hades, then watch it on YouTube and notice the story — the deaths are the content. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Roguelike",
@@ -1042,10 +1042,10 @@
     "imageUrl": "",
     "byline": "ConcernedApe",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Stardew Valley (2016) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first season and notice the community — the town is the game. The genius is that the farming is the rhythm."
+      "instruction": "Fun fact: the farming is the rhythm. Read about Stardew Valley, then watch it on YouTube and notice the community — the town is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Simulation",
@@ -1064,10 +1064,10 @@
     "imageUrl": "",
     "byline": "Nintendo",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Animal Crossing: New Horizons (2020) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first few days and notice the real-time — the clock is the game. The genius is that the gentleness is the design."
+      "instruction": "Fun fact: the gentleness is the design. Read about Animal Crossing: New Horizons, then watch it on YouTube and notice the real-time — the clock is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Simulation",
@@ -1086,10 +1086,10 @@
     "imageUrl": "",
     "byline": "Innersloth",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Among Us (2018) end-to-end",
       "durationMinutes": 60,
-      "instruction": "Play a round and notice the social gameplay — the deduction is the game. The genius is that the simplicity is the design."
+      "instruction": "Fun fact: the simplicity is the design. Read about Among Us, then watch it on YouTube and notice the social gameplay — the deduction is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Multiplayer",
@@ -1108,10 +1108,10 @@
     "imageUrl": "",
     "byline": "Epic Games",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Fortnite (2017) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play a match and notice the building — the mechanic is the game. The genius is that the live events are the culture."
+      "instruction": "Fun fact: the live events are the culture. Read about Fortnite, then watch it on YouTube and notice the building — the mechanic is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Battle Royale",
@@ -1130,10 +1130,10 @@
     "imageUrl": "",
     "byline": "Riot Games",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "League of Legends (2009) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play a match and notice the roles — the team composition is the strategy. The genius is that the champions are the depth."
+      "instruction": "Fun fact: the champions are the depth. Read about League of Legends, then watch it on YouTube and notice the roles — the team composition is the strategy. If it looks fun, you can try a similar game."
     },
     "tags": [
       "MOBA",
@@ -1152,10 +1152,10 @@
     "imageUrl": "",
     "byline": "Blizzard",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "World of Warcraft (2004) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the starting zone and notice the world — the community is the game. The genius is that the scale is the design."
+      "instruction": "Fun fact: the scale is the design. Read about World of Warcraft, then watch it on YouTube and notice the world — the community is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "MMORPG",
@@ -1174,10 +1174,10 @@
     "imageUrl": "",
     "byline": "Blizzard",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "StarCraft (1998) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the first mission and notice the factions — the asymmetry is the design. The genius is that the balance is the esport."
+      "instruction": "Fun fact: the balance is the esport. Read about StarCraft, then watch it on YouTube and notice the factions — the asymmetry is the design. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RTS",
@@ -1196,10 +1196,10 @@
     "imageUrl": "",
     "byline": "Firaxis",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Civilization VI (2016) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the first era and notice the districts — the placement is the strategy. The genius is that the history is the content."
+      "instruction": "Fun fact: the history is the content. Read about Civilization VI, then watch it on YouTube and notice the districts — the placement is the strategy. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Strategy",
@@ -1218,10 +1218,10 @@
     "imageUrl": "",
     "byline": "Ensemble Studios",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Age of Empires II (1999) end-to-end",
       "durationMinutes": 240,
-      "instruction": "Play the William Wallace campaign — it's the tutorial. The genius is that the history is the content."
+      "instruction": "Fun fact: the history is the content. Read about Age of Empires II, then watch it on YouTube — it's the tutorial. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RTS",
@@ -1240,10 +1240,10 @@
     "imageUrl": "",
     "byline": "Blizzard",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Diablo II (2000) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the first act and notice the loot — the drops are the game. The genius is that the item hunt is the depth."
+      "instruction": "Fun fact: the item hunt is the depth. Read about Diablo II, then watch it on YouTube and notice the loot — the drops are the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action RPG",
@@ -1262,10 +1262,10 @@
     "imageUrl": "",
     "byline": "thatgamecompany",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Journey (2012) end-to-end",
       "durationMinutes": 90,
-      "instruction": "Play through once without rushing — the companion is the game. The genius is that the anonymity is the design."
+      "instruction": "Fun fact: the anonymity is the design. Read about Journey, then watch it on YouTube — the companion is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Adventure",
@@ -1284,10 +1284,10 @@
     "imageUrl": "",
     "byline": "ZA/UM",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Disco Elysium (2019) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first day and notice the skills — the internal voices are the game. The genius is that the dialogue is the combat."
+      "instruction": "Fun fact: the dialogue is the combat. Read about Disco Elysium, then watch it on YouTube and notice the skills — the internal voices are the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -1306,10 +1306,10 @@
     "imageUrl": "",
     "byline": "Larian Studios",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Baldur's Gate 3 (2023) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the first act and notice the choices — the dice are the tension. The genius is that the freedom is the design."
+      "instruction": "Fun fact: the freedom is the design. Read about Baldur's Gate 3, then watch it on YouTube and notice the choices — the dice are the tension. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -1328,10 +1328,10 @@
     "imageUrl": "",
     "byline": "CD Projekt Red",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Cyberpunk 2077 (2020) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the opening act and notice the world — the city is the character. The genius is that the redemption is the story."
+      "instruction": "Fun fact: the redemption is the story. Read about Cyberpunk 2077, then watch it on YouTube and notice the world — the city is the character. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -1350,10 +1350,10 @@
     "imageUrl": "",
     "byline": "Atlus",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Persona 5 (2016) end-to-end",
       "durationMinutes": 360,
-      "instruction": "Play the first palace and notice the calendar — the time is the resource. The genius is that the style is the substance."
+      "instruction": "Fun fact: the style is the substance. Read about Persona 5, then watch it on YouTube and notice the calendar — the time is the resource. If it looks fun, you can try a similar game."
     },
     "tags": [
       "RPG",
@@ -1372,10 +1372,10 @@
     "imageUrl": "",
     "byline": "FromSoftware",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Sekiro: Shadows Die Twice (2019) end-to-end",
       "durationMinutes": 300,
-      "instruction": "Play the first boss and notice the posture — the parry is the game. The genius is that the duel is the design."
+      "instruction": "Fun fact: the duel is the design. Read about Sekiro: Shadows Die Twice, then watch it on YouTube and notice the posture — the parry is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Action",
@@ -1394,10 +1394,10 @@
     "imageUrl": "",
     "byline": "id Software",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Doom Eternal (2020) end-to-end",
       "durationMinutes": 180,
-      "instruction": "Play the first level and notice the loop — the kills are the resources. The genius is that the aggression is the design."
+      "instruction": "Fun fact: the aggression is the design. Read about Doom Eternal, then watch it on YouTube and notice the loop — the kills are the resources. If it looks fun, you can try a similar game."
     },
     "tags": [
       "FPS",
@@ -1416,10 +1416,10 @@
     "imageUrl": "",
     "byline": "Lucas Pope",
     "exploreAction": {
-      "verb": "Play",
+      "verb": "Watch",
       "targetName": "Papers, Please (2013) end-to-end",
       "durationMinutes": 120,
-      "instruction": "Play your first day and notice the rules — the bureaucracy is the game. The genius is that the morality is the tension."
+      "instruction": "Fun fact: the morality is the tension. Read about Papers, Please, then watch it on YouTube and notice the rules — the bureaucracy is the game. If it looks fun, you can try a similar game."
     },
     "tags": [
       "Simulation",
