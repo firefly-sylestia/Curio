@@ -348,7 +348,7 @@ object CurioPet {
     }
 
     /** The pet played (a dart / self-started game — persisted). */
-    fun notePlay(context: Context) {
+    fun notePlay(context: Context, react: Boolean = true) {
         val p = prefs(context)
         p.edit()
             .putInt(KEY_PET_PLAYS, p.getInt(KEY_PET_PLAYS, 0) + 1)
@@ -356,7 +356,11 @@ object CurioPet {
             .apply()
         CurioPetBrain.observePlay(context)
         // v9.2 — a play session starts the pet's PLAY reaction.
-        reactTo(Event.PLAY)
+        // v12 — some plays (the post-tap dart, the autonomous games, the
+        // Pet Life routine) bring their own line; `react = false` still
+        // counts the play and feeds the persona, but skips the event so the
+        // generic play reaction can't clobber that line.
+        if (react) reactTo(Event.PLAY)
     }
 
     private fun touchCount(context: Context): Int = prefs(context).getInt(KEY_PET_BOOPS, 0)
@@ -493,7 +497,11 @@ object CurioPet {
             bond() == Bond.STRANGER && now - lastXpAt(context) < 5 * 60_000L -> Mood.SHY
             leastExploredLane(context, lanes) != null -> Mood.CURIOUS
             // v9.2 — a long daytime lull reads grumpy before it reads sleepy.
-            timeOfDay() != TimeOfDay.NIGHT && now - lastXpAt(context) > 6 * 3_600_000L -> Mood.GRUMPY
+            // v12 — 6h was effectively unreachable (the pet auto-naps after
+            // 8 min idle, so it only ever sulked right after being woken from
+            // a long absence). 45 min makes it a real mood during a quiet or
+            // petting-heavy stretch without tripping over the daytime nap.
+            timeOfDay() != TimeOfDay.NIGHT && now - lastXpAt(context) > 45 * 60_000L -> Mood.GRUMPY
             // v8.14 — natural bed time: after dark the pet gets drowsy once
             // the day's excitement cools (30 min without XP) and dozes off.
             timeOfDay() == TimeOfDay.NIGHT && now - lastXpAt(context) > 30 * 60_000L -> Mood.SLEEPY

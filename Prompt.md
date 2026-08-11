@@ -1,5 +1,20 @@
 # Prompt.md — Request Log
 
+## Current Request (COMPLETED): Fix pet behavior double-fire bugs
+
+**Date:** 2026-08-11
+
+**What was asked:** Fix the four double-fire pet bugs: single TOUCH path, silent playful dart, grumpy threshold, level-up double-speak.
+
+**Changes made:**
+- **CurioPet.kt — `notePlay(context, react: Boolean = true)`**: `react=false` still counts the play, sets `KEY_LAST_PLAY_AT` (drives BOUNCY/PLAYFUL moods) and feeds `CurioPetBrain.observePlay`, but skips `reactTo(Event.PLAY)` so the generic play reaction can't clobber a line the play itself already carries.
+- **CurioFloatingPet.kt — all 4 play sites now silent**: the post-tap dart (was overwriting the tap's gated boop line with "Wheee!" after every tap), the chameleon game, the spark-catch game, and the Pet Life routine (each queues its own line).
+- **CurioFloatingPet.kt — single TOUCH path**: removed `Event.TOUCH` from the event-reaction `when` (added `else -> null` + `if (event != null)` guard). The tap handler was already the full owner (gated 40% line, tiered boop/play-bow/celebration motion, hearts, TAP custom actions); re-firing made every tap speak. `seenEvents` still increments so no reprocessing.
+- **CurioPet.kt — GRUMPY threshold 6h → 45 min**: 6h was unreachable (auto-nap at 8 min idle), so the pet only ever sulked after being woken from a long absence. Now it's a real mood during a quiet/petting-heavy stretch.
+- **CurioFloatingPet.kt — mood loop fires EXCITED only**: PROUD is fully owned by the LEVEL_UP event reaction (line + custom LEVEL_UP actions fire once there); the mood loop re-firing made the pet double-speak ~1.2s after a level-up and double-fire custom actions. EXCITED (new lane) has no event of its own, so the mood loop stays its only voice (keeps its pre-existing custom-action firing).
+
+**Validation:** brace balance OK (126 files), `git diff --check` clean, code review passed (type-check path verified via smart-cast; level-up-while-asleep regression negligible since earning XP requires interaction that keeps the pet awake; dormant PLAY event/mapping left as harmless scaffolding). Gradle build left to CI.
+
 ## Current Request (COMPLETED): stop shipping authoring scripts in commits
 
 **Date:** 2026-08-11

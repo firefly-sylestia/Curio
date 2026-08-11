@@ -566,7 +566,10 @@ fun CurioFloatingPet(
                     val target = playDartTarget!!
                     playDartTarget = null
                     // Playful dash to where the tap happened — quick and keen.
-                    CurioPet.notePlay(context)
+                    // v12 — silent play: the tap already answered with its own
+                    // (gated) line; firing the PLAY event here replaced it
+                    // with a generic play line after every single tap.
+                    CurioPet.notePlay(context, react = false)
                     walkTo(target, stepMs = 14, steps = 40)
                     continue
                 }
@@ -785,7 +788,9 @@ fun CurioFloatingPet(
                 // somewhere new with a flourish. Never while glued to the
                 // deck or mid-spin.
                 if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.05f) {
-                    CurioPet.notePlay(context)
+                    // v12 — the game speaks its own line; keep the generic
+                    // PLAY reaction quiet so it can't clobber it.
+                    CurioPet.notePlay(context, react = false)
                     queueReaction(CurioPet.chameleonLine())
                     squishKey++
                     chameleonAlpha.snapTo(1f)
@@ -813,7 +818,9 @@ fun CurioFloatingPet(
                 // v9.x — SPARK-CATCH GAME: a quick eager dash to a fresh spot
                 // to "grab" a falling spark, with a celebration on arrival.
                 if (!watching && !CurioPet.spinning && Random.nextFloat() < 0.06f) {
-                    CurioPet.notePlay(context)
+                    // v12 — the game speaks its own line; keep the generic
+                    // PLAY reaction quiet so it can't clobber it.
+                    CurioPet.notePlay(context, react = false)
                     queueReaction(CurioPet.sparkLine())
                     val sx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
                     val sy = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
@@ -829,7 +836,9 @@ fun CurioFloatingPet(
                 // often it does this comes from its GROWING PERSONALITY
                 // (bouncy pets play a lot, sparky ones are shy).
                 if (Random.nextFloat() < CurioPet.playfulBias(context)) {
-                    CurioPet.notePlay(context)
+                    // v12 — the routine speaks its own line; keep the generic
+                    // PLAY reaction quiet so it can't clobber it.
+                    CurioPet.notePlay(context, react = false)
                     playPetLifeRoutine(
                         PetLifeDirector.choose(
                             screen = routePrefix,
@@ -900,11 +909,15 @@ fun CurioFloatingPet(
                     CurioPet.Event.REVEAL_AUTO -> PetReactionEvents.REVEAL
                     CurioPet.Event.EXPLORE -> PetReactionEvents.EXPLORE
                     CurioPet.Event.SAVE -> PetReactionEvents.SAVE
-                    CurioPet.Event.TOUCH -> PetReactionEvents.TOUCH
                     CurioPet.Event.PLAY -> PetReactionEvents.PLAY
                     CurioPet.Event.LEVEL_UP -> PetReactionEvents.LEVEL_UP
+                    // v12 — TOUCH is owned entirely by the tap handler (gated
+                    // line + tiered motion + TAP actions). Re-firing it here
+                    // made EVERY tap speak, overwriting the 40% gated boop
+                    // line with the generic touch line.
+                    else -> null
                 }
-                fireReaction(event, CurioPet.eventLine(latest))
+                if (event != null) fireReaction(event, CurioPet.eventLine(latest))
                 if (latest == CurioPet.Event.SAVE) heartsKey++
                 // v8.53 — Phase 7: user-defined actions for app events fire
                 // alongside the built-in reaction.
@@ -929,7 +942,12 @@ fun CurioFloatingPet(
                 val m = CurioPet.mood(context, CurioQuests.categoriesState, screenHint)
                 if (lastMood != m) {
                     lastMood = m
-                    if (m == CurioPet.Mood.EXCITED || m == CurioPet.Mood.PROUD) {
+                    // v12 — PROUD is fully owned by the LEVEL_UP event
+                    // reaction (its line + custom actions fire once there);
+                    // the mood loop re-firing it made the pet double-speak
+                    // ~1.2s after a level-up. EXCITED (a new lane) has no
+                    // event of its own, so the mood loop stays its only voice.
+                    if (m == CurioPet.Mood.EXCITED) {
                         // App activity counts as interaction — the pet won't
                         // nap away mid-celebration.
                         fireReaction(
