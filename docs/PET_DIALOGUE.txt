@@ -439,9 +439,9 @@ Legend
     • "Streak day {N}! One spark at a time." / "Day {N}! The flame likes this pace."
 
 --------------------------------------------------------------------------------
-20. VOICE SYSTEM (v14) — the pet speaks in two registers by growth stage
-    Location: CurioPet.kt — every line source routes through
-              currentStage() == Stage.BABY (see the v14 BABY voice block)
+20. VOICE SYSTEM (v14/v14.1) — the pet speaks in three registers by growth stage
+    Location: CurioPet.kt — every line source routes through currentStage()
+              (Stage.BABY / Stage.FIRST_EVO / Stage.FINAL_EVO)
 
   BABY (Baby Spark — before Level 7 / path choice): telegraphic speech,
   modeled on human 18-24 month child language (telegraphic stage) and
@@ -457,7 +457,7 @@ Legend
       babyChameleonLines / babySparkLines / babyMorningLines /
       babyWelcomeBack*Lines / babySassyLines.
 
-  EVOLVED (Evolved / Fully Grown — Level 7+ with a path): the full rich
+  EVOLVED (Evolved — Level 7 with a path, FIRST_EVO): the full rich
   library above (section 1-19 pools). Natural-language writing rules
   (character-dialogue research):
     • Short-to-medium bursts; mix sentence lengths for rhythm.
@@ -466,6 +466,21 @@ Legend
       announcing them ("The deck knows what it's doing.", not
       "I predict a good outcome").
     • One consistent idiolect: witty, self-aware, warm.
+
+  MATURE (Fully Grown — Level 25, FINAL_EVO): a third, older register,
+  distinct from the first evolution. The pet has settled into itself:
+    • Longer, compound sentences with a reflective, philosophical bent
+      ("Growth comes quietly, then all at once.").
+    • Mentor-like observations about knowledge, time, and the shelf;
+      dry, gentle humor instead of eager sass.
+    • Calm sensory grounding — quiet, steady, warm; never cold.
+    • Bypasses the learning brain like the BABY (bubbleFor) and speaks
+      only from its own pools: matureMoodLine / matureEventLine /
+      matureTouchLine / matureStreakLine / matureSpinCheerLines /
+      maturePeekLines / matureChameleonLines / matureSparkLines /
+      matureMorningLines / matureWelcomeBack*Lines / matureSassyLines /
+      matureRoutineLine (Pet Life routines swap their youthful lines for
+      the calm register; unknown routine ids stay silent).
 
   MOTION-FIRST (v14) — play and spin moments prefer reaction over words:
     • Spin screen: the pet always hops while the deck reels; the cheer

@@ -1,18 +1,20 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETED): Route chain-quest stage rewards through addXp
+## Current Request (COMPLETED): Third, mature voice register for the fully-grown pet
 
 **Date:** 2026-08-11
 
-**What was asked:** Route chain-quest stage rewards through `addXp` so level-ups and evolutions never get missed (fixes the known quirk where `checkAll` grants stage XP outside the level/evolution detection path).
+**What was asked:** Give the fully-grown (Level 25 / FINAL_EVO) pet a third, more mature voice register distinct from the first evolution (FIRST_EVO).
 
-**Changes made (CurioQuests.kt):**
-- `checkAll(context)` → `awardChainStages(): Int` — awards any satisfied chain stages, returns the total XP granted, and NO LONGER persists (callers own the write).
-- `addXp` — calls `awardChainStages()` BEFORE reading the after-state, so stage XP is folded into level/evolution detection. Real XP (amount > 0) keeps the full reaction chain (evolved > level-up > xp-earned); a 0-XP refresh (amount == 0) only speaks when a level or growth tier was actually crossed, so it can't stomp an earlier event like a streak milestone.
-- `onStreakRecorded` — fires `noteStreakMilestone` (if new best) then routes through `addXp(context, 0)` (was `write` + `checkAll`), so chain XP from a streak record is detected and everything persists via addXp's write.
-- Seed/restore path — calls `awardChainStages()` + explicit `write(context)` (no pet reactions on restore).
+**Changes made (CurioPet.kt):**
+- New **MATURE voice block** after the baby pools: 16 val pools (sassy/proud/excited/happy/curious/focused/bouncy/shy/grumpy/playful/sleepy/spin-cheer/peek/chameleon/spark/morning + 3 welcome-back) + `matureMoodLine` / `matureEventLine` / `matureStreakLine` / `matureTouchLine`. Register: calm, wise, reflective, mentor-like; longer compound sentences, philosophical bent, dry gentle humor; em-dash-free per doc convention.
+- All 11 routing sites converted from `if (currentStage() == Stage.BABY) X else Y` to exhaustive 3-way `when (currentStage())`: sassy burst + eventLine, morningGreeting, welcomeBackLine (3 pools), lineFor, spinCheer, touchReaction, peekLine, chameleonLine, sparkLine, bubbleFor (FINAL_EVO bypasses `CurioPetBrain.say` like the BABY; brain still learns via observeActivity).
+- New `matureRoutineLine(routineId)` — maps all 37 Pet Life routine ids to calm mature lines (unknown ids → null). CurioFloatingPet.kt gate: FINAL_EVO swaps `routine.line` for the mature line instead of speaking the youthful ones.
+- `evolutionCeremonyLine` already had its FINAL_EVO branch (unchanged).
 
-**Validation:** brace balance OK, `git diff --check` clean, code review passed, no remaining `checkAll` refs. Gradle build left to CI.
+**Docs:** PET_DIALOGUE.txt section 20 now documents three registers (BABY / EVOLVED / MATURE) with writing rules; changelog bullet added.
+
+**Validation:** brace balance OK, `git diff --check` clean, code review passed (fixed: matureSleepyLines promoted to a val; routine lines no longer leak the youthful register to the mature pet). Gradle build left to CI.
 
 ## Current Request (COMPLETED): Dedicated quest-complete trigger in the Pet Designer
 

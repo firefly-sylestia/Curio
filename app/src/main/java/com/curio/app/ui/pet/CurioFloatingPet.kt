@@ -323,8 +323,15 @@ fun CurioFloatingPet(
             recentRoutineIds = (listOf(routine.id) + recentRoutineIds).distinct().take(5)
             lastTouch = System.currentTimeMillis()
             // v14 — a BABY speaks no routine lines: the routine plays as
-            // pure motion so the baby never utters adult sentences.
-            if (CurioPet.currentStage() != CurioPet.Stage.BABY) routine.line?.let(::queueReaction)
+            // pure motion so the baby never utters adult sentences. v14.1 —
+            // the fully grown pet swaps the youthful routine lines for its
+            // own calm register.
+            if (CurioPet.currentStage() != CurioPet.Stage.BABY) {
+                val line = if (CurioPet.currentStage() == CurioPet.Stage.FINAL_EVO) {
+                    CurioPet.matureRoutineLine(routine.id)
+                } else routine.line
+                line?.let(::queueReaction)
+            }
         }
 
         /**
