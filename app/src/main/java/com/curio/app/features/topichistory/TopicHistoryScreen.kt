@@ -56,6 +56,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.formatSessionShort
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
@@ -647,7 +648,7 @@ private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
                 )
             }
 
-            // ── Relative time + format glyph ──────────────────────────────
+            // ── Relative time + session duration + format glyph ───────────
             Column(
                 horizontalAlignment = Alignment.End
             ) {
@@ -656,13 +657,36 @@ private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                CurioIcon(
-                    name = entry.formatGlyph,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 16.dp,
+                // v22 — the explore-session duration rides the meta line when
+                // one was recorded (Timer glyph + "12m"), beside the format
+                // glyph, so each row shows how long the topic was explored.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(top = 2.dp)
-                )
+                ) {
+                    if (entry.sessionTimeMillis > 0L) {
+                        CurioIcon(
+                            name = CurioIcons.Timer,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 13.dp
+                        )
+                        Text(
+                            text = formatSessionShort(entry.sessionTimeMillis),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                    CurioIcon(
+                        name = entry.formatGlyph,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 14.dp
+                    )
+                }
             }
         }
     }
@@ -870,7 +894,9 @@ private data class HistoryEntry(
     val categoryId: CategoryId,
     val relativeTime: String,
     val dayLabel: String,
-    val formatGlyph: String
+    val formatGlyph: String,
+    // v22 — the saved capture's explore-session duration (0 = none recorded).
+    val sessionTimeMillis: Long = 0L
 )
 
 private fun CurioEntry.toHistoryEntry(): HistoryEntry = HistoryEntry(
@@ -879,7 +905,8 @@ private fun CurioEntry.toHistoryEntry(): HistoryEntry = HistoryEntry(
     categoryId = topic.categoryId,
     relativeTime = relativeTime(capturedAtMillis),
     dayLabel = dayLabel(capturedAtMillis),
-    formatGlyph = format.toGlyph()
+    formatGlyph = format.toGlyph(),
+    sessionTimeMillis = sessionTimeMillis
 )
 
 private fun CaptureFormat.toGlyph(): String = when (this) {

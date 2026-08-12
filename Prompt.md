@@ -1,6 +1,22 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Session duration as its own frosted-bar segment in entry detail (Android)
+## Current Request (COMPLETE): Session time in Topic History rows (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "Show session time in the topic history rows so you can see how long you explored each past topic."
+
+**What was built (app/src/main/java/com/curio/app/features/topichistory/TopicHistoryScreen.kt only):**
+- `HistoryEntry` gains `sessionTimeMillis: Long = 0L`; `CurioEntry.toHistoryEntry()` passes it through (imported `formatSessionShort`).
+- `HistoryRow`'s trailing meta column (relative time + lone format glyph) now shows — when a session was recorded — a Timer glyph (13dp) + the short duration (labelSmall, "12m") beside the format glyph (14dp), all in `onSurfaceVariant`, right-aligned.
+- Scope: only the day-grouped entry rows carry session data; Pinned/Sentiment rows are topic-level and untouched.
+- Reviewer nit applied: duration Text gets `maxLines = 1, softWrap = false` so an extreme font scale can't wrap it against the format glyph.
+
+**Validation:** No local Gradle build (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash: correct + minimal, style matches the Cabinet card's compact Timer+text treatment; one hardening nit (font-scale wrap) applied.
+
+## Previous Requests
+
+### Session duration as its own frosted-bar segment in entry detail (Android)
 
 **Date:** 2026-08-12
 
