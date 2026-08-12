@@ -242,7 +242,8 @@ private fun PreferencesSection(highlightKey: String? = null) {
     // v19 — the explore search-engine picker (which engine the "Explore in
     // browser" button opens).
     var showSearchEngineDialog by remember { mutableStateOf(false) }
-    val permissionMissing = Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+    // v26 — shared notification-permission gate (live-notification row).
+    val enableNotifications = rememberNotificationPermissionGate()
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -271,23 +272,12 @@ private fun PreferencesSection(highlightKey: String? = null) {
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    var pendingEnable by remember { mutableStateOf<(() -> Unit)?>(null) }
     // The result callback can fire while the system page is STILL open (the
     // permission not yet granted), so the grant/decline decision lives in
     // the ON_RESUME observer below, guarded by [overlaySettingsOpened].
     val overlaySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { /* no-op — ON_RESUME is the source of truth */ }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) pendingEnable?.invoke()
-        pendingEnable = null
-    }
-    fun enableNotifications(action: () -> Unit) {
-        if (!permissionMissing) action() else {
-            pendingEnable = action
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
     Column(modifier = Modifier.fillMaxWidth()) {
         // v19 — which search engine the "Explore in browser" button opens.
         // A row that opens the engine picker; the subtitle shows the choice.
@@ -435,7 +425,8 @@ private fun NotificationsSection(highlightKey: String? = null) {
     var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
     // v23 — whether the Explore dialog shows its bubble opt-in row.
     var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
-    val permissionMissing = Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+    // v26 — shared notification-permission gate (daily-reminder row).
+    val enableNotifications = rememberNotificationPermissionGate()
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -446,17 +437,6 @@ private fun NotificationsSection(highlightKey: String? = null) {
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-    var pendingEnable by remember { mutableStateOf<(() -> Unit)?>(null) }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) pendingEnable?.invoke()
-        pendingEnable = null
-    }
-    fun enableNotifications(action: () -> Unit) {
-        if (!permissionMissing) action() else {
-            pendingEnable = action
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
     }
     Column(modifier = Modifier.fillMaxWidth()) {
         SettingsRowPulse(highlightKey == "notif-reminder") {
@@ -626,6 +606,39 @@ private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, 
                 SwitchDefaults.colors()
             }
         )
+    }
+}
+
+/**
+ * The shared POST_NOTIFICATIONS permission gate (v26 — extracted so the
+ * Notifications and Preferences sections don't duplicate it).
+ *
+ * Returns an `enable(action)` function: if the notification permission is
+ * already granted (or the OS doesn't require it, pre-Android 13) the action
+ * runs immediately; otherwise the system permission dialog is requested
+ * first and the action runs only on grant (a declined request drops it —
+ * the switch stays off, the user can retry anytime).
+ */
+@Composable
+private fun rememberNotificationPermissionGate(): (() -> Unit) -> Unit {
+    val context = LocalContext.current
+    val permissionMissing = Build.VERSION.SDK_INT >= 33 &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+    var pendingEnable by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) pendingEnable?.invoke()
+        pendingEnable = null
+    }
+    // Deliberately NOT remembered: a fresh lambda each recomposition reads the
+    // current [permissionMissing], so a grant on return is seen immediately
+    // (remembering would capture the pre-grant value).
+    return { action ->
+        if (!permissionMissing) action() else {
+            pendingEnable = action
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }
 
