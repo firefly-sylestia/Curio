@@ -139,7 +139,7 @@ const HomeScreen: React.FC = () => {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-semibold" style={{ color: getTextColor(isDark) }}>Recents</h3>
             {recents.length > 0 && (
-              <button onClick={() => navigate('/cabinet')}
+              <button onClick={() => navigate('/history')}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold"
                 style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)', color: getTextColor(isDark) }}>
                 View all

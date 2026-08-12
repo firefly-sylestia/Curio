@@ -112,7 +112,7 @@ export const MenuDrawer: React.FC<{
           <MenuRow icon="workspace_premium" label="Quests & Levels" iconColor="#E8A838"
             onClick={() => handleNavigate('/quests')} />
           <MenuRow icon="history" label="Topic History" iconColor="#6366F1"
-            onClick={() => handleNavigate('/cabinet')} />
+            onClick={() => handleNavigate('/history')} />
 
           <div className="my-3 mx-3 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
 

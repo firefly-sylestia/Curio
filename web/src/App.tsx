@@ -17,6 +17,7 @@ import { QuestsScreen } from './screens/QuestsScreen';
 import { TopicBrowserScreen } from './screens/TopicBrowserScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { PetDesignerScreen } from './screens/PetDesignerScreen';
+import { TopicHistoryScreen } from './screens/TopicHistoryScreen';
 import React from 'react';
 import './index.css';
 
@@ -47,6 +48,7 @@ const App: React.FC = () => {
           <Route path="/browse" element={<TopicBrowserScreen />} />
           <Route path="/pet-designer" element={<PetDesignerScreen />} />
           <Route path="/quests" element={<QuestsScreen />} />
+          <Route path="/history" element={<TopicHistoryScreen />} />
         </Routes>
 
         {showBottomNav && <BottomNav />}

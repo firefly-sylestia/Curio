@@ -43,15 +43,24 @@ export const TopicRevealScreen: React.FC = () => {
 
   const handleExpressYourself = () => {
     if (topic && category) {
-      navigate(`/capture/${category.id.toLowerCase()}/${topic.name.replace(/\s+/g, '-')}`);
+      navigate(`/capture/${category.id.toLowerCase()}/${topic.id}`);
     }
   };
 
   const handleStartExploring = () => {
     if (topic) {
-      // Open Google search for the topic
       const query = encodeURIComponent(`${topic.name} ${topic.subtype}`);
-      window.open(`https://www.google.com/search?q=${query}`, '_blank');
+      const engine = localStorage.getItem('curio-search-engine') || 'google';
+      const urls: Record<string, string> = {
+        google: `https://www.google.com/search?q=${query}`,
+        duckduckgo: `https://duckduckgo.com/?q=${query}`,
+        bing: `https://www.bing.com/search?q=${query}`,
+        brave: `https://search.brave.com/search?q=${query}`,
+        ecosia: `https://www.ecosia.org/search?q=${query}`,
+        startpage: `https://www.startpage.com/sp/search?query=${query}`,
+        yahoo: `https://search.yahoo.com/search?p=${query}`,
+      };
+      window.open(urls[engine] || urls.google, '_blank');
     }
   };
 
@@ -71,6 +80,7 @@ export const TopicRevealScreen: React.FC = () => {
         formatDataJson: JSON.stringify({ notes: '' }),
         tagsJson: serializeTags([]),
         isLegacy: false,
+        sessionTimeMillis: 0,
       };
       await captureRepository.insert(entry);
       setSaved(true);
