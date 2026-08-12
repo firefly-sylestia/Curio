@@ -1,6 +1,23 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Explore in browser — search by the user's chosen search engine (Android)
+## Current Request (COMPLETE): Frosted plate behind the detail-view description (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "In detail view behind the description add a blur so it's easier to read."
+
+**User confirmation:** frosted glass plate, theme-aware and LESS whitish (not a true RenderEffect blur — the codebase previously dropped RenderEffect blur for the hero plates: "a visual no-op over flat color that cost GPU time on every scroll frame").
+
+**What was built (app/src/main/java/com/curio/app/features/detail/EntryDetailScreen.kt, QuickFactCard only):**
+- The detail view's topic description (QuickFactCard, previously deliberately backgroundless over the page wash + glyph watermark) now sits on a soft frosted plate: `clip(RoundedCornerShape(16.dp))` + translucent fill + 1dp hairline (ink 22%) + 14/12 padding.
+- Theme-aware fill (hoisted `paneFill`): dark non-pastel → deep slate glass `0xFF17131D` @ 0.55 (matches the app's heroSheetColor dark / AMOLED pitch-black language); Material style → `MaterialTheme.colorScheme.surface` @ 0.55 (Material branch intentionally beats dark so the device surface is used in dark+Material); light/pastel → `Color.White` @ 0.38 (deliberately lighter than the hero frost's 0.95→0.68 — the wash still glows through).
+- The "Quick fact" caption row stays on the bare wash above the plate; the teaser text + "…more/…less" toggle sit inside it (the toggle expands the plate).
+
+**Validation:** No Gradle build locally (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash: compile-safe, imports all present, `when` ordering correct, dark slate matches the app's dark-sheet color; two nits both addressed/noted — duplicate `RoundedCornerShape` hoisted to `paneShape`; the plate's inner width is ~28dp narrower so the 2-line collapse / "…more" appears slightly more often (accepted, intended).
+
+## Previous Requests
+
+### Explore in browser — search by the user's chosen search engine (Android) — COMPLETE
 
 **Date:** 2026-08-12
 

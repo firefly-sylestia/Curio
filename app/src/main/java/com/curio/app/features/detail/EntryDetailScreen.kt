@@ -1358,6 +1358,19 @@ private fun QuickFactCard(
     var expanded by rememberSaveable { mutableStateOf(false) }
     var hasOverflow by remember { mutableStateOf(false) }
     val ink = cat.categoryInk()
+    // v20 — a soft frosted plate behind the description text so it reads
+    // clearly over the page's glyph watermark. Theme-aware and deliberately
+    // LIGHTER than the hero's frost: translucent, so the category wash still
+    // glows through (deep slate glass in dark/AMOLED, device surface in
+    // Material, a whisper of milk glass in light/pastel).
+    val paneFill = when {
+        isCurioDarkTheme() && !AppPreferences.pastelColorsState ->
+            Color(0xFF17131D).copy(alpha = 0.55f)
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+        else -> Color.White.copy(alpha = 0.38f)
+    }
+    val paneShape = RoundedCornerShape(16.dp)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1376,24 +1389,35 @@ private fun QuickFactCard(
             )
         }
         Spacer(Modifier.height(6.dp))
-        Text(
-            text = teaser ?: "Loading topic…",
-            style = MaterialTheme.typography.bodyMedium,
-            color = ink,
-            softWrap = true,
-            maxLines = if (expanded) Int.MAX_VALUE else 2,
-            overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
-            onTextLayout = { layoutResult -> hasOverflow = layoutResult.hasVisualOverflow }
-        )
-        if (expanded || hasOverflow) {
-            Text(
-                text = if (expanded) "…less" else "…more",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = ink.copy(alpha = 0.85f),
-                modifier = Modifier
-                    .clickable { expanded = !expanded }
-                    .padding(top = 3.dp)
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(paneShape)
+                .background(paneFill)
+                .border(1.dp, ink.copy(alpha = 0.22f), paneShape)
+                .padding(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            Column {
+                Text(
+                    text = teaser ?: "Loading topic…",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ink,
+                    softWrap = true,
+                    maxLines = if (expanded) Int.MAX_VALUE else 2,
+                    overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
+                    onTextLayout = { layoutResult -> hasOverflow = layoutResult.hasVisualOverflow }
+                )
+                if (expanded || hasOverflow) {
+                    Text(
+                        text = if (expanded) "…less" else "…more",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = ink.copy(alpha = 0.85f),
+                        modifier = Modifier
+                            .clickable { expanded = !expanded }
+                            .padding(top = 3.dp)
+                    )
+                }
+            }
         }
     }
 }
