@@ -521,7 +521,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryForestTint,
             iconGlyph     = "landscape",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true  // v27i — 1030 topics shipped in assets/topics/plants.json
         ),
         CurioCategory(
             id            = CategoryId.TECHNOLOGIES,
