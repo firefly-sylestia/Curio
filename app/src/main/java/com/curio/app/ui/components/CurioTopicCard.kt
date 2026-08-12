@@ -42,6 +42,7 @@ import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
+import com.curio.app.data.formatSessionShort
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -208,11 +209,42 @@ fun CurioEntryCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = formatTimeAgo(entry.capturedAtDaysAgo),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        modifier = Modifier.weight(1f, fill = false),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        // v17 — the explore-session duration sits alongside the
+                        // when-it-was-saved label (hidden when no session was
+                        // recorded).
+                        if (entry.sessionTimeMillis > 0L) {
+                            CurioIcon(
+                                name = CurioIcons.Timer,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 12.dp
+                            )
+                            Text(
+                                text = formatSessionShort(entry.sessionTimeMillis),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = "·",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                        Text(
+                            text = formatTimeAgo(entry.capturedAtDaysAgo),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
                     EntryFormatBadges(entry)
                 }
             }

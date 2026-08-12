@@ -181,6 +181,45 @@ object ExploreSessionStore {
         activeSessionState = null
     }
 
+    // v17 — write-session handoff. The "write about it" flows (the done
+    // dialog and Home's session card) CLEAR the active session before
+    // navigating to the capture screen, so the save page can't read the
+    // elapsed time live. The ending flow stashes the pause-aware elapsed
+    // time here (keyed by topic) and the save page consumes it once, only
+    // when it matches the topic being saved.
+    private var pendingWriteCategory by mutableStateOf<CategoryId?>(null)
+    private var pendingWriteTopic by mutableStateOf<String?>(null)
+    private var pendingWriteMillis by mutableStateOf(0L)
+
+    /**
+     * Hands [elapsedMillis] to the upcoming capture page for this topic,
+     * called by the session-ending flows just before they clear the session.
+     */
+    fun handoffWriteSession(categoryId: CategoryId, topicName: String, elapsedMillis: Long) {
+        pendingWriteCategory = categoryId
+        pendingWriteTopic = topicName
+        pendingWriteMillis = elapsedMillis.coerceAtLeast(0L)
+    }
+
+    /**
+     * Reads the handed-off session duration for [categoryId]/[topicName]
+     * WITHOUT consuming it (0 when no handoff matches) — the capture page
+     * peeks it at save time and only clears it once the save succeeds, so a
+     * failed save + retry keeps the duration.
+     */
+    fun peekWriteSessionMillis(categoryId: CategoryId, topicName: String): Long =
+        if (pendingWriteCategory == categoryId && pendingWriteTopic == topicName)
+            pendingWriteMillis else 0L
+
+    /** Drops the pending handoff for [categoryId]/[topicName] after a save. */
+    fun clearWriteSessionHandoff(categoryId: CategoryId, topicName: String) {
+        if (pendingWriteCategory == categoryId && pendingWriteTopic == topicName) {
+            pendingWriteCategory = null
+            pendingWriteTopic = null
+            pendingWriteMillis = 0L
+        }
+    }
+
     /** Pauses the timer — freezes elapsed display; reminder is unaffected. */
     fun pauseSession(context: Context) {
         val current = activeSessionState ?: return
@@ -596,6 +635,24 @@ fun formatElapsed(millis: Long): String {
     return when {
         hours > 0 -> "${hours}h ${minutes}m"
         minutes > 0 -> "${minutes}m ${seconds}s"
+        else -> "${seconds}s"
+    }
+}
+
+/**
+ * Compact session duration for cards and hero labels — "45s", "12m",
+ * "1h 24m". Seconds are rounded up so a sub-second session never reads
+ * as "0s"; shorter than [formatElapsed]'s seconds-level detail so it fits
+ * a small card row or the frosted date segment's tiny line.
+ */
+fun formatSessionShort(millis: Long): String {
+    val totalSeconds = ((millis + 999L) / 1000L).coerceAtLeast(0L)
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        minutes > 0 -> "${minutes}m"
         else -> "${seconds}s"
     }
 }

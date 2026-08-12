@@ -101,6 +101,13 @@ data class CurioEntry(
     val title: String? = null,
     val capturedAtMillis: Long = System.currentTimeMillis(),
     /**
+     * v17 — how long the user explored this topic before saving (the
+     * explore session's pause-aware elapsed time at save). 0 = no session
+     * was recorded (imports, samples, older entries) — the UI hides the
+     * label then.
+     */
+    val sessionTimeMillis: Long = 0L,
+    /**
      * Free-form user tags added on the save page (v7.17) — searchable in
      * the Cabinet and shown as chips on the entry detail page. Stored in
      * Room's `tagsJson` column; legacy entries default to empty.

@@ -1,6 +1,37 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Pet games frequency + long-distance teleport (Android)
+## Current Request (COMPLETE): Session time on entries + detail view (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "In entries add the session time too alongside the topic bar. And show in detail view too."
+
+**What was built:**
+- **Data**: `CurioEntry.sessionTimeMillis: Long = 0L` (0 = none recorded). Room `CaptureEntity` gains the column; DB version 3→4 with `MIGRATION_3_4` (`ALTER TABLE captures ADD COLUMN sessionTimeMillis INTEGER NOT NULL DEFAULT 0`), registered with `fallbackToDestructiveMigration(false)`. Gson backups round-trip safely (old backups decode 0).
+- **Recording**: `SaveCaptureScreen` stamps the pause-aware explore-session elapsed time at save, matched to the topic (categoryId + topicName). **Critical integration fix found by review**: both "write about it" flows (the done-dialog in `CurioNavHost` and Home's `CurrentlyExploringCard`) CLEAR the session before navigating, so a live read would always be 0 — added a v17 handoff in `ExploreSessionStore` (`handoffWriteSession` → `peekWriteSessionMillis`/`clearWriteSessionHandoff`): the ending flows stash the elapsed time pre-clear; the save page peeks it and clears it only on save SUCCESS (retry-safe); a still-running session (Recents path) is read live as fallback. Edit re-saves preserve the original field via copy().
+- **Card**: `CurioEntryCard` meta row shows a Timer glyph + short duration ("12m") alongside the "Today/yesterday" label when a session was recorded.
+- **Detail**: `heroDateTinyLabel` appends " · explored 12m" to the hero's frosted Date segment tiny line.
+- **Shared helper**: `formatSessionShort(millis)` ("45s"/"12m"/"1h 24m") next to `formatElapsed`.
+
+**Validation:** No Gradle build locally (project rule — CI validates on push; env has no Android SDK). Reviewed by code-reviewer-deepseek-flash — its catch (session cleared before save) was fixed via the handoff; its robustness note (handoff lost on failed save) was fixed by peek-then-clear-on-success. Known minor edges (accepted): in-memory handoff is lost on process death between end-session and save; a stale handoff lingers if the user leaves the capture screen unsaved (keyed to exact topic, so blast radius is tiny).
+
+## Previous Requests
+
+### Pet games frequency + long-distance teleport (Android) — COMPLETE
+- Per-game cooldowns (hide-and-seek 40s, camouflage 40s, spark 30s) + 25s global gap — camouflage was starved because all games shared one clock the spark kept resetting (the chameleon game never reset it at all).
+- Hide-and-seek: caught peek no longer stuck half-off-screen; duplicate win-line speech removed.
+- Long-distance moves (>55% of the larger screen dimension) teleport (snap + landing squish) instead of sliding fast; spark chase still dashes.
+
+### Category Passport 4×3 + 2 pages; thin touch-grow scroll indicators (Android) — COMPLETE
+- `CurioScrollIndicator.kt` (new, foundation 1.12 ScrollIndicatorState) — thin 3dp overlay knob that grows on touch, drag-to-scroll, theme-ink colored.
+- Passport = 4×3 per page, 2 pages via HorizontalPager + dots.
+- Indicators on 8 screens: Topic Database, Profile, Quests, Settings hub + sections, Cabinet, Manage Categories, Topic History, Recent.
+
+### AMOLED cleanup on Profile + Settings (Android) — COMPLETE
+- `CurioSettingsCard` drops `tonalElevation` to `0.dp` in AMOLED (was 3.dp → Material3 tonal overlay washed the pitch-black cards with the coral scheme primary).
+- `CompactSwitchRow` switches + reminder-hour chips go pitch-black glass (black track/knob + hairline rim) in AMOLED.
+
+[See earlier request logs in git history]
 
 **Date:** 2026-08-12
 

@@ -134,6 +134,7 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.FieldMindMetadata
 import com.curio.app.data.formatElapsed
+import com.curio.app.data.formatSessionShort
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.shortName
 import com.curio.app.features.capture.formats.FilledStar
@@ -1232,10 +1233,18 @@ private fun CurioEntry.moodOf(): JournalMood? = when (val d = captureData) {
  * capture time, older entries a short relative label ("yesterday" / "3d
  * ago") — the date itself already sits on the segment's title line.
  */
-private fun heroDateTinyLabel(entry: CurioEntry): String = when (val days = entry.capturedAtDaysAgo) {
-    0 -> formatCapturedTime(entry.capturedAtMillis)
-    1 -> "yesterday"
-    else -> "${days}d ago"
+private fun heroDateTinyLabel(entry: CurioEntry): String {
+    // v17 — the explore-session duration rides the date's tiny line when it
+    // was recorded ("2:45 PM · explored 12m"), so the detail hero shows how
+    // long the topic was explored before saving.
+    val datePart = when (val days = entry.capturedAtDaysAgo) {
+        0 -> formatCapturedTime(entry.capturedAtMillis)
+        1 -> "yesterday"
+        else -> "${days}d ago"
+    }
+    val sessionPart = if (entry.sessionTimeMillis > 0L)
+        " · explored ${formatSessionShort(entry.sessionTimeMillis)}" else ""
+    return datePart + sessionPart
 }
 
 /**

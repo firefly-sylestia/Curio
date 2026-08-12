@@ -625,6 +625,14 @@ fun HomeScreen(navController: NavController) {
                 CurrentlyExploringCard(
                     session = activeSession,
                     onDone = {
+                        // v17 — hand the session's elapsed time to the capture
+                        // page before clearing (the save screen can't read it
+                        // once the session is gone).
+                        ExploreSessionStore.handoffWriteSession(
+                            activeSession.categoryId,
+                            activeSession.topicName,
+                            activeSession.elapsedMillis()
+                        )
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)

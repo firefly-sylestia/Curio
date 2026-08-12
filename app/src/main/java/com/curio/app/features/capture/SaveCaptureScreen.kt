@@ -62,6 +62,7 @@ import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureDraftStore
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CaptureRepository
+import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.JournalMood
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -288,6 +289,28 @@ fun SaveCaptureScreen(
                         saveError = "This entry is no longer available. Please go back and try again."
                         return@launch
                     }
+                    // v17 — how long this topic's explore session ran
+                    // (pause-aware). The "write about it" flows hand the
+                    // elapsed time over BEFORE clearing the session, so the
+                    // handoff is the primary source; a still-running session
+                    // (e.g. opened via Recents) is read live as a fallback.
+                    // Only attributed when the session matches this topic,
+                    // and only on a fresh save (edit re-saves keep their
+                    // original session time).
+                    val sessionMillis = if (existingEntry == null) {
+                        // Peek (don't consume): the handoff is only cleared
+                        // once the save succeeds, so a retry after a failed
+                        // save keeps the session label.
+                        ExploreSessionStore.peekWriteSessionMillis(
+                            resolvedTopic.categoryId, resolvedTopic.name
+                        ).takeIf { it > 0L } ?: ExploreSessionStore.activeSessionState
+                            ?.takeIf {
+                                it.categoryId == resolvedTopic.categoryId &&
+                                    it.topicName == resolvedTopic.name
+                            }
+                            ?.elapsedMillis()
+                            ?.coerceAtLeast(0L) ?: 0L
+                    } else 0L
                     val entry = if (existingEntry != null) {
                         // Edit mode: keep id/topic/title/timestamp, swap the data.
                         existingEntry.copy(
@@ -304,13 +327,21 @@ fun SaveCaptureScreen(
                             // and detail dispatch stay correct.
                             format = formatOf(persistedData),
                             captureData = persistedData,
-                            tags = tags
+                            tags = tags,
+                            sessionTimeMillis = sessionMillis
                         )
                     }
                     runCatching { CurioRepositoryHolder.repo.save(entry) }
                         .onSuccess {
                             savedEntryId = entry.id
                             saveError = null
+                            // v17 — the handed-off session duration is now
+                            // banked on the entry; drop the pending handoff so
+                            // a later save of the same topic can't inherit a
+                            // stale duration.
+                            ExploreSessionStore.clearWriteSessionHandoff(
+                                resolvedTopic.categoryId, resolvedTopic.name
+                            )
                             StreakTracker.recordActivity(context)
                             // Feed the quests system — NEW saves drive journey +
                             // daily + badges (the format feeds Every Format).
