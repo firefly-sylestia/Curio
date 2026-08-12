@@ -60,6 +60,7 @@ import com.curio.app.data.AudioQuality
 import com.curio.app.data.AudioQualitySettings
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.SearchEngine
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -318,6 +319,9 @@ private fun NotificationsSection(highlightKey: String? = null) {
     var overlaySettingsOpened by remember { mutableStateOf(false) }
     var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
+    // v19 — the explore search-engine picker (which engine the "Explore in
+    // browser" button opens).
+    var showSearchEngineDialog by remember { mutableStateOf(false) }
     val permissionMissing = Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
 
     DisposableEffect(lifecycleOwner) {
@@ -416,6 +420,18 @@ private fun NotificationsSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v19 — which search engine the "Explore in browser" button opens.
+        // A row that opens the engine picker; the subtitle shows the choice.
+        SettingsRowPulse(highlightKey == "notif-search-engine") {
+            CurioSettingsRow(
+                CurioIcons.Search,
+                "Search engine",
+                "Explore in browser opens ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}"
+            ) {
+                showSearchEngineDialog = true
+            }
+        }
+        CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "notif-live") {
             CompactSwitchRow("Live explore notification", "Ongoing timer with pause and stop", liveNotificationsEnabled) { enabled ->
                 if (enabled) enableNotifications {
@@ -477,6 +493,16 @@ private fun NotificationsSection(highlightKey: String? = null) {
                 if (launched.isFailure) overlaySettingsOpened = false
             }
         }
+    }
+    if (showSearchEngineDialog) {
+        SearchEngineDialog(
+            current = SearchEngine.fromId(AppPreferences.searchEngineState),
+            onDismiss = { showSearchEngineDialog = false },
+            onSelected = { engine ->
+                AppPreferences.setSearchEngine(context, engine)
+                showSearchEngineDialog = false
+            }
+        )
     }
 }
 

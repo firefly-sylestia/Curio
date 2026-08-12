@@ -102,6 +102,9 @@ object AppPreferences {
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
+    // v19 — the search engine the "Explore in browser" button opens (Google
+    // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
+    private const val KEY_SEARCH_ENGINE = "search_engine"
     // v8.1 — "don't nag" flag: once the user declines the "Display over
     // other apps" permission (dismisses the prompt or returns from system
     // settings without granting), all AUTOMATIC overlay prompts are
@@ -293,6 +296,12 @@ object AppPreferences {
     var exploreSessionsEnabledState by mutableStateOf(true)
         private set
 
+    // v19 — the chosen search engine id ("google", "duckduckgo", …) for the
+    // Explore browser button. Reactive so the Topic Reveal dialog copy and
+    // the Settings row update the moment it changes.
+    var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
+        private set
+
     // Live explore notifications — the persistent chronometer notification
     // with Pause/Stop controls shown while exploring (like Samsung/Google's
     // live-updating ongoing notifications). Default ON; off means no ongoing
@@ -451,6 +460,7 @@ object AppPreferences {
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
         smartDensityModeState = getSmartDensityMode(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
+        searchEngineState = getSearchEngine(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
@@ -749,6 +759,18 @@ object AppPreferences {
     fun setSmartDensityMode(context: Context, mode: SmartDensityMode) {
         prefs(context).edit().putString(KEY_SMART_DENSITY_MODE, mode.name).apply()
         smartDensityModeState = mode
+    }
+
+    /**
+     * v19 — the user's chosen explore search engine id, defaulting to
+     * Google so existing behavior is unchanged until they switch.
+     */
+    fun getSearchEngine(context: Context): String =
+        prefs(context).getString(KEY_SEARCH_ENGINE, null) ?: SearchEngine.GOOGLE.id
+
+    fun setSearchEngine(context: Context, engine: SearchEngine) {
+        prefs(context).edit().putString(KEY_SEARCH_ENGINE, engine.id).apply()
+        searchEngineState = engine.id
     }
 
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */

@@ -559,6 +559,8 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     // ── Notifications ────────────────────────────────────────────────
     SettingsDeepRow(CurioIcons.Notifications, "Daily shuffle reminder", "A daily nudge to spin the deck", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-reminder"),
     SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-sessions"),
+    // v19 — which search engine the "Explore in browser" button opens.
+    SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-search-engine"),
     SettingsDeepRow(CurioIcons.Notifications, "Live explore notification", "Ongoing timer with pause and stop", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-live"),
     SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-bubble"),
     SettingsDeepRow(CurioIcons.Layers, "Display over other apps", "System permission for the floating bubble", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-overlay"),

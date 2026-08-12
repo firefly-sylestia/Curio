@@ -1,6 +1,29 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): More pet tap actions/angles — visual reactions, not just dialog (Android)
+## Current Request (COMPLETE): Explore in browser — search by the user's chosen search engine (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "Change 'Explore in Google' to 'Explore in browser' for people who don't wanna use Google. Make it search by their selected search engine."
+
+**User confirmations:** (1) only the Google button changes — the YouTube button stays; (2) "engine for everything" — the chosen engine applies to ALL categories including music (the old music→YouTube default is gone; YouTube remains the explicit dialog button).
+
+**What was built (7 files):**
+- **data/ExploreSearch.kt** — new `SearchEngine` enum (Google default / DuckDuckGo / Bing / Brave / Ecosia / Startpage / Yahoo, with id + displayName + description). `buildEngineSearchUrl(topic, engine = SearchEngine.fromId(AppPreferences.searchEngineState))` builds per-engine URLs (google `q=`, duckduckgo `?q=`, bing/brave/ecosia `search?q=`, startpage `/sp/search?query=`, yahoo `p=`). `buildExploreSearchUrl` now always uses the engine (was: YouTube for ALBUMS/ARTISTS — the `categoryOpensYouTube` special-case was removed; zero remaining references repo-wide).
+- **data/AppPreferences.kt** — `KEY_SEARCH_ENGINE` + reactive `searchEngineState` (seeded in initThemeMode) + getter/setter.
+- **features/reveal/TopicRevealScreen.kt** — dialog button "Explore in Google" → "Explore in browser" (calls `buildEngineSearchUrl`); copy names the selected engine ("…Search in your browser with DuckDuckGo, or open YouTube."); `buildGoogleSearchUrl` import removed; dead `exploreOpenCopy` helper (pre-existing, never called) deleted; comments updated.
+- **features/settings/SettingsSharedComponents.kt** — new `SearchEngineDialog` mirroring `AudioQualityDialog` (radio list).
+- **features/settings/SettingsSectionScreen.kt** — Notifications section gains a "Search engine" `CurioSettingsRow` (subtitle shows the current engine) opening the dialog; `onSelected` → `AppPreferences.setSearchEngine`.
+- **features/settings/SettingsHubScreen.kt** — hub deep row (icon Search, key `notif-search-engine`).
+- **features/home/HomeScreen.kt** — comment parity only.
+
+**Notes:** Settings placement is Notifications (co-located with "Explore sessions") even though it's not a notification — reviewer + summary flag; user can ask to move it. The dialog's "Explore in YouTube" button is untouched. `openSilentExplore` / `startExploreSession` default now honor the chosen engine everywhere.
+
+**Validation:** No Gradle build locally (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash twice: URL formats standard, exhaustive `when`, reactive state read only in composable contexts, no dangling imports; the reviewer's behavioral flag (music still defaulting to YouTube) was put to the user → "engine for everything".
+
+## Previous Requests
+
+### More pet tap actions/angles — visual reactions, not just dialog (Android) — COMPLETE
 
 **Date:** 2026-08-12
 
