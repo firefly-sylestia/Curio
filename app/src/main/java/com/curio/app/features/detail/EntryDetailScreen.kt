@@ -1677,18 +1677,6 @@ private fun SoundBiteRender(
                             }
                         }
                     }
-                    // The saved title gets its OWN line under the primary
-                    // label (v7.44), muted so it never competes with it.
-                    if (!data.title.isNullOrBlank()) {
-                        Text(
-                            text = data.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(start = 26.dp)
-                        )
-                    }
                 }
             }
 
@@ -1711,6 +1699,32 @@ private fun SoundBiteRender(
                     surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                     border = category.categoryBorder()
                 )
+            }
+
+            // ── Saved title — its own paper slip (v26), OUTSIDE the audio
+            //    gate so a typed-only voice note (title without a recording)
+            //    still shows it. Mirrors the editor's title field: same
+            //    paper style + color, seeded per entry so it never re-tears.
+            if (!data.title.isNullOrBlank()) {
+                val titleSheet = data.titleColor ?: NotePaperColor.CREAM
+                NotePaperCard(
+                    style = data.titleStyle ?: data.paperStyle ?: NotePaperStyle.RULED,
+                    seed = noteSeed(entry.id, 30),
+                    paperColor = titleSheet,
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
+                    corner = 10.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 26.dp, end = 6.dp)
+                ) {
+                    Text(
+                        text = data.title,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = notePaperInk(titleSheet),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             // ── Transcribe the saved note (v7.18) — small mic chip that

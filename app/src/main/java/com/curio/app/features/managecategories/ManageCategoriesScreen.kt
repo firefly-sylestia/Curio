@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,15 +25,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -86,8 +95,30 @@ fun ManageCategoriesScreen(navController: NavController) {
         }
         base.map { cat -> cat.copy(isHidden = cat.id in AppPreferences.hiddenCategoriesState) }
     }
+    // v26 — local DRAFT order while the user drags: steppers and the
+    // long-press drag mutate the draft and persist on release, so the list
+    // animates into place (animateItem) instead of jumping. Re-keyed off
+    // [items] so external changes (hidden toggles) re-seed it cleanly.
+    var draft by remember(items) { mutableStateOf(items) }
+    var draggingId by remember { mutableStateOf<CategoryId?>(null) }
+    // Residual drag travel (px) — swaps fire when a full row step accrues.
+    var dragAccum by remember { mutableFloatStateOf(0f) }
+    // Average row height (the 56dp reorder column + 20dp padding dominates).
+    val dragStepPx = with(LocalDensity.current) { 76.dp.toPx() }
     // v5.8 — saveable-backed: keep the list's scroll position on rotation.
     val listState = rememberLazyListState()
+
+    fun shiftDraft(id: CategoryId, delta: Int) {
+        val idx = draft.indexOfFirst { it.id == id }
+        if (idx < 0) return
+        val target = (idx + delta).coerceIn(0, draft.lastIndex)
+        if (target == idx) return
+        draft = draft.toMutableList().apply { add(target, removeAt(idx)) }
+    }
+
+    fun persistDraft() {
+        AppPreferences.setCategoryOrder(context, draft.map { it.id })
+    }
 
     // The hero banner runs up BEHIND the status bar (the shared header
     // applies its own status-bar inset for the back pill) — the settings
@@ -123,25 +154,75 @@ fun ManageCategoriesScreen(navController: NavController) {
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // ── Helper text — flat caption under the hero ───────────
+                // ── Helper text + Reset order — flat caption under the hero
                 item("help") {
-                    Text(
-                        text = "Hidden categories won't show in Shuffle, Category Picker, or Cabinet. " +
-                              "Past entries in hidden categories are kept and reappear when you re-enable them.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 10.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Hidden categories won't show in Shuffle, Category Picker, or Cabinet. " +
+                                  "Past entries in hidden categories are kept and reappear when you re-enable them.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(
+                            onClick = {
+                                // v26 — restore the default lane order.
+                                draggingId = null
+                                dragAccum = 0f
+                                AppPreferences.setCategoryOrder(
+                                    context, CurioCategories.all.map { it.id }
+                                )
+                            }
+                        ) {
+                            Text("Reset order")
+                        }
+                    }
                 }
 
                 // ── Category rows — flat, with hairlines between them ───
-                itemsIndexed(items, key = { _, category -> category.id }) { index, category ->
+                // Draggable: long-press the ⋮ handle, then drag up/down; the
+                // lane glides into place and the order persists on release.
+                itemsIndexed(draft, key = { _, category -> category.id }) { index, category ->
                     CategoryRow(
                         category = category,
-                        isFirst = items.firstOrNull()?.id == category.id,
-                        isLast = items.lastOrNull()?.id == category.id,
-                        onMoveUp = { moveCategory(context, items, category.id, -1) },
-                        onMoveDown = { moveCategory(context, items, category.id, +1) },
+                        isFirst = draft.firstOrNull()?.id == category.id,
+                        isLast = draft.lastOrNull()?.id == category.id,
+                        isDragging = draggingId == category.id,
+                        modifier = Modifier.animateItem(),
+                        onMoveUp = { shiftDraft(category.id, -1); persistDraft() },
+                        onMoveDown = { shiftDraft(category.id, +1); persistDraft() },
+                        onDragStart = {
+                            draggingId = category.id
+                            dragAccum = 0f
+                        },
+                        onDragDelta = { dy ->
+                            dragAccum += dy
+                            // A full row-height of travel swaps the lane one
+                            // slot; the residual carries into the next swap
+                            // so long fast drags feel continuous.
+                            while (dragAccum >= dragStepPx) {
+                                dragAccum -= dragStepPx
+                                shiftDraft(category.id, +1)
+                            }
+                            while (dragAccum <= -dragStepPx) {
+                                dragAccum += dragStepPx
+                                shiftDraft(category.id, -1)
+                            }
+                        },
+                        onDragEnd = {
+                            draggingId = null
+                            dragAccum = 0f
+                            persistDraft()
+                        },
+                        onDragCancel = {
+                            draggingId = null
+                            dragAccum = 0f
+                        },
                         onVisibilityToggle = { visible ->
                             // Persist instantly — the app-wide reactive state
                             // updates and every consumer recomposes.
@@ -149,7 +230,7 @@ fun ManageCategoriesScreen(navController: NavController) {
                         }
                     )
                     // Hairline between rows — the flat-list divider language.
-                    if (index < items.lastIndex) {
+                    if (index < draft.lastIndex) {
                         CurioSettingsDivider()
                     }
                 }
@@ -181,8 +262,14 @@ private fun CategoryRow(
     category: CurioCategory,
     isFirst: Boolean,
     isLast: Boolean,
+    isDragging: Boolean = false,
+    modifier: Modifier = Modifier,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
+    onDragStart: () -> Unit,
+    onDragDelta: (Float) -> Unit,
+    onDragEnd: () -> Unit,
+    onDragCancel: () -> Unit,
     onVisibilityToggle: (Boolean) -> Unit
 ) {
     val hiddenAlpha by animateFloatAsState(
@@ -193,20 +280,39 @@ private fun CategoryRow(
 
     // Flat row — no card shell: a tinted icon chip, the name + Hidden
     // status, the reorder steppers + drag handle, and the visibility
-    // switch, sitting directly on the watermark backdrop.
+    // switch, sitting directly on the watermark backdrop. While dragging
+    // the row lifts (zIndex + slight scale) above its neighbors.
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = if (isDragging) 1.03f else 1f
+                scaleY = if (isDragging) 1.03f else 1f
+                alpha = if (isDragging) 0.9f else 1f
+            }
+            .zIndex(if (isDragging) 1f else 0f)
             .padding(horizontal = 4.dp, vertical = 10.dp)
             .alpha(hiddenAlpha),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ── Reorder stepper + drag handle (visual stand-in) ───────────
+        // ── Reorder stepper + real drag handle (v26: long-press to drag) ──
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.size(width = 40.dp, height = 56.dp)
+            modifier = Modifier
+                .size(width = 40.dp, height = 56.dp)
+                .pointerInput(category.id) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = { onDragStart() },
+                        onDrag = { change, amount ->
+                            change.consume()
+                            onDragDelta(amount.y)
+                        },
+                        onDragEnd = { onDragEnd() },
+                        onDragCancel = { onDragCancel() }
+                    )
+                }
         ) {
             ReorderButton(
                 glyph = CurioIcons.KeyboardArrowUp,
@@ -216,7 +322,11 @@ private fun CategoryRow(
             CurioIcon(
                 name = CurioIcons.DragHandle,
                 contentDescription = "Drag to reorder",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isDragging) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 size = 20.dp
             )
             ReorderButton(
@@ -301,28 +411,4 @@ private fun ReorderButton(glyph: String, enabled: Boolean, onClick: () -> Unit) 
             )
         }
     }
-}
-
-
-/**
- * Move the category matching [id] by [delta] positions and PERSIST the new
- * order to [AppPreferences] — the app-wide reactive order state updates,
- * so Home/Cabinet/Picker chip rows follow the reorder immediately.
- * No-op if at the boundary or if the id is not found.
- */
-private fun moveCategory(
-    context: android.content.Context,
-    list: List<CurioCategory>,
-    id: CategoryId,
-    delta: Int
-) {
-    val current = list.indexOfFirst { it.id == id }
-    if (current < 0) return
-    val target = (current + delta).coerceIn(0, list.lastIndex)
-    if (target == current) return
-    val reordered = list.toMutableList().apply {
-        val moved = removeAt(current)
-        add(target, moved)
-    }
-    AppPreferences.setCategoryOrder(context, reordered.map { it.id })
 }

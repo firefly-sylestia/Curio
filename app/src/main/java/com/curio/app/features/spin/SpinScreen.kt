@@ -1272,8 +1272,10 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 showCategoryPicker = false
             },
             onBrowseAll = {
+                // v26 — the sheet's "Manage categories" link opens the
+                // Manage Categories screen (was the full-screen picker).
                 showCategoryPicker = false
-                navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
+                navController.navigate(CurioRoutes.MANAGE_CATEGORIES) { launchSingleTop = true }
             }
         )
     }
@@ -3861,12 +3863,21 @@ private fun CategoryPickerSheet(
     // v7.94 — read the REACTIVE visible list directly (no remember): it
     // recomposes when Manage Categories hides/shows/reorders lanes.
     val categories = CurioCategories.visible
+    // v26 — reopen with the persisted deck: a mixed selection comes back in
+    // multi-select with every lane ticked, so the user can SEE and CHANGE
+    // the mix instead of it collapsing to the single first category. Hidden
+    // lanes are filtered out so they never show as pre-selected.
+    val context = LocalContext.current
+    val persistedVisible = remember {
+        AppPreferences.getLastSpinCategories(context)
+            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
+    }
     // Wide windows (tablet / landscape) spread the deck grid and cap the
     // sheet's content width so the picker stays readable on large screens.
     val wide = windowWidthSizeClass().isWide
     // Default = tap-to-open (single). Long-press enters multi-select mode.
-    var multiSelectMode by remember { mutableStateOf(false) }
-    var selectedSlugs by remember { mutableStateOf(setOf<String>()) }
+    var multiSelectMode by remember { mutableStateOf(persistedVisible.size > 1) }
+    var selectedSlugs by remember { mutableStateOf(persistedVisible.map { it.id.routeSlug }.toSet()) }
 
     // Same full-screen + swipe-down-dismiss pattern as the filter page — a    // ModalBottomSheet expanded to full height with a drag handle.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -4078,10 +4089,11 @@ private fun CategoryPickerSheet(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                         ) {
-                            CurioIcon(CurioIcons.Palette, null, tint = MaterialTheme.colorScheme.primary, size = 18.dp)
+                            CurioIcon(CurioIcons.DragHandle, null, tint = MaterialTheme.colorScheme.primary, size = 18.dp)
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "Browse all categories",
+                                // v26 — renamed; now opens Manage Categories.
+                                text = "Manage categories",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary
                             )

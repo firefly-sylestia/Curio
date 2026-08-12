@@ -41,3 +41,8 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • In-app updates for GitHub installs: tap "Update now" and the new release APK downloads right in the app (with a progress bar), then opens the installer — you confirm, like installing any APK. The Google Play in-app-update path is gone for good; the update card now has a short "Open release" link instead of "Get it on GitHub".
 • The "How Curio feels / Appearance and color" card header was removed from Settings — Appearance, Notifications, Recording, and Pet designer now sit directly under Personalize.
 • Settings got decluttered: the card header lines (Experiments, Your data, Visual language, Notifications, Recording, Backup & restore, FieldMind archive, and the Experiments screen headers) are gone — rows sit right under their section labels, and those section labels (Personalize, Explore, Safety & support, and similar) are now larger.
+• Saved voice-note titles now print on their own note-paper slip — the same paper style and color you picked when saving, even for typed-only notes.
+• Settings got tidier: Experiments is hidden from the hub (open it by tapping the version number five times in Support & diagnostics), and Manage categories + Topic history now sit next to Appearance.
+• Manage Categories supports drag-to-reorder — long-press the ⋮ handle and drag a lane into place — plus a Reset order button.
+• The Spin page category sheet now links straight to Manage categories.
+• Reopening What are we exploring? shows your saved mix as you left it, every deck pre-selected, so you can tweak it instead of re-picking.

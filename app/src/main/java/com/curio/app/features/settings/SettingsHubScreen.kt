@@ -488,22 +488,11 @@ private val SettingsSections = listOf(
                     SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint, and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
                     SettingsRowEntry(CurioIcons.Notifications, "Notifications", "Reminders and explore controls", CurioRoutes.SETTINGS_NOTIFICATIONS),
                     SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING),
-                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER)
-                )
-            )
-        )
-    ),
-    SettingsSectionEntry(
-        label = "Explore",
-        cards = listOf(
-            SettingsCardEntry(
-                // v25 — the "Experiments" card header was removed per
-                // request; the rows render directly under "Explore".
-                headerIcon = null,
-                headerTitle = null,
-                headerSubtitle = null,
-                rows = listOf(
-                    SettingsRowEntry(CurioIcons.Layers, "Card & deck experiments", "Main card, peek deck, and Spin tests", CurioRoutes.EXPERIMENTS),
+                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER),
+                    // v26 — Experiments is hidden from Settings (it opens via
+                    // the five-tap version trick in Support); these two moved
+                    // in here from the old Explore section so they stay one
+                    // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
                     SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY)
                 )
