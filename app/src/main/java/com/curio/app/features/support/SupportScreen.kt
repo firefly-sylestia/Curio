@@ -284,8 +284,8 @@ fun SupportScreen(navController: NavController) {
                                 downloadState = downloadState,
                                 downloadProgress = downloadProgress,
                                 downloadIndeterminate = downloadIndeterminate,
-                                onDownloadUpdate = { info?.let { downloadAndInstall(it) } },
-                                onRetryDownload = { info?.let { downloadAndInstall(it) } },
+                                onDownloadUpdate = { updateInfo?.let { downloadAndInstall(it) } },
+                                onRetryDownload = { updateInfo?.let { downloadAndInstall(it) } },
                                 onOpenRelease = { url ->
                                     runCatching {
                                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -471,19 +471,26 @@ private fun UpdateResultCard(
                         }
                         UpdateDownloadUi.Downloading -> {
                             Column {
-                                // null progress = indeterminate (shown until
-                                // the response's Content-Length is known).
-                                LinearProgressIndicator(
-                                    progress = {
-                                        if (downloadIndeterminate) null
-                                        else downloadProgress.coerceIn(0f, 1f)
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(6.dp),
-                                    color = CurioColors.CoralBlush,
-                                    trackColor = CurioColors.CoralBlush.copy(alpha = 0.20f)
-                                )
+                                // Indeterminate until the response's
+                                // Content-Length is known; determinate after.
+                                if (downloadIndeterminate) {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(6.dp),
+                                        color = CurioColors.CoralBlush,
+                                        trackColor = CurioColors.CoralBlush.copy(alpha = 0.20f)
+                                    )
+                                } else {
+                                    LinearProgressIndicator(
+                                        progress = { downloadProgress.coerceIn(0f, 1f) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(6.dp),
+                                        color = CurioColors.CoralBlush,
+                                        trackColor = CurioColors.CoralBlush.copy(alpha = 0.20f)
+                                    )
+                                }
                                 Spacer(Modifier.height(8.dp))
                                 Text(
                                     if (downloadIndeterminate) "Downloading…"

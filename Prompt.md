@@ -20,4 +20,8 @@
 
 **Interpretations:** "other sorting options" = the Topic Browser sort row (the app's only other sort); recycle-bin purge keeps a single confirm since the two-step applies to the initial delete.
 
+## CI fix (same day)
+
+SupportScreen.kt failed CI: (1) the download/retry lambdas referenced `info` (a param of `UpdateResultCard`) from the caller's scope — unresolved; fixed to `updateInfo?.let { downloadAndInstall(it) }`. (2) The indeterminate progress lambda returned `null` (`Float?`) but `LinearProgressIndicator(progress = { Float })` needs non-null in this Material3 version — split into the no-progress indeterminate overload when `downloadIndeterminate` is true vs the determinate overload with `progress = { downloadProgress.coerceIn(0f, 1f) }`. Pushed as a dedicated fix commit.
+
 **Next:** none pending.
