@@ -27,6 +27,11 @@ object CurioColors {
     // that vanishes on the cream background, so bonus/rank text + icons wear
     // this readable dark gold in light mode (dark mode keeps the bright butter).
     val GoldInk          = Color(0xFFB8860B)  // Dark goldenrod — readable on light
+    // v20 — deep rose ink for LIGHT surfaces: CoralBlush is a pale pastel
+    // that vanishes on the cream background, so coral icons/text/progress
+    // accents wear this readable deep rose in light mode (dark mode keeps
+    // the bright coral).
+    val CoralInk         = Color(0xFFE2556B)  // Deep rose — readable on light
     val SkyMint          = Color(0xFF8FE3CF)  // Soft mint — tertiary
     val CreamWhite       = Color(0xFFFFFBF5)  // Warm white — ink on primary/error fills + decorative accents
     val SoftCream        = Color(0xFFF7F0E4)  // Soft cream — light-mode background (user-preferred, less white)
@@ -57,6 +62,22 @@ object CurioColors {
     val CategoryRed      = Color(0xFFB91C1C)  // Food
     val CategoryBlue     = Color(0xFF1D4ED8)  // Internet culture
     val CategoryCoral    = CoralBlush  // Wildcard — the app's brand primary, not a deep accent
+    // v27i — deep accents for the 15 new lanes
+    val CategoryGreen       = Color(0xFF15803D)  // Biology
+    val CategoryLime        = Color(0xFF4D7C0F)  // Chemistry
+    val CategoryBrown       = Color(0xFF78350F)  // Animals
+    val CategoryForest      = Color(0xFF065F46)  // Plants
+    val CategorySlate       = Color(0xFF334155)  // Technologies
+    val CategoryNavy        = Color(0xFF1E3A8A)  // Astronomy
+    val CategorySepia       = Color(0xFF854D0E)  // History
+    val CategoryStone       = Color(0xFF57534E)  // Geology
+    val CategoryCrimson     = Color(0xFF9F1239)  // Medicine
+    val CategoryPeriwinkle  = Color(0xFF6D28D9)  // Psychology
+    val CategoryIndigoBlue  = Color(0xFF1E40AF)  // Mathematics
+    val CategoryGold        = Color(0xFFA16207)  // Economics
+    val CategoryTeal600     = Color(0xFF0D9488)  // Language
+    val CategoryZinc        = Color(0xFF3F3F46)  // Engineering
+    val CategoryDeepCyan    = Color(0xFF0C4A6E)  // Oceans
 
     /** Light 300-level twins for accent-colored ink on dark surfaces. */
     val CategoryIndigoInk = Color(0xFFA5B4FC)
@@ -76,6 +97,22 @@ object CurioColors {
     val CategoryRedInk     = Color(0xFFFCA5A5)
     val CategoryBlueInk    = Color(0xFF93C5FD)
     val CategoryCoralInk  = Color(0xFFFFC2CE)  // light coral twin for dark-surface ink
+    // v27i — the 15 new lanes (Tailwind-700 accents + 300-level ink twins)
+    val CategoryGreenInk     = Color(0xFF86EFAC)  // Biology
+    val CategoryLimeInk      = Color(0xFFBEF264)  // Chemistry
+    val CategoryBrownInk     = Color(0xFFFDE68A)  // Animals
+    val CategoryForestInk    = Color(0xFF6EE7B7)  // Plants
+    val CategorySlateInk     = Color(0xFFCBD5E1)  // Technologies
+    val CategoryNavyInk      = Color(0xFF93C5FD)  // Astronomy
+    val CategorySepiaInk     = Color(0xFFFDE68A)  // History
+    val CategoryStoneInk     = Color(0xFFD6D3D1)  // Geology
+    val CategoryCrimsonInk   = Color(0xFFFDA4AF)  // Medicine
+    val CategoryPeriwinkleInk = Color(0xFFC4B5FD) // Psychology
+    val CategoryIndigoBlueInk = Color(0xFFA5B4FC) // Mathematics
+    val CategoryGoldInk      = Color(0xFFFDE047)  // Economics
+    val CategoryTeal600Ink   = Color(0xFF5EEAD4)  // Language
+    val CategoryZincInk      = Color(0xFFD4D4D8)  // Engineering
+    val CategoryDeepCyanInk  = Color(0xFF7DD3FC)  // Oceans
 
     /** Tinted (20% alpha) washes of the researched category accents. */
     val CategoryIndigoTint = CategoryIndigo.copy(alpha = 0.20f)
@@ -95,6 +132,22 @@ object CurioColors {
     val CategoryRedTint     = CategoryRed.copy(alpha = 0.20f)
     val CategoryBlueTint    = CategoryBlue.copy(alpha = 0.20f)
     val CategoryCoralTint  = CategoryCoral.copy(alpha = 0.20f)
+    // v27i — tint washes for the 15 new lanes
+    val CategoryGreenTint     = CategoryGreen.copy(alpha = 0.20f)
+    val CategoryLimeTint      = CategoryLime.copy(alpha = 0.20f)
+    val CategoryBrownTint     = CategoryBrown.copy(alpha = 0.20f)
+    val CategoryForestTint    = CategoryForest.copy(alpha = 0.20f)
+    val CategorySlateTint     = CategorySlate.copy(alpha = 0.20f)
+    val CategoryNavyTint      = CategoryNavy.copy(alpha = 0.20f)
+    val CategorySepiaTint     = CategorySepia.copy(alpha = 0.20f)
+    val CategoryStoneTint     = CategoryStone.copy(alpha = 0.20f)
+    val CategoryCrimsonTint   = CategoryCrimson.copy(alpha = 0.20f)
+    val CategoryPeriwinkleTint = CategoryPeriwinkle.copy(alpha = 0.20f)
+    val CategoryIndigoBlueTint = CategoryIndigoBlue.copy(alpha = 0.20f)
+    val CategoryGoldTint      = CategoryGold.copy(alpha = 0.20f)
+    val CategoryTeal600Tint   = CategoryTeal600.copy(alpha = 0.20f)
+    val CategoryZincTint      = CategoryZinc.copy(alpha = 0.20f)
+    val CategoryDeepCyanTint  = CategoryDeepCyan.copy(alpha = 0.20f)
 
     /**
      * Legacy warm pastels — retained ONLY for brand/decorative use
@@ -105,6 +158,10 @@ object CurioColors {
     val Lilac            = Color(0xFFC9A6F2)  // legacy soft purple
     val DustyBlue        = Color(0xFF9BB8E8)  // legacy soft blue
     val Sage             = Color(0xFFA8C99A)  // legacy soft green
+    // v20 — deep sage ink for LIGHT surfaces: Sage is a pale pastel that
+    // vanishes on the cream background, so "done"/mastered icons + text
+    // wear this readable deep green in light mode (dark keeps the soft sage).
+    val SageInk          = Color(0xFF55803F)  // Deep fern — readable on light
     val Peach            = Color(0xFFFFB585)  // legacy soft orange
     val Teal             = Color(0xFF6FC7BE)  // legacy soft teal
 

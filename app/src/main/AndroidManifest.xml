@@ -15,6 +15,15 @@
     <!-- Explore-session timer: persistent elapsed-time notification + done reminder -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- v27 — session screenshots: the bubble captures one frame via
+         MediaProjection (Android 14+ requires this dedicated FGS type), and
+         the device-screenshot watcher reads Pictures/Screenshots to
+         auto-attach the user's own shots (READ_MEDIA_IMAGES on 13+). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <!-- Android 11+ package visibility: without this, resolveActivity() /
          queryIntentActivities() return nothing for OTHER apps' activities,

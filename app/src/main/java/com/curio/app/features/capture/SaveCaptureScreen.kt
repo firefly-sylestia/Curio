@@ -1,13 +1,17 @@
 package com.curio.app.features.capture
 
 import android.content.Context
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -50,19 +54,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioStorageManager
+import com.curio.app.data.NotePaperColor
 import com.curio.app.data.CaptureConverters
 import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureDraftStore
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CaptureRepository
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.SessionShots
 import com.curio.app.data.JournalMood
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -100,6 +108,8 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
+import coil.compose.rememberAsyncImagePainter
+import java.io.File
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
@@ -107,6 +117,8 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.notePaperInk
+import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import com.google.gson.Gson
@@ -196,6 +208,70 @@ fun SaveCaptureScreen(
     LaunchedEffect(editingEntry) {
         if (editEntryId != null) tags = editingEntry?.tags.orEmpty()
     }
+
+    // ── Session attachments (v27) — the explore session's SHARED note +
+    // captured screenshots, attached to this entry on save. On a fresh save
+    // they come from the pending write package (handed off when the session
+    // ended) and are read LIVE from the store — the device-screenshot
+    // watcher keeps appending to the pending package while this page is
+    // open, so the section must recompose on its own (no local copy). In
+    // edit mode the entry already carries them — kept in a local list so
+    // removals can re-write on save.
+    var sessionNote by remember { mutableStateOf("") }
+    // Edit-mode-only local list; fresh saves read the store reactively.
+    var editSessionScreenshots by remember { mutableStateOf<List<String>>(emptyList()) }
+    LaunchedEffect(editEntryId, editingEntry, topic?.name) {
+        if (editEntryId != null) {
+            sessionNote = editingEntry?.sessionNote.orEmpty()
+            editSessionScreenshots = editingEntry?.sessionScreenshots.orEmpty()
+        } else {
+            sessionNote = ExploreSessionStore.peekWriteSessionNote(cat.id, topic?.name.orEmpty())
+        }
+    }
+    // Fresh save: live-reactive (peek reads the store's mutableStateOf, so
+    // a watcher append recomposes this automatically). Edit mode: the local
+    // list the user can trim before re-saving.
+    val sessionScreenshots: List<String> = if (editEntryId == null) {
+        ExploreSessionStore.peekWriteSessionScreenshots(cat.id, topic?.name.orEmpty())
+    } else {
+        editSessionScreenshots
+    }
+    // The shared-note button expands into a small editor card.
+    var showNoteEditor by remember { mutableStateOf(false) }
+    // Photo-picker for adding more screenshots from the gallery.
+    val addScreenshotLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            val path = SessionShots.copyFrom(context, uri)
+            if (path != null) {
+                if (editEntryId == null) {
+                    ExploreSessionStore.appendPendingScreenshot(context, cat.id, topic?.name.orEmpty(), path)
+                } else {
+                    editSessionScreenshots = editSessionScreenshots + path
+                }
+            }
+        }
+    }
+    fun removeSessionScreenshot(path: String) {
+        SessionShots.delete(context, path)
+        if (editEntryId == null) {
+            ExploreSessionStore.removePendingScreenshot(context, cat.id, topic?.name.orEmpty(), path)
+        } else {
+            editSessionScreenshots = editSessionScreenshots.filterNot { it == path }
+        }
+    }
+    // The section + floating note button show only when a pending write
+    // handoff exists for THIS exact topic (fresh save) or the entry already
+    // carries attachments (edit mode). topic is a delegated property, so the
+    // name is read via safe-call rather than smart-cast.
+    val hasSessionAttachments = editEntryId != null ||
+        (topic?.let { ExploreSessionStore.hasPendingWriteFor(cat.id, it.name) } == true) ||
+        // v27h — never hide the section when there is actually something to
+        // show: a typed note or attached screenshots make it appear even if
+        // the pending-write match is somehow off (e.g. an edit resumed after
+        // a backup restore).
+        sessionNote.isNotBlank() || sessionScreenshots.isNotEmpty()
 
     // ── Draft autosave (v7.17) ──────────────────────────────────────────
     // While on this page, the current capture data is debounce-snapshotted
@@ -312,12 +388,24 @@ fun SaveCaptureScreen(
                             ?.elapsedMillis()
                             ?.coerceAtLeast(0L) ?: 0L
                     } else 0L
+                    // v27 — the session's SHARED note + screenshots ride onto
+                    // this entry. The note editor and screenshots section keep
+                    // them in local state; push the note back to the pending
+                    // package so the entry + any later save agree.
+                    if (existingEntry == null && sessionNote.isNotBlank()) {
+                        ExploreSessionStore.setPendingNote(
+                            context, resolvedTopic.categoryId, resolvedTopic.name, sessionNote
+                        )
+                    }
                     val entry = if (existingEntry != null) {
                         // Edit mode: keep id/topic/title/timestamp, swap the data.
                         existingEntry.copy(
                             format = formatOf(persistedData),
                             captureData = persistedData,
-                            tags = tags
+                            tags = tags,
+                            sessionNote = sessionNote.takeIf { it.isNotBlank() }
+                                ?: existingEntry.sessionNote,
+                            sessionScreenshots = sessionScreenshots
                         )
                     } else {
                         CurioEntry(
@@ -329,7 +417,9 @@ fun SaveCaptureScreen(
                             format = formatOf(persistedData),
                             captureData = persistedData,
                             tags = tags,
-                            sessionTimeMillis = sessionMillis
+                            sessionTimeMillis = sessionMillis,
+                            sessionNote = sessionNote.takeIf { it.isNotBlank() },
+                            sessionScreenshots = sessionScreenshots
                         )
                     }
                     runCatching { CurioRepositoryHolder.repo.save(entry) }
@@ -341,7 +431,7 @@ fun SaveCaptureScreen(
                             // a later save of the same topic can't inherit a
                             // stale duration.
                             ExploreSessionStore.clearWriteSessionHandoff(
-                                resolvedTopic.categoryId, resolvedTopic.name
+                                context, resolvedTopic.categoryId, resolvedTopic.name
                             )
                             StreakTracker.recordActivity(context)
                             // Feed the quests system — NEW saves drive journey +
@@ -445,8 +535,8 @@ fun SaveCaptureScreen(
         // ── Topic reminder strip with gradient ───────────────────────────
         // Wears the category tint with the tint setting on; with it off it
         // falls back to a plain theme surface so the whole flow goes neutral.
-        // v23 — how long this topic was explored, shown right under the
-        // topic in the strip: the saved entry's session in edit mode, or the
+        // v23 — how long this topic was explored, shown ALONGSIDE the topic
+        // in the strip: the saved entry's session in edit mode, or the
         // pending write-session handoff (live session as fallback) on a
         // fresh save — the same sources the save itself uses.
         // `topic` is a delegated property, so grab a stable local first (the
@@ -493,43 +583,60 @@ fun SaveCaptureScreen(
                     )
                 }
                 Column {
-                    Text(
-                        text = topic?.name ?: "Loading…",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = stripInk
-                    )
+                    // v27 — the session duration sits ALONGSIDE the topic in
+                    // the strip (long topics ellipsize so the pill never wraps).
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = topic?.name ?: "Loading…",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = stripInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        if (displaySessionMillis > 0L) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Timer,
+                                    contentDescription = null,
+                                    tint = stripInk.copy(alpha = 0.7f),
+                                    size = 13.dp
+                                )
+                                Text(
+                                    text = formatSessionShort(displaySessionMillis),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = stripInk.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = cat.displayName,
                         style = MaterialTheme.typography.labelSmall,
                         color = stripInk.copy(alpha = 0.7f)
                     )
-                    if (displaySessionMillis > 0L) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Timer,
-                                contentDescription = null,
-                                tint = stripInk.copy(alpha = 0.7f),
-                                size = 13.dp
-                            )
-                            Text(
-                                text = "explored ${formatSessionShort(displaySessionMillis)}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = stripInk.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
                 }
             }
         }
 
         // ── Scrollable format body ───────────────────────────────────────
-        Column(
+        // v27k — wrapped in a Box so the shared session-note pill can float
+        // over the scrolling content (pinned above the save CTA, reachable
+        // no matter how far the body is scrolled).
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
             // v7.98 — the format body fills the page: 16dp side margins
@@ -592,6 +699,52 @@ fun SaveCaptureScreen(
                         ink = cat.categoryInk(),
                         onAccentContent = cat.onAccent()
                     )
+
+                    // ── Session attachments (v27) — the explore session's
+                    // SHARED note + captured screenshots. Only when a session
+                    // handed them off (fresh save) or the entry already has
+                    // them (edit mode).
+                    if (hasSessionAttachments) {
+                        SessionAttachmentsCard(
+                            cat = cat,
+                            screenshots = sessionScreenshots,
+                            onAddScreenshot = {
+                                addScreenshotLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                            onRemoveScreenshot = { path -> removeSessionScreenshot(path) }
+                        )
+                    }
+            }
+            }
+
+            // ── Floating session-note pill (v27k) — pinned inside the
+            // scroll area (a Box sibling of the body) so the shared note
+            // stays reachable no matter how far the format body is scrolled.
+            // Shows the note text once typed; tapping opens the compact paper
+            // editor popup right above, which rides the IME while typing.
+            if (hasSessionAttachments) {
+                // align() is a BoxScope modifier, so the pill itself stays
+                // alignment-free and the Box wrapper pins it bottom-end.
+                Box(modifier = Modifier.align(Alignment.BottomEnd)) {
+                    SessionNoteFloatingPill(
+                        cat = cat,
+                        note = sessionNote,
+                        expanded = showNoteEditor,
+                        onToggle = { showNoteEditor = !showNoteEditor },
+                        onNoteChange = {
+                            sessionNote = it
+                            if (editEntryId == null) {
+                                ExploreSessionStore.setPendingNote(
+                                    context, cat.id, topic?.name.orEmpty(), it
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
 
@@ -928,6 +1081,215 @@ private fun TagEditorRow(
                     size = 20.dp,
                     modifier = Modifier.padding(10.dp)
                 )
+            }
+        }
+    }
+}
+
+/**
+ * v27k — the explore session's attachments card on the save page: the
+ * shared session screenshots (auto-attached device shots, each removable
+ * with a small cross). The SHARED NOTE moved to the floating pill above the
+ * save CTA (see [SessionNoteFloatingPill]) so it stays reachable while the
+ * format body is scrolled.
+ */
+@Composable
+private fun SessionAttachmentsCard(
+    cat: CurioCategory,
+    screenshots: List<String>,
+    onAddScreenshot: () -> Unit,
+    onRemoveScreenshot: (String) -> Unit
+) {
+    val accent = cat.themedAccent()
+    val ink = cat.categoryInk()
+    val tintWash = AppPreferences.tintWashEffective()
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // ── Header — title only; the note button floats above the save CTA ─
+        Text(
+            text = "From your explore session",
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        // ── Screenshots — auto-added during the session, shared, each
+        // removable with a small cross. The add tile stays so a session with
+        // no shots yet can still pick one from the gallery.
+        Text(
+                text = "Session screenshots",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                screenshots.forEach { path ->
+                    Box {
+                        val painter = rememberAsyncImagePainter(File(path))
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+                            modifier = Modifier.size(84.dp)
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = painter,
+                                contentDescription = "Session screenshot",
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        // Small cross — remove the attachment.
+                        Surface(
+                            onClick = { onRemoveScreenshot(path) },
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(2.dp)
+                                .size(20.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                CurioIcon(
+                                    name = CurioIcons.Close,
+                                    contentDescription = "Remove screenshot",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    size = 12.dp
+                                )
+                            }
+                        }
+                    }
+                }
+                // Add-from-gallery tile.
+                Surface(
+                    onClick = onAddScreenshot,
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (tintWash) cat.tint.copy(alpha = 0.14f)
+                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    border = BorderStroke(1.dp, accent.copy(alpha = 0.4f)),
+                    modifier = Modifier.size(84.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.PhotoLibrary,
+                                contentDescription = null,
+                                tint = if (tintWash) ink else accent,
+                                size = 22.dp
+                            )
+                    Text(
+                        text = "Add",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (tintWash) ink else accent
+                    )
+                }
+            }
+        }
+    }
+    }
+}
+
+/**
+ * v27k — the shared session note's FLOATING button on the save page.
+ * Pinned inside the scroll area (bottom-end, above the save CTA) so it stays
+ * on screen no matter how far the format body is scrolled. Shows the note
+ * text once anything is typed; tapping toggles a compact paper editor popup
+ * right above, which rides the IME so typing never hides it.
+ */
+@Composable
+private fun SessionNoteFloatingPill(
+    cat: CurioCategory,
+    note: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    onNoteChange: (String) -> Unit
+) {
+    val accent = cat.themedAccent()
+    Column(
+        modifier = Modifier
+            .imePadding()
+            .padding(end = 16.dp, bottom = 14.dp),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // ── Compact note editor popup — paper look, same copy as before ──
+        if (expanded) {
+            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = notePaperSurface(NotePaperColor.CREAM),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
+                shadowElevation = 6.dp,
+                modifier = Modifier.fillMaxWidth(0.94f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "Shared session note",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = paperInkColor.copy(alpha = 0.85f)
+                    )
+                    OutlinedTextField(
+                        value = note,
+                        onValueChange = { onNoteChange(it.take(240)) },
+                        placeholder = { Text("What stayed with you? (one note per session)") },
+                        minLines = 2,
+                        maxLines = 4,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "Shown on every entry saved from this session.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = paperInkColor.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
+        // ── The floating button itself — accent pill, shows the note ──
+        Surface(
+            onClick = onToggle,
+            shape = RoundedCornerShape(50),
+            color = accent,
+            border = BorderStroke(1.dp, lerp(accent, Color.White, 0.25f).copy(alpha = 0.6f)),
+            shadowElevation = 6.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Note,
+                    contentDescription = null,
+                    tint = cat.onAccent(),
+                    size = 16.dp
+                )
+                Text(
+                    text = if (note.isNotBlank()) note.take(24) else "Session note",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = cat.onAccent(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (expanded) {
+                    CurioIcon(
+                        name = CurioIcons.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = cat.onAccent(),
+                        size = 16.dp
+                    )
+                }
             }
         }
     }

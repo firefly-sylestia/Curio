@@ -65,6 +65,29 @@ fun CurioCategory.themedAccent(): Color {
 }
 
 /**
+ * v27j — the torn-hero HEADER fill accent. Resolves [themedAccent], then
+ * deepens it slightly when the "Deeper header color" preference is on
+ * (the default). Only the banner fill color changes — watermark glyphs,
+ * ink and everything else keep resolving from [themedAccent] exactly as
+ * before, so toggling never moves a watermark or a text color, only the
+ * painted paper under the torn edge. The darkening is a hue-preserving
+ * lightness drop: deep accents stay recognizable, pale pastels (wildcard
+ * coral) deepen instead of washing out.
+ */
+@Composable
+fun CurioCategory.headerAccent(): Color {
+    val base = themedAccent()
+    if (!AppPreferences.headerDeepState) return base
+    // Hue-preserving deepen: pull lightness down rather than lerping toward
+    // black (which would grey the hue). Light mode deepens a touch more so
+    // the banner reads a shade richer on the cream page; dark mode deepens
+    // only a whisper so the already-deep accent doesn't sink into midnight.
+    val hsl = toHsl(base)
+    val factor = if (isCurioDarkTheme()) 0.94f else 0.88f
+    return fromHsl(hsl.h, hsl.s, hsl.l * factor)
+}
+
+/**
  * v8.28 — text/icon ink for category accents on PLAIN surfaces in EVERY
  * light theme: like [categoryInk], but pale accents (e.g. the wildcard
  * coral, which is pastel by nature) get their deep hue twin even when

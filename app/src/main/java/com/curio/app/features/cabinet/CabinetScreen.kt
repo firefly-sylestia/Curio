@@ -99,6 +99,7 @@ import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -110,6 +111,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -645,7 +647,9 @@ private fun CabinetHeroHeader(
     // category's color instead of snapping.
     val targetFill = when {
         legacyMode -> MaterialTheme.colorScheme.tertiary
-        activeCat != null -> activeCat.themedAccent()
+        // v27j — header fill depth: a slightly darker painter accent by
+        // default (toggle in Experiments → Paper & headers).
+        activeCat != null -> activeCat.headerAccent()
         else -> settingsRoseAccent()
     }
     val targetInk = when {
@@ -823,6 +827,11 @@ private fun CabinetHeroHeader(
                                     color = ink,
                                     maxLines = 1
                                 )
+                                // v27 — experimental paper-title underline (two
+                                // short lines under the title text; OFF by default).
+                                if (AppPreferences.paperHeaderCutsState) {
+                                    PaperTitleLines(ink = ink)
+                                }
                                 Text(
                                     subtitle,
                                     style = MaterialTheme.typography.labelMedium,
@@ -1058,16 +1067,19 @@ private fun CabinetHeroActionPill(
     emphasized: Boolean = false,
     destructive: Boolean = false
 ) {
+    // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
+    // banner (especially in light mode), so hero actions like Select /
+    // Sort / Search read as invisible. The glass stays frosted but clear.
     val fill = when {
-        destructive -> ink.copy(alpha = 0.55f)
-        emphasized -> ink.copy(alpha = 0.42f)
-        else -> ink.copy(alpha = 0.18f)
+        destructive -> ink.copy(alpha = 0.65f)
+        emphasized -> ink.copy(alpha = 0.55f)
+        else -> ink.copy(alpha = 0.30f)
     }
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        border = BorderStroke(1.dp, ink.copy(alpha = 0.28f)),
+        border = BorderStroke(1.dp, ink.copy(alpha = 0.42f)),
         shadowElevation = 0.dp
     ) {
         Row(

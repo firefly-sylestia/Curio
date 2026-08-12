@@ -698,9 +698,6 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_PREFERENCES) {
                 SettingsSectionScreen(navController = navController, page = SettingsPage.PREFERENCES)
             }
-            composable(CurioRoutes.SETTINGS_NOTIFICATIONS) {
-                SettingsSectionScreen(navController = navController, page = SettingsPage.NOTIFICATIONS)
-            }
             composable(CurioRoutes.SETTINGS_RECORDING) {
                 SettingsSectionScreen(navController = navController, page = SettingsPage.RECORDING)
             }
@@ -949,13 +946,17 @@ fun CurioNavHost(
                     TextButton(onClick = {
                         showDoneDialog = false
                         confirmSessionCancel = false
-                        // v17 — hand the session's elapsed time to the capture
-                        // page before clearing (the save screen can't read it
-                        // once the session is gone).
+                        // v17/v27 — hand the session's write package (elapsed
+                        // time + shared note + screenshots) to the capture page
+                        // before clearing (the save screen can't read it once
+                        // the session is gone).
                         ExploreSessionStore.handoffWriteSession(
+                            context,
                             activeSession.categoryId,
                             activeSession.topicName,
-                            activeSession.elapsedMillis()
+                            activeSession.elapsedMillis(),
+                            note = activeSession.note,
+                            screenshots = activeSession.screenshotPaths
                         )
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)

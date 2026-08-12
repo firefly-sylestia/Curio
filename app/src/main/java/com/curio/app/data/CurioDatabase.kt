@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CaptureEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -65,6 +65,20 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v5 → v6 (v27): explore-session attachments per capture. Adds the
+         * nullable `sessionNote` column (NULL = no note) and the
+         * `sessionScreenshotsJson` array with an empty-array default so
+         * existing entries read as attachment-less (the entity's Kotlin
+         * defaults match these).
+         */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE captures ADD COLUMN sessionNote TEXT")
+                db.execSQL("ALTER TABLE captures ADD COLUMN sessionScreenshotsJson TEXT NOT NULL DEFAULT '[]'")
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -79,7 +93,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

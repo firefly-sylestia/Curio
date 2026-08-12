@@ -1,16 +1,8 @@
 package com.curio.app.ui.components
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,12 +11,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -58,34 +54,29 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
 /**
- * The explore-timer bubble's visual content — kept SHORT on purpose: just
- * the category glyph, the topic name and the live elapsed time. No
- * verb/target lines or descriptions; those live in the done-prompt, not on
- * a floating pill.
+ * The explore-timer bubble's visual content — kept SHORT on purpose: the
+ * category glyph, the topic name and the live elapsed time on the compact
+ * pill; the expanded panel adds icon-only controls, a shared session note,
+ * and a Finish action. No verb/target lines or
+ * descriptions — those live in the done-prompt, not on a floating pill.
  *
- * Two shapes, animated between on expand/collapse (v6.12 — a Transition
- * springs the size, morphs the corner radius and crossfades the content
- * instead of the old instant swap):
+ * Two states, swapped INSTANTLY (v27 — the old morph animation between the
+ * pill and the panel was laggy on many devices and is gone):
  *  - **Minimized** (default): a compact capsule pill — category glyph chip,
- *    the topic name, and a chronometer-style elapsed readout. Tapping it
- *    expands; long topic names slow-scroll (marquee) inside the pill so the
- *    full name is readable without stretching it.
- *  - **Expanded**: a rounded card panel (NOT a full capsule — a capsule
- *    with that much content reads as a circle). A header row with the glyph
- *    chip + topic + elapsed + a Minimize chevron, then a row of labeled
- *    controls: **Pause / Resume** and **Hide**. (Ending the session moved
- *    to the app's session-card corner — the floating pill only pauses and
- *    hides.)
- *
- * While the transition runs, [onSizeChanged] reports the growing/shrinking
- * pixel size so the service can keep the window centered and clamped —
- * timer ticks are excluded (they fire outside the transition window).
+ *    the topic name (long names slow-scroll/marquee), and a chronometer
+ *    readout. Tapping it expands.
+ *  - **Expanded**: a rounded card panel. Header (glyph + topic + elapsed +
+ *    minimize chevron), then a compact ICON-ONLY control row — Pause /
+ *    Resume, Hide —
+ *    then the shared session note field, then the Finish button that ends
+ *    the session and opens the write-it-down page.
  *
  * Dragging lives HERE (Compose), not on the window: a system-overlay
  * ComposeView's composed child consumes every View-level touch, so a View
@@ -97,8 +88,9 @@ import kotlinx.coroutines.delay
  * Used by [com.curio.app.infrastructure.ExploreSessionService] inside a
  * system overlay window (`TYPE_APPLICATION_OVERLAY`), so it renders over
  * other apps — including the browser — while an explore session runs.
- * Pure presentation apart from the drag deltas and the transient minimize
- * state (which resets to small whenever the window is rebuilt).
+ * Pure presentation apart from the drag deltas, the transient minimize
+ * state (which resets to small whenever the window is rebuilt) and the note
+ * field's local draft (pushed live to the session store).
  *
  * Theme-aware: surfaces, ink and borders come from [MaterialTheme] (so the
  * bubble follows light / dark / AMOLED / Material styles) and the accent is
@@ -110,12 +102,19 @@ fun ExploreBubbleContent(
     session: ExploreSession,
     onTogglePause: () -> Unit,
     onHide: () -> Unit,
+    // v27 — the note field writes the session's SHARED note live.
+    onNoteChange: (String) -> Unit,
+    // v27 — Finish button: end the session and open the write-it-down page.
+    onFinish: () -> Unit,
+    // v27 — focus changes on the note field; the service makes the overlay
+    // window focusable (so the keyboard can type) and restores it on blur.
+    onNoteFocusChange: (Boolean) -> Unit,
     onDragBy: (dx: Float, dy: Float) -> Unit,
     onDragEnd: () -> Unit,
-    // Called with the new pixel size whenever the bubble resizes WHILE the
-    // expand/collapse transition is running — the service keeps the window
-    // centered/clamped so the growth reads as unfurling in place instead of
-    // an anchored jump. Timer ticks never forward (see [sizeAnimating]).
+    // Called with the new pixel size right after an expand/collapse swap —
+    // the service re-centers/clamps the window so the instant size change
+    // reads as growth around the middle instead of a jump from the corner.
+    // Timer ticks never forward (see [resizeBurst]).
     onSizeChanged: (wPx: Int, hPx: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
@@ -147,41 +146,24 @@ fun ExploreBubbleContent(
     // (hide → re-show, service restart) the bubble comes back small.
     var minimized by remember { mutableStateOf(true) }
 
-    // ── Expand/collapse transition (v6.12) ────────────────────────────
-    // The bubble used to swap between the pill and the panel INSTANTLY —
-    // the window snapped to the new size with no motion. Now a Transition
-    // springs the size (pill ⇄ panel), morphs the corner radius (pill ⇄
-    // card) and crossfades the content, and the window position follows the
-    // animated size frame-by-frame via [onSizeChanged] — gated to this
-    // transition so the per-second timer tick can never nudge the bubble.
-    val transition = updateTransition(targetState = minimized, label = "bubbleExpand")
-    val corner by transition.animateDp(
-        // Same duration as the size tween below — one shared clock so the
-        // corner morph finishes exactly when the growth does (previously the
-        // corner beat the size to the end and the shape/card desynced).
-        transitionSpec = { tween(EXPAND_ANIM_MS, easing = FastOutSlowInEasing) },
-        label = "bubbleCorner"
-    ) { isMinimized -> if (isMinimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS }
-    // True while the expand/collapse animation runs — size callbacks are only
-    // forwarded to the service during this window. Driven by a fixed timer
-    // (NOT transition.isRunning): the old gate followed the 280ms corner
-    // tween while the content's spring size kept growing for hundreds of
-    // milliseconds after it closed, so the overlay window froze mid-growth
-    // and the panel outgrew it — the laggy, glitchy unfurl. A timer that
-    // matches the size tween exactly keeps the window and the content in
-    // lock-step for the whole animation.
-    var sizeAnimating by remember { mutableStateOf(false) }
-    var firstToggle by remember { mutableStateOf(true) }
+    // v27 — the shared note's draft. Kept as LOCAL state so the field never
+    // fights the store's recomposition (the session object changes on every
+    // keystroke, which would otherwise reset the cursor); each change is
+    // pushed live via [onNoteChange]. Re-seeded when the window is rebuilt
+    // for a different session.
+    var noteDraft by remember(session.topicName, session.startMillis) {
+        mutableStateOf(session.note)
+    }
+
+    // v27 — instant swap, no morph. The service still re-centers the window
+    // once after the size changes: forward size callbacks for a short burst
+    // after each expand/collapse toggle (NOT on the per-second timer tick,
+    // which would nudge the window every second).
+    var resizeBurst by remember { mutableStateOf(false) }
     LaunchedEffect(minimized) {
-        if (firstToggle) {
-            // Skip the initial composition — the window mounts at pill size
-            // and must not run the compensation dance on first layout.
-            firstToggle = false
-            return@LaunchedEffect
-        }
-        sizeAnimating = true
-        delay(EXPAND_ANIM_MS.toLong())
-        sizeAnimating = false
+        resizeBurst = true
+        delay(RESIZE_BURST_MS)
+        resizeBurst = false
     }
 
     // Drag — slop-gated Compose detector: taps on the pill/buttons still
@@ -196,10 +178,7 @@ fun ExploreBubbleContent(
     }
 
     Surface(
-        // Shape morphs with the transition: a near-capsule pill when
-        // minimized, a rounded card when expanded — animated, so the two
-        // shapes melt into each other instead of hard-swapping.
-        shape = RoundedCornerShape(corner),
+        shape = RoundedCornerShape(if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         border = BorderStroke(
             1.dp,
@@ -213,61 +192,42 @@ fun ExploreBubbleContent(
         modifier = modifier
             .then(dragModifier)
             .onSizeChanged { size ->
-                // Only while the expand/collapse transition runs — timer
-                // ticks change the pill width by a pixel and must not move
-                // the window.
-                if (sizeAnimating) onSizeChanged(size.width, size.height)
+                // Only during the post-toggle burst — timer ticks change the
+                // pill width by a pixel and must not move the window.
+                if (resizeBurst) onSizeChanged(size.width, size.height)
             }
             // The minimized pill is tappable anywhere to expand; the expanded
             // bubble's buttons handle their own input. Applied conditionally
             // so the expanded bubble carries no dead clickable semantics.
             .then(if (minimized) Modifier.clickable { minimized = false } else Modifier)
     ) {
-        // v7.18 — bounded tween EVERYWHERE. The DEFAULT AnimatedContent
-        // transition crossfades fine but sizes the content with a
-        // spring(StiffnessMediumLow) — a long asymptotic tail that felt
-        // laggy and outlived the corner morph. Now the size runs on the
-        // same FastOutSlowIn tween as the corner and the [sizeAnimating]
-        // gate above, so the overlay window follows the content in lock-step
-        // for the whole animation and everything lands together.
-        // v7.99 — clip the crossfade to the ANIMATING bounds (clip = true):
-        // the unclipped swap let the expanded panel's content render at full
-        // size while the window was still pill-sized, so the controls stuck
-        // out past the rounded bubble mid-animation and the unfurl read as
-        // glitchy. Clipping reveals the panel as the window grows — a clean
-        // unfold instead of an overlapping flash.
-        AnimatedContent(
-            targetState = minimized,
-            transitionSpec = {
-                (fadeIn(tween(EXPAND_FADE_IN_MS, easing = FastOutSlowInEasing)) togetherWith
-                    fadeOut(tween(EXPAND_FADE_OUT_MS, easing = LinearEasing)))
-                    .using(SizeTransform(clip = true) { _, _ ->
-                        tween(EXPAND_ANIM_MS, easing = FastOutSlowInEasing)
-                    })
-            },
-            label = "bubbleState"
-        ) { isMinimized ->
-            if (isMinimized) {
-                MinimizedPill(
-                    session = session,
-                    category = category,
-                    accent = accent,
-                    ink = ink,
-                    elapsed = elapsed,
-                    onExpand = { minimized = false }
-                )
-            } else {
-                ExpandedPanel(
-                    session = session,
-                    category = category,
-                    accent = accent,
-                    ink = ink,
-                    elapsed = elapsed,
-                    onTogglePause = onTogglePause,
-                    onHide = onHide,
-                    onMinimize = { minimized = true }
-                )
-            }
+        if (minimized) {
+            MinimizedPill(
+                session = session,
+                category = category,
+                accent = accent,
+                ink = ink,
+                elapsed = elapsed,
+                onExpand = { minimized = false }
+            )
+        } else {
+            ExpandedPanel(
+                session = session,
+                category = category,
+                accent = accent,
+                ink = ink,
+                elapsed = elapsed,
+                noteDraft = noteDraft,
+                onTogglePause = onTogglePause,
+                onHide = onHide,
+                onNoteChange = { note ->
+                    noteDraft = note
+                    onNoteChange(note)
+                },
+                onNoteFocusChange = onNoteFocusChange,
+                onFinish = onFinish,
+                onMinimize = { minimized = true }
+            )
         }
     }
 }
@@ -330,8 +290,9 @@ private fun MinimizedPill(
 
 /**
  * The expanded card panel — header (glyph chip + topic + elapsed + Minimize
- * chevron) over a row of labeled controls (Pause/Resume, Hide). Deliberately
- * a rounded rectangle, not a capsule, so it never reads as a circle.
+ * chevron), an ICON-ONLY control row (Pause/Resume, Hide, Screenshot), the
+ * shared session note field, and the Finish button. Deliberately a rounded
+ * rectangle, not a capsule, so it never reads as a circle.
  */
 @Composable
 private fun ExpandedPanel(
@@ -340,8 +301,12 @@ private fun ExpandedPanel(
     accent: Color,
     ink: Color,
     elapsed: Long,
+    noteDraft: String,
     onTogglePause: () -> Unit,
     onHide: () -> Unit,
+    onNoteChange: (String) -> Unit,
+    onNoteFocusChange: (Boolean) -> Unit,
+    onFinish: () -> Unit,
     onMinimize: () -> Unit
 ) {
     Column(
@@ -384,22 +349,106 @@ private fun ExpandedPanel(
             )
         }
 
-        // ── Controls: labeled actions ──────────────────────────────
+        // ── Icon-only controls: Pause/Resume · Hide · Screenshot ──
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            LabeledBubbleButton(
+            BubbleIconButton(
                 icon = if (session.paused) CurioIcons.PlayArrow else CurioIcons.Pause,
-                label = if (session.paused) "Resume" else "Pause",
+                contentDescription = if (session.paused) "Resume timer" else "Pause timer",
                 tint = if (AppPreferences.pastelColorsState) ink else accent,
                 onClick = onTogglePause
             )
-            LabeledBubbleButton(
+            BubbleIconButton(
                 icon = CurioIcons.Close,
-                label = "Hide",
+                contentDescription = "Hide timer",
                 tint = if (AppPreferences.pastelColorsState) ink
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onHide
             )
         }
+
+        // ── Shared session note (v27) — one note per session, attached
+        // to every entry saved from it. Local draft state (see
+        // [ExploreBubbleContent.noteDraft]); each keystroke is pushed live
+        // via [onNoteChange].
+        NoteField(
+            note = noteDraft,
+            onChange = onNoteChange,
+            onFocusChange = onNoteFocusChange,
+            accent = accent,
+            ink = ink
+        )
+
+        // ── Finish — end the session and open the write-it-down page.
+        Surface(
+            onClick = onFinish,
+            shape = RoundedCornerShape(50),
+            color = accent,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Check,
+                    contentDescription = null,
+                    tint = category.onAccent(),
+                    size = 18.dp
+                )
+                Text(
+                    text = "Finish & write it down",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color = category.onAccent(),
+                    modifier = Modifier.padding(start = 6.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The shared-note editor inside the expanded bubble. A compact rounded
+ * BasicTextField that grows to 2 lines; focused state is reported to the
+ * owning service so the overlay window can become focusable (the keyboard
+ * only types into a focusable window).
+ */
+@Composable
+private fun NoteField(
+    note: String,
+    onChange: (String) -> Unit,
+    onFocusChange: (Boolean) -> Unit,
+    accent: Color,
+    ink: Color
+) {
+    val pastel = AppPreferences.pastelColorsState
+    BasicTextField(
+        value = note,
+        onValueChange = { onChange(it.take(240)) },
+        textStyle = MaterialTheme.typography.bodySmall.copy(
+            color = if (pastel) ink else MaterialTheme.colorScheme.onSurface
+        ),
+        cursorBrush = SolidColor(accent),
+        maxLines = 2,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (pastel) accent.copy(alpha = 0.14f)
+                else MaterialTheme.colorScheme.surfaceContainerHighest
+            )
+            .onFocusChanged { onFocusChange(it.isFocused) }
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) { inner ->
+        if (note.isEmpty()) {
+            Text(
+                text = "Session note…",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (pastel) ink.copy(alpha = 0.55f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        inner()
     }
 }
 
@@ -509,7 +558,7 @@ private fun MarqueeTopicText(
     }
 }
 
-/** Small circular icon button used by the bubble's expand/minimize controls. */
+/** Small circular icon button used by the bubble's controls. */
 @Composable
 private fun BubbleIconButton(
     icon: String,
@@ -537,44 +586,6 @@ private fun BubbleIconButton(
     }
 }
 
-/** Small labeled pill button used by the expanded panel's control row. */
-@Composable
-private fun LabeledBubbleButton(
-    icon: String,
-    label: String,
-    tint: Color,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(
-            1.dp,
-            tint.copy(alpha = if (AppPreferences.pastelColorsState) 0.58f else 0.35f)
-        ),
-        shadowElevation = 0.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            CurioIcon(
-                name = icon,
-                contentDescription = null,
-                tint = tint,
-                size = 16.dp
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = tint
-            )
-        }
-    }
-}
-
 /**
  * Compact chronometer-style reading for the minimized pill ("12:34",
  * "1:02:34") — tighter than the friendly [formatElapsed] ("12m 5s") so the
@@ -593,16 +604,16 @@ private fun compactElapsed(millis: Long): String {
 }
 
 // ── Tuning constants ────────────────────────────────────────────────────
-// Corner radii the shape animates between: a near-capsule pill when
-// minimized (24dp ≈ the pill's half-height, so the ends stay fully rounded)
-// and a refined card when expanded.
+// Corner radii: a near-capsule pill when minimized (24dp ≈ the pill's
+// half-height, so the ends stay fully rounded) and a refined card when
+// expanded.
 private val PILL_CORNER_RADIUS = 24.dp
 private val PANEL_CORNER_RADIUS = 18.dp
 
 // Topic area width caps: tight in the minimized pill, roomier in the
 // expanded panel. Longer topics slow-scroll within these bounds.
 private val MINIMIZED_TOPIC_WIDTH = 110.dp
-private val EXPANDED_TOPIC_WIDTH = 180.dp
+private val EXPANDED_TOPIC_WIDTH = 160.dp
 
 // Marquee tuning — a slow ticker (~42 px/s) that holds briefly at each end
 // before gliding back, so the full topic name reveals itself at a readable
@@ -611,11 +622,7 @@ private const val MARQUEE_PX_PER_MS = 0.042f
 private const val MARQUEE_START_HOLD_MS = 900L
 private const val MARQUEE_END_HOLD_MS = 1_100L
 
-// Expand/collapse timing — ONE shared clock so the size, the corner morph
-// and the crossfade all finish together. The old default spring size tail
-// dragged on hundreds of ms after the corner stopped (and past the size-
-// forwarding gate), which read as lag. 300ms FastOutSlowIn is fast enough
-// to feel snappy, long enough to read as a deliberate unfurl.
-private const val EXPAND_ANIM_MS = 300
-private const val EXPAND_FADE_IN_MS = 220
-private const val EXPAND_FADE_OUT_MS = 100
+// v27 — how long size callbacks forward after an expand/collapse toggle
+// (long enough for the instant swap + one window relayout to land, short
+// enough that a per-second timer tick can never slip into it).
+private const val RESIZE_BURST_MS = 120L

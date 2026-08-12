@@ -263,6 +263,24 @@ class ExploreSessionService : Service() {
         return START_NOT_STICKY
     }
 
+    /**
+     * v27 — the bubble's Finish button. Ends the session the same way as the
+     * notification's "Done exploring" (shared teardown in
+     * [com.curio.app.infrastructure.ExploreReminderReceiver]): hands the
+     * session's elapsed time + shared note + screenshots off to the write
+     * package, clears the session, cancels the reminder, stops this service,
+     * and navigates to the write-it-down page. Reuses the receiver's
+     * ACTION_STOP so every end path stays in lock-step.
+     */
+    private fun finishToWritePage() {
+        runCatching {
+            sendBroadcast(
+                Intent(this, ExploreReminderReceiver::class.java)
+                    .setAction(ExploreReminderReceiver.ACTION_STOP)
+            )
+        }
+    }
+
     /** Puts the service into the foreground with [notification]. */
     private fun promote(notification: Notification) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -459,6 +477,11 @@ class ExploreSessionService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            // v27h — FLAG_SECURE REMOVED: it blanked the overlay in the
+            // user's own device screenshots (and made the session screenshot
+            // feature feel blocked). The bubble is now capturable — the user
+            // WANTS the session visible in the shots they take and the ones
+            // the session attaches.
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
@@ -529,6 +552,40 @@ class ExploreSessionService : Service() {
                             onHide = {
                                 ExploreSessionStore.setPillHidden(this@ExploreSessionService, true)
                                 render()
+                            },
+                            // v27 — the note field writes the session's SHARED
+                            // note live (one note per session; the finish flow
+                            // hands it off and every entry saved from the
+                            // session carries it).
+                            onNoteChange = { note ->
+                                ExploreSessionStore.setSessionNote(this@ExploreSessionService, note)
+                            },
+                            // v27 — the Finish button ends the session exactly
+                            // like the notification's "Done exploring": hand
+                            // off note + screenshots, clear, and hand the
+                            // user to the write-it-down page.
+                            onFinish = {
+                                finishToWritePage()
+                            },
+                            // v27 — typing in the note field needs a FOCUSABLE
+                            // window (an overlay with FLAG_NOT_FOCUSABLE can't
+                            // receive the keyboard). Flip the window flags for
+                            // the duration of the note edit and restore them on
+                            // blur. No FLAG_SECURE (v27h): the note is part of
+                            // the session the user is allowed to screenshot.
+                            onNoteFocusChange = { focused ->
+                                val view = bubbleView ?: return@ExploreBubbleContent
+                                val p = bubbleParams ?: return@ExploreBubbleContent
+                                val newFlags = if (focused) {
+                                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                                } else {
+                                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                                }
+                                if (p.flags != newFlags) {
+                                    p.flags = newFlags
+                                    runCatching { windowManager.updateViewLayout(view, p) }
+                                }
                             },
                             // Drag lives in Compose (the composed child of an
                             // overlay ComposeView consumes every View-level

@@ -22,6 +22,8 @@ import com.curio.app.MainActivity
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
@@ -64,7 +66,7 @@ fun CurioCrashScreen(navController: NavController) {
                 CurioIcon(
                     name = CurioIcons.ErrorOutline,
                     contentDescription = null,
-                    tint = CurioColors.CoralBlush,
+                    tint = curioRoseInk(),
                     size = 36.dp
                 )
             }
@@ -261,12 +263,13 @@ private data class CrashCategory(
     val label: String, val description: String, val recovery: String, val color: Color
 )
 
+@Composable
 private fun detectCategory(log: String): CrashCategory {
     val l = log.lowercase()
     return when {
         l.contains("room") || l.contains("sqlite") || l.contains("database") || l.contains("cursor") ->
             CrashCategory("Storage", "The local database encountered an error.",
-                "Your data is safe. A restart should resolve this.", CurioColors.Sage)
+                "Your data is safe. A restart should resolve this.", curioSageInk())
         l.contains("compose") || l.contains("recompose") || l.contains("modifier") || l.contains("layout") ->
             CrashCategory("UI", "The interface hit a rendering error.",
                 "A quick restart usually fixes this.", CurioColors.Lilac)

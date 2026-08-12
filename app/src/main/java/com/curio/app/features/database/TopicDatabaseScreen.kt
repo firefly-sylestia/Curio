@@ -78,6 +78,7 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.Dispatchers
@@ -506,10 +507,10 @@ fun TopicDatabaseScreen(navController: NavController) {
             enter = fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.85f),
             exit = scaleOut(tween(180), targetScale = 0.85f) + fadeOut(tween(180)),
             modifier = Modifier
-                // Sits left of the scroll-indicator strip (which owns the
-                // far-right edge) and below the pinned chip bar.
-                .align(Alignment.TopEnd)
-                .padding(end = 68.dp, top = SettingsHeroTotalHeight + 74.dp)
+                // Floating just below the pinned chip bar, centered over the
+                // list — clear of the scroll-indicator strip on the right.
+                .align(Alignment.TopCenter)
+                .padding(top = SettingsHeroTotalHeight + 74.dp)
         ) {
             Surface(
                 onClick = {
@@ -521,13 +522,19 @@ fun TopicDatabaseScreen(navController: NavController) {
                 color = MaterialTheme.colorScheme.primary,
                 shadowElevation = 6.dp
             ) {
-                CurioIcon(
-                    CurioIcons.ArrowUpward,
-                    "Back to top",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    size = 20.dp,
+                // v26c — Surface's content box has no contentAlignment, so the
+                // glyph used to sit top-start inside the circle; center it.
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier.padding(11.dp)
-                )
+                ) {
+                    CurioIcon(
+                        CurioIcons.ArrowUpward,
+                        "Back to top",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        size = 20.dp
+                    )
+                }
             }
         }
 
@@ -891,7 +898,7 @@ private fun DatabaseTopicRow(
                     if (done) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = CurioColors.Sage.copy(alpha = 0.16f)
+                            color = curioSageInk().copy(alpha = 0.16f)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -900,13 +907,13 @@ private fun DatabaseTopicRow(
                             ) {
                                 CurioIcon(
                                     CurioIcons.Check, null,
-                                    tint = CurioColors.Sage,
+                                    tint = curioSageInk(),
                                     size = 12.dp
                                 )
                                 Text(
                                     "explored",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = CurioColors.Sage
+                                    color = curioSageInk()
                                 )
                             }
                         }

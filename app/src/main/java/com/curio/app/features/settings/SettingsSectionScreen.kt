@@ -79,10 +79,11 @@ import com.curio.app.ui.theme.CurioIcons
 enum class SettingsPage(val title: String, val subtitle: String) {
     APPEARANCE("Appearance", "Theme, tint, and color mood"),
     // v26 — Preferences: the behavioral settings that aren't about how the
-    // app LOOKS or when it REMINDS you — search engine, explore sessions and
-    // the floating bubble, and the pet's chatter/games personality.
+    // app LOOKS — search engine, explore sessions and the floating bubble,
+    // the pet's chatter/games personality, and (v27) every notification
+    // control: the daily shuffle reminder + hour chips and the explore
+    // dialog's bubble opt-in row (the Notifications section is gone).
     PREFERENCES("Preferences", "Search, explore, and pet behavior"),
-    NOTIFICATIONS("Notifications", "Reminders and notifications"),
     RECORDING("Recording", "Voice-note quality and dictation"),
     DATA("Backup & restore", "Keep your captures safe")
 }
@@ -135,7 +136,6 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
                 when (page) {
                     SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
                     SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
-                    SettingsPage.NOTIFICATIONS -> NotificationsSection(highlightKey)
                     SettingsPage.RECORDING -> RecordingSection(highlightKey)
                     SettingsPage.DATA -> DataSection(navController, highlightKey)
                 }
@@ -239,6 +239,10 @@ private fun PreferencesSection(highlightKey: String? = null) {
     var overlaySettingsOpened by remember { mutableStateOf(false) }
     var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
+    // v27 — the daily shuffle reminder + its hour chips moved in from the
+    // removed Notifications section.
+    var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
+    var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
     // v19 — the explore search-engine picker (which engine the "Explore in
     // browser" button opens).
     var showSearchEngineDialog by remember { mutableStateOf(false) }
@@ -252,6 +256,8 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
                 liveNotificationsEnabled = AppPreferences.isLiveNotificationsEnabled(context)
                 exploreSessionsEnabled = AppPreferences.isExploreSessionsEnabled(context)
+                reminderHour = AppPreferences.getReminderHour(context)
+                showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
                 // v8.1 — returning from the system overlay-settings page: a
                 // grant re-enables the bubble and clears the declined flag;
                 // coming back without granting records the "no" so automatic
@@ -405,41 +411,11 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 )
             }
         }
-    }
-    if (showSearchEngineDialog) {
-        SearchEngineDialog(
-            current = SearchEngine.fromId(AppPreferences.searchEngineState),
-            onDismiss = { showSearchEngineDialog = false },
-            onSelected = { engine ->
-                AppPreferences.setSearchEngine(context, engine)
-                showSearchEngineDialog = false
-            }
-        )
-    }
-}
-
-@Composable
-private fun NotificationsSection(highlightKey: String? = null) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
-    // v23 — whether the Explore dialog shows its bubble opt-in row.
-    var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
-    // v26 — shared notification-permission gate (daily-reminder row).
-    val enableNotifications = rememberNotificationPermissionGate()
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                reminderHour = AppPreferences.getReminderHour(context)
-                showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SettingsRowPulse(highlightKey == "notif-reminder") {
+        CurioSettingsDivider()
+        // v27 — the daily shuffle reminder + its hour chips moved in from the
+        // removed Notifications section: Preferences is now the one home for
+        // notification controls.
+        SettingsRowPulse(highlightKey == "pref-reminder") {
             CompactSwitchRow("Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
                 if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
             }
@@ -448,9 +424,9 @@ private fun NotificationsSection(highlightKey: String? = null) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
                 items(listOf(9, 12, 15, 18, 21)) { hour ->
                     val selected = hour == reminderHour
-                    // AMOLED: the selected chip was the coral primary; it
-                    // swaps to pitch-black glass (white text + hairline rim) to
-                    // match the switches and the app's AMOLED control language.
+                    // AMOLED: the selected chip swaps to pitch-black glass
+                    // (white text + hairline rim) to match the switches and
+                    // the app's AMOLED control language.
                     val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
                     Surface(
                         onClick = {
@@ -483,7 +459,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
         CurioSettingsDivider()
         // v23 — the explore dialog's bubble opt-in row is hidden by default;
         // this re-shows it there as a single-line choice (no subtext).
-        SettingsRowPulse(highlightKey == "notif-bubble-dialog") {
+        SettingsRowPulse(highlightKey == "pref-bubble-dialog") {
             CompactSwitchRow(
                 "Explore bubble option in Explore dialog",
                 "Show the bubble choice as one line when you start an explore",
@@ -493,6 +469,16 @@ private fun NotificationsSection(highlightKey: String? = null) {
                 AppPreferences.setShowBubbleOptInDialog(context, it)
             }
         }
+    }
+    if (showSearchEngineDialog) {
+        SearchEngineDialog(
+            current = SearchEngine.fromId(AppPreferences.searchEngineState),
+            onDismiss = { showSearchEngineDialog = false },
+            onSelected = { engine ->
+                AppPreferences.setSearchEngine(context, engine)
+                showSearchEngineDialog = false
+            }
+        )
     }
 }
 

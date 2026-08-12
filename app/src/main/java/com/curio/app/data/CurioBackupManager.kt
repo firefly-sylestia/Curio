@@ -55,7 +55,7 @@ import kotlinx.coroutines.withContext
 object CurioBackupManager {
 
     /** Bump when the payload shape changes. Restore accepts version <= this. */
-    const val FORMAT_VERSION = 4
+    const val FORMAT_VERSION = 6
 
     /** MIME type used by the file pickers. */
     const val MIME_TYPE = "application/json"
@@ -154,6 +154,54 @@ object CurioBackupManager {
             }
             files
         }
+        // Bundle session screenshots (v5): read each capture's app-private
+        // session-shot files, keyed by their ORIGINAL absolute path
+        // (deduped — every entry saved from one session shares the same
+        // shots, so the same file is stored once). Missing/unreadable files
+        // are skipped — the capture still backs up, just without that shot.
+        // v6 — read the pending (unsaved) write handoff ONCE: a background
+        // append (device-screenshot watcher) could otherwise shift it between
+        // the bundle and the payload below.
+        val pwTarget = ExploreSessionStore.pendingWriteTarget()
+
+        val sessionShots = withContext(Dispatchers.IO) {
+            val files = mutableMapOf<String, ByteArray>()
+            captures.forEach { capture ->
+                deserializeStringList(capture.sessionScreenshotsJson).forEach { path ->
+                    if (!files.containsKey(path)) {
+                        runCatching {
+                            val file = File(path)
+                            if (file.isFile && file.length() > 0L) file.readBytes() else null
+                        }.getOrNull()?.let { files[path] = it }
+                    }
+                }
+            }
+            // v6 — the pending write's screenshots ride the backup too, so a
+            // mid-write backup isn't lost.
+            pwTarget?.let { (cat, topic) ->
+                ExploreSessionStore.peekWriteSessionScreenshots(cat, topic).forEach { path ->
+                    if (!files.containsKey(path)) {
+                        runCatching {
+                            val file = File(path)
+                            if (file.isFile && file.length() > 0L) file.readBytes() else null
+                        }.getOrNull()?.let { files[path] = it }
+                    }
+                }
+            }
+            files
+        }
+
+        // v6 — the pending (unsaved) write handoff payload: category, topic,
+        // elapsed time, the shared note and its screenshots.
+        val pendingWrite = pwTarget?.let { (cat, topic) ->
+            PendingWriteBackup(
+                categoryId = cat.name,
+                topicName = topic,
+                elapsedMillis = ExploreSessionStore.peekWriteSessionMillis(cat, topic),
+                note = ExploreSessionStore.peekWriteSessionNote(cat, topic),
+                screenshotPaths = ExploreSessionStore.peekWriteSessionScreenshots(cat, topic)
+            )
+        }
 
         val payload = BackupPayload(
             format = FORMAT_NAME,
@@ -163,6 +211,8 @@ object CurioBackupManager {
             preferences = prefs,
             audioFiles = audioFiles,
             imageFiles = imageFiles,
+            sessionShots = sessionShots,
+            pendingWrite = pendingWrite,
             // A stale/corrupt imported catalog must not make an otherwise
             // complete Curio backup fail. The catalog is supplementary data;
             // captures and preferences remain the backup's required payload.
@@ -284,7 +334,11 @@ object CurioBackupManager {
                 topicTeaser = capture.topicTeaser.orEmpty(),
                 format = format,
                 formatDataJson = formatDataJson,
-                tagsJson = capture.tagsJson.orEmpty().ifBlank { "[]" }
+                tagsJson = capture.tagsJson.orEmpty().ifBlank { "[]" },
+                // v6 column is NOT NULL — a pre-v6 backup (Gson Unsafe skips
+                // constructor defaults) must normalize to the empty array
+                // exactly like tagsJson, or the insert would throw.
+                sessionScreenshotsJson = capture.sessionScreenshotsJson.orEmpty().ifBlank { "[]" }
             )
         }
         val payloadPreferences = payload.preferences.orEmpty()
@@ -301,6 +355,11 @@ object CurioBackupManager {
         // in EntryDetail).
         val audioFiles = payload.audioFiles.orEmpty()
         val imageFiles = payload.imageFiles.orEmpty()
+        val sessionShots = payload.sessionShots.orEmpty()
+        // One shared index for the WHOLE restore: the same original session
+        // screenshot path appears on every entry saved from that session, so
+        // it must map to ONE restored file (matching export's dedup).
+        val shotIndexByPath = mutableMapOf<String, Int>()
         val restoredCaptures = withContext(Dispatchers.IO) {
             // Media is staged/overwritten only after the payload has been
             // fully validated above. Do not wipe current media here: if a
@@ -365,6 +424,34 @@ object CurioBackupManager {
                         }
                     }
                 }
+                // Session screenshots (v5): write each bundled shot and
+                // rewrite the capture's `sessionScreenshotsJson` paths to
+                // the restored file locations. The shared index maps one
+                // original path to one restored file across EVERY entry,
+                // preserving the one-session-shared-shots relationship.
+                runCatching {
+                    val paths = deserializeStringList(updated.sessionScreenshotsJson)
+                    if (paths.isNotEmpty()) {
+                        var remappedAny = false
+                        val remapped = paths.map { path ->
+                            val bytes = sessionShots[path]
+                            if (bytes != null) {
+                                remappedAny = true
+                                val idx = shotIndexByPath.getOrPut(path) { shotIndexByPath.size }
+                                SessionShots.restore(context, "shot-$idx", bytes)
+                            } else {
+                                path
+                            }
+                        }
+                        // Only rewrite the JSON when a shot actually moved
+                        // (skips pointless round-trips on legacy backups).
+                        if (remappedAny) {
+                            updated = updated.copy(
+                                sessionScreenshotsJson = Gson().toJson(remapped)
+                            )
+                        }
+                    }
+                }
                 updated
             }
         }
@@ -424,6 +511,37 @@ object CurioBackupManager {
         // of after a process restart. CaptureDraftStore reads prefs fresh on
         // every access, so drafts need no re-seed.
         ExploreSessionStore.seed(context)
+        // v6 — restore the pending (unsaved) write handoff: the shared note
+        // and screenshots survive a mid-write backup. Screenshot paths are
+        // remapped to the restored files through the SAME shared index as
+        // saved entries, so one original path still maps to one restored
+        // file even when an entry and the pending write share a shot.
+        val pendingWrite = payload.pendingWrite
+        if (pendingWrite != null) {
+            val cat = CategoryId.values().firstOrNull { it.name == pendingWrite.categoryId }
+            if (cat != null && pendingWrite.topicName.isNotBlank()) {
+                val restoredPaths = pendingWrite.screenshotPaths.mapNotNull { path ->
+                    val bytes = sessionShots[path]
+                    if (bytes != null) {
+                        val idx = shotIndexByPath.getOrPut(path) { shotIndexByPath.size }
+                        runCatching { SessionShots.restore(context, "shot-$idx", bytes) }.getOrNull()
+                    } else null
+                }
+                ExploreSessionStore.handoffWriteSession(
+                    context,
+                    cat,
+                    pendingWrite.topicName,
+                    pendingWrite.elapsedMillis.coerceAtLeast(0L),
+                    pendingWrite.note,
+                    restoredPaths
+                )
+            }
+        } else {
+            // Pre-v6 backups never bundled the pending write's screenshots —
+            // the prefs-restored package would point at dead paths. Drop it
+            // so the write page never shows dangling attachments.
+            ExploreSessionStore.clearPendingWrite(context)
+        }
         return RestoreResult(payloadCaptures.size, payloadPreferences.size)
     }
 
@@ -459,6 +577,19 @@ object CurioBackupManager {
 data class PrefEntry(val type: String, val value: Any?)
 
 /** Versioned backup envelope — serialized with Gson. */
+/**
+ * v6 — an in-flight write handoff: the shared note + screenshots a session
+ * finished with but the user hasn't saved as an entry yet. Included so a
+ * backup taken mid-write (finish -> save) doesn't lose it.
+ */
+data class PendingWriteBackup(
+    val categoryId: String,
+    val topicName: String,
+    val elapsedMillis: Long,
+    val note: String,
+    val screenshotPaths: List<String> = emptyList()
+)
+
 data class BackupPayload(
     val format: String,
     val version: Int,
@@ -469,6 +600,14 @@ data class BackupPayload(
     val audioFiles: Map<String, ByteArray> = emptyMap(),
     /** Image-attachment bytes keyed by their original URI string (v3). */
     val imageFiles: Map<String, ByteArray> = emptyMap(),
+    /**
+     * Session-screenshot bytes keyed by their original app-private file
+     * path (v5). Shared across every entry saved from one session, so each
+     * unique path is stored once.
+     */
+    val sessionShots: Map<String, ByteArray> = emptyMap(),
+    /** v6 — the pending (unsaved) write handoff (note + screenshots). */
+    val pendingWrite: PendingWriteBackup? = null,
     /** Imported FieldMind species catalog, preserved by Curio backup/restore. */
     val speciesCatalogJson: String? = null
 )

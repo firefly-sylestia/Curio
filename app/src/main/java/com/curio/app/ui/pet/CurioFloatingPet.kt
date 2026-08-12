@@ -275,6 +275,9 @@ fun CurioFloatingPet(
         var chameleonFindMe by remember { mutableStateOf(false) }
         var hideSeekActive by remember { mutableStateOf(false) }
         var peekCaught by remember { mutableStateOf(false) }
+        // v19 — set when a tap finds the camouflaged pet: the game ends as
+        // a win instead of slipping away unseen.
+        var chameleonFound by remember { mutableStateOf(false) }
         // v17 — the shared minimum gap between any two games, plus one
         // cooldown PER GAME (the old single clock let the spark game starve
         // hide-and-seek and the camouflage game).
@@ -650,6 +653,20 @@ fun CurioFloatingPet(
                 }
                 moving = false
             }
+            // v19 — after ANY game the pet winds down into a calm idle: any
+            // tap-dart queued mid-game is dropped (so it can't teleport away
+            // the moment the game ends), pokes and peeks stay quiet for a
+            // beat, and it just sits still. Touch still interrupts.
+            suspend fun windDownAfterGame() {
+                playDartTarget = null
+                lastPokeAt = System.currentTimeMillis()
+                lastPeekAt = System.currentTimeMillis()
+                var waited = 0L
+                while (waited < 3200L && !dragged && CurioPet.awake) {
+                    delay(120)
+                    waited += 120
+                }
+            }
             while (CurioPet.awake) {
                 if (TourController.currentStep != null) {
                     delay(240)
@@ -662,6 +679,7 @@ fun CurioFloatingPet(
                     offScreen = false
                     hideSeekActive = false
                     chameleonFindMe = false
+                    chameleonFound = false
                     peekCaught = false
                     chameleonAlpha.snapTo(1f)
                 }
@@ -994,13 +1012,16 @@ fun CurioFloatingPet(
                     hideSeekActive = false
                     squishKey++
                     lastTouch = System.currentTimeMillis()
+                    // v19 — the round is over: calm down to idle before the
+                    // next wander beat (drops any tap-dart, quiets pokes).
+                    windDownAfterGame()
                     continue
                 }
                 // v9.x — CHAMELEON GAME: the pet fades into the background
-                // and LEAVES the screen through a random edge (v16), hides
-                // off-screen, then slips back in from a different edge with
-                // a flourish. Never while glued to the deck, mid-spin, or
-                // already hiding.
+                // and waits to be found. Tap the faint ghost to win the
+                // round; let it be and it slips away invisibly, then
+                // reappears at a fresh edge with a flourish. Never while
+                // glued to the deck, mid-spin, or already hiding.
                 // v17 — the camouflage game was STARVED: it shared one
                 // cooldown clock with the faster spark game and never even
                 // reset it, so it could sit silent for minutes. It now owns
@@ -1022,21 +1043,37 @@ fun CurioFloatingPet(
                     chameleonAlpha.snapTo(1f)
                     chameleonAlpha.animateTo(0.12f, tween(420, easing = FastOutSlowInEasing))
                     delay(320)
-                    // Slip out through a random edge as a faint ghost, then
-                    // fade the rest of the way at the border.
                     chameleonFindMe = true
-                    val exitEdge = Random.nextInt(4)
-                    val exitX = when (exitEdge) {
-                        0 -> -petPx - marginPx
-                        1 -> maxW + marginPx
-                        else -> marginPx + Random.nextFloat() * (maxW - 2 * marginPx).coerceAtLeast(0f)
+                    chameleonFound = false
+                    // v19 — FIND-ME: the ghost stays right where it faded
+                    // (no edge-dash, so it can never be seen teleporting)
+                    // and waits a beat to be tapped. Only a tap (found) or
+                    // a drag (grab) ends the round early.
+                    var findWaited = 0L
+                    while (findWaited < 2600L && !chameleonFound &&
+                        !dragged && CurioPet.awake
+                    ) {
+                        delay(120)
+                        findWaited += 120
                     }
-                    val exitY = when (exitEdge) {
-                        2 -> -petPx - marginPx
-                        3 -> maxH + marginPx
-                        else -> marginPx + Random.nextFloat() * (maxH - 2 * marginPx).coerceAtLeast(0f)
+                    if (chameleonFound) {
+                        // Found mid-camouflage — a shared win: snap back to
+                        // full visibility in place and celebrate. The tap
+                        // handler already spoke the win line.
+                        chameleonAlpha.snapTo(1f)
+                        chameleonFindMe = false
+                        squishKey++
+                        celebrateKey++
+                        playTapAnimation("victory")
+                        heartsKey++
+                        var winBeat = 0L
+                        while (winBeat < 1400L && !dragged && CurioPet.awake) {
+                            delay(120)
+                            winBeat += 120
+                        }
+                        windDownAfterGame()
+                        continue
                     }
-                    walkTo(Offset(exitX, exitY), stepMs = 12, steps = 60)
                     // v9.x — if the user grabbed the pet mid-hide, pop back
                     // visible and let the drag win (a surprise jump under
                     // the finger is worse than a ruined game).
@@ -1045,11 +1082,18 @@ fun CurioFloatingPet(
                         chameleonFindMe = false
                         continue
                     }
+                    // Missed: fade the rest of the way out IN PLACE, slip
+                    // away invisibly, and reappear at a fresh edge. The
+                    // find window closes the moment the ghost is gone.
                     chameleonAlpha.animateTo(0f, tween(260))
+                    chameleonFindMe = false
                     offScreen = true
+                    // Park the invisible pet off the tappable area while it
+                    // hides (the box is still composed, so this keeps a
+                    // mid-hide tap from booping a ghost).
+                    pos = Offset(-petPx - marginPx, -petPx - marginPx)
                     delay(1500)
-                    // Re-enter from a DIFFERENT edge at a random spot along it.
-                    val enterEdge = (exitEdge + 1 + Random.nextInt(3)) % 4
+                    val enterEdge = Random.nextInt(4)
                     val enterX = when (enterEdge) {
                         0 -> -petPx - marginPx
                         1 -> maxW + marginPx
@@ -1074,10 +1118,12 @@ fun CurioFloatingPet(
                         steps = 44
                     )
                     offScreen = false
-                    chameleonFindMe = false
                     squishKey++
                     celebrateKey++
                     lastTouch = System.currentTimeMillis()
+                    // v19 — the round is over: calm down to idle before the
+                    // next wander beat.
+                    windDownAfterGame()
                     continue
                 }
                 // v9.x — SPARK-CATCH GAME: the pet chases a REAL, catchable
@@ -1141,6 +1187,9 @@ fun CurioFloatingPet(
                     sparkTarget = null
                     sparkKey++
                     lastTouch = System.currentTimeMillis()
+                    // v19 — the round is over: calm down to idle before the
+                    // next wander beat.
+                    windDownAfterGame()
                     continue
                 }
                 // v8.11 — the pet sometimes starts a game on its own: a play
@@ -1679,6 +1728,18 @@ fun CurioFloatingPet(
                             // celebration instead of the normal tap tiers.
                             if (peeking && hideSeekActive) {
                                 peekCaught = true
+                                CurioPet.notePlay(context, react = false)
+                                squishKey++
+                                heartsKey++
+                                speakNow(CurioPet.peekWinLine())
+                                fireCustomActions(PetActionTrigger.TAP)
+                            } else if (chameleonFindMe && CurioPet.awake) {
+                                // v19 — a tap on the camouflaged pet FINDS
+                                // it: the round ends in a win instead of the
+                                // normal boop, and no play-dart is queued so
+                                // it can never teleport away after the game.
+                                chameleonFound = true
+                                playDartTarget = null
                                 CurioPet.notePlay(context, react = false)
                                 squishKey++
                                 heartsKey++

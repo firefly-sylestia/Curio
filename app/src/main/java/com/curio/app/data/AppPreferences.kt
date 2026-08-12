@@ -109,6 +109,10 @@ object AppPreferences {
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
+    // v27 — recycle-bin retention: how many days soft-deleted captures stay
+    // before being auto-deleted forever (0 = keep forever). Default 30 days.
+    private const val KEY_RECYCLE_BIN_EXPIRY_DAYS = "recycle_bin_expiry_days"
+    private const val DEFAULT_RECYCLE_BIN_EXPIRY_DAYS = 30
     // v8.1 — "don't nag" flag: once the user declines the "Display over
     // other apps" permission (dismisses the prompt or returns from system
     // settings without granting), all AUTOMATIC overlay prompts are
@@ -245,6 +249,17 @@ object AppPreferences {
     var heroBorderState by mutableStateOf(true)
         private set
     var heroShadowState by mutableStateOf(false)
+    /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
+    var paperHeaderCutsState by mutableStateOf(false)
+    var paperHeaderHolesState by mutableStateOf(false)
+    var paperStatCardsState by mutableStateOf(false)
+    var paperStatTearState by mutableStateOf(false)
+        private set
+    // v27j — header fill depth. ON by default: the torn-hero headers wear a
+    // slightly DARKER version of the category's painter accent. Turning it
+    // off restores the exact pre-toggle accent. Watermark glyphs, ink and
+    // everything else are untouched — only the banner fill color deepens.
+    var headerDeepState by mutableStateOf(true)
         private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
@@ -305,6 +320,7 @@ object AppPreferences {
     // Explore browser button. Reactive so the Topic Reveal dialog copy and
     // the Settings row update the moment it changes.
     var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
+    var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
     // Live explore notifications — the persistent chronometer notification
@@ -444,7 +460,7 @@ object AppPreferences {
     var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
     /** Legacy custom flower-bed rows; the current home uses a fixed house scene. */
     var bedDesignRowsState by mutableStateOf<List<String>?>(null)
-    /** v9.5 — evolution path chosen at level 7 (null = baby, no choice yet). */
+    /** v9.5 — evolution path chosen at level 15 (null = baby, no choice yet). */
     var evoPathState by mutableStateOf<String?>(null)
         private set
     /** v9.6 — experimental per-part size and position controls. */
@@ -465,6 +481,11 @@ object AppPreferences {
         heroGradientState = isHeroGradientEnabled(context)
         heroBorderState = isHeroBorderEnabled(context)
         heroShadowState = isHeroShadowEnabled(context)
+        paperHeaderCutsState = isPaperHeaderCutsEnabled(context)
+        paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
+        paperStatCardsState = isPaperStatCardsEnabled(context)
+        paperStatTearState = isPaperStatTearEnabled(context)
+        headerDeepState = isHeaderDeepEnabled(context)
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
@@ -474,6 +495,7 @@ object AppPreferences {
         smartDensityModeState = getSmartDensityMode(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         searchEngineState = getSearchEngine(context)
+        recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
@@ -687,6 +709,58 @@ object AppPreferences {
         heroShadowState = enabled
     }
 
+    // ── Paper & header experiments (v27) ─────────────────────────────
+    private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
+    private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
+    private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
+    private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
+    private const val KEY_HEADER_DEEP = "header_deep"
+
+    /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
+    fun isPaperHeaderCutsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_HEADER_CUTS, false)
+
+    fun setPaperHeaderCutsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_HEADER_CUTS, enabled).apply()
+        paperHeaderCutsState = enabled
+    }
+
+    /** Whether the stamped pin-hole column down the header's left edge is on (experimental, default off). */
+    fun isPaperHeaderHolesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_HEADER_HOLES, false)
+
+    fun setPaperHeaderHolesEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_HEADER_HOLES, enabled).apply()
+        paperHeaderHolesState = enabled
+    }
+
+    /** Whether the Home Streak · Cabinet · Topics bar wears a solid paper card (experimental, default off). */
+    fun isPaperStatCardsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_STAT_CARDS, false)
+
+    fun setPaperStatCardsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_STAT_CARDS, enabled).apply()
+        paperStatCardsState = enabled
+    }
+
+    /** Whether the stat paper card wears torn paper edges (extended tear on top; experimental, default off). */
+    fun isPaperStatTearEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_STAT_TEAR, false)
+
+    fun setPaperStatTearEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_STAT_TEAR, enabled).apply()
+        paperStatTearState = enabled
+    }
+
+    /** Whether the torn-hero headers wear a slightly darker category accent (default ON). */
+    fun isHeaderDeepEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HEADER_DEEP, true)
+
+    fun setHeaderDeepEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HEADER_DEEP, enabled).apply()
+        headerDeepState = enabled
+    }
+
     // ── Dual-accent blend gradient (v10 toggle) ────────────────────────
     /** Whether the hero card wears the dual-accent blend gradient (default OFF). */
     fun isHeroBlendGradientEnabled(context: Context): Boolean =
@@ -785,6 +859,15 @@ object AppPreferences {
     fun setSearchEngine(context: Context, engine: SearchEngine) {
         prefs(context).edit().putString(KEY_SEARCH_ENGINE, engine.id).apply()
         searchEngineState = engine.id
+    }
+
+    /** v27 — recycle-bin retention window in days (0 = keep forever). */
+    fun getRecycleBinExpiryDays(context: Context): Int =
+        prefs(context).getInt(KEY_RECYCLE_BIN_EXPIRY_DAYS, DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
+
+    fun setRecycleBinExpiryDays(context: Context, days: Int) {
+        prefs(context).edit().putInt(KEY_RECYCLE_BIN_EXPIRY_DAYS, days).apply()
+        recycleBinExpiryDaysState = days
     }
 
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */

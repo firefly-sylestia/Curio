@@ -124,7 +124,19 @@ data class CurioEntry(
      * (deleted at that timestamp) instead of the Cabinet. Set by the DAO's
      * soft-delete; the recycle bin screen shows it with a restore/purge.
      */
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    /**
+     * v27 — the session's SHARED note (universal — one per session, shown
+     * on every entry saved from it). Attached at save time from the pending
+     * write package; null when the session had no note.
+     */
+    val sessionNote: String? = null,
+    /**
+     * v27 — screenshots captured during the explore session (bubble button
+     * + auto-attached device shots). App-private file paths, attached at
+     * save time from the pending write package.
+     */
+    val sessionScreenshots: List<String> = emptyList()
 ) {
     /** One-line preview for Cabinet cards. */
     val bodyPreview: String get() = captureData.toPreview()

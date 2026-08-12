@@ -35,7 +35,16 @@ data class ExploreSession(
     // The user hid the floating explore bubble for this session — persisted
     // so it doesn't pop back on every recomposition or navigation. (Field
     // name kept as `pillHidden` for JSON/legacy compatibility.)
-    val pillHidden: Boolean = false
+    val pillHidden: Boolean = false,
+    // v27 — the session's SHARED note (universal — one per session, shown
+    // on every entry saved from it via the editing page's floating note
+    // button) and the screenshots captured during the session (the bubble's
+    // screenshot button + auto-attached device shots). Persisted with the
+    // session so the bubble and the write-it-down page share them; the
+    // finish flow hands them off to the write session, and the save page
+    // attaches them to the saved entry.
+    val note: String = "",
+    val screenshotPaths: List<String> = emptyList()
 ) {
     /**
      * Active explore time — frozen while paused. [now] defaults to the
@@ -65,8 +74,16 @@ fun ExploreSession.reflectionQuestion(): String = when (categoryId) {
         "Finished reading? What idea do you want to keep?"
     CategoryId.PAINTERS, CategoryId.ARTWORKS ->
         "Finished looking? What detail caught your eye first?"
-    CategoryId.SCIENTISTS, CategoryId.DISCOVERIES ->
+    CategoryId.SCIENTISTS, CategoryId.DISCOVERIES,
+    // v27i — the 15 new lanes share their family's reflection flavor:
+    // the STEM-heavy ones explore, the wordy ones read.
+    CategoryId.BIOLOGY, CategoryId.CHEMISTRY, CategoryId.ANIMALS,
+    CategoryId.PLANTS, CategoryId.ASTRONOMY, CategoryId.GEOLOGY,
+    CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
+    CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING ->
         "Finished exploring? What fact surprised you most?"
+    CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS ->
+        "Finished reading? What idea do you want to keep?"
     CategoryId.GAMES ->
         "Finished watching? What moment or decision stuck with you?"
     CategoryId.SPORTS ->
@@ -129,6 +146,10 @@ object ExploreSessionStore {
     // capped recents list) because the shuffle deck must never deal one of
     // these again while alternatives remain.
     private const val KEY_DONE = "explore_done_topics"
+    // v27 — the pending "write it down" package (elapsed + shared note +
+    // screenshots) that survives the session being cleared, so a process
+    // death between finishing and saving never loses the note or shots.
+    private const val KEY_PENDING_WRITE = "explore_pending_write"
 
     // Cap the Home lists so they never grow unbounded.
     private const val MAX_LIST = 12
@@ -159,6 +180,7 @@ object ExploreSessionStore {
         recentlyExploredState = readExplored(context)
         recentlyUnexploredState = readUnexplored(context)
         doneTopicsState = readDone(context)
+        readPendingWrite(context)
     }
 
     // ── Active session ─────────────────────────────────────────────────
@@ -179,24 +201,76 @@ object ExploreSessionStore {
         activeSessionState = null
     }
 
-    // v17 — write-session handoff. The "write about it" flows (the done
-    // dialog and Home's session card) CLEAR the active session before
-    // navigating to the capture screen, so the save page can't read the
-    // elapsed time live. The ending flow stashes the pause-aware elapsed
-    // time here (keyed by topic) and the save page consumes it once, only
-    // when it matches the topic being saved.
+    // v17/v27 — write-session handoff. The "write about it" flows (the done
+    // dialog, Home's session card, and the bubble's Finish) CLEAR the active
+    // session before navigating to the capture screen, so the save page can't
+    // read the elapsed time live. The ending flow stashes the pause-aware
+    // elapsed time PLUS the session's shared note + screenshots here (keyed
+    // by topic); the save page peeks them once, only when they match the
+    // topic being saved, and clears them once the save succeeds. v27 — the
+    // package is PERSISTED so a process death between finishing and saving
+    // never loses the note or the captured screenshots; the device-screenshot
+    // watcher and the editing page keep appending to it until the save lands.
     private var pendingWriteCategory by mutableStateOf<CategoryId?>(null)
     private var pendingWriteTopic by mutableStateOf<String?>(null)
     private var pendingWriteMillis by mutableStateOf(0L)
+    private var pendingWriteNote by mutableStateOf("")
+    private var pendingWriteScreenshots by mutableStateOf<List<String>>(emptyList())
+
+    private fun savePendingWrite(context: Context) {
+        val cat = pendingWriteCategory ?: return
+        prefs(context).edit().putString(
+            KEY_PENDING_WRITE,
+            JSONObject()
+                .put("categoryId", cat.name)
+                .put("topicName", pendingWriteTopic ?: "")
+                .put("elapsedMillis", pendingWriteMillis)
+                .put("note", pendingWriteNote)
+                .put(
+                    "screenshotPaths",
+                    JSONArray().apply { pendingWriteScreenshots.forEach { put(it) } }
+                )
+                .toString()
+        ).apply()
+    }
+
+    private fun readPendingWrite(context: Context) {
+        val raw = prefs(context).getString(KEY_PENDING_WRITE, null) ?: return
+        val obj = try {
+            JSONObject(raw)
+        } catch (_: Exception) {
+            return
+        }
+        val id = obj.optString("categoryId")
+        val cat = CategoryId.values().firstOrNull { it.name == id } ?: return
+        pendingWriteCategory = cat
+        pendingWriteTopic = obj.optString("topicName")
+        pendingWriteMillis = obj.optLong("elapsedMillis").coerceAtLeast(0L)
+        pendingWriteNote = obj.optString("note")
+        pendingWriteScreenshots = obj.optJSONArray("screenshotPaths")?.let { arr ->
+            List(arr.length()) { i -> arr.optString(i) }.filter { it.isNotBlank() }
+        } ?: emptyList()
+    }
 
     /**
-     * Hands [elapsedMillis] to the upcoming capture page for this topic,
-     * called by the session-ending flows just before they clear the session.
+     * Hands the session's write package (elapsed time + shared note +
+     * screenshots) to the upcoming capture page for this topic, called by
+     * the session-ending flows just before they clear the session.
      */
-    fun handoffWriteSession(categoryId: CategoryId, topicName: String, elapsedMillis: Long) {
+    fun handoffWriteSession(
+        context: Context,
+        categoryId: CategoryId,
+        topicName: String,
+        elapsedMillis: Long,
+        note: String = "",
+        screenshots: List<String> = emptyList()
+    ) {
         pendingWriteCategory = categoryId
         pendingWriteTopic = topicName
         pendingWriteMillis = elapsedMillis.coerceAtLeast(0L)
+        pendingWriteNote = note
+        pendingWriteScreenshots = screenshots
+        savePendingWrite(context)
     }
 
     /**
@@ -209,13 +283,112 @@ object ExploreSessionStore {
         if (pendingWriteCategory == categoryId && pendingWriteTopic == topicName)
             pendingWriteMillis else 0L
 
+    /**
+     * v27 — the handed-off package's target, when one exists. Lets the
+     * device-screenshot watcher and other background paths append to the
+     * pending write (which survives the session being cleared) without
+     * knowing the topic in advance.
+     */
+    fun pendingWriteTarget(): Pair<CategoryId, String>? {
+        val cat = pendingWriteCategory ?: return null
+        val topic = pendingWriteTopic ?: return null
+        return cat to topic
+    }
+
+    /** v27 — true when a pending write handoff exists for this exact topic. */
+    fun hasPendingWriteFor(categoryId: CategoryId, topicName: String): Boolean =
+        pendingWriteCategory == categoryId && pendingWriteTopic == topicName
+
+    /** The handed-off shared note ("" when none matches). */
+    fun peekWriteSessionNote(categoryId: CategoryId, topicName: String): String =
+        if (pendingWriteCategory == categoryId && pendingWriteTopic == topicName)
+            pendingWriteNote else ""
+
+    /** The handed-off session screenshots (empty when none match). */
+    fun peekWriteSessionScreenshots(categoryId: CategoryId, topicName: String): List<String> =
+        if (pendingWriteCategory == categoryId && pendingWriteTopic == topicName)
+            pendingWriteScreenshots else emptyList()
+
+    /**
+     * v27 — appends a screenshot to the pending write package (used by the
+     * device-screenshot watcher and the editing page's add-from-gallery).
+     * No-op when no handoff matches [categoryId]/[topicName].
+     */
+    fun appendPendingScreenshot(
+        context: Context,
+        categoryId: CategoryId,
+        topicName: String,
+        path: String
+    ) {
+        if (pendingWriteCategory != categoryId || pendingWriteTopic != topicName) return
+        if (path.isBlank() || path in pendingWriteScreenshots) return
+        pendingWriteScreenshots = pendingWriteScreenshots + path
+        savePendingWrite(context)
+    }
+
+    /** v27 — removes one screenshot from the pending write package. */
+    fun removePendingScreenshot(context: Context, categoryId: CategoryId, topicName: String, path: String) {
+        if (pendingWriteCategory != categoryId || pendingWriteTopic != topicName) return
+        pendingWriteScreenshots = pendingWriteScreenshots.filterNot { it == path }
+        savePendingWrite(context)
+    }
+
+    /** v27 — sets the shared note on the pending write package. */
+    fun setPendingNote(context: Context, categoryId: CategoryId, topicName: String, note: String) {
+        if (pendingWriteCategory != categoryId || pendingWriteTopic != topicName) return
+        pendingWriteNote = note
+        savePendingWrite(context)
+    }
+
     /** Drops the pending handoff for [categoryId]/[topicName] after a save. */
-    fun clearWriteSessionHandoff(categoryId: CategoryId, topicName: String) {
+    fun clearWriteSessionHandoff(context: Context, categoryId: CategoryId, topicName: String) {
         if (pendingWriteCategory == categoryId && pendingWriteTopic == topicName) {
             pendingWriteCategory = null
             pendingWriteTopic = null
             pendingWriteMillis = 0L
+            pendingWriteNote = ""
+            pendingWriteScreenshots = emptyList()
+            prefs(context).edit().remove(KEY_PENDING_WRITE).apply()
         }
+    }
+
+    /**
+     * v6 — clears ANY pending write handoff regardless of topic. Backup
+     * restore uses this for pre-v6 backups, whose prefs-resurrected package
+     * points at device-local screenshot paths that were never bundled.
+     */
+    fun clearPendingWrite(context: Context) {
+        pendingWriteCategory = null
+        pendingWriteTopic = null
+        pendingWriteMillis = 0L
+        pendingWriteNote = ""
+        pendingWriteScreenshots = emptyList()
+        prefs(context).edit().remove(KEY_PENDING_WRITE).apply()
+    }
+
+    // ── Active-session note + screenshots (v27) — the bubble edits these
+    // directly on the live session; the finish flow hands them off (see
+    // [handoffWriteSession]) and the save page attaches them to the entry.
+
+    /** v27 — the bubble's note field writes the shared note onto the active session. */
+    fun setSessionNote(context: Context, note: String) {
+        val current = activeSessionState ?: return
+        if (current.note == note) return
+        startSession(context, current.copy(note = note))
+    }
+
+    /** v27 — a captured screenshot joins the active session's screenshot list. */
+    fun addSessionScreenshot(context: Context, path: String) {
+        val current = activeSessionState ?: return
+        if (path.isBlank() || path in current.screenshotPaths) return
+        startSession(context, current.copy(screenshotPaths = current.screenshotPaths + path))
+    }
+
+    /** v27 — removes one screenshot from the active session. */
+    fun removeSessionScreenshot(context: Context, path: String) {
+        val current = activeSessionState ?: return
+        if (path !in current.screenshotPaths) return
+        startSession(context, current.copy(screenshotPaths = current.screenshotPaths.filterNot { it == path }))
     }
 
     /** Pauses the timer — freezes elapsed display; reminder is unaffected. */
@@ -576,7 +749,11 @@ fun parseExploreSession(raw: String): ExploreSession? {
             pausedAtMillis = if (obj.has("pausedAtMillis") && !obj.isNull("pausedAtMillis"))
                 obj.optLong("pausedAtMillis") else null,
             accumulatedPausedMillis = obj.optLong("accumulatedPausedMillis"),
-            pillHidden = obj.optBoolean("pillHidden")
+            pillHidden = obj.optBoolean("pillHidden"),
+            note = obj.optString("note"),
+            screenshotPaths = obj.optJSONArray("screenshotPaths")?.let { arr ->
+                List(arr.length()) { i -> arr.optString(i) }.filter { it.isNotBlank() }
+            } ?: emptyList()
         )
     }.getOrNull()
 }
@@ -595,6 +772,8 @@ private fun ExploreSession.toJson(): JSONObject = JSONObject()
     .put("pausedAtMillis", pausedAtMillis ?: JSONObject.NULL)
     .put("accumulatedPausedMillis", accumulatedPausedMillis)
     .put("pillHidden", pillHidden)
+    .put("note", note)
+    .put("screenshotPaths", JSONArray().apply { screenshotPaths.forEach { put(it) } })
 
 
 /**

@@ -92,6 +92,7 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -103,6 +104,9 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -674,6 +678,11 @@ private fun ProfileHero(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            // v27 — experimental paper-title underline (two
+                            // short lines under the name; OFF by default).
+                            if (AppPreferences.paperHeaderCutsState) {
+                                PaperTitleLines(ink = ink)
+                            }
                             Text(
                                 taglineForStreak(displayStreak),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -967,7 +976,7 @@ private fun ProgressAndAchievementsCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CurioIcon(CurioIcons.WorkspacePremium, null, tint = CurioColors.ButterYellow, size = 22.dp)
+            CurioIcon(CurioIcons.WorkspacePremium, null, tint = curioGoldInk(), size = 22.dp)
             Text(
                 "XP progress",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
@@ -993,9 +1002,9 @@ private fun ProgressAndAchievementsCard(
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(50)),
-            color = if (amoled) MaterialTheme.colorScheme.onSurface else CurioColors.CoralBlush,
+            color = if (amoled) MaterialTheme.colorScheme.onSurface else curioRoseInk(),
             trackColor = if (amoled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                         else CurioColors.CoralBlush.copy(alpha = 0.14f)
+                         else curioRoseInk().copy(alpha = 0.14f)
         )
         Text(
             text = if (isMaxLevel) "Maximum level reached. Keep exploring for more XP."
@@ -1062,8 +1071,8 @@ private fun ProgressAndAchievementsCard(
                 .fillMaxWidth()
                 .height(6.dp)
                 .clip(RoundedCornerShape(50)),
-            color = CurioColors.Sage,
-            trackColor = CurioColors.Sage.copy(alpha = 0.14f)
+            color = curioSageInk(),
+            trackColor = curioSageInk().copy(alpha = 0.14f)
         )
         // v8.27 — the PINNED badge strip: earned medals first (up to five),
         // a "+N" tile when there are more, then locked silhouettes for

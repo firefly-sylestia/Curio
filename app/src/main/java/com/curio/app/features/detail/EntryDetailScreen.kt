@@ -136,6 +136,8 @@ import com.curio.app.data.TopicCatalog
 import com.curio.app.data.shortName
 import com.curio.app.features.capture.formats.FilledStar
 import com.curio.app.navigation.CurioRoutes
+import coil.compose.rememberAsyncImagePainter
+import java.io.File
 import com.curio.app.ui.components.CurioMoodBoardBackdrop
 import com.curio.app.ui.components.MoodBoardExport
 import com.curio.app.ui.components.MoodBoardFloatingCards
@@ -146,6 +148,7 @@ import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
 import com.curio.app.ui.components.rememberMoodBoardZoomState
 import com.curio.app.ui.components.shareComposableCard
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.data.AppPreferences
@@ -156,6 +159,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
@@ -167,8 +171,8 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.glyph
 import com.curio.app.ui.theme.notePaperHighlight
 import com.curio.app.ui.theme.notePaperInk
+import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.PatrickHandFontFamily
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -339,15 +343,18 @@ fun EntryDetailScreen(
         // uses the device-palette card blend here.
         val blendActive = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
             !(isCurioDarkTheme() && !AppPreferences.pastelColorsState)
+        // v27j — header fill depth: the hero wears a slightly darker painter
+        // accent by default (toggle in Experiments → Paper & headers).
+        val heroAccent = cat.headerAccent()
         val heroStart = if (blendActive) {
-            val blendStart = CurioGradients.cardGradient(cat.themedAccent()).first()
+            val blendStart = CurioGradients.cardGradient(heroAccent).first()
             // Keep the frosted-glass ink legible: if the blend's first stop
             // is too pale against [heroInk] (the white/onAccent content),
             // fall back to the deep category hold instead.
             if (contrastRatio(blendStart, heroInk) >= 3.0f) blendStart
-            else CurioGradients.categoryCardFill(cat.themedAccent(), isCurioDarkTheme())
+            else CurioGradients.categoryCardFill(heroAccent, isCurioDarkTheme())
         } else {
-            CurioGradients.categoryCardFill(cat.themedAccent(), isCurioDarkTheme())
+            CurioGradients.categoryCardFill(heroAccent, isCurioDarkTheme())
         }
         // v7.28 — the hero is a SOLID category color, no gradient. The depth
         // comes from the torn-paper seam: the solid banner is clipped by a
@@ -500,7 +507,45 @@ fun EntryDetailScreen(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
-                    Spacer(Modifier.height(18.dp))
+                    // v27 — how long this topic's explore session ran, shown
+                    // right under the title in the saved view (only when a
+                    // session was recorded).
+                    if (resolvedEntry.sessionTimeMillis > 0L) {
+                        Spacer(Modifier.height(10.dp))
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = heroCardInk.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, heroCardInk.copy(alpha = 0.28f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Timer,
+                                    contentDescription = null,
+                                    tint = heroInk.copy(alpha = 0.85f),
+                                    size = 14.dp
+                                )
+                                Text(
+                                    text = "explored ${formatSessionShort(resolvedEntry.sessionTimeMillis)}",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = heroInk.copy(alpha = 0.85f)
+                                )
+                            }
+                        }
+                    }
+                    // v27 — experimental paper-title underline (two short
+                    // lines under the entry title; OFF by default).
+                    if (AppPreferences.paperHeaderCutsState) {
+                        PaperTitleLines(ink = heroInk)
+                    }
+                    // v27 — the session pill above adds height; tighten the
+                    // gap so the fixed-height hero never overflows the seam.
+                    Spacer(Modifier.height(if (resolvedEntry.sessionTimeMillis > 0L) 10.dp else 18.dp))
 
                     // ── Frosted date / mood / session / type grid card — the
                     // meta card's date, mood, session and type segments moved
@@ -687,6 +732,17 @@ fun EntryDetailScreen(
                             }
                         }
                     }
+                }
+
+                // ── Session attachments (v27) — the explore session's
+                // SHARED note + captured screenshots, attached at save time.
+                // Shown between the tags and the format body.
+                if (resolvedEntry.sessionNote != null || resolvedEntry.sessionScreenshots.isNotEmpty()) {
+                    SessionNoteBlock(
+                        entry = resolvedEntry,
+                        category = cat,
+                        navController = navController
+                    )
                 }
 
                 // ── Format body ────────────────────────────────────────
@@ -2829,6 +2885,111 @@ private fun FrostedExportButton(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = frostInk
                 )
+            }
+        }
+    }
+}
+
+/**
+ * v27 — the explore session's attachments block on the entry detail page:
+ * the SHARED session note (universal — the same note that rode in on every
+ * entry saved from the session) plus the captured screenshots as tappable
+ * thumbnails (bubble capture + auto-attached device shots). Tap opens the
+ * lightbox. Rendered between the tags and the format body.
+ */
+@Composable
+private fun SessionNoteBlock(
+    entry: CurioEntry,
+    category: CurioCategory,
+    navController: NavController
+) {
+    val accent = category.themedAccent()
+    val ink = category.categoryInk()
+    Column(
+        modifier = Modifier
+            .padding(horizontal = detailBodyGutter())
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // ── Shared session note ──────────────────────────────────────
+        // v27h — the saved note wears the theme-aware note-PAPER sheet with
+        // its own readable ink instead of the faint tint wash, so it never
+        // washes out against the tinted detail page in either theme.
+        entry.sessionNote?.takeIf { it.isNotBlank() }?.let { note ->
+            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = notePaperSurface(NotePaperColor.CREAM),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = accent.copy(alpha = 0.16f)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Note,
+                            contentDescription = null,
+                            tint = ink,
+                            size = 18.dp,
+                            modifier = Modifier.padding(6.dp)
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = "Session note",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = paperInkColor.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = note,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = paperInkColor
+                        )
+                    }
+                }
+            }
+        }
+
+        // ── Session screenshots — tappable thumbnails → lightbox ────
+        if (entry.sessionScreenshots.isNotEmpty()) {
+            Text(
+                text = "Session screenshots",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                entry.sessionScreenshots.forEach { path ->
+                    val file = remember(path) { File(path) }
+                    val painter = rememberAsyncImagePainter(file)
+                    Surface(
+                        onClick = {
+                            navController.navigate(
+                                CurioRoutes.lightbox(Uri.fromFile(file).toString())
+                            )
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+                        modifier = Modifier.size(96.dp)
+                    ) {
+                        androidx.compose.foundation.Image(
+                            painter = painter,
+                            contentDescription = "Session screenshot",
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
             }
         }
     }

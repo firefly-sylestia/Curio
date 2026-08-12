@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +52,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.themedAccent
 
@@ -316,10 +318,13 @@ private fun RecentTopicRow(
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    // v27 — the icon wears the category's deep ink (Home's
+                    // explore-topic rows) instead of the pale accent, which
+                    // washed out against the tinted surface.
                     CurioIcon(
                         name = category.iconGlyph,
                         contentDescription = null,
-                        tint = accent,
+                        tint = category.categoryInk(),
                         size = 23.dp
                     )
                 }
@@ -338,11 +343,18 @@ private fun RecentTopicRow(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     if (tag != null) {
-                        Surface(shape = RoundedCornerShape(50), color = accent.copy(alpha = 0.14f)) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = accent.copy(alpha = 0.14f),
+                            // Same hairline rim as Home's explore-topic rows —
+                            // the deep ink text + pastel fill alone read
+                            // muddy on the tinted card.
+                            border = BorderStroke(1.dp, accent.copy(alpha = 0.4f))
+                        ) {
                             Text(
                                 text = tag,
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                color = accent,
+                                color = category.categoryInk(),
                                 modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                             )
                         }
@@ -356,7 +368,7 @@ private fun RecentTopicRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            CurioForwardArrow(contentDescription = label, tint = accent)
+            CurioForwardArrow(contentDescription = label, tint = category.categoryInk())
         }
     }
 }

@@ -142,7 +142,6 @@ object CurioRoutes {
     const val SETTINGS = "settings"
     const val SETTINGS_APPEARANCE = "settings/appearance"
     const val SETTINGS_PREFERENCES = "settings/preferences"
-    const val SETTINGS_NOTIFICATIONS = "settings/notifications"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
     const val EXPERIMENTS = "experiments"
@@ -237,7 +236,16 @@ fun NavController.navigateToTab(route: String) {
     // (the user had to back out to Quests before a tab tap would respond).
     // Landing on HOME first makes every tab tap from a pushed screen switch.
     val current = currentBackStackEntry?.destination?.route
-    if (current != null && current !in CurioRoutes.bottomNavRoutes) {
+    // v20 — a bottom-nav route PUSHED on top of a non-tab screen (e.g. the
+    // Cabinet opened from Profile) is a pushed instance too, even though its
+    // route name matches a tab. A genuine tab entry always sits directly on
+    // the HOME root; anything else — a pushed screen, or a tab route with a
+    // pushed screen beneath it — gets the explicit pop so the tap never
+    // looks dead.
+    val below = previousBackStackEntry?.destination?.route
+    val genuineTabInstance = current in CurioRoutes.bottomNavRoutes &&
+        below == CurioRoutes.HOME
+    if (current != null && !genuineTabInstance) {
         popBackStack(CurioRoutes.HOME, inclusive = false)
     }
     navigate(route) {

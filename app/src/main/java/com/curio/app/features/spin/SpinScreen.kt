@@ -25,6 +25,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -110,6 +111,9 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
 import com.curio.app.data.TourController
+import com.curio.app.features.picker.PickerPageTab
+import com.curio.app.features.picker.PickerPresetChip
+import com.curio.app.features.picker.deckPresets
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioQuests
@@ -157,6 +161,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.RevealBoundsTransform
@@ -638,6 +644,20 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // logic keys (landed topic, filters, reveal guard, last-used prefs)
     // keep operating on the real category set.
     val isMixedDeck = remember(activeCatIds) { activeCatIds.distinct().size > 1 }
+    // v27k — total topics in the current deck. The mixed labels show the pool
+    // size ("Mixed · 1,024"), not the lane count — the number that actually
+    // tells you how big the mix is. Wildcard resolves to the full canonical
+    // pool.
+    // Seeded with the lane count so the label never flashes "Mixed · 0"
+    // while the topic-count coroutine computes the real pool size.
+    var mixedTopicCount by remember { mutableStateOf(activeCatIds.distinct().size) }
+    LaunchedEffect(activeCatIds) {
+        mixedTopicCount = if (CategoryId.WILDCARD in activeCatIds) {
+            TopicJsonLoader.countCanonicalTopics()
+        } else {
+            activeCatIds.sumOf { TopicJsonLoader.countFor(it) }
+        }
+    }
 
     // v7.9 — pastel LIGHT mode: a single-category deck opens its hero
     // ticket on the pastel-family crown (a whisper of the pastel accent,
@@ -1118,7 +1138,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     VerticalDeckButton(
-                        label = if (isMixedDeck) "Mixed · ${activeCatIds.distinct().size}" else deckCat.displayName,
+                        label = if (isMixedDeck) "Mixed · $mixedTopicCount" else deckCat.displayName,
                         icon = deckCat.iconGlyph,
                         cat = deckCat,
                         selected = true,
@@ -1239,7 +1259,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // edges and stand vertically, so the middle stays clear.
         BottomCta(
             cat = deckCat,
-            mixedCount = activeCatIds.distinct().size,
+            mixedCount = if (isMixedDeck) mixedTopicCount else 1,
             filterActiveCount = activeFilters.size + activeSubtypes.size,
             vertical = extraCompact,
             onCategories = { showCategoryPicker = true },
@@ -3878,6 +3898,25 @@ private fun CategoryPickerSheet(
     // Default = tap-to-open (single). Long-press enters multi-select mode.
     var multiSelectMode by remember { mutableStateOf(persistedVisible.size > 1) }
     var selectedSlugs by remember { mutableStateOf(persistedVisible.map { it.id.routeSlug }.toSet()) }
+    // v27k — the two pages (Original lanes / New lanes) behind the same grid,
+    // and a scope for tab jumps. Same split as the full-screen picker.
+    val newLanes = CurioCategories.all.filter {
+        it.id in CategoryId.newLanes && it.id !in AppPreferences.hiddenCategoriesState
+    }
+    val originalLanes = categories.filter { it.id !in CategoryId.newLanes }
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val scope = rememberCoroutineScope()
+    // v27k — total topics across the ticked lanes (the Mix button shows the
+    // pool size, not the lane count).
+    var selectedTopicCount by remember { mutableStateOf(0) }
+    LaunchedEffect(selectedSlugs) {
+        val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
+        selectedTopicCount = if (CategoryId.WILDCARD in ids) {
+            TopicJsonLoader.countCanonicalTopics()
+        } else {
+            ids.sumOf { TopicJsonLoader.countFor(it) }
+        }
+    }
 
     // Same full-screen + swipe-down-dismiss pattern as the filter page — a    // ModalBottomSheet expanded to full height with a drag handle.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -3986,6 +4025,66 @@ private fun CategoryPickerSheet(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                     )
 
+                    // ── v27k — page tabs: Original lanes vs the New lanes ─
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        PickerPageTab(
+                            label = "Original",
+                            count = originalLanes.size,
+                            selected = pagerState.currentPage == 0,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(0) } }
+                        )
+                        PickerPageTab(
+                            label = "New",
+                            count = newLanes.size,
+                            selected = pagerState.currentPage == 1,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(1) } }
+                        )
+                        Spacer(Modifier.weight(1f))
+                    }
+
+                    // ── v27i — quick-mix preset chips (same row as the
+                    //    full-screen picker): tap to enter multi-select with
+                    //    exactly those lanes ticked, so the mix can be seen
+                    //    and adjusted before Mix — it never silently launches
+                    //    a deck you can't see.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        deckPresets.forEach { preset ->
+                            val active = if (preset.clearAll) {
+                                multiSelectMode && selectedSlugs.isEmpty()
+                            } else {
+                                multiSelectMode &&
+                                    preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
+                            }
+                            PickerPresetChip(
+                                label = preset.label,
+                                glyph = preset.glyph,
+                                selected = active,
+                                onClick = {
+                                    if (preset.clearAll) {
+                                        multiSelectMode = true
+                                        selectedSlugs = emptySet()
+                                    } else {
+                                        val lanes = preset.lanes(categories)
+                                        if (lanes.isNotEmpty()) {
+                                            multiSelectMode = true
+                                            selectedSlugs = lanes.map { it.id.routeSlug }.toSet()
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+
                     // ── Tile grid filling the screen ────────────────
                     // v7.4 — the grid sits inside a WEIGHTED Box that is a
                     // DIRECT child of the sheet Column. Weight inside the
@@ -4001,36 +4100,81 @@ private fun CategoryPickerSheet(
                             .fillMaxWidth()
                     ) {
                         MorphEntrance {
-                            LazyVerticalGrid(
-                                columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            HorizontalPager(
+                                state = pagerState,
                                 modifier = Modifier.fillMaxSize()
-                            ) {
-                            // All tiles render at once — no per-tile stagger.
-                            items(categories) { cat ->
-                                val slug = cat.id.routeSlug
-                                CurioCategoryCard(
-                                    category = cat,
-                                    isSelected = if (multiSelectMode) slug in selectedSlugs
-                                    else cat.id == currentCat.id,
-                                    onClick = {
-                                        if (multiSelectMode) {
-                                            selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug
-                                            else selectedSlugs + slug
-                                        } else {
-                                            onCategorySelected(cat)
-                                        }
-                                    },
-                                    onLongClick = {
-                                        multiSelectMode = true
-                                        if (slug !in selectedSlugs) {
-                                            selectedSlugs = selectedSlugs + slug
-                                        }
+                            ) { page ->
+                                when (page) {
+                                    0 -> LazyVerticalGrid(
+                                        columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
+                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                    // Original lanes — tap opens, hold to mix.
+                                    items(originalLanes) { cat ->
+                                        val slug = cat.id.routeSlug
+                                        CurioCategoryCard(
+                                            category = cat,
+                                            isSelected = if (multiSelectMode) slug in selectedSlugs
+                                            else cat.id == currentCat.id,
+                                            onClick = {
+                                                if (multiSelectMode) {
+                                                    selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug
+                                                    else selectedSlugs + slug
+                                                } else {
+                                                    onCategorySelected(cat)
+                                                }
+                                            },
+                                            onLongClick = {
+                                                multiSelectMode = true
+                                                if (slug !in selectedSlugs) {
+                                                    selectedSlugs = selectedSlugs + slug
+                                                }
+                                            }
+                                        )
                                     }
-                                )
-                            }
+                                    }
+                                    else -> LazyVerticalGrid(
+                                        columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
+                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                    // New lanes — not-yet-shipped ones show as
+                                    // Coming soon tiles.
+                                    items(newLanes) { cat ->
+                                        val slug = cat.id.routeSlug
+                                        val comingSoon = !cat.isReady
+                                        CurioCategoryCard(
+                                            category = cat,
+                                            comingSoon = comingSoon,
+                                            isSelected = if (multiSelectMode) slug in selectedSlugs
+                                            else cat.id == currentCat.id,
+                                            onClick = {
+                                                if (!comingSoon) {
+                                                    if (multiSelectMode) {
+                                                        selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug
+                                                        else selectedSlugs + slug
+                                                    } else {
+                                                        onCategorySelected(cat)
+                                                    }
+                                                }
+                                            },
+                                            onLongClick = if (comingSoon) null else {
+                                                {
+                                                    multiSelectMode = true
+                                                    if (slug !in selectedSlugs) {
+                                                        selectedSlugs = selectedSlugs + slug
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
+                                    }
+                                }
                             }
                         }
                     }
@@ -4063,7 +4207,7 @@ private fun CategoryPickerSheet(
                             ) {
                                 CurioIcon(CurioIcons.Check, null, size = 18.dp)
                                 Text(
-                                    text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · ${selectedSlugs.size}",
+                                    text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
                                     style = MaterialTheme.typography.labelLarge,
                                     modifier = Modifier.padding(start = 8.dp)
                                 )

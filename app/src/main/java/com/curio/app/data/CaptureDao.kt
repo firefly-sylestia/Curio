@@ -56,6 +56,10 @@ interface CaptureDao {
     @Query("SELECT * FROM captures WHERE deletedAt IS NOT NULL ORDER BY deletedAt DESC")
     fun getTrashedFlow(): Flow<List<CaptureEntity>>
 
+    /** One-shot snapshot of every recycled capture (for the auto-delete sweep). */
+    @Query("SELECT * FROM captures WHERE deletedAt IS NOT NULL ORDER BY deletedAt DESC")
+    suspend fun getTrashed(): List<CaptureEntity>
+
     @Query("SELECT * FROM captures WHERE id = :id AND deletedAt IS NOT NULL")
     suspend fun getTrashedById(id: String): CaptureEntity?
 

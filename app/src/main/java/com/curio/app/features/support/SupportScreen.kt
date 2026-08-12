@@ -63,6 +63,8 @@ import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import java.io.File
@@ -387,9 +389,9 @@ private fun UpdateResultCard(
     if (state == UpdateCheckUi.Idle || state == UpdateCheckUi.Checking) return
     val (tint, title) = when (state) {
         UpdateCheckUi.UpToDate ->
-            CurioColors.Sage to "You're on the latest version"
+            curioSageInk() to "You're on the latest version"
         UpdateCheckUi.GithubAvailable ->
-            CurioColors.CoralBlush to "New version: ${info?.tagName ?: ""}"
+            curioRoseInk() to "New version: ${info?.tagName ?: ""}"
         else ->
             MaterialTheme.colorScheme.error to "Couldn't check for updates"
     }
@@ -428,7 +430,7 @@ private fun UpdateResultCard(
                     if (notesExpanded) "Show less" else "Show more",
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        color = CurioColors.CoralBlush
+                        color = curioRoseInk()
                     ),
                     modifier = Modifier
                         .clickable(onClick = onToggleNotes)
@@ -462,7 +464,7 @@ private fun UpdateResultCard(
                                 "Open release",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.SemiBold,
-                                    color = CurioColors.CoralBlush
+                                    color = curioRoseInk()
                                 ),
                                 modifier = Modifier
                                     .clickable { info?.htmlUrl?.let { onOpenRelease(it) } }
@@ -478,8 +480,8 @@ private fun UpdateResultCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(6.dp),
-                                        color = CurioColors.CoralBlush,
-                                        trackColor = CurioColors.CoralBlush.copy(alpha = 0.20f)
+                                        color = curioRoseInk(),
+                                        trackColor = curioRoseInk().copy(alpha = 0.20f)
                                     )
                                 } else {
                                     LinearProgressIndicator(
@@ -487,8 +489,8 @@ private fun UpdateResultCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(6.dp),
-                                        color = CurioColors.CoralBlush,
-                                        trackColor = CurioColors.CoralBlush.copy(alpha = 0.20f)
+                                        color = curioRoseInk(),
+                                        trackColor = curioRoseInk().copy(alpha = 0.20f)
                                     )
                                 }
                                 Spacer(Modifier.height(8.dp))
@@ -533,7 +535,7 @@ private fun UpdateResultCard(
                             "View release notes",
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                color = CurioColors.CoralBlush
+                                color = curioRoseInk()
                             ),
                             modifier = Modifier
                                 .clickable { onOpenRelease(info.htmlUrl) }

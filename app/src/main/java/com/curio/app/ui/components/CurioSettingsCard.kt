@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioIcon
 
 /**
@@ -79,7 +80,7 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 CurioIcon(
                     icon, null,
-                    tint = if (isAmoled) MaterialTheme.colorScheme.onSurface else CurioColors.CoralBlush,
+                    tint = if (isAmoled) MaterialTheme.colorScheme.onSurface else curioRoseInk(),
                     size = 20.dp
                 )
             }

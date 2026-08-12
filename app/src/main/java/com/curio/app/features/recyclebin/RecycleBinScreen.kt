@@ -1,5 +1,6 @@
 package com.curio.app.features.recyclebin
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,10 +19,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -30,17 +34,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ImageStorageManager
+import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
@@ -54,6 +61,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.themedAccent
@@ -80,6 +88,11 @@ fun RecycleBinScreen(navController: NavController) {
     // Single-confirm dialogs for the permanent actions (already in the bin).
     var purgeTarget by remember { mutableStateOf<CurioEntry?>(null) }
     var showEmptyBinConfirm by remember { mutableStateOf(false) }
+    // v27 — customizable auto-delete window; expired captures are purged on
+    // open (below) and on app start (MainActivity).
+    var showExpiryDialog by remember { mutableStateOf(false) }
+    val expiryDays = AppPreferences.recycleBinExpiryDaysState
+    LaunchedEffect(Unit) { RecycleBinExpiry.purgeExpired(context) }
 
     fun purgeWithMedia(entry: CurioEntry) {
         scope.launch {
@@ -148,6 +161,28 @@ fun RecycleBinScreen(navController: NavController) {
                             }
                         }
                     }
+                    item("bin-expiry") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Auto-delete after",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(onClick = { showExpiryDialog = true }) {
+                                Text(
+                                    expiryLabel(expiryDays),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
                     items(trashed, key = { it.id }) { entry ->
                         TrashedEntryRow(
                             entry = entry,
@@ -160,6 +195,20 @@ fun RecycleBinScreen(navController: NavController) {
                         )
                     }
                 }
+            }
+        }
+        if (trashed.isEmpty()) {
+            TextButton(
+                onClick = { showExpiryDialog = true },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    "Auto-delete after ${expiryLabel(expiryDays)}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
         if (trashed.isNotEmpty()) {
@@ -244,7 +293,71 @@ fun RecycleBinScreen(navController: NavController) {
             }
         )
     }
+
+    // ── Auto-delete window picker ─────────────────────────────────────────
+    if (showExpiryDialog) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { showExpiryDialog = false },
+            title = { Text("Auto-delete after", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Captures left in the recycle bin past this window are deleted forever (with their media).",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    listOf(
+                        0 to "Keep forever",
+                        7 to "7 days",
+                        30 to "30 days",
+                        90 to "90 days"
+                    ).forEach { (days, label) ->
+                        val selected = days == expiryDays
+                        Surface(
+                            onClick = {
+                                AppPreferences.setRecycleBinExpiryDays(context, days)
+                                showExpiryDialog = false
+                                // Apply the new window right away.
+                                scope.launch { RecycleBinExpiry.purgeExpired(context) }
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else Color.Transparent,
+                            border = BorderStroke(
+                                1.dp,
+                                if (selected) curioDialogActionColor() else MaterialTheme.colorScheme.outlineVariant
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                RadioButton(
+                                    selected = selected,
+                                    onClick = null,
+                                    colors = RadioButtonDefaults.colors(selectedColor = curioDialogActionColor())
+                                )
+                                Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showExpiryDialog = false }, colors = curioDialogActionButtonColors()) {
+                    Text("Close", fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
 }
+
+/** "Keep forever" / "7 days" label for the recycle-bin expiry window. */
+private fun expiryLabel(days: Int): String =
+    if (days <= 0) "Keep forever" else "$days days"
 
 @Composable
 private fun TrashedEntryRow(

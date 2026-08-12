@@ -68,6 +68,10 @@ class CaptureRepository(private val dao: CaptureDao) {
             .map { entities -> entities.map { it.toEntry() } }
             .flowOn(Dispatchers.Default)
 
+    /** One-shot snapshot of every recycled capture (for the expiry sweep). */
+    suspend fun getTrashed(): List<CurioEntry> =
+        dao.getTrashed().map { it.toEntry() }
+
     /** Get one recycled capture by ID (null when not in the bin). */
     suspend fun getTrashedById(id: String): CurioEntry? =
         dao.getTrashedById(id)?.toEntry()

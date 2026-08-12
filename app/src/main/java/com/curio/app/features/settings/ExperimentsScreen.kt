@@ -107,6 +107,31 @@ fun ExperimentsScreen(navController: NavController) {
             // is gone for good (the deck always uses its natural size) and
             // Smart density's control moved out; Voice-to-text still lives in
             // Settings → Recording.
+            // v27 — paper & header experiments, all OFF by default.
+            item { CurioSectionLabel("Paper & headers") }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Title cut lines", "Two short lines under header titles", AppPreferences.paperHeaderCutsState) {
+                        AppPreferences.setPaperHeaderCutsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Stamped pin holes", "See-through punch holes on the paper stat card (needs the card on)", AppPreferences.paperHeaderHolesState) {
+                        AppPreferences.setPaperHeaderHolesEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Paper stat card", "Streak · Cabinet · Topics on a soft rose paper card", AppPreferences.paperStatCardsState) {
+                        AppPreferences.setPaperStatCardsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Torn paper edges", "Torn edges on the stat card — extended tear on top", AppPreferences.paperStatTearState) {
+                        AppPreferences.setPaperStatTearEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Deeper header color", "Torn-hero headers wear a slightly darker category accent (on by default)", AppPreferences.headerDeepState) {
+                        AppPreferences.setHeaderDeepEnabled(context, it)
+                    }
+                }
+            }
             item { CurioSectionLabel("Promo") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
