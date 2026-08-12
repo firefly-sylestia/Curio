@@ -727,11 +727,45 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    Text(
-                        "Saved",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Saved",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        // v21 — View all opens Topic History (liked, disliked,
+                        // pinned & day-grouped spins). Promo mode hides it: it
+                        // would lead to the real (empty) history page.
+                        if (!promoOn) {
+                            Surface(
+                                onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        "View all",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    CurioIcon(
+                                        CurioIcons.History,
+                                        "Open Topic History",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        size = 14.dp
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Spacer(Modifier.height(10.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         savedQuotes.forEach { quote ->

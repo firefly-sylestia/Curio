@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -20,9 +22,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,19 +35,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureFormat
+import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
+import com.curio.app.data.CurioTopic
 import com.curio.app.data.PinnedTopic
+import com.curio.app.data.TopicJsonLoader
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
@@ -51,10 +63,17 @@ import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.SoftTornBottomShape
+import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.settingsReadableInk
+import com.curio.app.ui.theme.settingsRoseAccent
 
 /**
  * Topic History — see Curio topic-history contract.
@@ -81,6 +100,32 @@ fun TopicHistoryScreen(navController: NavController) {
     // v6.7 — pinned-for-later topics from the Topic Reveal screen, listed
     // above the day-grouped capture history so the user can revisit them.
     val pinnedTopics = AppPreferences.pinnedTopicsState
+    // v21 — liked & disliked topics (Topic Reveal's like/dislike buttons),
+    // resolved to catalog topics so the rows show real topic names. Reactive
+    // off the sentiments state, so a vote flips the section instantly.
+    // Topic names live in the JSON catalogs, so resolution is suspend:
+    // produceState re-runs whenever the sentiments map is replaced.
+    // Null until the first resolution completes, so the empty state never
+    // flashes before the catalog lookups land (a user with only likes would
+    // otherwise see a one-frame "No shuffles yet").
+    val sentimentsState = produceState(
+        initialValue = null,
+        AppPreferences.topicSentimentsState
+    ) {
+        value = resolveSentimentTopics(
+            AppPreferences.topicSentimentsState,
+            AppPreferences.SENTIMENT_LIKE
+        ) to resolveSentimentTopics(
+            AppPreferences.topicSentimentsState,
+            AppPreferences.SENTIMENT_DISLIKE
+        )
+    }
+    val likedTopics = sentimentsState.value?.first.orEmpty()
+    val dislikedTopics = sentimentsState.value?.second.orEmpty()
+    val sentimentsLoaded = sentimentsState.value != null
+    // v21 — unpin confirmation (mirrors Home's Saved-shelf dialog): the
+    // bookmark button never drops a pin silently.
+    var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
     val entriesState = produceState<List<HistoryEntry>>(initialValue = emptyList()) {
         try {
             CurioRepositoryHolder.repo.observeAll().collect { savedEntries ->
@@ -114,10 +159,17 @@ fun TopicHistoryScreen(navController: NavController) {
     val filteredEntries = remember(entries, needle, filterCategoryId) {
         entries.filter { matches(it.categoryId, it.topicName) }
     }
+    val filteredLiked = remember(likedTopics, needle, filterCategoryId) {
+        likedTopics.filter { matches(it.categoryId, it.name) }
+    }
+    val filteredDisliked = remember(dislikedTopics, needle, filterCategoryId) {
+        dislikedTopics.filter { matches(it.categoryId, it.name) }
+    }
     val grouped = remember(filteredEntries) { filteredEntries.groupBy { it.dayLabel } }
     // Chips only for categories that actually appear in the history.
-    val availableCats = remember(entries, pinnedTopics) {
-        (entries.map { it.categoryId } + pinnedTopics.map { it.categoryId })
+    val availableCats = remember(entries, pinnedTopics, likedTopics, dislikedTopics) {
+        (entries.map { it.categoryId } + pinnedTopics.map { it.categoryId } +
+            likedTopics.map { it.categoryId } + dislikedTopics.map { it.categoryId })
             .distinct()
             .map { CurioCategories.byId(it) }
     }
@@ -129,32 +181,16 @@ fun TopicHistoryScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
     ) {
-        // ── Top bar — matches the shared push-screen header style ────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 0.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            CurioBackButton(onClick = { navController.popBackStack() })
-            Column {
-                Text(
-                    text = "Topic history",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = "Every topic you've explored, grouped by day",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        // ── Torn hero header — Home's construction (rose banner, bold tear,
+        //    white under-sheet, mirrored watermark pairs) with History's own
+        //    tear seed and its OWN BOOKS-family glyphs, so it reads as part
+        //    of the torn-banner family without copying Home's wildcard scatter.
+        HistoryHeroHeader(onBack = { navController.popBackStack() })
 
-        if (entries.isEmpty() && pinnedTopics.isEmpty()) {
+        if (sentimentsLoaded && entries.isEmpty() && pinnedTopics.isEmpty() &&
+            likedTopics.isEmpty() && dislikedTopics.isEmpty()
+        ) {
             CurioEmptyState(
                 glyph = CurioIcons.History,
                 headline = "No shuffles yet",
@@ -180,7 +216,9 @@ fun TopicHistoryScreen(navController: NavController) {
             )
         }
 
-        if (filteredEntries.isEmpty() && filteredPinned.isEmpty()) {
+        if (filteredEntries.isEmpty() && filteredPinned.isEmpty() &&
+            filteredLiked.isEmpty() && filteredDisliked.isEmpty()
+        ) {
             // Filters narrowed everything away — offer a one-tap reset.
             // (Same ScreenEntrance fade-up as the list, so the whole results
             // region shares one entrance language.)
@@ -222,13 +260,65 @@ fun TopicHistoryScreen(navController: NavController) {
                     ),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    // ── Liked topics (v21) — the Topic Reveal like button ──
+                    if (filteredLiked.isNotEmpty()) {
+                        item(key = "liked_header") {
+                            HistorySectionHeader(
+                                glyph = CurioIcons.ThumbUp,
+                                label = "Liked",
+                                count = filteredLiked.size,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        items(filteredLiked, key = { "like_${it.categoryId.name}_${it.id}" }) { topic ->
+                            SentimentTopicRow(
+                                topic = topic,
+                                glyph = CurioIcons.ThumbUp,
+                                onClick = {
+                                    navController.navigate(
+                                        com.curio.app.navigation.CurioRoutes.revealFor(
+                                            topic.categoryId.routeSlug,
+                                            topic.name
+                                        )
+                                    ) { launchSingleTop = true }
+                                }
+                            )
+                        }
+                    }
+
+                    // ── Disliked topics (v21) — the Topic Reveal dislike button ──
+                    if (filteredDisliked.isNotEmpty()) {
+                        item(key = "disliked_header") {
+                            HistorySectionHeader(
+                                glyph = CurioIcons.ThumbDown,
+                                label = "Disliked",
+                                count = filteredDisliked.size,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        items(filteredDisliked, key = { "dislike_${it.categoryId.name}_${it.id}" }) { topic ->
+                            SentimentTopicRow(
+                                topic = topic,
+                                glyph = CurioIcons.ThumbDown,
+                                onClick = {
+                                    navController.navigate(
+                                        com.curio.app.navigation.CurioRoutes.revealFor(
+                                            topic.categoryId.routeSlug,
+                                            topic.name
+                                        )
+                                    ) { launchSingleTop = true }
+                                }
+                            )
+                        }
+                    }
+
                     // ── Pinned for later (pin button on Topic Reveal) ────
                     if (filteredPinned.isNotEmpty()) {
                         item(key = "pinned_header") {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 8.dp, bottom = 6.dp),
+                                    .padding(top = 16.dp, bottom = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
@@ -257,9 +347,7 @@ fun TopicHistoryScreen(navController: NavController) {
                                         )
                                     ) { launchSingleTop = true }
                                 },
-                                onUnpin = {
-                                    AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
-                                }
+                                onUnpin = { pendingUnpin = pinned }
                             )
                         }
                         if (filteredEntries.isNotEmpty()) {
@@ -308,6 +396,179 @@ fun TopicHistoryScreen(navController: NavController) {
             }
         }
     }
+
+    // ── Unpin-topic confirmation — never drop a pin silently (mirrors
+    // Home's Saved-shelf dialog): the bookmark button asks before removing.
+    pendingUnpin?.let { pinned ->
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { pendingUnpin = null },
+            title = { Text("Unpin ${pinned.topicName}?") },
+            text = { Text("This removes ${pinned.topicName} from Pinned for later. The topic stays in the deck. You can pin it again anytime.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)
+                        pendingUnpin = null
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Unpin") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingUnpin = null }, colors = curioDialogActionButtonColors()) { Text("Keep") }
+            }
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Torn hero header — Home's rose-banner construction (bold tear, white
+// under-sheet, mirrored watermark collage) with History's OWN tear seed
+// and its own BOOKS-family glyphs, so the screen reads as part of the
+// torn-banner family without copying Home's wildcard scatter.
+// ═══════════════════════════════════════════════════════════════════════
+
+/** The torn banner's solid body height. */
+private val HistoryHeroBannerHeight = 186.dp
+/** Extra layout space for the white sheet below the torn banner. */
+private val HistoryHeroSheetExtent = 24.dp
+/** Total header footprint — banner plus its under-sheet extent. */
+private val HistoryHeroTotalHeight = HistoryHeroBannerHeight + HistoryHeroSheetExtent
+/** Fixed tear seed — History tears in its own pattern, never re-rolls. */
+private const val HISTORY_TEAR_SEED = 0xAB1E5
+
+/** One mirrored hero watermark pair (the settings/profile collage). */
+private data class HistoryHeroPair(
+    val biasX: Float,
+    val biasY: Float,
+    val size: Dp,
+    val rotation: Float,
+    val alpha: Float
+)
+
+@Composable
+private fun HistoryHeroHeader(onBack: () -> Unit) {
+    val heroTornShape = remember(HISTORY_TEAR_SEED) { SoftTornBottomShape(HISTORY_TEAR_SEED, bold = true) }
+    val sheetShape = remember(HISTORY_TEAR_SEED) {
+        SoftTornSheetShape(HISTORY_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
+    }
+    // The same rose-wood banner family as Home/Settings/Cabinet — theme
+    // aware (Material primary, pure black in AMOLED, rose in pastel).
+    val fill = settingsRoseAccent()
+    val ink = settingsReadableInk(fill)
+    // History's own watermark set: the BOOKS family (open book, library,
+    // quote, edit, …) instead of Home's wildcard casino/star scatter.
+    val heroSymbols = CurioIcons.heroWatermarkSymbols(CategoryFamily.BOOKS)
+    val heroPairs = listOf(
+        HistoryHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
+        HistoryHeroPair(biasX = 0.55f, biasY = -0.64f, size = 48.dp, rotation = 8f, alpha = 0.13f),
+        HistoryHeroPair(biasX = 0.94f, biasY = -0.12f, size = 56.dp, rotation = 14f, alpha = 0.14f),
+        HistoryHeroPair(biasX = 0.56f, biasY = 0.54f, size = 50.dp, rotation = 10f, alpha = 0.13f),
+        HistoryHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(HistoryHeroTotalHeight)
+    ) {
+        // ── White under-sheet — the tear's uneven lip reads white below
+        // the opaque banner (shared paper layer in every theme).
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp)
+                .offset(y = HistoryHeroBannerHeight - 18.dp)
+                .clip(sheetShape)
+                .background(CurioColors.CreamWhite)
+        )
+        // ── Torn-edge shadow — hairline dark rim just below the seam.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HistoryHeroBannerHeight)
+                .offset(y = 1.dp)
+                .clip(heroTornShape)
+                .background(Color.Black.copy(alpha = 0.20f))
+        )
+        // ── Solid rose banner, torn bottom edge.
+        Surface(
+            shape = heroTornShape,
+            color = fill,
+            shadowElevation = 0.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HistoryHeroBannerHeight)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Mirrored watermark collage — History's own glyphs around
+                // the banner edges in mirrored pairs.
+                heroPairs.forEachIndexed { i, pair ->
+                    HistoryHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, ink)
+                    HistoryHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, ink)
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 16.dp)
+                ) {
+                    // ── Top row — back pill (Cabinet style, ink-tinted) ──
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CurioBackButton(
+                            onClick = onBack,
+                            containerColor = ink.copy(alpha = 0.18f),
+                            contentColor = ink,
+                            disableRipple = true
+                        )
+                    }
+                    // Flex spacer — pins the title block just above the tear.
+                    Spacer(Modifier.weight(1f))
+                    // ── Title block — Cabinet's headline + subtitle ─────
+                    Column {
+                        Text(
+                            "Topic History",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = ink,
+                            maxLines = 1
+                        )
+                        Text(
+                            "Liked, disliked & every spin you've explored",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = ink.copy(alpha = 0.82f),
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One mirrored hero watermark glyph — the banner's readable ink at a soft
+ *  alpha (Home's HomeHeroSymbol construction, adapted for History). */
+@Composable
+private fun BoxScope.HistoryHeroSymbol(
+    glyph: String,
+    alignment: Alignment,
+    size: Dp,
+    rotation: Float,
+    alpha: Float,
+    tint: Color
+) {
+    CurioIcon(
+        name = glyph,
+        contentDescription = null,
+        tint = tint.copy(alpha = alpha),
+        size = size,
+        modifier = Modifier
+            .align(alignment)
+            .padding(10.dp)
+            .graphicsLayer { rotationZ = rotation }
+    )
 }
 
 /** Horizontally scrolling category filter — single-select; tapping the
@@ -407,6 +668,131 @@ private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
     }
 }
 
+
+// ── Section header for the sentiment lists (Liked / Disliked) ─────────────
+
+@Composable
+private fun HistorySectionHeader(
+    glyph: String,
+    label: String,
+    count: Int,
+    tint: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        CurioIcon(glyph, null, tint = tint, size = 16.dp)
+        Text(
+            text = "$label · $count",
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+// ── Sentiment row — thumb glyph + category accent dot (mirrors PinnedRow) ──
+
+@Composable
+private fun SentimentTopicRow(
+    topic: CurioTopic,
+    glyph: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cat = CurioCategories.byId(topic.categoryId)
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // ── Category accent dot with the sentiment thumb ────────────
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(cat.tint, shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = glyph,
+                    contentDescription = null,
+                    tint = cat.categoryInk(),
+                    size = 20.dp
+                )
+            }
+
+            Spacer(Modifier.size(12.dp))
+
+            // ── Topic name + category ───────────────────────────────────
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = topic.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = cat.displayName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = cat.categoryInk()
+                )
+            }
+        }
+    }
+}
+
+// ── Sentiment resolution — sentiments are stored as "CATEGORY:topicId" ────
+// keys; the topic names live in the JSON catalogs, so we load each involved
+// category (cached after first reveal) and match by id. A key whose category
+// part doesn't parse (e.g. a wildcard-spun topic) falls back to a scan of
+// every already-cached pool so the row still shows a real topic name.
+
+private suspend fun resolveSentimentTopics(
+    sentiments: Map<String, String>,
+    sentiment: String
+): List<CurioTopic> {
+    val wanted = sentiments.filterValues { it == sentiment }
+    if (wanted.isEmpty()) return emptyList()
+
+    val result = mutableListOf<CurioTopic>()
+    // Key → "CATEGORY:topicId". We load per category to keep the catalog
+    // lookups cheap (cached after the first reveal of that category).
+    val byCategory = wanted.keys.groupBy { key -> key.substringBefore(':') }
+    byCategory.forEach { (categoryName, keys) ->
+        val categoryId = CategoryId.values().firstOrNull { it.name == categoryName }
+        val topics: List<CurioTopic> = when {
+            categoryId != null && categoryId != CategoryId.WILDCARD ->
+                runCatching { TopicJsonLoader.load(categoryId) }.getOrDefault(emptyList())
+            else -> {
+                // Unknown / wildcard key — scan every already-cached pool.
+                CategoryId.values()
+                    .filter { it != CategoryId.WILDCARD }
+                    .mapNotNull { TopicJsonLoader.cached(it) }
+                    .flatten()
+            }
+        }
+        keys.forEach { key ->
+            val topicId = key.substringAfter(':')
+            topics.firstOrNull { it.id == topicId }?.let { result += it }
+        }
+    }
+    return result
+}
 
 // ── Pinned-for-later row — bookmark glyph + category accent dot ───────────
 

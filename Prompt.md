@@ -1,6 +1,24 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Frosted plate behind the detail-view description (Android)
+## Current Request (COMPLETE): Topic History upgrade — Liked/Disliked, Saved View-all, unpin dialog, Home-style hero (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "In topic history add the liked and unliked too, and in home where it says saved add a view-all toggle which takes to the topic history. And in topic history when I tap the bookmark button make it show the dialog of confirmation too. And also match its header design to home screen etc. but give its own different watermark glyphs."
+
+**What was built:**
+- **features/topichistory/TopicHistoryScreen.kt** —
+  - **Liked / Disliked sections** (from Topic Reveal's like/dislike votes): resolved from `AppPreferences.topicSentimentsState` (keyed "CATEGORY:topicId") via a new suspend `resolveSentimentTopics` (loads each involved category through `TopicJsonLoader.load` with `runCatching`; wildcard/unknown keys fall back to scanning already-`cached()` pools; matches by topic id). Fed by `produceState` keyed on the sentiments map — null initial so the empty state never flashes before the catalog lookups land (a user with only likes would otherwise see a one-frame "No shuffles yet"); rows are `SentimentTopicRow` (category accent dot + thumb glyph, mirrors the pinned row) under `HistorySectionHeader` (glyph + "Label · count"); tapping a row opens the reveal.
+  - **Unpin confirmation dialog** — the bookmark button now sets `pendingUnpin` and shows an AlertDialog mirroring Home's ("Unpin X?" / This removes X from Pinned for later… / Unpin · Keep), calling `AppPreferences.unpinTopic`.
+  - **Torn hero header** — `HistoryHeroHeader` matches the Home/Cabinet torn-banner family (bold `SoftTornBottomShape` tear, white `CreamWhite` under-sheet, black 0.20 shadow rim, rose fill via shared `settingsRoseAccent()` + `settingsReadableInk()`, ink-tinted `CurioBackButton` top row, `headlineSmall` ExtraBold title + subtitle pinned above the tear) but with its OWN `HISTORY_TEAR_SEED = 0xAB1E5` and its own watermark glyphs — `heroWatermarkSymbols(CategoryFamily.BOOKS)` (open book, library, quote, edit…) instead of Home's wildcard casino/star scatter.
+  - Removed five pre-existing unused imports (fromHsl/toHsl/lerp/isCurioDarkTheme/pastelFillInk) + a stray blank line.
+- **features/home/HomeScreen.kt** — the Saved section title became a Row with a "View all" pill (rounded-50 `surfaceContainerLow`, primary label + `CurioIcons.History` 14dp) navigating `CurioRoutes.TOPIC_HISTORY`; hidden in promo mode (mirrors the Recents pill).
+
+**Validation:** No Gradle build locally (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash twice: compile-safe (imports all used, no name collisions, produceState pairing correct); its one actionable flag (empty-state flash) fixed with the null-initial gate; two accepted notes — wildcard-scan fallback only sees cached pools (in practice the reveal caches the pool before a vote is recorded) and a brief resolution delay for sentiment sections.
+
+## Previous Requests
+
+### Frosted plate behind the detail-view description (Android) — COMPLETE
 
 **Date:** 2026-08-12
 
