@@ -631,7 +631,7 @@ private fun SetupSlide(
                 title = "Notifications",
                 // v22 — reasons, not descriptions: each permission explains
                 // WHY Curio uses it.
-                subtitle = "So your explore sessions get timed and we can nudge you back to write your finds down",
+                subtitle = "Your explore sessions get timed and we can nudge you back to write your finds down",
                 granted = notificationGranted,
                 onRequest = onRequestNotifications
             ) {
@@ -654,7 +654,7 @@ private fun SetupSlide(
             PermissionCard(
                 glyph = CurioIcons.Mic,
                 title = "Microphone",
-                subtitle = "So you can capture ideas out loud the moment they strike — no typing needed",
+                subtitle = "So you can capture ideas out in voice no typing needed",
                 granted = micGranted,
                 onRequest = onRequestMic
             )
@@ -665,7 +665,7 @@ private fun SetupSlide(
             PermissionCard(
                 glyph = CurioIcons.BubbleChart,
                 title = "Display over other apps",
-                subtitle = "So the explore bubble can float over any app while you research — your timer stays in view",
+                subtitle = "So the explore bubble can float over any app while you research, your timer stays in view with quick notes at your finger tips",
                 granted = overlayGranted,
                 onRequest = onRequestOverlay
             )
