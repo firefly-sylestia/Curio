@@ -26,22 +26,44 @@ import kotlin.coroutines.resume
  * in-app update (download in the background, install when it's ready).
  *
  * Sideloaded installs (direct APK / debug builds — not acquired via Google
- * Play) are handled gracefully: Play reports UPDATE_NOT_AVAILABLE, so
- * [available] returns null and the page falls back to the GitHub release
- * check (notes + release page) instead.
+ * Play) are handled gracefully: the Play path is gated on the actual
+ * INSTALLER ([isInstalledFromPlay]), so [available] returns null and the
+ * page falls back to the GitHub release check (notes + release page)
+ * instead. The installer gate matters because Play's availability answer
+ * alone is NOT a reliable Play-vs-sideload test.
  */
 object CurioInAppUpdate {
+
+    /**
+     * True when this app was installed from the Google Play Store.
+     *
+     * GitHub / ADB / file-manager installs return null (or their own
+     * installer package), so they never touch Play Core. [getInstallerPackageName]
+     * can be absent on some restores, which is fine — the GitHub fallback
+     * always works.
+     */
+    fun isInstalledFromPlay(context: Context): Boolean =
+        runCatching {
+            context.packageManager.getInstallerPackageName(context.packageName) == "com.android.vending"
+        }.getOrDefault(false)
 
     /**
      * Suspends until Play answers whether a FLEXIBLE update is available.
      *
      * Returns the [AppUpdateInfo] when an update is available AND the
-     * flexible flow is allowed; null otherwise (up to date, non-Play
-     * install, or the query failed).
+     * flexible flow is allowed; null otherwise (not a Play install, up to
+     * date, or the query failed).
      */
     suspend fun available(context: Context): AppUpdateInfo? = suspendCancellableCoroutine { cont ->
-        // Defensive: on sideloaded builds / Play-less devices a factory
-        // quirk must never crash the check — it just reports "no update".
+        // v25 — gate on the INSTALLER, not on Play's availability answer:
+        // sideloaded builds can still report UPDATE_AVAILABLE, which surfaced
+        // a bogus "Update available on Google Play" card on GitHub installs.
+        if (!isInstalledFromPlay(context)) {
+            cont.resume(null)
+            return@suspendCancellableCoroutine
+        }
+        // Defensive: a Play Core factory quirk must never crash the check —
+        // it just reports "no update".
         val manager = runCatching { AppUpdateManagerFactory.create(context) }.getOrNull()
         if (manager == null) {
             cont.resume(null)
@@ -82,9 +104,13 @@ object CurioInAppUpdate {
 @Composable
 fun CurioInAppUpdateHost() {
     val context = LocalContext.current.applicationContext
-    // Defensive: if Play Core can't initialize (sideload / no Play client),
-    // this host simply does nothing — it must never crash the app.
-    val manager = remember { runCatching { AppUpdateManagerFactory.create(context) }.getOrNull() }
+    // v25 — only installs that came from Google Play can use in-app updates;
+    // sideloaded GitHub builds never touch Play Core. Defensive on top: if
+    // Play Core can't initialize the host simply does nothing.
+    val manager = remember {
+        if (!isInstalledFromPlay(context)) null
+        else runCatching { AppUpdateManagerFactory.create(context) }.getOrNull()
+    }
     if (manager == null) return
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(manager) {
