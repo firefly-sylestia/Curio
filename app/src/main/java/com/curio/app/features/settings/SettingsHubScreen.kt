@@ -497,9 +497,11 @@ private val SettingsSections = listOf(
         label = "Explore",
         cards = listOf(
             SettingsCardEntry(
-                headerIcon = CurioIcons.ScienceGlyph,
-                headerTitle = "Experiments",
-                headerSubtitle = "Try visual ideas before they ship",
+                // v25 — the "Experiments" card header was removed per
+                // request; the rows render directly under "Explore".
+                headerIcon = null,
+                headerTitle = null,
+                headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Layers, "Card & deck experiments", "Main card, peek deck, and Spin tests", CurioRoutes.EXPERIMENTS),
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
@@ -512,9 +514,11 @@ private val SettingsSections = listOf(
         label = "Safety & support",
         cards = listOf(
             SettingsCardEntry(
-                headerIcon = CurioIcons.Backup,
-                headerTitle = "Your data",
-                headerSubtitle = "Backups and restore",
+                // v25 — the "Your data" card header was removed per request;
+                // the rows render directly under "Safety & support".
+                headerIcon = null,
+                headerTitle = null,
+                headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
                     // v24 — merged into the shared Support & diagnostics page

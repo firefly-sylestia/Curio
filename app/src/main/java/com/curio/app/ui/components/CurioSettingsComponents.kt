@@ -13,9 +13,11 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun CurioSectionLabel(text: String) {
+    // v25 — bumped from labelMedium so section labels (Personalize / Explore /
+    // Safety & support, and similar) read larger.
     Text(
         text = text,
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
     )

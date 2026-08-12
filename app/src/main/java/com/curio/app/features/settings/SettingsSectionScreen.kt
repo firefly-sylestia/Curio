@@ -65,7 +65,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsDivider
@@ -162,7 +161,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
     val styleIndex = themeStyles.indexOf(themeStyle).coerceAtLeast(0)
     val themeIndex = themes.indexOf(themeMode).coerceAtLeast(0)
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.AutoAwesome, "Visual language", "Small choices shape every page")
         SettingsRowPulse(highlightKey == "appearance-style") {
             // The Material style stays greyed out until it ships — the option
             // is visible so users know it's coming, but can't be selected.
@@ -328,7 +326,6 @@ private fun NotificationsSection(highlightKey: String? = null) {
         }
     }
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Notifications, "Notifications", "Quiet nudges, when you want them")
         SettingsRowPulse(highlightKey == "notif-reminder") {
             CompactSwitchRow("Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
                 if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
@@ -483,7 +480,6 @@ private fun RecordingSection(highlightKey: String? = null) {
     var quality by remember { mutableStateOf(AudioQualitySettings.get(context)) }
     var showQualityDialog by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Mic, "Recording", "Voice notes that sound like you")
         SettingsRowPulse(highlightKey == "recording-quality") {
             CurioSettingsRow(CurioIcons.Mic, "Audio quality", quality.label) {
                 showQualityDialog = true
@@ -512,7 +508,6 @@ private fun RecordingSection(highlightKey: String? = null) {
 @Composable
 private fun DataSection(navController: NavController, highlightKey: String? = null) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Backup, "Backup & restore", "Your captures stay yours")
         SettingsRowPulse(highlightKey == "data-tools") {
             CurioSettingsRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data") {
                 navController.navigate(CurioRoutes.SETTINGS_DATA) { launchSingleTop = true }

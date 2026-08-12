@@ -1,17 +1,18 @@
 # Prompt.md — Research & Analysis Tracking
 
-## Current Request (COMPLETE): Remove the "How Curio feels" card header in Settings
+## Current Request (COMPLETE): Remove remaining Settings card headers + bump section-label size
 
 **Date:** 2026-08-12
 
-**What was asked:** Remove the "How Curio feels / Appearance and color" card header LINE in Settings (with its icon and subtitle) — NOT the Appearance page and NOT the rows. The user confirmed via ask_user: keep Backup & restore ("Keep it") and keep the "Your data" card ("keep it").
+**What was asked:** "also similar header in settings identify and tell me" → after identifying all header lines (hub cards + sub-page headers), the user picked ALL of them for removal, plus: "increase the text size of the personalize explore and safety and support texts and similar".
 
-**Done:**
-- `SettingsHubScreen.kt`: the Personalize card's `headerIcon`/`headerTitle`/`headerSubtitle` for "How Curio feels" set to null. The card renderer already skips the header when those are null (`if (headerIcon != null && headerTitle != null && headerSubtitle != null) CurioCardHeader(...)`), so the four rows (Appearance, Notifications, Recording, Pet designer) now render directly under the "Personalize" section label. Search filter handles null headers too (`headerTitle?.contains(...) == true`). No page/row removed.
-- Changelog bullet added.
+**Removed (icon + title + subtitle header lines only — rows/pages untouched):**
+- Settings hub cards: "Experiments / Try visual ideas…", "Your data / Backups and restore" (both `headerIcon/Title/Subtitle = null`; the renderer skips null headers). "How Curio feels" was already removed in the previous commit.
+- SettingsSectionScreen: "Visual language" (Appearance), "Notifications", "Recording", "Backup & restore" (DataSection) — 4 CurioCardHeader lines removed; the CurioCardHeader import removed.
+- ExperimentsScreen: "Main card", "Deck peek cards", "Promo mode" headers removed; import removed.
+- BackupToolsScreen: "Backup & restore", "FieldMind archive" headers removed; import removed.
+- CurioSectionLabel (`ui/components/CurioSettingsComponents.kt`): font bumped labelMedium → titleSmall (SemiBold) — this is the shared component behind "Personalize"/"Explore"/"Safety & support" and every other section label (Support's Updates/Feedback/About, Experiments' Spin visuals/Promo, etc.), so all get larger at once.
 
-**Also this session:** the previous request — GitHub-only in-app updater (Play Core removed; "Update now" downloads the release APK with progress and opens the system installer; short "Open release" link) — was committed and pushed as `6f65d0c` (user asked: "commit and push the previous one"). This header removal is a separate commit after it.
-
-**Validation:** braces + `git diff --check` clean.
+**Validation:** braces + `git diff --check` clean; zero CurioCardHeader usages left in the 3 files that lost their imports; hub has 3 null-header cards.
 
 **Next:** none pending.

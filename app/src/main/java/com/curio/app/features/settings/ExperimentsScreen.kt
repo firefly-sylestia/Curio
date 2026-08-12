@@ -27,7 +27,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
@@ -75,7 +74,6 @@ fun ExperimentsScreen(navController: NavController) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // v25 — the Enhanced main gradient experiment PASSED
                     // (always ON), so its toggle was removed here.
-                    CurioCardHeader(CurioIcons.Layers, "Main card", "Hero ticket looks")
                     // v24 — the dual-accent hero gradient experiment was
                     // rejected (ugly golden blend); always OFF, so its toggle
                     // was removed here.
@@ -86,7 +84,6 @@ fun ExperimentsScreen(navController: NavController) {
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Layers, "Deck peek cards", "The fan behind the hero")
                     ExperimentSwitchRow("Top-lit deck cards", "Peek cards catch light at the top edge", AppPreferences.peekGradientState) {
                         AppPreferences.setPeekGradientEnabled(context, it)
                     }
@@ -113,7 +110,6 @@ fun ExperimentsScreen(navController: NavController) {
             item { CurioSectionLabel("Promo") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Star, "Promo mode", "Store-ready demo content")
                     CurioSettingsRow(
                         CurioIcons.Star,
                         "Promo mode",
