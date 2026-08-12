@@ -448,7 +448,7 @@ object AppPreferences {
     var customPetsState by mutableStateOf<List<String?>>(listOf(null, null))
     /** Legacy custom flower-bed rows; the current home uses a fixed house scene. */
     var bedDesignRowsState by mutableStateOf<List<String>?>(null)
-    /** v9.5 — evolution path chosen at level 7 (null = baby, no choice yet). */
+    /** v9.5 — evolution path chosen at level 15 (null = baby, no choice yet). */
     var evoPathState by mutableStateOf<String?>(null)
         private set
     /** v9.6 — experimental per-part size and position controls. */

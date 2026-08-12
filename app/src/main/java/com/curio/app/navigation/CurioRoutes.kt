@@ -142,7 +142,6 @@ object CurioRoutes {
     const val SETTINGS = "settings"
     const val SETTINGS_APPEARANCE = "settings/appearance"
     const val SETTINGS_PREFERENCES = "settings/preferences"
-    const val SETTINGS_NOTIFICATIONS = "settings/notifications"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
     const val EXPERIMENTS = "experiments"

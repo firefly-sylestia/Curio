@@ -46,11 +46,11 @@ object CurioPet {
     // ═══════════════════════════════════════════════════════════════════
     // v9.5 — Evolution system: three tiers (Baby → 1st Evo → Final Evo)
     // with three element paths (Fire / Water / Nature). The baby form is
-    // universal; at level 7 the user chooses a path; at level 25 the pet
+    // universal; at level 15 the user chooses a path; at level 25 the pet
     // reaches its final form. Each evolution plays an animation.
     // ═══════════════════════════════════════════════════════════════════
 
-    /** Evolution path — the elemental affinity chosen at level 7. */
+    /** Evolution path — the elemental affinity chosen at level 15. */
     enum class EvoPath(val displayName: String, val element: String) {
         FIRE("Blaze", "Fire"),
         WATER("Tide", "Water"),
@@ -66,7 +66,7 @@ object CurioPet {
         /** Human-readable label for this tier, including the element path. */
         fun label(path: EvoPath?): String = when (this) {
             BABY -> "Baby Spark"
-            FIRST_EVO -> "${path?.displayName ?: "Evolved"} (Level 7)"
+            FIRST_EVO -> "${path?.displayName ?: "Evolved"} (Level 15)"
             FINAL_EVO -> "${path?.displayName ?: "Grown"} (Level 25)"
         }
     }
@@ -75,14 +75,14 @@ object CurioPet {
     fun evolutionStage(level: Int, path: EvoPath?): Pair<Stage, EvoPath?> {
         return when {
             level >= 25 && path != null -> Stage.FINAL_EVO to path
-            level >= 7 && path != null -> Stage.FIRST_EVO to path
+            level >= 15 && path != null -> Stage.FIRST_EVO to path
             else -> Stage.BABY to null
         }
     }
 
-    /** True when the pet is ready to evolve (level >= 7, no path yet). */
+    /** True when the pet is ready to evolve (level >= 15, no path yet). */
     fun canEvolve(level: Int, path: EvoPath?): Boolean =
-        level >= 7 && path == null
+        level >= 15 && path == null
 
     /** True when the final evolution is unlocked (level >= 25). */
     fun canFinalEvolve(level: Int, path: EvoPath?): Boolean =
@@ -98,7 +98,7 @@ object CurioPet {
         val path = AppPreferences.evoPath()
         return when {
             level >= 25 && path != null -> Stage.FINAL_EVO
-            level >= 7 && path != null -> Stage.FIRST_EVO
+            level >= 15 && path != null -> Stage.FIRST_EVO
             else -> Stage.BABY
         }
     }
@@ -109,7 +109,7 @@ object CurioPet {
         val path = AppPreferences.evoPath()
         return when {
             level >= 25 && path != null -> Stage.FINAL_EVO
-            level >= 7 && path != null -> Stage.FIRST_EVO
+            level >= 15 && path != null -> Stage.FIRST_EVO
             else -> Stage.BABY
         }
     }
@@ -128,7 +128,7 @@ object CurioPet {
     fun nextStageHint(stage: Stage): String {
         val next = nextStage(stage) ?: return "Fully grown. Every lane is yours."
         return when (next) {
-            Stage.FIRST_EVO -> "Reach Level 7 to evolve."
+            Stage.FIRST_EVO -> "Reach Level 15 to evolve."
             Stage.FINAL_EVO -> "Reach Level 25 for the final evolution."
             Stage.BABY -> "Start your journey."
 

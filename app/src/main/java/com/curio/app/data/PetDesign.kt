@@ -140,23 +140,28 @@ data class PetDesign(
             "..oo........oo.."
         )
 
-        /** The original 16×16 default curled (asleep) grid. */
+        /**
+         * v27 — the default 16×16 curled (asleep) grid, redrawn to match the
+         * standing body: same head + ears, a rounded ball with the scarf,
+         * and the same tucked feet at the bottom (the old teardrop tail is
+         * gone).
+         */
         val DEFAULT_CURLED_16: List<String> = listOf(
             ".......GG.......",
             "...o...GG...o...",
             "..ob........bo..",
+            "..ob....o....bo.",
+            "...oooooooooo...",
             "..obbbbbbbbbbo..",
-            "...obbbbbbbbo...",
-            "..obbbbbbbbbbbo.",
             ".obbbbbbbbbbbbo.",
             "obbbbbbbbbbbbbbo",
             "obssssssssssssbo",
+            ".oSSssssssssSSo.",
+            "obbbbbbbbbbbbbbo",
             ".obbbbbbbbbbbbo.",
-            "..obbbbbbbbbbbo.",
-            "...obbbbbbbbo...",
-            ".....oBBbbbbBBo.",
-            "......oooooo....",
-            "................",
+            "..obbbbbbbbbbo..",
+            "....oBBbbbbBBo..",
+            ".....oo....oo...",
             "................"
         )
 
@@ -202,11 +207,12 @@ data class PetDesign(
         )
 
         /**
-         * v9.2 — the default 32×32 curled (asleep) pose: a cozy ball with
-         * its ears tucked and a fluffy tail curled around the front.
+         * v27 — the default 32×32 curled (asleep) pose, redrawn to match the
+         * standing body: the same head + ears on top, a rounded ball body
+         * with the scarf band, and the same tucked feet at the bottom (the
+         * old melting-teardrop tail is gone).
          */
         val DEFAULT_CURLED_32: List<String> = listOf(
-            "................................",
             "................................",
             "................................",
             "................................",
@@ -215,29 +221,30 @@ data class PetDesign(
             ".........o.....oo.....o.........",
             "........ooo...oo...ooo..........",
             ".......obbo...oo...obbo.........",
-            "......obbbbbbbbbbbbbbbbbbo......",
-            ".....obbbbbbbbbbbbbbbbbbbbo.....",
-            "....obbbbbbbbbbbbbbbbbbbbbbo....",
-            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
-            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "......obbbbbbbbbbbbbbbbbbbbbo...",
+            ".....obbbbbbbbbbbbbbbbbbbbbbbo..",
+            "....obbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbbbbo",
+            "..obbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
             "..osssssssssssssssssssssssssso..",
+            "..oSSssssssssssssssssssssssSSo..",
             "..obbbbbbbbbbbbbbbbbbbbbbbbbbo..",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
             ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
             "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
             "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
             "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
             "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
-            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbbbo",
-            "obbbbbbbbbbbbbbbbbbbbbbbbbbbbo..",
-            "..obbbbbbbbbbbbbbbbbbbbbbbbo....",
-            "...obbbbbbbbbbbbbbbbbbbbbbo.....",
-            ".....obbbbbbbbbbbbbbbbbbo.......",
-            ".......obbbbbbbbbbbbbbo.........",
-            ".........oooooooooooooo.........",
+            ".obbbbbbbbbbbbbbbbbbbbbbbbbbbbo.",
+            "..obbbbbbbbbbbbbbbbbbbbbbbbbbo..",
+            "...obbbbbbbbbbbbbbbbbbbbbbbbo...",
+            "....obbbbbbbbbbbbbbbbbbbbbbo....",
+            ".....oobbbbbbbbbbbbbbbbbboo.....",
+            "........oo........oo............",
             "................................",
             "................................",
             "................................",
-            "................................"
         )
 
         /**

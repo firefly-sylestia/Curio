@@ -263,7 +263,7 @@ fun PetDesignerScreen(navController: NavController) {
     var importMenuOpen by remember { mutableStateOf(false) }
     // v8.52 — the Settings → Accessories dialog.
     var accessoriesOpen by remember { mutableStateOf(false) }
-    // v9.5 — evolution: the 3-choice path picker dialog (shown at level 7).
+    // v9.5 — evolution: the 3-choice path picker dialog (shown at level 15).
     var evoDialogOpen by remember { mutableStateOf(false) }
     var evoAnimating by remember { mutableStateOf(false) }
 
@@ -1121,7 +1121,7 @@ fun PetDesignerScreen(navController: NavController) {
             }
         }
 
-        // ── Evolution choice (v9.5) — shown at level 7 ──────────────
+        // ── Evolution choice (v9.5) — shown at level 15 ─────────────
         if (evoDialogOpen) {
             DialogScrim(onDismiss = { /* must pick a path */ }) {
                 EvolutionChoiceDialog(
