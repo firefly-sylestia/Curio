@@ -59,6 +59,14 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
 
+import com.curio.app.ui.components.categoryEdgeShine
+import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.pet.PetLandmarks
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryBackgroundWash
+import kotlinx.coroutines.launch
+
 /**
  * v27l — display rank for the expanded (new) lanes on the picker's New page.
  * Groups related fields together: life sciences, chemistry, earth & space,
@@ -89,13 +97,6 @@ private fun newLaneRank(id: CategoryId): Int = when (id) {
     CategoryId.ECONOMICS -> 14
     else -> 100
 }
-import com.curio.app.ui.components.categoryEdgeShine
-import com.curio.app.ui.components.curioButtonColors
-import com.curio.app.ui.pet.PetLandmarks
-import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.categoryBackgroundWash
-import kotlinx.coroutines.launch
 
 /**
  * Full-screen Category Picker.
