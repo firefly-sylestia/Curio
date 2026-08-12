@@ -344,6 +344,20 @@ object ExploreSessionStore {
         }
     }
 
+    /**
+     * v6 — clears ANY pending write handoff regardless of topic. Backup
+     * restore uses this for pre-v6 backups, whose prefs-resurrected package
+     * points at device-local screenshot paths that were never bundled.
+     */
+    fun clearPendingWrite(context: Context) {
+        pendingWriteCategory = null
+        pendingWriteTopic = null
+        pendingWriteMillis = 0L
+        pendingWriteNote = ""
+        pendingWriteScreenshots = emptyList()
+        prefs(context).edit().remove(KEY_PENDING_WRITE).apply()
+    }
+
     // ── Active-session note + screenshots (v27) — the bubble edits these
     // directly on the live session; the finish flow hands them off (see
     // [handoffWriteSession]) and the save page attaches them to the entry.

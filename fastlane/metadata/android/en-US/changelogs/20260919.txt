@@ -70,3 +70,4 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Saved entries show the session note + tappable screenshot thumbnails on the detail page.
 • Backup & restore now carry your session screenshots too — the in-app backup bundles the shots captured during exploring and puts them back in place on restore (shared across every entry from that session, same as before).
 • Recycle bin auto-delete — deleted captures now expire on their own. Pick a window (Keep forever / 7 / 30 / 90 days) right inside the Recycle bin; anything past it is deleted forever, with its media, when the app opens or the bin is opened. Changing the window applies immediately.
+• Mid-write backups are safe now — if you finish exploring and back up before writing it down, the unsaved session note and screenshots ride along and come right back on restore, so nothing started in the session is lost.
