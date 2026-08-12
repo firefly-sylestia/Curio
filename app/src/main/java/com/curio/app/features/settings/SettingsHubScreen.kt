@@ -477,9 +477,13 @@ private val SettingsSections = listOf(
         label = "Personalize",
         cards = listOf(
             SettingsCardEntry(
-                headerIcon = CurioIcons.AutoAwesome,
-                headerTitle = "How Curio feels",
-                headerSubtitle = "Appearance and color",
+                // v25 — the "How Curio feels / Appearance and color" card
+                // header (icon + title + subtitle) was removed per request;
+                // the rows below render directly under "Personalize". The
+                // renderer skips the header when these are null.
+                headerIcon = null,
+                headerTitle = null,
+                headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint, and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
                     SettingsRowEntry(CurioIcons.Notifications, "Notifications", "Reminders and explore controls", CurioRoutes.SETTINGS_NOTIFICATIONS),
