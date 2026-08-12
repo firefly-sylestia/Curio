@@ -165,6 +165,34 @@ fun isCurioDarkTheme(): Boolean {
 }
 
 /**
+ * v20 — the brand coral as INK, theme-aware: bright CoralBlush on dark
+ * surfaces, a deep readable CoralInk on light cream (CoralBlush is a pale
+ * pastel that vanishes on the light background). Use for icons, text and
+ * progress accents that sit on cards/cream — the light-mode wash-out fix.
+ */
+@Composable
+fun curioRoseInk(): Color =
+    if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.CoralInk
+
+/**
+ * v20 — the brand butter as INK, theme-aware: bright ButterYellow on dark
+ * surfaces, deep GoldInk on light cream (ButterYellow vanishes on the
+ * light background). Gold twin of [curioRoseInk].
+ */
+@Composable
+fun curioGoldInk(): Color =
+    if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
+
+/**
+ * v20 — the soft sage as INK, theme-aware: soft Sage on dark surfaces, deep
+ * SageInk on light cream (Sage vanishes on the light background). For
+ * "done"/mastered icons, text and progress accents.
+ */
+@Composable
+fun curioSageInk(): Color =
+    if (isCurioDarkTheme()) CurioColors.Sage else CurioColors.SageInk
+
+/**
  * Non-composable dark check for services/workers — mirrors [isCurioDarkTheme]
  * but reads the system night flag from [Context] instead of the @Composable
  * [isSystemInDarkTheme], so plain functions (e.g. notification tinting in

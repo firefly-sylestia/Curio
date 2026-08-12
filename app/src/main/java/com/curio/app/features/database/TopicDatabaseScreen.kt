@@ -78,6 +78,7 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.Dispatchers
@@ -891,7 +892,7 @@ private fun DatabaseTopicRow(
                     if (done) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = CurioColors.Sage.copy(alpha = 0.16f)
+                            color = curioSageInk().copy(alpha = 0.16f)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -900,13 +901,13 @@ private fun DatabaseTopicRow(
                             ) {
                                 CurioIcon(
                                     CurioIcons.Check, null,
-                                    tint = CurioColors.Sage,
+                                    tint = curioSageInk(),
                                     size = 12.dp
                                 )
                                 Text(
                                     "explored",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = CurioColors.Sage
+                                    color = curioSageInk()
                                 )
                             }
                         }

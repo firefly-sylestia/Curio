@@ -84,6 +84,9 @@ import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.BadgeTier
@@ -422,7 +425,7 @@ fun QuestsScreen(navController: NavController) {
                         Text(
                             "Badge unlocked!",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                            color = CurioColors.Sage
+                            color = curioSageInk()
                         )
                         Text(
                             "${badgeTier(stage).displayName} · ${stage.title}",
@@ -478,8 +481,9 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
                 name = CurioIcons.WorkspacePremium,
                 contentDescription = null,
                 // Gold trophy — an earned rank reads better in warm gold
-                // than the coral used everywhere else (v7.103).
-                tint = CurioColors.ButterYellow,
+                // than the coral used everywhere else (v7.103). v20 — deep
+                // gold ink on light cream so it never washes out.
+                tint = curioGoldInk(),
                 size = 30.dp
             )
         }
@@ -490,8 +494,8 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(50)),
-            color = CurioColors.CoralBlush,
-            trackColor = CurioColors.CoralBlush.copy(alpha = 0.14f)
+            color = curioRoseInk(),
+            trackColor = curioRoseInk().copy(alpha = 0.14f)
         )
         Spacer(Modifier.height(4.dp))
         Text(
@@ -567,7 +571,7 @@ private fun CurrentQuestCard(
         Surface(
             onClick = { stage.navRoute?.let(onNavigate) },
             shape = RoundedCornerShape(50),
-            color = CurioColors.CoralBlush,
+            color = curioRoseInk(),
             enabled = stage.navRoute != null,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -657,7 +661,7 @@ private fun PathsCard(
                 CurioIcon(
                     name = CurioIcons.Star,
                     contentDescription = null,
-                    tint = CurioColors.CoralBlush,
+                    tint = curioRoseInk(),
                     size = 18.dp
                 )
             }
@@ -675,11 +679,11 @@ private fun PathsCard(
             Text(
                 "View",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = CurioColors.CoralBlush
+                color = curioRoseInk()
             )
             CurioForwardArrow(
                 "View badge shelf",
-                tint = CurioColors.CoralBlush,
+                tint = curioRoseInk(),
                 size = 14.dp
             )
         }
@@ -770,7 +774,7 @@ private fun PathRow(
         Text(
             "$chainDone/${chain.stages.size}",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = if (chainDone == chain.stages.size) CurioColors.Sage else CurioColors.CoralBlush
+            color = if (chainDone == chain.stages.size) curioSageInk() else curioRoseInk()
         )
         CurioIcon(
             name = if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
@@ -810,8 +814,8 @@ private fun ChainStageRow(
     onNavigate: () -> Unit
 ) {
     val accent = when {
-        done -> CurioColors.Sage
-        isCurrent -> CurioColors.CoralBlush
+        done -> curioSageInk()
+        isCurrent -> curioRoseInk()
         else -> MaterialTheme.colorScheme.outlineVariant
     }
     Row(
@@ -853,7 +857,7 @@ private fun ChainStageRow(
                 if (done) "Done · +${stage.xpReward} XP"
                 else "+${stage.xpReward} XP",
                 style = MaterialTheme.typography.labelSmall,
-                color = if (isCurrent) CurioColors.CoralBlush else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isCurrent) curioRoseInk() else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         // v8.3 — the chain's next actionable quest gets a Go/Start chip that
@@ -864,8 +868,8 @@ private fun ChainStageRow(
             Surface(
                 onClick = onNavigate,
                 shape = RoundedCornerShape(50),
-                color = if (isCurrent) CurioColors.CoralBlush
-                else CurioColors.CoralBlush.copy(alpha = 0.14f)
+                color = if (isCurrent) curioRoseInk()
+                else curioRoseInk().copy(alpha = 0.14f)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -875,11 +879,11 @@ private fun ChainStageRow(
                     Text(
                         if (isCurrent) "Go" else "Start",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = if (isCurrent) Color.White else CurioColors.CoralBlush
+                        color = if (isCurrent) Color.White else curioRoseInk()
                     )
                     CurioForwardArrow(
                         if (isCurrent) "Go to quest" else "Start this quest",
-                        tint = if (isCurrent) Color.White else CurioColors.CoralBlush,
+                        tint = if (isCurrent) Color.White else curioRoseInk(),
                         size = 14.dp
                     )
                 }
@@ -1017,7 +1021,7 @@ private fun DailyCard(
             Text(
                 "All done today! Fresh quests land at 4 AM.",
                 style = MaterialTheme.typography.bodySmall,
-                color = CurioColors.Sage,
+                color = curioSageInk(),
                 modifier = Modifier.padding(top = 6.dp)
             )
         }
@@ -1033,13 +1037,13 @@ private fun DailyCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = CurioColors.Sage.copy(alpha = 0.14f),
-                    border = BorderStroke(1.dp, CurioColors.Sage.copy(alpha = 0.30f))
+                    color = curioSageInk().copy(alpha = 0.14f),
+                    border = BorderStroke(1.dp, curioSageInk().copy(alpha = 0.30f))
                 ) {
                     Text(
                         "+${xpPop?.first ?: 0} XP",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = CurioColors.Sage,
+                        color = curioSageInk(),
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -1120,7 +1124,7 @@ private fun WeeklyQuestRow(
                     .size(34.dp)
                     .clip(RoundedCornerShape(11.dp))
                     .background(
-                        if (done) CurioColors.Sage.copy(alpha = 0.18f)
+                        if (done) curioSageInk().copy(alpha = 0.18f)
                         else accent.copy(alpha = 0.14f)
                     ),
                 contentAlignment = Alignment.Center
@@ -1128,7 +1132,7 @@ private fun WeeklyQuestRow(
                 CurioIcon(
                     name = if (done) CurioIcons.Check else CurioIcons.CalendarToday,
                     contentDescription = null,
-                    tint = if (done) CurioColors.Sage else accent,
+                    tint = if (done) curioSageInk() else accent,
                     size = 18.dp
                 )
             }
@@ -1157,7 +1161,7 @@ private fun WeeklyQuestRow(
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(50)),
-                    color = if (done) CurioColors.Sage else accent,
+                    color = if (done) curioSageInk() else accent,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
@@ -1179,7 +1183,7 @@ private fun WeeklyQuestRow(
                 Text(
                     if (done) "Done" else "+${quest.xpReward} XP",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (done) CurioColors.Sage else accent
+                    color = if (done) curioSageInk() else accent
                 )
             }
         }
@@ -1245,12 +1249,11 @@ private fun BonusLockedRow(coreRemaining: Int) {
 /**
  * v8.33 — the bonus quest gold, theme-aware: dark gold ink on light cream
  * surfaces (ButterYellow is a pale pastel that vanishes on the light
- * background), bright butter in dark mode where it pops. @Composable so it
- * can read the live theme state.
+ * background), bright butter in dark mode where it pops. v20 — delegates to
+ * the shared [curioGoldInk] helper so the light-mode fix lives in one place.
  */
 @Composable
-private fun bonusGold(): Color =
-    if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.GoldInk
+private fun bonusGold(): Color = curioGoldInk()
 
 /** One daily quest row — title, animated progress, and Claim / Go chip. */
 @Composable
@@ -1290,7 +1293,7 @@ private fun DailyQuestRow(
     // v8.33 — bonus gold reads on LIGHT cream surfaces: dark gold ink in
     // light mode (ButterYellow vanishes on the pale background), bright
     // butter in dark mode where it pops.
-    val accent = if (quest.bonus) bonusGold() else CurioColors.CoralBlush
+    val accent = if (quest.bonus) bonusGold() else curioRoseInk()
     val pulseAlpha = if (claimable) {
         val pulse = rememberInfiniteTransition(label = "claimPulse")
         pulse.animateFloat(
@@ -1317,7 +1320,7 @@ private fun DailyQuestRow(
                     .size(34.dp)
                     .clip(RoundedCornerShape(11.dp))
                     .background(
-                        if (done) CurioColors.Sage.copy(alpha = 0.18f)
+                        if (done) curioSageInk().copy(alpha = 0.18f)
                         else accent.copy(alpha = 0.14f)
                     ),
                 contentAlignment = Alignment.Center
@@ -1329,7 +1332,7 @@ private fun DailyQuestRow(
                         else -> CurioIcons.TaskAlt
                     },
                     contentDescription = null,
-                    tint = if (done) CurioColors.Sage else accent,
+                    tint = if (done) curioSageInk() else accent,
                     size = 18.dp
                 )
             }
@@ -1367,7 +1370,7 @@ private fun DailyQuestRow(
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(50)),
-                    color = if (done) CurioColors.Sage else accent,
+                    color = if (done) curioSageInk() else accent,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
@@ -1391,7 +1394,7 @@ private fun DailyQuestRow(
                 Text(
                     if (done) "Done" else "+${quest.xpReward} XP",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (done) CurioColors.Sage else accent
+                    color = if (done) curioSageInk() else accent
                 )
                 // v8.3 — Go chip on in-progress dailies: jump to the screen
                 // where this quest's action happens. v8.6 — the discovery
@@ -1644,10 +1647,10 @@ private fun PassportStamp(
     val tint: Color
     when (stamp) {
         CurioPassport.Stamp.MASTERED -> {
-            label = "Mastered"; glyph = CurioIcons.TaskAlt; tint = CurioColors.Sage
+            label = "Mastered"; glyph = CurioIcons.TaskAlt; tint = curioSageInk()
         }
         CurioPassport.Stamp.EXPLORED -> {
-            label = "Explored"; glyph = CurioIcons.Check; tint = CurioColors.Sage
+            label = "Explored"; glyph = CurioIcons.Check; tint = curioSageInk()
         }
         CurioPassport.Stamp.PEEKED -> {
             label = "Peeked"; glyph = CurioIcons.Star; tint = ink
@@ -1660,7 +1663,7 @@ private fun PassportStamp(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = when (stamp) {
-            CurioPassport.Stamp.MASTERED -> CurioColors.Sage.copy(alpha = 0.12f)
+            CurioPassport.Stamp.MASTERED -> curioSageInk().copy(alpha = 0.12f)
             CurioPassport.Stamp.UNSEEN -> accent.copy(alpha = 0.10f)
             else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
         },

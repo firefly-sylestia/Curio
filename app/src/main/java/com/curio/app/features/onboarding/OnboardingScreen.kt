@@ -93,6 +93,7 @@ import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.launch
@@ -720,7 +721,7 @@ private fun PermissionCard(
                 CurioIcon(
                     name = glyph,
                     contentDescription = null,
-                    tint = CurioColors.CoralBlush,
+                    tint = curioRoseInk(),
                     size = 20.dp
                 )
             }

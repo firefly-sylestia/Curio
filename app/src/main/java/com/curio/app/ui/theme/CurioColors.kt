@@ -27,6 +27,11 @@ object CurioColors {
     // that vanishes on the cream background, so bonus/rank text + icons wear
     // this readable dark gold in light mode (dark mode keeps the bright butter).
     val GoldInk          = Color(0xFFB8860B)  // Dark goldenrod — readable on light
+    // v20 — deep rose ink for LIGHT surfaces: CoralBlush is a pale pastel
+    // that vanishes on the cream background, so coral icons/text/progress
+    // accents wear this readable deep rose in light mode (dark mode keeps
+    // the bright coral).
+    val CoralInk         = Color(0xFFE2556B)  // Deep rose — readable on light
     val SkyMint          = Color(0xFF8FE3CF)  // Soft mint — tertiary
     val CreamWhite       = Color(0xFFFFFBF5)  // Warm white — ink on primary/error fills + decorative accents
     val SoftCream        = Color(0xFFF7F0E4)  // Soft cream — light-mode background (user-preferred, less white)
@@ -105,6 +110,10 @@ object CurioColors {
     val Lilac            = Color(0xFFC9A6F2)  // legacy soft purple
     val DustyBlue        = Color(0xFF9BB8E8)  // legacy soft blue
     val Sage             = Color(0xFFA8C99A)  // legacy soft green
+    // v20 — deep sage ink for LIGHT surfaces: Sage is a pale pastel that
+    // vanishes on the cream background, so "done"/mastered icons + text
+    // wear this readable deep green in light mode (dark keeps the soft sage).
+    val SageInk          = Color(0xFF55803F)  // Deep fern — readable on light
     val Peach            = Color(0xFFFFB585)  // legacy soft orange
     val Teal             = Color(0xFF6FC7BE)  // legacy soft teal
 

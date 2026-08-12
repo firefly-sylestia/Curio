@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioQuests
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
@@ -472,8 +473,8 @@ fun CurioBadgeStrip(
                 Surface(
                     onClick = onViewAll,
                     shape = CircleShape,
-                    color = CurioColors.Sage.copy(alpha = 0.13f),
-                    border = BorderStroke(1.dp, CurioColors.Sage.copy(alpha = 0.28f))
+                    color = curioSageInk().copy(alpha = 0.13f),
+                    border = BorderStroke(1.dp, curioSageInk().copy(alpha = 0.28f))
                 ) {
                     Box(
                         modifier = Modifier.size(medalSize),
@@ -482,7 +483,7 @@ fun CurioBadgeStrip(
                         Text(
                             "+${earned.size - earnedLimit}",
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                            color = CurioColors.Sage
+                            color = curioSageInk()
                         )
                     }
                 }

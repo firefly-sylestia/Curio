@@ -71,6 +71,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -327,7 +328,7 @@ fun TopicHistoryScreen(navController: NavController) {
                             ) {
                                 CurioIcon(
                                     CurioIcons.Bookmark, null,
-                                    tint = CurioColors.CoralBlush,
+                                    tint = curioRoseInk(),
                                     size = 16.dp
                                 )
                                 Text(

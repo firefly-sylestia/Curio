@@ -61,6 +61,8 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
@@ -233,7 +235,7 @@ fun PromoModeScreen(navController: NavController) {
  *  hidden promo mode (reached via the Experiments screen). */
 @Composable
 private fun PromoStatusCard(on: Boolean, onToggle: () -> Unit) {
-    val accent = if (on) CurioColors.Sage else CurioColors.CoralBlush
+    val accent = if (on) curioSageInk() else curioRoseInk()
     val icon = if (on) CurioIcons.Check else CurioIcons.Close
     Surface(
         shape = RoundedCornerShape(20.dp),

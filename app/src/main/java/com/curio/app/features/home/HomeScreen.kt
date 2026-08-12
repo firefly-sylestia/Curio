@@ -120,6 +120,9 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.pastelAccent
@@ -1718,7 +1721,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     DrawerNavItem(
                         icon = CurioIcons.WorkspacePremium,
                         label = "Quests & Levels",
-                        iconTint = CurioColors.ButterYellow
+                        iconTint = curioGoldInk()
                     ) { onNavigate(CurioRoutes.QUESTS) }
                 }
                 item("history") {
@@ -1732,7 +1735,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     DrawerNavItem(
                         icon = CurioIcons.DragHandle,
                         label = "Manage Categories",
-                        iconTint = CurioColors.Sage
+                        iconTint = curioSageInk()
                     ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
                 }
                 item("database") {
@@ -1746,7 +1749,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     DrawerNavItem(
                         icon = CurioIcons.SupportAgent,
                         label = "Support & diagnostics",
-                        iconTint = CurioColors.CoralBlush
+                        iconTint = curioRoseInk()
                     ) { onNavigate(CurioRoutes.SUPPORT) }
                 }
                 item("replay") {
