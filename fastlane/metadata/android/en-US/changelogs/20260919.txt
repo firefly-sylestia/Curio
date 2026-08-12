@@ -56,3 +56,4 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Pastel headers (Home, Profile, Settings) got a touch more saturation so they pop a little.
 • The update check now correctly spots newer releases even when their version has a suffix (like v1.0.0.1-test) instead of saying you're up to date.
 • The no-AI pledge reads warmer: "Keep your research your own — and stay curious."
+• Experiments gains a Paper & headers section: header cut lines (tilted corner strokes + three ticks top-right), stamped pin holes down the header left edge, and a soft rose-cream paper card for the Home Streak · Cabinet · Topics bar. All off by default.

@@ -107,6 +107,23 @@ fun ExperimentsScreen(navController: NavController) {
             // is gone for good (the deck always uses its natural size) and
             // Smart density's control moved out; Voice-to-text still lives in
             // Settings → Recording.
+            // v27 — paper & header experiments, all OFF by default.
+            item { CurioSectionLabel("Paper & headers") }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Header cut lines", "Tilted corner strokes + three ticks top-right", AppPreferences.paperHeaderCutsState) {
+                        AppPreferences.setPaperHeaderCutsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Stamped pin holes", "Punch-hole circles down the header's left edge", AppPreferences.paperHeaderHolesState) {
+                        AppPreferences.setPaperHeaderHolesEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Paper stat card", "Streak · Cabinet · Topics on a soft rose paper card", AppPreferences.paperStatCardsState) {
+                        AppPreferences.setPaperStatCardsEnabled(context, it)
+                    }
+                }
+            }
             item { CurioSectionLabel("Promo") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {

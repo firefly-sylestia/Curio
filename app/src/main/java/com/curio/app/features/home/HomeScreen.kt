@@ -105,6 +105,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.PaperHeaderAccents
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.pet.CurioPetHome
@@ -390,6 +391,17 @@ fun HomeScreen(navController: NavController) {
                         .height(HomeQuestHeroHeight)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
+                        // v27 — experimental paper accents (OFF by default;
+                        // toggle in Settings → Experiments → Paper & headers).
+                        if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
+                            PaperHeaderAccents(
+                                ink = questInk,
+                                pinHoles = AppPreferences.paperHeaderHolesState,
+                                cornerLines = AppPreferences.paperHeaderCutsState,
+                                topTicks = AppPreferences.paperHeaderCutsState,
+                                modifier = Modifier.matchParentSize()
+                            )
+                        }
                         // v7.33 — detail-style mirrored watermark collage: the
                         // quest family's symbols (casino, star, sparkle, …)
                         // scatter around the banner edges in mirrored pairs —
@@ -476,26 +488,38 @@ fun HomeScreen(navController: NavController) {
                             // icon/value/label design, sitting just above the
                             // torn seam on a soft rose gradient pane (the
                             // banner's own color, not white frost).
+                            // v27 — experimental: the same bar can wear a
+                            // solid paper card instead (soft rose-cream in
+                            // light, a warm rose-brown in dark) when the
+                            // "Paper stat card" experiment is on.
+                            val paperStatsOn = AppPreferences.paperStatCardsState
+                            val paperStatBg = if (isCurioDarkTheme())
+                                lerp(heroFill, Color(0xFF2A211C), 0.50f)
+                            else
+                                lerp(heroFill, Color(0xFFFFF6EB), 0.62f)
                             Surface(
                                 shape = RoundedCornerShape(20.dp),
-                                color = Color.Transparent,
-                                border = BorderStroke(1.dp, questInk.copy(alpha = 0.28f)),
-                                shadowElevation = 0.dp
+                                color = if (paperStatsOn) paperStatBg else Color.Transparent,
+                                border = BorderStroke(1.dp, questInk.copy(alpha = if (paperStatsOn) 0.26f else 0.28f)),
+                                shadowElevation = if (paperStatsOn) 3.dp else 0.dp
                             ) {
                                 // The gradient must wear the card's rounded
                                 // shape itself — Surface does not clip its
                                 // content, so a plain background() would bleed
                                 // square corners past the rounded border.
                                 Box(
-                                    modifier = Modifier.background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                heroFill.copy(alpha = 0.12f),
-                                                lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
-                                            )
-                                        ),
-                                        RoundedCornerShape(20.dp)
-                                    )
+                                    modifier = if (paperStatsOn)
+                                        Modifier.background(paperStatBg, RoundedCornerShape(20.dp))
+                                    else
+                                        Modifier.background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    heroFill.copy(alpha = 0.12f),
+                                                    lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                                )
+                                            ),
+                                            RoundedCornerShape(20.dp)
+                                        )
                                 ) {
                                     Row(
                                         modifier = Modifier

@@ -146,6 +146,7 @@ import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
 import com.curio.app.ui.components.rememberMoodBoardZoomState
 import com.curio.app.ui.components.shareComposableCard
+import com.curio.app.ui.components.PaperHeaderAccents
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.data.AppPreferences
@@ -449,6 +450,17 @@ fun EntryDetailScreen(
                     .clip(heroTornShape)
                     .background(heroStart)
             ) {
+                // v27 — experimental paper accents (OFF by default; toggle in
+                // Settings → Experiments → Paper & headers).
+                if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
+                    PaperHeaderAccents(
+                        ink = heroInk,
+                        pinHoles = AppPreferences.paperHeaderHolesState,
+                        cornerLines = AppPreferences.paperHeaderCutsState,
+                        topTicks = AppPreferences.paperHeaderCutsState,
+                        modifier = Modifier.matchParentSize()
+                    )
+                }
                 // ── Hero watermark — a scatter of the entry's category-family
                 //     symbols (instruments for Music, camera kit for Movies,
                 //     books for Books, art tools for Visual Art, lab symbols

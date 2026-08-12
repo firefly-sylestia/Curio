@@ -245,6 +245,10 @@ object AppPreferences {
     var heroBorderState by mutableStateOf(true)
         private set
     var heroShadowState by mutableStateOf(false)
+    /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
+    var paperHeaderCutsState by mutableStateOf(false)
+    var paperHeaderHolesState by mutableStateOf(false)
+    var paperStatCardsState by mutableStateOf(false)
         private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
@@ -465,6 +469,9 @@ object AppPreferences {
         heroGradientState = isHeroGradientEnabled(context)
         heroBorderState = isHeroBorderEnabled(context)
         heroShadowState = isHeroShadowEnabled(context)
+        paperHeaderCutsState = isPaperHeaderCutsEnabled(context)
+        paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
+        paperStatCardsState = isPaperStatCardsEnabled(context)
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
@@ -685,6 +692,38 @@ object AppPreferences {
     fun setHeroShadowEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_SHADOW, enabled).apply()
         heroShadowState = enabled
+    }
+
+    // ── Paper & header experiments (v27) ─────────────────────────────
+    private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
+    private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
+    private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
+
+    /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
+    fun isPaperHeaderCutsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_HEADER_CUTS, false)
+
+    fun setPaperHeaderCutsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_HEADER_CUTS, enabled).apply()
+        paperHeaderCutsState = enabled
+    }
+
+    /** Whether the stamped pin-hole column down the header's left edge is on (experimental, default off). */
+    fun isPaperHeaderHolesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_HEADER_HOLES, false)
+
+    fun setPaperHeaderHolesEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_HEADER_HOLES, enabled).apply()
+        paperHeaderHolesState = enabled
+    }
+
+    /** Whether the Home Streak · Cabinet · Topics bar wears a solid paper card (experimental, default off). */
+    fun isPaperStatCardsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_STAT_CARDS, false)
+
+    fun setPaperStatCardsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_STAT_CARDS, enabled).apply()
+        paperStatCardsState = enabled
     }
 
     // ── Dual-accent blend gradient (v10 toggle) ────────────────────────
