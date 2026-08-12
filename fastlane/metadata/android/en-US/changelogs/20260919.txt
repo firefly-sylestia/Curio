@@ -87,3 +87,4 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Content: Geology lane passes 1000 topics (rocks, minerals, plate tectonics, earthquakes, volcanoes, glaciers, fossils, caves, ocean geology, deep time, famous geologists) and goes fully live.
 • Fix: update check now finds beta releases — the checker reads the full GitHub releases list (which includes prereleases) instead of the latest-release endpoint that silently skips them, and any different published tag counts as an update.
 • New Appearance option: "Sky azure hero" — the shared torn hero banner (Home, Profile, Settings, Cabinet, Quests, Onboarding) can wear a brighter airy azure instead of the rose, with a deep azure twin for dark mode. Default stays rose.
+• Content: every one of the 1000 astronomy topics now carries a rich, fun quick fact (74-134 words each) written in the explore-first style of the original lanes.
