@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -524,8 +525,8 @@ fun SaveCaptureScreen(
         // ── Topic reminder strip with gradient ───────────────────────────
         // Wears the category tint with the tint setting on; with it off it
         // falls back to a plain theme surface so the whole flow goes neutral.
-        // v23 — how long this topic was explored, shown right under the
-        // topic in the strip: the saved entry's session in edit mode, or the
+        // v23 — how long this topic was explored, shown ALONGSIDE the topic
+        // in the strip: the saved entry's session in edit mode, or the
         // pending write-session handoff (live session as fallback) on a
         // fresh save — the same sources the save itself uses.
         // `topic` is a delegated property, so grab a stable local first (the
@@ -572,34 +573,44 @@ fun SaveCaptureScreen(
                     )
                 }
                 Column {
-                    Text(
-                        text = topic?.name ?: "Loading…",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = stripInk
-                    )
+                    // v27 — the session duration sits ALONGSIDE the topic in
+                    // the strip (long topics ellipsize so the pill never wraps).
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = topic?.name ?: "Loading…",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = stripInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        if (displaySessionMillis > 0L) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Timer,
+                                    contentDescription = null,
+                                    tint = stripInk.copy(alpha = 0.7f),
+                                    size = 13.dp
+                                )
+                                Text(
+                                    text = formatSessionShort(displaySessionMillis),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = stripInk.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = cat.displayName,
                         style = MaterialTheme.typography.labelSmall,
                         color = stripInk.copy(alpha = 0.7f)
                     )
-                    if (displaySessionMillis > 0L) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Timer,
-                                contentDescription = null,
-                                tint = stripInk.copy(alpha = 0.7f),
-                                size = 13.dp
-                            )
-                            Text(
-                                text = "explored ${formatSessionShort(displaySessionMillis)}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = stripInk.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
                 }
             }
         }

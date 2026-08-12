@@ -502,12 +502,45 @@ fun EntryDetailScreen(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
+                    // v27 — how long this topic's explore session ran, shown
+                    // right under the title in the saved view (only when a
+                    // session was recorded).
+                    if (resolvedEntry.sessionTimeMillis > 0L) {
+                        Spacer(Modifier.height(10.dp))
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = heroCardInk.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, heroCardInk.copy(alpha = 0.28f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Timer,
+                                    contentDescription = null,
+                                    tint = heroInk.copy(alpha = 0.85f),
+                                    size = 14.dp
+                                )
+                                Text(
+                                    text = "explored ${formatSessionShort(resolvedEntry.sessionTimeMillis)}",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = heroInk.copy(alpha = 0.85f)
+                                )
+                            }
+                        }
+                    }
                     // v27 — experimental paper-title underline (two short
                     // lines under the entry title; OFF by default).
                     if (AppPreferences.paperHeaderCutsState) {
                         PaperTitleLines(ink = heroInk)
                     }
-                    Spacer(Modifier.height(18.dp))
+                    // v27 — the session pill above adds height; tighten the
+                    // gap so the fixed-height hero never overflows the seam.
+                    Spacer(Modifier.height(if (resolvedEntry.sessionTimeMillis > 0L) 10.dp else 18.dp))
 
                     // ── Frosted date / mood / session / type grid card — the
                     // meta card's date, mood, session and type segments moved
