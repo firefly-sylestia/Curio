@@ -20,7 +20,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -140,7 +139,6 @@ import com.curio.app.ui.theme.CurioMixedDeck
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.deepHueInk
@@ -1741,9 +1739,6 @@ private fun FilterSheet(
                                 accent = cat.themedAccent(),
                                 ink = cat.onAccent(),
                                 chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                chipBorder = cat.categoryBorder(
-                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                ),
                                 onClick = {
                                     draftSubtypes = if (st in draftSubtypes) draftSubtypes - st else draftSubtypes + st
                                 }
@@ -1764,9 +1759,6 @@ private fun FilterSheet(
                                 accent = cat.themedAccent(),
                                 ink = cat.onAccent(),
                                 chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                chipBorder = cat.categoryBorder(
-                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                ),
                                 onClick = {
                                     draftFilters = if (tag in draftFilters) draftFilters - tag else draftFilters + tag
                                 }
@@ -1784,9 +1776,6 @@ private fun FilterSheet(
                                 accent = cat.themedAccent(),
                                 ink = cat.onAccent(),
                                 chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                chipBorder = cat.categoryBorder(
-                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                ),
                                 onClick = {
                                     draftFilters = if (era in draftFilters) draftFilters - era else draftFilters + era
                                 }
@@ -1804,9 +1793,6 @@ private fun FilterSheet(
                                 accent = cat.themedAccent(),
                                 ink = cat.onAccent(),
                                 chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                chipBorder = cat.categoryBorder(
-                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                ),
                                 onClick = {
                                     draftFilters = if (origin in draftFilters) draftFilters - origin else draftFilters + origin
                                 }
@@ -1827,9 +1813,6 @@ private fun FilterSheet(
                                 accent = cat.themedAccent(),
                                 ink = cat.onAccent(),
                                 chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                chipBorder = cat.categoryBorder(
-                                    fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                ),
                                 onClick = {
                                     draftFilters = if (franchise in draftFilters) draftFilters - franchise else draftFilters + franchise
                                 }
@@ -1924,7 +1907,6 @@ private fun CompactChip(
     accent: Color,
     ink: Color = Color.White,
     chipSurface: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    chipBorder: BorderStroke? = null,
     onClick: () -> Unit
 ) {
     // Plain Surface + clickable (no M3 minimum touch-target inflation) keeps
@@ -1932,7 +1914,7 @@ private fun CompactChip(
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else chipSurface,
-        border = if (selected) null else chipBorder,
+        shadowElevation = if (selected) 3.dp else 1.dp,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))
@@ -2176,8 +2158,7 @@ private fun DeckLoadingHint(cat: CurioCategory) {
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-            shadowElevation = 0.dp,
-            border = cat.categoryBorder(),
+            shadowElevation = 3.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
@@ -2219,8 +2200,7 @@ private fun DeckLoadFailedHint(cat: CurioCategory, onRetry: () -> Unit) {
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-            shadowElevation = 0.dp,
-            border = cat.categoryBorder(),
+            shadowElevation = 3.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
@@ -2276,8 +2256,7 @@ private fun EmptyPoolHint(cat: CurioCategory) {
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-            shadowElevation = 0.dp,
-            border = cat.categoryBorder(),
+            shadowElevation = 3.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
@@ -2636,20 +2615,7 @@ private fun HeroTicketCard(
                 // shine above is the primary accent carrier), and plain
                 // dark mode drops the white hairline to a whisper 0.10 so
                 // it never reads as a bright outline on the deep fills.
-                border = BorderStroke(
-                    1.dp,
-                    // Order matters: `dark` intentionally precedes
-                    // `heroBorderOn`, so dark mode ALWAYS gets the whisper
-                    // 0.10 hairline (the border toggle only lifts it in
-                    // light mode — the dark rim-light is drawn separately
-                    // inside the card).
-                    when {
-                        isAmoled -> accent.copy(alpha = 0.20f)
-                        dark -> ink.copy(alpha = 0.10f)
-                        heroBorderOn -> ink.copy(alpha = 0.14f)
-                        else -> ink.copy(alpha = 0.18f)
-                    }
-                ),
+                shadowElevation = 6.dp,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Box(
@@ -3198,12 +3164,8 @@ private fun PeekCard(
                 // modifier (above, before the clip); the Surface stays flat
                 // so the two-depth glow is the ONLY shadow and never stacks
                 // with an elevation halo.
-                shadowElevation = 0.dp,
+                shadowElevation = 2.dp,
                 tonalElevation = 0.dp,
-                // Subtle hairline outline — kept very light so the rotated
-                // stroke stays crisp instead of aliasing into pixel noise —
-                // lets each deck layer read as a distinct card.
-                border = BorderStroke(width = 1.dp, color = hairline),
                 modifier = Modifier
                     .fillMaxSize()
                     .background(brush = fillBrush, shape = RoundedCornerShape(corner))
@@ -3720,28 +3682,12 @@ private fun deckControlSurface(cat: CurioCategory): Color =
     } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
         // v13 — AMOLED unselected controls are PITCH BLACK like the selected
         // ones (the dark-grey surfaceContainerHigh plate is gone); the accent
-        // hairline from [deckControlBorder] keeps them defined on the pure
-        // black page.
+        // the edge shine keeps them defined on the pure black page.
         Color.Black
     } else {
         cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
     }
 
-/**
- * Unselected deck-control border — the device outline hairline in the
- * Material style, the theme-aware category border otherwise. AMOLED keeps a
- * quiet accent hairline so the pure-black pills stay distinct from the
- * pure-black page.
- */
-@Composable
-private fun deckControlBorder(cat: CurioCategory): BorderStroke? =
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        BorderStroke(1.dp, cat.categoryInk().copy(alpha = 0.28f))
-    } else {
-        cat.categoryBorder()
-    }
 
 /**
  * Tall vertical pill used by the extra-compact bottom bar (v7.2) — icon
@@ -3767,8 +3713,7 @@ private fun VerticalDeckButton(
             if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
             else cat.themedButtonFill()
         } else deckControlSurface(cat),
-        border = if (selected) null else deckControlBorder(cat),
-        shadowElevation = 0.dp,
+        shadowElevation = if (selected) 6.dp else 3.dp,
         modifier = modifier
             .size(width = 54.dp, height = 112.dp)
             // v9.x — Material buttons keep their category identity as the
@@ -3823,8 +3768,7 @@ private fun DeckControlButton(
             if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
             else cat.themedButtonFill()
         } else deckControlSurface(cat),
-        border = if (selected) null else deckControlBorder(cat),
-        shadowElevation = 0.dp,
+        shadowElevation = if (selected) 6.dp else 3.dp,
         modifier = modifier
             .height(62.dp)
             // v9.x — Material buttons keep their category identity as the

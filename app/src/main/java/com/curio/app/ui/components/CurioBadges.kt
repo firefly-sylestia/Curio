@@ -6,9 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -348,21 +347,16 @@ fun CurioBadgeMedal(
                             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
                         }
                     )
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f), CircleShape)
+                    .shadow(2.dp, CircleShape)
             )
         }
-        // The inner ring and its glyph.
+        // The inner glyph plate — the coin's edge is implied by the metal
+        // gradient and a soft drop shadow, no outline ring.
         Box(
             modifier = Modifier
                 .fillMaxSize(0.80f)
                 .clip(CircleShape)
-                .then(
-                    if (unlocked) {
-                        Modifier.border(1.5.dp, Color.White.copy(alpha = 0.55f), CircleShape)
-                    } else {
-                        Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
-                    }
-                ),
+                .shadow(2.dp, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             when {
@@ -400,7 +394,7 @@ fun CurioBadgeMedal(
                     .size(medalSize * 0.26f)
                     .clip(CircleShape)
                     .background(Brush.linearGradient(listOf(Color.White, accent)))
-                    .border(1.dp, Color.White.copy(alpha = 0.85f), CircleShape)
+                    .shadow(2.dp, CircleShape)
             )
         }
         // Earned marker — a gold check, or a sparkle on secret badges.
@@ -411,7 +405,7 @@ fun CurioBadgeMedal(
                     .size(medalSize * 0.31f)
                     .clip(CircleShape)
                     .background(if (tier == BadgeTier.SECRET) accent else CurioColors.ButterYellow)
-                    .border(1.5.dp, Color.White, CircleShape),
+                    .shadow(2.dp, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
@@ -474,7 +468,7 @@ fun CurioBadgeStrip(
                     onClick = onViewAll,
                     shape = CircleShape,
                     color = curioSageInk().copy(alpha = 0.13f),
-                    border = BorderStroke(1.dp, curioSageInk().copy(alpha = 0.28f))
+                    shadowElevation = 2.dp
                 ) {
                     Box(
                         modifier = Modifier.size(medalSize),

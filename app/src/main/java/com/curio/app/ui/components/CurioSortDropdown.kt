@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -67,7 +66,7 @@ fun CurioSortDropdown(
                 onClick = { expanded = true },
                 shape = RoundedCornerShape(50),
                 color = fill,
-                border = BorderStroke(1.dp, ink.copy(alpha = 0.42f))
+                shadowElevation = 2.dp
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -92,7 +91,7 @@ fun CurioSortDropdown(
                 onClick = onToggleDirection,
                 shape = CircleShape,
                 color = fill,
-                border = BorderStroke(1.dp, ink.copy(alpha = 0.42f))
+                shadowElevation = 2.dp
             ) {
                 CurioIcon(
                     name = if (ascending) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,

@@ -1,6 +1,5 @@
 package com.curio.app.features.picker
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -477,11 +476,7 @@ fun PickerPageTab(
         } else {
             MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
         },
-        border = BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-        ),
+        shadowElevation = if (selected) 3.dp else 1.dp,
         modifier = Modifier
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {

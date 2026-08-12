@@ -1,6 +1,5 @@
 package com.curio.app.ui.theme
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -338,8 +337,7 @@ fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorSche
  * mid-tone is desaturated toward a neutral grey (deep accents otherwise
  * read muddy over midnight) and blended a touch stronger than the page wash
  * so the chip LIFTS off the tinted background instead of sinking into it —
- * less saturated, more contrast. The crisp edge comes from
- * [categoryBorder]'s light-twin hairline. Honors the Settings tint toggle —
+ * less saturated, more contrast. Honors the Settings tint toggle —
  * when it's off, [base] is returned unchanged so chips go back to the plain
  * theme surface.
  */
@@ -373,34 +371,6 @@ private fun lightSurfaceTint(accent: Color): Color =
     // fills instead of dissolving into the background.
     if (AppPreferences.pastelColorsState) lightAccentTint(accent, saturation = 0.28f, lightness = 0.86f)
     else lightAccentTint(accent, saturation = 0.36f, lightness = 0.86f)
-
-/**
- * Theme-aware border for CARDS and BUTTONS that wear a tinted surface on a
- * tinted page background.
- *
- * Tinted surfaces ([categorySurface], `category.tint`, etc.) sit on a
- * category-washed page, so without a rule they can visually melt into the
- * background. This returns a slim theme-aware edge — deep accent in light
- * mode, light twin in dark (same resolution as [categoryInk]) — at a low
- * alpha so the card/button reads as a distinct surface without a hard line.
- *
- * Honors the Settings tint toggle: when it's off, [fallback] is returned
- * (null by default = no border), so plain-theme pages keep their exact
- * pre-tint look.
- */
-@Composable
-fun CurioCategory.categoryBorder(fallback: BorderStroke? = null): BorderStroke? {
-    if (!AppPreferences.tintWashEffective()) {
-        // Material keeps a quiet accent hairline so cards/pills read defined
-        // on the hue-neutral surfaces (AMOLED wears its own black-glass
-        // borders; Curio-with-tint-off falls back to the caller's default).
-        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-            return BorderStroke(1.dp, categoryInk().copy(alpha = 0.26f))
-        }
-        return fallback
-    }
-    return BorderStroke(1.dp, categoryInk().copy(alpha = 0.30f))
-}
 
 /**
  * Per-family dark-mode wash tuning.

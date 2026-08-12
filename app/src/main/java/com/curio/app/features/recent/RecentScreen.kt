@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -349,7 +348,7 @@ private fun RecentTopicRow(
                             // Same hairline rim as Home's explore-topic rows —
                             // the deep ink text + pastel fill alone read
                             // muddy on the tinted card.
-                            border = BorderStroke(1.dp, accent.copy(alpha = 0.4f))
+                            shadowElevation = 2.dp
                         ) {
                             Text(
                                 text = tag,

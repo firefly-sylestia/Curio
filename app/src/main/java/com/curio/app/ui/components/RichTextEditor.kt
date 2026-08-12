@@ -5,9 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -722,7 +721,7 @@ fun RichTextEditor(
         Surface(
             shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
-            border = BorderStroke(1.dp, effectiveAccent.copy(alpha = 0.32f)),
+            shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column {
@@ -837,8 +836,7 @@ fun RichTextEditor(
                     // margins; the field must not clip at all.
                     shape = if (paper) RoundedCornerShape(0.dp) else RoundedCornerShape(14.dp),
                     color = if (paper) Color.Transparent else surface,
-                    border = if (paper || !showFieldBorder) null
-                            else BorderStroke(1.dp, accent.copy(alpha = 0.25f)),
+                    shadowElevation = if (paper || !showFieldBorder) 0.dp else 2.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     BasicTextField(
@@ -996,7 +994,6 @@ private fun SelectionFormatBar(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 4.dp,
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
         modifier = Modifier.padding(bottom = 2.dp)
     ) {
         Row(
@@ -1090,7 +1087,7 @@ private fun ToolToggleButton(
         enabled = enabled,
         shape = RoundedCornerShape(10.dp),
         color = fill,
-        border = BorderStroke(1.dp, rim),
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         Row(
@@ -1103,7 +1100,7 @@ private fun ToolToggleButton(
                     modifier = Modifier
                         .size(12.dp)
                         .background(dot, CircleShape)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        .shadow(1.dp, CircleShape)
                 )
             }
             CurioIcon(
@@ -1137,11 +1134,7 @@ private fun FormatToolButton(
         shape = RoundedCornerShape(10.dp),
         color = if (active) accent.copy(alpha = 0.18f)
                 else MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(
-            1.dp,
-            if (active) accent.copy(alpha = 0.65f)
-            else MaterialTheme.colorScheme.outlineVariant
-        ),
+        shadowElevation = if (active) 3.dp else 1.dp,
         modifier = modifier
     ) {
         CurioIcon(

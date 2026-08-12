@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -659,8 +658,7 @@ private fun DatabaseFilterChip(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = if (selected) tint else MaterialTheme.colorScheme.surfaceContainerLow,
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        shadowElevation = if (selected) 4.dp else 2.dp
     ) {
         Text(
             text = if (count > 0) "$label $count" else label,

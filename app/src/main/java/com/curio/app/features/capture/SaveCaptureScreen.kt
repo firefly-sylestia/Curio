@@ -6,7 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -114,7 +113,6 @@ import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.notePaperInk
@@ -559,7 +557,7 @@ fun SaveCaptureScreen(
         Surface(
             color = stripColor,
             shape = RoundedCornerShape(20.dp),
-            border = cat.categoryBorder(),
+            shadowElevation = 3.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
@@ -1024,7 +1022,7 @@ private fun TagEditorRow(
                         shape = RoundedCornerShape(50),
                         color = if (AppPreferences.tintWashEffective()) tint.copy(alpha = 0.14f)
                                 else MaterialTheme.colorScheme.surfaceVariant,
-                        border = BorderStroke(1.dp, accent.copy(alpha = 0.4f))
+                        shadowElevation = 2.dp
                     ) {
                         Row(
                             modifier = Modifier.padding(start = 10.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
@@ -1133,7 +1131,7 @@ private fun SessionAttachmentsCard(
                         val painter = rememberAsyncImagePainter(File(path))
                         Surface(
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+                            shadowElevation = 2.dp,
                             modifier = Modifier.size(84.dp)
                         ) {
                             androidx.compose.foundation.Image(
@@ -1148,7 +1146,7 @@ private fun SessionAttachmentsCard(
                             onClick = { onRemoveScreenshot(path) },
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            shadowElevation = 2.dp,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(2.dp)
@@ -1171,7 +1169,7 @@ private fun SessionAttachmentsCard(
                     shape = RoundedCornerShape(14.dp),
                     color = if (tintWash) cat.tint.copy(alpha = 0.14f)
                             else MaterialTheme.colorScheme.surfaceContainerHigh,
-                    border = BorderStroke(1.dp, accent.copy(alpha = 0.4f)),
+                    shadowElevation = 2.dp,
                     modifier = Modifier.size(84.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -1226,7 +1224,6 @@ private fun SessionNoteFloatingPill(
             Surface(
                 shape = RoundedCornerShape(18.dp),
                 color = notePaperSurface(NotePaperColor.CREAM),
-                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
                 shadowElevation = 6.dp,
                 modifier = Modifier.fillMaxWidth(0.94f)
             ) {
@@ -1261,7 +1258,6 @@ private fun SessionNoteFloatingPill(
             onClick = onToggle,
             shape = RoundedCornerShape(50),
             color = accent,
-            border = BorderStroke(1.dp, lerp(accent, Color.White, 0.25f).copy(alpha = 0.6f)),
             shadowElevation = 6.dp
         ) {
             Row(
@@ -1520,7 +1516,7 @@ private fun FormatBodyForCategory(
                     shape = RoundedCornerShape(50),
                     color = if (i == activeIndex) category.themedAccent()
                             else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    border = if (i == activeIndex) null else category.categoryBorder(),
+                    shadowElevation = if (i == activeIndex) 3.dp else 1.dp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Row(
@@ -1768,12 +1764,7 @@ private fun FormatChip(
         color = if (AppPreferences.tintWashEffective() && active.format == fmt) category.tint
                 else if (active.format == fmt) category.themedAccent()
                 else category.categorySurface(MaterialTheme.colorScheme.surface),
-        border = if (active.format == fmt) BorderStroke(
-            1.dp,
-            category.themedAccent().copy(alpha = 0.5f)
-        ) else category.categoryBorder(
-            fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-        ),
+        shadowElevation = if (active.format == fmt) 3.dp else 1.dp,
         modifier = Modifier.padding(vertical = 2.dp)
     ) {
         Row(

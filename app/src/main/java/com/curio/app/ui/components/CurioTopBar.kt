@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
@@ -44,7 +43,6 @@ fun CurioBackButton(
     // hero ink; every other screen keeps the default surfaceVariant circle.
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    border: BorderStroke? = null,
     // Optional floating shadow — the entry-detail hero's scroll-reactive
     // sticky bar grows this with scroll progress so the popped pills visibly
     // float off the page; every other screen keeps the flat 0dp default.
@@ -71,7 +69,6 @@ fun CurioBackButton(
         Surface(
             shape = RoundedCornerShape(50),
             color = containerColor,
-            border = border,
             shadowElevation = shadowElevation,
             modifier = modifier.clickable(
                 interactionSource = interactionSource,
@@ -84,7 +81,6 @@ fun CurioBackButton(
             onClick = onClick,
             shape = RoundedCornerShape(50),
             color = containerColor,
-            border = border,
             shadowElevation = shadowElevation,
             modifier = modifier
         ) { icon() }

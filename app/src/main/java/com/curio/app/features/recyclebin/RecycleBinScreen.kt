@@ -1,6 +1,5 @@
 package com.curio.app.features.recyclebin
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -324,10 +323,7 @@ fun RecycleBinScreen(navController: NavController) {
                             },
                             shape = RoundedCornerShape(16.dp),
                             color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else Color.Transparent,
-                            border = BorderStroke(
-                                1.dp,
-                                if (selected) curioDialogActionColor() else MaterialTheme.colorScheme.outlineVariant
-                            ),
+                            shadowElevation = if (selected) 3.dp else 1.dp,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(

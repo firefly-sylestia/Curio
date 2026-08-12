@@ -18,7 +18,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -119,7 +118,6 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -783,7 +781,7 @@ fun TopicRevealScreen(
                         shape = RoundedCornerShape(50),
                         color = cat.themedAccent().copy(alpha = 0.22f),
                         shadowElevation = 0.dp,
-                        border = BorderStroke(1.dp, cat.themedAccent().copy(alpha = 0.48f))
+                        shadowElevation = 2.dp
                     ) {
                         Text(
                             text = tag,
@@ -1332,7 +1330,7 @@ private fun RevealAlreadyButton(
         enabled = enabled,
         shape = RoundedCornerShape(50),
         color = if (enabled) surface else surface.copy(alpha = 0.45f),
-        border = cat.categoryBorder(),
+        shadowElevation = 3.dp,
         modifier = modifier
             .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
             // Give the writing action a real, forgiving tap target across its
@@ -1710,8 +1708,7 @@ private fun TeaserCard(
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
-        shadowElevation = 0.dp,
-        border = cat.categoryBorder(),
+        shadowElevation = 3.dp,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -1757,8 +1754,7 @@ private fun ActionPromptCard(
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-        shadowElevation = 0.dp,
-        border = cat.categoryBorder(),
+        shadowElevation = 3.dp,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -1859,8 +1855,7 @@ private fun SentimentButton(
         onClick = onClick,
         shape = CircleShape,
         color = if (active) accent else MaterialTheme.colorScheme.surfaceVariant,
-        border = if (active) null
-                else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        shadowElevation = if (active) 4.dp else 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),

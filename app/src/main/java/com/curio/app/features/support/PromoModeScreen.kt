@@ -1,8 +1,6 @@
 package com.curio.app.features.support
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -240,7 +238,7 @@ private fun PromoStatusCard(on: Boolean, onToggle: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = accent.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.40f)),
+        shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -389,7 +387,7 @@ fun PromoShareCard(topicsTotal: Int) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
                             .background(Color.White.copy(alpha = 0.22f))
-                            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.46f)), RoundedCornerShape(50))
+                            .shadow(2.dp, RoundedCornerShape(50))
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -500,7 +498,7 @@ private fun PromoChip(glyph: String, label: String, ink: Color) {
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.20f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.44f)), RoundedCornerShape(50))
+            .shadow(2.dp, RoundedCornerShape(50))
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)

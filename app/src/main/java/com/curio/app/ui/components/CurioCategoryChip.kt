@@ -1,5 +1,6 @@
 package com.curio.app.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -71,13 +72,12 @@ fun CurioCategoryChip(
             selectedLabelColor = category.categoryInk(),
             selectedLeadingIconColor = category.categoryInk()
         ),
-        border = FilterChipDefaults.filterChipBorder(
-            enabled = true,
-            selected = selected,
-            borderColor = MaterialTheme.colorScheme.outline,
-            selectedBorderColor = Color.Transparent,
-            borderWidth = 1.dp,
-            selectedBorderWidth = 0.dp
+        // v27n — elevation replaces the outline: chips lift off the page
+        // (higher when selected) instead of drawing a hairline ring.
+        border = BorderStroke(0.dp, Color.Transparent),
+        elevation = FilterChipDefaults.filterChipElevation(
+            elevation = if (selected) 4.dp else 2.dp,
+            selectedElevation = 4.dp
         )
     )
 }

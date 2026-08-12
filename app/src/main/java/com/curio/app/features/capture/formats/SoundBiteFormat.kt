@@ -9,7 +9,6 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -867,7 +866,7 @@ private fun TranscribePanel(
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = accent.copy(alpha = 0.1f),
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+            shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -949,11 +948,7 @@ private fun DictateFieldButton(
         shape = RoundedCornerShape(8.dp),
         color = if (enabled) accent.copy(alpha = 0.10f)
                 else MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(
-            1.dp,
-            if (enabled) accent.copy(alpha = 0.40f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-        ),
+        shadowElevation = 2.dp
         shadowElevation = 0.dp
     ) {
         CurioIcon(
