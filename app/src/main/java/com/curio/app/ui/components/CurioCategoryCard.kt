@@ -79,7 +79,10 @@ fun CurioCategoryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    // v27i — New-lane tile that has no shipped content yet: dimmed,
+    // non-interactive, and labelled "Coming soon" instead of a topic count.
+    comingSoon: Boolean = false
 ) {
     // True press tracking (not a sticky click flag): the card returns to
     // rest scale after every tap — important now that cards are toggle
@@ -156,16 +159,21 @@ fun CurioCategoryCard(
         color = Color.Transparent,
         shadowElevation = 0.dp,
         tonalElevation = 0.dp,
-        border = cardBorder,
+        border = if (comingSoon) BorderStroke(
+            1.dp,
+            category.categoryInk().copy(alpha = 0.22f)
+        ) else cardBorder,
         modifier = modifier
             .fillMaxWidth()
             .height(104.dp)
             .scale(scale)
             // v9.x — the theme-style edge shine: AMOLED black-glass and
-            // Material both wear the category-colored rim light.
+            // Material both wear the category-colored rim light. Coming-soon
+            // tiles wear a much fainter rim so they read as "locked".
             .categoryEdgeShine(
                 RoundedCornerShape(22.dp),
-                accent = category.themedAccent()
+                accent = category.themedAccent(),
+                intensity = if (comingSoon) 0.25f else 1f
             )
     ) {
         Box(
@@ -173,6 +181,9 @@ fun CurioCategoryCard(
                 .fillMaxSize()
                 .background(
                     if (isSelected) Brush.verticalGradient(gradient)
+                    else if (comingSoon) SolidColor(
+                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f)
+                    )
                     else SolidColor(idleSurface),
                     RoundedCornerShape(22.dp)
                 )
@@ -185,7 +196,8 @@ fun CurioCategoryCard(
                         }
                     },
                     interactionSource = interactionSource,
-                    indication = null
+                    indication = null,
+                    enabled = !comingSoon
                 )
         ) {
             // ── Active-state sheen — soft white glow over the gradient so
@@ -212,8 +224,11 @@ fun CurioCategoryCard(
             CurioIcon(
                 name = category.iconGlyph,
                 contentDescription = null,
-                tint = if (isSelected) lerp(cardColor, cardInk, 0.55f).copy(alpha = 0.18f)
-                       else idleInk.copy(alpha = 0.16f),
+                tint = when {
+                    isSelected -> lerp(cardColor, cardInk, 0.55f).copy(alpha = 0.18f)
+                    comingSoon -> idleInk.copy(alpha = 0.08f)
+                    else -> idleInk.copy(alpha = 0.16f)
+                },
                 size = 64.dp,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
@@ -233,15 +248,23 @@ fun CurioCategoryCard(
                     Text(
                         text = category.displayName,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = if (isSelected) cardInk else MaterialTheme.colorScheme.onSurface,
+                        color = when {
+                            isSelected -> cardInk
+                            comingSoon -> MaterialTheme.colorScheme.onSurfaceVariant
+                            else -> MaterialTheme.colorScheme.onSurface
+                        },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = if (isWildcard) "Surprise mix" else "$topicCount topics",
+                        text = when {
+                            comingSoon -> "Coming soon"
+                            isWildcard -> "Surprise mix"
+                            else -> "$topicCount topics"
+                        },
                         style = MaterialTheme.typography.labelMedium,
                         color = if (isSelected) cardInk.copy(alpha = 0.85f)
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (comingSoon) 0.8f else 1f),
                         maxLines = 1
                     )
                 }

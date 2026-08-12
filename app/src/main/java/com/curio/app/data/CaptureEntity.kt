@@ -189,6 +189,13 @@ fun CaptureEntity.toEntry(): CurioEntry {
                 CategoryId.MANHWA, CategoryId.MYTHOLOGY -> "Read"
                 CategoryId.PAINTERS, CategoryId.ARTWORKS -> "View"
                 CategoryId.SCIENTISTS, CategoryId.DISCOVERIES -> "Explore"
+                // v27i — the 15 new lanes: the STEM-heavy ones explore,
+                // the wordy ones read.
+                CategoryId.BIOLOGY, CategoryId.CHEMISTRY, CategoryId.ANIMALS,
+                CategoryId.PLANTS, CategoryId.ASTRONOMY, CategoryId.GEOLOGY,
+                CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
+                CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING -> "Explore"
+                CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS -> "Read"
                 CategoryId.GAMES -> "Watch"
                 CategoryId.FOOD -> "Read"
                 CategoryId.WILDCARD -> "Discover"

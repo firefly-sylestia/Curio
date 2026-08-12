@@ -1,0 +1,1991 @@
+[
+  {
+    "id": "history-code-hammurabi",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Code of Hammurabi (c. 1754 BCE)",
+    "teaser": "One of the oldest complete law codes on Earth, carved into a seven-foot basalt pillar. It ruled Babylon with 282 laws that ranged from fair wages to, yes, an eye for an eye.",
+    "imageUrl": "",
+    "byline": "Hammurabi, King of Babylon",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Code of Hammurabi's surviving 282 laws",
+      "durationMinutes": 30,
+      "instruction": "Skim the law list and notice which professions got the most specific protections - builders and surgeons were held to strict standards, and their failures carried the same punishment their mistakes caused. Pick one law that feels surprisingly modern and one that feels alien, then think about what each reveals about Babylonian daily life."
+    },
+    "tags": ["Ancient", "Babylon", "Law", "Mesopotamia"],
+    "tier": 1
+  },
+  {
+    "id": "history-great-pyramid-giza",
+    "categoryId": "HISTORY",
+    "subtype": "Site",
+    "name": "The Great Pyramid of Giza (c. 2560 BCE)",
+    "teaser": "It held the record for the world's tallest building for nearly 3,800 years. Its four sides are aligned to true north within a fraction of a degree, and the casing stones once made it glow like a mirror.",
+    "imageUrl": "",
+    "byline": "Built under Pharaoh Khufu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Great Pyramid's construction and geometry",
+      "durationMinutes": 40,
+      "instruction": "Read about how 2.3 million blocks, averaging 2.5 tons each, were moved and set within about 20 years. Notice the staggering logistics: one block every few minutes, around the clock. Then look at the precision of the base - level within a few centimeters across 13 acres - and ask yourself what tools you think made that possible."
+    },
+    "tags": ["Ancient", "Egypt", "Engineering", "Architecture"],
+    "tier": 1
+  },
+  {
+    "id": "history-library-alexandria",
+    "categoryId": "HISTORY",
+    "subtype": "Institution",
+    "name": "The Library of Alexandria",
+    "teaser": "Ancient Egypt's megaproject of knowledge, where ships were searched for books to copy. It may have held hundreds of thousands of scrolls - and its decline became a byword for lost knowledge.",
+    "imageUrl": "",
+    "byline": "Founded under Ptolemy I (c. 300 BCE)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Library of Alexandria's rise and the myth of its destruction",
+      "durationMinutes": 30,
+      "instruction": "Read about how the library collected the world's scrolls - including the story that every ship docking at Alexandria was searched and any books found were copied. Notice that the famous single-fire destruction is a myth; the decline was slower and messier. Think about what the loss of accumulated knowledge actually does to a civilization."
+    },
+    "tags": ["Ancient", "Egypt", "Knowledge", "Books"],
+    "tier": 1
+  },
+  {
+    "id": "history-battle-marathon",
+    "categoryId": "HISTORY",
+    "subtype": "Battle",
+    "name": "The Battle of Marathon (490 BCE)",
+    "teaser": "A vastly outnumbered Athenian force charged the Persian army at a run and won in a few hours. The legend of a runner carrying the news gave the marathon race its name.",
+    "imageUrl": "",
+    "byline": "Athenians vs. the Persian Empire",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Battle of Marathon (490 BCE) and the run that followed",
+      "durationMinutes": 25,
+      "instruction": "Read how roughly 10,000 Athenians charged about 25,000 Persians in bronze armor at a dead run, closing the arrow-killing gap fast. Notice the double-envelopment tactic - the weaker center intentionally gave ground while the wings crushed the flanks. Then weigh whether the real messenger run was 40 kilometers and why that still became the modern marathon."
+    },
+    "tags": ["Ancient", "Greece", "War", "Persia"],
+    "tier": 1
+  },
+  {
+    "id": "history-roman-aqueducts",
+    "categoryId": "HISTORY",
+    "subtype": "Engineering",
+    "name": "The Roman Aqueducts",
+    "teaser": "Rome's water system carried about a million cubic meters of water a day - mostly underground. The famous arches were only a fraction of the network, and the system ran partly on gravity alone.",
+    "imageUrl": "",
+    "byline": "Roman Republic and Empire",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Rome's aqueduct system actually worked",
+      "durationMinutes": 35,
+      "instruction": "Read about the eleven aqueducts that fed Rome, and notice the surprising detail: most ran in covered underground channels, descending just a few centimeters per hundred meters so the water never stopped flowing by pure gravity. Look at how the engineers handled valleys - with inverted siphons of lead pipe - and think about what that precision took to survey without modern instruments."
+    },
+    "tags": ["Ancient", "Rome", "Engineering", "Water"],
+    "tier": 1
+  },
+  {
+    "id": "history-colosseum-opening-games",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Colosseum's Opening Games (80 CE)",
+    "teaser": "Titus opened the Colosseum with 100 days of games. Ancient writers claimed thousands of animals died and the arena floor could be flooded for mock sea battles.",
+    "imageUrl": "",
+    "byline": "Emperor Titus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Colosseum's opening spectacle of 80 CE",
+      "durationMinutes": 30,
+      "instruction": "Read about the opening games and the engineering that made them possible: a retractable awning, trapdoors, animal elevators, and a floor that could be flooded for naval reenactments. Notice the scale of the crowd control - up to 50,000 seats with numbered entrances. Then think about what it cost in lives and what it meant that a ruler gave it as a gift to the people."
+    },
+    "tags": ["Ancient", "Rome", "Entertainment", "Architecture"],
+    "tier": 1
+  },
+  {
+    "id": "history-fall-western-rome",
+    "categoryId": "HISTORY",
+    "subtype": "Turning point",
+    "name": "The Fall of the Western Roman Empire (476 CE)",
+    "teaser": "The last western emperor was a teenager named Romulus Augustulus, deposed by a Germanic general who simply decided not to appoint a replacement. Rome didn't fall in a day - it faded over decades.",
+    "imageUrl": "",
+    "byline": "The Western Roman Empire",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Why the Western Roman Empire collapsed in 476 CE",
+      "durationMinutes": 40,
+      "instruction": "Read about the long decline and notice how the empire didn't end with one barbarian sack but with slow fracture: economic strain, plague, political instability, and armies increasingly led by non-Roman generals. Notice how much of Roman infrastructure and law survived inside the kingdoms that replaced it. Ask yourself which 'collapse' - the quick one or the slow one - better fits the evidence."
+    },
+    "tags": ["Ancient", "Rome", "Empire", "Decline"],
+    "tier": 1
+  },
+  {
+    "id": "history-terracotta-army",
+    "categoryId": "HISTORY",
+    "subtype": "Site",
+    "name": "The Terracotta Army (c. 210 BCE)",
+    "teaser": "Thousands of life-size clay soldiers guard a buried emperor, each with a unique face. The excavation site is still yielding new pits, and none of the figures were exactly alike.",
+    "imageUrl": "",
+    "byline": "Built for Qin Shi Huang",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Terracotta Army of Qin Shi Huang",
+      "durationMinutes": 35,
+      "instruction": "Read about the army's scale - over 8,000 soldiers, 130 chariots, and hundreds of horses, arranged in battle formation around the emperor's tomb. Notice the production trick: bodies were made on assembly lines while heads and faces were individually detailed, so no two appear identical. Then look at the tomb complex itself - a buried replica of the imperial palace - and think about what a ruler expects to need after death."
+    },
+    "tags": ["Ancient", "China", "Archaeology", "Qin"],
+    "tier": 1
+  },
+  {
+    "id": "history-dead-sea-scrolls",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Dead Sea Scrolls (c. 250 BCE-68 CE)",
+    "teaser": "Hidden in desert caves for nearly two millennia, these scrolls include the oldest known copies of Hebrew scripture. They survived because the dry climate and sealed jars preserved them.",
+    "imageUrl": "",
+    "byline": "A Jewish community near Qumran",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Dead Sea Scrolls and what they revealed",
+      "durationMinutes": 30,
+      "instruction": "Read about the scrolls' discovery in 1947 - a shepherd throwing a stone into a cave heard pottery break. Notice the remarkable preservation conditions and the painstaking reconstruction of fragments that had to be pieced together like puzzles. Then consider what a cache of manuscripts, deliberately hidden from an approaching army, tells you about how communities protect what they value."
+    },
+    "tags": ["Ancient", "Israel", "Religion", "Archaeology"],
+    "tier": 1
+  },
+  {
+    "id": "history-silk-road",
+    "categoryId": "HISTORY",
+    "subtype": "Network",
+    "name": "The Silk Road",
+    "teaser": "Not a single road but a web of routes linking China to the Mediterranean. Silk, spices, paper, religions, and diseases all traveled it - and so did the idea of a shared world.",
+    "imageUrl": "",
+    "byline": "Spanning China to Rome",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Silk Road's routes, goods, and travelers",
+      "durationMinutes": 40,
+      "instruction": "Read about the Silk Road's real geography: not one highway but shifting oasis routes through deserts, mountain passes, and steppe. Notice the relay pattern - few merchants traveled the whole length; goods passed hand to hand. Pay attention to what moved besides goods: Buddhism to China, paper to the West, and the pandemic ideas that followed the caravans. Then ask what the modern equivalent of a Silk Road looks like."
+    },
+    "tags": ["Ancient", "Trade", "China", "Routes"],
+    "tier": 1
+  },
+  {
+    "id": "history-zhou-mandate-heaven",
+    "categoryId": "HISTORY",
+    "subtype": "Idea",
+    "name": "The Zhou Dynasty's Mandate of Heaven (c. 1046 BCE)",
+    "teaser": "The Zhou justified their takeover by claiming the gods had withdrawn their approval from the old kings. This idea - that rulers hold power only while ruling well - shaped Chinese politics for three thousand years.",
+    "imageUrl": "",
+    "byline": "The Zhou Dynasty",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Mandate of Heaven and how it legitimized rulers",
+      "durationMinutes": 30,
+      "instruction": "Read about the doctrine the Zhou used to justify overthrowing the Shang - and notice how it cut both ways: it sanctified the dynasty in power but also gave rebels a ready-made argument. Floods, famines, and defeats could all be read as the mandate being withdrawn. Think about how this elegant idea made natural disasters into political events, and whether you see echoes of it in any modern politics."
+    },
+    "tags": ["Ancient", "China", "Politics", "Zhou"],
+    "tier": 2
+  },
+  {
+    "id": "history-persian-royal-road",
+    "categoryId": "HISTORY",
+    "subtype": "Network",
+    "name": "The Persian Royal Road (c. 5th century BCE)",
+    "teaser": "A 2,500-kilometer relay highway across the Persian Empire with fresh horses staged every few dozen kilometers. A message could cross it in about a week - faster than anything the world had seen.",
+    "imageUrl": "",
+    "byline": "The Achaemenid Empire",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Persian Royal Road's relay system",
+      "durationMinutes": 25,
+      "instruction": "Read how the road connected Susa to Sardis with staging posts, inns, and fresh mounts every day's ride. Notice the detail from Herodotus: 'neither snow, nor rain, nor heat, nor darkness' stopped the couriers - a phrase later borrowed by postal services. Think about what an empire can control when information moves at that speed, and what the bottleneck was without it."
+    },
+    "tags": ["Ancient", "Persia", "Trade", "Roads"],
+    "tier": 2
+  },
+  {
+    "id": "history-spartacus-revolt",
+    "categoryId": "HISTORY",
+    "subtype": "Revolt",
+    "name": "Spartacus's Slave Revolt (73-71 BCE)",
+    "teaser": "A gladiator led an army of escaped slaves that defeated Roman legions twice before being crushed. For two years, tens of thousands of people held off the Republic.",
+    "imageUrl": "",
+    "byline": "Spartacus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Third Servile War led by Spartacus",
+      "durationMinutes": 30,
+      "instruction": "Read about how a breakout from a gladiator school grew into a mobile army that raided southern Italy and beat two Roman consular armies. Notice the strategic question at the heart of the story: should the rebels cross the Alps to freedom or stay and plunder Italy? Spartacus's choice - and the division it caused - sealed the revolt's fate. Consider what his final battle at the river Silarus tells you about desperation versus discipline."
+    },
+    "tags": ["Ancient", "Rome", "Revolt", "Gladiators"],
+    "tier": 1
+  },
+  {
+    "id": "history-vesuvius-79",
+    "categoryId": "HISTORY",
+    "subtype": "Disaster",
+    "name": "The Eruption of Mount Vesuvius (79 CE)",
+    "teaser": "Pompeii and Herculaneum were buried in ash and pyroclastic flow so fast that people died mid-step. The preserved city became a time capsule of Roman daily life.",
+    "imageUrl": "",
+    "byline": "Campania, Roman Italy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Vesuvius eruption of 79 CE and Pompeii's preservation",
+      "durationMinutes": 40,
+      "instruction": "Read the eyewitness account of Pliny the Younger, who described the eruption from across the bay while his uncle sailed toward it and died. Notice the sequence - pumice rain, then the lethal heat wave - and how the ash cast preserved the shapes of the dead. Think about what it means that we know what ordinary Romans ate, wrote on walls, and worried about because a volcano froze a city in time."
+    },
+    "tags": ["Ancient", "Rome", "Disaster", "Archaeology"],
+    "tier": 1
+  },
+  {
+    "id": "history-hannibal-alps",
+    "categoryId": "HISTORY",
+    "subtype": "Campaign",
+    "name": "Hannibal Crossing the Alps (218 BCE)",
+    "teaser": "A Carthaginian general marched war elephants over the Alps into Italy and nearly destroyed Rome. The crossing alone - through snow, landslides, and ambushes - is still debated by historians.",
+    "imageUrl": "",
+    "byline": "Hannibal Barca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hannibal's alpine crossing of 218 BCE",
+      "durationMinutes": 30,
+      "instruction": "Read how Hannibal moved tens of thousands of men, horses, and elephants through passes that historians still argue about - Polybius's account describes the army eating through the Alps on captured provisions and losing many to cold and rockfalls. Notice his battlefield tactics afterward, like the double-envelopment at Cannae. Ask yourself what made this gamble rational, and what a general risks when the path itself is the enemy."
+    },
+    "tags": ["Ancient", "Carthage", "War", "Elephants"],
+    "tier": 1
+  },
+  {
+    "id": "history-oracle-delphi",
+    "categoryId": "HISTORY",
+    "subtype": "Site",
+    "name": "The Oracle of Delphi",
+    "teaser": "For a thousand years, kings and cities asked a priestess questions and acted on her riddling answers. Even skeptics kept consulting her, just in case.",
+    "imageUrl": "",
+    "byline": "Sanctuary of Apollo, Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Oracle of Delphi actually worked",
+      "durationMinutes": 30,
+      "instruction": "Read about the mechanics of the oracle: a priestess, the Pythia, delivered answers that priests polished into verse. Notice the famous ambiguity - Croesus was told a great empire would fall if he attacked, and it did; it was his own. Some scholars now suspect a real geological cause: ethylene gas seeping from the ground. Consider the powerful position of the only people who could interpret the god's words."
+    },
+    "tags": ["Ancient", "Greece", "Religion", "Mystery"],
+    "tier": 1
+  },
+  {
+    "id": "history-cuneiform-writing",
+    "categoryId": "HISTORY",
+    "subtype": "Invention",
+    "name": "Cuneiform Writing (c. 3200 BCE)",
+    "teaser": "The world's first writing system began as clay tokens pressed with a reed to record grain and livestock in Sumer. Over centuries, those account marks grew into literature.",
+    "imageUrl": "",
+    "byline": "Sumer, Mesopotamia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How cuneiform evolved from counting to literature",
+      "durationMinutes": 30,
+      "instruction": "Read how cuneiform started as simple pictographs for counting goods and slowly became a full writing system able to express poetry, law, and letters - the Epic of Gilgamesh was written in it. Notice the material: wet clay tablets that hardened into a permanent record, which is why so many survive. Think about what it means that the first writers were probably accountants, and that trade may have created literature."
+    },
+    "tags": ["Ancient", "Mesopotamia", "Writing", "Sumer"],
+    "tier": 1
+  },
+  {
+    "id": "history-thermopylae",
+    "categoryId": "HISTORY",
+    "subtype": "Battle",
+    "name": "The Battle of Thermopylae (480 BCE)",
+    "teaser": "A few thousand Greeks held a mountain pass against the largest army the world had yet seen for three days. They lost - but the stand reshaped how the West remembered itself.",
+    "imageUrl": "",
+    "byline": "Leonidas of Sparta vs. Xerxes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The stand at Thermopylae (480 BCE)",
+      "durationMinutes": 30,
+      "instruction": "Read about the narrow pass where a small Greek force neutralized Persia's numbers, and the betrayal - a local shepherd showed the Persians a mountain path - that doomed the defenders. Notice what the sources agree on versus what later storytelling added, like the famous 'come and take them.' Then consider how a military defeat became one of history's most enduring symbols of defiance."
+    },
+    "tags": ["Ancient", "Greece", "War", "Sparta"],
+    "tier": 1
+  },
+  {
+    "id": "history-athenian-acropolis",
+    "categoryId": "HISTORY",
+    "subtype": "Site",
+    "name": "The Athenian Acropolis",
+    "teaser": "Perched on a rocky plateau above Athens, the Parthenon's columns are subtly curved - a deliberate optical correction that makes the building look straight and strong.",
+    "imageUrl": "",
+    "byline": "Classical Athens, 5th century BCE",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Parthenon and the optical tricks of the Acropolis",
+      "durationMinutes": 35,
+      "instruction": "Read about the refinements baked into the Parthenon: columns lean slightly inward, the platform bows upward in the middle, and every column swells gently at its midpoint - all so the eye reads perfect straightness. Notice what the marbles were for: a treasury for the Delian League that doubled as a monument. Then consider why a democracy would spend its alliance's money on one building."
+    },
+    "tags": ["Ancient", "Greece", "Architecture", "Athens"],
+    "tier": 1
+  },
+  {
+    "id": "history-aksumite-empire",
+    "categoryId": "HISTORY",
+    "subtype": "Civilization",
+    "name": "The Aksumite Empire (c. 100-940 CE)",
+    "teaser": "An African empire that minted its own coins, built towering stone stelae, and traded across three continents. Its kings claimed descent from Solomon, and its fall remains partly a mystery.",
+    "imageUrl": "",
+    "byline": "Kingdom of Aksum, Ethiopia and Eritrea",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Aksumite Empire's trade, stelae, and coins",
+      "durationMinutes": 35,
+      "instruction": "Read about how Aksum grew rich on the Red Sea trade in ivory, frankincense, and gold, and how it was one of the first states in the world to mint its own coins - bearing kings' names in Greek. Notice the massive granite stelae, one of which still stands at over 24 meters. Look into the theories of the kingdom's decline, including climate change and the rise of new trade routes, and consider how an empire's geography can turn from asset to weakness."
+    },
+    "tags": ["Ancient", "Africa", "Ethiopia", "Trade"],
+    "tier": 1
+  },
+  {
+    "id": "history-petra",
+    "categoryId": "HISTORY",
+    "subtype": "Site",
+    "name": "The Nabataean City of Petra",
+    "teaser": "Carved into rose-red desert cliffs, Petra was a trade metropolis that mastered desert water engineering. Its Treasury facade is only the entrance to a city far larger than it looks.",
+    "imageUrl": "",
+    "byline": "The Nabataeans, Jordan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Petra's rock-cut facades and water systems",
+      "durationMinutes": 40,
+      "instruction": "Read about how Petra, built by nomadic traders turned urban planners, channelled flash floods through tunnels and cisterns to support tens of thousands of people in a desert. Notice that most of the city is still unexcavated, and that the famous Treasury is thought to have been a royal tomb, not a treasury at all. Then consider the skill of carving monumental facades from the top down, on scaffolding, without modern tools."
+    },
+    "tags": ["Ancient", "Jordan", "Architecture", "Water"],
+    "tier": 1
+  },
+  {
+    "id": "history-bayeux-tapestry",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Bayeux Tapestry (c. 1070)",
+    "teaser": "Not a tapestry but a 70-meter embroidered comic strip of the Norman conquest of England. Its 58 scenes include a comet that everyone interpreted as an omen.",
+    "imageUrl": "",
+    "byline": "Embroidered in the 1070s",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Bayeux Tapestry's telling of 1066",
+      "durationMinutes": 35,
+      "instruction": "Read the tapestry as a piece of political propaganda made by the winners - it frames Harold's broken oath as the cause of his doom. Notice the details scholars pore over: the appearance of Halley's Comet, the ships and armor, even the riddle of who commissioned it and why the needlework is so fine. Then ask how a source you know to be biased can still tell you true things."
+    },
+    "tags": ["Medieval", "England", "Art", "Normandy"],
+    "tier": 1
+  },
+  {
+    "id": "history-battle-hastings",
+    "categoryId": "HISTORY",
+    "subtype": "Battle",
+    "name": "The Battle of Hastings (1066)",
+    "teaser": "One arrow, one day, one crown. Harold Godwinson died at Hastings and William of Normandy took England - the last successful invasion of the island in history.",
+    "imageUrl": "",
+    "byline": "William of Normandy vs. Harold Godwinson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Battle of Hastings and the Norman conquest of England",
+      "durationMinutes": 30,
+      "instruction": "Read how Harold marched his exhausted army 400 kilometers in days after defeating a Norse invasion in the north, then faced William's fresh cavalry on Senlac Hill. Notice the famous feigned retreats that broke the shield wall, and the mystery of Harold's death - the arrow-in-the-eye story comes from the tapestry and may be embroidery in every sense. Think about what changes when a country's ruling class is replaced in a single day."
+    },
+    "tags": ["Medieval", "England", "War", "Normandy"],
+    "tier": 1
+  },
+  {
+    "id": "history-magna-carta",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Magna Carta (1215)",
+    "teaser": "A peace treaty between King John and rebellious barons, sealed at Runnymede. Most of its clauses were about feudal dues - yet it became the seed of constitutional rights worldwide.",
+    "imageUrl": "",
+    "byline": "King John and the English barons",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Magna Carta's clauses and its long afterlife",
+      "durationMinutes": 35,
+      "instruction": "Read the actual clauses and notice how mundane most are - fish weirs, widows' rights, weights and measures. The famous clause 39 promises that no free man shall be imprisoned or stripped of rights except by the lawful judgment of his peers. Notice the detail that the charter was annulled by the pope weeks later, yet reissued and became a symbol. Ask why a failed medieval treaty keeps getting cited by modern constitutions."
+    },
+    "tags": ["Medieval", "England", "Law", "Rights"],
+    "tier": 1
+  },
+  {
+    "id": "history-black-death",
+    "categoryId": "HISTORY",
+    "subtype": "Pandemic",
+    "name": "The Black Death (1347-1351)",
+    "teaser": "A pandemic that may have killed half of Europe in a few years. It rearranged economies, ended serfdom in places, and changed how people understood their own bodies and gods.",
+    "imageUrl": "",
+    "byline": "Europe and Asia, 1347-1351",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Black Death's toll and its aftermath",
+      "durationMinutes": 45,
+      "instruction": "Read how the plague arrived on Genoese trading ships at Messina and raced along trade routes, with symptoms from buboes to a lung form that killed within days. Notice the ripple effects: labor shortages raised wages, serfs bargained for freedom, and religious certainties cracked as prayers failed. Compare the medieval responses - flight, quarantine, scapegoating - with modern pandemics, and ask which reactions were rational given what they knew."
+    },
+    "tags": ["Medieval", "Europe", "Pandemic", "Economy"],
+    "tier": 1
+  },
+  {
+    "id": "history-hundred-years-war",
+    "categoryId": "HISTORY",
+    "subtype": "War",
+    "name": "The Hundred Years' War (1337-1453)",
+    "teaser": "Actually 116 years of war between England and France, fought over who rightfully owned the French crown. It created national identities on both sides and ended with both monarchies transformed.",
+    "imageUrl": "",
+    "byline": "England vs. France",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Hundred Years' War and how it made nations",
+      "durationMinutes": 40,
+      "instruction": "Read about the war's phases - the English victories at Crécy and Agincourt thanks to longbowmen, then the reversal led by Joan of Arc, a teenage peasant who changed the war's momentum. Notice how the war accelerated both kingdoms' centralization: taxes, standing armies, and national feeling where feudal loyalties had ruled. Think about what it means that a dynastic quarrel created the very idea of two separate nations."
+    },
+    "tags": ["Medieval", "England", "France", "War"],
+    "tier": 1
+  },
+  {
+    "id": "history-first-crusade",
+    "categoryId": "HISTORY",
+    "subtype": "Campaign",
+    "name": "The First Crusade (1096-1099)",
+    "teaser": "Called by a pope, fought by armies that included a ragtag 'people's crusade' that never made it. Against the odds, the professional armies captured Jerusalem - and then things got very dark.",
+    "imageUrl": "",
+    "byline": "Urban II's call to arms",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The First Crusade's journey and the fall of Jerusalem",
+      "durationMinutes": 45,
+      "instruction": "Read how Pope Urban II's 1095 sermon in Clermont sparked years of warfare, and how the crusaders - nobles, knights, and pilgrims - marched across Europe to besiege Antioch and then Jerusalem. Notice the tension between the sources: contemporary writers celebrated the capture while also recording terrible massacres. Consider how a single speech, amplified by faith and hunger for land, launched a war that still shapes perceptions centuries later."
+    },
+    "tags": ["Medieval", "Religion", "War", "Jerusalem"],
+    "tier": 1
+  },
+  {
+    "id": "history-fall-constantinople",
+    "categoryId": "HISTORY",
+    "subtype": "Turning point",
+    "name": "The Fall of Constantinople (1453)",
+    "teaser": "The Ottoman siege broke walls that had held for a thousand years, partly with gunpowder cannon. Scholars fleeing the fallen city carried Greek learning into Italy, helping ignite the Renaissance.",
+    "imageUrl": "",
+    "byline": "Mehmed II vs. Constantine XI",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1453 siege of Constantinople and its aftermath",
+      "durationMinutes": 40,
+      "instruction": "Read about the siege's particulars: the giant bombard 'Basilica' that could hurl stone balls at the Theodosian walls, the chain across the Golden Horn, and the final assault that found an unguarded gate. Notice the detail that the last Byzantine emperor died fighting, his body never identified. Then follow the aftermath - Mehmed repopulating the city, and Greek scholars carrying manuscripts westward. Consider how one siege moved knowledge across a sea."
+    },
+    "tags": ["Medieval", "Ottoman", "War", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "history-mongol-yam-system",
+    "categoryId": "HISTORY",
+    "subtype": "System",
+    "name": "The Mongol Empire's Yam Postal System",
+    "teaser": "Genghis Khan's empire ran on a relay of horse stations that could move a message hundreds of kilometers a day. Marco Polo called it 'the best thing' about the Mongols.",
+    "imageUrl": "",
+    "byline": "The Mongol Empire, 13th century",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Yam: the Mongol postal relay",
+      "durationMinutes": 30,
+      "instruction": "Read how the Yam network of stations, spaced a day's ride apart and stocked with fresh horses and food, let imperial couriers cross the largest contiguous empire in history. Notice how it doubled as a passenger service for envoys and, later, a highway for the Plague. Think about the management genius of running a continental logistics system with paper passes, and what your own parcel delivery has inherited from it."
+    },
+    "tags": ["Medieval", "Mongol", "Trade", "Communication"],
+    "tier": 2
+  },
+  {
+    "id": "history-viking-longship",
+    "categoryId": "HISTORY",
+    "subtype": "Engineering",
+    "name": "The Viking Longship",
+    "teaser": "Sleek, shallow-drafted, and built with overlapping planks, the longship could cross the Atlantic and then sail up a river shallow enough to ford. It made the Vikings history's great raiders.",
+    "imageUrl": "",
+    "byline": "Scandinavian shipwrights, 8th-11th century",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Viking longships were built and sailed",
+      "durationMinutes": 30,
+      "instruction": "Read about the construction - oak planks split from logs and riveted in overlapping strakes, with a keel that bent with the waves instead of snapping. Notice the clinker hull flexed rather than fought the sea, and the square sail plus oars gave both ocean and river capability. Consider what it takes to build a ship by eye, without written plans, and what it meant that a village's shipwright was its most strategic asset."
+    },
+    "tags": ["Medieval", "Vikings", "Ships", "Seafaring"],
+    "tier": 1
+  },
+  {
+    "id": "history-charlemagne-coronation",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "Charlemagne's Coronation (800 CE)",
+    "teaser": "Pope Leo III crowned Charlemagne 'Emperor of the Romans' on Christmas Day - an event Charlemagne claimed surprised him. It married the Church to a new Western empire that would become Europe.",
+    "imageUrl": "",
+    "byline": "Pope Leo III and Charlemagne",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Charlemagne's coronation and the birth of a Western empire",
+      "durationMinutes": 30,
+      "instruction": "Read about the coronation's ambiguity - did Charlemagne accept willingly or was he, as his biographer claimed, displeased to be crowned by the pope? Notice how the ceremony asserted that the Church could make emperors, a claim that would haunt medieval politics for centuries. Consider how a single religious ceremony created a tradition of empire that lasted, in various forms, until 1806."
+    },
+    "tags": ["Medieval", "Religion", "Empire", "Frankish"],
+    "tier": 1
+  },
+  {
+    "id": "history-hanseatic-league",
+    "categoryId": "HISTORY",
+    "subtype": "Alliance",
+    "name": "The Hanseatic League (13th-17th century)",
+    "teaser": "A trading alliance of hundreds of northern European cities that operated almost like a state - with its own fleets, courts, and even wars - all in the name of trade.",
+    "imageUrl": "",
+    "byline": "Cities across the Baltic and North Sea",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Hanseatic League's rise and fall",
+      "durationMinutes": 40,
+      "instruction": "Read about how Lubeck and its partner cities pooled resources to control the Baltic trade in herring, grain, and timber, using embargoes as weapons and setting legal standards for merchants abroad. Notice that the League had no constitution - it ran on mutual interest and shared courts. Consider the counterintuitive economics of the League's end: it flourished on scarcity and lost relevance as states grew strong and trade opened up."
+    },
+    "tags": ["Medieval", "Trade", "Germany", "Cities"],
+    "tier": 2
+  },
+  {
+    "id": "history-domesday-book",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Domesday Book (1086)",
+    "teaser": "Twenty years after conquering England, William the Conqueror ordered a survey so thorough that people called it the 'Day of Judgment' book. It listed almost every farm, mill, and pig in England.",
+    "imageUrl": "",
+    "byline": "Commissioned by William the Conqueror",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Domesday Book and what it reveals",
+      "durationMinutes": 30,
+      "instruction": "Read how royal commissioners fanned out across England with a fixed set of questions - who owned what, how much it was worth, and what it had been worth in 1066. Notice the resentments it records: tenants complained they had been overtaxed and under-regarded. Ask yourself why a king would spend so much on a census, and what it reveals about the difference between governing a kingdom you inherited and one you conquered."
+    },
+    "tags": ["Medieval", "England", "Taxes", "Records"],
+    "tier": 1
+  },
+  {
+    "id": "history-mansa-musa-hajj",
+    "categoryId": "HISTORY",
+    "subtype": "Journey",
+    "name": "Mansa Musa's Hajj (1324)",
+    "teaser": "The emperor of Mali crossed the Sahara with a caravan said to include tens of thousands of people and so much gold that he crashed the price of the metal in Cairo for a decade.",
+    "imageUrl": "",
+    "byline": "Mansa Musa, Emperor of Mali",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mansa Musa's pilgrimage and the gold of Mali",
+      "durationMinutes": 30,
+      "instruction": "Read about the pilgrimage that put Mali on the medieval world map - the historian al-Umari described the emperor's generosity emptying the Cairo gold market for years. Notice the dual role of the hajj: a religious duty and a display of staggering wealth that made Mali the subject of European maps. Consider what the journey reveals about the scale and sophistication of 14th-century West African kingdoms."
+    },
+    "tags": ["Medieval", "Africa", "Mali", "Gold"],
+    "tier": 1
+  },
+  {
+    "id": "history-tenochtitlan",
+    "categoryId": "HISTORY",
+    "subtype": "City",
+    "name": "Tenochtitlan (founded 1325)",
+    "teaser": "An island city of perhaps 200,000 people, built on a lake with canals, aqueducts, and floating gardens. The Spanish conquerors wrote that they had never seen anything like it.",
+    "imageUrl": "",
+    "byline": "The Aztec (Mexica) capital",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tenochtitlan and its lake-city engineering",
+      "durationMinutes": 35,
+      "instruction": "Read about how the Mexica built on a swampy lake island, expanding with chinampas - artificial islands of mud and reeds - and linking districts by canals. Notice the aqueduct that brought fresh water from the shore and the dikes that separated salt from fresh water. Consider the irony of the city's end: built on water, it was besieged and starved before falling in 1521, and the lake was later drained beneath Mexico City."
+    },
+    "tags": ["Medieval", "Mesoamerica", "Aztec", "Cities"],
+    "tier": 1
+  },
+  {
+    "id": "history-inca-road-system",
+    "categoryId": "HISTORY",
+    "subtype": "Network",
+    "name": "The Inca Qhapaq Nan Road System",
+    "teaser": "Over 30,000 kilometers of stone-paved roads through the Andes, complete with suspension bridges and relay runners. It bound an empire that stretched along a whole mountain range.",
+    "imageUrl": "",
+    "byline": "The Inca Empire",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Inca road network and its chasqui runners",
+      "durationMinutes": 30,
+      "instruction": "Read about the Qhapaq Nan's engineering - graded ramps, drainage, and woven suspension bridges over gorges - and how it connected Cusco to the empire's four quarters. Notice the chasqui relay runners who could move messages or fresh fish from the coast to the highlands faster than almost any alternative. Consider what a road system tells you about a state's ambition and how it was possible without wheels or writing as we know them."
+    },
+    "tags": ["Medieval", "Andes", "Inca", "Roads"],
+    "tier": 1
+  },
+  {
+    "id": "history-knights-templar-downfall",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Knights Templar's Downfall (1307)",
+    "teaser": "Europe's richest military order was arrested en masse on a Friday the 13th, accused of heresy. The king who destroyed them owed them a fortune - and seized it.",
+    "imageUrl": "",
+    "byline": "Philip IV of France vs. the Templars",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The arrest and trial of the Knights Templar",
+      "durationMinutes": 35,
+      "instruction": "Read how on October 13, 1307, agents of Philip IV arrested hundreds of Templars across France in a coordinated dawn operation, extracting confessions under torture that later unraveled. Notice the mechanics of the fall: a king in debt, a pope under pressure, and an order whose secrecy made rumor easy. Consider what the Templars' vaults - and the legend of their treasure - say about how institutions fall when their wealth exceeds their protection."
+    },
+    "tags": ["Medieval", "France", "Religion", "Money"],
+    "tier": 1
+  },
+  {
+    "id": "history-gothic-cathedrals",
+    "categoryId": "HISTORY",
+    "subtype": "Architecture",
+    "name": "Gothic Cathedrals and Flying Buttresses (12th-15th century)",
+    "teaser": "Builders replaced thick walls with skeletal frames and pointed arches, letting stained glass flood the nave with light. The flying buttress made it possible - a support that works in mid-air.",
+    "imageUrl": "",
+    "byline": "Medieval master masons",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Gothic engineering raised cathedrals toward the sky",
+      "durationMinutes": 35,
+      "instruction": "Read about the structural logic of the flying buttress - it transfers the roof's outward thrust to massive outer piers, freeing the walls to be mostly window. Notice how the pointed arch lets builders vary height and span, and how several cathedrals collapsed during construction as builders pushed limits. Consider what a town investing generations of wealth in one building says about the ambitions of medieval society, and what it cost when it failed."
+    },
+    "tags": ["Medieval", "France", "Architecture", "Religion"],
+    "tier": 1
+  },
+  {
+    "id": "history-fall-granada",
+    "categoryId": "HISTORY",
+    "subtype": "Turning point",
+    "name": "The Fall of Granada (1492)",
+    "teaser": "The last Muslim kingdom in Iberia surrendered in the same year Columbus sailed. The Alhambra's surrender treaty promised tolerance - promises that were soon broken.",
+    "imageUrl": "",
+    "byline": "The Reconquista's final act",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The surrender of Granada in 1492",
+      "durationMinutes": 30,
+      "instruction": "Read about the surrender of Granada to Ferdinand and Isabella, ending nearly eight centuries of Muslim rule in parts of Iberia. Notice the treaty's guarantees - freedom of religion and property for the city's people - and how quickly they eroded. Consider the year 1492 as a hinge: expulsion of Jews, completion of the Reconquista, and Columbus's voyage, all in one year, and how each reshaped the map of the world."
+    },
+    "tags": ["Renaissance", "Spain", "War", "1490s"],
+    "tier": 1
+  },
+  {
+    "id": "history-spanish-armada",
+    "categoryId": "HISTORY",
+    "subtype": "Campaign",
+    "name": "The Spanish Armada (1588)",
+    "teaser": "Spain sent the largest fleet it had ever built to invade England. Storms, fireships, and bad luck wrecked it - and the defeat reshaped the balance of power in Europe.",
+    "imageUrl": "",
+    "byline": "Philip II of Spain vs. Elizabeth I of England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Armada's voyage and defeat",
+      "durationMinutes": 35,
+      "instruction": "Read about the Armada's plan - a crescent formation meant to escort an invasion army across the Channel - and how it unravelled: English fireships scattered the fleet, and the 'Protestant wind' drove the survivors the long way around Scotland and Ireland. Notice how much of the outcome was weather and logistics rather than heroic battle. Consider why a single failed invasion became such a powerful symbol for England, and how symbol outgrew reality."
+    },
+    "tags": ["Renaissance", "Spain", "England", "Naval"],
+    "tier": 1
+  },
+  {
+    "id": "history-treaty-westphalia",
+    "categoryId": "HISTORY",
+    "subtype": "Treaty",
+    "name": "The Treaty of Westphalia (1648)",
+    "teaser": "The peace that ended the Thirty Years' War invented the modern idea of the sovereign nation-state. Europe's map, and the very concept of borders, was redrawn by diplomats.",
+    "imageUrl": "",
+    "byline": "European powers at Munster and Osnabruck",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Peace of Westphalia and the birth of the nation-state",
+      "durationMinutes": 40,
+      "instruction": "Read about the two treaties signed in 1648 after the bloodiest religious conflict Europe had known, and notice the radical principle they established: each ruler gets to decide their state's religion, and states are sovereign within their borders. Consider how the idea that princes, not popes or emperors, hold final authority over their territory became the foundation of the international order you still live in."
+    },
+    "tags": ["17th century", "Europe", "Diplomacy", "War"],
+    "tier": 1
+  },
+  {
+    "id": "history-great-fire-london",
+    "categoryId": "HISTORY",
+    "subtype": "Disaster",
+    "name": "The Great Fire of London (1666)",
+    "teaser": "A bakery fire on Pudding Lane consumed most of medieval London in four days. Only six people died by record, but the fire destroyed 13,000 houses and, in a way, rebuilt the city.",
+    "imageUrl": "",
+    "byline": "London, September 1666",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Great Fire of London and its rebuilding",
+      "durationMinutes": 30,
+      "instruction": "Read about the fire's trajectory - how wind and timber buildings turned a bakery accident into a citywide catastrophe, and how the decision to stop it came down to blowing up houses to create firebreaks. Notice the surprisingly low death toll and the class dimension: the fire was blamed on Catholics and foreigners in panics afterward. Consider how disaster cleared the way for the brick and stone London that followed, and who profited from rebuilding."
+    },
+    "tags": ["17th century", "England", "Disaster", "Cities"],
+    "tier": 1
+  },
+  {
+    "id": "history-salem-witch-trials",
+    "categoryId": "HISTORY",
+    "subtype": "Trial",
+    "name": "The Salem Witch Trials (1692)",
+    "teaser": "A wave of accusations in a Massachusetts village led to 200 arrests and 20 executions before the panic collapsed. The judges later apologized - one spent his life trying to make amends.",
+    "imageUrl": "",
+    "byline": "Salem Village, Massachusetts Bay Colony",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Salem witch trials and how they ended",
+      "durationMinutes": 35,
+      "instruction": "Read about how spectral evidence - testimony that a witch's spirit appeared to the accuser - sent people to the gallows, and notice the modern explanations historians offer: ergot poisoning, frontier anxieties, family feuds, or a genuine belief system. Consider the mechanics of the collapse: when accusers accused the governor's wife, the spell broke. Ask yourself what safeguards a community needs against a moral panic, then and now."
+    },
+    "tags": ["17th century", "America", "Religion", "Law"],
+    "tier": 1
+  },
+  {
+    "id": "history-luther-95-theses",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "Martin Luther's 95 Theses (1517)",
+    "teaser": "A professor's list of complaints about indulgences, likely posted on a church door in Wittenberg, went viral in the new medium of print and split Western Christianity.",
+    "imageUrl": "",
+    "byline": "Martin Luther",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 95 Theses and the birth of the Reformation",
+      "durationMinutes": 35,
+      "instruction": "Read about what the theses actually argued - a scholar's objection to the sale of indulgences, not yet a plan to break with Rome - and notice how printing multiplied copies across Europe within weeks. Pay attention to the detail that Luther's protest found an audience ready to hear it, from princes who resented Rome's money to believers who doubted the trade in forgiveness. Consider how a theological footnote, amplified by new technology, became a schism."
+    },
+    "tags": ["Renaissance", "Religion", "Printing", "Reformation"],
+    "tier": 1
+  },
+  {
+    "id": "history-wars-roses",
+    "categoryId": "HISTORY",
+    "subtype": "War",
+    "name": "The Wars of the Roses (1455-1487)",
+    "teaser": "A 30-year tangle of English noble factions, with crowns changing hands and kings killed and restored. The 'roses' red and white were mostly a later invention - the reality was messier.",
+    "imageUrl": "",
+    "byline": "House of Lancaster vs. House of York",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Wars of the Roses and how Henry VII ended them",
+      "durationMinutes": 40,
+      "instruction": "Read about the war's rhythm - battles like Towton (the bloodiest on English soil) punctuating years of uneasy peace, with the crown switching hands several times. Notice how Shakespeare's later plays, commissioned by the winning dynasty, polished the 'roses' narrative. Then look at the ending: Henry VII married Elizabeth of York, uniting the houses, and began a dynasty that would rule England for over a century. Consider how the winners wrote the history."
+    },
+    "tags": ["Medieval", "England", "War", "Monarchy"],
+    "tier": 1
+  },
+  {
+    "id": "history-fugger-dynasty",
+    "categoryId": "HISTORY",
+    "subtype": "Dynasty",
+    "name": "The Fugger Banking Dynasty (15th-16th century)",
+    "teaser": "A German family that lent money to popes and emperors and financed the mining industry. When a king they funded defaulted, it set off the first recorded sovereign debt crisis.",
+    "imageUrl": "",
+    "byline": "The Fugger family of Augsburg",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Fuggers and early modern finance",
+      "durationMinutes": 35,
+      "instruction": "Read about how Jakob Fugger grew a textile business into a European financial empire, bankrolling the election of Charles V as Holy Roman Emperor - an election that literally had a price tag. Notice the fateful loan to the Spanish crown secured on silver and wool, and the default in 1557 that toppled the firm and its rivals. Consider what this early story of too-big-to-fail banking teaches about how money and power have always been tangled."
+    },
+    "tags": ["Renaissance", "Germany", "Money", "Banking"],
+    "tier": 2
+  },
+  {
+    "id": "history-declaration-independence",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Declaration of Independence (1776)",
+    "teaser": "A list of grievances against King George III, signed by 56 men who risked execution as traitors. Its opening words about self-evident truths became a global template for revolution.",
+    "imageUrl": "",
+    "byline": "Thomas Jefferson and the Continental Congress",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Declaration's arguments and its paradoxes",
+      "durationMinutes": 35,
+      "instruction": "Read the Declaration's structure - a philosophical preamble, a long list of specific grievances, and the final assertion of sovereignty - and notice how Jefferson's draft was edited, including the removal of a passage condemning the slave trade. Pay attention to the paradox that a document declaring universal equality was written by enslavers. Consider what it means that the contradiction was part of the document from the start."
+    },
+    "tags": ["18th century", "America", "Revolution", "Rights"],
+    "tier": 1
+  },
+  {
+    "id": "history-french-revolution",
+    "categoryId": "HISTORY",
+    "subtype": "Revolution",
+    "name": "The French Revolution (1789)",
+    "teaser": "A bankrupt monarchy, a hungry population, and an Enlightenment-educated middle class - the combination detonated in 1789 and, within years, a king lost his head and the world watched.",
+    "imageUrl": "",
+    "byline": "The people of France",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The French Revolution's rise, terror, and legacy",
+      "durationMinutes": 45,
+      "instruction": "Read about the sequence - the Estates-General, the storming of the Bastille, the Declaration of the Rights of Man, and the spiral into the Terror - and notice how each stage was powered by the fear that the revolution would be reversed. Pay attention to the detail that the revolutionaries introduced the metric system and the modern calendar as acts of total reform. Consider how a movement for liberty ended in a dictatorship under Napoleon, and whether that arc was inevitable."
+    },
+    "tags": ["18th century", "France", "Revolution", "Politics"],
+    "tier": 1
+  },
+  {
+    "id": "history-haitian-revolution",
+    "categoryId": "HISTORY",
+    "subtype": "Revolution",
+    "name": "The Haitian Revolution (1791-1804)",
+    "teaser": "The only successful slave revolt in history built a nation from a French sugar colony. Toussaint Louverture out-thought three empires before dying in a French prison.",
+    "imageUrl": "",
+    "byline": "Toussaint Louverture and the enslaved of Saint-Domingue",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Haiti became the first Black republic",
+      "durationMinutes": 45,
+      "instruction": "Read about how the richest colony in the Americas - built on brutal sugar slavery - exploded into revolution, and how Toussaint Louverture's military and diplomatic brilliance held off the French, British, and Spanish. Notice the detail that Napoleon sent an expedition to crush the revolution and reinstate slavery, and that Haiti won anyway, then was forced to pay reparations for its own freedom. Consider why this revolution was so dangerous to the world's powers - and so often erased from the story."
+    },
+    "tags": ["18th century", "Caribbean", "Revolution", "Slavery"],
+    "tier": 1
+  },
+  {
+    "id": "history-boston-tea-party",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Boston Tea Party (1773)",
+    "teaser": "Colonists disguised as Mohawk people dumped 342 chests of tea into Boston Harbor to protest a tax break given to a monopoly. The British response helped start the American Revolution.",
+    "imageUrl": "",
+    "byline": "The Sons of Liberty, Boston",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Boston Tea Party and the British reaction",
+      "durationMinutes": 25,
+      "instruction": "Read about the protest's logic - the Tea Act actually lowered the price of tea, but it also forced colonists to pay a tax they had no voice in and propped up the East India Company's monopoly. Notice the precision: the participants dumped only tea, carefully avoided other damage, and cleaned the decks afterward. Consider how a symbolic act of destruction became the hinge of the conflict, and how the British punishment - closing Boston's port - united the colonies."
+    },
+    "tags": ["18th century", "America", "Revolution", "Protest"],
+    "tier": 1
+  },
+  {
+    "id": "history-reign-terror",
+    "categoryId": "HISTORY",
+    "subtype": "Era",
+    "name": "The Reign of Terror (1793-1794)",
+    "teaser": "For a year, revolutionary France executed tens of thousands in the name of virtue. The guillotine was a 'humane' innovation - fast and equal for all classes, including its own architects.",
+    "imageUrl": "",
+    "byline": "The Committee of Public Safety",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Terror consumed the French Revolution",
+      "durationMinutes": 35,
+      "instruction": "Read about how the Committee of Public Safety, led by Robespierre, used emergency powers and the guillotine against 'enemies of the revolution' - a category that expanded to include former allies. Notice the accelerating logic: each purge justified the next, and the Terror finally consumed Robespierre himself. Consider what the word 'terror' meant to its architects - they believed it was virtue made violent - and what that tells you about how revolutions justify their cruelty."
+    },
+    "tags": ["18th century", "France", "Revolution", "Terror"],
+    "tier": 1
+  },
+  {
+    "id": "history-congress-vienna",
+    "categoryId": "HISTORY",
+    "subtype": "Conference",
+    "name": "The Congress of Vienna (1815)",
+    "teaser": "After Napoleon, Europe's powers gathered to redraw the map and prevent another war like it. They built a balance of power that held - more or less - for a century.",
+    "imageUrl": "",
+    "byline": "Metternich, Castlereagh, Talleyrand and the powers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Congress of Vienna redrew Europe",
+      "durationMinutes": 35,
+      "instruction": "Read about the diplomacy that ran for months amid balls and banquets, as the victors traded territory and prestige. Notice the counterintuitive detail: Talleyrand, representing defeated France, outmaneuvered the winners by appealing to legitimacy. Consider how the system they built - a balance of great powers meeting to manage crises - kept the peace for decades, and what it cost the peoples whose nations were traded like property without their consent."
+    },
+    "tags": ["19th century", "Europe", "Diplomacy", "Peace"],
+    "tier": 1
+  },
+  {
+    "id": "history-gettysburg-address",
+    "categoryId": "HISTORY",
+    "subtype": "Speech",
+    "name": "The Gettysburg Address (1863)",
+    "teaser": "Two minutes, 272 words, delivered at the dedication of a battlefield cemetery. The speech reframed the Civil War as a test of whether democracy itself could survive.",
+    "imageUrl": "",
+    "byline": "Abraham Lincoln",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gettysburg Address and its rewriting of the war's meaning",
+      "durationMinutes": 25,
+      "instruction": "Read the full 272 words and notice what Lincoln did with the frame: he reached back to 1776, declared the war a test of whether 'government of the people, by the people, for the people' could endure, and quietly invoked equality in a nation that still enslaved people. The speech was received with polite applause at the time; the orator before him spoke for two hours. Consider why the short speech outlived the long one, and what it says about words at turning points."
+    },
+    "tags": ["19th century", "America", "Civil War", "Speeches"],
+    "tier": 1
+  },
+  {
+    "id": "history-emancipation-proclamation",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Emancipation Proclamation (1863)",
+    "teaser": "A wartime order that freed enslaved people only in states 'in rebellion' - and made abolition the Union's war aim. It transformed the conflict and invited Black men to fight for their own freedom.",
+    "imageUrl": "",
+    "byline": "Abraham Lincoln",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Emancipation Proclamation's limits and power",
+      "durationMinutes": 30,
+      "instruction": "Read about the Proclamation's careful legal craft: it freed enslaved people in Confederate-held territory, where Lincoln's authority was contested, and left slavery untouched in loyal border states. Notice that this seeming weakness was the point - it framed emancipation as a war measure. Then read how it changed the war's character, from the enlistment of Black soldiers to the question of what the peace would mean. Consider what it means when freedom is granted as strategy rather than justice."
+    },
+    "tags": ["19th century", "America", "Civil War", "Slavery"],
+    "tier": 1
+  },
+  {
+    "id": "history-industrial-revolution-factory",
+    "categoryId": "HISTORY",
+    "subtype": "Turning point",
+    "name": "The Factory System (c. 1760-1840)",
+    "teaser": "Machines gathering workers under one roof changed time itself: work was suddenly measured by the clock, not the season. The factory system created both fortunes and a new class of labor.",
+    "imageUrl": "",
+    "byline": "Britain's Industrial Revolution",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the factory system remade work and time",
+      "durationMinutes": 35,
+      "instruction": "Read about how water and steam power concentrated production in factories, and notice the cultural invention hiding inside: the regimented working day, the whistle, the time-discipline that felt alien to people used to task-based work. Pay attention to the child labor that powered the early mills and the reform movements it eventually provoked. Consider what changed when a family's rhythm of work became a factory's shift schedule, and what your own workday has inherited from that shift."
+    },
+    "tags": ["19th century", "Britain", "Industry", "Labor"],
+    "tier": 1
+  },
+  {
+    "id": "history-transcontinental-railroad",
+    "categoryId": "HISTORY",
+    "subtype": "Project",
+    "name": "The Transcontinental Railroad (1869)",
+    "teaser": "Two crews - one mostly Irish, one mostly Chinese - laid track from opposite coasts and met in Utah in 1869. The line shrank a six-month journey to a week.",
+    "imageUrl": "",
+    "byline": "The Union Pacific and Central Pacific",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Building the first transcontinental railroad",
+      "durationMinutes": 35,
+      "instruction": "Read about the engineering race across prairies, deserts, and the Sierra Nevada, where Chinese workers carved tunnels through granite and snow. Notice the incentives at play: the government paid by the mile, so crews raced, sometimes laying miles a day. Consider the cost in lives and the fortunes made, and how the golden spike at Promontory Summit symbolized a continent finally bound together - and the Native nations whose lands the rails crossed."
+    },
+    "tags": ["19th century", "America", "Railways", "Engineering"],
+    "tier": 1
+  },
+  {
+    "id": "history-suez-canal",
+    "categoryId": "HISTORY",
+    "subtype": "Project",
+    "name": "The Suez Canal (1869)",
+    "teaser": "A 190-kilometer ditch across the desert that cut the sea route between Europe and Asia by weeks. Thousands of forced laborers built it, and its toll on them was hidden from the opening celebrations.",
+    "imageUrl": "",
+    "byline": "Ferdinand de Lesseps and the Suez Canal Company",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Suez Canal's construction and global impact",
+      "durationMinutes": 35,
+      "instruction": "Read about how the canal was dug - largely by hand, much of it by Egyptian forced laborers under appalling conditions - and how it instantly reshaped world trade and empire. Notice the financial detail: Britain quietly bought the Khedive's canal shares, gaining control of the route to India without a shot. Consider the gap between the canal's monument-inauguration pomp and its human cost, and how the shortcut changed which places on Earth mattered strategically."
+    },
+    "tags": ["19th century", "Egypt", "Engineering", "Trade"],
+    "tier": 1
+  },
+  {
+    "id": "history-opium-wars",
+    "categoryId": "HISTORY",
+    "subtype": "War",
+    "name": "The Opium Wars (1839-1860)",
+    "teaser": "Britain went to war with China to keep selling opium - a drug it had banned at home. The result was forced treaties, Hong Kong ceded, and a century of Chinese weakness.",
+    "imageUrl": "",
+    "byline": "Britain vs. Qing China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Opium Wars and the unequal treaties",
+      "durationMinutes": 40,
+      "instruction": "Read about how Britain's trade deficit with China was balanced by smuggling opium, and how China's attempt to suppress it triggered naval war. Notice the detail that Britain's gunboats were protecting a commerce that British law itself prohibited at home. The peace treaties - the 'unequal treaties' - opened ports, ceded Hong Kong, and set indemnities. Consider what the wars reveal about how trade and coercion were fused in the 19th century, and how the memory of that humiliation still shapes politics."
+    },
+    "tags": ["19th century", "China", "Britain", "War"],
+    "tier": 1
+  },
+  {
+    "id": "history-meiji-restoration",
+    "categoryId": "HISTORY",
+    "subtype": "Turning point",
+    "name": "The Meiji Restoration (1868)",
+    "teaser": "A feudal Japan that had closed its borders for two centuries transformed itself into a modern industrial power within a single generation - by choice, and with breathtaking speed.",
+    "imageUrl": "",
+    "byline": "Japan's Meiji reformers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Japan modernized in the Meiji era",
+      "durationMinutes": 40,
+      "instruction": "Read about how a coalition of samurai reformers abolished the shogunate, restored the emperor, and then systematically remade the country: conscript armies, universal schooling, a railway, a constitution. Notice the deliberation - Japanese officials traveled abroad, studied Western institutions, and imported what they chose. Consider what it meant for a country to industrialize in decades rather than centuries, and what it cost in identity and tradition."
+    },
+    "tags": ["19th century", "Japan", "Modernization", "Reform"],
+    "tier": 1
+  },
+  {
+    "id": "history-berlin-conference",
+    "categoryId": "HISTORY",
+    "subtype": "Conference",
+    "name": "The Berlin Conference (1884-1885)",
+    "teaser": "European powers sat in Berlin and divided Africa among themselves without a single African present. They set rules for carving up a continent - and the map they drew still causes conflict.",
+    "imageUrl": "",
+    "byline": "Bismarck and the European powers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Berlin Conference and the partition of Africa",
+      "durationMinutes": 35,
+      "instruction": "Read about how Otto von Bismarck convened the powers to regulate the scramble for Africa, with rules based on 'effective occupation' - land claimed had to be administered. Notice that the negotiations were about trade access and boundary lines drawn on maps in Europe, with rivers and coastlines treated as property. Consider how borders decided in a few months, ignoring language and culture, still ripple through African politics today, and whether you can see the map's fingerprints in modern headlines."
+    },
+    "tags": ["19th century", "Africa", "Colonialism", "Diplomacy"],
+    "tier": 1
+  },
+  {
+    "id": "history-zulu-shaka",
+    "categoryId": "HISTORY",
+    "subtype": "Figure",
+    "name": "Shaka Zulu and the Zulu Kingdom (1816-1828)",
+    "teaser": "A brilliant and brutal military reformer who built a small clan into a kingdom that defied the British Empire. His innovations in warfare changed southern Africa forever.",
+    "imageUrl": "",
+    "byline": "Shaka kaSenzangakhona",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shaka's military reforms and the rise of the Zulu kingdom",
+      "durationMinutes": 35,
+      "instruction": "Read about Shaka's reforms - the short stabbing spear that replaced throwing spears, the disciplined formations, and the age-regiment system that turned warriors into a standing army. Notice the scale of the change: within two decades the Zulu dominated a region the size of Western Europe. Then read about the 1879 war that followed his death, when Zulu forces annihilated a British column at Isandlwana before being overwhelmed. Consider how a leader's innovations outlasted him."
+    },
+    "tags": ["19th century", "Africa", "Zulu", "War"],
+    "tier": 1
+  },
+  {
+    "id": "history-rocket-locomotive",
+    "categoryId": "HISTORY",
+    "subtype": "Invention",
+    "name": "The Rocket Locomotive (1829)",
+    "teaser": "A steam engine that hit nearly 48 km/h in 1829 - so fast that observers worried passengers would suffocate. George Stephenson's Rocket won a trial and launched the railway age.",
+    "imageUrl": "",
+    "byline": "George and Robert Stephenson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Rainhill Trials and the Rocket",
+      "durationMinutes": 25,
+      "instruction": "Read about the Rainhill Trials, where the Liverpool and Manchester Railway tested locomotives and the Rocket won by combining a multi-tube boiler with a blast pipe. Notice the era's fears: newspapers speculated about the effects of speed on the human body, and one skeptic insisted railways would prevent cows from grazing. Consider how a machine that moved people faster than horses changed perceptions of time and distance, and what the 19th century's 'impossible' speed was compared with today's."
+    },
+    "tags": ["19th century", "Britain", "Railways", "Invention"],
+    "tier": 1
+  },
+  {
+    "id": "history-sarajevo-assassination",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Assassination at Sarajevo (1914)",
+    "teaser": "A sandwich and a wrong turn changed history. After a failed bomb attack, Archduke Franz Ferdinand's driver took a wrong turn, stopped beside the one assassin still waiting, and the 20th century lurched toward war.",
+    "imageUrl": "",
+    "byline": "Gavrilo Princip and the Black Hand",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Sarajevo assassination and the road to World War I",
+      "durationMinutes": 30,
+      "instruction": "Read about the day itself - the failed bombing, the archduke's decision to visit the wounded in hospital, and the wrong turn that put his car inches from Gavrilo Princip. Notice how the assassination was the spark, not the cause: the alliances, mobilization timetables, and rivalries were already loaded. Consider the counterfactual - if the car hadn't stopped, would the war still have come - and how we weigh chance against structure in history."
+    },
+    "tags": ["20th century", "Europe", "World War I", "Assassination"],
+    "tier": 1
+  },
+  {
+    "id": "history-treaty-versailles",
+    "categoryId": "HISTORY",
+    "subtype": "Treaty",
+    "name": "The Treaty of Versailles (1919)",
+    "teaser": "Signed in the Hall of Mirrors where Germany's empire was proclaimed, the peace that ended World War I assigned blame and reparations - and planted resentments that helped seed World War II.",
+    "imageUrl": "",
+    "byline": "The Allied powers and Germany",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Treaty of Versailles and its contested legacy",
+      "durationMinutes": 40,
+      "instruction": "Read about the treaty's terms - the war-guilt clause, territorial losses, disarmament, and reparations figures - and the debate among the victors themselves, from Wilson's idealism to Clemenceau's security demands. Notice the economic logic: reparations designed to hurt helped wreck the Weimar economy and fed nationalist fury. Consider the historians' argument about whether the treaty was truly harsh or merely unenforceable, and how a peace can fail by asking for too much and delivering too little."
+    },
+    "tags": ["20th century", "Europe", "World War I", "Peace"],
+    "tier": 1
+  },
+  {
+    "id": "history-russian-revolution",
+    "categoryId": "HISTORY",
+    "subtype": "Revolution",
+    "name": "The Russian Revolution (1917)",
+    "teaser": "A food riot in Petrograd toppled the tsar in days; months later the Bolsheviks seized power in a nearly bloodless coup. The world's first communist state was born from a war-worn empire.",
+    "imageUrl": "",
+    "byline": "Lenin, the Bolsheviks, and the Russian people",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The two revolutions of 1917 in Russia",
+      "durationMinutes": 45,
+      "instruction": "Read about the surprising sequence: in February, crowds and mutinous soldiers forced the tsar's abdication without a master plan; in October, the Bolsheviks took power almost casually, against Lenin's own party's expectations. Notice the role of the war - 'peace, land, and bread' had power because millions were dying and hungry. Consider how a revolution that promised to liberate workers ended in a one-party dictatorship, and how much of that arc was visible in 1917."
+    },
+    "tags": ["20th century", "Russia", "Revolution", "Communism"],
+    "tier": 1
+  },
+  {
+    "id": "history-great-depression",
+    "categoryId": "HISTORY",
+    "subtype": "Crisis",
+    "name": "The Great Depression (1929-1939)",
+    "teaser": "A stock market crash turned into a decade of global economic catastrophe. In the US, unemployment peaked near 25 percent, and banks failed by the thousands - savings simply vanished.",
+    "imageUrl": "",
+    "byline": "The global economy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Great Depression's causes and consequences",
+      "durationMinutes": 45,
+      "instruction": "Read about the depression's mechanics - margin-bought stocks, bank runs, the gold standard's rigidity, and the contraction of world trade - and notice how policy choices turned a crash into a decade. Pay attention to the human scale: breadlines, Hoovervilles, and the Okies migrating west. Then read how governments responded, from the New Deal to tariffs that backfired, and consider which lessons of 1929-33 still shape how economists and leaders think about crises."
+    },
+    "tags": ["20th century", "America", "Economy", "Crisis"],
+    "tier": 1
+  },
+  {
+    "id": "history-dust-bowl",
+    "categoryId": "HISTORY",
+    "subtype": "Disaster",
+    "name": "The Dust Bowl (1930s)",
+    "teaser": "Plowing the southern Great Plains into wheat fields left topsoil exposed; drought turned it to dust that darkened skies hundreds of kilometers away. The land itself moved.",
+    "imageUrl": "",
+    "byline": "The American Southern Plains",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Dust Bowl's ecological and human toll",
+      "durationMinutes": 35,
+      "instruction": "Read about how decades of wheat monoculture and the plowing of native grassland - combined with drought - produced dust storms that buried houses and reached as far as the Atlantic. Notice the human cost: hundreds of thousands left the Plains, and the federal response, from soil conservation to resettlement, marked the first time Washington treated land abuse as a national problem. Consider how a man-made ecological disaster on American soil looks from the perspective of today's climate debates."
+    },
+    "tags": ["20th century", "America", "Ecology", "Farming"],
+    "tier": 1
+  },
+  {
+    "id": "history-d-day-normandy",
+    "categoryId": "HISTORY",
+    "subtype": "Operation",
+    "name": "D-Day: The Normandy Landings (1944)",
+    "teaser": "The largest amphibious invasion in history - over 150,000 troops landed on one day across five beaches. Deception operations convinced the Germans the attack would come elsewhere.",
+    "imageUrl": "",
+    "byline": "Operation Overlord, June 6, 1944",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The planning, deception, and landings of D-Day",
+      "durationMinutes": 45,
+      "instruction": "Read about the months of planning and the elaborate deception - a phantom army in southeast England, fake radio traffic, and inflatable tanks - that kept German reserves away from Normandy. Notice the per-beach story: Omaha almost failed, while airborne troops landed scattered across the countryside. Consider the scale of coordination across weather forecasts, tides, and national forces, and how the single day hinged on decisions made before dawn in darkened rooms."
+    },
+    "tags": ["20th century", "World War II", "War", "France"],
+    "tier": 1
+  },
+  {
+    "id": "history-united-nations-founding",
+    "categoryId": "HISTORY",
+    "subtype": "Institution",
+    "name": "The Founding of the United Nations (1945)",
+    "teaser": "Born from the ashes of a second world war, the UN was an attempt to make 'never again' a working institution. Its Charter was drafted before the war even ended.",
+    "imageUrl": "",
+    "byline": "Fifty-one founding nations",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the United Nations was founded and designed",
+      "durationMinutes": 35,
+      "instruction": "Read about the UN's founding - the Dumbarton Oaks talks and the San Francisco conference - and notice the design tension at its heart: the Security Council's five veto-holding powers were the victors of 1945, and the veto froze the hierarchy of that moment. Consider the Charter's opening words about saving succeeding generations, and ask what the UN's successes (from peacekeeping to global health) and failures reveal about how far institutional design can go in restraining the powerful."
+    },
+    "tags": ["20th century", "World War II", "Diplomacy", "Institutions"],
+    "tier": 1
+  },
+  {
+    "id": "history-marshall-plan",
+    "categoryId": "HISTORY",
+    "subtype": "Program",
+    "name": "The Marshall Plan (1948)",
+    "teaser": "The US spent about $13 billion - over $150 billion today - rebuilding Western Europe. The goal was economic recovery; the effect was a Europe that chose American alliance over Soviet promises.",
+    "imageUrl": "",
+    "byline": "George C. Marshall and the United States",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Marshall Plan and the rebuilding of Europe",
+      "durationMinutes": 30,
+      "instruction": "Read about how the European Recovery Program worked - grants, not just loans, coordinated by the Europeans themselves - and notice the strategic logic: prosperity would starve communist appeal. Pay attention to the detail that the Soviet Union was offered participation and refused, splitting Europe into the plan's recipients and its rejects. Consider whether the plan's success was mostly money or mostly coordination, and what it implies about how generosity can serve national interest."
+    },
+    "tags": ["20th century", "Europe", "America", "Economy"],
+    "tier": 1
+  },
+  {
+    "id": "history-berlin-airlift",
+    "categoryId": "HISTORY",
+    "subtype": "Operation",
+    "name": "The Berlin Blockade and Airlift (1948-1949)",
+    "teaser": "When the Soviets cut all land routes to West Berlin, the West answered with planes - nearly 280,000 flights delivering coal, food, and hope to a city of two million for 11 months.",
+    "imageUrl": "",
+    "byline": "The Western Allies and Berlin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Berlin Airlift broke the blockade",
+      "durationMinutes": 35,
+      "instruction": "Read about the logistics of the airlift - planes landing every few minutes around the clock, with candy drops for children becoming a symbol. Notice the decision it required: no one knew if an airlift could feed a city, and it nearly failed in the winter before American planes arrived. Consider what the episode meant for the Cold War - a city kept alive by flight, a blockade that failed, and a West Berlin that became the showcase of the West's promises."
+    },
+    "tags": ["20th century", "Cold War", "Berlin", "Logistics"],
+    "tier": 1
+  },
+  {
+    "id": "history-montgomery-bus-boycott",
+    "categoryId": "HISTORY",
+    "subtype": "Movement",
+    "name": "The Montgomery Bus Boycott (1955-1956)",
+    "teaser": "After Rosa Parks refused to give up her seat, Black Montgomery walked for 381 days rather than ride segregated buses. The boycott ended only when the Supreme Court ruled segregation unconstitutional.",
+    "imageUrl": "",
+    "byline": "Rosa Parks, Martin Luther King Jr., and the people of Montgomery",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Montgomery Bus Boycott and the birth of a movement",
+      "durationMinutes": 35,
+      "instruction": "Read about how Parks's arrest sparked a coordinated boycott organized through churches and carpools, and how a 26-year-old minister named Martin Luther King Jr. emerged as its leader. Notice the strategy: the demand wasn't just for Parks but for dignity - equal seating, courteous treatment, Black drivers on Black routes. Consider the economics of the boycott's victory, when the bus company's finances forced the city to negotiate, and what that teaches about where leverage comes from."
+    },
+    "tags": ["20th century", "America", "Civil Rights", "Protest"],
+    "tier": 1
+  },
+  {
+    "id": "history-cuban-missile-crisis",
+    "categoryId": "HISTORY",
+    "subtype": "Crisis",
+    "name": "The Cuban Missile Crisis (1962)",
+    "teaser": "For thirteen days, the world stood closer to nuclear war than at any time before or since. A Soviet submarine nearly fired a nuclear torpedo; a US pilot took photos that changed the standoff.",
+    "imageUrl": "",
+    "byline": "Kennedy, Khrushchev, and Castro",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The thirteen days of the Cuban Missile Crisis",
+      "durationMinutes": 40,
+      "instruction": "Read about the sequence of the crisis - U-2 photographs revealing missile sites, the quarantine, the secret back-channel letters, and the deal that traded missiles in Cuba for missiles in Turkey. Notice the close calls that historians later uncovered: a Soviet sub's captain vetoed a nuclear launch his officers requested. Consider how decision-making under days-long pressure, with miscommunication a constant threat, produced a compromise - and what that says about the value of time in diplomacy."
+    },
+    "tags": ["20th century", "Cold War", "Cuba", "Nuclear"],
+    "tier": 1
+  },
+  {
+    "id": "history-berlin-wall-falls",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Berlin Wall Falls (1989)",
+    "teaser": "A confused East German spokesman announced travel rules 'immediately' - and thousands of Berliners surged to the wall. The guards, with no orders to fire, opened the gates. The Cold War began to end.",
+    "imageUrl": "",
+    "byline": "The people of East and West Berlin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The night the Berlin Wall fell",
+      "durationMinutes": 30,
+      "instruction": "Read about the evening of November 9, 1989, when Gunter Schabowski's press conference mistake - answering a question about travel rules with 'immediately' - sent crowds to the crossing points. Notice the quiet heroism: border guards, instructed to protect the wall, chose not to fire on unarmed civilians. Consider how an unintended phrase, amplified by live television, undid 28 years of division, and what that says about the fragility of systems built on control."
+    },
+    "tags": ["20th century", "Cold War", "Berlin", "Reunification"],
+    "tier": 1
+  },
+  {
+    "id": "history-apollo-11-moon-landing",
+    "categoryId": "HISTORY",
+    "subtype": "Achievement",
+    "name": "The Apollo 11 Moon Landing (1969)",
+    "teaser": "600 million people watched as humans first set foot on another world. The guidance computer that helped land the Eagle had less computing power than a modern calculator.",
+    "imageUrl": "",
+    "byline": "Armstrong, Aldrin, Collins, and the Apollo program",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Apollo 11 and the race to the Moon",
+      "durationMinutes": 40,
+      "instruction": "Read about the scale of Apollo - 400,000 people working toward one landing, with the landing itself automated by a computer with kilobytes of memory while Armstrong took manual control past the crater field. Notice the geopolitical engine: the space race was Cold War competition, and the Moon landing was, as one official put it, a peaceful act that demonstrated power. Consider what it took - money, risk, and national will - and why no one has gone back in the decades since."
+    },
+    "tags": ["20th century", "Space", "America", "Achievement"],
+    "tier": 1
+  },
+  {
+    "id": "history-tutankhamun-tomb",
+    "categoryId": "HISTORY",
+    "subtype": "Discovery",
+    "name": "The Discovery of Tutankhamun's Tomb (1922)",
+    "teaser": "Howard Carter found a tomb that had stayed hidden for over 3,000 years, packed with gold. The 'curse' rumors began when Lord Carnarvon died months later - of an infected mosquito bite.",
+    "imageUrl": "",
+    "byline": "Howard Carter and Lord Carnarvon",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening of Tutankhamun's tomb in 1922",
+      "durationMinutes": 35,
+      "instruction": "Read about the discovery's dramatic detail - Carter's team was days from giving up when they found the steps, and when asked what he saw through the hole in the door, Carter said 'wonderful things.' Notice the archaeology of the moment: the tomb's nearly intact contents became a worldwide media event, and the curse stories were newspapers selling papers. Consider what the discovery did to Egyptology and to Egypt itself, and how a boy king's grave became a global phenomenon."
+    },
+    "tags": ["20th century", "Egypt", "Archaeology", "Discovery"],
+    "tier": 1
+  },
+  {
+    "id": "history-spanish-flu-1918",
+    "categoryId": "HISTORY",
+    "subtype": "Pandemic",
+    "name": "The 1918 Influenza Pandemic",
+    "teaser": "A flu that killed more people than World War I - possibly 50 million - and vanished almost as strangely as it arrived. It hit healthy young adults hardest, a pattern that still puzzles scientists.",
+    "imageUrl": "",
+    "byline": "The global pandemic of 1918-1920",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1918 flu's toll and the fight against it",
+      "durationMinutes": 35,
+      "instruction": "Read about the pandemic's unusual shape - the W-shaped mortality curve that struck the young and strong - and how it spread along troop transport routes during the final year of World War I. Notice that 'Spanish flu' got its name only because Spain, neutral and uncensored, reported it first. Consider how the world's response - masks, closures, and, in some cities, nothing - compared to the medical knowledge of the time, and what echoes of 1918 you can see in modern pandemics."
+    },
+    "tags": ["20th century", "Pandemic", "Health", "Medicine"],
+    "tier": 1
+  },
+  {
+    "id": "history-prague-spring",
+    "categoryId": "HISTORY",
+    "subtype": "Movement",
+    "name": "The Prague Spring (1968)",
+    "teaser": "Czechoslovakia tried to build 'socialism with a human face' - free press, reforms, open debate. Moscow answered with tanks in August, and the experiment ended in a single night.",
+    "imageUrl": "",
+    "byline": "Alexander Dubcek and the Czechoslovak reformers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Prague Spring and the Soviet invasion",
+      "durationMinutes": 30,
+      "instruction": "Read about how Dubcek's reforms - easing censorship, permitting political associations, humanizing the economy - electrified Czechoslovakia, and how the Soviet leadership watched with alarm as reform threatened to spread. Notice the resistance's shape: unarmed crowds met tanks, and radio stations broadcast until the last minute. Consider what the invasion's timing and brutality reveal about the limits of reform within a bloc, and why the Prague Spring's memory outlived its eight months."
+    },
+    "tags": ["20th century", "Cold War", "Czechoslovakia", "Reform"],
+    "tier": 2
+  },
+  {
+    "id": "history-watergate",
+    "categoryId": "HISTORY",
+    "subtype": "Scandal",
+    "name": "The Watergate Scandal (1972-1974)",
+    "teaser": "A break-in at the Democratic headquarters was traced, through dogged reporting and a secret tape system, to the president himself. Richard Nixon resigned rather than face impeachment.",
+    "imageUrl": "",
+    "byline": "The Washington Post, the Senate, and Nixon's tapes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Watergate brought down a president",
+      "durationMinutes": 40,
+      "instruction": "Read about the chain from a bungled burglary to the Oval Office - the Washington Post's reporting, the 'deep throat' source, and the discovery that Nixon secretly taped his own conversations. Notice the legal mechanics: the Supreme Court ordered the tapes released, and the smoking-gun recording revealed the cover-up. Consider how institutions - a free press, an independent judiciary, and a Congress willing to act - checked a president, and what the case revealed about the strength and fragility of those checks."
+    },
+    "tags": ["20th century", "America", "Politics", "Scandal"],
+    "tier": 1
+  },
+  {
+    "id": "history-chernobyl-disaster",
+    "categoryId": "HISTORY",
+    "subtype": "Disaster",
+    "name": "The Chernobyl Disaster (1986)",
+    "teaser": "A safety test at a Soviet nuclear plant turned into history's worst nuclear accident. The firefighters who went first died within weeks, and an exclusion zone still surrounds the site.",
+    "imageUrl": "",
+    "byline": "Chernobyl Nuclear Power Plant, Ukraine",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Chernobyl accident and its consequences",
+      "durationMinutes": 40,
+      "instruction": "Read about how a routine test at 1:23 a.m. - combined with a reactor design that was unstable at low power - caused a steam explosion that blew the roof off. Notice the cascade of failures: the design's lack of a containment dome, operators pressing past safety limits, and officials initially denying anything had happened. Consider what the accident reveals about the cost of secrecy around technology, and how the disaster reshaped nuclear policy and the Soviet Union's final years."
+    },
+    "tags": ["20th century", "Soviet Union", "Disaster", "Nuclear"],
+    "tier": 1
+  },
+  {
+    "id": "history-london-underground",
+    "categoryId": "HISTORY",
+    "subtype": "Invention",
+    "name": "The First Underground Railway (1863)",
+    "teaser": "London opened the world's first subway in 1863, dug by hand with 'cut and cover' - and pulled by steam locomotives that filled the tunnels with smoke. People rode it anyway.",
+    "imageUrl": "",
+    "byline": "The Metropolitan Railway, London",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the London Underground began",
+      "durationMinutes": 25,
+      "instruction": "Read about the audacity of digging a railway beneath a city - excavating streets, moving gas mains and sewers, and building ventilated tunnels for steam trains. Notice the reception: 40,000 people rode the Metropolitan line on its opening day, despite the smoke and the novelty of traveling underground. Consider what the decision to build downward meant for how cities grow, and what the world's oldest subway has in common with the newest one a century and a half later."
+    },
+    "tags": ["19th century", "Britain", "Railways", "Cities"],
+    "tier": 1
+  },
+  {
+    "id": "history-first-census-china",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "China's Early Census Records (2 CE)",
+    "teaser": "The Han dynasty counted nearly 58 million people in 2 CE - a record of empire-scale bookkeeping. The numbers were taken seriously enough to shape taxes and armies for centuries.",
+    "imageUrl": "",
+    "byline": "The Han dynasty of China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Han census and ancient state bookkeeping",
+      "durationMinutes": 25,
+      "instruction": "Read about how the Han state registered households, counted able-bodied men, and used the figures to levy taxes and conscript soldiers - a scale of administration unmatched in the ancient world. Notice the historian's craft in the numbers: they survive in a later encyclopedia, so scholars debate their accuracy. Consider what a state's willingness to count its people reveals about how it governs them, and how the census became both a tool of order and of control."
+    },
+    "tags": ["Ancient", "China", "Records", "Han"],
+    "tier": 2
+  },
+  {
+    "id": "history-pompeii-last-day",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "Pliny the Younger's Letters on Vesuvius (79 CE)",
+    "teaser": "A teenager's letters to a historian are the only eyewitness account of the Vesuvius eruption - and the only surviving description of his uncle's death. They founded the science of volcanology.",
+    "imageUrl": "",
+    "byline": "Pliny the Younger",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pliny's letters describing the eruption",
+      "durationMinutes": 25,
+      "instruction": "Read Pliny the Younger's two letters - he watched the eruption from Misenum across the bay while his uncle sailed toward it and died. Notice the forensic detail: the cloud shaped like a pine tree, the ash fall, the earthquake that shook buildings, and the darkness at midday. Scientists later named the eruptive style 'Plinian' after the letters. Consider what it means that one young man's careful description became the foundation of a science - and how ordinary observation can become extraordinary record."
+    },
+    "tags": ["Ancient", "Rome", "Volcano", "Letters"],
+    "tier": 2
+  },
+  {
+    "id": "history-printing-gutenberg",
+    "categoryId": "HISTORY",
+    "subtype": "Invention",
+    "name": "The Gutenberg Printing Press (c. 1450)",
+    "teaser": "Movable type, oil-based ink, and a wine press - combined into the machine that made books cheap and ideas hard to control. Europe's first printed book was a Bible with about 180 copies.",
+    "imageUrl": "",
+    "byline": "Johannes Gutenberg, Mainz",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the printing press changed information",
+      "durationMinutes": 30,
+      "instruction": "Read about the components Gutenberg assembled - reusable metal type cast in molds, ink that stuck to metal, and a screw press borrowed from winemaking - and notice how each piece existed before him; the innovation was the combination. Consider the knock-on effects: prices fell, literacy rose, and authorities lost their monopoly on scripture and news. Ask what our equivalent of the printing press is, and whether we can predict its consequences any better than 15th-century readers could."
+    },
+    "tags": ["Renaissance", "Invention", "Printing", "Information"],
+    "tier": 1
+  },
+  {
+    "id": "history-columbian-exchange",
+    "categoryId": "HISTORY",
+    "subtype": "Phenomenon",
+    "name": "The Columbian Exchange (1492 onward)",
+    "teaser": "After Columbus, two worlds traded crops, animals, people, and pathogens. Tomatoes and potatoes transformed Europe; horses and smallpox transformed the Americas - not always for the better.",
+    "imageUrl": "",
+    "byline": "The meeting of the Old and New Worlds",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Columbian Exchange's goods, diseases, and people",
+      "durationMinutes": 40,
+      "instruction": "Read about the exchange's flows - maize, potatoes, and tomatoes eastward; wheat, horses, and cattle westward; and, fatally, diseases that devastated populations with no immunity. Notice the ironies: the sweet potato helped feed China's population boom, while the exchange also moved enslaved people and reshaped global demography. Consider how a single voyage began a permanent rewiring of the planet's food, people, and pathogens, and which of its effects are still unfolding."
+    },
+    "tags": ["Renaissance", "Global", "Trade", "Exploration"],
+    "tier": 1
+  },
+  {
+    "id": "history-scientific-revolution",
+    "categoryId": "HISTORY",
+    "subtype": "Movement",
+    "name": "The Scientific Revolution (16th-17th century)",
+    "teaser": "A small circle of thinkers replaced 'trust the ancients' with 'test it yourself.' Galileo's telescope and Newton's laws remade the universe from a stage into a machine you could calculate.",
+    "imageUrl": "",
+    "byline": "Copernicus, Galileo, Newton, and others",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Scientific Revolution's ideas and methods",
+      "durationMinutes": 40,
+      "instruction": "Read about how Copernicus's heliocentric model, Galileo's telescopic observations, and Newton's laws of motion and gravity overturned centuries of accepted physics. Notice the methodological shift as much as the discoveries: experiment and mathematics replacing appeals to authority. Consider the courage involved - Galileo faced the Inquisition for saying the Earth moved - and ask what it takes to change not just what people know, but how they decide what counts as knowledge."
+    },
+    "tags": ["Renaissance", "Science", "Ideas", "Europe"],
+    "tier": 1
+  },
+  {
+    "id": "history-age-exploration",
+    "categoryId": "HISTORY",
+    "subtype": "Era",
+    "name": "The Age of Exploration (15th-17th century)",
+    "teaser": "In a few generations, European ships mapped most of the world's coasts - searching for spices, gold, and routes. The maps they drew were instruments of both wonder and conquest.",
+    "imageUrl": "",
+    "byline": "Europe's maritime powers",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Age of Exploration's voyages and motives",
+      "durationMinutes": 40,
+      "instruction": "Read about the voyages that opened the globe - Dias around the Cape, da Gama to India, Columbus across the Atlantic, Magellan's crew around the world - and notice the mix of motives: God, gold, and glory, plus the search for spices that were worth more than gold by weight. Pay attention to the logistics: months at sea, scurvy, and ships that could barely navigate open ocean. Consider how curiosity, commerce, and conquest arrived on the same deck."
+    },
+    "tags": ["Renaissance", "Ships", "Exploration", "Global"],
+    "tier": 1
+  },
+  {
+    "id": "history-transatlantic-slave-trade",
+    "categoryId": "HISTORY",
+    "subtype": "Trade",
+    "name": "The Transatlantic Slave Trade (16th-19th century)",
+    "teaser": "An estimated 12.5 million Africans were forced across the Atlantic over four centuries. The trade built empires, cities, and fortunes on a scale that is still being accounted for.",
+    "imageUrl": "",
+    "byline": "European empires and African intermediaries",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The scale and legacy of the transatlantic slave trade",
+      "durationMinutes": 45,
+      "instruction": "Read about the 'middle passage' - the crossing in which an estimated 15 percent of captives died - and the triangular trade that tied European goods to African captives to American plantation produce. Notice the economies built on it: sugar, tobacco, cotton, and the banking that financed them. Consider how historians measure the trade's legacy - in demography, wealth, and memory - and why reckoning with a centuries-old system still shapes modern debates about reparations and history."
+    },
+    "tags": ["Colonialism", "Slavery", "Trade", "Atlantic"],
+    "tier": 1
+  },
+  {
+    "id": "history-enlightenment",
+    "categoryId": "HISTORY",
+    "subtype": "Movement",
+    "name": "The Enlightenment (18th century)",
+    "teaser": "Philosophers dared to argue that society could be redesigned by reason - that kings weren't divine and knowledge wasn't fixed. Their books helped light the American and French Revolutions.",
+    "imageUrl": "",
+    "byline": "Voltaire, Rousseau, Locke, and the philosophes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Enlightenment's ideas and their political afterlife",
+      "durationMinutes": 40,
+      "instruction": "Read about the core Enlightenment wager - that reason, applied to society, could replace tradition, superstition, and arbitrary authority - and the role of the salons and coffeehouses where these ideas were debated. Notice the paradoxes: the movement that championed universal rights coexisted with slavery and empire. Consider how a few decades of books and conversations became the intellectual scaffolding for revolutions and constitutions that still structure politics today."
+    },
+    "tags": ["18th century", "Europe", "Ideas", "Philosophy"],
+    "tier": 1
+  },
+  {
+    "id": "history-wright-brothers-flight",
+    "categoryId": "HISTORY",
+    "subtype": "Achievement",
+    "name": "The Wright Brothers' First Flight (1903)",
+    "teaser": "On a windswept beach in North Carolina, Orville Wright flew 36.5 meters in 12 seconds - shorter than a modern jumbo jet's wingspan. The bicycle mechanics had solved controlled flight.",
+    "imageUrl": "",
+    "byline": "Wilbur and Orville Wright",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Wright brothers achieved powered flight",
+      "durationMinutes": 30,
+      "instruction": "Read about how the brothers, who ran a bicycle shop, methodically tackled the problem the experts had failed - starting with gliders and building their own wind tunnel to test wing shapes. Notice the breakthrough that others missed: three-axis control, the same principle in every aircraft since. Consider the distance between that first 12-second hop and the airplane you've flown in, and what it says about how grand technologies begin with small, stubborn experiments."
+    },
+    "tags": ["20th century", "Aviation", "Invention", "America"],
+    "tier": 1
+  },
+  {
+    "id": "history-little-rock-nine",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Little Rock Nine (1957)",
+    "teaser": "Nine Black teenagers faced an armed mob to attend an all-white high school, after the Supreme Court had declared segregation unconstitutional. The National Guard was called - to block them, then to protect them.",
+    "imageUrl": "",
+    "byline": "The Little Rock Nine, Arkansas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The integration of Little Rock Central High School",
+      "durationMinutes": 30,
+      "instruction": "Read about September 1957, when the Little Rock Nine tried to enter Central High past Arkansas National Guardsmen sent by the governor to keep them out - and how President Eisenhower federalized the Guard and sent the 101st Airborne to escort them in. Notice the daily ordeal that followed: harassment for a full school year, and only one of the nine graduating from the school. Consider what it takes for individuals to carry the weight of a legal victory, and how enforcement, not just rulings, made rights real."
+    },
+    "tags": ["20th century", "America", "Civil Rights", "Education"],
+    "tier": 1
+  },
+  {
+    "id": "history-manhattan-project",
+    "categoryId": "HISTORY",
+    "subtype": "Project",
+    "name": "The Manhattan Project (1942-1945)",
+    "teaser": "A secret industrial effort that cost $2 billion and employed 130,000 people built the atomic bomb in under three years. Its scientists both delivered the weapon and spent decades agonizing over it.",
+    "imageUrl": "",
+    "byline": "The United States, with British and Canadian help",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Manhattan Project's scale and legacy",
+      "durationMinutes": 40,
+      "instruction": "Read about how the project built entire secret cities - Oak Ridge, Hanford, Los Alamos - to enrich uranium and produce plutonium, and the race against Nazi Germany that justified it. Notice the scientists' ambivalence: the project succeeded, and then many of its leaders, from Oppenheimer to Einstein, spent the rest of their lives warning about what they had built. Consider the questions the project raised about secrecy, science, and responsibility - questions that haven't gone away."
+    },
+    "tags": ["20th century", "World War II", "Science", "Nuclear"],
+    "tier": 1
+  },
+  {
+    "id": "history-channel-tunnel",
+    "categoryId": "HISTORY",
+    "subtype": "Project",
+    "name": "The Channel Tunnel (1988-1994)",
+    "teaser": "Three tunnels bored through chalk beneath the sea, linking England and France after two centuries of proposals. Napoleon's engineers drew plans for an invasion tunnel; the builders of the 1990s finished the job.",
+    "imageUrl": "",
+    "byline": "Britain and France, Eurotunnel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Building the Channel Tunnel",
+      "durationMinutes": 30,
+      "instruction": "Read about the engineering of the Channel Tunnel - tunnel-boring machines chewing through the chalk marl while surveyors on opposite sides met in the middle with centimeter-level accuracy. Notice the history of the idea: proposals date to the 1700s, and a real attempt in the 1880s was abandoned. Consider what changed in the 20th century to make it possible - not just machinery but the political will of two countries - and what the tunnel reveals about how long big ideas take."
+    },
+    "tags": ["20th century", "Britain", "France", "Engineering"],
+    "tier": 1
+  },
+  {
+    "id": "history-rwandan-genocide",
+    "categoryId": "HISTORY",
+    "subtype": "Atrocity",
+    "name": "The Rwandan Genocide (1994)",
+    "teaser": "In 100 days, up to a million Tutsi and moderate Hutu were killed while the world watched and debated terminology. The word 'genocide' itself became a question of policy.",
+    "imageUrl": "",
+    "byline": "Rwanda, 1994",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Rwandan genocide and the world's response",
+      "durationMinutes": 45,
+      "instruction": "Read about how the genocide unfolded after the assassination of Rwanda's president - radio stations broadcasting hate, roadblocks, and machetes - and the chilling detail that it was faster and more systematic than most outsiders believed possible. Notice the international dimension: UN peacekeepers were withdrawn as the killing peaked, and the word 'genocide' was avoided partly because using it would obligate intervention. Consider what the episode teaches about the gap between knowing and acting."
+    },
+    "tags": ["20th century", "Africa", "Rwanda", "Atrocity"],
+    "tier": 1
+  },
+  {
+    "id": "history-voyages-cook",
+    "categoryId": "HISTORY",
+    "subtype": "Exploration",
+    "name": "Captain Cook's Pacific Voyages (1768-1779)",
+    "teaser": "James Cook charted more of the Pacific than anyone before him - and died on a Hawaiian beach. His crews were the first Europeans many islanders ever saw, for better and worse.",
+    "imageUrl": "",
+    "byline": "James Cook and the Endeavour",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cook's three voyages across the Pacific",
+      "durationMinutes": 40,
+      "instruction": "Read about Cook's three voyages - mapping New Zealand and Australia's east coast, crossing the Antarctic Circle, and searching for the Northwest Passage - and notice his famous orders: to treat the islanders well and keep his crews healthy, which made his ships notably cleaner and his crews freer of scurvy. Consider the double edge of his voyages: extraordinary mapping and science, and the arrival of a world that would be changed by contact. Ask how a navigator becomes both celebrated and contested."
+    },
+    "tags": ["18th century", "Exploration", "Pacific", "Ships"],
+    "tier": 1
+  },
+  {
+    "id": "history-first-opium-documents",
+    "categoryId": "HISTORY",
+    "subtype": "Document",
+    "name": "The Treaty of Nanking (1842)",
+    "teaser": "China's first 'unequal treaty,' imposed after losing the First Opium War, ceded Hong Kong and opened five ports. Its shadow stretched across Chinese politics for a century and more.",
+    "imageUrl": "",
+    "byline": "Qing China and Britain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Treaty of Nanking and the unequal treaty system",
+      "durationMinutes": 30,
+      "instruction": "Read about the treaty's terms - the cession of Hong Kong, the opening of five treaty ports, a large indemnity, and the beginning of extraterritorial rights for foreigners in China. Notice how the treaty set a pattern: a string of similar agreements followed, each chipping at China's sovereignty, and the term 'century of humiliation' came to describe the era. Consider what it means when a peace treaty is remembered less as a settlement than as a wound, and how that memory shapes foreign policy."
+    },
+    "tags": ["19th century", "China", "Britain", "Treaties"],
+    "tier": 2
+  },
+  {
+    "id": "history-armada-symbol",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Defeat of the Spanish Armada in English Memory",
+    "teaser": "England's narrow victory in 1588 became a national origin story - the storm that 'blew' for the Protestants. The medals, ballads, and portraits that followed built a myth as carefully as any fleet.",
+    "imageUrl": "",
+    "byline": "Elizabethan England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Armada became a national myth",
+      "durationMinutes": 30,
+      "instruction": "Read about how the defeat was turned into legend almost immediately - commemorative medals reading 'God blew and they were scattered,' portraits of Elizabeth in Armada dress, and ballads celebrating divine favor. Notice the historical correction: the weather mattered, but so did English seamanship and Spanish logistics failures. Consider how a single event can be packaged as destiny, and how the myth of 1588 was used to build a national identity that lasted for centuries."
+    },
+    "tags": ["Renaissance", "England", "Myth", "Naval"],
+    "tier": 2
+  },
+  {
+    "id": "history-venice-merchant-republic",
+    "categoryId": "HISTORY",
+    "subtype": "Civilization",
+    "name": "Venice: The Merchant Republic",
+    "teaser": "A city of islands with no farmland built a maritime empire on trade, ruled by an elected doge and a famously complex constitution. Its wealth built palaces on water and funded the Renaissance.",
+    "imageUrl": "",
+    "byline": "The Republic of Venice",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Venice built wealth without farmland",
+      "durationMinutes": 40,
+      "instruction": "Read about how Venice turned its lagoon into an advantage - ships, salt, and the trade between East and West - and governed itself through a tangle of councils designed to prevent any one family from dominating. Notice the detail that Venice's Arsenal could assemble a galley in a day, an early example of industrial production. Consider how a city with no land to farm became one of history's richest, and what happens to a maritime power when trade routes shift."
+    },
+    "tags": ["Medieval", "Renaissance", "Italy", "Trade"],
+    "tier": 1
+  },
+  {
+    "id": "history-samurai-bushido",
+    "categoryId": "HISTORY",
+    "subtype": "Era",
+    "name": "The Samurai and Bushido (12th-19th century)",
+    "teaser": "Japan's warrior class ruled for seven centuries, bound by a code that was more about loyalty and honor than the sword. In peacetime, many samurai were clerks and administrators.",
+    "imageUrl": "",
+    "byline": "Japan's warrior class",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The samurai's rise, rule, and reinvention",
+      "durationMinutes": 40,
+      "instruction": "Read about how samurai emerged as provincial warriors, rose with the shogunate, and later became bureaucrats as Japan entered long periods of peace - the famous code of bushido was largely written down centuries later, in peacetime, as a retroactive ideal. Notice the Meiji era's decision to abolish the class and turn samurai swords into plowshares and pensions. Consider what the gap between the warrior myth and the clerk reality tells you about how every class tells its own story."
+    },
+    "tags": ["Medieval", "Japan", "Warriors", "Code"],
+    "tier": 1
+  },
+  {
+    "id": "history-ottoman-siege-vienna",
+    "categoryId": "HISTORY",
+    "subtype": "Siege",
+    "name": "The Siege of Vienna (1683)",
+    "teaser": "The Ottoman army's last great push into Europe stalled at Vienna's walls. The relief charge that broke the siege became the moment Europe's balance of power tipped - and the origin of the croissant story.",
+    "imageUrl": "",
+    "byline": "Ottoman Empire vs. the Holy League",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 1683 siege of Vienna",
+      "durationMinutes": 35,
+      "instruction": "Read about the siege's drama - the city's defenders holding out for two months while the Polish king Jan Sobieski marched to their relief and led a massive cavalry charge that broke the Ottoman lines. Notice the military detail: Ottoman sappers were tunneling under the walls when the charge came. The legend that bakers celebrated the victory with crescent-shaped pastries is likely fiction, but it outlived the battle. Consider how one battle was remembered as the hinge of two civilizations' fortunes."
+    },
+    "tags": ["17th century", "Ottoman", "Vienna", "War"],
+    "tier": 1
+  },
+  {
+    "id": "history-elmina-castle",
+    "categoryId": "HISTORY",
+    "subtype": "Site",
+    "name": "Elmina Castle (1482)",
+    "teaser": "The oldest European building south of the Sahara began as a gold-trade fort and became a slave-holding dungeon. Today it is both a World Heritage site and a monument to a painful history.",
+    "imageUrl": "",
+    "byline": "Built by the Portuguese on the Gold Coast",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Elmina Castle's layered history",
+      "durationMinutes": 30,
+      "instruction": "Read about the castle's two lives - first a Portuguese trading post for gold, then, under Dutch and later British control, a holding place for enslaved people awaiting the middle passage, with dungeons below the governor's chapel. Notice the irony the site preserves: a church above, a dungeon below. Consider what it means that a building can hold both a nation's oldest European architecture and one of its most painful memories, and how such sites are reckoned with today."
+    },
+    "tags": ["Colonialism", "Africa", "Ghana", "Slavery"],
+    "tier": 1
+  },
+  {
+    "id": "history-panama-canal",
+    "categoryId": "HISTORY",
+    "subtype": "Project",
+    "name": "The Panama Canal (1904-1914)",
+    "teaser": "A French company went bankrupt trying to dig a canal across Panama; the US finished it by controlling rivers with dams and locks. Over 25,000 workers died across both attempts.",
+    "imageUrl": "",
+    "byline": "France then the United States",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Panama Canal was finally built",
+      "durationMinutes": 35,
+      "instruction": "Read about how the French attempt was defeated less by rock than by disease - yellow fever and malaria - until the US effort took on the mosquitoes themselves, draining swamps and screening hospitals. Notice the engineering pivot: instead of a sea-level trench, a chain of locks lifting ships over the continental divide. Consider the human ledger of the project, the geopolitical deal that carved Panama from Colombia, and how a shortcut for trade reshaped the world's shipping lanes."
+    },
+    "tags": ["20th century", "Panama", "Engineering", "Trade"],
+    "tier": 1
+  },
+  {
+    "id": "history-empire-state-building",
+    "categoryId": "HISTORY",
+    "subtype": "Achievement",
+    "name": "The Empire State Building (1931)",
+    "teaser": "Raised at the start of the Great Depression, the world's tallest building went up in 410 days - with workers averaging four and a half floors a week. It was called the 'Empty State Building' for years.",
+    "imageUrl": "",
+    "byline": "Built by the Starrett Brothers, New York",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Empire State Building's record-speed construction",
+      "durationMinutes": 30,
+      "instruction": "Read about the construction's audacious speed - a skeleton of steel rising a floor every day, with materials arriving on a tight railway schedule - and the name's irony: completed in 1931, much of its office space sat empty for a decade. Notice the competition that drove it: a skyscraper race in New York in the 1920s and 30s. Consider what it meant to build the world's tallest tower as the economy collapsed, and how a symbol of confidence became a symbol of the Depression's excess."
+    },
+    "tags": ["20th century", "America", "Architecture", "Depression"],
+    "tier": 1
+  },
+  {
+    "id": "history-apartheid-begins",
+    "categoryId": "HISTORY",
+    "subtype": "System",
+    "name": "Apartheid in South Africa (1948-1994)",
+    "teaser": "A legal system built to keep racial separation permanent - with passbooks, homelands, and forced removals. It ended in 1994, not with a collapse of order but with a negotiated revolution and a truth commission.",
+    "imageUrl": "",
+    "byline": "South Africa's National Party government",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How apartheid worked and how it ended",
+      "durationMinutes": 45,
+      "instruction": "Read about apartheid's machinery - the Population Registration Act sorting everyone by race, the pass laws that controlled movement, and the homelands policy that stripped millions of citizenship. Notice the resistance it provoked: the Sharpeville massacre, the Soweto uprising, the international boycott movement, and the long imprisonment of Nelson Mandela. Consider the astonishing endgame - a negotiated transition and the Truth and Reconciliation Commission - and what a society chooses when it decides to tell the truth about itself instead of taking revenge."
+    },
+    "tags": ["20th century", "Africa", "South Africa", "Rights"],
+    "tier": 1
+  },
+  {
+    "id": "history-moon-landing-tv",
+    "categoryId": "HISTORY",
+    "subtype": "Event",
+    "name": "The Moon Landing on Television (1969)",
+    "teaser": "An estimated 600 million people watched the first moonwalk live - about a fifth of humanity. The transmission itself, from 380,000 kilometers away, was a technical feat on top of the flight.",
+    "imageUrl": "",
+    "byline": "The Apollo 11 broadcast",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the moon landing reached television screens",
+      "durationMinutes": 25,
+      "instruction": "Read about the broadcast engineering - the lunar module's low-power antenna, the tracking stations, and the 2.2 seconds of delay - and how the world gathered around screens at odd hours, with celebrations from London to Lagos. Notice the small drama: the first camera was mounted on the lander, and the famous first steps were nearly missed because it was switched on late. Consider what it meant for humanity to watch itself reach another world, and how live television made a shared experience of a single moment."
+    },
+    "tags": ["20th century", "Space", "Television", "Media"],
+    "tier": 2
+  },
+  {
+    "id": "history-voynich-untouched",
+    "categoryId": "HISTORY",
+    "subtype": "Mystery",
+    "name": "The Voynich Manuscript (c. 15th century)",
+    "teaser": "A book written in a script no one can read, illustrated with plants that don't exist. Carbon dating confirms its age; every attempt at decipherment has failed - or been a hoax.",
+    "imageUrl": "",
+    "byline": "Unknown author",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Voynich Manuscript and its unsolved script",
+      "durationMinutes": 30,
+      "instruction": "Read about the manuscript's features - its unreadable script, its botanical illustrations of imaginary plants, its astronomical diagrams - and the theories about it, from a lost language to a medieval hoax to an invented cipher. Notice what carbon dating and statistical analysis have established, and what they can't explain. Consider why a document that may be meaningless keeps pulling in codebreakers and cranks alike, and what our fascination with it says about the appeal of unsolved things."
+    },
+    "tags": ["Medieval", "Mystery", "Books", "Cipher"],
+    "tier": 1
+  },
+  {
+    "id": "history-thomas-cromwell-reforms",
+    "categoryId": "HISTORY",
+    "subtype": "Figure",
+    "name": "Thomas Cromwell and Tudor Bureaucracy",
+    "teaser": "The son of a blacksmith became Henry VIII's fixer, dissolving the monasteries and building the machinery of the modern English state. His fall was as swift as his rise - beheaded in 1540.",
+    "imageUrl": "",
+    "byline": "Thomas Cromwell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Thomas Cromwell built the Tudor state",
+      "durationMinutes": 35,
+      "instruction": "Read about how Cromwell rose from humble origins to engineer the break with Rome, dissolve the monasteries, and centralize royal power through Parliament and a professional bureaucracy. Notice the bureaucratic revolution hiding in his work: records, audits, and administrative machinery where medieval informality had ruled. Consider how the same skills that made him indispensable made him dangerous, and what his execution in 1540 - engineered by his rivals - reveals about the court politics of the age."
+    },
+    "tags": ["Renaissance", "England", "Politics", "Reform"],
+    "tier": 2
+  },
+  {
+    "id": "history-great-wall-qin",
+    "categoryId": "HISTORY",
+    "subtype": "Project",
+    "name": "The First Great Wall (Qin Dynasty, 3rd century BCE)",
+    "teaser": "The wall you picture today is mostly Ming dynasty. Qin Shi Huang's original was a series of rammed-earth fortifications linking older walls - built by hundreds of thousands of conscripts.",
+    "imageUrl": "",
+    "byline": "Qin Shi Huang",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Qin Shi Huang's wall and the Ming wall that replaced it",
+      "durationMinutes": 30,
+      "instruction": "Read about the first emperor's wall - earthen ramparts connecting older state walls to keep northern nomads out - and how later dynasties rebuilt it, with the surviving stone and brick version dating mostly to the Ming. Notice the human cost: conscript laborers built it at a terrible price, and legend says dead workers were buried in the fill. Consider how a defensive project that never fully stopped invaders still became a nation's symbol, and what the difference between the original and the tourist version tells you about history and myth."
+    },
+    "tags": ["Ancient", "China", "Qin", "Defense"],
+    "tier": 1
+  },
+  {
+    "id": "history-zheng-he-fleets",
+    "categoryId": "HISTORY",
+    "subtype": "Exploration",
+    "name": "Zheng He's Treasure Fleets (1405-1433)",
+    "teaser": "A Chinese admiral commanded the largest wooden ships ever built and sailed them across the Indian Ocean decades before Columbus. Then China stopped, dismantled the fleet, and the era ended.",
+    "imageUrl": "",
+    "byline": "Admiral Zheng He, Ming dynasty",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Zheng He's seven voyages across the Indian Ocean",
+      "durationMinutes": 35,
+      "instruction": "Read about the treasure fleet's scale - ships reportedly far larger than anything Europeans built, with hundreds of vessels and tens of thousands of crew, sailing from China to East Africa. Notice the purpose: display, diplomacy, and tribute rather than conquest or colonization. Then read the counterintuitive ending: after Zheng He's death the voyages were stopped, the fleet burned, and China turned inward. Consider what it means when a state that had mastered the oceans chooses to abandon them, and why that choice still puzzles historians."
+    },
+    "tags": ["Medieval", "China", "Ships", "Exploration"],
+    "tier": 1
+  },
+  {
+    "id": "history-papal-states",
+    "categoryId": "HISTORY",
+    "subtype": "State",
+    "name": "The Papal States (756-1870)",
+    "teaser": "For over a thousand years, the pope ruled a swath of central Italy as a secular monarch - complete with armies, taxes, and wars. The unification of Italy ended it, and the pope became 'the prisoner of the Vatican.'",
+    "imageUrl": "",
+    "byline": "The papacy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the papacy ruled a state for a millennium",
+      "durationMinutes": 30,
+      "instruction": "Read about how the donation of land in central Italy gave popes temporal power - popes who led armies, signed treaties, and taxed their subjects alongside their spiritual role. Notice the irony of the arrangement: the 'Donation of Constantine,' long used to justify papal lands, was later proven a forgery. Consider how the pope's loss of his state in 1870 changed the papacy's authority - stripped of armies, it gained moral stature - and what that says about power's strange accounting."
+    },
+    "tags": ["Medieval", "Italy", "Religion", "Politics"],
+    "tier": 2
+  },
+  {
+    "id": "history-silk-road-paper-money",
+    "categoryId": "HISTORY",
+    "subtype": "Invention",
+    "name": "Paper Money in Yuan China (13th century)",
+    "teaser": "Marco Polo was astonished: the Great Khan paid his armies with decorated paper that was 'worth as much as if it were pure gold.' It was the world's first government-backed paper currency.",
+    "imageUrl": "",
+    "byline": "The Yuan dynasty",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kublai Khan's paper currency",
+      "durationMinutes": 30,
+      "instruction": "Read about how the Yuan state issued paper notes, backed by the government's authority rather than metal reserves, and required their use - refusing them could cost you your life. Notice the warning it contains about money: when the treasury printed too much, inflation wrecked the system, and China returned to coin and, later, silver. Consider what Marco Polo's wonder reveals about how money is a story a society agrees to believe, and how the Yuan's lesson about overprinting is still taught in every economics class."
+    },
+    "tags": ["Medieval", "China", "Money", "Mongol"],
+    "tier": 2
+  },
+  {
+    "id": "history-erosion-venice-sinking",
+    "categoryId": "HISTORY",
+    "subtype": "Challenge",
+    "name": "Venice's Fight Against the Water",
+    "teaser": "Venice has been sinking for centuries - its wooden piles driven into mud, its groundwater pumped, its sea levels rising. Modern engineering now raises flood barriers from beneath the lagoon.",
+    "imageUrl": "",
+    "byline": "The Republic of Venice and its successors",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How Venice was built on water and keeps fighting it",
+      "durationMinutes": 30,
+      "instruction": "Read about the engineering that lets a city sit on water - millions of wooden piles driven through mud to firm clay, buildings made light, and canals instead of streets - and the slow sinking caused partly by the pumping of groundwater and the weight of the city itself. Notice the modern answer, the MOSE flood barriers that rise from the lagoon floor. Consider what it means for a whole city to be a long-term experiment in defying its own geography."
+    },
+    "tags": ["Renaissance", "Italy", "Water", "Engineering"],
+    "tier": 2
+  },
+  {
+    "id": "history-archimedes-syracuse",
+    "categoryId": "HISTORY",
+    "subtype": "Siege",
+    "name": "The Siege of Syracuse (214-212 BCE)",
+    "teaser": "A Roman army besieged a Greek city defended by Archimedes - whose war machines reportedly included a claw that lifted ships out of the water. The city fell anyway, and Archimedes died at a soldier's sword.",
+    "imageUrl": "",
+    "byline": "Archimedes of Syracuse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Archimedes's machines and the fall of Syracuse",
+      "durationMinutes": 25,
+      "instruction": "Read about how the elderly Archimedes turned geometry into weapons - the stories, possibly exaggerated, of mirrors focusing sunlight on ships and a claw that grabbed Roman vessels by the prow. Notice that the city still fell after a two-year siege, and that Archimedes, absorbed in a diagram, was reportedly killed by a soldier who didn't know who he was. Consider why a single mind can delay but not decide a war, and how the death of the era's greatest scientist became part of the story of its greatest siege."
+    },
+    "tags": ["Ancient", "Greece", "War", "Science"],
+    "tier": 1
+  },
+  {
+    "id": "history-cambodia-angkor",
+    "categoryId": "HISTORY",
+    "subtype": "Civilization",
+    "name": "The Khmer Empire and Angkor (9th-15th century)",
+    "teaser": "Angkor was one of the world's largest pre-industrial cities - a water-management civilization whose reservoirs and canals covered more land than the temples did. Its collapse may have been a water crisis.",
+    "imageUrl": "",
+    "byline": "The Khmer Empire, Cambodia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Angkor's water systems and its fall",
+      "durationMinutes": 40,
+      "instruction": "Read about how the Khmer engineered a city around water - massive reservoirs called barays, a network of canals, and the temple-mountain of Angkor Wat - and how archaeologists now read the landscape as one vast hydraulic machine. Notice the leading theory of the collapse: the water system, overtaxed by climate swings and overexpansion, became the city's undoing. Consider what it means that a civilization's masterpiece of water engineering may have been what broke it, and what that warns about infrastructure built at the edge of its limits."
+    },
+    "tags": ["Medieval", "Cambodia", "Water", "Empire"],
+    "tier": 1
+  },
+  {
+    "id": "history-maya-cities",
+    "categoryId": "HISTORY",
+    "subtype": "Civilization",
+    "name": "The Maya City-States (c. 250-900 CE)",
+    "teaser": "A civilization of dozens of rival city-states that built towering temples in the jungle, wrote books in a script we've only recently deciphered, and collapsed mysteriously around 900 CE.",
+    "imageUrl": "",
+    "byline": "The Classic Maya, Mesoamerica",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Maya cities, writing, and the Classic collapse",
+      "durationMinutes": 40,
+      "instruction": "Read about how the Maya built cities like Tikal and Calakmul with precise calendars, monumental architecture, and a full writing system - much of it now deciphered, revealing dynasties and wars. Notice the collapse: over a few generations, the great cities were abandoned, and scholars now point to a combination of drought, overpopulation, and intercity warfare. Consider how a civilization that knew enough astronomy to predict eclipses could not escape its own ecological limits, and what the Maya's slow, structural end - not a single catastrophe - says about resilience."
+    },
+    "tags": ["Ancient", "Mesoamerica", "Maya", "Collapse"],
+    "tier": 1
+  },
+  {
+    "id": "history-missionaries-jesuits-china",
+    "categoryId": "HISTORY",
+    "subtype": "Encounter",
+    "name": "The Jesuits in Ming China (16th-17th century)",
+    "teaser": "Jesuit missionaries reached the Ming court not with armies but with mathematics, clocks, and maps - and were appointed to run China's calendar. The encounter mixed wonder, suspicion, and influence.",
+    "imageUrl": "",
+    "byline": "Matteo Ricci and the Jesuits",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Matteo Ricci's mission and the science exchange",
+      "durationMinutes": 30,
+      "instruction": "Read about how Matteo Ricci learned Chinese, adopted Confucian dress, and impressed the court with European science - astronomy, cartography, and clocks - earning the Jesuits a place at the imperial court and responsibility for the calendar. Notice the cultural trading: Ricci translated Confucian classics to Europe while the Jesuits introduced Western astronomy to China. Consider what this exchange - conducted without conquest - reveals about how knowledge moves between civilizations, and why it ended as Europe's approach shifted."
+    },
+    "tags": ["Renaissance", "China", "Religion", "Science"],
+    "tier": 2
+  },
+  {
+    "id": "history-last-dinosaurs-asteroid",
+    "categoryId": "HISTORY",
+    "subtype": "Turning point",
+    "name": "The Day the Dinosaurs Died (66 million years ago)",
+    "teaser": "An asteroid roughly 10 kilometers wide hit the Yucatan and ended 165 million years of dinosaur rule. The impact winter that followed also cleared the way for mammals - and, eventually, for us.",
+    "imageUrl": "",
+    "byline": "The Chicxulub impact",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Chicxulub impact and the K-Pg extinction",
+      "durationMinutes": 30,
+      "instruction": "Read about how the impact hypothesis - an iridium layer found worldwide, then a buried crater under Mexico's coast - came to be accepted, and what the day itself looked like: a fireball, tsunamis, and years of dust that starved the planet of sunlight. Notice that some birds, our dinosaurs, survived. Consider how a chance cosmic event reset the course of life on Earth, and how a single day 66 million years ago is the reason your own existence is possible."
+    },
+    "tags": ["Prehistory", "Extinction", "Earth", "Turning point"],
+    "tier": 1
+  }
+]

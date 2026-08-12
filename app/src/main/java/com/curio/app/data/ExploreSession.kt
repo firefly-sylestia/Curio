@@ -74,8 +74,16 @@ fun ExploreSession.reflectionQuestion(): String = when (categoryId) {
         "Finished reading? What idea do you want to keep?"
     CategoryId.PAINTERS, CategoryId.ARTWORKS ->
         "Finished looking? What detail caught your eye first?"
-    CategoryId.SCIENTISTS, CategoryId.DISCOVERIES ->
+    CategoryId.SCIENTISTS, CategoryId.DISCOVERIES,
+    // v27i — the 15 new lanes share their family's reflection flavor:
+    // the STEM-heavy ones explore, the wordy ones read.
+    CategoryId.BIOLOGY, CategoryId.CHEMISTRY, CategoryId.ANIMALS,
+    CategoryId.PLANTS, CategoryId.ASTRONOMY, CategoryId.GEOLOGY,
+    CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
+    CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING ->
         "Finished exploring? What fact surprised you most?"
+    CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS ->
+        "Finished reading? What idea do you want to keep?"
     CategoryId.GAMES ->
         "Finished watching? What moment or decision stuck with you?"
     CategoryId.SPORTS ->

@@ -51,11 +51,38 @@ enum class CategoryId {
     SPORTS,
     FOOD,
     INTERNET,
+    // ── v27i — 15 new lanes (content expansion pass, authored in batches) ──
+    BIOLOGY,
+    CHEMISTRY,
+    ANIMALS,
+    PLANTS,
+    TECHNOLOGIES,
+    ASTRONOMY,
+    HISTORY,
+    GEOLOGY,
+    MEDICINE,
+    PSYCHOLOGY,
+    MATHEMATICS,
+    ECONOMICS,
+    LANGUAGE,
+    ENGINEERING,
+    OCEANS,
     WILDCARD;
 
     companion object {
         fun fromRoute(slug: String): CategoryId? =
             values().firstOrNull { it.routeSlug == slug }
+
+        /**
+         * v27i — the 15 lanes added in the content-expansion pass. The
+         * category picker splits its deck grid into the original 21 lanes
+         * and these new lanes (a swipeable second page).
+         */
+        val newLanes: Set<CategoryId> = setOf(
+            BIOLOGY, CHEMISTRY, ANIMALS, PLANTS, TECHNOLOGIES,
+            ASTRONOMY, HISTORY, GEOLOGY, MEDICINE, PSYCHOLOGY,
+            MATHEMATICS, ECONOMICS, LANGUAGE, ENGINEERING, OCEANS
+        )
 
         /** Default chip order on Home + Category Picker. Wildcard stays last. */
         val defaultOrder: List<CategoryId> = listOf(
@@ -70,6 +97,9 @@ enum class CategoryId {
             SPORTS,
             FOOD,
             INTERNET,
+            BIOLOGY, CHEMISTRY, ANIMALS, PLANTS, TECHNOLOGIES,
+            ASTRONOMY, HISTORY, GEOLOGY, MEDICINE, PSYCHOLOGY,
+            MATHEMATICS, ECONOMICS, LANGUAGE, ENGINEERING, OCEANS,
             WILDCARD
         )
     }
@@ -96,6 +126,21 @@ enum class CategoryId {
         SPORTS      -> "sports"
         FOOD        -> "food"
         INTERNET    -> "internet"
+        BIOLOGY     -> "biology"
+        CHEMISTRY   -> "chemistry"
+        ANIMALS     -> "animals"
+        PLANTS      -> "plants"
+        TECHNOLOGIES -> "technologies"
+        ASTRONOMY   -> "astronomy"
+        HISTORY     -> "history"
+        GEOLOGY     -> "geology"
+        MEDICINE    -> "medicine"
+        PSYCHOLOGY  -> "psychology"
+        MATHEMATICS -> "mathematics"
+        ECONOMICS   -> "economics"
+        LANGUAGE    -> "language"
+        ENGINEERING -> "engineering"
+        OCEANS      -> "oceans"
         WILDCARD    -> "wildcard"
     }
 }
@@ -135,6 +180,15 @@ enum class CategoryFamily {
             CategoryId.SPORTS -> SPORTS
             CategoryId.FOOD -> FOOD
             CategoryId.INTERNET -> INTERNET
+            // v27i — the STEM-heavy new lanes join the SCIENCE family (they
+            // share the science tint story + wildcard pool); the wordy ones
+            // join BOOKS. No new family values — CurioIcons' exhaustive
+            // when(family) glyph map stays untouched.
+            CategoryId.BIOLOGY, CategoryId.CHEMISTRY, CategoryId.ANIMALS,
+            CategoryId.PLANTS, CategoryId.ASTRONOMY, CategoryId.GEOLOGY,
+            CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
+            CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING -> SCIENCE
+            CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS -> BOOKS
             CategoryId.WILDCARD -> WILDCARD
         }
     }
@@ -425,6 +479,158 @@ object CurioCategories {
             family        = CategoryFamily.INTERNET,
             defaultFormat = CaptureFormat.OpenNotebook
         ),
+        // ── v27i — 15 new lanes (content expansion pass) ────────────────
+        CurioCategory(
+            id            = CategoryId.BIOLOGY,
+            displayName   = "Biology",
+            accent        = CurioColors.CategoryGreen,
+            lightAccent   = CurioColors.CategoryGreenInk,
+            tint          = CurioColors.CategoryGreenTint,
+            iconGlyph     = "science",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.CHEMISTRY,
+            displayName   = "Chemistry",
+            accent        = CurioColors.CategoryLime,
+            lightAccent   = CurioColors.CategoryLimeInk,
+            tint          = CurioColors.CategoryLimeTint,
+            iconGlyph     = "colorize",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.ANIMALS,
+            displayName   = "Animals",
+            accent        = CurioColors.CategoryBrown,
+            lightAccent   = CurioColors.CategoryBrownInk,
+            tint          = CurioColors.CategoryBrownTint,
+            iconGlyph     = "pets",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.PLANTS,
+            displayName   = "Plants",
+            accent        = CurioColors.CategoryForest,
+            lightAccent   = CurioColors.CategoryForestInk,
+            tint          = CurioColors.CategoryForestTint,
+            iconGlyph     = "landscape",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.TECHNOLOGIES,
+            displayName   = "Technologies",
+            accent        = CurioColors.CategorySlate,
+            lightAccent   = CurioColors.CategorySlateInk,
+            tint          = CurioColors.CategorySlateTint,
+            iconGlyph     = "smart_display",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.ASTRONOMY,
+            displayName   = "Astronomy",
+            accent        = CurioColors.CategoryNavy,
+            lightAccent   = CurioColors.CategoryNavyInk,
+            tint          = CurioColors.CategoryNavyTint,
+            iconGlyph     = "dark_mode",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.HISTORY,
+            displayName   = "History",
+            accent        = CurioColors.CategorySepia,
+            lightAccent   = CurioColors.CategorySepiaInk,
+            tint          = CurioColors.CategorySepiaTint,
+            iconGlyph     = "history",
+            family        = CategoryFamily.BOOKS,
+            defaultFormat = CaptureFormat.Marginalia,
+            isReady       = true  // v27i — 117 topics shipped in assets/topics/history.json
+        ),
+        CurioCategory(
+            id            = CategoryId.GEOLOGY,
+            displayName   = "Geology",
+            accent        = CurioColors.CategoryStone,
+            lightAccent   = CurioColors.CategoryStoneInk,
+            tint          = CurioColors.CategoryStoneTint,
+            iconGlyph     = "layers",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.MEDICINE,
+            displayName   = "Medicine",
+            accent        = CurioColors.CategoryCrimson,
+            lightAccent   = CurioColors.CategoryCrimsonInk,
+            tint          = CurioColors.CategoryCrimsonTint,
+            iconGlyph     = "self_improvement",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.PSYCHOLOGY,
+            displayName   = "Psychology",
+            accent        = CurioColors.CategoryPeriwinkle,
+            lightAccent   = CurioColors.CategoryPeriwinkleInk,
+            tint          = CurioColors.CategoryPeriwinkleTint,
+            iconGlyph     = "psychology",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.MATHEMATICS,
+            displayName   = "Mathematics",
+            accent        = CurioColors.CategoryIndigoBlue,
+            lightAccent   = CurioColors.CategoryIndigoBlueInk,
+            tint          = CurioColors.CategoryIndigoBlueTint,
+            iconGlyph     = "equalizer",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.ECONOMICS,
+            displayName   = "Economics",
+            accent        = CurioColors.CategoryGold,
+            lightAccent   = CurioColors.CategoryGoldInk,
+            tint          = CurioColors.CategoryGoldTint,
+            iconGlyph     = "public",
+            family        = CategoryFamily.BOOKS,
+            defaultFormat = CaptureFormat.Marginalia
+        ),
+        CurioCategory(
+            id            = CategoryId.LANGUAGE,
+            displayName   = "Language",
+            accent        = CurioColors.CategoryTeal600,
+            lightAccent   = CurioColors.CategoryTeal600Ink,
+            tint          = CurioColors.CategoryTeal600Tint,
+            iconGlyph     = "format_quote",
+            family        = CategoryFamily.BOOKS,
+            defaultFormat = CaptureFormat.Marginalia
+        ),
+        CurioCategory(
+            id            = CategoryId.ENGINEERING,
+            displayName   = "Engineering",
+            accent        = CurioColors.CategoryZinc,
+            lightAccent   = CurioColors.CategoryZincInk,
+            tint          = CurioColors.CategoryZincTint,
+            iconGlyph     = "settings",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
+        CurioCategory(
+            id            = CategoryId.OCEANS,
+            displayName   = "Oceans",
+            accent        = CurioColors.CategoryDeepCyan,
+            lightAccent   = CurioColors.CategoryDeepCyanInk,
+            tint          = CurioColors.CategoryDeepCyanTint,
+            iconGlyph     = "bubble_chart",
+            family        = CategoryFamily.SCIENCE,
+            defaultFormat = CaptureFormat.FieldNotes
+        ),
         // ── Wildcard (brand coral; cards use the themed coral gradient) ──
         CurioCategory(
             id            = CategoryId.WILDCARD,
@@ -505,7 +711,15 @@ object CurioCategories {
                 order.mapNotNull { id -> all.firstOrNull { it.id == id } } +
                     all.filter { it.id !in order }
             }
-            return base.filterNot { it.id in hidden }
+            // v27i — new lanes stay out of the chip rows / Spin sheet / Cabinet
+            // filters until their topic content actually ships (isReady = true,
+            // set on the CurioCategory entry when assets/topics/{slug}.json
+            // reaches 100+ topics). They only surface as "Coming soon" tiles on
+            // the Category Picker's New-lanes page, which reads `all` directly
+            // instead of `visible`.
+            return base
+                .filterNot { it.id in hidden }
+                .filterNot { it.id in CategoryId.newLanes && !it.isReady }
         }
 
     /** Returns all categories in the given [family], in default order. */
