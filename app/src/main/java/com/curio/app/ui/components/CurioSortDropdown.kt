@@ -1,5 +1,6 @@
 package com.curio.app.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -54,7 +55,10 @@ fun CurioSortDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selected = options.firstOrNull { it.key == selectedKey }
-    val fill = if (emphasized) ink.copy(alpha = 0.42f) else ink.copy(alpha = 0.18f)
+    // v27 — match the deepened hero pill glass: the old 18% fill vanished
+    // on the rose banner, and the sort control had no border at all — the
+    // capsules now read clearly next to the other hero actions.
+    val fill = if (emphasized) ink.copy(alpha = 0.55f) else ink.copy(alpha = 0.30f)
 
     Box(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -62,7 +66,8 @@ fun CurioSortDropdown(
             Surface(
                 onClick = { expanded = true },
                 shape = RoundedCornerShape(50),
-                color = fill
+                color = fill,
+                border = BorderStroke(1.dp, ink.copy(alpha = 0.42f))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -86,7 +91,8 @@ fun CurioSortDropdown(
             Surface(
                 onClick = onToggleDirection,
                 shape = CircleShape,
-                color = fill
+                color = fill,
+                border = BorderStroke(1.dp, ink.copy(alpha = 0.42f))
             ) {
                 CurioIcon(
                     name = if (ascending) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,

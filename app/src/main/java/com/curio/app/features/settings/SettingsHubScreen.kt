@@ -381,12 +381,15 @@ fun SettingsHeroActionPill(
     emphasized: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val fill = if (emphasized) ink.copy(alpha = 0.42f) else ink.copy(alpha = 0.18f)
+    // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
+    // banner (especially in light mode), so hero actions like search / sort
+    // read as invisible. The glass stays frosted but clearly visible.
+    val fill = if (emphasized) ink.copy(alpha = 0.55f) else ink.copy(alpha = 0.30f)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        border = BorderStroke(1.dp, ink.copy(alpha = 0.28f)),
+        border = BorderStroke(1.dp, ink.copy(alpha = 0.42f)),
         shadowElevation = 0.dp,
         modifier = modifier
     ) {

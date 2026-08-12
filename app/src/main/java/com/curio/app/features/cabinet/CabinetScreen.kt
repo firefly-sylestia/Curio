@@ -1064,16 +1064,19 @@ private fun CabinetHeroActionPill(
     emphasized: Boolean = false,
     destructive: Boolean = false
 ) {
+    // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
+    // banner (especially in light mode), so hero actions like Select /
+    // Sort / Search read as invisible. The glass stays frosted but clear.
     val fill = when {
-        destructive -> ink.copy(alpha = 0.55f)
-        emphasized -> ink.copy(alpha = 0.42f)
-        else -> ink.copy(alpha = 0.18f)
+        destructive -> ink.copy(alpha = 0.65f)
+        emphasized -> ink.copy(alpha = 0.55f)
+        else -> ink.copy(alpha = 0.30f)
     }
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        border = BorderStroke(1.dp, ink.copy(alpha = 0.28f)),
+        border = BorderStroke(1.dp, ink.copy(alpha = 0.42f)),
         shadowElevation = 0.dp
     ) {
         Row(
