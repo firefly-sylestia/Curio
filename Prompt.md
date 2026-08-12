@@ -1,6 +1,24 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Session time on entries + detail view (Android)
+## Current Request (COMPLETE): More pet tap actions/angles — visual reactions, not just dialog (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "Add more pet actions angles, more tap reactions in visual not just dialog."
+
+**What was built (app/src/main/java/com/curio/app/ui/pet/CurioFloatingPet.kt):**
+- **Root cause**: taps only fired the four motion keys (squish/bow/hop/spin) + a face + gated dialog — the pet's rich authored animation catalog (glance/wave/stretch/sidepeek/stumble/look_up/backturn/victory/inspect, with SIDE/BACK/LOOKING_UP/LOOKING_DOWN viewpoint angles and per-frame motion) was used only by ambient Pet Life routines and custom actions, never by taps.
+- **New tap-animation slot**: `tapAnim`/`tapFrameIndex`/`tapKey` state + a one-shot stepper LaunchedEffect, mirroring the custom-action machinery. `playTapAnimation(id)` resolves `activeDesign.animations[id] ?: animationById(id)`, cancels a playing routine (tap is a direct interaction), guards empty frames.
+- **Richer tiers** (inside the existing `rule.enabled` gate so the TOUCH-reaction disable contract is preserved): tier 1 = squish + random glance/sidepeek/wave; tier 2 = play-bow + random wave/look_up/stumble; tier 3 = celebration hop + one spin + random victory/backturn/happy. `fireCustomActions(TAP)` still fires.
+- **Sprite wiring**: `activeFrame = caFrame ?: tapFrame ?: lifeFrame`; `activeView` honors tap-frame viewpoints; faceOverride chain gains `?: tapAnim?.let { activeDesign.faceFor(it.mood) }` — the scene's own mood face (shy stumble, proud victory…) wins during the ~0.7s scene, then the configured TOUCH face shows as the ~0.7s afterglow (reactionFace still auto-clears at 1.4s). **User confirmed**: always-on (no toggle) + animation's face during scenes.
+- **Hide-and-seek catch** now also strikes a victory pose (after the snap-back).
+- Priority: custom action > tap scene > routine (playCustomAction clears tapAnim; the routine guard includes tapAnim).
+
+**Validation:** No Gradle build locally (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash — compile-safe (no @Composable calls in lambdas, no shadowing, all symbols exist, stepper self-clears/restarts on rapid taps, empty-frames guarded); the one flagged behavior fork (scene face vs TOUCH face) was put to the user, who chose the animation's face.
+
+## Previous Requests
+
+### Session time on entries + detail view (Android) — COMPLETE
 
 **Date:** 2026-08-12
 

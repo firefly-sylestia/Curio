@@ -341,12 +341,20 @@ fun CurioFloatingPet(
         var routineKey by remember { mutableIntStateOf(0) }
         var routineView by remember { mutableStateOf(com.curio.app.data.PetViewAngle.FRONT) }
         var recentRoutineIds by remember { mutableStateOf<List<String>>(emptyList()) }
+        // v18 — taps can play full authored animations (wave, glance, victory,
+        // back-turn…) with their viewpoints and per-frame motion — not just
+        // the four motion keys. Same machinery as custom actions; a tap is a
+        // direct interaction, so it interrupts an ambient Pet Life routine.
+        var tapAnim by remember { mutableStateOf<PetAnimation?>(null) }
+        var tapFrameIndex by remember { mutableIntStateOf(0) }
+        var tapKey by remember { mutableIntStateOf(0) }
 
         /** Starts one contextual Pet Life routine and remembers its id. */
         fun playPetLifeRoutine(routine: PetLifeRoutine) {
             // A routine is a complete little scene: let it finish before a
             // second idle trigger can replace its frames or speech bubble.
-            if (routineAnim != null || customActionAnim != null) return
+            // v18 — a playing tap animation also holds the stage.
+            if (routineAnim != null || customActionAnim != null || tapAnim != null) return
             val anim = activeDesign.animations[routine.animationId]
                 ?: animationById(routine.animationId)
                 ?: return
@@ -381,6 +389,23 @@ fun CurioFloatingPet(
             }
             routineAnim = null
             routineView = com.curio.app.data.PetViewAngle.FRONT
+        }
+
+        // v18 — steps a tap reaction's animation once (exactly like the
+        // routine / custom steppers), then clears it so the sprite falls back
+        // to its normal look and the reaction face's afterglow.
+        LaunchedEffect(tapKey, tapAnim) {
+            val anim = tapAnim ?: return@LaunchedEffect
+            val frames = anim.frames
+            if (frames.isEmpty()) {
+                tapAnim = null
+                return@LaunchedEffect
+            }
+            for (i in frames.indices) {
+                tapFrameIndex = i
+                delay(frames[i].durationMs.toLong())
+            }
+            tapAnim = null
         }
 
         /**
@@ -419,6 +444,26 @@ fun CurioFloatingPet(
         }
 
         /**
+         * v18 — plays one authored animation as the tap's VISUAL reaction:
+         * built-in scenes like wave / glance / victory carry authored
+         * viewpoints (SIDE, BACK, LOOKING_UP…) and per-frame motion, so taps
+         * get a varied little scene instead of only the motion keys. A tap is
+         * a direct interaction, so it interrupts an ambient routine; a custom
+         * action still wins over it (priority in the sprite call).
+         */
+        fun playTapAnimation(id: String) {
+            if (routineAnim != null) {
+                routineAnim = null
+                routineView = com.curio.app.data.PetViewAngle.FRONT
+            }
+            val anim = activeDesign.animations[id] ?: animationById(id) ?: return
+            if (anim.frames.isEmpty()) return
+            tapAnim = anim
+            tapFrameIndex = 0
+            tapKey++
+        }
+
+        /**
          * v8.53 — plays one user-defined custom action: resolves its
          * animation (built-in or drawn in the designer), starts the frame
          * stepper, wears the animation's mood face, and speaks a random
@@ -426,11 +471,13 @@ fun CurioFloatingPet(
          */
         fun playCustomAction(action: CustomPetAction) {
             // Custom authored actions take priority over ambient Pet Life;
-            // cancel the routine so the two scenes never overlap.
+            // cancel the routine so the two scenes never overlap. v18 — a
+            // tap scene yields to it too.
             if (routineAnim != null) {
                 routineAnim = null
                 routineView = com.curio.app.data.PetViewAngle.FRONT
             }
+            tapAnim = null
             val anim = activeDesign.animations[action.animationId]
                 ?: animationById(action.animationId)
                 ?: return
@@ -921,13 +968,15 @@ fun CurioFloatingPet(
                         // Caught mid-peek — a shared win. Snap fully back
                         // into view first (the tap caught it half-off-screen
                         // at the edge), and DON'T re-speak the win line: the
-                        // tap handler already said it.
+                        // tap handler already said it. v18 — the win also
+                        // strikes a proud victory pose.
                         pos = Offset(
                             peekX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
                             peekY.coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
                         )
                         squishKey++
                         celebrateKey++
+                        playTapAnimation("victory")
                         heartsKey++
                     } else {
                         // Missed: slip fully back in and strut away.
@@ -1670,8 +1719,20 @@ fun CurioFloatingPet(
                                     // v8.21 — tapping never spins it dizzy anymore
                                     // (that's for dragging): boop → play-bow → a
                                     // big happy celebration hop.
-                                    1 -> squishKey++
-                                    2 -> playKey++
+                                    // v18 — each tier ALSO plays an authored
+                                    // scene with a viewpoint angle, picked at
+                                    // random so every tap looks a little
+                                    // different: soft curious glances and a
+                                    // wave, a shy stumble, a proud victory
+                                    // pose, a cheeky back-turn…
+                                    1 -> {
+                                        squishKey++
+                                        playTapAnimation(listOf("glance", "sidepeek", "wave").random())
+                                    }
+                                    2 -> {
+                                        playKey++
+                                        playTapAnimation(listOf("wave", "look_up", "stumble").random())
+                                    }
                                     else -> {
                                         // v8.35 — the biggest taps add a
                                         // celebratory twirl.
@@ -1681,6 +1742,7 @@ fun CurioFloatingPet(
                                         // rapid taps keep the happy motion but
                                         // never restart a spin loop.
                                         if (tapStreak == 3) spinKey++
+                                        playTapAnimation(listOf("victory", "backturn", "happy").random())
                                     }
                                 }
                                 // v8.21 — hearts for the playful/celebrate taps
@@ -1723,10 +1785,12 @@ fun CurioFloatingPet(
             // custom action is running the frame is null and everything
             // falls back to the normal look.
             val caFrame = customActionAnim?.frames?.getOrNull(customActionFrame)
+            val tapFrame = tapAnim?.frames?.getOrNull(tapFrameIndex)
             val lifeFrame = routineAnim?.frames?.getOrNull(routineFrame)
-            val activeFrame = caFrame ?: lifeFrame
+            val activeFrame = caFrame ?: tapFrame ?: lifeFrame
             val activeView = when {
                 caFrame != null -> caFrame.view
+                tapFrame != null && tapFrame.view != com.curio.app.data.PetViewAngle.FRONT -> tapFrame.view
                 lifeFrame != null && lifeFrame.view != com.curio.app.data.PetViewAngle.FRONT -> lifeFrame.view
                 else -> routineView
             }
@@ -1750,7 +1814,11 @@ fun CurioFloatingPet(
                 dizzy = dizzy || recovering,
                 // v8.35 — the reaction editor's face + the hide-and-peek pose.
                 // v8.53 — a custom action's animation mood wins while playing.
+                // v18 — a tap reaction's animation mood wears its own face
+                // (shy stumble, proud victory…) while the scene plays; the
+                // configured TOUCH face returns as the afterglow.
                 faceOverride = customActionAnim?.let { activeDesign.faceFor(it.mood) }
+                    ?: tapAnim?.let { activeDesign.faceFor(it.mood) }
                     ?: routineAnim?.let { activeDesign.faceFor(it.mood) }
                     ?: reactionFace,
                 // Per-frame pixel layers work for custom actions and Pet Life
