@@ -77,6 +77,18 @@ import kotlin.random.Random
 
 private val FLOAT_SIZE = 72.dp
 private val EDGE_MARGIN = 14.dp
+// v17 — a wander that spans more than this fraction of the screen's larger
+// dimension TELEPORTS (blink + landing squish) instead of sliding across
+// quickly; shorter hops keep the gentle walk.
+private const val LONG_JUMP_FRACTION = 0.55f
+// v17 — pet-game pacing: a minimum gap between ANY two games, plus each
+// game's OWN cooldown. They used to share one clock that the fast spark
+// game kept resetting — which starved hide-and-seek and the camouflage
+// game for minutes at a time.
+private const val GAME_MIN_SPACING_MS = 25_000L
+private const val HIDE_SEEK_COOLDOWN_MS = 40_000L
+private const val CHAMELEON_COOLDOWN_MS = 40_000L
+private const val SPARK_COOLDOWN_MS = 30_000L
 private val SPARK_PX = 44.dp
 private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 // v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
@@ -263,7 +275,13 @@ fun CurioFloatingPet(
         var chameleonFindMe by remember { mutableStateOf(false) }
         var hideSeekActive by remember { mutableStateOf(false) }
         var peekCaught by remember { mutableStateOf(false) }
+        // v17 — the shared minimum gap between any two games, plus one
+        // cooldown PER GAME (the old single clock let the spark game starve
+        // hide-and-seek and the camouflage game).
         var lastGameAt by remember { mutableStateOf(0L) }
+        var lastHideSeekAt by remember { mutableStateOf(0L) }
+        var lastChameleonAt by remember { mutableStateOf(0L) }
+        var lastSparkAt by remember { mutableStateOf(0L) }
         // v8.16 — landmark pokes keep a cooldown so the pet interacts often
         // but never spams the same thing every beat. v9.x — the window grew
         // from 4s to 12s so button pokes read as occasional, not hovering.
@@ -557,6 +575,19 @@ fun CurioFloatingPet(
             // [stepMs] small = fast dash; [steps] = path length.
             suspend fun walkTo(target: Offset, stepMs: Long = 24, steps: Int = 56) {
                 facing = if (target.x >= pos.x) 1f else -1f
+                // v17 — LONG journeys TELEPORT: instead of skimming across
+                // the screen in big quick steps, the pet blinks straight to
+                // the far spot with a tiny landing squish. Short hops keep
+                // the gentle walk (and game dashes that need to be chased,
+                // like the spark, never use walkTo).
+                if (hypot(target.x - pos.x, target.y - pos.y) >
+                    maxOf(maxW, maxH) * LONG_JUMP_FRACTION
+                ) {
+                    if (dragged || gliding || !CurioPet.awake) return
+                    pos = target
+                    squishKey++
+                    return
+                }
                 moving = true
                 val start = pos
                 for (i in 1..steps) {
@@ -823,15 +854,20 @@ fun CurioFloatingPet(
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
-                // v16 — HIDE-AND-SEEK: the pet dashes OFF-SCREEN through a
-                // random edge, hides for a beat, then peeks back from a
-                // DIFFERENT edge — half in, half out. Tap it while it's
-                // peeking to catch it and win the round.
+                // v16 — HIDE-AND-SEEK: the pet leaves OFF-SCREEN through a
+                // random edge (a long exit, so it blinks away v17), hides
+                // for a beat, then peeks back from a DIFFERENT edge — half
+                // in, half out. Tap it while it's peeking to catch it and
+                // win the round.
+                // v17 — its own cooldown (was 45s on the shared clock that
+                // the spark game kept resetting) and a higher base chance.
                 if (!watching && !CurioPet.spinning && !offScreen &&
-                    System.currentTimeMillis() - lastGameAt > 45_000L &&
-                    Random.nextFloat() < 0.05f * CurioPet.gameFrequencyMultiplier()
+                    System.currentTimeMillis() - lastGameAt > GAME_MIN_SPACING_MS &&
+                    System.currentTimeMillis() - lastHideSeekAt > HIDE_SEEK_COOLDOWN_MS &&
+                    Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
                 ) {
                     lastGameAt = System.currentTimeMillis()
+                    lastHideSeekAt = lastGameAt
                     CurioPet.notePlay(context, react = false)
                     if (CurioPet.shouldSpeak(0.4f)) queueReaction(CurioPet.peekLine())
                     squishKey++
@@ -882,11 +918,17 @@ fun CurioFloatingPet(
                     }
                     peeking = false
                     if (peekCaught) {
-                        // Caught mid-peek — a shared win.
+                        // Caught mid-peek — a shared win. Snap fully back
+                        // into view first (the tap caught it half-off-screen
+                        // at the edge), and DON'T re-speak the win line: the
+                        // tap handler already said it.
+                        pos = Offset(
+                            peekX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                            peekY.coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                        )
                         squishKey++
                         celebrateKey++
                         heartsKey++
-                        if (CurioPet.shouldSpeak(0.8f)) queueReaction(CurioPet.peekWinLine())
                     } else {
                         // Missed: slip fully back in and strut away.
                         if (CurioPet.shouldSpeak(0.4f) && !dragged) queueReaction(CurioPet.missedMeLine())
@@ -910,10 +952,17 @@ fun CurioFloatingPet(
                 // off-screen, then slips back in from a different edge with
                 // a flourish. Never while glued to the deck, mid-spin, or
                 // already hiding.
+                // v17 — the camouflage game was STARVED: it shared one
+                // cooldown clock with the faster spark game and never even
+                // reset it, so it could sit silent for minutes. It now owns
+                // its cooldown (40s) and fires more eagerly.
                 if (!watching && !CurioPet.spinning && !offScreen && !hideSeekActive &&
-                    System.currentTimeMillis() - lastGameAt > 60_000L &&
-                    Random.nextFloat() < 0.05f * CurioPet.gameFrequencyMultiplier()
+                    System.currentTimeMillis() - lastGameAt > GAME_MIN_SPACING_MS &&
+                    System.currentTimeMillis() - lastChameleonAt > CHAMELEON_COOLDOWN_MS &&
+                    Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
                 ) {
+                    lastGameAt = System.currentTimeMillis()
+                    lastChameleonAt = lastGameAt
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
@@ -987,10 +1036,12 @@ fun CurioFloatingPet(
                 // grab it; the user can tap the spark first to win the round
                 // together.
                 if (!watching && !CurioPet.spinning && !offScreen && !hideSeekActive &&
-                    System.currentTimeMillis() - lastGameAt > 35_000L &&
+                    System.currentTimeMillis() - lastGameAt > GAME_MIN_SPACING_MS &&
+                    System.currentTimeMillis() - lastSparkAt > SPARK_COOLDOWN_MS &&
                     Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
                 ) {
                     lastGameAt = System.currentTimeMillis()
+                    lastSparkAt = lastGameAt
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
