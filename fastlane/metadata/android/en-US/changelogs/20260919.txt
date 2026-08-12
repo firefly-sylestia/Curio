@@ -59,3 +59,4 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Experiments gains a Paper & headers section: header cut lines (tilted corner strokes + three ticks top-right), stamped pin holes down the header left edge, and a soft rose-cream paper card for the Home Streak · Cabinet · Topics bar. All off by default.
 • Notification controls moved into Preferences (daily reminder with hour chips, live explore notification, bubble options) and the separate Notifications section is gone.
 • The pet now evolves at Level 15 instead of 7, and its sleep pose was redrawn to match its shape (no more melting tail).
+• Pet games are now their own little world: camouflage lets you tap the faint ghost to find it (no more mid-game teleports), and every game winds down to a calm idle when it ends instead of darting off.
