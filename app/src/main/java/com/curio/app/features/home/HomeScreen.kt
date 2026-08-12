@@ -532,7 +532,7 @@ fun HomeScreen(navController: NavController) {
                                                 )
                                                 repeat(3) { i ->
                                                     val cx = size.width * (i + 1) / 4f
-                                                    addOval(Rect(Offset(cx, holeY), holeR), Path.Direction.CW)
+                                                    addOval(Rect(Offset(cx, holeY), holeR), Path.Direction.Clockwise)
                                                 }
                                                 fillType = PathFillType.EvenOdd
                                             }
