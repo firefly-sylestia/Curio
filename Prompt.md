@@ -1,6 +1,22 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): No-AI messaging + onboarding type-scale bumps + explore-bubble opt-in + permission reasons (Android)
+## Current Request (COMPLETE): CI fix — scroll-indicator API mismatches (Android)
+
+**Date:** 2026-08-12
+
+**What happened:** CI (`compileReleaseKotlin` + `compileDebugKotlin`) failed on the scroll-indicator feature: `state = listState.scrollIndicatorState` was nullable (`ScrollIndicatorState?`) but the component took non-null; `listState.scrollBy(...)` unresolved; `positionChange()` invoked as a function (it's Boolean in foundation 1.12.0-alpha03); `state.maxOffset` unresolved (the interface exposes only scrollOffset/contentSize/viewportSize).
+
+**Root cause:** the component was written against a guessed API, not the real artifact. Verified the REAL surface from the cached `foundation-android-1.12.0-alpha03` AAR class constant pools (no JDK/javap/strings in env — used `grep -a` on extracted classes): `ScrollIndicatorState` = scrollOffset/contentSize/viewportSize only; `LazyListState`/`LazyGridState`/`ScrollState`/`ScrollableState` have `dispatchRawDelta(Float): Boolean` but NO `scrollBy`; `.scrollIndicatorState` is nullable.
+
+**Fix (10 files):**
+- **ui/components/CurioScrollIndicator.kt** — `state: ScrollIndicatorState?` (null renders nothing); geometry `derivedStateOf` null-guards (`val s = state ?: return@derivedStateOf ScrollKnob(0f,0f,0f)`), `remember(state)`-keyed; drag delta from stable `change.currentPosition.y - change.previousPosition.y`; typo `g.maxOffset` → `g.maxOffsetPx`; KDoc updated to `{ listState.dispatchRawDelta(it) }`.
+- **9 screens** (Cabinet, TopicDatabase, ManageCategories, Profile, Quests, Recent, SettingsHub, SettingsSection, TopicHistory) — `onScrollBy = { listState/gridState.scrollBy(it) }` → `{ ...dispatchRawDelta(it) }` (non-suspend Boolean-returning lambda coerces to the `suspend (Float) -> Unit` param).
+
+**Validation:** No local Gradle build (project rule — CI validates on push; the fix targets the exact CI error list). Reviewed by code-reviewer-deepseek-flash: correct + complete, two accepted nits (per-event drag coroutine, silent no-op default).
+
+## Previous Requests
+
+### No-AI messaging + onboarding type-scale bumps + explore-bubble opt-in + permission reasons (Android)
 
 **Date:** 2026-08-12
 

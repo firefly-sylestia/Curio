@@ -330,7 +330,7 @@ fun QuestsScreen(navController: NavController) {
         // Side scroll indicator — thin overlay knob, grows on touch.
         CurioVerticalScrollIndicator(
             state = listState.scrollIndicatorState,
-            onScrollBy = { listState.scrollBy(it) },
+            onScrollBy = { listState.dispatchRawDelta(it) },
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()

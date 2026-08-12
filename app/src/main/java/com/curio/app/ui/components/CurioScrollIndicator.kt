@@ -44,23 +44,26 @@ import kotlinx.coroutines.launch
  *    touches it, so it reads quietly until it's needed.
  *  - Dragging the knob scrolls the list (maps drag distance to scroll
  *    distance); the knob color follows the theme's surface ink.
- *  - Hidden entirely when the content fits in the viewport.
+ *  - Hidden entirely when the content fits in the viewport (or when the
+ *    state is null).
  *
  * Built on foundation's new [ScrollIndicatorState] (exposed by ScrollState /
- * LazyListState / LazyGridState / PagerState via `.scrollIndicatorState`).
- * The old VerticalScrollbar API was removed in this foundation version, so
- * the knob is drawn here directly from scrollOffset/contentSize/viewportSize.
+ * LazyListState / LazyGridState / PagerState via `.scrollIndicatorState` —
+ * NULLABLE in this foundation version). The old VerticalScrollbar API was
+ * removed in this foundation version, so the knob is drawn here directly
+ * from scrollOffset/contentSize/viewportSize.
  *
- * @param state the scroll state's indicator state (e.g. `listState.scrollIndicatorState`).
+ * @param state the scroll state's indicator state (e.g. `listState.scrollIndicatorState`)
+ *   — nullable: a null state (no scrollable backing yet) renders nothing.
  * @param onScrollBy called with a pixel delta while the knob is dragged —
- *   wire it to the same state (`{ listState.scrollBy(it) }`).
+ *   wire it to the same state (`{ listState.dispatchRawDelta(it) }`).
  * @param modifier sizes/aligns the indicator — callers should align it to the
  *   right edge of the list area (`Modifier.align(Alignment.CenterEnd).fillMaxHeight()`)
  *   with padding that clears heroes/pinned bars.
  */
 @Composable
 fun CurioVerticalScrollIndicator(
-    state: ScrollIndicatorState,
+    state: ScrollIndicatorState?,
     onScrollBy: suspend (Float) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -76,20 +79,22 @@ fun CurioVerticalScrollIndicator(
 
     // Knob geometry in px: height, offset from the strip's top, and the
     // draggable travel (strip minus knob). Recomputes as the list scrolls.
-    val geometry: State<ScrollKnob> = remember {
+    // Keyed on the state so a null → non-null transition re-creates the block.
+    val geometry: State<ScrollKnob> = remember(state) {
         derivedStateOf {
-            val content = state.contentSize.toFloat()
-            val viewport = state.viewportSize.toFloat()
+            val s = state ?: return@derivedStateOf ScrollKnob(0f, 0f, 0f)
+            val content = s.contentSize.toFloat()
+            val viewport = s.viewportSize.toFloat()
             val bar = barHeightPx
             if (content <= viewport || bar <= 0f) {
                 ScrollKnob(0f, 0f, 0f)
             } else {
                 val minThumb = 32f * density.density
                 val thumb = maxOf(minThumb, bar * viewport / content)
-                val maxOffset = bar - thumb
+                val travel = bar - thumb
                 val scrollable = content - viewport
-                val fraction = (state.scrollOffset.toFloat() / scrollable).coerceIn(0f, 1f)
-                ScrollKnob(thumb, fraction * maxOffset, maxOffset)
+                val fraction = (s.scrollOffset.toFloat() / scrollable).coerceIn(0f, 1f)
+                ScrollKnob(thumb, fraction * travel, travel)
             }
         }
     }
@@ -106,7 +111,7 @@ fun CurioVerticalScrollIndicator(
             .pointerInput(state) {
                 awaitEachGesture {
                     // Nothing to indicate (or not measured yet) — skip.
-                    if (state.contentSize <= state.viewportSize || state.viewportSize <= 0) {
+                    if (state == null || state.contentSize <= state.viewportSize || state.viewportSize <= 0) {
                         return@awaitEachGesture
                     }
                     val down = awaitFirstDown(requireUnconsumed = false)
@@ -117,15 +122,18 @@ fun CurioVerticalScrollIndicator(
                             val event = awaitPointerEvent()
                             val change = event.changes.firstOrNull { it.id == pointerId } ?: break
                             if (change.changedToUp()) break
-                            val dy = change.positionChange().y
+                            // Delta from the raw pointer positions — stable
+                            // API across compose versions (positionChange()
+                            // changed shape in newer foundations).
+                            val dy = change.currentPosition.y - change.previousPosition.y
                             if (dy == 0f) continue
                             change.consume()
                             val g = geometry.value
                             val scrollable = (state.contentSize - state.viewportSize).toFloat()
-                            if (g.maxOffset > 1f && scrollable > 0f) {
+                            if (g.maxOffsetPx > 1f && scrollable > 0f) {
                                 // Same ratio as the thumb: drag distance over
                                 // knob travel times the total scrollable range.
-                                val delta = dy / g.maxOffset * scrollable
+                                val delta = dy / g.maxOffsetPx * scrollable
                                 scope.launch { onScrollBy(delta) }
                             }
                         }

@@ -424,7 +424,7 @@ fun SettingsHubScreen(navController: NavController) {
         // Side scroll indicator — thin overlay knob, grows on touch.
         CurioVerticalScrollIndicator(
             state = gridState.scrollIndicatorState,
-            onScrollBy = { gridState.scrollBy(it) },
+            onScrollBy = { gridState.dispatchRawDelta(it) },
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
