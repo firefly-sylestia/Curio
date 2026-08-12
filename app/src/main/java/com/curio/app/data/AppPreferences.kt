@@ -202,9 +202,10 @@ object AppPreferences {
     var pastelCrownDepthState by mutableStateOf(true)
         private set
 
-    // Hidden promo/demo-content mode (v7.107) — unlocked by tapping the
-    // Version row in Support & diagnostics five times (tap five times
-    // again to turn it OFF). While ON, the app shows promotional sample
+    // Hidden promo/demo-content mode (v7.107) — OFF by default; v24 it is
+    // reached from the Experiments screen (Settings → Experiments → Promo
+    // mode, or the Version row's five-tap in Support & diagnostics) and its
+    // own page's toggle is the one control. While ON, the app shows promo sample
     // content everywhere (Home hero stats + recents, Profile level,
     // Quests level, Cabinet grid) so the user can screenshot the app for
     // store promotion. Demo data is derived from real topics via

@@ -1397,7 +1397,9 @@ private fun HeroCard(
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
-    val heroBlendOn = AppPreferences.heroBlendGradientState
+    // v24 — the dual-accent hero gradient experiment was rejected (ugly
+    // golden blend); always OFF, so the blend branch below is dead.
+    val heroBlendOn = false
 
     // v8.36 — auto-growing hero: the title used to be hard-capped at 3
     // lines, cutting very long topic names. The card now measures how much

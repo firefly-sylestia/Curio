@@ -43,7 +43,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
-import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
@@ -203,11 +202,11 @@ fun SupportScreen(navController: NavController) {
                                     versionTaps++
                                     if (versionTaps >= 5) {
                                         versionTaps = 0
-                                        AppPreferences.setPromoModeEnabled(
-                                            context,
-                                            !AppPreferences.promoModeState
-                                        )
-                                        navController.navigate(CurioRoutes.PROMO) { launchSingleTop = true }
+                                        // v24 — the five-tap opens the
+                                        // Experiments screen (and keeps it
+                                        // open); it no longer toggles promo
+                                        // mode (promo lives in Experiments).
+                                        navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
                                     }
                                 }
                                 .padding(horizontal = 4.dp, vertical = 13.dp),
@@ -224,9 +223,7 @@ fun SupportScreen(navController: NavController) {
                                 Text(
                                     text = when {
                                         versionTaps in 1..4 ->
-                                            "Tap ${5 - versionTaps} more to toggle promo mode"
-                                        AppPreferences.promoModeState ->
-                                            "Promo mode on · tap 5× to turn off"
+                                            "Tap ${5 - versionTaps} more to open Experiments"
                                         else ->
                                             "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
                                     },

@@ -1,6 +1,24 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): 3D shuffle button always-on + toggle removed
+## Current Request (COMPLETE): Experiments cleanup — close rejected experiments, version-tap opens Experiments, promo off by default
+
+**Date:** 2026-08-12
+
+**What was asked:** dual-accent hero gradient is ugly (yellow) → keep off; take out the Layout & input section from Experiments and remove Smart Spin layout entirely (don't keep it on); remove tail-fade peek motion (didn't pass) and deck card shadows (weird look while cards animate) → keep off; Version 5-tap should open the Experiments screen (kept open) instead of toggling promo mode; promo mode off by default; turning experiments off is done from inside the Experiments screen, not via 5 taps.
+
+**Done:**
+- ExperimentsScreen: removed Dual-accent hero gradient, Deck card shadows, Tail-fade peek motion toggles; removed the whole Layout & input section (Smart Spin layout, Smart density, Voice-to-text); added a Promo mode row → `CurioRoutes.PROMO`; dropped now-unused imports (SegmentedButton/SegmentedButtonDefaults/SingleChoiceSegmentedButtonRow/SmartDensityMode), added CurioRoutes import.
+- SpinScreen: `heroBlendOn`/`shadowsOn`/`tailFadeOn`/`smartLayout` hardcoded false (with v24 comments) — the rejected looks can never come back, even for users who had them enabled.
+- TopicRevealScreen: `heroBlendOn` hardcoded false.
+- SupportScreen: Version 5-tap now navigates to `CurioRoutes.EXPERIMENTS` (no promo toggle); subtitle hints "Tap N more to open Experiments"; removed now-unused AppPreferences import.
+- PromoModeScreen + PromoMode + AppPreferences comments updated: promo reached from Experiments, off by default, its page's toggle is the one control.
+- Changelog bullets + app/AGENTS.md v24 bullet added.
+
+**Validation:** braces + `git diff --check` clean; grep confirms no leftover SmartDensityMode/SegmentedButton/smart-spin UI refs; all hardcoded vals still referenced by their branches. Also pushed the CI compile fix for the Play Core imports (`AppUpdateType` → `com.google.android.play.core.install.model`; dropped bogus `play.core.tasks` import) as `534f158`.
+
+## Previous Requests
+
+### 3D shuffle button always-on + toggle removed (Android)
 
 **Date:** 2026-08-12
 

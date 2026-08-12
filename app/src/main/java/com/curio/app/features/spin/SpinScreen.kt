@@ -1007,7 +1007,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // the device's physical dpi; a high-density phone should also become
         // smaller when the user chooses 2x.
         val densityExtraCompact = densityMode == SmartDensityMode.EXTRA_COMPACT
-        val smartLayout = AppPreferences.smartSpinLayoutState
+        // v24 — Smart Spin layout removed for good (its toggle was dropped):
+        // the deck always uses the natural sizing, never a smart compact tier.
+        val smartLayout = false
         val heightCompact = maxHeight < SpinCompactThresholdHeight
         val extraCompact = smartLayout && maxHeight < SpinExtraCompactThresholdHeight
         // Extra-compact implies heightCompact (600 < 680), so this stays
@@ -2330,7 +2332,9 @@ private fun HeroTicketCard(
     val heroGradientOn = AppPreferences.heroGradientState
     val heroBorderOn = AppPreferences.heroBorderState
     val heroShadowOn = AppPreferences.heroShadowState
-    val heroBlendOn = AppPreferences.heroBlendGradientState
+    // v24 — the dual-accent hero gradient experiment was rejected (ugly
+    // golden blend); always OFF, so the blend branch below is dead.
+    val heroBlendOn = false
     // v7.14 — the enhanced gradient is a top-left-lit DIAGONAL multi-stop
     // sweep: a bright crown at the top-left catches light, the card's own
     // stops run through the middle (the Material blend keeps its identity),
@@ -3016,9 +3020,12 @@ private fun PeekCard(
     // feature resolves to the classic look.
     val gradientOn = AppPreferences.peekGradientState
     val hairlineOn = AppPreferences.peekHairlineState
-    val shadowsOn = AppPreferences.peekShadowsState
     val titlesOn = AppPreferences.peekTitlesState
-    val tailFadeOn = AppPreferences.peekTailFadeState
+    // v24 — deck card shadows (weird look while the cards animate) and
+    // tail-fade peek motion (didn't pass) were rejected; both stay OFF, so
+    // their toggles were removed from Experiments.
+    val shadowsOn = false
+    val tailFadeOn = false
     // 1a — top-lit crown: a whisper of light at the card top so the top
     // peek catches light and whispers "next up" on the reel. The base is
     // always the level-darkened blend; the gradient toggle layers the
