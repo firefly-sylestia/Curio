@@ -2650,7 +2650,7 @@
   "categoryId": "BIOLOGY",
   "subtype": "Discovery",
   "name": "The White Shark's Highway (2004)",
-  "teaser": "Satellite tags revealed great white sharks making a 20,000-kilometer round trip across the Pacific every year - to an open-ocean 'White Shark Café' that no one knew existed. The tagged sharks turned out to commute like commuters.",
+  "teaser": "Satellite tags revealed great white sharks making a 20,000-kilometer round trip across the Pacific every year - to an open-ocean 'White Shark Caf\u00e9' that no one knew existed. The tagged sharks turned out to commute like commuters.",
   "imageUrl": "",
   "byline": "The tagging expeditions",
   "exploreAction": {
@@ -5739,7 +5739,7 @@
   "name": "The mRNA Vaccine (2020)",
   "teaser": "The COVID-19 mRNA vaccines were the first mRNA vaccines ever approved - a technology that had been in development for decades, rejected as too fragile. They work by sending the body's own cells a recipe for a harmless spike protein, teaching the immune system what to attack.",
   "imageUrl": "",
-  "byline": "Karikó, Weissman, and the vaccine teams",
+  "byline": "Karik\u00f3, Weissman, and the vaccine teams",
   "exploreAction": {
    "verb": "Explore",
    "targetName": "The development of mRNA vaccines",
@@ -6928,5 +6928,1776 @@
    "Decompression"
   ],
   "tier": 1
+ },
+ {
+  "id": "bio-dna-helicase",
+  "name": "DNA Helicase",
+  "categoryId": "BIOLOGY",
+  "subtype": "Molecular biology",
+  "teaser": "The unzipping enzyme that splits the double helix so it can copy itself",
+  "byline": "Molecular machinery",
+  "tags": [
+   "dna",
+   "enzymes",
+   "molecular biology"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Unzip a DNA strand",
+   "durationMinutes": 8,
+   "instruction": "Watch an animation of helicase unzipping DNA, then list the three things that happen right after it lets go."
+  }
+ },
+ {
+  "id": "bio-pcr-laboratory",
+  "name": "Polymerase Chain Reaction",
+  "categoryId": "BIOLOGY",
+  "subtype": "Molecular biology",
+  "teaser": "The copy machine for DNA that turned genetics into an everyday science",
+  "byline": "Lab technique",
+  "tags": [
+   "dna",
+   "lab",
+   "genetics"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Run a PCR reaction",
+   "durationMinutes": 12,
+   "instruction": "Find how PCR copies a single DNA snippet into millions, then name the three temperature steps of each cycle."
+  }
+ },
+ {
+  "id": "bio-gel-electrophoresis",
+  "name": "Gel Electrophoresis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Molecular biology",
+  "teaser": "Sorting DNA fragments by size with electricity and jelly",
+  "byline": "Lab technique",
+  "tags": [
+   "dna",
+   "lab"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Run a gel",
+   "durationMinutes": 10,
+   "instruction": "Look up how gel electrophoresis separates DNA fragments, then explain why smaller pieces travel further."
+  }
+ },
+ {
+  "id": "bio-genetic-code-triplets",
+  "name": "The Genetic Code",
+  "categoryId": "BIOLOGY",
+  "subtype": "Molecular biology",
+  "teaser": "How three-letter DNA words spell out every protein in your body",
+  "byline": "Code of life",
+  "tags": [
+   "dna",
+   "genetics",
+   "code"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Read the code",
+   "durationMinutes": 14,
+   "instruction": "Explore how triplet codons map to amino acids, then decode the word 'curious' as if it were protein language."
+  }
+ },
+ {
+  "id": "bio-chromosome-pairs",
+  "name": "Chromosome Pairs",
+  "categoryId": "BIOLOGY",
+  "subtype": "Genetics",
+  "teaser": "Your 23 pairs of instruction books, inherited one copy from each parent",
+  "byline": "Blueprint",
+  "tags": [
+   "genetics",
+   "chromosomes"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Count the pairs",
+   "durationMinutes": 8,
+   "instruction": "Find out why humans have 23 pairs of chromosomes, then name which pair decides biological sex in most mammals."
+  }
+ },
+ {
+  "id": "bio-allele-dominance",
+  "name": "Dominant and Recessive Alleles",
+  "categoryId": "BIOLOGY",
+  "subtype": "Genetics",
+  "teaser": "Why some genes shout over others in the inheritance lottery",
+  "byline": "Mendel's laws",
+  "tags": [
+   "genetics",
+   "mendel"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Sort the alleles",
+   "durationMinutes": 11,
+   "instruction": "Explore how dominant and recessive alleles pair up, then predict the odds of a hidden trait reappearing."
+  }
+ },
+ {
+  "id": "bio-punnett-square",
+  "name": "Punnett Squares",
+  "categoryId": "BIOLOGY",
+  "subtype": "Genetics",
+  "teaser": "The grid that predicts what offspring might inherit",
+  "byline": "Probability tool",
+  "tags": [
+   "genetics",
+   "probability"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Fill a square",
+   "durationMinutes": 9,
+   "instruction": "Draw a Punnett square for two heterozygous parents, then state the probability of each outcome."
+  }
+ },
+ {
+  "id": "bio-mutation-source",
+  "name": "Where Mutations Come From",
+  "categoryId": "BIOLOGY",
+  "subtype": "Genetics",
+  "teaser": "Copying errors, sunlight, and chemicals quietly rewrite your genome",
+  "byline": "Evolution's engine",
+  "tags": [
+   "genetics",
+   "evolution"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Find a mutation",
+   "durationMinutes": 10,
+   "instruction": "Research the main sources of DNA mutation, then explain why most mutations are neutral rather than deadly."
+  }
+ },
+ {
+  "id": "bio-natural-selection-shape",
+  "name": "Natural Selection",
+  "categoryId": "BIOLOGY",
+  "subtype": "Genetics",
+  "teaser": "The filter that keeps helpful traits and quietly removes harmful ones",
+  "byline": "Evolution",
+  "tags": [
+   "evolution",
+   "adaptation"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Spot the adaptation",
+   "durationMinutes": 12,
+   "instruction": "Pick a real animal and explain how natural selection shaped one of its features over generations."
+  }
+ },
+ {
+  "id": "bio-adaptive-radiation",
+  "name": "Adaptive Radiation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Evolution",
+  "teaser": "One ancestor, dozens of descendants \u2014 each tuned to a different life",
+  "byline": "Explosion of forms",
+  "tags": [
+   "evolution",
+   "biodiversity"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the branches",
+   "durationMinutes": 11,
+   "instruction": "Study Darwin's finches or Hawaiian honeycreepers, then list three niches the descendants filled."
+  }
+ },
+ {
+  "id": "bio-convergent-evolution",
+  "name": "Convergent Evolution",
+  "categoryId": "BIOLOGY",
+  "subtype": "Evolution",
+  "teaser": "Unrelated species finding the same clever answer to the same problem",
+  "byline": "Same solution twice",
+  "tags": [
+   "evolution",
+   "comparative"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Compare the wings",
+   "durationMinutes": 9,
+   "instruction": "Compare dolphin and shark body shapes, then explain why they look alike despite different ancestors."
+  }
+ },
+ {
+  "id": "bio-vestigial-organs",
+  "name": "Vestigial Organs",
+  "categoryId": "BIOLOGY",
+  "subtype": "Evolution",
+  "teaser": "Evolutionary leftovers like the appendix and tailbone that once had jobs",
+  "byline": "Body archaeology",
+  "tags": [
+   "evolution",
+   "anatomy"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Find a leftover",
+   "durationMinutes": 8,
+   "instruction": "List three human vestigial features, then find the animal they once belonged to in our ancestors."
+  }
+ },
+ {
+  "id": "bio-fossil-formation",
+  "name": "How Fossils Form",
+  "categoryId": "BIOLOGY",
+  "subtype": "Paleontology",
+  "teaser": "The rare chain of events that turns a dead creature into stone",
+  "byline": "Deep time",
+  "tags": [
+   "fossils",
+   "paleontology"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Make a fossil",
+   "durationMinutes": 10,
+   "instruction": "Walk through the steps of fossilization, then explain why soft bodies almost never fossilize."
+  }
+ },
+ {
+  "id": "bio-transitional-fossils",
+  "name": "Transitional Fossils",
+  "categoryId": "BIOLOGY",
+  "subtype": "Paleontology",
+  "teaser": "Missing-link skeletons like Tiktaalik that show evolution mid-step",
+  "byline": "Stone bridges",
+  "tags": [
+   "fossils",
+   "evolution"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet Tiktaalik",
+   "durationMinutes": 12,
+   "instruction": "Study the Tiktaalik fossil, then name two features it shares with fish and two with land animals."
+  }
+ },
+ {
+  "id": "bio-radioactive-dating",
+  "name": "Radiometric Dating",
+  "categoryId": "BIOLOGY",
+  "subtype": "Paleontology",
+  "teaser": "How atomic clocks inside rocks reveal their true age",
+  "byline": "Deep time",
+  "tags": [
+   "fossils",
+   "geology"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Read the clock",
+   "durationMinutes": 11,
+   "instruction": "Learn how carbon-14 and potassium-argon dating work, then explain which one suits million-year-old rocks."
+  }
+ },
+ {
+  "id": "bio-amber-preservation",
+  "name": "Amber Time Capsules",
+  "categoryId": "BIOLOGY",
+  "subtype": "Paleontology",
+  "teaser": "Insects trapped in tree resin, perfectly preserved for millions of years",
+  "byline": "Golden graves",
+  "tags": [
+   "fossils",
+   "insects"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Open a capsule",
+   "durationMinutes": 8,
+   "instruction": "Discover why amber preserves soft tissues so well, then name a famous creature found inside it."
+  }
+ },
+ {
+  "id": "bio-food-chain-flow",
+  "name": "Food Chains and Webs",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "The energy highway from sunlight to apex predator",
+  "byline": "Energy flow",
+  "tags": [
+   "ecology",
+   "energy"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Build a web",
+   "durationMinutes": 9,
+   "instruction": "Trace a five-link food chain, then explain what happens to 90% of the energy at each step."
+  }
+ },
+ {
+  "id": "bio-keystone-species",
+  "name": "Keystone Species",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "Species like sea otters whose presence holds whole ecosystems together",
+  "byline": "Ecosystem anchors",
+  "tags": [
+   "ecology",
+   "conservation"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Remove the keystone",
+   "durationMinutes": 12,
+   "instruction": "Study the sea otter story, then name another keystone species and predict what collapses without it."
+  }
+ },
+ {
+  "id": "bio-biome-map",
+  "name": "Earth's Biomes",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "Deserts, rainforests, tundras \u2014 the planet's great habitat zones",
+  "byline": "World tour",
+  "tags": [
+   "ecology",
+   "biomes"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Map a biome",
+   "durationMinutes": 10,
+   "instruction": "Compare a desert and a tundra biome, then list the climate factors that define both."
+  }
+ },
+ {
+  "id": "bio-ecological-succession",
+  "name": "Ecological Succession",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "How bare rock and ash slowly become living communities again",
+  "byline": "Nature rebuilds",
+  "tags": [
+   "ecology",
+   "restoration"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch a comeback",
+   "durationMinutes": 11,
+   "instruction": "Follow succession after a volcanic eruption, then order the stages from pioneer species to forest."
+  }
+ },
+ {
+  "id": "bio-symbiosis-types",
+  "name": "Symbiosis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "Mutualism, commensalism, and parasitism \u2014 nature's roommate agreements",
+  "byline": "Living together",
+  "tags": [
+   "ecology",
+   "relationships"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Classify the pairs",
+   "durationMinutes": 9,
+   "instruction": "Find one real example of each symbiosis type, then explain who wins and who loses in each."
+  }
+ },
+ {
+  "id": "bio-clownfish-anemone",
+  "name": "Clownfish and Anemones",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "A fish that lives safely inside a stinging fortress",
+  "byline": "Classic mutualism",
+  "tags": [
+   "symbiosis",
+   "oceans"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet the partners",
+   "durationMinutes": 8,
+   "instruction": "Discover how clownfish avoid anemone stings, then list what each partner gains."
+  }
+ },
+ {
+  "id": "bio-mycorrhizal-network",
+  "name": "The Wood Wide Web",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "Fungal threads that connect forest trees and trade nutrients underground",
+  "byline": "Underground internet",
+  "tags": [
+   "fungi",
+   "forests",
+   "networks"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Tap the network",
+   "durationMinutes": 13,
+   "instruction": "Learn how mycorrhizal fungi link tree roots, then explain how a stressed tree 'warns' its neighbors."
+  }
+ },
+ {
+  "id": "bio-coral-bleaching",
+  "name": "Coral Bleaching",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "When warming seas make coral reefs turn ghost-white",
+  "byline": "Reefs in peril",
+  "tags": [
+   "oceans",
+   "climate"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch a reef fade",
+   "durationMinutes": 11,
+   "instruction": "Research why corals expel their algae partners, then list two things a reef loses when it bleaches."
+  }
+ },
+ {
+  "id": "bio-tide-pools",
+  "name": "Tide Pools",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "Miniature oceans that appear and vanish with every tide",
+  "byline": "Life between tides",
+  "tags": [
+   "oceans",
+   "intertidal"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Explore a pool",
+   "durationMinutes": 8,
+   "instruction": "Discover how tide pool creatures survive drying out, then name three animals that call a pool home."
+  }
+ },
+ {
+  "id": "bio-deep-sea-vent-life",
+  "name": "Deep-Sea Vent Communities",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecology",
+  "teaser": "Ecosystems powered by chemistry, not sunlight, miles beneath the waves",
+  "byline": "Life in the dark",
+  "tags": [
+   "oceans",
+   "extremophiles"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Visit a vent",
+   "durationMinutes": 14,
+   "instruction": "Explore hydrothermal vent ecosystems, then explain how tube worms survive with no sunlight at all."
+  }
+ },
+ {
+  "id": "bio-antibiotic-resistance",
+  "name": "Antibiotic Resistance",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "Bacteria learning to shrug off the drugs we built to stop them",
+  "byline": "The superbug threat",
+  "tags": [
+   "bacteria",
+   "medicine"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the resistance",
+   "durationMinutes": 12,
+   "instruction": "Explain how overuse of antibiotics speeds up resistance, then list two things individuals can do to slow it."
+  }
+ },
+ {
+  "id": "bio-probiotic-gut-flora",
+  "name": "The Gut Microbiome",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "Trillions of bacteria living inside you that shape digestion and mood",
+  "byline": "Your inner jungle",
+  "tags": [
+   "bacteria",
+   "health"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet your microbes",
+   "durationMinutes": 11,
+   "instruction": "Find out how many bacterial cells share your body, then name two ways gut microbes help you."
+  }
+ },
+ {
+  "id": "bio-viruses-living-debate",
+  "name": "Are Viruses Alive?",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "The strange in-between creatures that hijack living cells",
+  "byline": "Border of life",
+  "tags": [
+   "viruses",
+   "debate"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Pick a side",
+   "durationMinutes": 10,
+   "instruction": "Explore arguments for and against viruses being alive, then defend your verdict with two reasons."
+  }
+ },
+ {
+  "id": "bio-bacteriophage",
+  "name": "Bacteriophages",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "Viruses that hunt bacteria \u2014 nature's microscopic predators",
+  "byline": "Bacteria eaters",
+  "tags": [
+   "viruses",
+   "bacteria"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch a hunt",
+   "durationMinutes": 11,
+   "instruction": "Learn how phages inject DNA into bacteria, then explain why doctors are revisiting phage therapy."
+  }
+ },
+ {
+  "id": "bio-first-microscope-views",
+  "name": "The First Microscope Views",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "How a Dutch cloth merchant discovered a hidden world in a drop of water",
+  "byline": "History of science",
+  "tags": [
+   "microscopy",
+   "history"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet van Leeuwenhoek",
+   "durationMinutes": 9,
+   "instruction": "Read about Antonie van Leeuwenhoek's discoveries, then list three things he saw that nobody believed existed."
+  }
+ },
+ {
+  "id": "bio-gram-staining",
+  "name": "Gram Staining",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "The purple-pink test that sorts bacteria by their cell walls",
+  "byline": "Lab identity card",
+  "tags": [
+   "bacteria",
+   "lab"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Run the stain",
+   "durationMinutes": 9,
+   "instruction": "Learn why gram-positive bacteria hold purple dye, then name one disease caused by each type."
+  }
+ },
+ {
+  "id": "bio-extremophiles",
+  "name": "Extremophiles",
+  "categoryId": "BIOLOGY",
+  "subtype": "Microbiology",
+  "teaser": "Life forms thriving in boiling acid, deep ice, and radiation zones",
+  "byline": "Survival champions",
+  "tags": [
+   "extremophiles",
+   "survival"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Visit the extremes",
+   "durationMinutes": 11,
+   "instruction": "Meet tardigrades and heat-loving archaea, then name the harshest place you found living cells."
+  }
+ },
+ {
+  "id": "bio-plant-photosynthesis-deep",
+  "name": "Photosynthesis, Inside Out",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "How a leaf turns sunlight, water, and air into sugar and oxygen",
+  "byline": "The great kitchen",
+  "tags": [
+   "plants",
+   "energy"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the photon",
+   "durationMinutes": 13,
+   "instruction": "Walk through the light and dark reactions, then list the three inputs and three outputs of photosynthesis."
+  }
+ },
+ {
+  "id": "bio-chloroplast-tour",
+  "name": "Inside a Chloroplast",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "The green organelles that run the planet's solar power plants",
+  "byline": "Solar factories",
+  "tags": [
+   "plants",
+   "cells"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Tour the thylakoids",
+   "durationMinutes": 10,
+   "instruction": "Explore chloroplast structure, then explain the role of chlorophyll and why leaves are green."
+  }
+ },
+ {
+  "id": "bio-carnivorous-plants",
+  "name": "Carnivorous Plants",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Plants that turned the tables and started eating animals",
+  "byline": "The plant predators",
+  "tags": [
+   "plants",
+   "predators"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet a pitcher",
+   "durationMinutes": 11,
+   "instruction": "Compare a Venus flytrap and a pitcher plant, then explain why they eat insects in the first place."
+  }
+ },
+ {
+  "id": "bio-venus-flytrap-mechanism",
+  "name": "The Venus Flytrap's Snap",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "A trap that springs shut in a tenth of a second \u2014 how?",
+  "byline": "Fastest plant",
+  "tags": [
+   "plants",
+   "mechanisms"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Trigger the snap",
+   "durationMinutes": 10,
+   "instruction": "Discover how trigger hairs and electrical signals close the trap, then explain the two-touch rule."
+  }
+ },
+ {
+  "id": "bio-plant-communication",
+  "name": "Plants That Talk",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Underground fungal networks and chemical signals between neighbors",
+  "byline": "The silent signals",
+  "tags": [
+   "plants",
+   "networks"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Eavesdrop on a plant",
+   "durationMinutes": 12,
+   "instruction": "Find evidence that plants warn each other of pests, then explain how the signal travels."
+  }
+ },
+ {
+  "id": "bio-tree-rings",
+  "name": "Tree Rings",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Reading a tree's autobiography one annual ring at a time",
+  "byline": "Wooden archives",
+  "tags": [
+   "trees",
+   "climate"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Count the rings",
+   "durationMinutes": 9,
+   "instruction": "Learn what each tree ring records, then explain how a dry year shows up in the wood."
+  }
+ },
+ {
+  "id": "bio-bark-protection",
+  "name": "Why Trees Have Bark",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "The living armor that guards a tree's transport system",
+  "byline": "Tree skin",
+  "tags": [
+   "trees",
+   "anatomy"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Inspect the bark",
+   "durationMinutes": 8,
+   "instruction": "Find the three jobs bark does, then explain what happens when a ring of bark is removed."
+  }
+ },
+ {
+  "id": "bio-seed-dispersal-tricks",
+  "name": "Seed Dispersal",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Wings, hooks, explosions, and bellies \u2014 how seeds travel the world",
+  "byline": "Travel agency",
+  "tags": [
+   "plants",
+   "seeds"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Design a seed",
+   "durationMinutes": 11,
+   "instruction": "List four dispersal strategies, then design a seed for a wind-only island and justify it."
+  }
+ },
+ {
+  "id": "bio-germination-steps",
+  "name": "How a Seed Wakes Up",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "The hidden sequence from dry seed to first green shoot",
+  "byline": "The awakening",
+  "tags": [
+   "plants",
+   "seeds"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Wake a seed",
+   "durationMinutes": 9,
+   "instruction": "Research the germination checklist \u2014 water, oxygen, temperature \u2014 then order the early growth stages."
+  }
+ },
+ {
+  "id": "bio-plant-hormones",
+  "name": "Plant Hormones",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Chemical messages that tell roots down, shoots up, and fruit to ripen",
+  "byline": "Plant messengers",
+  "tags": [
+   "plants",
+   "hormones"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the signal",
+   "durationMinutes": 11,
+   "instruction": "Meet auxin, gibberellin, and ethylene, then explain which one makes a plant bend toward light."
+  }
+ },
+ {
+  "id": "bio-phototropism",
+  "name": "Phototropism",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Why houseplants lean toward the window",
+  "byline": "Bending toward light",
+  "tags": [
+   "plants",
+   "light"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch it lean",
+   "durationMinutes": 8,
+   "instruction": "Learn how auxin moves to the shaded side, then explain the growth difference that causes the bend."
+  }
+ },
+ {
+  "id": "bio-angiosperm-success",
+  "name": "Why Flowers Won",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "The flowering plants that conquered the planet in 100 million years",
+  "byline": "The takeover",
+  "tags": [
+   "plants",
+   "evolution"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Count the winners",
+   "durationMinutes": 12,
+   "instruction": "Compare flowers with cones and ferns, then list two advantages flowers gained from animal partners."
+  }
+ },
+ {
+  "id": "bio-pollinator-partnerships",
+  "name": "Pollinator Partnerships",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "The flower-bee bargains that feed a third of our crops",
+  "byline": "Nature's deal",
+  "tags": [
+   "plants",
+   "pollination"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the bee",
+   "durationMinutes": 11,
+   "instruction": "Discover how bee vision differs from ours, then explain why many flowers are yellow or blue."
+  }
+ },
+ {
+  "id": "bio-mimicry-orchids",
+  "name": "Deceptive Orchids",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Orchids that imitate female insects to trick males into carrying pollen",
+  "byline": "Floral fraud",
+  "tags": [
+   "orchids",
+   "mimicry"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet the trickster",
+   "durationMinutes": 13,
+   "instruction": "Study bee orchids and their insect look-alikes, then explain how the mimicry helps the flower."
+  }
+ },
+ {
+  "id": "bio-plant-medicine",
+  "name": "Medicines From Plants",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "How aspirin, quinine, and taxol all began as plant chemistry",
+  "byline": "Nature's pharmacy",
+  "tags": [
+   "plants",
+   "medicine"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Trace a drug",
+   "durationMinutes": 12,
+   "instruction": "Pick one plant-derived medicine, then trace it from plant to pill and name its original source species."
+  }
+ },
+ {
+  "id": "bio-fungi-not-plants",
+  "name": "Why Fungi Aren't Plants",
+  "categoryId": "BIOLOGY",
+  "subtype": "Botany",
+  "teaser": "Mushrooms are closer to animals than to lettuce \u2014 the surprising truth",
+  "byline": "The third kingdom",
+  "tags": [
+   "fungi",
+   "classification"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Reclassify a mushroom",
+   "durationMinutes": 9,
+   "instruction": "Find three features that separate fungi from plants, then name the molecule in their cell walls."
+  }
+ },
+ {
+  "id": "bio-bioluminescent-organisms",
+  "name": "Bioluminescence",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Living light \u2014 fireflies, anglerfish, and glowing plankton",
+  "byline": "Nature's neon",
+  "tags": [
+   "animals",
+   "light"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Light up",
+   "durationMinutes": 10,
+   "instruction": "Explore how luciferin creates light, then list three animals that glow and why each does it."
+  }
+ },
+ {
+  "id": "bio-mimicry-defense",
+  "name": "Mimicry as Defense",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Species that copy poisonous models to dodge predators",
+  "byline": "Fashion of fear",
+  "tags": [
+   "mimicry",
+   "defense"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Spot the copycat",
+   "durationMinutes": 11,
+   "instruction": "Compare monarch and viceroy butterflies, then explain how a harmless mimic benefits from the copy."
+  }
+ },
+ {
+  "id": "bio-camouflage-masters",
+  "name": "Masters of Camouflage",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Cuttlefish, chameleons, and stick insects that vanish in plain sight",
+  "byline": "Hide and seek",
+  "tags": [
+   "animals",
+   "camouflage"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Find the hidden",
+   "durationMinutes": 9,
+   "instruction": "Pick one camouflage expert, then explain the two tricks \u2014 color and texture \u2014 it uses to hide."
+  }
+ },
+ {
+  "id": "bio-echolocation",
+  "name": "Echolocation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Bats and dolphins painting the world with sound",
+  "byline": "Seeing with ears",
+  "tags": [
+   "bats",
+   "sound"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Click and listen",
+   "durationMinutes": 11,
+   "instruction": "Learn how bats read returning echoes, then compare their method with a dolphin's sonar."
+  }
+ },
+ {
+  "id": "bio-migration-navigation",
+  "name": "How Migrants Navigate",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The magnetic maps, star charts, and smell trails behind epic journeys",
+  "byline": "The great journeys",
+  "tags": [
+   "migration",
+   "navigation"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the flock",
+   "durationMinutes": 13,
+   "instruction": "Research monarch or Arctic tern migration, then name two navigation tools the animal uses."
+  }
+ },
+ {
+  "id": "bio-monarch-migration",
+  "name": "The Monarch Migration",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Four generations of butterflies completing a 3,000-mile relay",
+  "byline": "The butterfly relay",
+  "tags": [
+   "butterflies",
+   "migration"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Trace the route",
+   "durationMinutes": 12,
+   "instruction": "Follow the monarch's Mexico-to-Canada relay, then explain how the final generation finds the same trees."
+  }
+ },
+ {
+  "id": "bio-sleep-in-animals",
+  "name": "Why Animals Sleep",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "From fruit flies to whales, every animal needs its nightly recharge",
+  "byline": "The universal pause",
+  "tags": [
+   "sleep",
+   "behavior"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Study a sleeper",
+   "durationMinutes": 10,
+   "instruction": "Compare dolphin unihemispheric sleep with human sleep, then name one theory of why sleep exists."
+  }
+ },
+ {
+  "id": "bio-hibernation-science",
+  "name": "Hibernation and Torpor",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The extreme energy-saving modes that let animals skip winter",
+  "byline": "The long nap",
+  "tags": [
+   "sleep",
+   "winter"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Survive a winter",
+   "durationMinutes": 11,
+   "instruction": "Learn how a bear's heart rate drops in hibernation, then compare it with a hummingbird's nightly torpor."
+  }
+ },
+ {
+  "id": "bio-tool-use-animals",
+  "name": "Tool Use in Animals",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Crows, octopuses, and chimps that make and wield tools",
+  "byline": "Beyond instinct",
+  "tags": [
+   "intelligence",
+   "behavior"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch a craftsman",
+   "durationMinutes": 12,
+   "instruction": "Find a crow or octopus using a tool, then explain what tool use suggests about animal intelligence."
+  }
+ },
+ {
+  "id": "bio-animal-language",
+  "name": "Animal Communication",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Honeybee dances, whale songs, and prairie dog vocabulary",
+  "byline": "The animal chatter",
+  "tags": [
+   "communication",
+   "behavior"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Decode a call",
+   "durationMinutes": 12,
+   "instruction": "Study the waggle dance, then explain how a bee communicates distance and direction to its hive."
+  }
+ },
+ {
+  "id": "bio-prairie-dog-vocabulary",
+  "name": "Prairie Dog Language",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Rodents with distinct alarm calls for different predators",
+  "byline": "The tiny town criers",
+  "tags": [
+   "communication",
+   "rodents"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Learn the dialect",
+   "durationMinutes": 10,
+   "instruction": "Find out how prairie dog calls describe predator type and color, then list the variables they encode."
+  }
+ },
+ {
+  "id": "bio-octopus-intelligence",
+  "name": "The Octopus Mind",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Nine brains, blue blood, and puzzle-solving that stuns scientists",
+  "byline": "The alien of the sea",
+  "tags": [
+   "cephalopods",
+   "intelligence"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Solve like an octopus",
+   "durationMinutes": 13,
+   "instruction": "Explore octopus problem-solving and camouflage control, then explain why each arm has its own brain."
+  }
+ },
+ {
+  "id": "bio-ant-colony-society",
+  "name": "Ant Colony Society",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "How millions of nearly blind workers run a superorganism",
+  "byline": "The superorganism",
+  "tags": [
+   "ants",
+   "societies"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the pheromone",
+   "durationMinutes": 12,
+   "instruction": "Learn how ants use pheromone trails, then list the castes in a colony and each one's job."
+  }
+ },
+ {
+  "id": "bio-bee-hive-democracy",
+  "name": "The Honeybee Hive",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "A democracy of thousands that votes by dancing",
+  "byline": "The superorganism",
+  "tags": [
+   "bees",
+   "societies"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch the vote",
+   "durationMinutes": 11,
+   "instruction": "Explore how scout bees debate new nest sites by dancing, then explain how the hive reaches consensus."
+  }
+ },
+ {
+  "id": "bio-termite-mounds",
+  "name": "Termite Mound Engineering",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Air-conditioned skyscrapers built by blind insects",
+  "byline": "Natural architecture",
+  "tags": [
+   "termites",
+   "engineering"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Tour a mound",
+   "durationMinutes": 11,
+   "instruction": "Learn how termite mounds circulate air without fans, then explain the chimney effect they use."
+  }
+ },
+ {
+  "id": "bio-spider-silk-strength",
+  "name": "Spider Silk",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Stronger than steel by weight and stretchier than rubber",
+  "byline": "Nature's fiber",
+  "tags": [
+   "spiders",
+   "materials"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Test the silk",
+   "durationMinutes": 10,
+   "instruction": "Compare dragline silk with steel and Kevlar, then explain why orb-weavers recycle their webs."
+  }
+ },
+ {
+  "id": "bio-jumping-spider-vision",
+  "name": "Jumping Spider Vision",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Eight eyes, including telephoto lenses, on a pea-sized hunter",
+  "byline": "The tiny stalker",
+  "tags": [
+   "spiders",
+   "vision"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "See like a spider",
+   "durationMinutes": 9,
+   "instruction": "Discover how a jumping spider's principal eyes work, then explain what 'retinal scanning' means."
+  }
+ },
+ {
+  "id": "bio-bird-song-learning",
+  "name": "Why Birds Sing",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Songs that are part melody, part alarm, and part love letter",
+  "byline": "The dawn chorus",
+  "tags": [
+   "birds",
+   "sound"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Decode a song",
+   "durationMinutes": 10,
+   "instruction": "Compare songbirds' learned songs with innate calls, then name two functions of the dawn chorus."
+  }
+ },
+ {
+  "id": "bio-bird-migration-feats",
+  "name": "Record-Breaking Bird Migrations",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Arctic terns flying pole to pole \u2014 44,000 miles a year",
+  "byline": "The marathon flyers",
+  "tags": [
+   "birds",
+   "migration"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow a tern",
+   "durationMinutes": 12,
+   "instruction": "Research the Arctic tern or bar-tailed godwit, then list the record it holds and how it fuels the trip."
+  }
+ },
+ {
+  "id": "bio-crocodile-parenting",
+  "name": "Crocodile Parenting",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The fearsome reptiles that guard their nests and carry babies in their jaws",
+  "byline": "Fierce mothers",
+  "tags": [
+   "reptiles",
+   "parenting"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet the nursery",
+   "durationMinutes": 10,
+   "instruction": "Find out how crocodile mothers guard nests and hatchlings, then explain how temperature sets the sex of the young."
+  }
+ },
+ {
+  "id": "bio-turtle-navigation",
+  "name": "Sea Turtle Homing",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Turtles that cross oceans to return to the exact beach where they hatched",
+  "byline": "The homecoming",
+  "tags": [
+   "turtles",
+   "migration"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the compass",
+   "durationMinutes": 13,
+   "instruction": "Learn how sea turtles use Earth's magnetic field, then explain why they return to their natal beach."
+  }
+ },
+ {
+  "id": "bio-chameleon-color-purpose",
+  "name": "What Chameleon Colors Mean",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "It is mood and temperature \u2014 not just camouflage",
+  "byline": "The mood rings",
+  "tags": [
+   "reptiles",
+   "color"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Read the colors",
+   "durationMinutes": 10,
+   "instruction": "Discover how chameleons change color, then list three messages a color change can send."
+  }
+ },
+ {
+  "id": "bio-axolotl-regeneration",
+  "name": "The Axolotl's Superpower",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "A salamander that regrows limbs, hearts, and even parts of its brain",
+  "byline": "The eternal teenager",
+  "tags": [
+   "amphibians",
+   "regeneration"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Grow it back",
+   "durationMinutes": 12,
+   "instruction": "Research axolotl regeneration, then explain the cell trick that lets it rebuild a whole limb."
+  }
+ },
+ {
+  "id": "bio-platypus-oddities",
+  "name": "The Platypus Paradox",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "A mammal that lays eggs, has a bill, and shocks predators with venom",
+  "byline": "Nature's mashup",
+  "tags": [
+   "mammals",
+   "oddities"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet the mix",
+   "durationMinutes": 11,
+   "instruction": "List the platypus traits that seem borrowed from other animal groups, then explain how it hunts blind."
+  }
+ },
+ {
+  "id": "bio-echidna-spines",
+  "name": "Echidnas",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Egg-laying mammals covered in spines that forage with electro-sensing snouts",
+  "byline": "The spiny monotreme",
+  "tags": [
+   "mammals",
+   "monotremes"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Meet an echidna",
+   "durationMinutes": 9,
+   "instruction": "Discover how echidnas sense prey electrically, then explain why monotremes matter to mammal evolution."
+  }
+ },
+ {
+  "id": "bio-kangaroo-joey-life",
+  "name": "The Kangaroo Joey",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "A baby the size of a jellybean crawling into a pouch for months",
+  "byline": "Pouch life",
+  "tags": [
+   "marsupials",
+   "parenting"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the joey",
+   "durationMinutes": 9,
+   "instruction": "Trace a joey's journey from birth to pouch exit, then explain how kangaroos pause pregnancy."
+  }
+ },
+ {
+  "id": "bio-koala-eucalyptus-diet",
+  "name": "The Koala's Tricky Diet",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Eating leaves that are toxic to almost everything else",
+  "byline": "The fussy eater",
+  "tags": [
+   "marsupials",
+   "diet"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Chew the leaves",
+   "durationMinutes": 10,
+   "instruction": "Find out how koalas detoxify eucalyptus, then explain why they sleep up to 20 hours a day."
+  }
+ },
+ {
+  "id": "bio-elephant-infrasound",
+  "name": "Elephant Infrasound",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Calls too low for humans to hear that travel for kilometers",
+  "byline": "The silent thunder",
+  "tags": [
+   "elephants",
+   "communication"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Feel the rumble",
+   "durationMinutes": 11,
+   "instruction": "Learn how elephants communicate with infrasound, then explain why low frequencies travel so far."
+  }
+ },
+ {
+  "id": "bio-giraffe-heart",
+  "name": "The Giraffe's Pressure Pump",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "A two-foot heart and special valves that keep blood flowing uphill",
+  "byline": "Engineering a neck",
+  "tags": [
+   "giraffes",
+   "anatomy"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Pump the pressure",
+   "durationMinutes": 12,
+   "instruction": "Explore the giraffe's blood pressure system, then list two adaptations that prevent fainting when it bends down."
+  }
+ },
+ {
+  "id": "bio-blue-whale-feeding",
+  "name": "The Blue Whale's Bite",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The largest animal alive feeding on some of the smallest prey",
+  "byline": "The giant and the krill",
+  "tags": [
+   "whales",
+   "oceans"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Take a gulp",
+   "durationMinutes": 11,
+   "instruction": "Learn how baleen filters krill from seawater, then calculate how many krill a blue whale eats in a day."
+  }
+ },
+ {
+  "id": "bio-dolphin-sleep",
+  "name": "How Dolphins Sleep",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Half a brain awake at a time so they never stop swimming",
+  "byline": "The half-sleepers",
+  "tags": [
+   "dolphins",
+   "sleep"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Watch them nap",
+   "durationMinutes": 9,
+   "instruction": "Discover unihemispheric sleep, then explain why a dolphin cannot afford to fully fall asleep."
+  }
+ },
+ {
+  "id": "bio-shark-senses",
+  "name": "The Shark's Sixth Sense",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Electroreception that lets sharks feel the heartbeat of hidden prey",
+  "byline": "The sensing machine",
+  "tags": [
+   "sharks",
+   "senses"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Feel the field",
+   "durationMinutes": 11,
+   "instruction": "Explore the ampullae of Lorenzini, then list the full sensory suite a shark hunts with."
+  }
+ },
+ {
+  "id": "bio-penguin-thermoregulation",
+  "name": "Penguin Survival Engineering",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "How flightless birds survive Antarctic winters in huddles",
+  "byline": "The frozen colony",
+  "tags": [
+   "penguins",
+   "survival"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Huddle up",
+   "durationMinutes": 10,
+   "instruction": "Learn how emperor penguins share warmth and slow their hearts, then explain the huddle rotation."
+  }
+ },
+ {
+  "id": "bio-hummingbird-metabolism",
+  "name": "The Hummingbird Engine",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "A heartbeat of 1,200 beats per minute and a diet of pure sugar",
+  "byline": "The tiny turbine",
+  "tags": [
+   "birds",
+   "metabolism"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Fuel the flight",
+   "durationMinutes": 11,
+   "instruction": "Discover how hummingbirds fuel hovering flight, then explain what torpor is and when they use it."
+  }
+ },
+ {
+  "id": "bio-owl-silent-flight",
+  "name": "The Owl's Silent Wings",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Feather fringes that let owls hunt without a sound",
+  "byline": "The velvet assassin",
+  "tags": [
+   "owls",
+   "flight"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Listen for nothing",
+   "durationMinutes": 10,
+   "instruction": "Learn how wing fringes and velvet surfaces muffle sound, then explain why silent flight matters for hunting."
+  }
+ },
+ {
+  "id": "bio-falcon-dive-speed",
+  "name": "The Peregrine's Dive",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The fastest animal on Earth, reaching 240 mph in a stoop",
+  "byline": "The speed record",
+  "tags": [
+   "birds",
+   "speed"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Pull the dive",
+   "durationMinutes": 9,
+   "instruction": "Find out how peregrine falcons reach terminal velocity, then name the adaptations that protect their eyes and lungs."
+  }
+ },
+ {
+  "id": "bio-rattlesnake-heat-pits",
+  "name": "Rattlesnake Heat Vision",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Pits that see infrared, turning body heat into a hunting map",
+  "byline": "The thermal hunters",
+  "tags": [
+   "snakes",
+   "senses"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "See the heat",
+   "durationMinutes": 10,
+   "instruction": "Explore how pit organs detect infrared, then explain the advantage of hunting at night."
+  }
+ },
+ {
+  "id": "bio-tardigrade-survival",
+  "name": "Tardigrades",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The water bears that survive space, boiling, and freezing",
+  "byline": "The indestructibles",
+  "tags": [
+   "tardigrades",
+   "extremophiles"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Test a water bear",
+   "durationMinutes": 12,
+   "instruction": "Learn how tardigrades enter cryptobiosis, then list three extreme conditions they have survived."
+  }
+ },
+ {
+  "id": "bio-firefly-light-signals",
+  "name": "Firefly Courtship",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Aerial light shows where every flash pattern is a love letter",
+  "byline": "The light language",
+  "tags": [
+   "fireflies",
+   "courtship"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Learn the flashes",
+   "durationMinutes": 10,
+   "instruction": "Discover how firefly flashes differ by species, then explain the danger of female mimics."
+  }
+ },
+ {
+  "id": "bio-cicada-lifecycles",
+  "name": "The Cicada's 17 Years",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Periodical cicadas that wait underground for almost two decades",
+  "byline": "The long wait",
+  "tags": [
+   "insects",
+   "lifecycles"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Count the years",
+   "durationMinutes": 11,
+   "instruction": "Explore the periodical cicada lifecycle, then discuss why 13 and 17-year cycles might be prime-number tricks."
+  }
+ },
+ {
+  "id": "bio-butterfly-metamorphosis",
+  "name": "Metamorphosis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "The caterpillar that dissolves into soup and rebuilds itself as a butterfly",
+  "byline": "The great rebuild",
+  "tags": [
+   "butterflies",
+   "metamorphosis"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the change",
+   "durationMinutes": 11,
+   "instruction": "Learn what happens inside the chrysalis, then explain which body parts the caterpillar keeps."
+  }
+ },
+ {
+  "id": "bio-dragonfly-flight",
+  "name": "Dragonfly Aerobatics",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Two sets of wings that let dragonflies fly backwards and hover",
+  "byline": "The ace pilots",
+  "tags": [
+   "insects",
+   "flight"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Fly like a dragonfly",
+   "durationMinutes": 10,
+   "instruction": "Compare dragonfly wings with bird wings, then list three maneuvers their independent wings allow."
+  }
+ },
+ {
+  "id": "bio-lunar-cycles-life",
+  "name": "Animals Guided by the Moon",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Reefs that spawn, crabs that molt, and owls that hunt by moonlight",
+  "byline": "The moonlit schedule",
+  "tags": [
+   "moon",
+   "behavior"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Follow the moon",
+   "durationMinutes": 11,
+   "instruction": "Find one animal whose behavior syncs with the lunar cycle, then explain the evolutionary reason."
+  }
+ },
+ {
+  "id": "bio-bioluminescent-koi",
+  "name": "Glowing Marine Light Shows",
+  "categoryId": "BIOLOGY",
+  "subtype": "Zoology",
+  "teaser": "Dinoflagellate blooms that make waves glow electric blue",
+  "byline": "The neon surf",
+  "tags": [
+   "oceans",
+   "bioluminescence"
+  ],
+  "tier": 1,
+  "exploreAction": {
+   "verb": "Explore",
+   "target": "Touch the glow",
+   "durationMinutes": 9,
+   "instruction": "Discover what triggers glowing plankton, then explain why the organisms flash when disturbed."
+  }
  }
 ]
