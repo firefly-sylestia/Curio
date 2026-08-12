@@ -76,8 +76,7 @@ fun CurioCategoryChip(
         // (higher when selected) instead of drawing a hairline ring.
         border = BorderStroke(0.dp, Color.Transparent),
         elevation = FilterChipDefaults.filterChipElevation(
-            elevation = if (selected) 4.dp else 2.dp,
-            selectedElevation = 4.dp
+            elevation = if (selected) 4.dp else 2.dp
         )
     )
 }

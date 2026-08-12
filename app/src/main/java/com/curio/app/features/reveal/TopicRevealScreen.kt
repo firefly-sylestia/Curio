@@ -780,7 +780,6 @@ fun TopicRevealScreen(
                         modifier = Modifier.weight(1f, fill = false),
                         shape = RoundedCornerShape(50),
                         color = cat.themedAccent().copy(alpha = 0.22f),
-                        shadowElevation = 0.dp,
                         shadowElevation = 2.dp
                     ) {
                         Text(
@@ -982,8 +981,19 @@ fun TopicRevealScreen(
                             }
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
-                        colors = curioDialogActionButtonColors()
-                    ) { Text("Explore in browser") }
+                        colors = curioDialogActionButtonColors(),
+                        // v27n — the two action labels sit side by side in a
+                        // width-constrained dialog, so each stays on ONE line
+                        // (tight padding + ellipsis fallback instead of
+                        // wrapping into a broken two-line button).
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            "Explore in browser",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     TextButton(
                         onClick = {
                             engaged = true
@@ -994,8 +1004,15 @@ fun TopicRevealScreen(
                             }
                             startExploreSession(topic, buildYouTubeSearchUrl(topic))
                         },
-                        colors = curioDialogActionButtonColors()
-                    ) { Text("Explore in YouTube") }
+                        colors = curioDialogActionButtonColors(),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            "Explore in YouTube",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             },
             dismissButton = null

@@ -949,7 +949,6 @@ private fun DictateFieldButton(
         color = if (enabled) accent.copy(alpha = 0.10f)
                 else MaterialTheme.colorScheme.surfaceVariant,
         shadowElevation = 2.dp
-        shadowElevation = 0.dp
     ) {
         CurioIcon(
             name = CurioIcons.Mic,

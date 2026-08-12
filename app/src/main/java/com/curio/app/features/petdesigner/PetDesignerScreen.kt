@@ -4945,7 +4945,7 @@ private fun EvolutionChoiceDialog(
                     containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
                     else MaterialTheme.colorScheme.surfaceVariant
                 ),
-                shadowElevation = if (isSelected) 4.dp else 2.dp,
+                elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Row(

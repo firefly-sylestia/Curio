@@ -2602,20 +2602,9 @@ private fun HeroTicketCard(
             Surface(
                 shape = RoundedCornerShape(30.dp),
                 color = Color.Transparent,
-                // v7.14 — elevation shadow moved to the layered
+                // v7.14 — elevation shadow lives on the layered
                 // Modifier.shadow chain above; the Surface stays flat.
                 shadowElevation = 0.dp,
-                // v7.16 — refined border: OFF is a whisper 1dp hairline at
-                // 18% ink — seats the card on the page without a harsh
-                // accent outline (the accent rim-light stays OFF by default).
-                // ON drops the hairline lower and the accent is drawn as a
-                // soft gradient rim-light inside (the drawBehind below).
-                // v15 — the hairline seats the card without a bright ring:
-                // AMOLED wears the deck accent at a quiet 0.20 (the edge
-                // shine above is the primary accent carrier), and plain
-                // dark mode drops the white hairline to a whisper 0.10 so
-                // it never reads as a bright outline on the deep fills.
-                shadowElevation = 6.dp,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Box(

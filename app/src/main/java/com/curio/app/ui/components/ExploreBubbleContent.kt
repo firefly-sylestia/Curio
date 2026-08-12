@@ -179,11 +179,9 @@ fun ExploreBubbleContent(
     Surface(
         shape = RoundedCornerShape(if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 12.dp,
-        // No elevation shadow: the old 8dp shadow rendered BEYOND the
-        // overlay window's bounds and the window clipped it into a hard,
-        // boxy edge around the pill. The crisp accent border carries the
-        // definition now.
+        // Overlay windows clip elevation shadows into a hard, boxy edge
+        // around the pill, so the bubble stays flat — its definition
+        // comes from the container step + accent glow, not a shadow.
         shadowElevation = 0.dp,
         modifier = modifier
             .then(dragModifier)
@@ -566,7 +564,6 @@ private fun BubbleIconButton(
         onClick = onClick,
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = 4.dp,
         shadowElevation = 0.dp
     ) {
         CurioIcon(

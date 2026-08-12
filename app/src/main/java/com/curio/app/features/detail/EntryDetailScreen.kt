@@ -3013,10 +3013,8 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
         // surface hides the page watermark so only the board's
         // [CurioMoodBoardBackdrop] shows.
         color = category.categorySurfaceMoodBoard(),
-            shadowElevation = 0.dp,
-            // Faint category rule — the saved board sits on the tinted page,
-            // so a slim theme-aware border (accent in light, light twin in
-            // dark via categoryInk) keeps it from blending into the wash.
+            // The saved board sits on the tinted page — the elevation lift
+            // keeps it from blending into the wash.
             shadowElevation = 3.dp,
             // v7.17 — the whole board (and its in-place zoom overlay) draws
             // ABOVE the caption + quote cards that follow it in this Column:

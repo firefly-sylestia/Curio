@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -536,7 +537,6 @@ fun HomeScreen(navController: NavController) {
                             Surface(
                                 shape = statShape,
                                 color = if (holesOn) Color.Transparent else if (paperStatsOn) paperStatBg else Color.Transparent,
-                                shadowElevation = 2.dp,
                                 shadowElevation = if (paperStatsOn) 3.dp else 0.dp
                             ) {
                                 // The fill must wear the card's own shape —
@@ -1247,7 +1247,6 @@ private fun TopBarPill(
     Surface(
         shape = shape,
         color = bg,
-        shadowElevation = 2.dp,
         shadowElevation = elevation,
         modifier = Modifier
             .size(42.dp)
@@ -2156,7 +2155,6 @@ private fun CurrentlyExploringCard(
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(),
-        shadowElevation = 0.dp,
         shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -2268,7 +2266,8 @@ private fun CurrentlyExploringCard(
                     OutlinedButton(
                         onClick = onKeepExploring,
                         shape = RoundedCornerShape(50),
-                        shadowElevation = 2.dp,
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                        border = BorderStroke(0.dp, Color.Transparent),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = exploreInk),
                         modifier = Modifier.weight(1f)
                     ) {
