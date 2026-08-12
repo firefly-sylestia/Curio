@@ -102,6 +102,10 @@ object AppPreferences {
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
+    // v23 — whether the "Show the explore bubble" opt-in row appears inside
+    // the Explore now dialog (default OFF; the Notifications toggle
+    // re-shows it there as a single-line choice).
+    private const val KEY_SHOW_BUBBLE_OPT_IN_DIALOG = "show_bubble_opt_in_dialog"
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
@@ -317,6 +321,12 @@ object AppPreferences {
     // (and the Settings toggle enables it anytime).
     var overlayBubbleEnabledState by mutableStateOf(false)
         private set
+    // v23 — whether the Explore dialog shows its bubble opt-in row. Hidden
+    // by default; the Notifications toggle re-shows it (single-line, no
+    // subtext) so the dialog stays clean while the Settings toggle still
+    // enables the bubble itself.
+    var showBubbleOptInDialogState by mutableStateOf(false)
+        private set
 
     // v8.1 — whether the user has declined the "Display over other apps"
     // permission (see [isOverlayAskDeclined]). Suppresses the automatic
@@ -465,6 +475,7 @@ object AppPreferences {
         searchEngineState = getSearchEngine(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
+        showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         petEnabledState = isPetEnabled(context)
@@ -818,6 +829,19 @@ object AppPreferences {
                 com.curio.app.infrastructure.ExploreSessionService.stop(context)
             }
         }
+    }
+
+    /**
+     * v23 — whether the Explore now dialog shows its "Show the explore
+     * bubble" opt-in row. Default OFF (hidden); the Notifications toggle
+     * re-shows it as a single-line choice inside the dialog.
+     */
+    fun isShowBubbleOptInDialog(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SHOW_BUBBLE_OPT_IN_DIALOG, false)
+
+    fun setShowBubbleOptInDialog(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SHOW_BUBBLE_OPT_IN_DIALOG, enabled).apply()
+        showBubbleOptInDialogState = enabled
     }
 
     /**

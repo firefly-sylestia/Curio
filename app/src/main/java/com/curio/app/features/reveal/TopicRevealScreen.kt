@@ -96,7 +96,6 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
-import com.curio.app.data.SearchEngine
 import com.curio.app.data.TourController
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
@@ -913,9 +912,10 @@ fun TopicRevealScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        // v19 — the browser button searches the user's chosen
-                        // engine (Google by default), so the copy names it.
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}, or open YouTube.",
+                        // v23 — the browser button searches the user's chosen
+                        // engine (pickable in onboarding + Settings), so the
+                        // copy stays engine-neutral.
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open YouTube.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -931,33 +931,30 @@ fun TopicRevealScreen(
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    // ── v22 — opt-in for the floating explore bubble ──
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.BubbleChart,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            size = 18.dp
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
+                    // ── v22/v23 — opt-in for the floating explore bubble ──
+                    // v23 — hidden from the dialog by default; the
+                    // Notifications toggle re-shows it as a single main text
+                    // line with no subtext.
+                    if (AppPreferences.isShowBubbleOptInDialog(context)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.BubbleChart,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 18.dp
+                            )
                             Text(
                                 "Show the explore bubble",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
                             )
-                            Text(
-                                "A small timer that floats over other apps while you explore",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Switch(checked = bubbleOptIn, onCheckedChange = { bubbleOptIn = it })
                         }
-                        Switch(checked = bubbleOptIn, onCheckedChange = { bubbleOptIn = it })
                     }
                 }
             },
@@ -970,9 +967,13 @@ fun TopicRevealScreen(
                             // v22 — apply the bubble opt-in before starting:
                             // opting in is an explicit intent, so a previously
                             // declined "Display over other apps" ask re-opens
-                            // (mirrors the Settings toggle's behavior).
-                            AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
-                            if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
+                            // (mirrors the Settings toggle's behavior). Only
+                            // applied when the dialog row is visible — when
+                            // it's hidden, Settings owns the bubble entirely.
+                            if (AppPreferences.isShowBubbleOptInDialog(context)) {
+                                AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
+                                if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
+                            }
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors()
@@ -981,8 +982,10 @@ fun TopicRevealScreen(
                         onClick = {
                             engaged = true
                             showExploreDialog = false
-                            AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
-                            if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
+                            if (AppPreferences.isShowBubbleOptInDialog(context)) {
+                                AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
+                                if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
+                            }
                             startExploreSession(topic, buildYouTubeSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors()

@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -77,6 +79,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.SearchEngine
 import com.curio.app.data.TourController
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
@@ -109,12 +112,12 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun OnboardingScreen(navController: NavController) {
-    // Intro slides + theme step + permission setup (v7.100 adds the theme
-    // picker between the intros and the permissions).
-    val pagerState = rememberPagerState(pageCount = { OnboardingSlides.size + 2 })
+    // Intro slides + theme step + search step + permission setup (v7.100
+    // adds the theme picker; v23 adds the search-engine step).
+    val pagerState = rememberPagerState(pageCount = { OnboardingSlides.size + 3 })
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val isLastSlide = pagerState.currentPage == OnboardingSlides.size + 1
+    val isLastSlide = pagerState.currentPage == OnboardingSlides.size + 2
 
     // ── Setup-step permission state ───────────────────────────────────
     var notificationGranted by remember { mutableStateOf(hasNotificationPermission(context)) }
@@ -286,6 +289,12 @@ fun OnboardingScreen(navController: NavController) {
                                 }
                             }
                             OnboardingSlides.size + 1 -> {
+                                // Search step: which engine Explore opens in the browser.
+                                MorphEntrance {
+                                    SearchSlide()
+                                }
+                            }
+                            OnboardingSlides.size + 2 -> {
                                 // Final step: permission setup, not an intro slide.
                                 SetupSlide(
                                     notificationGranted = notificationGranted,
@@ -323,8 +332,9 @@ fun OnboardingScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.Center
             ) {
                 if (!isLastSlide) {
-                    // One dot per intro slide + one for the theme step.
-                    (0..OnboardingSlides.size).forEach { index ->
+                    // One dot per intro slide + one for the theme step + one
+                    // for the search step.
+                    (0..OnboardingSlides.size + 1).forEach { index ->
                         val selected = pagerState.currentPage == index
                         PageDot(
                             selected = selected,
@@ -596,6 +606,7 @@ private fun SetupSlide(
     // ink, permission cards as paper boxes. Centered when the content fits,
     // scrollable on very small screens — the Box centers the scrollable
     // column as a whole.
+    val context = LocalContext.current
     val ink = heroInk()
     Box(
         modifier = Modifier
@@ -668,7 +679,14 @@ private fun SetupSlide(
                 subtitle = "So the explore bubble can float over any app while you research, your timer stays in view with quick notes at your finger tips",
                 granted = overlayGranted,
                 onRequest = onRequestOverlay
-            )
+            ) {
+                // v23 — the bubble opt-in lives inside this card once the
+                // permission is granted (mirrors the reminder-row pattern).
+                if (overlayGranted) {
+                    CurioSettingsDivider()
+                    BubbleOptInRow()
+                }
+            }
         }
     }
 }
@@ -794,6 +812,50 @@ private fun ReminderRow(
             )
         }
         Switch(checked = reminderWanted, onCheckedChange = onReminderChange)
+    }
+}
+
+/** v23 — the explore-bubble opt-in row inside the overlay permission card
+ *  (self-contained: reads/writes the bubble pref directly). */
+@Composable
+private fun BubbleOptInRow() {
+    val context = LocalContext.current
+    var bubbleEnabled by remember { mutableStateOf(AppPreferences.isOverlayBubbleEnabled(context)) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        CurioIcon(
+            name = CurioIcons.BubbleChart,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 18.dp
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                "Show the explore bubble",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "A small timer that floats over other apps while you explore",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Switch(
+            checked = bubbleEnabled,
+            onCheckedChange = { enabled ->
+                bubbleEnabled = enabled
+                if (enabled) AppPreferences.setOverlayAskDeclined(context, false)
+                AppPreferences.setOverlayBubbleEnabled(context, enabled)
+            }
+        )
     }
 }
 
@@ -1024,6 +1086,120 @@ private fun ThemeModeChip(
             )
             Text(
                 text = label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = if (selected) fill else ink
+            )
+        }
+    }
+}
+
+/** v23 — the search-engine step: which engine the Explore button opens in
+ *  the browser. Mirrors the theme step's ink-glass chip language. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SearchSlide() {
+    val context = LocalContext.current
+    val engineId = AppPreferences.searchEngineState
+    val fill = settingsRoseAccent()
+    val ink = settingsReadableInk(fill)
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        val compact = maxHeight < 380.dp
+        Column(
+            // Scrollable like the theme/setup steps — large system font
+            // scales must never clip the chips.
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "SEARCH",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 2.sp
+                ),
+                color = ink.copy(alpha = 0.75f),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
+
+            Text(
+                text = "Explore with your engine",
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = ink,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
+
+            Text(
+                text = "Pick which search engine the Explore button opens in your browser. You can change it anytime in Settings.",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 26.sp
+                ),
+                color = ink.copy(alpha = 0.85f),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(if (compact) 16.dp else 22.dp))
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                SearchEngine.entries.forEach { engine ->
+                    SearchEngineChip(
+                        engine = engine,
+                        selected = engine.id == engineId,
+                        fill = fill,
+                        ink = ink,
+                        onClick = { AppPreferences.setSearchEngine(context, engine) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** One engine chip in the search step — selected fills with the banner's
+ *  ink (text flips to the rose fill) and wears a check; unselected is a
+ *  translucent ink-glass pill with a hairline ink rim. */
+@Composable
+private fun SearchEngineChip(
+    engine: SearchEngine,
+    selected: Boolean,
+    fill: Color,
+    ink: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (selected) ink else ink.copy(alpha = 0.14f),
+        border = if (selected) null else BorderStroke(1.dp, ink.copy(alpha = 0.45f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (selected) {
+                CurioIcon(
+                    name = CurioIcons.Check,
+                    contentDescription = null,
+                    tint = fill,
+                    size = 15.dp
+                )
+            }
+            Text(
+                text = engine.displayName,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = if (selected) fill else ink
             )

@@ -76,6 +76,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.formatSessionShort
 import com.curio.app.data.shortName
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -444,6 +445,21 @@ fun SaveCaptureScreen(
         // ── Topic reminder strip with gradient ───────────────────────────
         // Wears the category tint with the tint setting on; with it off it
         // falls back to a plain theme surface so the whole flow goes neutral.
+        // v23 — how long this topic was explored, shown right under the
+        // topic in the strip: the saved entry's session in edit mode, or the
+        // pending write-session handoff (live session as fallback) on a
+        // fresh save — the same sources the save itself uses.
+        val displaySessionMillis = when {
+            editEntryId != null -> editingEntry?.sessionTimeMillis ?: 0L
+            topic != null -> ExploreSessionStore.peekWriteSessionMillis(cat.id, topic.name)
+                .takeIf { it > 0L }
+                ?: ExploreSessionStore.activeSessionState
+                    ?.takeIf { it.categoryId == cat.id && it.topicName == topic.name }
+                    ?.elapsedMillis()
+                    ?.coerceAtLeast(0L)
+                ?: 0L
+            else -> 0L
+        }
         val tintWash = AppPreferences.tintWashEffective()
         val stripColor = if (tintWash) cat.tint else MaterialTheme.colorScheme.surfaceContainerHigh
         val stripInk = if (tintWash) cat.categoryInk() else MaterialTheme.colorScheme.onSurface
@@ -484,6 +500,24 @@ fun SaveCaptureScreen(
                         style = MaterialTheme.typography.labelSmall,
                         color = stripInk.copy(alpha = 0.7f)
                     )
+                    if (displaySessionMillis > 0L) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Timer,
+                                contentDescription = null,
+                                tint = stripInk.copy(alpha = 0.7f),
+                                size = 13.dp
+                            )
+                            Text(
+                                text = "explored ${formatSessionShort(displaySessionMillis)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = stripInk.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
                 }
             }
         }

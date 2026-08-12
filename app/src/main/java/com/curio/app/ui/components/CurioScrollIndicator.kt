@@ -40,8 +40,11 @@ import kotlinx.coroutines.launch
  *    content (no layout shift).
  *  - Thin when idle (3dp, faint), grows to a 9dp handle when the user
  *    touches it, so it reads quietly until it's needed.
- *  - Dragging the knob scrolls the list (maps drag distance to scroll
- *    distance); the knob color follows the theme's surface ink.
+ *  - Dragging the KNOB scrolls the list SLOWLY and gently (a fixed 1:2.5
+ *    finger-to-content ratio, never the full-range jump); only the knob
+ *    itself responds to touch — the empty strip above/below does nothing,
+ *    and there is no tap-to-position jump.
+ *  - The knob color follows the theme's surface ink.
  *  - Hidden entirely when the content fits in the viewport (or when the
  *    state is null).
  *
@@ -99,56 +102,87 @@ fun CurioVerticalScrollIndicator(
 
     val knobColor = MaterialTheme.colorScheme.onSurface.copy(alpha = knobAlpha)
 
+    // The knob's touch-target geometry — its exact vertical extent plus a
+    // small pad, so grabbing the knob is easy but the empty strip above and
+    // below it never responds (no accidental jumps).
+    val g = geometry.value
+    val hitHeightPx = if (g.thumbPx > 0f) g.thumbPx + KnobTouchPadPx else 0f
+    val hitOffsetPx = if (g.thumbPx > 0f) g.offsetPx - KnobTouchPadPx / 2f else 0f
+
     Box(
         modifier = modifier
             // Fixed-width hit strip — the caller supplies the height (and any
-            // hero-clearance padding); 28dp gives a grabbable target without
-            // stealing much screen real estate.
+            // hero-clearance padding); 28dp gives the knob a grabbable target
+            // without stealing much screen real estate.
             .width(28.dp)
-            .onSizeChanged { barHeightPx = it.height.toFloat() }
-            .pointerInput(state) {
-                // Drag-to-scroll via the stable drag-gesture detector: it
-                // hands us the pixel delta directly, so we never touch
-                // per-event position math (which changed shape across
-                // compose versions). The knob grows while a drag is active
-                // and shrinks back on release.
-                detectVerticalDragGestures(
-                    onDragStart = { touched = true },
-                    onDragEnd = { touched = false },
-                    onDragCancel = { touched = false },
-                    onVerticalDrag = { change, dragAmount ->
-                        change.consume()
-                        val s = state
-                        if (s != null && dragAmount != 0f) {
-                            val g = geometry.value
-                            val scrollable = (s.contentSize - s.viewportSize).toFloat()
-                            if (g.maxOffsetPx > 1f && scrollable > 0f) {
-                                // Same ratio as the thumb: drag distance over
-                                // knob travel times the total scrollable range.
-                                val delta = dragAmount / g.maxOffsetPx * scrollable
-                                scope.launch { onScrollBy(delta) }
-                            }
-                        }
-                    }
-                )
-            },
+            .onSizeChanged { barHeightPx = it.height.toFloat() },
         contentAlignment = Alignment.TopEnd
     ) {
-        // The knob — aligned to the strip's top-right, then nudged down by the
-        // computed offset so it tracks the list position exactly.
+        // ── The knob — aligned to the strip's top-right, then nudged down by
+        //    the computed offset so it tracks the list position exactly. ──
         Box(
             modifier = Modifier
                 .padding(end = 2.dp)
                 .width(knobWidth)
-                .height(with(density) { geometry.value.thumbPx.toDp() })
-                .offset(y = with(density) { geometry.value.offsetPx.toDp() })
+                .height(with(density) { g.thumbPx.toDp() })
+                .offset(y = with(density) { g.offsetPx.toDp() })
                 .clip(RoundedCornerShape(50))
                 .background(knobColor)
+        )
+
+        // ── The knob's touch target — invisible, sized/placed to overlap the
+        //    knob, and the ONLY touchable part of the strip. Dragging scrolls
+        //    slowly via the stable drag-gesture detector (it hands us the
+        //    pixel delta directly, so we never touch per-event position math,
+        //    which changed shape across compose versions). The knob grows
+        //    while a drag is active and shrinks back on release. ──
+        Box(
+            modifier = Modifier
+                .width(28.dp)
+                .height(with(density) { hitHeightPx.toDp() })
+                .offset(y = with(density) { hitOffsetPx.toDp() })
+                .pointerInput(state, hitHeightPx > 0f) {
+                    // No knob (content fits / no state yet) → nothing to grab.
+                    if (hitHeightPx <= 0f) return@pointerInput
+                    detectVerticalDragGestures(
+                        onDragStart = { touched = true },
+                        onDragEnd = { touched = false },
+                        onDragCancel = { touched = false },
+                        onVerticalDrag = { change, dragAmount ->
+                            change.consume()
+                            val s = state
+                            if (s != null && dragAmount != 0f) {
+                                val scrollable = (s.contentSize - s.viewportSize).toFloat()
+                                if (scrollable > 0f) {
+                                    // Slow, gentle scroll — a fixed
+                                    // finger-to-content ratio, never the
+                                    // full-range jump, and clamped per event
+                                    // so a fast flick can't race the list.
+                                    val delta = (dragAmount * KnobScrollRatio)
+                                        .coerceIn(-KnobMaxDeltaPx, KnobMaxDeltaPx)
+                                    scope.launch { onScrollBy(delta) }
+                                }
+                            }
+                        }
+                    )
+                }
         )
     }
 }
 
-/** Knob geometry in px — height, offset from the strip top, draggable travel. */
+/** Slow-scroll ratio — 1 finger px scrolls ~2.5 content px. A gentle crawl,
+ *  never the old full-range jump (which raced the list on long screens). */
+private const val KnobScrollRatio = 2.5f
+
+/** Per-drag-event scroll cap (px) — a fast flick can't burst the list. */
+private const val KnobMaxDeltaPx = 180f
+
+/** Extra vertical padding around the knob's touch target (px). */
+private const val KnobTouchPadPx = 14f
+
+/** Knob geometry in px — height, offset from the strip top, and the knob's
+ *  draggable travel (currently reserved: the drag uses a fixed slow ratio, so
+ *  travel is not read by the gesture code anymore). */
 private data class ScrollKnob(
     val thumbPx: Float,
     val offsetPx: Float,

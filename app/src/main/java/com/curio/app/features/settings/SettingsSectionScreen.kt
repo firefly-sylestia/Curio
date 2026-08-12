@@ -212,30 +212,9 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setPetEnabled(context, it)
             }
         }
-        // v8.8 — the floating pet companion: wanders on every screen, can be
-        // dragged anywhere, and naps back into its flower bed. Default ON;
-        // turning it off keeps the pet at home in the bed.
-        SettingsRowPulse(highlightKey == "appearance-floating-pet") {
-            CompactSwitchRow(
-                "Floating pet",
-                "Wanders, follows your finger, naps in its flower bed",
-                AppPreferences.floatingPetEnabledState
-            ) {
-                AppPreferences.setFloatingPetEnabled(context, it)
-            }
-        }
-        // v8.43 — the pet's learning brain (CurioPetBrain): observes real
-        // activity, builds a personality, and develops its own catchphrases
-        // over time. Default ON; off = classic rule-based lines only.
-        SettingsRowPulse(highlightKey == "appearance-pet-brain") {
-            CompactSwitchRow(
-                "Pet brain",
-                "The pet learns your habits and grows its own personality",
-                AppPreferences.petBrainEnabledState
-            ) {
-                AppPreferences.setPetBrainEnabled(context, it)
-            }
-        }
+        // v23 — the floating pet and pet brain are always-on companions now
+        // (their Appearance toggles were removed); only chatter + games stay
+        // tunable below.
         // v16 — how chatty the pet is. Cozy is the default; Talkative opens
         // the bubble more often, Quiet says less.
         SettingsRowPulse(highlightKey == "appearance-pet-chatter") {
@@ -280,29 +259,9 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 )
             }
         }
-        CurioSettingsDivider()
-        // v8.16 — whether a landed topic's reveal opens itself as soon as
-        // the deck settles. Default OFF: the deck just lands and the front
-        // card stays tappable (no reveal page, no open-it prompt).
-        SettingsRowPulse(highlightKey == "appearance-auto-open") {
-            CompactSwitchRow(
-                "Auto-open landed topic",
-                "Open the topic reveal as soon as the deck lands",
-                AppPreferences.autoOpenRevealState
-            ) {
-                AppPreferences.setAutoOpenReveal(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-reaction-lines") {
-            CompactSwitchRow(
-                "Custom reaction lines",
-                "Let Curie speak your saved lines for each event",
-                AppPreferences.customReactionLinesState
-            ) {
-                AppPreferences.setCustomReactionLinesEnabled(context, it)
-            }
-        }
+        // v23 — auto-open landed topic is always on now (its toggle was
+        // removed) and custom reaction lines are permanently off (their
+        // editor is no longer reachable, so the toggle was removed too).
     }
 }
 
@@ -317,6 +276,8 @@ private fun NotificationsSection(highlightKey: String? = null) {
     // grant — or a decline — just happened).
     var overlayUsable by remember { mutableStateOf(AppPreferences.overlayActuallyUsable(context)) }
     var overlaySettingsOpened by remember { mutableStateOf(false) }
+    // v23 — whether the Explore dialog shows its bubble opt-in row.
+    var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
     var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
     // v19 — the explore search-engine picker (which engine the "Explore in
@@ -329,6 +290,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 reminderHour = AppPreferences.getReminderHour(context)
                 overlayEnabled = AppPreferences.isOverlayBubbleEnabled(context)
+                showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
                 liveNotificationsEnabled = AppPreferences.isLiveNotificationsEnabled(context)
                 exploreSessionsEnabled = AppPreferences.isExploreSessionsEnabled(context)
@@ -464,6 +426,19 @@ private fun NotificationsSection(highlightKey: String? = null) {
                     overlayEnabled = enabled
                     AppPreferences.setOverlayBubbleEnabled(context, enabled)
                 }
+            }
+        }
+        CurioSettingsDivider()
+        // v23 — the explore dialog's bubble opt-in row is hidden by default;
+        // this re-shows it there as a single-line choice (no subtext).
+        SettingsRowPulse(highlightKey == "notif-bubble-dialog") {
+            CompactSwitchRow(
+                "Explore bubble option in Explore dialog",
+                "Show the bubble choice as one line when you start an explore",
+                showBubbleOptInDialogEnabled
+            ) {
+                showBubbleOptInDialogEnabled = it
+                AppPreferences.setShowBubbleOptInDialog(context, it)
             }
         }
         CurioSettingsDivider()
