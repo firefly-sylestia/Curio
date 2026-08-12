@@ -1,6 +1,18 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Update check redo (in-app updates + full notes) + merge Support/Diagnostics/About into one page
+## Current Request (COMPLETE): 3D shuffle button always-on + toggle removed
+
+**Date:** 2026-08-12
+
+**What was asked:** in the Deck & controls experiment, make the 3D shuffle button on by default and remove its option from Settings.
+
+**Done:** removed the "3D shuffle button" toggle from `features/settings/ExperimentsScreen.kt` (Deck & controls card; header subtitle now "Pastel accents"). The feature already defaults ON (`AppPreferences.threeDButtonState` = true, `is3DButtonGradientEnabled` default true) and stays that way — SpinScreen reads it unchanged. Changelog bullet + app/AGENTS.md note added. CI compile fix from the previous push (delegated-property smart cast in SaveCaptureScreen) also landed (`e07a465`).
+
+## Previous Requests
+
+### Update check redo (in-app updates + full notes) + merge Support/Diagnostics/About into one page (Android)
+
+**Date:** 2026-08-12 — Play Core `app-update` 2.1.0 flexible in-app updates with sideload fallback to the GitHub release check; full expandable release notes; `SupportScreen` is now the single page (Updates / Feedback / About Curio) reachable from Settings, Profile, and the Home drawer; removed the old Settings → About page, `SETTINGS_ABOUT` route, `AboutSection`, and `CurioUpdateCheckRow`.
 
 **Date:** 2026-08-12
 

@@ -116,11 +116,9 @@ fun ExperimentsScreen(navController: NavController) {
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Layers, "Deck & controls", "Shuffle button and pastel accents")
-                    ExperimentSwitchRow("3D shuffle button", "Raised gradient, shadow, and orbiting dots", AppPreferences.threeDButtonState) {
-                        AppPreferences.set3DButtonGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
+                    // v24 — the 3D shuffle button is decided: always on by
+                    // default, so its experiment toggle was removed here.
+                    CurioCardHeader(CurioIcons.Layers, "Deck & controls", "Pastel accents")
                     ExperimentSwitchRow("Pastel crown depth", "A subtle darker crown on pastel cards", AppPreferences.pastelCrownDepthState) {
                         AppPreferences.setPastelCrownDepthEnabled(context, it)
                     }
