@@ -449,12 +449,15 @@ fun SaveCaptureScreen(
         // topic in the strip: the saved entry's session in edit mode, or the
         // pending write-session handoff (live session as fallback) on a
         // fresh save — the same sources the save itself uses.
+        // `topic` is a delegated property, so grab a stable local first (the
+        // compiler can't smart-cast a delegated getter past a null check).
+        val localTopic = topic
         val displaySessionMillis = when {
             editEntryId != null -> editingEntry?.sessionTimeMillis ?: 0L
-            topic != null -> ExploreSessionStore.peekWriteSessionMillis(cat.id, topic.name)
+            localTopic != null -> ExploreSessionStore.peekWriteSessionMillis(cat.id, localTopic.name)
                 .takeIf { it > 0L }
                 ?: ExploreSessionStore.activeSessionState
-                    ?.takeIf { it.categoryId == cat.id && it.topicName == topic.name }
+                    ?.takeIf { it.categoryId == cat.id && it.topicName == localTopic.name }
                     ?.elapsedMillis()
                     ?.coerceAtLeast(0L)
                 ?: 0L
