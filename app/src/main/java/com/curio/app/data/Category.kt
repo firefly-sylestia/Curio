@@ -499,7 +499,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryLimeTint,
             iconGlyph     = "colorize",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true  // v27i — 577 topics shipped in assets/topics/chemistry.json
         ),
         CurioCategory(
             id            = CategoryId.ANIMALS,
