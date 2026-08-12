@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,8 +27,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -81,8 +80,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.TopicCatalog
-import com.curio.app.data.AudioStorageManager
-import com.curio.app.data.ImageStorageManager
+
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
@@ -92,6 +90,10 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioNavTint
+import com.curio.app.ui.components.CurioSortDropdown
+import com.curio.app.ui.components.CurioSortOption
+import com.curio.app.ui.components.CurioTwoStepDeleteDialog
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.MorphEntrance
@@ -101,10 +103,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioDialogActionButtonColors
-import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -161,12 +160,14 @@ fun CabinetScreen(navController: NavController) {
     // sort button toggles newest-first / oldest-first by capture time.
     var searchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var sortNewestFirst by rememberSaveable { mutableStateOf(true) }
+    // v26 — sort is a dropdown (field) + a universal ascending/descending
+    // arrow. Default: Date, newest first (descending).
+    var cabinetSortField by rememberSaveable { mutableStateOf(CabinetSortField.DATE.name) }
+    var sortAscending by rememberSaveable { mutableStateOf(false) }
     var selectionMode by rememberSaveable { mutableStateOf(false) }
     var selectedEntryIds by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
     var showBulkDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     val deleteScope = rememberCoroutineScope()
-    val context = androidx.compose.ui.platform.LocalContext.current
     val searchFocus = remember { FocusRequester() }
     LaunchedEffect(searchActive) {
         if (searchActive) {
@@ -192,7 +193,7 @@ fun CabinetScreen(navController: NavController) {
         }
     }
 
-    val visibleEntries = remember(entries, selectedFilter, showLegacyOnly, searchQuery, sortNewestFirst) {
+    val visibleEntries = remember(entries, selectedFilter, showLegacyOnly, searchQuery, cabinetSortField, sortAscending) {
         val q = searchQuery.trim()
         var result = if (selectedFilter == null) entries
             else entries.filter { it.topic.categoryId == selectedFilter }
@@ -209,8 +210,19 @@ fun CabinetScreen(navController: NavController) {
                     it.tags.any { tag -> tag.contains(q, ignoreCase = true) }
             }
         }
-        if (sortNewestFirst) result.sortedByDescending { it.capturedAtMillis }
-        else result.sortedBy { it.capturedAtMillis }
+        when (CabinetSortField.valueOf(cabinetSortField)) {
+            CabinetSortField.DATE -> result = if (sortAscending) result.sortedBy { it.capturedAtMillis }
+            else result.sortedByDescending { it.capturedAtMillis }
+            CabinetSortField.TITLE -> {
+                val byTitle = result.sortedBy { it.title?.lowercase() ?: it.topic.name.lowercase() }
+                result = if (sortAscending) byTitle else byTitle.reversed()
+            }
+            CabinetSortField.CATEGORY -> {
+                val byCat = result.sortedBy { it.topic.categoryId.name }
+                result = if (sortAscending) byCat else byCat.reversed()
+            }
+        }
+        result
     }
 
     val categorySelectionIds = visibleEntries.map { it.id }.toSet()
@@ -222,36 +234,23 @@ fun CabinetScreen(navController: NavController) {
         categorySelectionIds.all { it in selectedEntryIds }
 
     if (showBulkDeleteConfirm) {
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { showBulkDeleteConfirm = false },
-            title = { Text("Delete selected captures?", fontWeight = FontWeight.Bold) },
-            text = { Text("This permanently deletes ${selectedEntryIds.size} selected capture(s), including their attached media.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showBulkDeleteConfirm = false
-                    val ids = selectedEntryIds.toList()
-                    deleteScope.launch {
-                        val selectedEntries = entries.filter { it.id in ids }
-                        val deleted = runCatching {
-                            CurioRepositoryHolder.repo.deleteByIds(ids)
-                        }.isSuccess
-                        if (deleted) {
-                            selectedEntries.forEach { entry ->
-                                entry.captureData.audioFilePaths().forEach { path ->
-                                    AudioStorageManager.deleteAudio(context, path)
-                                }
-                                ImageStorageManager.deleteImagesForEntry(context, entry.id)
-                            }
-                            selectedEntryIds = emptySet()
-                            selectionMode = false
-                        }
-                    }
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showBulkDeleteConfirm = false }, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+        // v26 — double confirmation + recycle bin: nothing is permanently
+        // deleted here (media is kept so restores work), so the old
+        // "permanently deletes including media" wording is gone.
+        CurioTwoStepDeleteDialog(
+            visible = showBulkDeleteConfirm,
+            title = if (selectedEntryIds.size == 1) "this capture"
+            else "${selectedEntryIds.size} selected captures",
+            body = "These ${selectedEntryIds.size} captures move to the Recycle bin.",
+            onDismiss = { showBulkDeleteConfirm = false },
+            onConfirmed = {
+                showBulkDeleteConfirm = false
+                val ids = selectedEntryIds.toList()
+                deleteScope.launch {
+                    runCatching { CurioRepositoryHolder.repo.softDeleteByIds(ids) }
+                    selectedEntryIds = emptySet()
+                    selectionMode = false
+                }
             }
         )
     }
@@ -440,6 +439,16 @@ fun CabinetScreen(navController: NavController) {
         }
         }
 
+        // Side scroll indicator — thin overlay knob, grows on touch.
+        CurioVerticalScrollIndicator(
+            state = gridState.scrollIndicatorState,
+            onScrollBy = { gridState.dispatchRawDelta(it) },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = contentTop + 8.dp, bottom = 16.dp)
+        )
+
         // ── Sticky filter chip bar — drawn ON TOP of the scroll content.
         // As the grid scrolls the bar lifts, pops (0.97 → 1.0) and frosts in
         // (Profile's pill mechanism), pinning just below the ragged tear
@@ -524,12 +533,20 @@ fun CabinetScreen(navController: NavController) {
                         label = "Select",
                         ink = ink
                     )
-                    CabinetHeroActionPill(
-                        onClick = { sortNewestFirst = !sortNewestFirst },
-                        glyph = if (sortNewestFirst) CurioIcons.ArrowDownward else CurioIcons.ArrowUpward,
-                        contentDescription = if (sortNewestFirst) "Newest first. Tap for oldest" else "Oldest first. Tap for newest",
+                    // v26 — sort dropdown: the label opens the field list,
+                    // the arrow toggles ascending/descending universally.
+                    CurioSortDropdown(
+                        options = listOf(
+                            CurioSortOption(CabinetSortField.DATE.name, "Date"),
+                            CurioSortOption(CabinetSortField.TITLE.name, "Title"),
+                            CurioSortOption(CabinetSortField.CATEGORY.name, "Category")
+                        ),
+                        selectedKey = cabinetSortField,
+                        ascending = sortAscending,
+                        onSelect = { cabinetSortField = it },
+                        onToggleDirection = { sortAscending = !sortAscending },
                         ink = ink,
-                        emphasized = sortNewestFirst
+                        emphasized = true
                     )
                     CabinetHeroActionPill(
                         onClick = { searchActive = true },
@@ -1142,3 +1159,8 @@ private fun FilterChipLite(
         }
     }
 }
+
+
+/** Cabinet sort fields — the sort dropdown selects the field, and the
+ * universal arrow toggles ascending/descending (v26). */
+private enum class CabinetSortField { DATE, TITLE, CATEGORY }

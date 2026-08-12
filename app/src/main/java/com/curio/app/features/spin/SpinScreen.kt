@@ -650,14 +650,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // non-pastel keep the classic card gradient (the muted pastel twins
     // already match the dark peeks).
     val deckGradient = if (pastelMode && !darkMode && !isMixedDeck) {
-        // v7.12 — pastel crown depth: when the toggle is on, the top stop
-        // gets a subtle 5% black deepen instead of the old 4% white lift,
-        // so the card reads with a gentle darker crown for depth.
-        val topCrown = if (AppPreferences.pastelCrownDepthState) {
-            lerp(deckAccent, Color.Black, 0.05f)
-        } else {
-            lerp(deckAccent, Color.White, 0.04f)
-        }
+        // v25 — Pastel crown depth PASSED: always ON — the top stop carries
+        // a subtle 5% black deepen for a gentle darker crown (the old 4%
+        // white-lift fallback is gone; its toggle was removed from
+        // Experiments).
+        val topCrown = lerp(deckAccent, Color.Black, 0.05f)
         listOf(
             topCrown,
             lightAccentTint(deckAccent, saturation = 0.22f, lightness = 0.80f)
@@ -937,6 +934,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             val resolved = resolveTopicForSlot(0, hand, cycleIndex, landedTopic)
             if (resolved != null) {
                 landingAlreadyOpened = true
+                // v25 — pin the tapped topic as the landed topic: the NavHost
+                // disposes Spin while Reveal is open, so the hand re-deals on
+                // return. Without this pin, tapping a card on the idle deck
+                // (no landed topic yet) came back to a DIFFERENT random front
+                // card. The pin clears on the next swipe or spin, exactly
+                // like a real landing.
+                landedTopicName = resolved.name
                 isOpening = true
                 // Give the settled ticket time to grow before the reveal
                 // destination enters. This mirrors the automatic landing
@@ -1007,7 +1011,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // the device's physical dpi; a high-density phone should also become
         // smaller when the user chooses 2x.
         val densityExtraCompact = densityMode == SmartDensityMode.EXTRA_COMPACT
-        val smartLayout = AppPreferences.smartSpinLayoutState
+        // v24 — Smart Spin layout removed for good (its toggle was dropped):
+        // the deck always uses the natural sizing, never a smart compact tier.
+        val smartLayout = false
         val heightCompact = maxHeight < SpinCompactThresholdHeight
         val extraCompact = smartLayout && maxHeight < SpinExtraCompactThresholdHeight
         // Extra-compact implies heightCompact (600 < 680), so this stays
@@ -1266,8 +1272,10 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 showCategoryPicker = false
             },
             onBrowseAll = {
+                // v26 — the sheet's "Manage categories" link opens the
+                // Manage Categories screen (was the full-screen picker).
                 showCategoryPicker = false
-                navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
+                navController.navigate(CurioRoutes.MANAGE_CATEGORIES) { launchSingleTop = true }
             }
         )
     }
@@ -2327,10 +2335,14 @@ private fun HeroTicketCard(
     val hPx = with(density) { h.toPx() }
     // v7.13 — Main card toggles read directly from reactive state so
     // flipping any toggle recomposes the hero card instantly.
-    val heroGradientOn = AppPreferences.heroGradientState
+    // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
+    // toggle was removed from Experiments and the read is hardcoded here.
+    val heroGradientOn = true
     val heroBorderOn = AppPreferences.heroBorderState
     val heroShadowOn = AppPreferences.heroShadowState
-    val heroBlendOn = AppPreferences.heroBlendGradientState
+    // v24 — the dual-accent hero gradient experiment was rejected (ugly
+    // golden blend); always OFF, so the blend branch below is dead.
+    val heroBlendOn = false
     // v7.14 — the enhanced gradient is a top-left-lit DIAGONAL multi-stop
     // sweep: a bright crown at the top-left catches light, the card's own
     // stops run through the middle (the Material blend keeps its identity),
@@ -3016,9 +3028,12 @@ private fun PeekCard(
     // feature resolves to the classic look.
     val gradientOn = AppPreferences.peekGradientState
     val hairlineOn = AppPreferences.peekHairlineState
-    val shadowsOn = AppPreferences.peekShadowsState
     val titlesOn = AppPreferences.peekTitlesState
-    val tailFadeOn = AppPreferences.peekTailFadeState
+    // v24 — deck card shadows (weird look while the cards animate) and
+    // tail-fade peek motion (didn't pass) were rejected; both stay OFF, so
+    // their toggles were removed from Experiments.
+    val shadowsOn = false
+    val tailFadeOn = false
     // 1a — top-lit crown: a whisper of light at the card top so the top
     // peek catches light and whispers "next up" on the reel. The base is
     // always the level-darkened blend; the gradient toggle layers the
@@ -3848,12 +3863,21 @@ private fun CategoryPickerSheet(
     // v7.94 — read the REACTIVE visible list directly (no remember): it
     // recomposes when Manage Categories hides/shows/reorders lanes.
     val categories = CurioCategories.visible
+    // v26 — reopen with the persisted deck: a mixed selection comes back in
+    // multi-select with every lane ticked, so the user can SEE and CHANGE
+    // the mix instead of it collapsing to the single first category. Hidden
+    // lanes are filtered out so they never show as pre-selected.
+    val context = LocalContext.current
+    val persistedVisible = remember {
+        AppPreferences.getLastSpinCategories(context)
+            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
+    }
     // Wide windows (tablet / landscape) spread the deck grid and cap the
     // sheet's content width so the picker stays readable on large screens.
     val wide = windowWidthSizeClass().isWide
     // Default = tap-to-open (single). Long-press enters multi-select mode.
-    var multiSelectMode by remember { mutableStateOf(false) }
-    var selectedSlugs by remember { mutableStateOf(setOf<String>()) }
+    var multiSelectMode by remember { mutableStateOf(persistedVisible.size > 1) }
+    var selectedSlugs by remember { mutableStateOf(persistedVisible.map { it.id.routeSlug }.toSet()) }
 
     // Same full-screen + swipe-down-dismiss pattern as the filter page — a    // ModalBottomSheet expanded to full height with a drag handle.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -4065,10 +4089,11 @@ private fun CategoryPickerSheet(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                         ) {
-                            CurioIcon(CurioIcons.Palette, null, tint = MaterialTheme.colorScheme.primary, size = 18.dp)
+                            CurioIcon(CurioIcons.DragHandle, null, tint = MaterialTheme.colorScheme.primary, size = 18.dp)
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "Browse all categories",
+                                // v26 — renamed; now opens Manage Categories.
+                                text = "Manage categories",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary
                             )

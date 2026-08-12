@@ -2,7 +2,7 @@
 // Routes, theme, bottom nav, floating pet
 
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { ThemeProvider, useTheme, getBackgroundColor, getTextColor } from './theme/ThemeContext';
+import { ThemeProvider } from './theme/ThemeContext';
 import BottomNav from './components/BottomNav';
 import { FloatingPet } from './components/FloatingPet';
 import HomeScreen from './screens/HomeScreen';
@@ -16,6 +16,8 @@ import { EntryDetailScreen } from './screens/EntryDetailScreen';
 import { QuestsScreen } from './screens/QuestsScreen';
 import { TopicBrowserScreen } from './screens/TopicBrowserScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
+import { PetDesignerScreen } from './screens/PetDesignerScreen';
+import { TopicHistoryScreen } from './screens/TopicHistoryScreen';
 import React from 'react';
 import './index.css';
 
@@ -44,8 +46,9 @@ const App: React.FC = () => {
           <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
           <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />
           <Route path="/browse" element={<TopicBrowserScreen />} />
-          <Route path="/pet-designer" element={<PetDesignerPlaceholder />} />
+          <Route path="/pet-designer" element={<PetDesignerScreen />} />
           <Route path="/quests" element={<QuestsScreen />} />
+          <Route path="/history" element={<TopicHistoryScreen />} />
         </Routes>
 
         {showBottomNav && <BottomNav />}
@@ -54,23 +57,4 @@ const App: React.FC = () => {
     </ThemeProvider>
   );
 };
-
-const PetDesignerPlaceholder: React.FC = () => {
-  const { isDark } = useTheme();
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, false) }}>
-      <div className="text-center px-6">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #FF8FA3 0%, #FFD97D 100%)' }}>
-          <span className="material-symbols-outlined text-4xl" style={{ color: '#fff' }}>pets</span>
-        </div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Pet Designer</h2>
-        <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
-          Coming soon — customize your companion
-        </p>
-      </div>
-    </div>
-  );
-};
-
 export default App;

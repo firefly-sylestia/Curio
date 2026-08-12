@@ -77,6 +77,18 @@ import kotlin.random.Random
 
 private val FLOAT_SIZE = 72.dp
 private val EDGE_MARGIN = 14.dp
+// v17 — a wander that spans more than this fraction of the screen's larger
+// dimension TELEPORTS (blink + landing squish) instead of sliding across
+// quickly; shorter hops keep the gentle walk.
+private const val LONG_JUMP_FRACTION = 0.55f
+// v17 — pet-game pacing: a minimum gap between ANY two games, plus each
+// game's OWN cooldown. They used to share one clock that the fast spark
+// game kept resetting — which starved hide-and-seek and the camouflage
+// game for minutes at a time.
+private const val GAME_MIN_SPACING_MS = 25_000L
+private const val HIDE_SEEK_COOLDOWN_MS = 40_000L
+private const val CHAMELEON_COOLDOWN_MS = 40_000L
+private const val SPARK_COOLDOWN_MS = 30_000L
 private val SPARK_PX = 44.dp
 private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 // v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
@@ -263,7 +275,13 @@ fun CurioFloatingPet(
         var chameleonFindMe by remember { mutableStateOf(false) }
         var hideSeekActive by remember { mutableStateOf(false) }
         var peekCaught by remember { mutableStateOf(false) }
+        // v17 — the shared minimum gap between any two games, plus one
+        // cooldown PER GAME (the old single clock let the spark game starve
+        // hide-and-seek and the camouflage game).
         var lastGameAt by remember { mutableStateOf(0L) }
+        var lastHideSeekAt by remember { mutableStateOf(0L) }
+        var lastChameleonAt by remember { mutableStateOf(0L) }
+        var lastSparkAt by remember { mutableStateOf(0L) }
         // v8.16 — landmark pokes keep a cooldown so the pet interacts often
         // but never spams the same thing every beat. v9.x — the window grew
         // from 4s to 12s so button pokes read as occasional, not hovering.
@@ -323,12 +341,20 @@ fun CurioFloatingPet(
         var routineKey by remember { mutableIntStateOf(0) }
         var routineView by remember { mutableStateOf(com.curio.app.data.PetViewAngle.FRONT) }
         var recentRoutineIds by remember { mutableStateOf<List<String>>(emptyList()) }
+        // v18 — taps can play full authored animations (wave, glance, victory,
+        // back-turn…) with their viewpoints and per-frame motion — not just
+        // the four motion keys. Same machinery as custom actions; a tap is a
+        // direct interaction, so it interrupts an ambient Pet Life routine.
+        var tapAnim by remember { mutableStateOf<PetAnimation?>(null) }
+        var tapFrameIndex by remember { mutableIntStateOf(0) }
+        var tapKey by remember { mutableIntStateOf(0) }
 
         /** Starts one contextual Pet Life routine and remembers its id. */
         fun playPetLifeRoutine(routine: PetLifeRoutine) {
             // A routine is a complete little scene: let it finish before a
             // second idle trigger can replace its frames or speech bubble.
-            if (routineAnim != null || customActionAnim != null) return
+            // v18 — a playing tap animation also holds the stage.
+            if (routineAnim != null || customActionAnim != null || tapAnim != null) return
             val anim = activeDesign.animations[routine.animationId]
                 ?: animationById(routine.animationId)
                 ?: return
@@ -363,6 +389,23 @@ fun CurioFloatingPet(
             }
             routineAnim = null
             routineView = com.curio.app.data.PetViewAngle.FRONT
+        }
+
+        // v18 — steps a tap reaction's animation once (exactly like the
+        // routine / custom steppers), then clears it so the sprite falls back
+        // to its normal look and the reaction face's afterglow.
+        LaunchedEffect(tapKey, tapAnim) {
+            val anim = tapAnim ?: return@LaunchedEffect
+            val frames = anim.frames
+            if (frames.isEmpty()) {
+                tapAnim = null
+                return@LaunchedEffect
+            }
+            for (i in frames.indices) {
+                tapFrameIndex = i
+                delay(frames[i].durationMs.toLong())
+            }
+            tapAnim = null
         }
 
         /**
@@ -401,6 +444,26 @@ fun CurioFloatingPet(
         }
 
         /**
+         * v18 — plays one authored animation as the tap's VISUAL reaction:
+         * built-in scenes like wave / glance / victory carry authored
+         * viewpoints (SIDE, BACK, LOOKING_UP…) and per-frame motion, so taps
+         * get a varied little scene instead of only the motion keys. A tap is
+         * a direct interaction, so it interrupts an ambient routine; a custom
+         * action still wins over it (priority in the sprite call).
+         */
+        fun playTapAnimation(id: String) {
+            if (routineAnim != null) {
+                routineAnim = null
+                routineView = com.curio.app.data.PetViewAngle.FRONT
+            }
+            val anim = activeDesign.animations[id] ?: animationById(id) ?: return
+            if (anim.frames.isEmpty()) return
+            tapAnim = anim
+            tapFrameIndex = 0
+            tapKey++
+        }
+
+        /**
          * v8.53 — plays one user-defined custom action: resolves its
          * animation (built-in or drawn in the designer), starts the frame
          * stepper, wears the animation's mood face, and speaks a random
@@ -408,11 +471,13 @@ fun CurioFloatingPet(
          */
         fun playCustomAction(action: CustomPetAction) {
             // Custom authored actions take priority over ambient Pet Life;
-            // cancel the routine so the two scenes never overlap.
+            // cancel the routine so the two scenes never overlap. v18 — a
+            // tap scene yields to it too.
             if (routineAnim != null) {
                 routineAnim = null
                 routineView = com.curio.app.data.PetViewAngle.FRONT
             }
+            tapAnim = null
             val anim = activeDesign.animations[action.animationId]
                 ?: animationById(action.animationId)
                 ?: return
@@ -557,6 +622,19 @@ fun CurioFloatingPet(
             // [stepMs] small = fast dash; [steps] = path length.
             suspend fun walkTo(target: Offset, stepMs: Long = 24, steps: Int = 56) {
                 facing = if (target.x >= pos.x) 1f else -1f
+                // v17 — LONG journeys TELEPORT: instead of skimming across
+                // the screen in big quick steps, the pet blinks straight to
+                // the far spot with a tiny landing squish. Short hops keep
+                // the gentle walk (and game dashes that need to be chased,
+                // like the spark, never use walkTo).
+                if (hypot(target.x - pos.x, target.y - pos.y) >
+                    maxOf(maxW, maxH) * LONG_JUMP_FRACTION
+                ) {
+                    if (dragged || gliding || !CurioPet.awake) return
+                    pos = target
+                    squishKey++
+                    return
+                }
                 moving = true
                 val start = pos
                 for (i in 1..steps) {
@@ -823,15 +901,20 @@ fun CurioFloatingPet(
                     lastTouch = System.currentTimeMillis()
                     continue
                 }
-                // v16 — HIDE-AND-SEEK: the pet dashes OFF-SCREEN through a
-                // random edge, hides for a beat, then peeks back from a
-                // DIFFERENT edge — half in, half out. Tap it while it's
-                // peeking to catch it and win the round.
+                // v16 — HIDE-AND-SEEK: the pet leaves OFF-SCREEN through a
+                // random edge (a long exit, so it blinks away v17), hides
+                // for a beat, then peeks back from a DIFFERENT edge — half
+                // in, half out. Tap it while it's peeking to catch it and
+                // win the round.
+                // v17 — its own cooldown (was 45s on the shared clock that
+                // the spark game kept resetting) and a higher base chance.
                 if (!watching && !CurioPet.spinning && !offScreen &&
-                    System.currentTimeMillis() - lastGameAt > 45_000L &&
-                    Random.nextFloat() < 0.05f * CurioPet.gameFrequencyMultiplier()
+                    System.currentTimeMillis() - lastGameAt > GAME_MIN_SPACING_MS &&
+                    System.currentTimeMillis() - lastHideSeekAt > HIDE_SEEK_COOLDOWN_MS &&
+                    Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
                 ) {
                     lastGameAt = System.currentTimeMillis()
+                    lastHideSeekAt = lastGameAt
                     CurioPet.notePlay(context, react = false)
                     if (CurioPet.shouldSpeak(0.4f)) queueReaction(CurioPet.peekLine())
                     squishKey++
@@ -882,11 +965,19 @@ fun CurioFloatingPet(
                     }
                     peeking = false
                     if (peekCaught) {
-                        // Caught mid-peek — a shared win.
+                        // Caught mid-peek — a shared win. Snap fully back
+                        // into view first (the tap caught it half-off-screen
+                        // at the edge), and DON'T re-speak the win line: the
+                        // tap handler already said it. v18 — the win also
+                        // strikes a proud victory pose.
+                        pos = Offset(
+                            peekX.coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
+                            peekY.coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                        )
                         squishKey++
                         celebrateKey++
+                        playTapAnimation("victory")
                         heartsKey++
-                        if (CurioPet.shouldSpeak(0.8f)) queueReaction(CurioPet.peekWinLine())
                     } else {
                         // Missed: slip fully back in and strut away.
                         if (CurioPet.shouldSpeak(0.4f) && !dragged) queueReaction(CurioPet.missedMeLine())
@@ -910,10 +1001,17 @@ fun CurioFloatingPet(
                 // off-screen, then slips back in from a different edge with
                 // a flourish. Never while glued to the deck, mid-spin, or
                 // already hiding.
+                // v17 — the camouflage game was STARVED: it shared one
+                // cooldown clock with the faster spark game and never even
+                // reset it, so it could sit silent for minutes. It now owns
+                // its cooldown (40s) and fires more eagerly.
                 if (!watching && !CurioPet.spinning && !offScreen && !hideSeekActive &&
-                    System.currentTimeMillis() - lastGameAt > 60_000L &&
-                    Random.nextFloat() < 0.05f * CurioPet.gameFrequencyMultiplier()
+                    System.currentTimeMillis() - lastGameAt > GAME_MIN_SPACING_MS &&
+                    System.currentTimeMillis() - lastChameleonAt > CHAMELEON_COOLDOWN_MS &&
+                    Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
                 ) {
+                    lastGameAt = System.currentTimeMillis()
+                    lastChameleonAt = lastGameAt
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
@@ -987,10 +1085,12 @@ fun CurioFloatingPet(
                 // grab it; the user can tap the spark first to win the round
                 // together.
                 if (!watching && !CurioPet.spinning && !offScreen && !hideSeekActive &&
-                    System.currentTimeMillis() - lastGameAt > 35_000L &&
+                    System.currentTimeMillis() - lastGameAt > GAME_MIN_SPACING_MS &&
+                    System.currentTimeMillis() - lastSparkAt > SPARK_COOLDOWN_MS &&
                     Random.nextFloat() < 0.06f * CurioPet.gameFrequencyMultiplier()
                 ) {
                     lastGameAt = System.currentTimeMillis()
+                    lastSparkAt = lastGameAt
                     // v12 — the game speaks its own line; keep the generic
                     // PLAY reaction quiet so it can't clobber it.
                     CurioPet.notePlay(context, react = false)
@@ -1619,8 +1719,20 @@ fun CurioFloatingPet(
                                     // v8.21 — tapping never spins it dizzy anymore
                                     // (that's for dragging): boop → play-bow → a
                                     // big happy celebration hop.
-                                    1 -> squishKey++
-                                    2 -> playKey++
+                                    // v18 — each tier ALSO plays an authored
+                                    // scene with a viewpoint angle, picked at
+                                    // random so every tap looks a little
+                                    // different: soft curious glances and a
+                                    // wave, a shy stumble, a proud victory
+                                    // pose, a cheeky back-turn…
+                                    1 -> {
+                                        squishKey++
+                                        playTapAnimation(listOf("glance", "sidepeek", "wave").random())
+                                    }
+                                    2 -> {
+                                        playKey++
+                                        playTapAnimation(listOf("wave", "look_up", "stumble").random())
+                                    }
                                     else -> {
                                         // v8.35 — the biggest taps add a
                                         // celebratory twirl.
@@ -1630,6 +1742,7 @@ fun CurioFloatingPet(
                                         // rapid taps keep the happy motion but
                                         // never restart a spin loop.
                                         if (tapStreak == 3) spinKey++
+                                        playTapAnimation(listOf("victory", "backturn", "happy").random())
                                     }
                                 }
                                 // v8.21 — hearts for the playful/celebrate taps
@@ -1672,10 +1785,12 @@ fun CurioFloatingPet(
             // custom action is running the frame is null and everything
             // falls back to the normal look.
             val caFrame = customActionAnim?.frames?.getOrNull(customActionFrame)
+            val tapFrame = tapAnim?.frames?.getOrNull(tapFrameIndex)
             val lifeFrame = routineAnim?.frames?.getOrNull(routineFrame)
-            val activeFrame = caFrame ?: lifeFrame
+            val activeFrame = caFrame ?: tapFrame ?: lifeFrame
             val activeView = when {
                 caFrame != null -> caFrame.view
+                tapFrame != null && tapFrame.view != com.curio.app.data.PetViewAngle.FRONT -> tapFrame.view
                 lifeFrame != null && lifeFrame.view != com.curio.app.data.PetViewAngle.FRONT -> lifeFrame.view
                 else -> routineView
             }
@@ -1699,7 +1814,11 @@ fun CurioFloatingPet(
                 dizzy = dizzy || recovering,
                 // v8.35 — the reaction editor's face + the hide-and-peek pose.
                 // v8.53 — a custom action's animation mood wins while playing.
+                // v18 — a tap reaction's animation mood wears its own face
+                // (shy stumble, proud victory…) while the scene plays; the
+                // configured TOUCH face returns as the afterglow.
                 faceOverride = customActionAnim?.let { activeDesign.faceFor(it.mood) }
+                    ?: tapAnim?.let { activeDesign.faceFor(it.mood) }
                     ?: routineAnim?.let { activeDesign.faceFor(it.mood) }
                     ?: reactionFace,
                 // Per-frame pixel layers work for custom actions and Pet Life

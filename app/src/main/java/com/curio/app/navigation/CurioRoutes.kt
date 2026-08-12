@@ -141,10 +141,10 @@ object CurioRoutes {
     const val EDIT_ENTRY = "edit-entry/{entryId}"
     const val SETTINGS = "settings"
     const val SETTINGS_APPEARANCE = "settings/appearance"
+    const val SETTINGS_PREFERENCES = "settings/preferences"
     const val SETTINGS_NOTIFICATIONS = "settings/notifications"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
-    const val SETTINGS_ABOUT = "settings/about"
     const val EXPERIMENTS = "experiments"
     const val MANAGE_CATEGORIES = "manage-categories"
     const val TOPIC_HISTORY = "topic-history"
@@ -154,6 +154,8 @@ object CurioRoutes {
     const val BUG_REPORT = "bug-report"
     const val SUPPORT = "support"
     const val PROMO = "promo"
+    // v26 — recycle bin for soft-deleted captures (Settings entry).
+    const val RECYCLE_BIN = "recycle-bin"
     const val DATABASE = "database"
     const val FIELDMIND_OBSERVATION = "fieldmind-observation"
     // v8.34 — the Pet designer playground (custom pet look, Settings entry).

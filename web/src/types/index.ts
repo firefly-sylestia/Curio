@@ -63,15 +63,39 @@ export interface CurioTopic {
   curatedDate: string;
 }
 
+// Journal mood — matches Android JournalMood enum
+export type JournalMood = 'CALM' | 'HAPPY' | 'CURIOUS' | 'INSPIRED' | 'TIRED' | 'OVERWHELMED';
+
+export const JOURNAL_MOODS: Array<{ id: JournalMood; label: string; icon: string }> = [
+  { id: 'CALM', label: 'Calm', icon: 'self_improvement' },
+  { id: 'HAPPY', label: 'Happy', icon: 'sentiment_satisfied' },
+  { id: 'CURIOUS', label: 'Curious', icon: 'psychology' },
+  { id: 'INSPIRED', label: 'Inspired', icon: 'emoji_objects' },
+  { id: 'TIRED', label: 'Tired', icon: 'bedtime' },
+  { id: 'OVERWHELMED', label: 'Overwhelmed', icon: 'waves' },
+];
+
 // Capture Data Types
 export interface SoundBiteData {
   durationSeconds: number;
-  notes: string;
+  title: string;
+  note: string;
+  audioFilePath: string | null;
+  audioDataUrl: string | null;
+  fileSizeBytes: number;
+  mood: JournalMood | null;
+  quotes: Array<{ text: string; context?: string }>;
+  // Note paper styling
+  titleStyle: 'ruled' | 'torn' | 'tornRuled';
+  noteStyle: 'ruled' | 'torn' | 'tornRuled';
+  titleColor: 'cream' | 'white' | 'kraft';
+  noteColor: 'cream' | 'white' | 'kraft';
 }
 
 export interface ReelNotesData {
   rating: number;
   review: string;
+  mood: JournalMood | null;
   favoriteQuote?: number;
 }
 
@@ -81,17 +105,20 @@ export interface MarginaliaData {
     text: string;
     context?: string;
   }>;
+  mood: JournalMood | null;
 }
 
 export interface GalleryWallData {
   caption: string;
   images: string[];
+  mood: JournalMood | null;
 }
 
 export interface FieldNotesData {
   observed: string;
   surprised: string;
   learnNext: string;
+  mood: JournalMood | null;
 }
 
 export interface OpenNotebookData {
@@ -121,6 +148,7 @@ export interface CaptureEntity {
   formatDataJson: string;
   tagsJson: string;
   isLegacy: boolean;
+  sessionTimeMillis?: number;
 }
 
 // Curio Entry (domain object)
@@ -133,6 +161,7 @@ export interface CurioEntry {
   capturedAtMillis: number;
   tags: string[];
   isLegacy: boolean;
+  sessionTimeMillis?: number;
 }
 
 // Pet System

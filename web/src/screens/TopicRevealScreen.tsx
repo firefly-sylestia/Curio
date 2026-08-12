@@ -43,15 +43,24 @@ export const TopicRevealScreen: React.FC = () => {
 
   const handleExpressYourself = () => {
     if (topic && category) {
-      navigate(`/capture/${category.id.toLowerCase()}/${topic.name.replace(/\s+/g, '-')}`);
+      navigate(`/capture/${category.id.toLowerCase()}/${topic.id}`);
     }
   };
 
   const handleStartExploring = () => {
     if (topic) {
-      // Open Google search for the topic
       const query = encodeURIComponent(`${topic.name} ${topic.subtype}`);
-      window.open(`https://www.google.com/search?q=${query}`, '_blank');
+      const engine = localStorage.getItem('curio-search-engine') || 'google';
+      const urls: Record<string, string> = {
+        google: `https://www.google.com/search?q=${query}`,
+        duckduckgo: `https://duckduckgo.com/?q=${query}`,
+        bing: `https://www.bing.com/search?q=${query}`,
+        brave: `https://search.brave.com/search?q=${query}`,
+        ecosia: `https://www.ecosia.org/search?q=${query}`,
+        startpage: `https://www.startpage.com/sp/search?query=${query}`,
+        yahoo: `https://search.yahoo.com/search?p=${query}`,
+      };
+      window.open(urls[engine] || urls.google, '_blank');
     }
   };
 
@@ -71,6 +80,7 @@ export const TopicRevealScreen: React.FC = () => {
         formatDataJson: JSON.stringify({ notes: '' }),
         tagsJson: serializeTags([]),
         isLegacy: false,
+        sessionTimeMillis: 0,
       };
       await captureRepository.insert(entry);
       setSaved(true);
@@ -94,11 +104,18 @@ export const TopicRevealScreen: React.FC = () => {
 
   const action = topic.actionPrompt;
   const [r, g, b] = hexToRgb(category.accent);
-  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 228];
-  const heroBg = `linear-gradient(180deg,
-    rgba(${r},${g},${b},0.94) 0%,
-    rgba(${Math.round(r*0.55+surfaceRgb[0]*0.45)},${Math.round(g*0.55+surfaceRgb[1]*0.45)},${Math.round(b*0.55+surfaceRgb[2]*0.45)},0.72) 50%,
-    rgba(${Math.round(r*0.22+surfaceRgb[0]*0.78)},${Math.round(g*0.22+surfaceRgb[1]*0.78)},${Math.round(b*0.22+surfaceRgb[2]*0.78)},0.88) 100%)`;
+  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 245];
+  // Android cardGradient: 2-stop vertical gradient
+  // Stop 1 (top): lerp(accent, Black, dark?0.28:0.10)
+  const deepen = isDark ? 0.28 : 0.10;
+  const s1r = Math.round(r * (1 - deepen));
+  const s1g = Math.round(g * (1 - deepen));
+  const s1b = Math.round(b * (1 - deepen));
+  // Stop 2 (bottom): lerp(stop1, surface, 0.30)
+  const s2r = Math.round(s1r * 0.70 + surfaceRgb[0] * 0.30);
+  const s2g = Math.round(s1g * 0.70 + surfaceRgb[1] * 0.30);
+  const s2b = Math.round(s1b * 0.70 + surfaceRgb[2] * 0.30);
+  const heroBg = `linear-gradient(180deg, rgb(${s1r},${s1g},${s1b}) 0%, rgb(${s2r},${s2g},${s2b}) 100%)`;
 
   return (
     <div className="min-h-screen pb-24 relative"
@@ -145,9 +162,9 @@ export const TopicRevealScreen: React.FC = () => {
           {/* Accent rule */}
           <div className="absolute top-0 left-3 right-3 h-[2px] rounded-full"
             style={{ background: category.accent, opacity: 0.45 }} />
-          {/* Top-lit crown */}
-          <div className="absolute top-0 left-0 right-0 h-[60px] pointer-events-none"
-            style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%)' }} />
+          {/* Top-lit crown — subtle white lift matching Android */}
+          <div className="absolute top-0 left-0 right-0 h-[80px] pointer-events-none"
+            style={{ background: isDark ? 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)' : 'linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)' }} />
           {/* Watermark */}
           <div className="absolute right-2 bottom-2 pointer-events-none"
             style={{ color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>

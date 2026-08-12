@@ -30,7 +30,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -90,6 +94,7 @@ import com.curio.app.ui.components.tierAccent
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioSettingsCard
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.CurioPetHeroCard
@@ -189,6 +194,7 @@ fun QuestsScreen(navController: NavController) {
     val onQuestNavigate: (String) -> Unit = { route ->
         navController.navigateToQuestRoute(route)
     }
+    val listState = rememberLazyListState()
 
     Box(
         modifier = Modifier
@@ -211,6 +217,7 @@ fun QuestsScreen(navController: NavController) {
         // every settings screen.
         ScreenEntrance {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 10.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -320,6 +327,15 @@ fun QuestsScreen(navController: NavController) {
                 }
             }
         }
+        // Side scroll indicator — thin overlay knob, grows on touch.
+        CurioVerticalScrollIndicator(
+            state = listState.scrollIndicatorState,
+            onScrollBy = { listState.dispatchRawDelta(it) },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+        )
         // Drawn on top of the scroll content — cards slide under the ragged
         // tear as they scroll up.
         SettingsHeroHeader(
@@ -1547,6 +1563,10 @@ private fun PassportCard(
     val mastered = cats.count {
         CurioPassport.progress(context, it.id).stamp == CurioPassport.Stamp.MASTERED
     }
+    // v8.5 — the passport reads as a 4×3 stamp grid per page (12 lanes); the
+    // 21 lanes page into two swipeable pages with a dot indicator.
+    val pages = cats.chunked(12)
+    val pagerState = rememberPagerState(pageCount = { pages.size })
     CurioSettingsCard {
         CurioCardHeader(
             CurioIcons.Star,
@@ -1554,21 +1574,50 @@ private fun PassportCard(
             "$mastered of ${cats.size} lanes mastered"
         )
         Spacer(Modifier.height(4.dp))
-        cats.chunked(3).forEach { row ->
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            val pageCats = pages[page]
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                pageCats.chunked(4).forEach { row ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 3.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        row.forEach { cat ->
+                            PassportStamp(
+                                cat = cat,
+                                modifier = Modifier.weight(1f),
+                                onClick = { onSpin(cat.id.routeSlug) }
+                            )
+                        }
+                        repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                }
+            }
+        }
+        if (pages.size > 1) {
+            Spacer(Modifier.height(8.dp))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 3.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                row.forEach { cat ->
-                    PassportStamp(
-                        cat = cat,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onSpin(cat.id.routeSlug) }
+                repeat(pages.size) { i ->
+                    val selected = pagerState.currentPage == i
+                    Box(
+                        modifier = Modifier
+                            .size(if (selected) 8.dp else 6.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outlineVariant
+                            )
                     )
                 }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
             }
         }
     }

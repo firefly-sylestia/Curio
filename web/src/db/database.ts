@@ -21,13 +21,14 @@ let dbPromise: Promise<IDBPDatabase<CurioDBSchema>> | null = null;
 
 export const getDatabase = (): Promise<IDBPDatabase<CurioDBSchema>> => {
   if (!dbPromise) {
-    dbPromise = openDB<CurioDBSchema>('curio-database', 1, {
-      upgrade(db) {
-        // Create captures store
-        const capturesStore = db.createObjectStore('captures', { keyPath: 'id' });
-        capturesStore.createIndex('by-category', 'categoryId');
-        capturesStore.createIndex('by-date', 'capturedAtMillis');
-        capturesStore.createIndex('by-topic', 'topicId');
+    dbPromise = openDB<CurioDBSchema>('curio-database', 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const capturesStore = db.createObjectStore('captures', { keyPath: 'id' });
+          capturesStore.createIndex('by-category', 'categoryId');
+          capturesStore.createIndex('by-date', 'capturedAtMillis');
+          capturesStore.createIndex('by-topic', 'topicId');
+        }
       },
     });
   }

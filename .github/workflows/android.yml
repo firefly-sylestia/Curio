@@ -116,4 +116,7 @@ jobs:
           name: curio-pr-release-apks-${{ github.run_number }}
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
-          retention-days: 14
+          # v26 — CI PR/push APKs are throwaway test builds: shrink to the
+          # minimum so artifact storage barely accumulates. The official
+          # APKs attached to tag RELEASES (release.yml) stay permanent.
+          retention-days: 1

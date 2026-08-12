@@ -25,3 +25,34 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • The Tour got a proper bottom dock with big Next and Skip buttons on a solid background, tour dialogue is no longer cut off at two lines, and tapping anywhere on screen advances the tour.
 • Browse Topics gained a dedicated Wildcard lane — the 500+ hand-curated curiosities from wildcard.json are now browsable on their own, with their own filter chip and section.
 • The Spin deck no longer shows the misleading “Nothing here yet” card when a topic load fails — it shows a Try again state instead, and a failed refresh never wipes a warm deck.
+• The Explore dialog got cleaner: the bubble opt-in row is hidden by default, and a new Notifications setting (Explore bubble option in Explore dialog) brings it back as a single line with no subtext. Onboarding gained a Search step to pick which search engine Explore opens — Google, DuckDuckGo, Bing, Brave, Ecosia, Startpage or Yahoo — and the bubble choice now also lives inside onboarding’s “Display over other apps” card.
+• Explore session time now shows right under the topic on the save/edit page — “explored 12m” beside the category — matching the detail view’s Session segment.
+• The scroll indicator’s knob now drags gently: slow, smooth scrolling only, and only the knob itself responds to touch, so tapping the strip does nothing.
+• Settings → Appearance was tidied: the floating pet, pet brain and auto-open landed topic are always on now (their toggles are gone), and custom reaction lines stay off permanently since their editor is no longer reachable.
+• Support & diagnostics is now the single home for updates, feedback, replay intro and the project link — the old Settings → About Curio page was merged into it, and the page is reachable from both Settings and Profile.
+• Check for updates got better: it asks Google Play for an in-app update first (downloads and installs without leaving the app; sideloaded APK builds gracefully fall back to the GitHub release), and the result card now shows the full release notes with a Show more / Show less toggle instead of a clipped preview.
+• The 3D shuffle button is always on now — its toggle was removed from Settings → Experiments (Deck & controls).
+• Experiment cleanup: the dual-accent hero gradient (ugly golden blend), deck card shadows (weird while cards animate), tail-fade peek motion, and Smart Spin layout are all gone — those options were removed from Experiments and the losing looks are off for good. The Layout & input section was removed from Experiments; Voice-to-text still lives in Settings → Recording.
+• The Version row five-tap now opens the Experiments screen (and keeps it open) instead of toggling promo mode. Promo mode is off by default and lives in Experiments — Settings → Experiments → Promo mode — where its own page turns it on and off.
+• Tapping a card on the Spin deck no longer swaps to a different random topic when you come back — the card you opened stays at the front of the deck.
+• The Explore button on Topic Reveal now always starts a real explore session — including from Browse Topics — with the timer, recents and done-mark, instead of silently opening a search page.
+• Enhanced main gradient and Pastel crown depth passed: always on now, and their toggles were removed from Settings → Experiments.
+• No more "Update available on Google Play" on sideloaded builds — the Play Store in-app-update path only shows when the app was actually installed from Google Play; GitHub/APK installs go straight to the GitHub release check.
+• In-app updates for GitHub installs: tap "Update now" and the new release APK downloads right in the app (with a progress bar), then opens the installer — you confirm, like installing any APK. The Google Play in-app-update path is gone for good; the update card now has a short "Open release" link instead of "Get it on GitHub".
+• The "How Curio feels / Appearance and color" card header was removed from Settings — Appearance, Notifications, Recording, and Pet designer now sit directly under Personalize.
+• Settings got decluttered: the card header lines (Experiments, Your data, Visual language, Notifications, Recording, Backup & restore, FieldMind archive, and the Experiments screen headers) are gone — rows sit right under their section labels, and those section labels (Personalize, Explore, Safety & support, and similar) are now larger.
+• Saved voice-note titles now print on their own note-paper slip — the same paper style and color you picked when saving, even for typed-only notes.
+• Settings got tidier: Experiments is hidden from the hub (open it by tapping the version number five times in Support & diagnostics), and Manage categories + Topic history now sit next to Appearance.
+• Manage Categories supports drag-to-reorder — long-press the ⋮ handle and drag a lane into place — plus a Reset order button.
+• The Spin page category sheet now links straight to Manage categories.
+• Reopening What are we exploring? shows your saved mix as you left it, every deck pre-selected, so you can tweak it instead of re-picking.
+• Topic Browser lists every category alphabetically out of the box, and the scroll knob now speed-scrolls — the further you drag, the faster it goes.
+• Tap the scroll knob to open the A–Z rail; it tracks the letter you are on as you scroll, and tapping a letter jumps straight there.
+• The Recents page now wears the torn-paper hero header that matches the rest of the app.
+• Deleting a capture now asks twice, then sends it to the Recycle bin instead of erasing it — recover it anytime from Settings → Safety & support → Recycle bin (Restore, Delete forever, or Empty bin).
+• The Cabinet sort control is now a dropdown (Date / Title / Category) with a universal arrow that flips ascending ↔ descending — same dropdown style in the Topic Browser (Default / Name / Year).
+• Settings grows a Preferences screen (right after Appearance): Search engine, Explore sessions, Live explore notification, the Floating bubble, and the pet's chatter + games personality now live together as one "how Curio behaves" home.
+• The Topic Browser's search and sort now ride the header, the category filter floats below it like the Cabinet, and a floating up-arrow appears when you scroll deep to jump back to the top.
+• Pastel headers (Home, Profile, Settings) got a touch more saturation so they pop a little.
+• The update check now correctly spots newer releases even when their version has a suffix (like v1.0.0.1-test) instead of saying you're up to date.
+• The no-AI pledge reads warmer: "Keep your research your own — and stay curious."

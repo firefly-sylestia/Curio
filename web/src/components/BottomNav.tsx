@@ -8,8 +8,8 @@ import { MaterialIcon } from './SharedComponents';
 
 const tabs = [
   { path: '/', label: 'Home', icon: 'cottage' },
-  { path: '/spin', label: 'Spin', icon: 'casino' },
-  { path: '/cabinet', label: 'Cabinet', icon: 'book_5' },
+  { path: '/spin', label: 'Shuffle', icon: 'auto_awesome' },
+  { path: '/cabinet', label: 'Cabinet', icon: 'inventory_2' },
 ];
 
 const BottomNav: React.FC = () => {
@@ -24,10 +24,11 @@ const BottomNav: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe"
+    <div className="fixed bottom-0 left-0 right-0 z-50"
       style={{
         background: isAmoled ? '#000' : isDark ? '#1a1a2e' : '#FFFFFF',
         borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}>
       <div className="flex items-center justify-around h-16 px-2">
         {tabs.map(tab => {

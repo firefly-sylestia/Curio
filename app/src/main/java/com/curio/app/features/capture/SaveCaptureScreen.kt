@@ -62,6 +62,7 @@ import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureDraftStore
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CaptureRepository
+import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.JournalMood
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -75,6 +76,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.formatSessionShort
 import com.curio.app.data.shortName
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -288,6 +290,28 @@ fun SaveCaptureScreen(
                         saveError = "This entry is no longer available. Please go back and try again."
                         return@launch
                     }
+                    // v17 — how long this topic's explore session ran
+                    // (pause-aware). The "write about it" flows hand the
+                    // elapsed time over BEFORE clearing the session, so the
+                    // handoff is the primary source; a still-running session
+                    // (e.g. opened via Recents) is read live as a fallback.
+                    // Only attributed when the session matches this topic,
+                    // and only on a fresh save (edit re-saves keep their
+                    // original session time).
+                    val sessionMillis = if (existingEntry == null) {
+                        // Peek (don't consume): the handoff is only cleared
+                        // once the save succeeds, so a retry after a failed
+                        // save keeps the session label.
+                        ExploreSessionStore.peekWriteSessionMillis(
+                            resolvedTopic.categoryId, resolvedTopic.name
+                        ).takeIf { it > 0L } ?: ExploreSessionStore.activeSessionState
+                            ?.takeIf {
+                                it.categoryId == resolvedTopic.categoryId &&
+                                    it.topicName == resolvedTopic.name
+                            }
+                            ?.elapsedMillis()
+                            ?.coerceAtLeast(0L) ?: 0L
+                    } else 0L
                     val entry = if (existingEntry != null) {
                         // Edit mode: keep id/topic/title/timestamp, swap the data.
                         existingEntry.copy(
@@ -304,13 +328,21 @@ fun SaveCaptureScreen(
                             // and detail dispatch stay correct.
                             format = formatOf(persistedData),
                             captureData = persistedData,
-                            tags = tags
+                            tags = tags,
+                            sessionTimeMillis = sessionMillis
                         )
                     }
                     runCatching { CurioRepositoryHolder.repo.save(entry) }
                         .onSuccess {
                             savedEntryId = entry.id
                             saveError = null
+                            // v17 — the handed-off session duration is now
+                            // banked on the entry; drop the pending handoff so
+                            // a later save of the same topic can't inherit a
+                            // stale duration.
+                            ExploreSessionStore.clearWriteSessionHandoff(
+                                resolvedTopic.categoryId, resolvedTopic.name
+                            )
                             StreakTracker.recordActivity(context)
                             // Feed the quests system — NEW saves drive journey +
                             // daily + badges (the format feeds Every Format).
@@ -413,6 +445,24 @@ fun SaveCaptureScreen(
         // ── Topic reminder strip with gradient ───────────────────────────
         // Wears the category tint with the tint setting on; with it off it
         // falls back to a plain theme surface so the whole flow goes neutral.
+        // v23 — how long this topic was explored, shown right under the
+        // topic in the strip: the saved entry's session in edit mode, or the
+        // pending write-session handoff (live session as fallback) on a
+        // fresh save — the same sources the save itself uses.
+        // `topic` is a delegated property, so grab a stable local first (the
+        // compiler can't smart-cast a delegated getter past a null check).
+        val localTopic = topic
+        val displaySessionMillis = when {
+            editEntryId != null -> editingEntry?.sessionTimeMillis ?: 0L
+            localTopic != null -> ExploreSessionStore.peekWriteSessionMillis(cat.id, localTopic.name)
+                .takeIf { it > 0L }
+                ?: ExploreSessionStore.activeSessionState
+                    ?.takeIf { it.categoryId == cat.id && it.topicName == localTopic.name }
+                    ?.elapsedMillis()
+                    ?.coerceAtLeast(0L)
+                ?: 0L
+            else -> 0L
+        }
         val tintWash = AppPreferences.tintWashEffective()
         val stripColor = if (tintWash) cat.tint else MaterialTheme.colorScheme.surfaceContainerHigh
         val stripInk = if (tintWash) cat.categoryInk() else MaterialTheme.colorScheme.onSurface
@@ -453,6 +503,24 @@ fun SaveCaptureScreen(
                         style = MaterialTheme.typography.labelSmall,
                         color = stripInk.copy(alpha = 0.7f)
                     )
+                    if (displaySessionMillis > 0L) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Timer,
+                                contentDescription = null,
+                                tint = stripInk.copy(alpha = 0.7f),
+                                size = 13.dp
+                            )
+                            Text(
+                                text = "explored ${formatSessionShort(displaySessionMillis)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = stripInk.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -50,13 +50,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -109,6 +107,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.NotePaperCard
 import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.components.buildRichAnnotated
@@ -120,9 +119,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
-import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.CaptureData
-import com.curio.app.data.ImageStorageManager
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.JournalMood
@@ -134,6 +131,7 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.FieldMindMetadata
 import com.curio.app.data.formatElapsed
+import com.curio.app.data.formatSessionShort
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.shortName
 import com.curio.app.features.capture.formats.FilledStar
@@ -153,12 +151,9 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
-import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.curioDialogActionButtonColors
-import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.readableAccentInk
@@ -507,15 +502,16 @@ fun EntryDetailScreen(
                     )
                     Spacer(Modifier.height(18.dp))
 
-                    // ── Frosted date / mood / type grid card — the meta
-                    // card's date, mood and type segments moved into the hero
-                    // on a genuine frosted-glass pane: a translucent layer
-                    // that samples the gradient behind the bar, BLURS it, and
-                    // renders it clipped to the card, with a white frosted-
-                    // glass tint and a hairline rim so the card reads as
-                    // frosted glass while
+                    // ── Frosted date / mood / session / type grid card — the
+                    // meta card's date, mood, session and type segments moved
+                    // into the hero on a genuine frosted-glass pane: a
+                    // translucent layer that samples the gradient behind the
+                    // bar, BLURS it, and renders it clipped to the card, with
+                    // a white frosted-glass tint and a hairline rim so the
+                    // card reads as frosted glass while
                     // the crisp hero backdrop stays sharp around it. Mood
-                    // shows only when the entry has one.
+                    // shows only when the entry has one; Session shows only
+                    // when an explore-session duration was recorded.
                     val heroMood = resolvedEntry.moodOf()
                     val heroTypeLabel = if (resolvedEntry.captureData is CaptureData.Portfolio)
                         "Portfolio" else resolvedEntry.format.shortName
@@ -589,6 +585,22 @@ fun EntryDetailScreen(
                                     icon = heroMood.glyph,
                                     title = heroMood.label,
                                     subtitle = "Mood",
+                                    ink = heroCardInk,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                VerticalDivider(
+                                    modifier = Modifier.height(30.dp),
+                                    color = heroCardInk.copy(alpha = 0.25f)
+                                )
+                            }
+                            // v22 — the explore-session duration as its own
+                            // segment, right beside Mood; only when a session
+                            // was actually recorded.
+                            if (resolvedEntry.sessionTimeMillis > 0L) {
+                                FrostedSegment(
+                                    icon = CurioIcons.Timer,
+                                    title = formatSessionShort(resolvedEntry.sessionTimeMillis),
+                                    subtitle = "Session",
                                     ink = heroCardInk,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -712,32 +724,19 @@ fun EntryDetailScreen(
     }
 
     if (deleteDialogVisible) {
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { deleteDialogVisible = false },
-            title = { Text("Delete this entry?") },
-            text = { Text("This capture will be permanently removed from your Cabinet.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    deleteDialogVisible = false
-                    scope.launch {
-                        // Delete every SoundBite recording — recursing through
-                        // OpenNotebook wrappers and Portfolio sections.
-                        resolvedEntry.captureData.audioFilePaths().forEach { path ->
-                            AudioStorageManager.deleteAudio(context, path)
-                        }
-                        // Delete restored-from-backup image files for this
-                        // entry (provider-picked photos live in their source
-                        // app and need no cleanup here).
-                        ImageStorageManager.deleteImagesForEntry(context, resolvedEntry.id)
-                        runCatching { CurioRepositoryHolder.repo.deleteById(resolvedEntry.id) }
-                        navController.popBackStack()
-                    }
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = { deleteDialogVisible = false }, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+        // v26 — double confirmation + recycle bin: the capture moves to the
+        // recycle bin (media is kept so a restore works); nothing is erased.
+        CurioTwoStepDeleteDialog(
+            visible = deleteDialogVisible,
+            title = "this capture",
+            body = "This capture moves to the Recycle bin.",
+            onDismiss = { deleteDialogVisible = false },
+            onConfirmed = {
+                deleteDialogVisible = false
+                scope.launch {
+                    runCatching { CurioRepositoryHolder.repo.softDeleteById(resolvedEntry.id) }
+                    navController.popBackStack()
+                }
             }
         )
     }
@@ -1232,10 +1231,15 @@ private fun CurioEntry.moodOf(): JournalMood? = when (val d = captureData) {
  * capture time, older entries a short relative label ("yesterday" / "3d
  * ago") — the date itself already sits on the segment's title line.
  */
-private fun heroDateTinyLabel(entry: CurioEntry): String = when (val days = entry.capturedAtDaysAgo) {
-    0 -> formatCapturedTime(entry.capturedAtMillis)
-    1 -> "yesterday"
-    else -> "${days}d ago"
+private fun heroDateTinyLabel(entry: CurioEntry): String {
+    // The explore-session duration moved OUT of this tiny line in v22 — it
+    // now has its own "Session" segment in the frosted bar right beside
+    // Mood, so the date line stays just the capture time / relative day.
+    return when (val days = entry.capturedAtDaysAgo) {
+        0 -> formatCapturedTime(entry.capturedAtMillis)
+        1 -> "yesterday"
+        else -> "${days}d ago"
+    }
 }
 
 /**
@@ -1349,6 +1353,19 @@ private fun QuickFactCard(
     var expanded by rememberSaveable { mutableStateOf(false) }
     var hasOverflow by remember { mutableStateOf(false) }
     val ink = cat.categoryInk()
+    // v20 — a soft frosted plate behind the description text so it reads
+    // clearly over the page's glyph watermark. Theme-aware and deliberately
+    // LIGHTER than the hero's frost: translucent, so the category wash still
+    // glows through (deep slate glass in dark/AMOLED, device surface in
+    // Material, a whisper of milk glass in light/pastel).
+    val paneFill = when {
+        isCurioDarkTheme() && !AppPreferences.pastelColorsState ->
+            Color(0xFF17131D).copy(alpha = 0.55f)
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+        else -> Color.White.copy(alpha = 0.38f)
+    }
+    val paneShape = RoundedCornerShape(16.dp)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1367,24 +1384,35 @@ private fun QuickFactCard(
             )
         }
         Spacer(Modifier.height(6.dp))
-        Text(
-            text = teaser ?: "Loading topic…",
-            style = MaterialTheme.typography.bodyMedium,
-            color = ink,
-            softWrap = true,
-            maxLines = if (expanded) Int.MAX_VALUE else 2,
-            overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
-            onTextLayout = { layoutResult -> hasOverflow = layoutResult.hasVisualOverflow }
-        )
-        if (expanded || hasOverflow) {
-            Text(
-                text = if (expanded) "…less" else "…more",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = ink.copy(alpha = 0.85f),
-                modifier = Modifier
-                    .clickable { expanded = !expanded }
-                    .padding(top = 3.dp)
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(paneShape)
+                .background(paneFill)
+                .border(1.dp, ink.copy(alpha = 0.22f), paneShape)
+                .padding(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            Column {
+                Text(
+                    text = teaser ?: "Loading topic…",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ink,
+                    softWrap = true,
+                    maxLines = if (expanded) Int.MAX_VALUE else 2,
+                    overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
+                    onTextLayout = { layoutResult -> hasOverflow = layoutResult.hasVisualOverflow }
+                )
+                if (expanded || hasOverflow) {
+                    Text(
+                        text = if (expanded) "…less" else "…more",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = ink.copy(alpha = 0.85f),
+                        modifier = Modifier
+                            .clickable { expanded = !expanded }
+                            .padding(top = 3.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -1630,18 +1658,6 @@ private fun SoundBiteRender(
                             }
                         }
                     }
-                    // The saved title gets its OWN line under the primary
-                    // label (v7.44), muted so it never competes with it.
-                    if (!data.title.isNullOrBlank()) {
-                        Text(
-                            text = data.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(start = 26.dp)
-                        )
-                    }
                 }
             }
 
@@ -1664,6 +1680,32 @@ private fun SoundBiteRender(
                     surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                     border = category.categoryBorder()
                 )
+            }
+
+            // ── Saved title — its own paper slip (v26), OUTSIDE the audio
+            //    gate so a typed-only voice note (title without a recording)
+            //    still shows it. Mirrors the editor's title field: same
+            //    paper style + color, seeded per entry so it never re-tears.
+            if (!data.title.isNullOrBlank()) {
+                val titleSheet = data.titleColor ?: NotePaperColor.CREAM
+                NotePaperCard(
+                    style = data.titleStyle ?: data.paperStyle ?: NotePaperStyle.RULED,
+                    seed = noteSeed(entry.id, 30),
+                    paperColor = titleSheet,
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
+                    corner = 10.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 26.dp, end = 6.dp)
+                ) {
+                    Text(
+                        text = data.title,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = notePaperInk(titleSheet),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             // ── Transcribe the saved note (v7.18) — small mic chip that
@@ -3667,11 +3709,19 @@ private fun CurioShareCard(
     // is off, preserving the exact pre-pastel share card.
     val ink = pastelFillInk(category.themedAccent())
 
+    // v22 — the explore-session duration joins the captured-date line when
+    // one was recorded ("Captured today · explored 12m"), matching the
+    // detail hero's frosted-date language (same datePart + sessionPart style).
+    val sessionPart = if (entry.sessionTimeMillis > 0L) {
+        " · explored ${formatSessionShort(entry.sessionTimeMillis)}"
+    } else {
+        ""
+    }
     val daysAgoText = when (entry.capturedAtDaysAgo) {
         0 -> "Captured today"
         1 -> "Captured yesterday"
         else -> "Captured ${entry.capturedAtDaysAgo}d ago"
-    }
+    } + sessionPart
 
     Box(
         modifier = Modifier

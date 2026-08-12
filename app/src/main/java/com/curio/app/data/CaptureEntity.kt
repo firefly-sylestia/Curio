@@ -32,7 +32,15 @@ data class CaptureEntity(
     // rows read as empty; backup restore normalizes nulls defensively.
     val tagsJson: String = "[]",
     // v3 — explicit FieldMind restore provenance. Native Curio saves remain false.
-    val isLegacy: Boolean = false
+    val isLegacy: Boolean = false,
+    // v4 — explore-session duration at save time (ms). 0 = no session
+    // recorded. Room migration v3→v4 adds this column with DEFAULT 0 so
+    // existing rows read as no-session; backup restore normalizes defensively.
+    val sessionTimeMillis: Long = 0L,
+    // v5 — recycle bin: nullable soft-delete timestamp (NULL = live). Room
+    // migration v4→v5 adds the column (nullable, no default) so existing rows
+    // read as live; the main list queries filter `deletedAt IS NULL`.
+    val deletedAt: Long? = null
 )
 
 /**
@@ -136,7 +144,8 @@ fun CurioEntry.toEntity(): CaptureEntity = CaptureEntity(
     title = title,
     formatDataJson = Gson().toJson(captureData),
     tagsJson = Gson().toJson(tags),
-    isLegacy = isLegacy
+    isLegacy = isLegacy,
+    sessionTimeMillis = sessionTimeMillis
 )
 
 /**
@@ -208,7 +217,9 @@ fun CaptureEntity.toEntry(): CurioEntry {
         title = title,
         capturedAtMillis = capturedAtMillis,
         tags = deserializeTags(tagsJson),
-        isLegacy = this.isLegacy
+        isLegacy = this.isLegacy,
+        sessionTimeMillis = this.sessionTimeMillis,
+        deletedAt = this.deletedAt
     )
 }
 

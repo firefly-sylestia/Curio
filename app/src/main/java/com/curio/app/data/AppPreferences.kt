@@ -102,6 +102,13 @@ object AppPreferences {
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
     private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
+    // v23 — whether the "Show the explore bubble" opt-in row appears inside
+    // the Explore now dialog (default OFF; the Notifications toggle
+    // re-shows it there as a single-line choice).
+    private const val KEY_SHOW_BUBBLE_OPT_IN_DIALOG = "show_bubble_opt_in_dialog"
+    // v19 — the search engine the "Explore in browser" button opens (Google
+    // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
+    private const val KEY_SEARCH_ENGINE = "search_engine"
     // v8.1 — "don't nag" flag: once the user declines the "Display over
     // other apps" permission (dismisses the prompt or returns from system
     // settings without granting), all AUTOMATIC overlay prompts are
@@ -195,9 +202,10 @@ object AppPreferences {
     var pastelCrownDepthState by mutableStateOf(true)
         private set
 
-    // Hidden promo/demo-content mode (v7.107) — unlocked by tapping the
-    // Version row in Support & diagnostics five times (tap five times
-    // again to turn it OFF). While ON, the app shows promotional sample
+    // Hidden promo/demo-content mode (v7.107) — OFF by default; v24 it is
+    // reached from the Experiments screen (Settings → Experiments → Promo
+    // mode, or the Version row's five-tap in Support & diagnostics) and its
+    // own page's toggle is the one control. While ON, the app shows promo sample
     // content everywhere (Home hero stats + recents, Profile level,
     // Quests level, Cabinet grid) so the user can screenshot the app for
     // store promotion. Demo data is derived from real topics via
@@ -293,6 +301,12 @@ object AppPreferences {
     var exploreSessionsEnabledState by mutableStateOf(true)
         private set
 
+    // v19 — the chosen search engine id ("google", "duckduckgo", …) for the
+    // Explore browser button. Reactive so the Topic Reveal dialog copy and
+    // the Settings row update the moment it changes.
+    var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
+        private set
+
     // Live explore notifications — the persistent chronometer notification
     // with Pause/Stop controls shown while exploring (like Samsung/Google's
     // live-updating ongoing notifications). Default ON; off means no ongoing
@@ -304,7 +318,15 @@ object AppPreferences {
     // OTHER apps (the browser) via SYSTEM_ALERT_WINDOW. Default ON; off
     // means the timer lives only in the notification (when live
     // notifications are on) — there is no in-app pill fallback.
-    var overlayBubbleEnabledState by mutableStateOf(true)
+    // v22 — default OFF: the bubble is now opt-in from the explore dialog
+    // (and the Settings toggle enables it anytime).
+    var overlayBubbleEnabledState by mutableStateOf(false)
+        private set
+    // v23 — whether the Explore dialog shows its bubble opt-in row. Hidden
+    // by default; the Notifications toggle re-shows it (single-line, no
+    // subtext) so the dialog stays clean while the Settings toggle still
+    // enables the bubble itself.
+    var showBubbleOptInDialogState by mutableStateOf(false)
         private set
 
     // v8.1 — whether the user has declined the "Display over other apps"
@@ -451,8 +473,10 @@ object AppPreferences {
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
         smartDensityModeState = getSmartDensityMode(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
+        searchEngineState = getSearchEngine(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
+        showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         petEnabledState = isPetEnabled(context)
@@ -751,6 +775,18 @@ object AppPreferences {
         smartDensityModeState = mode
     }
 
+    /**
+     * v19 — the user's chosen explore search engine id, defaulting to
+     * Google so existing behavior is unchanged until they switch.
+     */
+    fun getSearchEngine(context: Context): String =
+        prefs(context).getString(KEY_SEARCH_ENGINE, null) ?: SearchEngine.GOOGLE.id
+
+    fun setSearchEngine(context: Context, engine: SearchEngine) {
+        prefs(context).edit().putString(KEY_SEARCH_ENGINE, engine.id).apply()
+        searchEngineState = engine.id
+    }
+
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */
     fun isExploreSessionsEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_EXPLORE_SESSIONS_ENABLED, true)
@@ -797,11 +833,26 @@ object AppPreferences {
     }
 
     /**
-     * Whether the floating explore bubble is on. Default ON. Off = the
-     * timer lives only in the notification (when live notifications are on).
+     * v23 — whether the Explore now dialog shows its "Show the explore
+     * bubble" opt-in row. Default OFF (hidden); the Notifications toggle
+     * re-shows it as a single-line choice inside the dialog.
+     */
+    fun isShowBubbleOptInDialog(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SHOW_BUBBLE_OPT_IN_DIALOG, false)
+
+    fun setShowBubbleOptInDialog(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SHOW_BUBBLE_OPT_IN_DIALOG, enabled).apply()
+        showBubbleOptInDialogState = enabled
+    }
+
+    /**
+     * Whether the floating explore bubble is on. v22 — default OFF: the
+     * bubble is opt-in (the explore dialog's "Show the explore bubble"
+     * switch, or the Settings toggle). Off = the timer lives only in the
+     * notification (when live notifications are on).
      */
     fun isOverlayBubbleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_OVERLAY_BUBBLE_ENABLED, true)
+        prefs(context).getBoolean(KEY_OVERLAY_BUBBLE_ENABLED, false)
 
     fun setOverlayBubbleEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_OVERLAY_BUBBLE_ENABLED, enabled).apply()

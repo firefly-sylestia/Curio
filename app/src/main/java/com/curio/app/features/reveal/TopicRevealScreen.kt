@@ -45,6 +45,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -98,11 +99,9 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TourController
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreSearchUrl
-import com.curio.app.data.buildGoogleSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
-import com.curio.app.data.categoryOpensYouTube
-import com.curio.app.data.openSilentExplore
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -240,6 +239,13 @@ fun TopicRevealScreen(
     // recently-unexplored so Home can offer to resume it.
     var engaged by rememberSaveable { mutableStateOf(false) }
     var showExploreDialog by rememberSaveable { mutableStateOf(false) }
+    // v22 — explore-bubble opt-in inside the explore dialog. Defaults to the
+    // Settings pref (OFF for fresh installs); the choice is applied to prefs
+    // when an action is picked, so flipping it here is the same as the
+    // Settings toggle (persistent - last choice wins).
+    var bubbleOptIn by rememberSaveable {
+        mutableStateOf(AppPreferences.isOverlayBubbleEnabled(context))
+    }
 
     val latestBrowseMode by rememberUpdatedState(browseMode)
     val latestResolved by rememberUpdatedState(resolved)
@@ -253,19 +259,10 @@ fun TopicRevealScreen(
             showExploreDialog = true
         }
     }
-    // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
-    // Explore action: it opens the topic's search page without recording
-    // quests, passport, pet events, recents or a timer. Express Yourself is
-    // separate and remains the deliberate write-about-it path.
-    val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
-        // Browse mode has no tour navigation. During a tour, only dismiss the
-        // guide; never launch a browser as a side effect of a demonstrated tap.
-        if (TourController.active) {
-            TourController.skip()
-        } else {
-            latestResolved?.let { topic -> openSilentExplore(context, topic) }
-        }
-    }
+    // v25 — browse-mode Explore (opened from the Topic Database) now runs the
+    // REAL explore session — same dialog, timer, recents and done-mark as the
+    // Spin deck — instead of the old silent out-of-app search (v8.12). The
+    // user asked why Explore didn't start a session from the browser.
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
         if (TourController.active) {
             // Tour taps demonstrate controls only. End the tour instead of
@@ -292,8 +289,8 @@ fun TopicRevealScreen(
     // simply tap "Explore now" again.
     var pendingNotificationSession by remember { mutableStateOf<ExploreSession?>(null) }
 
-    /** Opens the search page (Google — YouTube for music), then lands back
-     *  on Home — returning to the
+    /** Opens the search page (the chosen search engine — YouTube for music),
+     *  then lands back on Home — returning to the
      *  app triggers the "are you done exploring?" prompt. Deferred into the
      *  permission callback when a notification-permission request is in
      *  flight, so the foreground service starts while this activity is still
@@ -474,7 +471,7 @@ fun TopicRevealScreen(
         openExploreBrowserAndGoHome(session)
     }
 
-    /** Starts a timed explore session, opens the search page (Google — YouTube for music), back to Home. */
+    /** Starts a timed explore session, opens the search page (chosen engine — YouTube for music), back to Home. */
     fun startExploreSession(topic: CurioTopic, searchUrl: String = buildExploreSearchUrl(topic)) {
         engaged = true
         // Engaging for real — record as recently-explored and clear any
@@ -627,7 +624,6 @@ fun TopicRevealScreen(
                         resolved = latestResolved,
                         onExplore = latestOnExplore,
                         onAlready = latestOnAlready,
-                        onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
@@ -905,7 +901,10 @@ fun TopicRevealScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Choose Google or YouTube to begin.",
+                        // v23 — the browser button searches the user's chosen
+                        // engine (pickable in onboarding + Settings), so the
+                        // copy stays engine-neutral.
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open YouTube.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -914,6 +913,38 @@ fun TopicRevealScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    // v22 — the no-AI pledge, bold so it leads the dialog's
+                    // intent: research stays the user's own words.
+                    Text(
+                        "Keep your research your own, and stay curious. This is your curiosity — in your own words.",
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    // ── v22/v23 — opt-in for the floating explore bubble ──
+                    // v23 — hidden from the dialog by default; the
+                    // Notifications toggle re-shows it as a single main text
+                    // line with no subtext.
+                    if (AppPreferences.isShowBubbleOptInDialog(context)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.BubbleChart,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 18.dp
+                            )
+                            Text(
+                                "Show the explore bubble",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Switch(checked = bubbleOptIn, onCheckedChange = { bubbleOptIn = it })
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -922,14 +953,28 @@ fun TopicRevealScreen(
                         onClick = {
                             engaged = true
                             showExploreDialog = false
-                            startExploreSession(topic, buildGoogleSearchUrl(topic))
+                            // v22 — apply the bubble opt-in before starting:
+                            // opting in is an explicit intent, so a previously
+                            // declined "Display over other apps" ask re-opens
+                            // (mirrors the Settings toggle's behavior). Only
+                            // applied when the dialog row is visible — when
+                            // it's hidden, Settings owns the bubble entirely.
+                            if (AppPreferences.isShowBubbleOptInDialog(context)) {
+                                AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
+                                if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
+                            }
+                            startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors()
-                    ) { Text("Explore in Google") }
+                    ) { Text("Explore in browser") }
                     TextButton(
                         onClick = {
                             engaged = true
                             showExploreDialog = false
+                            if (AppPreferences.isShowBubbleOptInDialog(context)) {
+                                AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
+                                if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
+                            }
                             startExploreSession(topic, buildYouTubeSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors()
@@ -1086,8 +1131,6 @@ private fun RevealActionRow(
     resolved: CurioTopic?,
     onExplore: () -> Unit,
     onAlready: () -> Unit,
-    // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
-    onSilentExplore: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
@@ -1153,8 +1196,10 @@ private fun RevealActionRow(
                             onClick = onExplore
                         )
                     }
-                } else if (onSilentExplore != null) {
-                    // Browse mode: Explore opens the search page silently.
+                } else {
+                    // v25 — browse-mode Explore runs the REAL explore session
+                    // (dialog → timer → recents → done-mark), same as the
+                    // Spin deck — no more silent out-of-app search.
                     PetLandmark(
                         id = "start-exploring",
                         kind = PetLandmarks.Kind.FUN,
@@ -1168,7 +1213,7 @@ private fun RevealActionRow(
                             label = "Explore",
                             metrics = m,
                             modifier = lm.weight(1f),
-                            onClick = onSilentExplore
+                            onClick = onExplore
                         )
                     }
                 }
@@ -1339,9 +1384,13 @@ private fun HeroCard(
     //    deck's front ticket; otherwise a plain vertical gradient.
     val dark = isCurioDarkTheme()
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
-    val heroGradientOn = AppPreferences.heroGradientState
+    // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
+    // toggle was removed from Experiments and the read is hardcoded here.
+    val heroGradientOn = true
     val heroBorderOn = AppPreferences.heroBorderState
-    val heroBlendOn = AppPreferences.heroBlendGradientState
+    // v24 — the dual-accent hero gradient experiment was rejected (ugly
+    // golden blend); always OFF, so the blend branch below is dead.
+    val heroBlendOn = false
 
     // v8.36 — auto-growing hero: the title used to be hard-capped at 3
     // lines, cutting very long topic names. The card now measures how much
@@ -1774,14 +1823,6 @@ private fun verbIcon(verb: String): String = when (verb.lowercase().trim()) {
     "play" -> "play_arrow"
     else -> "auto_awesome"
 }
-
-/** The explore-dialog copy for what actually opens — mirrors
- *  categoryOpensYouTube so the copy can never drift from the URL built by
- *  buildExploreSearchUrl. */
-private fun exploreOpenCopy(cat: com.curio.app.data.CurioCategory): String =
-    if (categoryOpensYouTube(cat.id)) "We'll open YouTube to get you started."
-    else "We'll open a Google search to get you started."
-
 
 /** Circular like/dislike toggle — active state fills with the category accent. */
 @Composable

@@ -93,6 +93,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
+import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
@@ -625,6 +626,14 @@ fun HomeScreen(navController: NavController) {
                 CurrentlyExploringCard(
                     session = activeSession,
                     onDone = {
+                        // v17 — hand the session's elapsed time to the capture
+                        // page before clearing (the save screen can't read it
+                        // once the session is gone).
+                        ExploreSessionStore.handoffWriteSession(
+                            activeSession.categoryId,
+                            activeSession.topicName,
+                            activeSession.elapsedMillis()
+                        )
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)
@@ -633,8 +642,9 @@ fun HomeScreen(navController: NavController) {
                         ) { launchSingleTop = true }
                     },
                     onKeepExploring = {
-                        // Re-open the search page (Google — YouTube for
-                        // music) — the session keeps ticking in the background.
+                        // Re-open the search page (the chosen search engine —
+                        // YouTube for music) — the session keeps ticking in
+                        // the background.
                         runCatching {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(activeSession.searchUrl)))
                         }
@@ -718,11 +728,45 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    Text(
-                        "Saved",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Saved",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        // v21 — View all opens Topic History (liked, disliked,
+                        // pinned & day-grouped spins). Promo mode hides it: it
+                        // would lead to the real (empty) history page.
+                        if (!promoOn) {
+                            Surface(
+                                onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        "View all",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    CurioIcon(
+                                        CurioIcons.History,
+                                        "Open Topic History",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        size = 14.dp
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Spacer(Modifier.height(10.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         savedQuotes.forEach { quote ->
@@ -1364,8 +1408,14 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                // v22 — the explore-session duration joins the meta line
+                // when one was recorded ("Films · 2d ago · explored 12m").
                 Text(
-                    "${cat.displayName} · ${entry.capturedAtDaysAgoLabel()}",
+                    if (entry.sessionTimeMillis > 0L) {
+                        "${cat.displayName} · ${entry.capturedAtDaysAgoLabel()} · explored ${formatSessionShort(entry.sessionTimeMillis)}"
+                    } else {
+                        "${cat.displayName} · ${entry.capturedAtDaysAgoLabel()}"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
@@ -1427,8 +1477,9 @@ private fun homeRoseAccent(): Color {
         // toward pink and lift it slightly so the pastel reads clean and airy,
         // not brown or terracotta. The small saturation lift keeps the pastel
         // lively without turning it neon. Other category pastels stay unchanged.
+        // v26 — about +5% more saturation so the pastel headers pop a little.
         val pinkHue = (base.h - 15f + 360f) % 360f
-        fromHsl(pinkHue, (base.s * 0.90f).coerceIn(0f, 0.80f), 0.82f)
+        fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.82f)
     } else {
         // v7.36 — the base is a soft dusty rose now; lift it a touch and
         // hold saturation modestly so the non-pastel Home banner reads as a

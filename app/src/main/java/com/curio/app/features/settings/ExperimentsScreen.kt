@@ -11,9 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,11 +23,10 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
-import com.curio.app.data.SmartDensityMode
+import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
@@ -76,15 +72,11 @@ fun ExperimentsScreen(navController: NavController) {
             item { CurioSectionLabel("Spin visuals") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Layers, "Main card", "Hero ticket looks")
-                    ExperimentSwitchRow("Enhanced main gradient", "Richer top-lit depth on the hero card", AppPreferences.heroGradientState) {
-                        AppPreferences.setHeroGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Dual-accent hero gradient", "Blends the category accent with a warm golden companion for a richer multi-tone gradient", AppPreferences.heroBlendGradientState) {
-                        AppPreferences.setHeroBlendGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
+                    // v25 — the Enhanced main gradient experiment PASSED
+                    // (always ON), so its toggle was removed here.
+                    // v24 — the dual-accent hero gradient experiment was
+                    // rejected (ugly golden blend); always OFF, so its toggle
+                    // was removed here.
                     ExperimentSwitchRow("Main card shadow", "Ambient depth below the hero card", AppPreferences.heroShadowState) {
                         AppPreferences.setHeroShadowEnabled(context, it)
                     }
@@ -92,7 +84,6 @@ fun ExperimentsScreen(navController: NavController) {
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Layers, "Deck peek cards", "The fan behind the hero")
                     ExperimentSwitchRow("Top-lit deck cards", "Peek cards catch light at the top edge", AppPreferences.peekGradientState) {
                         AppPreferences.setPeekGradientEnabled(context, it)
                     }
@@ -101,71 +92,30 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPeekHairlineEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Deck card shadows", "Soft ambient depth under peek cards", AppPreferences.peekShadowsState) {
-                        AppPreferences.setPeekShadowsEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
+                    // v24 — deck card shadows (weird look while the cards
+                    // animate) and tail-fade peek motion (didn't pass) were
+                    // both rejected; always OFF, so their toggles were removed.
                     ExperimentSwitchRow("Roomier deck titles", "Two-line near-card titles", AppPreferences.peekTitlesState) {
                         AppPreferences.setPeekTitlesEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Tail-fade peek motion", "Newer travel-first motion that fades cards at the end", AppPreferences.peekTailFadeState) {
-                        AppPreferences.setPeekTailFadeEnabled(context, it)
-                    }
                 }
             }
+            // v25 — the Deck & controls card is gone: the 3D shuffle button
+            // (always on) and Pastel crown depth (PASSED, always on) both had
+            // their toggles removed, leaving the card empty.
+            // v24 — the Layout & input section was removed: Smart Spin layout
+            // is gone for good (the deck always uses its natural size) and
+            // Smart density's control moved out; Voice-to-text still lives in
+            // Settings → Recording.
+            item { CurioSectionLabel("Promo") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Layers, "Deck & controls", "Shuffle button and pastel accents")
-                    ExperimentSwitchRow("3D shuffle button", "Raised gradient, shadow, and orbiting dots", AppPreferences.threeDButtonState) {
-                        AppPreferences.set3DButtonGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Pastel crown depth", "A subtle darker crown on pastel cards", AppPreferences.pastelCrownDepthState) {
-                        AppPreferences.setPastelCrownDepthEnabled(context, it)
-                    }
-                }
-            }
-            item { CurioSectionLabel("Layout & input") }
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.ScienceGlyph, "Behavior tests", "Temporary options for tuning")
-                    ExperimentSwitchRow("Smart Spin layout", "Fits the deck on short screens", AppPreferences.smartSpinLayoutState) {
-                        AppPreferences.setSmartSpinLayoutEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    Text("Smart density", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), modifier = Modifier.padding(top = 6.dp))
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
-                        SmartDensityMode.entries.forEachIndexed { index, mode ->
-                            SegmentedButton(
-                                selected = mode == AppPreferences.smartDensityModeState,
-                                onClick = { AppPreferences.setSmartDensityMode(context, mode) },
-                                shape = SegmentedButtonDefaults.itemShape(index = index, count = SmartDensityMode.entries.size)
-                            ) {
-                                Text(
-                                    text = when (mode) {
-                                        SmartDensityMode.OFF -> "Off"
-                                        SmartDensityMode.COMPACT -> "Compact"
-                                        SmartDensityMode.EXTRA_COMPACT -> "2x"
-                                    },
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        }
-                    }
-                    Text(
-                        text = when (AppPreferences.smartDensityModeState) {
-                            SmartDensityMode.OFF -> "Density sizing off"
-                            SmartDensityMode.COMPACT -> "Smaller on low-density phones · larger on high-density"
-                            SmartDensityMode.EXTRA_COMPACT -> "2x: even smaller on very low-density phones"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
-                    )
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Voice-to-text", "Dictation buttons on voice-note fields", AppPreferences.voiceToTextEnabledState) {
-                        AppPreferences.setVoiceToTextEnabled(context, it)
+                    CurioSettingsRow(
+                        CurioIcons.Star,
+                        "Promo mode",
+                        "Demo content for store screenshots"
+                    ) {
+                        navController.navigate(CurioRoutes.PROMO) { launchSingleTop = true }
                     }
                 }
             }

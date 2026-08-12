@@ -1,5 +1,14 @@
 package com.curio.app.features.settings
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +27,14 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,11 +48,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -56,6 +76,7 @@ import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.PetLandmark
@@ -103,6 +124,12 @@ private data class SettingsHeroPair(
  * symbols, a back pill over the banner, and the title + subtitle pinned
  * just above the tear. Shared by every settings screen so the whole
  * Settings family wears the same hero-style header.
+ *
+ * v26 — optional hero action pills (the [trailing] slot rides the top row
+ * next to the back pill, Cabinet-style ink-glass pills) and an optional
+ * morph-open search field that replaces the title block while active
+ * (the same scale/fade morph as the Cabinet hero). When [searchActive] the
+ * trailing pills are swapped for a single Cancel pill.
  */
 @Composable
 fun SettingsHeroHeader(
@@ -111,7 +138,18 @@ fun SettingsHeroHeader(
     onBack: () -> Unit,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
-    compact: Boolean = false
+    compact: Boolean = false,
+    // v26 — optional action pills riding the top row beside the back pill.
+    // Receives the hero's readable ink for the pill glass. Passed as a NAMED
+    // argument (not trailing-lambda syntax): the @Composable slot isn't the
+    // last parameter, and the trailing form fails to bind under K2.
+    trailing: (@Composable (ink: Color) -> Unit)? = null,
+    searchActive: Boolean = false,
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {},
+    onCloseSearch: () -> Unit = {},
+    searchFocus: FocusRequester? = null,
+    searchPlaceholder: String = "Search…"
 ) {
     val bannerHeight = if (compact) 140.dp else SettingsHeroBannerHeight
     val totalHeight = bannerHeight + SettingsHeroSheetExtent
@@ -186,7 +224,7 @@ fun SettingsHeroHeader(
                         .statusBarsPadding()
                         .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 16.dp)
                 ) {
-                    // ── Back pill over the banner ───────────────────────
+                    // ── Top row — back pill + optional hero action pills ──
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -198,25 +236,173 @@ fun SettingsHeroHeader(
                             contentColor = symbolTint,
                             disableRipple = true
                         )
+                        if (searchActive) {
+                            // Search is open — the trailing pills are swapped
+                            // for a single Cancel pill (Cabinet's contract).
+                            SettingsHeroActionPill(
+                                onClick = onCloseSearch,
+                                label = "Cancel",
+                                glyph = CurioIcons.Close,
+                                contentDescription = "Close search",
+                                ink = ink
+                            )
+                        } else if (trailing != null) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                trailing(ink)
+                            }
+                        }
                     }
-                    // Flex spacer — pins the title block just above the tear.
+                    // Flex spacer — pins the title/search block just above the tear.
                     Spacer(Modifier.weight(1f))
-                    // ── Title + subtitle — the header's identity ───────
-                    Column {
-                        Text(
-                            title,
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                            color = ink,
-                            maxLines = 1
-                        )
-                        Text(
-                            subtitle,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = ink.copy(alpha = 0.82f),
-                            maxLines = 1
-                        )
+                    // ── Title + subtitle OR the morph-open search field —
+                    //    the search bar scales in from the pill's position
+                    //    when opened, and the title fades back in when
+                    //    closed (the Cabinet hero's search morph).
+                    AnimatedContent(
+                        targetState = searchActive,
+                        transitionSpec = {
+                            if (targetState) {
+                                // Search opening: scale in + fade in
+                                (scaleIn(tween(280, easing = FastOutSlowInEasing), initialScale = 0.92f)
+                                    + fadeIn(tween(280, easing = FastOutSlowInEasing)))
+                                    .togetherWith(fadeOut(tween(200)))
+                            } else {
+                                // Search closing: title fades back in
+                                (fadeIn(tween(280, easing = FastOutSlowInEasing)))
+                                    .togetherWith(
+                                        scaleOut(tween(200, easing = FastOutSlowInEasing), targetScale = 0.92f)
+                                            + fadeOut(tween(200))
+                                    )
+                            }
+                        },
+                        label = "settingsSearchExpand"
+                    ) { active ->
+                        if (active) {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = onSearchQueryChange,
+                                placeholder = {
+                                    Text(
+                                        searchPlaceholder,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                leadingIcon = {
+                                    CurioIcon(
+                                        CurioIcons.Search, null,
+                                        tint = ink,
+                                        size = 20.dp
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        IconButton(onClick = { onSearchQueryChange("") }) {
+                                            CurioIcon(
+                                                CurioIcons.Close,
+                                                "Clear search",
+                                                tint = ink.copy(alpha = 0.85f),
+                                                size = 20.dp
+                                            )
+                                        }
+                                    }
+                                },
+                                singleLine = true,
+                                shape = RoundedCornerShape(50),
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = ink),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(onSearch = {}),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = ink.copy(alpha = 0.16f),
+                                    unfocusedContainerColor = ink.copy(alpha = 0.16f),
+                                    focusedBorderColor = ink.copy(alpha = 0.55f),
+                                    unfocusedBorderColor = ink.copy(alpha = 0.30f),
+                                    cursorColor = ink,
+                                    focusedTextColor = ink,
+                                    unfocusedTextColor = ink,
+                                    focusedPlaceholderColor = ink.copy(alpha = 0.72f),
+                                    unfocusedPlaceholderColor = ink.copy(alpha = 0.72f),
+                                    focusedLeadingIconColor = ink,
+                                    unfocusedLeadingIconColor = ink,
+                                    focusedTrailingIconColor = ink.copy(alpha = 0.85f),
+                                    unfocusedTrailingIconColor = ink.copy(alpha = 0.85f)
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .then(
+                                        if (searchFocus != null) Modifier.focusRequester(searchFocus)
+                                        else Modifier
+                                    )
+                            )
+                        } else {
+                            Column {
+                                Text(
+                                    title,
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = ink,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    subtitle,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = ink.copy(alpha = 0.82f),
+                                    maxLines = 1
+                                )
+                            }
+                        }
                     }
                 }
+            }
+        }
+    }
+}
+
+/** One ink-glass action pill on the hero — the banner's readable ink at a
+ *  soft alpha (the Cabinet hero pill language), so hero action pills like
+ *  sort / search read on the rose in every theme. [emphasized] deepens the
+ *  fill for the active/primary state. Public so settings-family screens can
+ *  pass their own pills into [SettingsHeroHeader]'s trailing slot. */
+@Composable
+fun SettingsHeroActionPill(
+    onClick: () -> Unit,
+    ink: Color,
+    label: String? = null,
+    glyph: String? = null,
+    contentDescription: String? = null,
+    emphasized: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val fill = if (emphasized) ink.copy(alpha = 0.42f) else ink.copy(alpha = 0.18f)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = fill,
+        border = BorderStroke(1.dp, ink.copy(alpha = 0.28f)),
+        shadowElevation = 0.dp,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            if (glyph != null) {
+                CurioIcon(
+                    name = glyph,
+                    contentDescription = contentDescription,
+                    tint = ink,
+                    size = 18.dp
+                )
+            }
+            if (label != null) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color = ink
+                )
             }
         }
     }
@@ -269,7 +455,9 @@ fun settingsRoseAccent(): Color {
         CurioColors.HomeRosewoodDark
     } else if (AppPreferences.pastelColorsState) {
         val pinkHue = (base.h - 15f + 360f) % 360f
-        fromHsl(pinkHue, (base.s * 0.90f).coerceIn(0f, 0.80f), 0.82f)
+        // v26 — pastel headers get a touch more saturation (about +5%) so
+        // the rose banners pop a little without leaving the airy family.
+        fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.82f)
     } else {
         fromHsl(base.h, (base.s * 0.80f).coerceAtMost(0.40f), (base.l * 1.06f).coerceAtMost(0.70f))
     }
@@ -334,8 +522,10 @@ fun SettingsHubScreen(navController: NavController) {
         // Compact hero on tablets/landscape — 140dp instead of 180dp so
         // the torn banner doesn't dominate the short vertical space.
         val heroTotal = if (wide) 140.dp + SettingsHeroSheetExtent else SettingsHeroTotalHeight
+        val gridState = rememberLazyGridState()
         ScreenEntrance {
             LazyVerticalGrid(
+                state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = heroTotal + 10.dp, bottom = 24.dp),
@@ -416,6 +606,15 @@ fun SettingsHubScreen(navController: NavController) {
                 }
             }
         }
+        // Side scroll indicator — thin overlay knob, grows on touch.
+        CurioVerticalScrollIndicator(
+            state = gridState.scrollIndicatorState,
+            onScrollBy = { gridState.dispatchRawDelta(it) },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = heroTotal + 10.dp, bottom = 16.dp)
+        )
         // Drawn on top of the scroll content — rows slide under the ragged
         // tear as they scroll up.
         SettingsHeroHeader(
@@ -463,27 +662,26 @@ private val SettingsSections = listOf(
         label = "Personalize",
         cards = listOf(
             SettingsCardEntry(
-                headerIcon = CurioIcons.AutoAwesome,
-                headerTitle = "How Curio feels",
-                headerSubtitle = "Appearance and color",
+                // v25 — the "How Curio feels / Appearance and color" card
+                // header (icon + title + subtitle) was removed per request;
+                // the rows below render directly under "Personalize". The
+                // renderer skips the header when these are null.
+                headerIcon = null,
+                headerTitle = null,
+                headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint, and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
-                    SettingsRowEntry(CurioIcons.Notifications, "Notifications", "Reminders and explore controls", CurioRoutes.SETTINGS_NOTIFICATIONS),
+                    // v26 — Preferences: search engine, explore behavior, and
+                    // the pet's personality — "how Curio behaves" choices
+                    // pulled out of Notifications and Appearance.
+                    SettingsRowEntry(CurioIcons.Tune, "Preferences", "Search engine, explore, and pet behavior", CurioRoutes.SETTINGS_PREFERENCES),
+                    SettingsRowEntry(CurioIcons.Notifications, "Notifications", "Reminders and notifications", CurioRoutes.SETTINGS_NOTIFICATIONS),
                     SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING),
-                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER)
-                )
-            )
-        )
-    ),
-    SettingsSectionEntry(
-        label = "Explore",
-        cards = listOf(
-            SettingsCardEntry(
-                headerIcon = CurioIcons.ScienceGlyph,
-                headerTitle = "Experiments",
-                headerSubtitle = "Try visual ideas before they ship",
-                rows = listOf(
-                    SettingsRowEntry(CurioIcons.Layers, "Card & deck experiments", "Main card, peek deck, and Spin tests", CurioRoutes.EXPERIMENTS),
+                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER),
+                    // v26 — Experiments is hidden from Settings (it opens via
+                    // the five-tap version trick in Support); these two moved
+                    // in here from the old Explore section so they stay one
+                    // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
                     SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY)
                 )
@@ -494,12 +692,18 @@ private val SettingsSections = listOf(
         label = "Safety & support",
         cards = listOf(
             SettingsCardEntry(
-                headerIcon = CurioIcons.Backup,
-                headerTitle = "Your data",
-                headerSubtitle = "Backups and restore",
+                // v25 — the "Your data" card header was removed per request;
+                // the rows render directly under "Safety & support".
+                headerIcon = null,
+                headerTitle = null,
+                headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
-                    SettingsRowEntry(CurioIcons.Info, "About Curio", "Replay intro and app details", CurioRoutes.SETTINGS_ABOUT)
+                    // v26 — recycle bin for soft-deleted captures.
+                    SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN),
+                    // v24 — merged into the shared Support & diagnostics page
+                    // (same screen Profile's "Support & diagnostics" opens).
+                    SettingsRowEntry(CurioIcons.Info, "Support & diagnostics", "Updates, reports, help & app details", CurioRoutes.SUPPORT)
                 )
             )
         )
@@ -541,13 +745,19 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
     SettingsDeepRow(CurioIcons.Schedule, "Entry date & mood", "Date, mood, and attachments on saved entries", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-entry"),
-    SettingsDeepRow(CurioIcons.Edit, "Custom reaction lines", "Let Curie speak your saved lines for each event", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-reaction-lines"),
+    // ── Preferences (v26) — search engine, explore behavior, pet personality ──
+    // v19 — which search engine the "Explore in browser" button opens.
+    SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
+    SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
+    SettingsDeepRow(CurioIcons.Notifications, "Live explore notification", "Ongoing timer with pause and stop", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-live"),
+    SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-bubble"),
+    SettingsDeepRow(CurioIcons.Layers, "Display over other apps", "System permission for the floating bubble", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-overlay"),
+    SettingsDeepRow(CurioIcons.Pets, "Pet chatter", "Quiet, cozy, or talkative pet dialogue", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-chatter"),
+    SettingsDeepRow(CurioIcons.Pets, "Pet games", "How often the pet starts games", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-games"),
     // ── Notifications ────────────────────────────────────────────────
     SettingsDeepRow(CurioIcons.Notifications, "Daily shuffle reminder", "A daily nudge to spin the deck", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-reminder"),
-    SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-sessions"),
-    SettingsDeepRow(CurioIcons.Notifications, "Live explore notification", "Ongoing timer with pause and stop", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-live"),
-    SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-bubble"),
-    SettingsDeepRow(CurioIcons.Layers, "Display over other apps", "System permission for the floating bubble", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-overlay"),
+    // v23 — re-shows the bubble opt-in row inside the Explore now dialog.
+    SettingsDeepRow(CurioIcons.BubbleChart, "Explore bubble option in Explore dialog", "Show the bubble choice in the Explore now dialog", CurioRoutes.SETTINGS_NOTIFICATIONS, SettingsPage.NOTIFICATIONS, "notif-bubble-dialog"),
     // ── Recording ────────────────────────────────────────────────────
     SettingsDeepRow(CurioIcons.Mic, "Audio quality", "Voice-note recording quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
     SettingsDeepRow(CurioIcons.Edit, "Voice-to-text", "Dictation buttons on voice-note fields", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
@@ -555,9 +765,10 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
     // ── About ────────────────────────────────────────────────────────
-    SettingsDeepRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again", CurioRoutes.SETTINGS_ABOUT, SettingsPage.ABOUT, "about-intro"),
-    SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.SETTINGS_ABOUT, SettingsPage.ABOUT, "about-version"),
-    SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.SETTINGS_ABOUT, SettingsPage.ABOUT, "about-update")
+    // v24 — About content lives on the shared Support & diagnostics page.
+    SettingsDeepRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again", CurioRoutes.SUPPORT),
+    SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.SUPPORT),
+    SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.SUPPORT)
 )
 
 /** One flat search result — the matching row plus its section context so

@@ -95,6 +95,7 @@ import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
 import com.curio.app.features.topichistory.TopicHistoryScreen
 import com.curio.app.features.recent.RecentScreen
+import com.curio.app.features.recyclebin.RecycleBinScreen
 import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
@@ -174,6 +175,7 @@ private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.TOPIC_HISTORY,
     CurioRoutes.MANAGE_CATEGORIES,
     CurioRoutes.RECENTS_ALL,
+    CurioRoutes.RECYCLE_BIN,
     CurioRoutes.SUPPORT,
     CurioRoutes.BUG_REPORT,
     CurioRoutes.DATABASE
@@ -693,6 +695,9 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_APPEARANCE) {
                 SettingsSectionScreen(navController = navController, page = SettingsPage.APPEARANCE)
             }
+            composable(CurioRoutes.SETTINGS_PREFERENCES) {
+                SettingsSectionScreen(navController = navController, page = SettingsPage.PREFERENCES)
+            }
             composable(CurioRoutes.SETTINGS_NOTIFICATIONS) {
                 SettingsSectionScreen(navController = navController, page = SettingsPage.NOTIFICATIONS)
             }
@@ -702,9 +707,6 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_DATA) {
                 BackupToolsScreen(navController = navController)
             }
-            composable(CurioRoutes.SETTINGS_ABOUT) {
-                SettingsSectionScreen(navController = navController, page = SettingsPage.ABOUT)
-            }
             composable(CurioRoutes.EXPERIMENTS) {
                 ExperimentsScreen(navController = navController)
             }
@@ -713,6 +715,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.TOPIC_HISTORY) {
                 TopicHistoryScreen(navController = navController)
+            }
+            composable(CurioRoutes.RECYCLE_BIN) {
+                RecycleBinScreen(navController = navController)
             }
             composable(CurioRoutes.RECENTS_ALL) {
                 RecentScreen(navController = navController)
@@ -944,6 +949,14 @@ fun CurioNavHost(
                     TextButton(onClick = {
                         showDoneDialog = false
                         confirmSessionCancel = false
+                        // v17 — hand the session's elapsed time to the capture
+                        // page before clearing (the save screen can't read it
+                        // once the session is gone).
+                        ExploreSessionStore.handoffWriteSession(
+                            activeSession.categoryId,
+                            activeSession.topicName,
+                            activeSession.elapsedMillis()
+                        )
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)

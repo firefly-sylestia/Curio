@@ -36,7 +36,6 @@ import com.curio.app.data.FieldMindLegacyImport
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
@@ -265,7 +264,6 @@ fun BackupToolsScreen(navController: NavController) {
             item { CurioSectionLabel("Your data") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.Backup, "Backup & restore", "A complete, portable copy of Curio")
                     CurioSettingsRow(CurioIcons.Backup, "Back up now", "Save captures, settings + recordings") {
                         backupLauncher.launch(CurioBackupManager.suggestedFileName())
                     }
@@ -283,7 +281,6 @@ fun BackupToolsScreen(navController: NavController) {
             item { CurioSectionLabel("Legacy import") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioCardHeader(CurioIcons.History, "FieldMind archive", "Add older observations to your Cabinet")
                     CurioSettingsRow(
                         CurioIcons.History,
                         "Restore from FieldMind backup",

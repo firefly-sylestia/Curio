@@ -1,0 +1,323 @@
+package com.curio.app.features.recyclebin
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.curio.app.data.AudioStorageManager
+import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioEntry
+import com.curio.app.data.CurioRepositoryHolder
+import com.curio.app.data.ImageStorageManager
+import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.ui.adaptive.isWide
+import com.curio.app.ui.adaptive.wideContentEdgePadding
+import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
+import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.themedAccent
+import kotlinx.coroutines.launch
+
+/**
+ * Recycle bin (v26) — every soft-deleted capture lands here instead of being
+ * erased. The user can restore entries back to the Cabinet or permanently
+ * delete them (which is when attached media is finally removed). Opened from
+ * Settings → Safety & support → Recycle bin.
+ */
+@Composable
+fun RecycleBinScreen(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val trashed by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+        try {
+            CurioRepositoryHolder.repo.observeTrashed().collect { value = it }
+        } catch (_: Exception) {
+            value = emptyList()
+        }
+    }
+    val listState = rememberLazyListState()
+    // Single-confirm dialogs for the permanent actions (already in the bin).
+    var purgeTarget by remember { mutableStateOf<CurioEntry?>(null) }
+    var showEmptyBinConfirm by remember { mutableStateOf(false) }
+
+    fun purgeWithMedia(entry: CurioEntry) {
+        scope.launch {
+            // Permanent: only now are the recording + images finally removed.
+            entry.captureData.audioFilePaths().forEach { path ->
+                AudioStorageManager.deleteAudio(context, path)
+            }
+            ImageStorageManager.deleteImagesForEntry(context, entry.id)
+            runCatching { CurioRepositoryHolder.repo.purgeById(entry.id) }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        if (!windowWidthSizeClass().isWide) {
+            CurioWatermarkBackdrop(
+                activeCat = CurioCategories.byId(CategoryId.WILDCARD),
+                alphaScale = 0.45f
+            )
+        }
+        ScreenEntrance {
+            if (trashed.isEmpty()) {
+                CurioEmptyState(
+                    glyph = CurioIcons.Restore,
+                    headline = "Recycle bin is empty",
+                    subtext = "Deleted captures wait here so you can bring them back — nothing is lost yet.",
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                    modifier = Modifier.padding(top = SettingsHeroTotalHeight)
+                )
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = wideContentEdgePadding(),
+                        end = wideContentEdgePadding(),
+                        top = SettingsHeroTotalHeight + 10.dp,
+                        bottom = 24.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    item("bin-controls") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${trashed.size} capture(s) waiting. Restore them here, or delete forever.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(
+                                onClick = { showEmptyBinConfirm = true }
+                            ) {
+                                Text(
+                                    "Empty bin",
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                    items(trashed, key = { it.id }) { entry ->
+                        TrashedEntryRow(
+                            entry = entry,
+                            onRestore = {
+                                scope.launch {
+                                    runCatching { CurioRepositoryHolder.repo.restoreById(entry.id) }
+                                }
+                            },
+                            onDeleteForever = { purgeTarget = entry }
+                        )
+                    }
+                }
+            }
+        }
+        if (trashed.isNotEmpty()) {
+            CurioVerticalScrollIndicator(
+                state = listState.scrollIndicatorState,
+                onScrollBy = { listState.dispatchRawDelta(it) },
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+                    .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+            )
+        }
+        SettingsHeroHeader(
+            title = "Recycle bin",
+            subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you",
+            onBack = { navController.popBackStack() }
+        )
+    }
+
+    // ── Delete forever (single entry) ──────────────────────────────────
+    purgeTarget?.let { entry ->
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { purgeTarget = null },
+            title = { Text("Delete forever?", fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    "\"${entry.topic.name}\" and its attached media will be permanently erased. " +
+                        "This can't be undone."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    purgeTarget = null
+                    purgeWithMedia(entry)
+                }) {
+                    Text("Delete forever", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { purgeTarget = null }, colors = curioDialogActionButtonColors()) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // ── Empty bin — purges everything, then removes all attached media ──
+    if (showEmptyBinConfirm) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { showEmptyBinConfirm = false },
+            title = { Text("Empty the Recycle bin?", fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    "${trashed.size} capture(s) — and their attached media — will be permanently erased. " +
+                        "This can't be undone."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showEmptyBinConfirm = false
+                    scope.launch {
+                        trashed.forEach { entry ->
+                            entry.captureData.audioFilePaths().forEach { path ->
+                                AudioStorageManager.deleteAudio(context, path)
+                            }
+                            ImageStorageManager.deleteImagesForEntry(context, entry.id)
+                        }
+                        runCatching { CurioRepositoryHolder.repo.purgeTrashed() }
+                    }
+                }) {
+                    Text("Empty bin", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEmptyBinConfirm = false }, colors = curioDialogActionButtonColors()) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun TrashedEntryRow(
+    entry: CurioEntry,
+    onRestore: () -> Unit,
+    onDeleteForever: () -> Unit
+) {
+    val category = CurioCategories.byId(entry.topic.categoryId)
+    val accent = category.themedAccent()
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = category.categorySurface(),
+        shadowElevation = 0.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = accent.copy(alpha = 0.16f),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    CurioIcon(
+                        name = category.iconGlyph,
+                        contentDescription = null,
+                        tint = accent,
+                        size = 22.dp
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = entry.topic.name,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${category.displayName} · deleted ${deletedDaysAgoLabel(entry.deletedAt)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                TextButton(onClick = onRestore) {
+                    Text("Restore", fontWeight = FontWeight.SemiBold)
+                }
+                TextButton(onClick = onDeleteForever) {
+                    Text(
+                        "Delete forever",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** \"today\" / \"yesterday\" / \"3d ago\" for the soft-delete timestamp. */
+private fun deletedDaysAgoLabel(deletedAt: Long?): String {
+    if (deletedAt == null) return "recently"
+    val days = ((System.currentTimeMillis() - deletedAt) / 86_400_000L).toInt()
+    return when (days) {
+        0 -> "today"
+        1 -> "yesterday"
+        else -> "$days days ago"
+    }
+}

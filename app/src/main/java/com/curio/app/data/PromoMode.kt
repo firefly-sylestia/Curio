@@ -2,9 +2,10 @@ package com.curio.app.data
 
 /**
  * Promo/demo-content mode (v7.107) — the hidden promotional state the app
- * shows when `AppPreferences.promoModeState` is ON (unlocked by tapping the
- * Version row in Support & diagnostics five times; tap five times again to
- * turn it OFF).
+ * shows when `AppPreferences.promoModeState` is ON. v24: OFF by default and
+ * reached from the Experiments screen (Settings → Experiments → Promo mode,
+ * or the Version row's five-tap in Support & diagnostics); its own page's
+ * toggle is the one control for it.
  *
  * While ON, the app surfaces promotional SAMPLE content — derived entirely
  * from real topics via [TopicCatalog.sampleEntries] and the loaded pools —

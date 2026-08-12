@@ -70,6 +70,14 @@ fun CategoryPickerScreen(navController: NavController) {
     // v7.94 — read the REACTIVE visible list directly (no remember): hidden
     // lanes drop out and reordered lanes follow Manage Categories instantly.
     val categories = CurioCategories.visible
+    // v26 — reopen with the persisted deck: a mixed selection comes back in
+    // multi-select with every lane ticked, so the user can SEE and CHANGE
+    // the mix instead of it collapsing to the single first category. Hidden
+    // lanes are filtered out so they never show as pre-selected.
+    val persistedVisible = remember {
+        AppPreferences.getLastSpinCategories(context)
+            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
+    }
     val gridState = rememberLazyGridState()
     // Wide windows (tablet / landscape) spread the deck grid and cap the
     // sheet's content width so the picker stays readable on large screens.
@@ -83,8 +91,10 @@ fun CategoryPickerScreen(navController: NavController) {
         CurioCategories.byId(id)
     }
     // Null = not in multi-select mode (tap-to-open). Once set, cards toggle.
-    var selectedSlugs by rememberSaveable { mutableStateOf(listOf<String>()) }
-    var multiSelectMode by rememberSaveable { mutableStateOf(false) }
+    var selectedSlugs by rememberSaveable {
+        mutableStateOf(persistedVisible.map { it.id.routeSlug })
+    }
+    var multiSelectMode by rememberSaveable { mutableStateOf(persistedVisible.size > 1) }
 
     val toggleSlug = { slug: String ->
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug

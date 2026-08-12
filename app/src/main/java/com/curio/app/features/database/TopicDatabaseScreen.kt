@@ -1,40 +1,56 @@
 package com.curio.app.features.database
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,6 +63,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.pet.PetLandmark
@@ -55,12 +72,16 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.components.CurioSortDropdown
+import com.curio.app.ui.components.CurioSortOption
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -85,16 +106,37 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun TopicDatabaseScreen(navController: NavController) {
-    // v7.97 — SAVEABLE state: the search query, the selected category filter
-    // and the scroll position survive leaving the screen (Topic Reveal
-    // round-trips, tab switches, rotation, process death) instead of
-    // resetting to a fresh blank list every time you come back.
-    var query by rememberSaveable { mutableStateOf("") }
+    // v7.97 — SAVEABLE state: the selected category filter and the scroll
+    // position survive leaving the screen (Topic Reveal round-trips, tab
+    // switches, rotation, process death) instead of resetting to a fresh
+    // blank list every time you come back. v26 — the search query moved into
+    // [searchQuery] (the hero search field) but stays saveable here.
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
-    // v8.54 — sort control: DEFAULT (category file order) / A–Z / Z–A /
-    // YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so it
-    // survives reveal round-trips, tab switches, and rotation.
-    var sortMode by rememberSaveable { mutableStateOf(DatabaseSortMode.DEFAULT) }
+    // v26 — sort control: a dropdown (Default / Name / Year) plus a
+    // universal ascending/descending arrow. Saved like the search + filter so
+    // it survives reveal round-trips, tab switches, and rotation.
+    var tdSortField by rememberSaveable { mutableStateOf(DatabaseSortField.DEFAULT.name) }
+    var tdSortAscending by rememberSaveable { mutableStateOf(false) }
+    // v26 — hero search: the search pill morphs the hero into a search field
+    // (the Cabinet's search-morph contract) so search/sort/filters all live
+    // in the header instead of scrolling inside the list.
+    var searchActive by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val searchFocus = remember { FocusRequester() }
+    LaunchedEffect(searchActive) {
+        if (searchActive) {
+            searchFocus.requestFocus()
+        }
+    }
+    // Map the (field, direction) pair onto the existing sort modes: Default
+    // keeps per-lane A–Z with headers; Name/Year obey the arrow.
+    val sortMode = when (DatabaseSortField.valueOf(tdSortField)) {
+        DatabaseSortField.DEFAULT -> DatabaseSortMode.DEFAULT
+        DatabaseSortField.NAME -> if (tdSortAscending) DatabaseSortMode.ALPHA_ASC
+        else DatabaseSortMode.ALPHA_DESC
+        DatabaseSortField.YEAR -> if (tdSortAscending) DatabaseSortMode.YEAR_OLDEST
+        else DatabaseSortMode.YEAR_NEWEST
+    }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
     // the list first composes with zero rows and a restored LazyListState gets
@@ -190,7 +232,7 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Keyed on the done-set snapshot (structural equality) so badges refresh.
     // v8.54 — with a non-default sort active the list flattens to one sorted
     // run (section headers would break a global A–Z / year order).
-    val needle = query.trim().lowercase()
+    val needle = searchQuery.trim().lowercase()
     val matches: (IndexedTopic) -> Boolean = { indexed ->
         needle.isEmpty() ||
             indexed.nameKey.contains(needle) ||
@@ -216,7 +258,13 @@ fun TopicDatabaseScreen(navController: NavController) {
                 buildList {
                     catalog.forEach { (cat, topics) ->
                         if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                        val shown = topics.mapNotNull { indexById[it.id] }.filter(matches)
+                        val shown = topics.mapNotNull { indexById[it.id] }
+                            .filter(matches)
+                            // v26 — the DEFAULT order is now A–Z WITHIN each
+                            // category (stable sort: ties keep file order), so
+                            // the browser reads alphabetically out of the box
+                            // while section headers still group the lanes.
+                            .sortedBy { it.nameKey }
                         if (shown.isEmpty()) return@forEach
                         if (effectiveCat == null) {
                             add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
@@ -302,6 +350,34 @@ fun TopicDatabaseScreen(navController: NavController) {
         }
     }
 
+    // ── A–Z fast-scroller (v26) — the scroll knob's letter rail: the active
+    //    letter is derived from the topic row at the top of the list, and
+    //    tapping a letter jumps to the first topic starting with it.
+    val alphabetLetters = remember { ('A'..'Z').map { it.toString() } }
+    val activeAlphabetIndex: Int? by remember(rows) {
+        derivedStateOf {
+            val last = (rows.size - 1).coerceAtLeast(0)
+            val start = listState.firstVisibleItemIndex.coerceIn(0, last)
+            for (i in start until rows.size) {
+                val name = rows[i].topic?.name
+                if (!name.isNullOrEmpty()) {
+                    val idx = alphabetLetters.indexOf(name.first().uppercaseChar().toString())
+                    if (idx >= 0) return@derivedStateOf idx
+                }
+            }
+            null
+        }
+    }
+    val alphabetScope = rememberCoroutineScope()
+    val onAlphabetSelect: (String) -> Unit = { letter ->
+        val target = rows.indexOfFirst {
+            it.topic?.name?.startsWith(letter, ignoreCase = true) == true
+        }
+        if (target >= 0) {
+            alphabetScope.launch { listState.scrollToItem(target.coerceIn(0, rows.lastIndex)) }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -324,153 +400,11 @@ fun TopicDatabaseScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = DatabaseContentTop,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // ── Search + category filter chips ─────────────────────────
-                item("controls") {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        // v8.xx — the search box is a pet landmark: the pet
-                        // walks over and pokes it, and the tour's Browse-Topics
-                        // stop points the guide right at it.
-                        PetLandmark(
-                            id = "search",
-                            kind = PetLandmarks.Kind.FUN,
-                            screen = "database"
-                        ) { lm ->
-                        OutlinedTextField(
-                            value = query,
-                            onValueChange = { query = it },
-                            placeholder = {
-                                Text(
-                                    if (totalTopics > 0) "Search $totalTopics topics…"
-                                    else "Search topics…",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            leadingIcon = {
-                                CurioIcon(
-                                    CurioIcons.Search, null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 20.dp
-                                )
-                            },
-                            trailingIcon = {
-                                if (query.isNotEmpty()) {
-                                    Surface(
-                                        onClick = { query = "" },
-                                        shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                                    ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier.size(26.dp)
-                                        ) {
-                                            CurioIcon(
-                                                CurioIcons.Close, null,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                size = 16.dp
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(50),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                cursorColor = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = lm.fillMaxWidth()
-                        )
-                        }
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            item("all") {
-                                DatabaseFilterChip(
-                                    label = "All",
-                                    count = totalTopics,
-                                    selectedInk = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    accent = MaterialTheme.colorScheme.primary,
-                                    tint = MaterialTheme.colorScheme.primaryContainer,
-                                    selected = effectiveCat == null,
-                                    onClick = { selectedCat = null }
-                                )
-                            }
-                            items(catalog, key = { it.first.id.name }) { (cat, list) ->
-                                DatabaseFilterChip(
-                                    label = cat.displayName,
-                                    count = list.size,
-                                    selectedInk = cat.accent,
-                                    accent = cat.accent,
-                                    tint = cat.tint,
-                                    selected = effectiveCat == cat.id,
-                                    onClick = { selectedCat = cat.id }
-                                )
-                            }
-                        }
-                        // v8.54 — sort control: A–Z / Z–A / Newest / Oldest (by year).
-                        // Direction is explicit so sorting never depends on a hidden toggle state.
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            item("sort-label") {
-                                Text(
-                                    text = "Sort",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                    modifier = Modifier.padding(start = 2.dp)
-                                )
-                            }
-                            item("sort-alpha-asc") {
-                                DatabaseSortChip(
-                                    label = "A–Z",
-                                    glyph = CurioIcons.ArrowUpward,
-                                    selected = sortMode == DatabaseSortMode.ALPHA_ASC,
-                                    onClick = { sortMode = DatabaseSortMode.ALPHA_ASC }
-                                )
-                            }
-                            item("sort-alpha-desc") {
-                                DatabaseSortChip(
-                                    label = "Z–A",
-                                    glyph = CurioIcons.ArrowDownward,
-                                    selected = sortMode == DatabaseSortMode.ALPHA_DESC,
-                                    onClick = { sortMode = DatabaseSortMode.ALPHA_DESC }
-                                )
-                            }
-                            item("sort-newest") {
-                                DatabaseSortChip(
-                                    label = "Newest",
-                                    glyph = CurioIcons.ArrowDownward,
-                                    selected = sortMode == DatabaseSortMode.YEAR_NEWEST,
-                                    onClick = {
-                                        sortMode = if (sortMode == DatabaseSortMode.YEAR_NEWEST) DatabaseSortMode.DEFAULT
-                                        else DatabaseSortMode.YEAR_NEWEST
-                                    }
-                                )
-                            }
-                            item("sort-oldest") {
-                                DatabaseSortChip(
-                                    label = "Oldest",
-                                    glyph = CurioIcons.ArrowUpward,
-                                    selected = sortMode == DatabaseSortMode.YEAR_OLDEST,
-                                    onClick = {
-                                        sortMode = if (sortMode == DatabaseSortMode.YEAR_OLDEST) DatabaseSortMode.DEFAULT
-                                        else DatabaseSortMode.YEAR_OLDEST
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
                 // ── Loading / empty / list states ──────────────────────────
                 // Catalog parsing and indexing are separate background steps.
                 // Keep the loading state through both so the intermediate
@@ -544,11 +478,122 @@ fun TopicDatabaseScreen(navController: NavController) {
                 }
             }
         }
-        // ── Torn rose hero on top — rows disappear under the tear.
+        // Side scroll indicator — speed-scrolling knob (v26) with the A–Z
+        // fast-scroller rail (tap the knob to open it, tap a letter to jump).
+        CurioVerticalScrollIndicator(
+            state = listState.scrollIndicatorState,
+            onScrollBy = { listState.dispatchRawDelta(it) },
+            alphabet = alphabetLetters,
+            activeAlphabetIndex = activeAlphabetIndex,
+            onAlphabetSelect = onAlphabetSelect,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = DatabaseContentTop, bottom = 16.dp)
+        )
+
+        // ── Floating back-to-top arrow (v26) — once the list is scrolled
+        // down a ways (≈ a full screen of rows), a small arrow floats at the
+        // top of the viewport (just below the pinned chip bar) and jumps
+        // straight back to the top of the list instead of scrolling all the
+        // way up again. Row-based estimate (~70dp each) so it only appears
+        // when genuinely "too much down".
+        val backToTopVisible by remember {
+            derivedStateOf { listState.firstVisibleItemIndex >= BackToTopRowThreshold }
+        }
+        AnimatedVisibility(
+            visible = backToTopVisible,
+            enter = fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.85f),
+            exit = scaleOut(tween(180), targetScale = 0.85f) + fadeOut(tween(180)),
+            modifier = Modifier
+                // Sits left of the scroll-indicator strip (which owns the
+                // far-right edge) and below the pinned chip bar.
+                .align(Alignment.TopEnd)
+                .padding(end = 68.dp, top = SettingsHeroTotalHeight + 74.dp)
+        ) {
+            Surface(
+                onClick = {
+                    savedScrollIndex = 0
+                    savedScrollOffset = 0
+                    alphabetScope.launch { listState.scrollToItem(0) }
+                },
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary,
+                shadowElevation = 6.dp
+            ) {
+                CurioIcon(
+                    CurioIcons.ArrowUpward,
+                    "Back to top",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    size = 20.dp,
+                    modifier = Modifier.padding(11.dp)
+                )
+            }
+        }
+
+        // ── Floating category filter bar (v26) — the Cabinet's sticky chip
+        // bar language: rests just below the hero, then lifts, pops (0.97 →
+        // 1.0) and frosts in as the list scrolls, pinning just below the
+        // ragged tear while the topic rows pass underneath it.
+        DatabaseStickyChipBar(
+            listState = listState,
+            catalog = catalog,
+            totalTopics = totalTopics,
+            selectedCat = effectiveCat,
+            onSelectAll = { selectedCat = null },
+            onSelectCategory = { selectedCat = it }
+        )
+
+        // ── Torn rose hero on top — rows disappear under the tear. The
+        // sort dropdown and search pill ride the hero's top row as ink-glass
+        // pills (the Cabinet's hero contract), and the search pill morphs
+        // the hero into a search field while active.
         SettingsHeroHeader(
             title = "Topic Database",
             subtitle = if (totalTopics > 0) "$totalTopics topics across ${catalog.size} lanes" else "Every topic, one place",
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            searchActive = searchActive,
+            searchQuery = searchQuery,
+            onSearchQueryChange = { searchQuery = it },
+            onCloseSearch = { searchActive = false; searchQuery = "" },
+            searchFocus = searchFocus,
+            searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
+            // Passed as a NAMED argument (not trailing-lambda syntax): the
+            // @Composable slot isn't the last parameter, and the trailing
+            // form fails to bind under K2.
+            trailing = { ink ->
+                // Sort dropdown — the label opens the field list, the arrow
+                // toggles ascending/descending universally (v26).
+                CurioSortDropdown(
+                    options = listOf(
+                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default"),
+                        CurioSortOption(DatabaseSortField.NAME.name, "Name"),
+                        CurioSortOption(DatabaseSortField.YEAR.name, "Year")
+                    ),
+                    selectedKey = tdSortField,
+                    ascending = tdSortAscending,
+                    onSelect = { tdSortField = it },
+                    onToggleDirection = { tdSortAscending = !tdSortAscending },
+                    ink = ink,
+                    emphasized = true
+                )
+                // Search pill — the pet landmark moved with the search box
+                // into the header: the pet still walks over and pokes it,
+                // and the tour's Browse-Topics stop points at it.
+                PetLandmark(
+                    id = "search",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "database"
+                ) { lm ->
+                    SettingsHeroActionPill(
+                        onClick = { searchActive = true },
+                        glyph = CurioIcons.Search,
+                        contentDescription = "Search topics",
+                        ink = ink,
+                        modifier = lm
+                    )
+                }
+            }
         )
     }
 }
@@ -588,8 +633,17 @@ private fun DatabaseFilterChip(
     accent: Color = MaterialTheme.colorScheme.primary,
     tint: Color = MaterialTheme.colorScheme.primaryContainer,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    // v26 — the floating chip bar pops each pill on scroll: the label
+    // blooms toward its accent as the pill pops (Cabinet's per-pill pop).
+    popProgress: Float = 0f
 ) {
+    val labelColor = if (selected) selectedInk
+    else lerp(
+        MaterialTheme.colorScheme.onSurfaceVariant,
+        accent,
+        popProgress * 0.55f
+    )
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
@@ -600,20 +654,141 @@ private fun DatabaseFilterChip(
         Text(
             text = if (count > 0) "$label $count" else label,
             style = MaterialTheme.typography.labelLarge,
-            color = if (selected) selectedInk else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = labelColor,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
         )
     }
 }
 
+// ── Floating category filter bar ─────────────────────────────────────────
+// The Cabinet's sticky chip bar, adapted for the database's LazyListState:
+// rests just below the hero, then lifts, pops and pins just below the
+// ragged tear as the list scrolls, while the topic rows pass underneath.
+/** Where the chip bar rests below the hero (its unpinned spot). */
+private val DatabaseChipBarRestTop = SettingsHeroTotalHeight + 4.dp
+/** Where the chip bar pins when scrolled — just below the ragged tear. */
+private val DatabaseChipBarPinnedTop = SettingsHeroTotalHeight + 2.dp
+/** Scroll distance (dp) before the chip bar fully pins (Cabinet pill style). */
+private val DatabaseChipStickyThreshold = 56.dp
+/** The chip bar's layout height — scroll content starts below it. */
+private val DatabaseChipBarHeight = 52.dp
+/** Top content padding — hero + floating chip bar + breathing room. */
+private val DatabaseContentTop = SettingsHeroTotalHeight + DatabaseChipBarHeight + 12.dp
+/** Rows scrolled before the floating back-to-top arrow appears (≈ one
+ *  full screen — each row is roughly 70dp tall). */
+private const val BackToTopRowThreshold = 10
+
+/**
+ * The floating category filter row — the Cabinet's sticky chip bar,
+ * drawn ON TOP of the scroll content. As the list scrolls the row lifts a
+ * few dp to pin just below the hero's ragged tear, and every pill pops on
+ * its own — scale 0.90 → 1.0, staggered left→right, with the label
+ * blooming toward its accent (v26).
+ */
+@Composable
+private fun BoxScope.DatabaseStickyChipBar(
+    listState: LazyListState,
+    catalog: List<Pair<CurioCategory, List<CurioTopic>>>,
+    totalTopics: Int,
+    selectedCat: CategoryId?,
+    onSelectAll: () -> Unit,
+    onSelectCategory: (CategoryId) -> Unit
+) {
+    val thresholdPx = with(LocalDensity.current) { DatabaseChipStickyThreshold.toPx() }
+    val barBottomPx = with(LocalDensity.current) { (DatabaseChipBarRestTop + DatabaseChipBarHeight).toPx() }
+    val progress by remember {
+        derivedStateOf {
+            val first = listState.layoutInfo.visibleItemsInfo.firstOrNull()
+            if (first == null) 0f
+            else ((barBottomPx - first.offset) / thresholdPx).coerceIn(0f, 1f)
+        }
+    }
+    val frostShift = FastOutSlowInEasing.transform(progress)
+    val liftPx = with(LocalDensity.current) { (DatabaseChipBarRestTop - DatabaseChipBarPinnedTop).toPx() }
+
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .offset(y = DatabaseChipBarRestTop)
+            .graphicsLayer {
+                translationY = -liftPx * frostShift
+            }
+    ) {
+        item("all") {
+            DatabaseChipPop(
+                index = 0,
+                frostShift = frostShift
+            ) { popProgress ->
+                DatabaseFilterChip(
+                    label = "All",
+                    count = totalTopics,
+                    selectedInk = MaterialTheme.colorScheme.onPrimaryContainer,
+                    accent = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.primaryContainer,
+                    selected = selectedCat == null,
+                    onClick = onSelectAll,
+                    popProgress = popProgress
+                )
+            }
+        }
+        itemsIndexed(catalog, key = { _, pair -> pair.first.id.name }) { i, (cat, list) ->
+            DatabaseChipPop(
+                index = i + 1,
+                frostShift = frostShift
+            ) { popProgress ->
+                DatabaseFilterChip(
+                    label = cat.displayName,
+                    count = list.size,
+                    selectedInk = cat.accent,
+                    accent = cat.accent,
+                    tint = cat.tint,
+                    selected = selectedCat == cat.id,
+                    onClick = { onSelectCategory(cat.id) },
+                    popProgress = popProgress
+                )
+            }
+        }
+    }
+}
+
+/** Per-pill pop — each chip scales 0.90 → 1.0 as the bar lifts to pin
+ *  (staggered left→right, eased on the same curve as the bar's lift). */
+@Composable
+private fun DatabaseChipPop(
+    index: Int,
+    frostShift: Float,
+    content: @Composable (popProgress: Float) -> Unit
+) {
+    val stagger = (index * 0.07f).coerceAtMost(0.85f)
+    val pillProgress = ((frostShift - stagger) / (1f - stagger)).coerceIn(0f, 1f)
+    val eased = FastOutSlowInEasing.transform(pillProgress)
+    val pillScale = androidx.compose.ui.util.lerp(0.90f, 1f, eased)
+    Box(
+        modifier = Modifier.graphicsLayer {
+            scaleX = pillScale
+            scaleY = pillScale
+        }
+    ) {
+        content(eased)
+    }
+}
+
 /**
  * How the Topic Database list is ordered. DEFAULT keeps the per-category
- * file order with section headers; the other modes flatten to one sorted
- * run (headers are hidden because a global sort breaks grouping).
+ * grouping — A–Z within each lane — with section headers; the other modes
+ * flatten to one sorted run (headers are hidden because a global sort
+ * breaks grouping).
  */
 private enum class DatabaseSortMode {
     DEFAULT, ALPHA_ASC, ALPHA_DESC, YEAR_NEWEST, YEAR_OLDEST
 }
+
+/** Sort fields for the sort dropdown (v26) — the arrow toggles direction. */
+private enum class DatabaseSortField { DEFAULT, NAME, YEAR }
 
 /**
  * Best-effort publication/birth year for sorting. Topics have no dedicated
@@ -638,45 +813,6 @@ private fun topicYear(topic: CurioTopic): Int? {
         DECADE_YEAR.find(tag)?.let { return it.groupValues[1].toInt() * 10 }
     }
     return null
-}
-
-/** Small toggle chip for the sort row — icon + label, mirrors [DatabaseFilterChip]. */
-@Composable
-private fun DatabaseSortChip(
-    label: String,
-    glyph: String? = null,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerLow,
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
-        ) {
-            if (glyph != null) {
-                CurioIcon(
-                    glyph, null,
-                    tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 14.dp
-                )
-            }
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
 }
 
 /** Category section header shown while browsing All. */

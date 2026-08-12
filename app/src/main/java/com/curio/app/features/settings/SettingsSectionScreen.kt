@@ -11,12 +11,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +34,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -57,17 +60,16 @@ import com.curio.app.data.AudioQuality
 import com.curio.app.data.AudioQualitySettings
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
-import com.curio.app.features.onboarding.CurioOnboardingState
+import com.curio.app.data.SearchEngine
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
-import com.curio.app.ui.components.CurioUpdateCheckRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
@@ -76,10 +78,13 @@ import com.curio.app.ui.theme.CurioIcons
 /** Settings destination selected from the compact hub. */
 enum class SettingsPage(val title: String, val subtitle: String) {
     APPEARANCE("Appearance", "Theme, tint, and color mood"),
-    NOTIFICATIONS("Notifications", "Reminders and explore controls"),
+    // v26 — Preferences: the behavioral settings that aren't about how the
+    // app LOOKS or when it REMINDS you — search engine, explore sessions and
+    // the floating bubble, and the pet's chatter/games personality.
+    PREFERENCES("Preferences", "Search, explore, and pet behavior"),
+    NOTIFICATIONS("Notifications", "Reminders and notifications"),
     RECORDING("Recording", "Voice-note quality and dictation"),
-    DATA("Backup & restore", "Keep your captures safe"),
-    ABOUT("About Curio", "Help and app details")
+    DATA("Backup & restore", "Keep your captures safe")
 }
 
 @Composable
@@ -129,13 +134,22 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
             item {
                 when (page) {
                     SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
+                    SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
                     SettingsPage.NOTIFICATIONS -> NotificationsSection(highlightKey)
                     SettingsPage.RECORDING -> RecordingSection(highlightKey)
                     SettingsPage.DATA -> DataSection(navController, highlightKey)
-                    SettingsPage.ABOUT -> AboutSection(navController, highlightKey)
                 }
             }
         }
+        // Side scroll indicator — thin overlay knob, grows on touch.
+        CurioVerticalScrollIndicator(
+            state = listState.scrollIndicatorState,
+            onScrollBy = { listState.dispatchRawDelta(it) },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = SettingsHeroTotalHeight + 8.dp, bottom = 16.dp)
+        )
         // Drawn on top of the scroll content — rows slide under the ragged
         // tear as they scroll up.
         SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
@@ -152,7 +166,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
     val styleIndex = themeStyles.indexOf(themeStyle).coerceAtLeast(0)
     val themeIndex = themes.indexOf(themeMode).coerceAtLeast(0)
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.AutoAwesome, "Visual language", "Small choices shape every page")
         SettingsRowPulse(highlightKey == "appearance-style") {
             // The Material style stays greyed out until it ships — the option
             // is visible so users know it's coming, but can't be selected.
@@ -198,105 +211,26 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setPetEnabled(context, it)
             }
         }
-        // v8.8 — the floating pet companion: wanders on every screen, can be
-        // dragged anywhere, and naps back into its flower bed. Default ON;
-        // turning it off keeps the pet at home in the bed.
-        SettingsRowPulse(highlightKey == "appearance-floating-pet") {
-            CompactSwitchRow(
-                "Floating pet",
-                "Wanders, follows your finger, naps in its flower bed",
-                AppPreferences.floatingPetEnabledState
-            ) {
-                AppPreferences.setFloatingPetEnabled(context, it)
-            }
-        }
-        // v8.43 — the pet's learning brain (CurioPetBrain): observes real
-        // activity, builds a personality, and develops its own catchphrases
-        // over time. Default ON; off = classic rule-based lines only.
-        SettingsRowPulse(highlightKey == "appearance-pet-brain") {
-            CompactSwitchRow(
-                "Pet brain",
-                "The pet learns your habits and grows its own personality",
-                AppPreferences.petBrainEnabledState
-            ) {
-                AppPreferences.setPetBrainEnabled(context, it)
-            }
-        }
-        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
-        // the bubble more often, Quiet says less.
-        SettingsRowPulse(highlightKey == "appearance-pet-chatter") {
-            CompactSegmentedRow(
-                "Pet chatter",
-                listOf("Quiet", "Cozy", "Talkative"),
-                when (AppPreferences.petChatterState) {
-                    "quiet" -> 0
-                    "talkative" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetChatter(
-                    context,
-                    when (index) {
-                        0 -> "quiet"
-                        2 -> "talkative"
-                        else -> "cozy"
-                    }
-                )
-            }
-        }
-        // v16 — how often the pet starts its games on its own: Relaxed,
-        // Normal (default), or Eager.
-        SettingsRowPulse(highlightKey == "appearance-pet-games") {
-            CompactSegmentedRow(
-                "Pet games",
-                listOf("Relaxed", "Normal", "Eager"),
-                when (AppPreferences.petGameFrequencyState) {
-                    "relaxed" -> 0
-                    "eager" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetGameFrequency(
-                    context,
-                    when (index) {
-                        0 -> "relaxed"
-                        2 -> "eager"
-                        else -> "normal"
-                    }
-                )
-            }
-        }
-        CurioSettingsDivider()
-        // v8.16 — whether a landed topic's reveal opens itself as soon as
-        // the deck settles. Default OFF: the deck just lands and the front
-        // card stays tappable (no reveal page, no open-it prompt).
-        SettingsRowPulse(highlightKey == "appearance-auto-open") {
-            CompactSwitchRow(
-                "Auto-open landed topic",
-                "Open the topic reveal as soon as the deck lands",
-                AppPreferences.autoOpenRevealState
-            ) {
-                AppPreferences.setAutoOpenReveal(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-reaction-lines") {
-            CompactSwitchRow(
-                "Custom reaction lines",
-                "Let Curie speak your saved lines for each event",
-                AppPreferences.customReactionLinesState
-            ) {
-                AppPreferences.setCustomReactionLinesEnabled(context, it)
-            }
-        }
+        // v26 — pet chatter + pet games moved to Preferences (the pet's
+        // behavior personality is a preference, not a look).
+        // v23 — auto-open landed topic is always on now (its toggle was
+        // removed) and custom reaction lines are permanently off (their
+        // editor is no longer reachable, so the toggle was removed too).
     }
 }
 
+/**
+ * Preferences — the behavioral settings that aren't about how the app LOOKS
+ * (Appearance) or when it REMINDS you (Notifications): which search engine
+ * Explore opens, how explore sessions behave (timer / live notification /
+ * floating bubble), and the pet's personality (chatter + games). v26 — the
+ * rows moved here from Notifications and Appearance so Preferences is the
+ * home for "how Curio behaves" choices.
+ */
 @Composable
-private fun NotificationsSection(highlightKey: String? = null) {
+private fun PreferencesSection(highlightKey: String? = null) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
     var overlayEnabled by remember { mutableStateOf(AppPreferences.overlayBubbleEnabledState) }
     // v8.1 — live "Display over other apps" grant state + a flag that the
     // system special-access page was opened (so ON_RESUME knows whether a
@@ -305,12 +239,15 @@ private fun NotificationsSection(highlightKey: String? = null) {
     var overlaySettingsOpened by remember { mutableStateOf(false) }
     var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
-    val permissionMissing = Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+    // v19 — the explore search-engine picker (which engine the "Explore in
+    // browser" button opens).
+    var showSearchEngineDialog by remember { mutableStateOf(false) }
+    // v26 — shared notification-permission gate (live-notification row).
+    val enableNotifications = rememberNotificationPermissionGate()
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                reminderHour = AppPreferences.getReminderHour(context)
                 overlayEnabled = AppPreferences.isOverlayBubbleEnabled(context)
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
                 liveNotificationsEnabled = AppPreferences.isLiveNotificationsEnabled(context)
@@ -335,62 +272,33 @@ private fun NotificationsSection(highlightKey: String? = null) {
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    var pendingEnable by remember { mutableStateOf<(() -> Unit)?>(null) }
     // The result callback can fire while the system page is STILL open (the
     // permission not yet granted), so the grant/decline decision lives in
     // the ON_RESUME observer below, guarded by [overlaySettingsOpened].
     val overlaySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { /* no-op — ON_RESUME is the source of truth */ }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) pendingEnable?.invoke()
-        pendingEnable = null
-    }
-    fun enableNotifications(action: () -> Unit) {
-        if (!permissionMissing) action() else {
-            pendingEnable = action
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Notifications, "Notifications", "Quiet nudges, when you want them")
-        SettingsRowPulse(highlightKey == "notif-reminder") {
-            CompactSwitchRow("Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
-                if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
-            }
-        }
-        if (AppPreferences.reminderEnabledState) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
-                items(listOf(9, 12, 15, 18, 21)) { hour ->
-                    val selected = hour == reminderHour
-                    Surface(
-                        onClick = {
-                            reminderHour = hour
-                            AppPreferences.setReminderHour(context, hour)
-                        },
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        Text(
-                            formatHour(hour),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                        )
-                    }
-                }
+        // v19 — which search engine the "Explore in browser" button opens.
+        // A row that opens the engine picker; the subtitle shows the choice.
+        SettingsRowPulse(highlightKey == "pref-search-engine") {
+            CurioSettingsRow(
+                CurioIcons.Search,
+                "Search engine",
+                "Explore in browser opens ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}"
+            ) {
+                showSearchEngineDialog = true
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "notif-sessions") {
+        SettingsRowPulse(highlightKey == "pref-sessions") {
             CompactSwitchRow("Explore sessions", "Timer, reminder, and done prompt", exploreSessionsEnabled) {
                 exploreSessionsEnabled = it
                 AppPreferences.setExploreSessionsEnabled(context, it)
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "notif-live") {
+        SettingsRowPulse(highlightKey == "pref-live") {
             CompactSwitchRow("Live explore notification", "Ongoing timer with pause and stop", liveNotificationsEnabled) { enabled ->
                 if (enabled) enableNotifications {
                     liveNotificationsEnabled = true
@@ -402,7 +310,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "notif-bubble") {
+        SettingsRowPulse(highlightKey == "pref-bubble") {
             CompactSwitchRow("Floating explore bubble", "Timer bubble over other apps", overlayEnabled) { enabled ->
                 if (enabled && !AppPreferences.overlayActuallyUsable(context)) {
                     // Explicit intent — stop suppressing the prompt and
@@ -429,7 +337,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
         // and opens the system special-access page (on or off — the grant
         // can't be flipped from the app). The switch re-reads reality on
         // return, so granting here re-enables the bubble and future prompts.
-        SettingsRowPulse(highlightKey == "notif-overlay") {
+        SettingsRowPulse(highlightKey == "pref-overlay") {
             CompactSwitchRow(
                 "Display over other apps",
                 if (overlayUsable) "Granted. The bubble can float over other apps"
@@ -451,6 +359,140 @@ private fun NotificationsSection(highlightKey: String? = null) {
                 if (launched.isFailure) overlaySettingsOpened = false
             }
         }
+        CurioSettingsDivider()
+        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
+        // the bubble more often, Quiet says less. Moved from Appearance (v26).
+        SettingsRowPulse(highlightKey == "pref-pet-chatter") {
+            CompactSegmentedRow(
+                "Pet chatter",
+                listOf("Quiet", "Cozy", "Talkative"),
+                when (AppPreferences.petChatterState) {
+                    "quiet" -> 0
+                    "talkative" -> 2
+                    else -> 1
+                }
+            ) { index ->
+                AppPreferences.setPetChatter(
+                    context,
+                    when (index) {
+                        0 -> "quiet"
+                        2 -> "talkative"
+                        else -> "cozy"
+                    }
+                )
+            }
+        }
+        CurioSettingsDivider()
+        // v16 — how often the pet starts its games on its own: Relaxed,
+        // Normal (default), or Eager. Moved from Appearance (v26).
+        SettingsRowPulse(highlightKey == "pref-pet-games") {
+            CompactSegmentedRow(
+                "Pet games",
+                listOf("Relaxed", "Normal", "Eager"),
+                when (AppPreferences.petGameFrequencyState) {
+                    "relaxed" -> 0
+                    "eager" -> 2
+                    else -> 1
+                }
+            ) { index ->
+                AppPreferences.setPetGameFrequency(
+                    context,
+                    when (index) {
+                        0 -> "relaxed"
+                        2 -> "eager"
+                        else -> "normal"
+                    }
+                )
+            }
+        }
+    }
+    if (showSearchEngineDialog) {
+        SearchEngineDialog(
+            current = SearchEngine.fromId(AppPreferences.searchEngineState),
+            onDismiss = { showSearchEngineDialog = false },
+            onSelected = { engine ->
+                AppPreferences.setSearchEngine(context, engine)
+                showSearchEngineDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun NotificationsSection(highlightKey: String? = null) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
+    // v23 — whether the Explore dialog shows its bubble opt-in row.
+    var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
+    // v26 — shared notification-permission gate (daily-reminder row).
+    val enableNotifications = rememberNotificationPermissionGate()
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                reminderHour = AppPreferences.getReminderHour(context)
+                showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SettingsRowPulse(highlightKey == "notif-reminder") {
+            CompactSwitchRow("Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
+                if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
+            }
+        }
+        if (AppPreferences.reminderEnabledState) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
+                items(listOf(9, 12, 15, 18, 21)) { hour ->
+                    val selected = hour == reminderHour
+                    // AMOLED: the selected chip was the coral primary; it
+                    // swaps to pitch-black glass (white text + hairline rim) to
+                    // match the switches and the app's AMOLED control language.
+                    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+                    Surface(
+                        onClick = {
+                            reminderHour = hour
+                            AppPreferences.setReminderHour(context, hour)
+                        },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        color = when {
+                            selected && isAmoled -> Color.Black
+                            selected -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+                        },
+                        contentColor = when {
+                            selected && isAmoled -> MaterialTheme.colorScheme.onSurface
+                            selected -> MaterialTheme.colorScheme.onPrimary
+                            else -> MaterialTheme.colorScheme.onSurface
+                        },
+                        border = if (selected && isAmoled) BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)) else null,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    ) {
+                        Text(
+                            formatHour(hour),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+        CurioSettingsDivider()
+        // v23 — the explore dialog's bubble opt-in row is hidden by default;
+        // this re-shows it there as a single-line choice (no subtext).
+        SettingsRowPulse(highlightKey == "notif-bubble-dialog") {
+            CompactSwitchRow(
+                "Explore bubble option in Explore dialog",
+                "Show the bubble choice as one line when you start an explore",
+                showBubbleOptInDialogEnabled
+            ) {
+                showBubbleOptInDialogEnabled = it
+                AppPreferences.setShowBubbleOptInDialog(context, it)
+            }
+        }
     }
 }
 
@@ -460,7 +502,6 @@ private fun RecordingSection(highlightKey: String? = null) {
     var quality by remember { mutableStateOf(AudioQualitySettings.get(context)) }
     var showQualityDialog by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Mic, "Recording", "Voice notes that sound like you")
         SettingsRowPulse(highlightKey == "recording-quality") {
             CurioSettingsRow(CurioIcons.Mic, "Audio quality", quality.label) {
                 showQualityDialog = true
@@ -489,7 +530,6 @@ private fun RecordingSection(highlightKey: String? = null) {
 @Composable
 private fun DataSection(navController: NavController, highlightKey: String? = null) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Backup, "Backup & restore", "Your captures stay yours")
         SettingsRowPulse(highlightKey == "data-tools") {
             CurioSettingsRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data") {
                 navController.navigate(CurioRoutes.SETTINGS_DATA) { launchSingleTop = true }
@@ -498,35 +538,6 @@ private fun DataSection(navController: NavController, highlightKey: String? = nu
         CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "data-workspace") {
             CurioSettingsInfoRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace")
-        }
-    }
-}
-
-@Composable
-private fun AboutSection(navController: NavController, highlightKey: String? = null) {
-    val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Info, "About Curio", "Help and app details")
-        SettingsRowPulse(highlightKey == "about-intro") {
-            CurioSettingsRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again") {
-                CurioOnboardingState.reset(context)
-                navController.navigate(CurioRoutes.ONBOARDING) { launchSingleTop = true }
-            }
-        }
-        CurioSettingsDivider()
-        // Version straight from the build — VERSION_NAME is the release tag
-        // this APK was built from (e.g. "1.0.0"), VERSION_CODE is the
-        // per-build number, so the readout is always accurate.
-        SettingsRowPulse(highlightKey == "about-version") {
-            CurioSettingsInfoRow(
-                CurioIcons.Info,
-                "Version",
-                "${com.curio.app.BuildConfig.VERSION_NAME} · build ${com.curio.app.BuildConfig.VERSION_CODE}"
-            )
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "about-update") {
-            CurioUpdateCheckRow()
         }
     }
 }
@@ -572,12 +583,62 @@ private fun CompactSegmentedRow(
 
 @Composable
 private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
+    // AMOLED: the scheme primary is the coral brand color, so the ON
+    // track lit pink. Pitch-black glass instead (black track, white knob,
+    // hairline white rim) — the app's AMOLED control language.
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, enabled = enabled, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            enabled = enabled,
+            onCheckedChange = onCheckedChange,
+            colors = if (isAmoled) {
+                SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.onSurface,
+                    checkedTrackColor = Color.Black,
+                    checkedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+            } else {
+                SwitchDefaults.colors()
+            }
+        )
+    }
+}
+
+/**
+ * The shared POST_NOTIFICATIONS permission gate (v26 — extracted so the
+ * Notifications and Preferences sections don't duplicate it).
+ *
+ * Returns an `enable(action)` function: if the notification permission is
+ * already granted (or the OS doesn't require it, pre-Android 13) the action
+ * runs immediately; otherwise the system permission dialog is requested
+ * first and the action runs only on grant (a declined request drops it —
+ * the switch stays off, the user can retry anytime).
+ */
+@Composable
+private fun rememberNotificationPermissionGate(): (() -> Unit) -> Unit {
+    val context = LocalContext.current
+    val permissionMissing = Build.VERSION.SDK_INT >= 33 &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+    var pendingEnable by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) pendingEnable?.invoke()
+        pendingEnable = null
+    }
+    // Deliberately NOT remembered: a fresh lambda each recomposition reads the
+    // current [permissionMissing], so a grant on return is seen immediately
+    // (remembering would capture the pre-grant value).
+    return { action ->
+        if (!permissionMissing) action() else {
+            pendingEnable = action
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }
 

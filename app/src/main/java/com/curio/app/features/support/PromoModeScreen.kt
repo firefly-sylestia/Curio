@@ -65,9 +65,10 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
 /**
- * Promo mode — the hidden, share-ready promo page unlocked by tapping the
- * Version row in Support & diagnostics five times (five more toggles it
- * OFF, per v7.107).
+ * Promo mode — the hidden, share-ready promo page. v24: reached from the
+ * Experiments screen (Settings → Experiments → Promo mode, or the Version
+ * row's five-tap in Support & diagnostics). Promo mode itself is OFF by
+ * default; this page's own toggle is the one control for it.
  *
  * While promo mode is ON the whole app shows promotional SAMPLE content
  * (Home hero stats + recents, Profile level, Quests level, Cabinet grid —
@@ -209,7 +210,7 @@ fun PromoModeScreen(navController: NavController) {
                 }
                 item {
                     Text(
-                        "Reopen anytime: in Support & diagnostics, tap the Version row five times. Five more taps turn demo content off.",
+                        "Reopen anytime from the Experiments screen (Settings, or the Version row's five-tap in Support & diagnostics). Turn demo content off right here.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                         textAlign = TextAlign.Center,
@@ -229,7 +230,7 @@ fun PromoModeScreen(navController: NavController) {
 }
 
 /** The ON/OFF status card with the big toggle — the one control for the
- *  hidden mode (plus the Version 5-tap in Support). */
+ *  hidden promo mode (reached via the Experiments screen). */
 @Composable
 private fun PromoStatusCard(on: Boolean, onToggle: () -> Unit) {
     val accent = if (on) CurioColors.Sage else CurioColors.CoralBlush
