@@ -253,6 +253,7 @@ object AppPreferences {
     var paperHeaderCutsState by mutableStateOf(false)
     var paperHeaderHolesState by mutableStateOf(false)
     var paperStatCardsState by mutableStateOf(false)
+    var paperStatTearState by mutableStateOf(false)
         private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
@@ -477,6 +478,7 @@ object AppPreferences {
         paperHeaderCutsState = isPaperHeaderCutsEnabled(context)
         paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
+        paperStatTearState = isPaperStatTearEnabled(context)
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
@@ -704,6 +706,7 @@ object AppPreferences {
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
+    private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -730,6 +733,15 @@ object AppPreferences {
     fun setPaperStatCardsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_STAT_CARDS, enabled).apply()
         paperStatCardsState = enabled
+    }
+
+    /** Whether the stat paper card wears torn paper edges (extended tear on top; experimental, default off). */
+    fun isPaperStatTearEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_STAT_TEAR, false)
+
+    fun setPaperStatTearEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_STAT_TEAR, enabled).apply()
+        paperStatTearState = enabled
     }
 
     // ── Dual-accent blend gradient (v10 toggle) ────────────────────────

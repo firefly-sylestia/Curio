@@ -1088,6 +1088,123 @@ class SoftTornSheetShape(
 }
 
 /**
+ * The Home Streak · Cabinet · Topics stat card's torn paper outline
+ * (experimental "Torn paper edges" look, off by default).
+ *
+ * The TOP edge carries an EXTENDED tear — the hero's BOLD soft seam pushed
+ * ~15% deeper and inverted, so the slip reads as paper torn OUT of the
+ * banner (mostly extending above its nominal top, with a few notches). The
+ * other three edges tear with a SHARPER, jaggier ragged edge (real paper
+ * bites at a higher frequency, not the rounded hero waves), so the slip
+ * reads as genuinely ripped on every side while only the top gets the
+ * extended look.
+ *
+ * Deterministic per seed and cached per size — recomposition never
+ * re-tears, and the same seed always reproduces the identical outline.
+ */
+class TornStatPaperShape(private val seed: Int) : Shape {
+    private var cachedSize: Size? = null
+    private var cachedOutline: Outline? = null
+
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        cachedOutline?.let { cached ->
+            if (cachedSize == size) return cached
+        }
+        val outline = Outline.Generic(buildTornStatPath(seed, size, density))
+        cachedSize = size
+        cachedOutline = outline
+        return outline
+    }
+}
+
+private fun buildTornStatPath(seed: Int, size: Size, density: Density): Path {
+    val w = size.width
+    val h = size.height
+    val path = Path()
+    if (w <= 0f || h <= 0f) {
+        path.moveTo(0f, 0f); path.lineTo(w, 0f); path.lineTo(w, h); path.lineTo(0f, h); path.close()
+        return path
+    }
+    val step = with(density) { 4.dp.toPx() }
+    // Top edge — the EXTENDED tear: the hero's bold soft seam, inverted so
+    // it reads as paper torn out of the banner (mostly extended above the
+    // nominal top, with a few notches), pushed ~15% deeper for the extended
+    // look. The hero banner shows through the torn gaps.
+    val top = SoftTearParams(seed, density, bold = true)
+    // The three straight sides tear with a SHARPER, jaggier edge — a couple
+    // of high-frequency value-noise octaves, faded to crisp corners so the
+    // four sides meet cleanly.
+    fun sharpDisp(edgeSeed: Int, pos: Float, span: Float): Float {
+        val t = pos / span
+        val fade = when {
+            t < 0.04f -> t / 0.04f
+            t > 0.96f -> (1f - t) / 0.04f
+            else -> 1f
+        }
+        val amp = with(density) { 3.5.dp.toPx() }
+        val n1 = (valueNoise(edgeSeed, pos * 0.21f, 5.3f) - 0.5f) * 2f
+        val n2 = (valueNoise(edgeSeed + 7, pos * 0.53f, 9.7f) - 0.5f) * 2f * 0.55f
+        val n3 = (valueNoise(edgeSeed + 13, pos * 1.31f, 3.9f) - 0.5f) * 2f * 0.30f
+        return (n1 + n2 + n3) * amp * fade
+    }
+    val right = seed + 0x1A1
+    val bottom = seed + 0x2B2
+    val left = seed + 0x3C3
+
+    var first = true
+    fun add(p: Offset) {
+        if (first) {
+            path.moveTo(p.x, p.y)
+            first = false
+        } else {
+            path.lineTo(p.x, p.y)
+        }
+    }
+
+    // ── Top edge (left → right) — EXTENDED soft tear ─────────────────────
+    // The tear fades to zero over the last ~5% at each end (like the sharp
+    // sides' corner fade), so the extended edge meets the side tears in a
+    // crisp corner instead of stepping down through a visible notch — the
+    // hero's torn seam is masked by a white under-sheet, but this card has
+    // no under-sheet to hide a corner gap.
+    var x = 0f
+    while (x <= w) {
+        val t = x / w
+        val fade = when {
+            t < 0.05f -> t / 0.05f
+            t > 0.95f -> (1f - t) / 0.05f
+            else -> 1f
+        }
+        add(Offset(x, -top.disp(x, w) * 1.15f * fade))
+        x += step
+    }
+    // ── Right edge (top → bottom) — sharper ragged tear ─────────────────
+    var y = 0f
+    while (y <= h) {
+        add(Offset(w + sharpDisp(right, y, h), y))
+        y += step
+    }
+    // ── Bottom edge (right → left) ──────────────────────────────────────
+    x = w
+    while (x >= 0f) {
+        add(Offset(x, h + sharpDisp(bottom, x, w)))
+        x -= step
+    }
+    // ── Left edge (bottom → top) ────────────────────────────────────────
+    y = h
+    while (y >= 0f) {
+        add(Offset(sharpDisp(left, y, h), y))
+        y -= step
+    }
+    path.close()
+    return path
+}
+
+/**
  * The seeded tear personality for a soft torn edge — wave count, depths,
  * tilt and phase are all drawn from ONE random stream derived from the tear
  * seed, so every entry tears differently but the same seed always

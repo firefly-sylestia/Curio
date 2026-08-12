@@ -170,6 +170,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.glyph
 import com.curio.app.ui.theme.notePaperHighlight
 import com.curio.app.ui.theme.notePaperInk
+import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.PatrickHandFontFamily
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -2900,7 +2901,6 @@ private fun SessionNoteBlock(
 ) {
     val accent = category.themedAccent()
     val ink = category.categoryInk()
-    val tintWash = AppPreferences.tintWashEffective()
     Column(
         modifier = Modifier
             .padding(horizontal = detailBodyGutter())
@@ -2908,12 +2908,15 @@ private fun SessionNoteBlock(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // ── Shared session note ──────────────────────────────────────
+        // v27h — the saved note wears the theme-aware note-PAPER sheet with
+        // its own readable ink instead of the faint tint wash, so it never
+        // washes out against the tinted detail page in either theme.
         entry.sessionNote?.takeIf { it.isNotBlank() }?.let { note ->
+            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
             Surface(
                 shape = RoundedCornerShape(18.dp),
-                color = if (tintWash) category.tint.copy(alpha = 0.14f)
-                        else MaterialTheme.colorScheme.surfaceContainerHigh,
-                border = BorderStroke(1.dp, accent.copy(alpha = 0.4f)),
+                color = notePaperSurface(NotePaperColor.CREAM),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -2923,7 +2926,7 @@ private fun SessionNoteBlock(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = accent.copy(alpha = 0.14f)
+                        color = accent.copy(alpha = 0.16f)
                     ) {
                         CurioIcon(
                             name = CurioIcons.Note,
@@ -2937,13 +2940,12 @@ private fun SessionNoteBlock(
                         Text(
                             text = "Session note",
                             style = MaterialTheme.typography.labelSmall,
-                            color = if (tintWash) ink.copy(alpha = 0.7f)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = paperInkColor.copy(alpha = 0.7f)
                         )
                         Text(
                             text = note,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (tintWash) ink else MaterialTheme.colorScheme.onSurface
+                            color = paperInkColor
                         )
                     }
                 }

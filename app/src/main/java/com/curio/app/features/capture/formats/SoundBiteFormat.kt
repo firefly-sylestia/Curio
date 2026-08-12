@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import java.util.Locale
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.CaptureData
 import com.curio.app.data.NotePaperColor
 import com.curio.app.data.NotePaperStyle
@@ -615,6 +616,20 @@ fun SoundBiteFormat(
                             showTrimmer = false
                             startTrim = 0f
                             endTrim = 1f
+                        },
+                        // v27h — delete the recorded attachment for good:
+                        // remove the audio file and reset to the idle state
+                        // so the take can't save a ghost recording.
+                        onDelete = {
+                            AudioStorageManager.deleteAudio(context, savedFilePath)
+                            recorder.release()
+                            restoredRecording = false
+                            recordingState = recorder.state
+                            recordingSeconds = 0
+                            savedFilePath = null
+                            showTrimmer = false
+                            startTrim = 0f
+                            endTrim = 1f
                         }
                     )
                 }
@@ -1081,7 +1096,8 @@ private fun StoppedControls(
     accent: Color,
     tint: Color,
     seconds: Int,
-    onReRecord: () -> Unit
+    onReRecord: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1106,11 +1122,23 @@ private fun StoppedControls(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        TextButton(
-            onClick = onReRecord,
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Record over", color = accent)
+            TextButton(
+                onClick = onReRecord,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(text = "Record over", color = accent)
+            }
+            TextButton(
+                onClick = onDelete,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(text = "Delete recording", color = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }

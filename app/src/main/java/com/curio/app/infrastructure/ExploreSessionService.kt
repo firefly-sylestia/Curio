@@ -529,13 +529,13 @@ class ExploreSessionService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            // v27h — FLAG_SECURE REMOVED: it blanked the overlay in the
+            // user's own device screenshots (and made the session screenshot
+            // feature feel blocked). The bubble is now capturable — the user
+            // WANTS the session visible in the shots they take and the ones
+            // the session attaches.
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                // v27 — FLAG_SECURE: the floating timer + note must never
-                // appear in the session screenshots the bubble itself
-                // captures (or in the user's own device screenshots), so
-                // the overlay window is excluded from every capture path.
-                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -640,18 +640,16 @@ class ExploreSessionService : Service() {
                             // window (an overlay with FLAG_NOT_FOCUSABLE can't
                             // receive the keyboard). Flip the window flags for
                             // the duration of the note edit and restore them on
-                            // blur; FLAG_SECURE stays so the note itself never
-                            // leaks into a screenshot.
+                            // blur. No FLAG_SECURE (v27h): the note is part of
+                            // the session the user is allowed to screenshot.
                             onNoteFocusChange = { focused ->
                                 val view = bubbleView ?: return@ExploreBubbleContent
                                 val p = bubbleParams ?: return@ExploreBubbleContent
-                                val secure = WindowManager.LayoutParams.FLAG_SECURE
                                 val newFlags = if (focused) {
-                                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or secure
+                                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                                 } else {
                                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                                        secure
+                                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                                 }
                                 if (p.flags != newFlags) {
                                     p.flags = newFlags

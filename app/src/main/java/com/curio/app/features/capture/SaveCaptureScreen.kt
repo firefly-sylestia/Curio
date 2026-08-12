@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioStorageManager
+import com.curio.app.data.NotePaperColor
 import com.curio.app.data.CaptureConverters
 import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureDraftStore
@@ -114,6 +116,8 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.notePaperInk
+import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import com.google.gson.Gson
@@ -261,7 +265,12 @@ fun SaveCaptureScreen(
     // carries attachments (edit mode). topic is a delegated property, so the
     // name is read via safe-call rather than smart-cast.
     val hasSessionAttachments = editEntryId != null ||
-        (topic?.let { ExploreSessionStore.hasPendingWriteFor(cat.id, it.name) } == true)
+        (topic?.let { ExploreSessionStore.hasPendingWriteFor(cat.id, it.name) } == true) ||
+        // v27h — never hide the section when there is actually something to
+        // show: a typed note or attached screenshots make it appear even if
+        // the pending-write match is somehow off (e.g. an edit resumed after
+        // a backup restore).
+        sessionNote.isNotBlank() || sessionScreenshots.isNotEmpty()
 
     // ── Draft autosave (v7.17) ──────────────────────────────────────────
     // While on this page, the current capture data is debounce-snapshotted
@@ -1089,11 +1098,14 @@ private fun SessionAttachmentsCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
             // Small floating note button — expands the shared-note editor.
+            // v27h — always a SOLID accent pill with on-accent content: the
+            // old tint-wash fill washed out against the tinted page in light
+            // mode, so the button read as a faint ghost.
             Surface(
                 onClick = onToggleNoteEditor,
                 shape = RoundedCornerShape(50),
-                color = if (tintWash) cat.tint else accent,
-                border = BorderStroke(1.dp, accent.copy(alpha = 0.5f))
+                color = accent,
+                border = BorderStroke(1.dp, lerp(accent, Color.White, 0.25f).copy(alpha = 0.6f))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -1103,25 +1115,28 @@ private fun SessionAttachmentsCard(
                     CurioIcon(
                         name = CurioIcons.Note,
                         contentDescription = null,
-                        tint = if (tintWash) ink else cat.onAccent(),
+                        tint = cat.onAccent(),
                         size = 16.dp
                     )
                     Text(
                         text = if (showNoteEditor) "Done" else "Session note",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = if (tintWash) ink else cat.onAccent()
+                        color = cat.onAccent()
                     )
                 }
             }
         }
 
         // ── Shared note editor (universal — not per-take) ──────────
+        // v27h — the editor wears the note-PAPER look (theme-aware cream/
+        // dark sheet with its own readable ink) instead of the faint tint
+        // wash that washed out on tinted pages — the note always reads.
         if (showNoteEditor) {
+            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
             Surface(
                 shape = RoundedCornerShape(18.dp),
-                color = if (tintWash) cat.tint.copy(alpha = 0.14f)
-                        else MaterialTheme.colorScheme.surfaceContainerHigh,
-                border = BorderStroke(1.dp, accent.copy(alpha = 0.4f)),
+                color = notePaperSurface(NotePaperColor.CREAM),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -1131,7 +1146,7 @@ private fun SessionAttachmentsCard(
                     Text(
                         text = "Shared session note",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = if (tintWash) ink else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = paperInkColor.copy(alpha = 0.85f)
                     )
                     OutlinedTextField(
                         value = note,
@@ -1145,8 +1160,7 @@ private fun SessionAttachmentsCard(
                     Text(
                         text = "Shown on every entry saved from this session.",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (tintWash) ink.copy(alpha = 0.6f)
-                                else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = paperInkColor.copy(alpha = 0.6f)
                     )
                 }
             }

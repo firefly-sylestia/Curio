@@ -122,6 +122,10 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Paper stat card", "Streak · Cabinet · Topics on a soft rose paper card", AppPreferences.paperStatCardsState) {
                         AppPreferences.setPaperStatCardsEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Torn paper edges", "Torn edges on the stat card — extended tear on top", AppPreferences.paperStatTearState) {
+                        AppPreferences.setPaperStatTearEnabled(context, it)
+                    }
                 }
             }
             item { CurioSectionLabel("Promo") }

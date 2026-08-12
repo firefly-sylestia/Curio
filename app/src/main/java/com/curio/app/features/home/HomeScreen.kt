@@ -67,6 +67,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -78,6 +79,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
@@ -91,6 +93,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.PromoMode
 import com.curio.app.data.TopicCatalog
+import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.SavedQuote
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
@@ -101,6 +104,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
+import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.ExploreSessionService
@@ -506,33 +510,62 @@ fun HomeScreen(navController: NavController) {
                                 lerp(heroFill, Color(0xFF2A211C), 0.50f)
                             else
                                 lerp(heroFill, Color(0xFFFFF6EB), 0.62f)
+                            // v27h — the Topics stat always shows the TRUE
+                            // catalog total: the splash warm-cache seeds the
+                            // first frame, then a lightweight IO count of the
+                            // JSON assets refreshes it — so the number never
+                            // reads 0 just because the database/catalog hasn't
+                            // finished loading, and it tracks content drops.
+                            val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
+                                value = TopicJsonLoader.countCanonicalTopics()
+                            }
+                            // v27h — torn paper edges (separate experiment):
+                            // when on, the paper card wears a real torn-paper
+                            // outline — an EXTENDED tear on the top edge and
+                            // sharper ragged tears on the other three — instead
+                            // of the rounded card.
+                            val tearOn = paperStatsOn && AppPreferences.paperStatTearState
+                            val statShape: Shape = remember(tearOn) {
+                                if (tearOn) TornStatPaperShape(0x5A7E4D) else RoundedCornerShape(20.dp)
+                            }
                             // v27 — the paper card can carry REAL punch holes
-                            // (Stamped pin holes experiment): the fill is drawn
-                            // as an EvenOdd path so the hole circles stay
-                            // transparent and the hero banner shows through.
+                            // (Stamped pin holes experiment): a vertical column
+                            // of holes down the LEFT edge, drawn as an EvenOdd
+                            // path so the holes stay transparent and the hero
+                            // banner shows through.
                             val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
                             Surface(
-                                shape = RoundedCornerShape(20.dp),
+                                shape = statShape,
                                 color = if (holesOn) Color.Transparent else if (paperStatsOn) paperStatBg else Color.Transparent,
                                 border = BorderStroke(1.dp, questInk.copy(alpha = if (paperStatsOn) 0.26f else 0.28f)),
                                 shadowElevation = if (paperStatsOn) 3.dp else 0.dp
                             ) {
-                                // The gradient must wear the card's rounded
-                                // shape itself — Surface does not clip its
-                                // content, so a plain background() would bleed
-                                // square corners past the rounded border.
+                                // The fill must wear the card's own shape —
+                                // Surface does not clip its content, so a plain
+                                // background() would bleed square corners past
+                                // the torn/rounded border.
                                 Box(
                                     modifier = when {
                                         holesOn -> Modifier.drawWithCache {
                                             val holeR = 5.dp.toPx()
-                                            val holeY = 13.dp.toPx()
+                                            val holeX = 13.dp.toPx()
+                                            // Punch through the SAME outline the
+                                            // Surface wears (torn or rounded), so
+                                            // the card edge and the holes read as
+                                            // one piece of paper.
+                                            val outline = statShape.createOutline(size, LayoutDirection.Ltr, this)
+                                            val basePath = (outline as? Outline.Generic)?.path
                                             val path = Path().apply {
-                                                addRoundRect(
-                                                    RoundRect(Rect(Offset.Zero, size), CornerRadius(20.dp.toPx()))
-                                                )
+                                                if (basePath != null) {
+                                                    addPath(basePath)
+                                                } else {
+                                                    addRoundRect(
+                                                        RoundRect(Rect(Offset.Zero, size), CornerRadius(20.dp.toPx()))
+                                                    )
+                                                }
                                                 repeat(3) { i ->
-                                                    val cx = size.width * (i + 1) / 4f
-                                                    addOval(Rect(Offset(cx, holeY), holeR), Path.Direction.Clockwise)
+                                                    val cy = size.height * (i + 1) / 4f
+                                                    addOval(Rect(Offset(holeX, cy), holeR), Path.Direction.Clockwise)
                                                 }
                                                 fillType = PathFillType.EvenOdd
                                             }
@@ -541,17 +574,17 @@ fun HomeScreen(navController: NavController) {
                                                 // A faint pressed rim around each
                                                 // hole — the paper edge catching light.
                                                 repeat(3) { i ->
-                                                    val cx = size.width * (i + 1) / 4f
+                                                    val cy = size.height * (i + 1) / 4f
                                                     drawCircle(
                                                         color = questInk.copy(alpha = 0.15f),
                                                         radius = holeR + 1.5.dp.toPx(),
-                                                        center = Offset(cx, holeY),
+                                                        center = Offset(holeX, cy),
                                                         style = Stroke(width = 1.5.dp.toPx())
                                                     )
                                                 }
                                             }
                                         }
-                                        paperStatsOn -> Modifier.background(paperStatBg, RoundedCornerShape(20.dp))
+                                        paperStatsOn -> Modifier.background(paperStatBg, statShape)
                                         else -> Modifier.background(
                                             Brush.verticalGradient(
                                                 listOf(
@@ -604,7 +637,7 @@ fun HomeScreen(navController: NavController) {
                                         // instead of the recent-feed size.
                                         HeroStatSegment(
                                             glyph = CurioIcons.AutoAwesome,
-                                            value = "${TopicCatalog.totalTopicCount()}",
+                                            value = "$topicsTotal",
                                             label = "Topics",
                                             tint = questInk,
                                             ink = questInk,
