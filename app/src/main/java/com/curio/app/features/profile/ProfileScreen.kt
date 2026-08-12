@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -87,6 +88,7 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -341,6 +343,16 @@ fun ProfileScreen(navController: NavController) {
             }
             item { Spacer(Modifier.navigationBarsPadding().height(4.dp)) }
         }
+
+        // Side scroll indicator — thin overlay knob, grows on touch.
+        CurioVerticalScrollIndicator(
+            state = listState.scrollIndicatorState,
+            onScrollBy = { listState.scrollBy(it) },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = ProfileHeroTotalHeight + 8.dp, bottom = 16.dp)
+        )
 
         // ── Pinned Back + Settings pills — Home's scroll-reactive sticky
         // bar, adapted for Profile: resting on the hero they wear the SOLID

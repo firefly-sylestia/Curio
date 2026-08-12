@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +49,7 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioSearchField
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
@@ -206,11 +208,14 @@ fun TopicHistoryScreen(navController: NavController) {
             }
         } else {
             ScreenEntrance {
-                LazyColumn(
-                    state = listState,
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(1f),
+                        .weight(1f)
+                ) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(
                         horizontal = wideContentEdgePadding(),
                         vertical = 10.dp
@@ -289,6 +294,16 @@ fun TopicHistoryScreen(navController: NavController) {
                             )
                         }
                     }
+                }
+                // Side scroll indicator — thin overlay knob, grows on touch.
+                CurioVerticalScrollIndicator(
+                    state = listState.scrollIndicatorState,
+                    onScrollBy = { listState.scrollBy(it) },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                        .padding(vertical = 8.dp)
+                )
                 }
             }
         }

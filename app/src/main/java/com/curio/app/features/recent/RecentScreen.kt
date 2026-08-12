@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,6 +44,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioForwardArrow
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -171,6 +173,7 @@ fun RecentScreen(navController: NavController) {
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
                 )
             } else {
+                Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
@@ -181,6 +184,16 @@ fun RecentScreen(navController: NavController) {
                         RecentFeedRow(item = item, navController = navController)
                     }
                     item { Spacer(Modifier.size(12.dp)) }
+                }
+                // Side scroll indicator — thin overlay knob, grows on touch.
+                CurioVerticalScrollIndicator(
+                    state = listState.scrollIndicatorState,
+                    onScrollBy = { listState.scrollBy(it) },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                        .padding(vertical = 8.dp)
+                )
                 }
             }
         }

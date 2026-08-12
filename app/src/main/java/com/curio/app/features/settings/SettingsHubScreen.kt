@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -56,6 +58,7 @@ import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.PetLandmark
@@ -334,8 +337,10 @@ fun SettingsHubScreen(navController: NavController) {
         // Compact hero on tablets/landscape — 140dp instead of 180dp so
         // the torn banner doesn't dominate the short vertical space.
         val heroTotal = if (wide) 140.dp + SettingsHeroSheetExtent else SettingsHeroTotalHeight
+        val gridState = rememberLazyGridState()
         ScreenEntrance {
             LazyVerticalGrid(
+                state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = heroTotal + 10.dp, bottom = 24.dp),
@@ -416,6 +421,15 @@ fun SettingsHubScreen(navController: NavController) {
                 }
             }
         }
+        // Side scroll indicator — thin overlay knob, grows on touch.
+        CurioVerticalScrollIndicator(
+            state = gridState.scrollIndicatorState,
+            onScrollBy = { gridState.scrollBy(it) },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = heroTotal + 10.dp, bottom = 16.dp)
+        )
         // Drawn on top of the scroll content — rows slide under the ragged
         // tear as they scroll up.
         SettingsHeroHeader(

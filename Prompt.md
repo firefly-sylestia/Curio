@@ -1,28 +1,32 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): AMOLED cleanup on Profile + Settings (Android)
+## Current Request (COMPLETE): Category Passport 4×3 + 2 pages; thin touch-grow scroll indicators (Android)
 
 **Date:** 2026-08-12
 
-**What was asked:** User reported a "weird color tint" on the Profile and Settings screens in AMOLED mode and asked to "make the buttons pitch black". They asked me to identify what they meant and confirm before changing anything. After one false start on the web app (user clarified they work in the Android app; the web change was reverted), the user confirmed via ask_user that the tint is: (1) the **pink toggles & chips** on Settings, and (2) the **rose tint on the card shells** on Profile (Progress & Achievements, Your lanes, Settings & preferences, Support & diagnostics). Scope confirmed: **Profile + Settings only**.
+**What was asked:** (1) Make the Category Passport show 4×3 per page and split it into 2 pages. (2) Add a side scroll indicator in the Topic Browser and "the places where it needs". (3) The indicator must be thin when idle, only grow when the user touches it to move, never move on-screen content (overlay), and its handle/knob must match the UI.
 
-**Root causes found:**
-1. **Rose tint on cards** — `CurioSettingsCard` sets `color = Color.Black` in AMOLED but kept `tonalElevation = 3.dp`. Material3's tonal elevation overlay blends the color scheme's `primary` (the coral brand color `CoralBlush` in `CurioAmoledColorScheme`) over the container — so every pitch-black card on Profile/Settings hub was washed with a faint rose tint.
-2. **Pink toggles** — `CompactSwitchRow` on the settings sub-screens used a plain `Switch`, whose checked track defaults to the scheme `primary` = coral pink in AMOLED.
-3. **Pink reminder-hour chips** — the selected time chip in `NotificationsSection` used `MaterialTheme.colorScheme.primary` (coral pink) when selected.
+**What was built:**
 
-**Changes made:**
-- `app/src/main/java/com/curio/app/ui/components/CurioSettingsCard.kt` — `tonalElevation` now drops to `0.dp` in AMOLED (kept at `3.dp` otherwise), killing the rose overlay. The black-glass `categoryEdgeShine` rim still keeps cards defined.
-- `app/src/main/java/com/curio/app/features/settings/SettingsSectionScreen.kt`:
-  - `CompactSwitchRow` — in AMOLED the switch wears pitch-black glass: `SwitchDefaults.colors(checkedTrackColor = Color.Black, checkedThumbColor = onSurface, checkedBorderColor = onSurface @ 25%)`; defaults elsewhere.
-  - `NotificationsSection` reminder-hour chips — in AMOLED the selected chip becomes `Color.Black` with white text + a 1dp hairline `onSurface` rim instead of the coral primary.
+1. **New shared component** `app/src/main/java/com/curio/app/ui/components/CurioScrollIndicator.kt` — `CurioVerticalScrollIndicator(state, onScrollBy, modifier)`:
+   - Built on foundation 1.12's **new** `ScrollIndicatorState` (the classic `VerticalScrollbar`/`ScrollbarStyle` API was **removed** in this foundation version — verified via javap on the cached 1.12.0-alpha03 artifact; `scrollIndicatorState` is a cached member property on `LazyListState`/`LazyGridState`/`ScrollState`, confirmed via a `private final` backing field, so it's safe to key `pointerInput` on).
+   - **Overlay only** — caller aligns it in the screen's Box (`align(CenterEnd).fillMaxHeight()`), so it never shifts layout.
+   - **Thin when idle (3dp @ 0.30 alpha), grows to 9dp @ 0.80 alpha when touched** (animateDp/FloatAsState, 140ms tween).
+   - **Drag-to-scroll** — `pointerInput` maps knob travel to scroll distance via `onScrollBy` (`listState.scrollBy(it)`); hidden entirely when content fits the viewport.
 
-**Scope note (disclosed):** `CurioSettingsCard` is shared — the tonal-elevation fix also removes the same accidental rose wash from Quests and Onboarding cards in AMOLED (matching the component's documented "AMOLED cards are proper pitch black" intent). User was not re-asked; flag if they want those scoped out.
+2. **Passport pager** `QuestsScreen.kt` (`PassportCard`) — `cats.chunked(12)` → 4×3 grid per page (`chunked(4)` rows), `HorizontalPager` + `rememberPagerState(pageCount = { pages.size })`; 21 visible lanes → 2 pages; dot indicator below when >1 page.
 
-**Deliberately left alone (user did not flag them):** the Sage-green "Achievements" progress bar on Profile (v15 white-glass pattern was applied to the XP bar but missed here), the blue DustyBlue "Settings & preferences" tile, the yellow ButterYellow XP icon, and the rose 18% back pill on the Settings hero.
+3. **Indicators wired into 8 scroll areas** (all `listState`/`gridState.scrollIndicatorState` + `scrollBy`, top padding clears heroes/pinned bars):
+   - Topic Database (the browser), Profile, Quests, Settings hub (grid), Settings sections
+   - Cabinet (grid), Manage Categories, Topic History (list wrapped in a Box so the strip matches the list region), Recent (same wrap-in-Box pattern)
 
-**Validation:** No Gradle compile/build run locally (project rule — CI validates on push; the env has no Android SDK). Compose/M3 API usage (`SwitchDefaults.colors` named params, `Surface(tonalElevation)`) verified against Material3 1.5.0-alpha20 / BOM 2026.05.01 via docs research. Code reviewed by code-reviewer-deepseek-flash (no CI-breaking issues found).
+**Validation:** No Gradle compile/build locally (project rule — CI validates on push; env has no Android SDK). API usage verified against the cached foundation 1.12.0-alpha03 artifact (javap: `ScrollIndicatorState` interface = `scrollOffset`/`contentSize`/`viewportSize`; `weight` is scope-free in this version, which the TopicHistory/Recent Box wraps rely on). Reviewed by code-reviewer-deepseek-flash — flagged `pointerInput(state)` key stability (cleared: instance is a cached `final` field) and RecentScreen's hardcoded 88dp top padding (fixed by adopting the wrap-in-Box pattern). Known minor edge case (accepted): if the user hides categories, passport page row counts can diverge (e.g. 12/8), causing a small pager height change on swipe — both pages are 3 rows at the default 21 lanes.
 
 ## Previous Requests
 
-[See previous request logs in git history]
+### AMOLED cleanup on Profile + Settings (Android) — COMPLETE
+- `CurioSettingsCard` drops `tonalElevation` to `0.dp` in AMOLED (was 3.dp → Material3 tonal overlay washed the pitch-black cards with the coral scheme primary).
+- `CompactSwitchRow` switches + reminder-hour chips go pitch-black glass (black track/knob + hairline rim) in AMOLED.
+- Scope: Profile + Settings confirmed by user; shared-card side effect on Quests/Onboarding disclosed (matches component's pitch-black intent).
+
+[See earlier request logs in git history]
