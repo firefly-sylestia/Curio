@@ -1,6 +1,21 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Session time in Recent feed rows + share card (Android)
+## Current Request (COMPLETE): Session duration as its own frosted-bar segment in entry detail (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "Add the session duration to the entry-detail stats (e.g. alongside Mood in the frosted bar) as its own segment."
+
+**What was built (app/src/main/java/com/curio/app/features/detail/EntryDetailScreen.kt only):**
+- The hero's frosted meta bar now shows **Date | Mood? | Session? | Type**: a new conditional `FrostedSegment` (Timer glyph, `formatSessionShort(entry.sessionTimeMillis)`, subtitle "Session") + trailing VerticalDivider inserted between the Mood block and the Type segment, shown only when `sessionTimeMillis > 0L` — mirrors the Mood block exactly (same ink/divider/weight).
+- **Dedup**: `heroDateTinyLabel` (the Date segment's tiny line) had its v17 "· explored 12m" `sessionPart` removed — the duration now has its own segment, so the date line is back to capture-time / "yesterday" / "Xd ago" (no double display).
+- Frosted-bar doc comment updated to "date / mood / session / type".
+
+**Validation:** No local Gradle build (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash: correct + complete (mirrors Mood block, dedup right, symbols resolve, no dead code); one cosmetic note — with 4 weighted segments the Type label gets ~25% width on phones (single-line ellipsis handles it).
+
+## Previous Requests
+
+### Session time in Recent feed rows + share card (Android)
 
 **Date:** 2026-08-12
 

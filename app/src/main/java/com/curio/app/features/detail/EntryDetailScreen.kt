@@ -508,15 +508,16 @@ fun EntryDetailScreen(
                     )
                     Spacer(Modifier.height(18.dp))
 
-                    // ── Frosted date / mood / type grid card — the meta
-                    // card's date, mood and type segments moved into the hero
-                    // on a genuine frosted-glass pane: a translucent layer
-                    // that samples the gradient behind the bar, BLURS it, and
-                    // renders it clipped to the card, with a white frosted-
-                    // glass tint and a hairline rim so the card reads as
-                    // frosted glass while
+                    // ── Frosted date / mood / session / type grid card — the
+                    // meta card's date, mood, session and type segments moved
+                    // into the hero on a genuine frosted-glass pane: a
+                    // translucent layer that samples the gradient behind the
+                    // bar, BLURS it, and renders it clipped to the card, with
+                    // a white frosted-glass tint and a hairline rim so the
+                    // card reads as frosted glass while
                     // the crisp hero backdrop stays sharp around it. Mood
-                    // shows only when the entry has one.
+                    // shows only when the entry has one; Session shows only
+                    // when an explore-session duration was recorded.
                     val heroMood = resolvedEntry.moodOf()
                     val heroTypeLabel = if (resolvedEntry.captureData is CaptureData.Portfolio)
                         "Portfolio" else resolvedEntry.format.shortName
@@ -590,6 +591,22 @@ fun EntryDetailScreen(
                                     icon = heroMood.glyph,
                                     title = heroMood.label,
                                     subtitle = "Mood",
+                                    ink = heroCardInk,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                VerticalDivider(
+                                    modifier = Modifier.height(30.dp),
+                                    color = heroCardInk.copy(alpha = 0.25f)
+                                )
+                            }
+                            // v22 — the explore-session duration as its own
+                            // segment, right beside Mood; only when a session
+                            // was actually recorded.
+                            if (resolvedEntry.sessionTimeMillis > 0L) {
+                                FrostedSegment(
+                                    icon = CurioIcons.Timer,
+                                    title = formatSessionShort(resolvedEntry.sessionTimeMillis),
+                                    subtitle = "Session",
                                     ink = heroCardInk,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -1234,17 +1251,14 @@ private fun CurioEntry.moodOf(): JournalMood? = when (val d = captureData) {
  * ago") — the date itself already sits on the segment's title line.
  */
 private fun heroDateTinyLabel(entry: CurioEntry): String {
-    // v17 — the explore-session duration rides the date's tiny line when it
-    // was recorded ("2:45 PM · explored 12m"), so the detail hero shows how
-    // long the topic was explored before saving.
-    val datePart = when (val days = entry.capturedAtDaysAgo) {
+    // The explore-session duration moved OUT of this tiny line in v22 — it
+    // now has its own "Session" segment in the frosted bar right beside
+    // Mood, so the date line stays just the capture time / relative day.
+    return when (val days = entry.capturedAtDaysAgo) {
         0 -> formatCapturedTime(entry.capturedAtMillis)
         1 -> "yesterday"
         else -> "${days}d ago"
     }
-    val sessionPart = if (entry.sessionTimeMillis > 0L)
-        " · explored ${formatSessionShort(entry.sessionTimeMillis)}" else ""
-    return datePart + sessionPart
 }
 
 /**
