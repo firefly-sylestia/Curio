@@ -37,6 +37,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploredTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.UnexploredTopic
+import com.curio.app.data.formatSessionShort
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -234,6 +235,14 @@ private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
         is RecentFeedItem.SavedEntry -> {
             val entry = item.entry
             val category = CurioCategories.byId(entry.topic.categoryId)
+            // v22 — the explore-session duration joins the meta line when one
+            // was recorded ("Films · 2d ago · explored 12m"), matching the
+            // detail hero's language.
+            val meta = if (entry.sessionTimeMillis > 0L) {
+                "${category.displayName} · ${entry.capturedAtDaysAgoLabel()} · explored ${formatSessionShort(entry.sessionTimeMillis)}"
+            } else {
+                "${category.displayName} · ${entry.capturedAtDaysAgoLabel()}"
+            }
             Surface(
                 onClick = {
                     navController.navigate(CurioRoutes.entryDetail(entry.id)) {
@@ -265,7 +274,7 @@ private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = "${category.displayName} · ${entry.capturedAtDaysAgoLabel()}",
+                            text = meta,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,

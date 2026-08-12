@@ -1,6 +1,23 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): CI fix — scroll-indicator API mismatches (Android)
+## Current Request (COMPLETE): Session time in Recent feed rows + share card (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** "Show the session time in the Recent feed rows and the share card too."
+
+**What was built (3 files):** session duration (`entry.sessionTimeMillis`, formatted via the existing `formatSessionShort`, e.g. "12m") now joins the meta line **only when a session was recorded** (>0), using the same "· explored 12m" language as the detail hero:
+- **features/recent/RecentScreen.kt** — SavedEntry feed row subtitle becomes `meta` = "Category · 2d ago · explored 12m" (import `formatSessionShort`).
+- **features/home/HomeScreen.kt** — `RecentEntryRow` (Home's five-item preview) same conditional subtitle (import `formatSessionShort`).
+- **features/detail/EntryDetailScreen.kt** — `CurioShareCard`'s date chip "Captured today" → "Captured today · explored 12m" via the file's existing `datePart + sessionPart` house style (reviewer nit: replaced a buildString with the hero's `sessionPart` convention).
+
+Explored/Unexplored feed rows have no entry → no session time (they're topic rows, unchanged).
+
+**Validation:** No local Gradle build (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash: compile-safe, imports resolve, no shadowing; two nits — duplicated conditional across the two row renderers (accepted, one-expression) and the share card's buildString style (fixed to match heroDateTinyLabel).
+
+## Previous Requests
+
+### CI fix — scroll-indicator API mismatches (Android)
 
 **Date:** 2026-08-12
 

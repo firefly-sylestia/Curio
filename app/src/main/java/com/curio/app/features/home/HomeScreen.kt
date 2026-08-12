@@ -93,6 +93,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
+import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
@@ -1407,8 +1408,14 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                // v22 — the explore-session duration joins the meta line
+                // when one was recorded ("Films · 2d ago · explored 12m").
                 Text(
-                    "${cat.displayName} · ${entry.capturedAtDaysAgoLabel()}",
+                    if (entry.sessionTimeMillis > 0L) {
+                        "${cat.displayName} · ${entry.capturedAtDaysAgoLabel()} · explored ${formatSessionShort(entry.sessionTimeMillis)}"
+                    } else {
+                        "${cat.displayName} · ${entry.capturedAtDaysAgoLabel()}"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1

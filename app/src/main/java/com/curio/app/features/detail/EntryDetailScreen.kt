@@ -3700,11 +3700,19 @@ private fun CurioShareCard(
     // is off, preserving the exact pre-pastel share card.
     val ink = pastelFillInk(category.themedAccent())
 
+    // v22 — the explore-session duration joins the captured-date line when
+    // one was recorded ("Captured today · explored 12m"), matching the
+    // detail hero's frosted-date language (same datePart + sessionPart style).
+    val sessionPart = if (entry.sessionTimeMillis > 0L) {
+        " · explored ${formatSessionShort(entry.sessionTimeMillis)}"
+    } else {
+        ""
+    }
     val daysAgoText = when (entry.capturedAtDaysAgo) {
         0 -> "Captured today"
         1 -> "Captured yesterday"
         else -> "Captured ${entry.capturedAtDaysAgo}d ago"
-    }
+    } + sessionPart
 
     Box(
         modifier = Modifier
