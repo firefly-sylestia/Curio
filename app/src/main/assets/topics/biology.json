@@ -1,1 +1,3341 @@
-[]
+[
+ {
+  "id": "biology-cell-first-seen",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The First Cells Seen (1665)",
+  "teaser": "Robert Hooke looked at a slice of cork through his microscope and saw tiny boxes he called 'cells' - because they reminded him of monastery rooms. He was looking at dead plant cell walls; the living things inside wouldn't be seen for another century.",
+  "imageUrl": "",
+  "byline": "Robert Hooke",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Robert Hooke's Micrographia and the discovery of cells",
+   "durationMinutes": 30,
+   "instruction": "Read how Hooke's 1665 book Micrographia - with its huge foldout drawings of fleas and cork - shocked London by showing a world invisible to the naked eye. Notice that his 'cells' were empty husks; the first observation of living cells inside them came only in the 1830s, when better lenses finally existed."
+  },
+  "tags": [
+   "Cell",
+   "Microscope",
+   "History"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-cell-theory",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Cell Theory (1839)",
+  "teaser": "Two German scientists - a botanist and a zoologist who'd never met - independently concluded that all living things are made of cells. The theory that unites all biology was born in a decade when most scientists still thought life was spontaneous soup.",
+  "imageUrl": "",
+  "byline": "Schleiden and Schwann",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The formulation of cell theory",
+   "durationMinutes": 30,
+   "instruction": "Read how Schleiden and Schwann, working separately, both realized that plant and animal tissues were built from cells, and how Rudolf Virchow added the third pillar a decade later: every cell comes from another cell. Notice the quiet revolution: cell theory is why we can study a yeast cell and learn about human disease."
+  },
+  "tags": [
+   "Cell",
+   "Theory",
+   "Biology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-dna-helix",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Double Helix (1953)",
+  "teaser": "A 25-year-old American and a British physicist - one loud, one shy - built a model that explained how life copies itself. Their one-page paper in Nature is the most cited in history, and the photo that cracked it was taken by a woman who never shared the Nobel.",
+  "imageUrl": "",
+  "byline": "Watson, Crick, and Franklin",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of DNA's structure",
+   "durationMinutes": 35,
+   "instruction": "Read how the double helix was solved by model-building plus one crucial X-ray photograph - Photo 51, taken by Rosalind Franklin - that revealed the molecule's shape. Notice the drama: Franklin's data was shown to Watson and Crick without her knowledge, and when the Nobel came, she'd already died, and the prize famously doesn't go to the dead."
+  },
+  "tags": [
+   "DNA",
+   "Genetics",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-central-dogma",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Central Dogma (1958)",
+  "teaser": "Francis Crick's one-way rule - DNA makes RNA makes protein - described how information flows through life. It held for forty years, until viruses and prions turned up that break every arrow in the diagram.",
+  "imageUrl": "",
+  "byline": "Francis Crick",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The central dogma of molecular biology",
+   "durationMinutes": 30,
+   "instruction": "Read how Crick, in a famous 1957 lecture, proposed that once information is in a protein, it never flows back out - DNA to RNA to protein, one direction only. Notice the exceptions that came later: retroviruses copy RNA back into DNA, and prions pass on their shape without any nucleic acid at all, bending the dogma without breaking it."
+  },
+  "tags": [
+   "DNA",
+   "RNA",
+   "Protein"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-gene-definition",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "What Is a Gene? (1866-2000)",
+  "teaser": "For 130 years scientists argued about what a gene is - first a 'unit of heredity,' then a stretch of DNA, then a sentence with alternative readings. The Human Genome Project's biggest surprise was how few genes we have: about 20,000, fewer than a rice plant.",
+  "imageUrl": "",
+  "byline": "The geneticists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The changing definition of a gene",
+   "durationMinutes": 35,
+   "instruction": "Read how Mendel's invisible 'factors' became chromosomes, then DNA sequences, then - after the genome projects - something fuzzier, since a single gene can code for many proteins through splicing. Notice the humility in the number: humans have about 20,000 protein-coding genes, roughly the same as a nematode worm, so the difference between species lies elsewhere - in regulation, not count."
+  },
+  "tags": [
+   "Gene",
+   "Genetics",
+   "DNA"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mendel-peas",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Mendel's Peas (1865)",
+  "teaser": "A monk spent eight years crossing 29,000 pea plants and worked out the laws of inheritance - then published in a journal nobody read, and his work was ignored for 35 years. When it was rediscovered in 1900, it became the foundation of genetics.",
+  "imageUrl": "",
+  "byline": "Gregor Mendel",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Mendel's experiments with pea plants",
+   "durationMinutes": 30,
+   "instruction": "Read how Mendel chose peas for their obvious traits - round or wrinkled, tall or short - and counted every offspring, turning biology into arithmetic decades before statistics was a discipline. Notice the detail that explains the neglect: he presented his numbers at a local natural history society, and the audience that could have understood the math was elsewhere, in a field called statistics that barely existed."
+  },
+  "tags": [
+   "Genetics",
+   "Mendel",
+   "History"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-natural-selection",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Natural Selection (1859)",
+  "teaser": "Darwin's dangerous idea: that random variation plus selective survival explains the design of life without a designer. The evidence he trusted most was pigeons - he bred them for decades to prove how plastic species could be.",
+  "imageUrl": "",
+  "byline": "Charles Darwin",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Natural selection and its evidence",
+   "durationMinutes": 35,
+   "instruction": "Read how Darwin built the argument from barnacles, fossils, and domesticated pigeons - he kept dozens of breeds to show how fast human selection could reshape a bird - and how Alfred Russel Wallace independently arrived at the same theory, prompting Darwin to publish after 20 years of hesitation. Notice what Darwin got wrong: he never understood heredity, and his theory was incomplete until combined with Mendel's genetics half a century later."
+  },
+  "tags": [
+   "Evolution",
+   "Darwin",
+   "Biology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-survival-fittest",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Survival of the Fittest (1864)",
+  "teaser": "The phrase that became a slogan wasn't Darwin's - it was Herbert Spencer's, borrowed into later editions of Origin of Species. 'Fittest' doesn't mean strongest; it means best matched to the environment, which is why a bacterium can out-evolve a whale.",
+  "imageUrl": "",
+  "byline": "Herbert Spencer",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The real meaning of 'survival of the fittest'",
+   "durationMinutes": 25,
+   "instruction": "Read how Spencer, a philosopher, coined the phrase to describe his own ideas about society, and how Darwin adopted it under pressure from critics - then spent the rest of his life explaining that 'fittest' means adapted, not superior. Notice the mischief the phrase caused: it was twisted to justify racism, eugenics, and laissez-faire economics, none of which follow from the biology."
+  },
+  "tags": [
+   "Evolution",
+   "Ideas",
+   "Misuse"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-peppered-moth",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Peppered Moth (1950s)",
+  "teaser": "In industrial England, pollution darkened tree trunks - and dark moths that had been rare suddenly thrived, because birds could see the pale ones. When clean-air laws arrived, the pale moths came back. It became the textbook example of evolution in action.",
+  "imageUrl": "",
+  "byline": "Bernard Kettlewell",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The peppered moth and industrial melanism",
+   "durationMinutes": 25,
+   "instruction": "Read how Kettlewell's marking experiments showed birds picking the conspicuous moths off the trees, matching the rise and fall of dark forms with the rise and fall of soot. Notice the recent controversy: some photographs of the moths were staged on different trees, which critics used to attack the whole story - but the underlying selection was confirmed repeatedly, staged photos or not."
+  },
+  "tags": [
+   "Evolution",
+   "Moth",
+   "Experiment"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-finches-galapagos",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Darwin's Finches (1835-1976)",
+  "teaser": "Darwin collected 13 similar birds on the Galapagos and barely noticed them - he even mislabeled which island they came from. It took Peter and Rosemary Grant, who measured every finch for 40 years, to show evolution happening in real time on those islands.",
+  "imageUrl": "",
+  "byline": "Darwin and the Grants",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Darwin's finches and the Grants' long study",
+   "durationMinutes": 30,
+   "instruction": "Read how Darwin's finches - beaks shaped by which seeds they eat - became the icon of evolution only after the Grants' decades of measurements showed beak size changing measurably after each drought. Notice the twist of the story: Darwin himself was more impressed by the mockingbirds than the finches, and the finch fame came later, earned by the scientists who watched them evolve."
+  },
+  "tags": [
+   "Evolution",
+   "Finches",
+   "Galapagos"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-antibiotic-resistance",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Antibiotic Resistance (1940s-present)",
+  "teaser": "Bacteria evolve resistance to every antibiotic within a few decades of its introduction - sometimes within months of its first use. It's natural selection on fast-forward: each dose of antibiotics is a selective filter that favors the survivors.",
+  "imageUrl": "",
+  "byline": "The microbes and the pharmacists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The evolution of antibiotic resistance",
+   "durationMinutes": 30,
+   "instruction": "Read how resistance genes spread not just by inheritance but by horizontal gene transfer - bacteria swapping DNA like trading cards, even across species - which is why resistance to one drug can leap from a farm to a hospital. Notice the race we're losing: few new antibiotics have been discovered since the 1980s, and resistant infections already kill over a million people a year."
+  },
+  "tags": [
+   "Evolution",
+   "Medicine",
+   "Bacteria"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mitosis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Mitosis (c. 1880)",
+  "teaser": "Every time a cell divides, it copies its 3 billion DNA letters and splits them exactly - a ballet of chromosomes so precise that errors cause cancer. The dance was first filmed in 1910, and we still don't fully understand its mechanics.",
+  "imageUrl": "",
+  "byline": "The cell biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The choreography of mitosis",
+   "durationMinutes": 30,
+   "instruction": "Read how mitosis - prophase to telophase - uses a molecular scaffold called the spindle to drag each chromosome copy to opposite ends, and how the cell checks its work at every stage before committing to divide. Notice the failure mode: when the checkpoints fail, chromosomes split unevenly, and that genetic chaos is one of the hallmarks of cancer cells."
+  },
+  "tags": [
+   "Cell",
+   "Mitosis",
+   "Biology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-meiosis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Meiosis (1883)",
+  "teaser": "The cell division that makes eggs and sperm halves the chromosomes - then shuffles them, so every child is a new combination no one has ever been. It's why you're not a clone of either parent, and why siblings differ.",
+  "imageUrl": "",
+  "byline": "The geneticists of the 1880s",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Meiosis and genetic recombination",
+   "durationMinutes": 30,
+   "instruction": "Read how meiosis performs two divisions and one crucial swap - crossing over, where paired chromosomes physically exchange pieces - producing four genetically unique cells where mitosis made two identical ones. Notice the biological bet: the whole point of sex may be this shuffling, generating variety so that at least some offspring survive whatever the environment throws next."
+  },
+  "tags": [
+   "Cell",
+   "Sex",
+   "Genetics"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-photosynthesis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Photosynthesis (c. 1770s-1960s)",
+  "teaser": "A leaf turns sunlight, water, and carbon dioxide into sugar - and the oxygen we breathe is its exhaust. The process that feeds nearly all life on Earth was only fully worked out in the 1960s, and its core enzyme is so slow it's a bottleneck for all of agriculture.",
+  "imageUrl": "",
+  "byline": "Ingenhousz, Priestley, and Calvin",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of photosynthesis",
+   "durationMinutes": 35,
+   "instruction": "Read how Priestley found plants 'restore' air, Ingenhousz showed they do it only in light, and Calvin traced the carbon's path through the cell - work that took the newly invented radioactive carbon. Notice the inefficiency at the heart of green life: the enzyme Rubisco is so sluggish that plants must make enormous amounts of it, which is why so much of a leaf's nitrogen is tied up in a single enzyme."
+  },
+  "tags": [
+   "Photosynthesis",
+   "Plants",
+   "Energy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mitochondria",
+  "categoryId": "BIOLOGY",
+  "subtype": "Structure",
+  "name": "The Powerhouse (c. 1890-1970s)",
+  "teaser": "The mitochondria are the cell's furnaces, burning sugar with oxygen to make the energy currency ATP. They were once free-living bacteria that moved inside our cells two billion years ago - and they kept their own DNA to prove it.",
+  "imageUrl": "",
+  "byline": "Altmann and Lynn Margulis",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of mitochondria and their origin",
+   "durationMinutes": 30,
+   "instruction": "Read how mitochondria were first seen in the 1890s, dismissed for decades, then revealed by Lynn Margulis to be captured bacteria - their circular DNA and double membranes are the fingerprints of that ancient merger. Notice the deal that made us: the bacteria got a home, the host cell got 30 times more energy per sugar, and every animal on Earth runs on that partnership."
+  },
+  "tags": [
+   "Mitochondria",
+   "Cell",
+   "Evolution"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-chloroplast-origin",
+  "categoryId": "BIOLOGY",
+  "subtype": "Structure",
+  "name": "The Chloroplast's Origin (c. 1960s)",
+  "teaser": "Chloroplasts - the solar panels inside plant cells - were once free-living cyanobacteria that got eaten but not digested. The evidence is written in their own genes, which still encode the machinery of a bacterium.",
+  "imageUrl": "",
+  "byline": "Lynn Margulis",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The endosymbiotic origin of chloroplasts",
+   "durationMinutes": 25,
+   "instruction": "Read how the endosymbiotic theory - that chloroplasts and mitochondria were once free bacteria - was mocked for a decade until DNA sequencing proved it: chloroplasts have their own genomes, their own ribosomes, and divide independently of the cell. Notice the elegant payoff: every plant on Earth is a chimera, part alga, part bacterium, part host - a living fossil of an ancient meal."
+  },
+  "tags": [
+   "Chloroplast",
+   "Plants",
+   "Evolution"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-dna-replication",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "DNA Copies Itself (1958)",
+  "teaser": "The double helix's beauty is that it unzips and each half builds its partner - 'semiconservative' replication, proven in a single elegant experiment with heavy nitrogen. Your body performs this copy a trillion times a day.",
+  "imageUrl": "",
+  "byline": "Meselson and Stahl",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How DNA replication was proven",
+   "durationMinutes": 30,
+   "instruction": "Read how Meselson and Stahl grew bacteria in heavy nitrogen, then switched them to normal nitrogen and watched the DNA's density - an experiment so clean it's taught as the gold standard of proof. Notice the machine that does the work: a molecular complex called the replisome unwinds and copies the strands at 1,000 bases per second, with proofreading that keeps the error rate below one in a billion."
+  },
+  "tags": [
+   "DNA",
+   "Replication",
+   "Experiment"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mutation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Mutation (1901)",
+  "teaser": "A mutation is a typo in the DNA - a letter changed, added, or deleted. Most are harmless or harmful, but a rare few are improvements, and every living thing you see is the product of an unbroken chain of lucky typos.",
+  "imageUrl": "",
+  "byline": "Hugo de Vries",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Mutation and its role in evolution",
+   "durationMinutes": 30,
+   "instruction": "Read how the word 'mutation' was coined by a botanist who watched a new variety of evening primrose appear suddenly in his garden, and how mutations - random, undirected - provide the raw material natural selection works on. Notice the scale: each human inherits about 60 new mutations, mostly harmless, and the slow accumulation of such typos is the molecular clock that lets us date when lineages split."
+  },
+  "tags": [
+   "Mutation",
+   "Evolution",
+   "Genetics"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-genetic-code",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Genetic Code (1961)",
+  "teaser": "Four letters of DNA, read in triplets, spell out 20 amino acids - the alphabet of all proteins, and it's nearly identical in every organism from bacteria to blue whales. The code was cracked in just a few years with a test-tube trick.",
+  "imageUrl": "",
+  "byline": "Nirenberg, Khorana, and Holley",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The cracking of the genetic code",
+   "durationMinutes": 30,
+   "instruction": "Read how Nirenberg made synthetic RNA molecules and found which triplets code for which amino acids - a code-cracking race won in 1968 with the Nobel shared three ways. Notice the universality that makes genetic engineering possible: because the code is the same everywhere, you can put a jellyfish's glow gene into a mouse and it works."
+  },
+  "tags": [
+   "Genetic code",
+   "DNA",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-pcr",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "PCR (1983)",
+  "teaser": "The polymerase chain reaction copies a single piece of DNA into billions of copies in hours - the invention that made DNA testing, forensics, and the entire biotech industry possible. Its inventor conceived it while driving at night and won the Nobel a decade later.",
+  "imageUrl": "",
+  "byline": "Kary Mullis",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The invention of PCR",
+   "durationMinutes": 25,
+   "instruction": "Read how Kary Mullis, a surfer and chemist, imagined cycling through the copying steps in his head during a night drive, and how his heat-stable enzyme - borrowed from a hot-spring bacterium - made the reaction practical. Notice the moral: PCR's inventor became a controversial figure who doubted HIV causes AIDS, yet the technique he gave the world is now used in every crime lab and diagnostic lab on Earth."
+  },
+  "tags": [
+   "PCR",
+   "DNA",
+   "Invention"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-genome-project",
+  "categoryId": "BIOLOGY",
+  "subtype": "Project",
+  "name": "The Human Genome Project (1990-2003)",
+  "teaser": "Fifteen years and $3 billion to read the 3 billion letters of human DNA - then a private company raced them to the finish line. The resulting 'draft' was a mix of hundreds of people's DNA, and no one person's genome it was.",
+  "imageUrl": "",
+  "byline": "The international genome consortium",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Human Genome Project",
+   "durationMinutes": 35,
+   "instruction": "Read how the project pooled DNA from anonymous donors to build a reference sequence, and how the race with Craig Venter's private effort forced an early, rough draft announced jointly at the White House in 2000. Notice the surprises: the finished sequence revealed that most of our DNA is not genes at all - it's regulatory switches, dead viruses, and junk, and we share 98% of it with chimpanzees."
+  },
+  "tags": [
+   "Genome",
+   "DNA",
+   "Science"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-epigenetics",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Epigenetics (1942)",
+  "teaser": "Identical twins start with identical DNA but age differently - because chemical tags on the DNA switch genes on and off, shaped by diet, stress, and environment. These 'epigenetic' marks are how an organism remembers its history.",
+  "imageUrl": "",
+  "byline": "Conrad Waddington",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Epigenetics and gene regulation",
+   "durationMinutes": 30,
+   "instruction": "Read how Waddington coined 'epigenetics' to describe how a single fertilized egg becomes hundreds of different cell types with the same DNA, and how methylation marks - little chemical caps - lock genes into off or on states. Notice the modern twist: some of these marks can be passed to children, which means a starving grandmother's experience can leave molecular traces in her grandchildren's gene expression."
+  },
+  "tags": [
+   "Epigenetics",
+   "Genes",
+   "Environment"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-junk-dna",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Junk DNA (1972-2012)",
+  "teaser": "For decades, most of the genome was dismissed as 'junk' - 98% of our DNA that seemed to do nothing. The ENCODE project then claimed most of it is functional after all, starting a fight that's still going about what 'function' even means.",
+  "imageUrl": "",
+  "byline": "Susumu Ohno",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The junk DNA debate",
+   "durationMinutes": 30,
+   "instruction": "Read how the term 'junk DNA' was coined in 1972 by a geneticist who argued that most of the genome is evolutionary debris - dead viruses, broken genes, and repetitive noise. Notice the pendulum: ENCODE's 2012 claim that 80% is functional was met with furious rebuttals from evolutionary biologists, who point out that being transcribed isn't the same as being useful - the debate is really about how we define 'function.'"
+  },
+  "tags": [
+   "Genome",
+   "Evolution",
+   "Debate"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-chromosome-number",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Chromosome Counting (1956)",
+  "teaser": "For 30 years, scientists believed humans had 48 chromosomes - the wrong number appeared in every textbook. In 1956, better techniques showed the truth: 46. The correction launched human genetics, and 48 still appears in some old encyclopedias.",
+  "imageUrl": "",
+  "byline": "Tjio and Levan",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The correction of the human chromosome count",
+   "durationMinutes": 25,
+   "instruction": "Read how the miscount happened because chromosomes clump together in poor preparations, and how Tjio and Levan, using better spreading techniques, counted 46 - confirming the error that had spawned entire theories about race and evolution built on 48. Notice the consequence: with the true number established, researchers could finally link specific chromosomal anomalies like Down syndrome (three copies of chromosome 21) to their causes."
+  },
+  "tags": [
+   "Chromosome",
+   "Genetics",
+   "Correction"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-sickle-cell",
+  "categoryId": "BIOLOGY",
+  "subtype": "Disease",
+  "name": "Sickle Cell and Malaria (1949)",
+  "teaser": "One DNA letter change makes hemoglobin bend red blood cells into sickles - deadly in two copies, protective in one, because the malaria parasite can't easily invade sickle-shaped cells. It's natural selection visible in a single gene.",
+  "imageUrl": "",
+  "byline": "Linus Pauling and colleagues",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The molecular basis of sickle cell disease",
+   "durationMinutes": 30,
+   "instruction": "Read how Pauling called sickle cell the first 'molecular disease' - a single amino acid swap in hemoglobin - and how the gene's geography maps the malaria belt: carriers are common where malaria is common, because being a carrier meant surviving childhood. Notice the human cost of that ancient protection: two copies of the gene cause painful crises and shortened life, a trade-off written into millions of genomes."
+  },
+  "tags": [
+   "Sickle cell",
+   "Malaria",
+   "Genetics"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-x-chromosome-inactivation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Silenced X (1961)",
+  "teaser": "Female mammals have two X chromosomes but use only one - the other is rolled up and silenced at random in every cell. The result: women are genetic mosaics, with some cells using mom's X and others dad's, which is why calico cats are almost always female.",
+  "imageUrl": "",
+  "byline": "Mary Lyon",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "X chromosome inactivation",
+   "durationMinutes": 30,
+   "instruction": "Read how Lyon's hypothesis - that one X is randomly shut off in each cell - explains the calico cat's patchwork: each patch is a clone of a cell that silenced one X or the other. Notice the deeper point: it's a dosage-compensation system, ensuring males and females use the same amount of X-linked gene products, and its failures cause developmental disorders."
+  },
+  "tags": [
+   "Genetics",
+   "X chromosome",
+   "Mosaic"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-prions",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Prions (1982)",
+  "teaser": "Stanley Prusiner discovered an infectious agent that is just a misfolded protein - no DNA, no RNA - and watched his field call him crazy for a decade. Prions cause mad cow disease and Kuru, and they spread by making healthy proteins misfold in their image.",
+  "imageUrl": "",
+  "byline": "Stanley Prusiner",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of prions",
+   "durationMinutes": 30,
+   "instruction": "Read how Prusiner showed that scrapie - a sheep disease - could be transmitted by a pure protein, overturning the rule that all infectious agents need nucleic acid, and how the Nobel committee waited until 1997 to confirm his heresy. Notice the eerie mechanism: a prion is a protein that acts as a template, forcing its neighbors to refold - a self-propagating shape, which is why it's called an 'infectious protein.'"
+  },
+  "tags": [
+   "Prion",
+   "Protein",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-virus-what-is",
+  "categoryId": "BIOLOGY",
+  "subtype": "Structure",
+  "name": "What Is a Virus? (1898)",
+  "teaser": "A virus is a piece of genetic code in a protein shell - not quite alive, not quite dead - that hijacks cells to copy itself. They're the most abundant biological entities on Earth, and only a tiny fraction infect humans.",
+  "imageUrl": "",
+  "byline": "Beijerinck and Ivanovsky",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The nature of viruses",
+   "durationMinutes": 30,
+   "instruction": "Read how Beijerinck called the filterable infectious agent a 'contagium vivum fluidum' - a living, fluid contagion - because it passed through filters that trapped bacteria and couldn't be grown alone. Notice the paradox at the heart of virology: viruses are inert crystals outside cells and full-blown replicators inside them, which is why biologists still argue about whether they're alive."
+  },
+  "tags": [
+   "Virus",
+   "Microbe",
+   "Biology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bacteriophage",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Virus Eaters (1917)",
+  "teaser": "Bacteriophages - 'bacteria eaters' - are viruses that infect bacteria, discovered a century ago and almost forgotten when antibiotics arrived. Now, with resistance rising, phage therapy is being revived as a last-resort treatment.",
+  "imageUrl": "",
+  "byline": "Felix d'Herelle",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of bacteriophages",
+   "durationMinutes": 30,
+   "instruction": "Read how d'Herelle found invisible killers that could clear bacterial cultures, named them phages, and used them to treat dysentery in 1919 - years before antibiotics existed - only to see the field abandoned after penicillin. Notice the renaissance: when a patient with a drug-resistant infection has no options, doctors now turn to engineered phages, and one dramatic 2016 cure made headlines worldwide."
+  },
+  "tags": [
+   "Virus",
+   "Phage",
+   "Medicine"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-immune-memory",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Immune Memory (1796-1980s)",
+  "teaser": "Your immune system remembers every invader it has fought - that's why vaccines work, and why you rarely catch the same cold twice. The memory cells behind this were only properly identified in the 1960s, 170 years after vaccination began.",
+  "imageUrl": "",
+  "byline": "Jenner, Burnet, and the immunologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How immune memory works",
+   "durationMinutes": 30,
+   "instruction": "Read how the immune system keeps a standing army of memory B and T cells after each infection - ready to react in days instead of weeks on re-exposure - and how Edward Jenner's 1796 cowpox experiment was immune memory in action, a century before anyone knew cells existed. Notice the weakness in the system: some viruses, like influenza and HIV, mutate to dodge the memory, which is why you need a new flu shot every year."
+  },
+  "tags": [
+   "Immunity",
+   "Vaccine",
+   "Cells"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-antibodies",
+  "categoryId": "BIOLOGY",
+  "subtype": "Structure",
+  "name": "Antibodies (1890-1960s)",
+  "teaser": "Antibodies are Y-shaped proteins that grab onto invaders with stunning specificity - each one binds a single target like a key to a lock. Your body can generate billions of different antibodies, more than its genes could possibly encode by one-per-gene logic.",
+  "imageUrl": "",
+  "byline": "Behring, Edelman, and Porter",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The structure and diversity of antibodies",
+   "durationMinutes": 30,
+   "instruction": "Read how antibodies were first found in blood serum by Behring in 1890, and how the mystery of their diversity - millions of shapes from a few thousand genes - was solved when Tonegawa showed that antibody genes are assembled by cutting and rejoining DNA in each developing B cell. Notice the payoff: that assembly mechanism is why vaccines can provoke a tailored antibody for almost any protein on Earth."
+  },
+  "tags": [
+   "Antibody",
+   "Immunity",
+   "Structure"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-t-cells",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Killer Cells (1960s)",
+  "teaser": "T cells are the immune system's assassins and generals - they can kill infected cells on contact and orchestrate the whole defense. Their discovery turned immunology from blood chemistry into a cellular battlefield.",
+  "imageUrl": "",
+  "byline": "Miller and the cellular immunologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery and role of T cells",
+   "durationMinutes": 30,
+   "instruction": "Read how Jacques Miller showed that the thymus - a gland everyone thought was useless - produces a class of lymphocytes that become T cells, the cells that reject transplants, fight cancer, and restrain autoimmune attacks. Notice the check they run: every T cell is tested in the thymus to make sure it doesn't attack the body's own tissues, and the 95% that fail the test are killed - the price of self-tolerance."
+  },
+  "tags": [
+   "Immunity",
+   "T cells",
+   "Biology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-vaccines-history",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "Vaccination (1796)",
+  "teaser": "Edward Jenner injected a boy with cowpox to protect him from smallpox - a folk practice from milkmaids, given a scientific test. The word 'vaccine' comes from vacca, Latin for cow, and 180 years later vaccination eradicated smallpox from the Earth.",
+  "imageUrl": "",
+  "byline": "Edward Jenner",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The history of vaccination",
+   "durationMinutes": 30,
+   "instruction": "Read how Jenner's experiment - using cowpox as a milder relative of smallpox - was built on the observation that milkmaids' hands, scarred by cowpox, never showed smallpox scars. Notice the ultimate proof of the idea: smallpox, which killed 300 million people in the 20th century alone, was declared eradicated in 1980, the only human disease ever wiped out - by a vaccination campaign, not a cure."
+  },
+  "tags": [
+   "Vaccine",
+   "Medicine",
+   "History"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-antibiotics-discovery",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Penicillin (1928)",
+  "teaser": "Alexander Fleming came back from holiday to find mold killing bacteria in a forgotten dish - and his 'mold juice' was ignored for a decade until war made antibiotics urgent. By D-Day, penicillin was saving soldiers who would have died of infected wounds.",
+  "imageUrl": "",
+  "byline": "Alexander Fleming and the Oxford team",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery and development of penicillin",
+   "durationMinutes": 30,
+   "instruction": "Read how the accidental contamination - a Penicillium mold spore landing in a Staphylococcus dish - led Fleming to notice a clear ring of dead bacteria, and how Florey and Chain's Oxford team turned the unstable juice into a mass-producible drug just in time for World War II. Notice the flip side: Fleming himself warned at his Nobel lecture that overuse would breed resistance - and he was right within a generation."
+  },
+  "tags": [
+   "Penicillin",
+   "Medicine",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-microbiome",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Microbiome (2000s)",
+  "teaser": "Your body hosts ten times more microbial cells than human ones - trillions of bacteria, fungi, and viruses living in your gut, skin, and mouth. The Human Microbiome Project revealed that these passengers digest your food, train your immune system, and may even influence your mood.",
+  "imageUrl": "",
+  "byline": "The Human Microbiome Project",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The human microbiome",
+   "durationMinutes": 30,
+   "instruction": "Read how sequencing technology revealed a hidden organ: a community of about 1,000 microbial species per person, mostly in the colon, that digests fiber into nutrients we can't, makes vitamins, and crowds out pathogens. Notice the ongoing revolution: scientists are now studying whether gut bacteria influence obesity, allergies, and depression - and 'microbiome' has become one of the fastest-moving fields in medicine, full of hype and real promise."
+  },
+  "tags": [
+   "Microbiome",
+   "Gut",
+   "Bacteria"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-extremophiles",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Extremophiles (1960s-1990s)",
+  "teaser": "Organisms that thrive in boiling springs, acid lakes, Antarctic ice, and deep-sea vents - the 'extremophiles' that redrew the map of where life can live. Their heat-stable enzymes now power PCR and their existence fuels the search for life on Mars.",
+  "imageUrl": "",
+  "byline": "Thomas Brock",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of extremophiles",
+   "durationMinutes": 30,
+   "instruction": "Read how Thomas Brock found bacteria living in Yellowstone's boiling pools in the 1960s - a discovery that redefined the limits of life and gave us Taq polymerase, the heat-stable enzyme at the heart of PCR and the entire DNA-testing industry. Notice the lesson for astrobiology: if life thrives at 121 degrees in volcanic vents, then 'habitable' zones elsewhere in the solar system suddenly look much wider."
+  },
+  "tags": [
+   "Extremophiles",
+   "Microbe",
+   "Life"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-deep-sea-vents",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Deep-Sea Vents (1977)",
+  "teaser": "Scientists in a submarine found entire ecosystems living in total darkness around volcanic vents - tube worms, crabs, and bacteria feeding on chemicals, not sunlight. It was the first time anyone had found a food chain not powered by the sun.",
+  "imageUrl": "",
+  "byline": "The Alvin expedition",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of hydrothermal vent ecosystems",
+   "durationMinutes": 35,
+   "instruction": "Read how the 1977 dive of Alvin to the Galapagos Rift found gardens of giant tube worms, clams, and shrimp thriving on hydrogen sulfide, with bacteria at the base of the food web doing chemosynthesis instead of photosynthesis. Notice the two revolutions in one discovery: biology gained a new way of making food, and the theory of life's origin gained a plausible nursery - the vents may be where life itself began."
+  },
+  "tags": [
+   "Ocean",
+   "Ecosystem",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-endosymbiosis-evidence",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Bacterial Deal (1967)",
+  "teaser": "Lynn Margulis proposed that complex cells evolved by swallowing simpler ones - a theory so radical that 15 journals rejected her paper. Today her endosymbiotic theory is textbook biology, and her persistence is taught as a lesson in scientific courage.",
+  "imageUrl": "",
+  "byline": "Lynn Margulis",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The evidence for endosymbiosis",
+   "durationMinutes": 30,
+   "instruction": "Read how Margulis argued that mitochondria and chloroplasts were once free-living bacteria, citing their own DNA, their own ribosomes, and their double membranes - and how the establishment resistance nearly killed the idea before DNA sequencing vindicated it. Notice her second, still-debated claim: that even flagella came from symbiotic spirochetes, a proposal that remains controversial but keeps her reputation as biology's great iconoclast."
+  },
+  "tags": [
+   "Endosymbiosis",
+   "Evolution",
+   "Margulis"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-homeostasis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Homeostasis (1865-1932)",
+  "teaser": "Your body holds temperature, blood sugar, and pH in narrow bands no matter what the world throws at you - a concept the French physiologist Claude Bernard called the 'internal environment,' and Walter Cannon named homeostasis. It's why you're alive on a 40-degree day or a fasting day.",
+  "imageUrl": "",
+  "byline": "Claude Bernard and Walter Cannon",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The concept of homeostasis",
+   "durationMinutes": 30,
+   "instruction": "Read how Bernard realized that the constancy of the internal milieu is the condition of free life - a body that holds steady can wander anywhere - and how Cannon gave the idea its name and its feedback loops. Notice the failure modes: diabetes is a broken glucose homeostat, fever a deliberately reset thermostat, and every modern 'smart' device from thermostats to self-driving cars is built on the same feedback logic your body runs."
+  },
+  "tags": [
+   "Homeostasis",
+   "Physiology",
+   "Body"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-nerve-signal",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Nerve Signal (1930s-1950s)",
+  "teaser": "A neuron fires by letting sodium rush in and potassium rush out - a wave of charge that travels down the axon at up to 120 meters per second. The 'action potential' was worked out on giant squid neurons, which are thick enough to poke electrodes into.",
+  "imageUrl": "",
+  "byline": "Hodgkin and Huxley",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the action potential works",
+   "durationMinutes": 30,
+   "instruction": "Read how Hodgkin and Huxley used the squid's giant axon - a nerve a millimeter wide, unique in the animal kingdom - to measure the ion currents behind the nerve impulse, and how their 1952 equations still model brain activity today. Notice the speed trick: many neurons are wrapped in myelin, a fatty insulator that lets the signal jump between gaps, which is why multiple sclerosis, which destroys myelin, slows the body's wiring to a crawl."
+  },
+  "tags": [
+   "Neuron",
+   "Nerve",
+   "Brain"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-synapse",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Synapse (1897-1950s)",
+  "teaser": "The gap between neurons - the synapse - is where thought becomes chemistry: a signal arriving at one side releases molecules that cross the gap and fire the next cell. Its discovery turned the brain from a wire net into a chemical organ.",
+  "imageUrl": "",
+  "byline": "Sherrington and the neurochemists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of the synapse",
+   "durationMinutes": 30,
+   "instruction": "Read how Sherrington named the 'synapse' in 1897 to explain how reflexes pass from sensory to motor nerves, and how Otto Loewi proved chemical transmission in a dream-inspired experiment: he soaked two frog hearts and transferred the fluid between them. Notice the everyday relevance: caffeine, antidepressants, nicotine, and nearly every drug and poison work by tampering with synaptic chemistry."
+  },
+  "tags": [
+   "Synapse",
+   "Brain",
+   "Neuron"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-reflex-arc",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Reflex (1870s)",
+  "teaser": "Touch something hot and your hand pulls away before you even know it - because the reflex arc runs through the spinal cord, bypassing the brain. It's the fastest computation your nervous system does, and it was mapped before the word 'neuron' existed.",
+  "imageUrl": "",
+  "byline": "Charles Sherrington",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The reflex arc",
+   "durationMinutes": 25,
+   "instruction": "Read how Sherrington showed that a reflex is a complete circuit - sensory neuron to spinal cord to motor neuron - that works even when the brain is asleep or severed, and how his mapping of reflex arcs founded the modern study of the nervous system. Notice the deception: you feel the pain after the withdrawal, which is why you can be surprised by your own hand - the brain is the last to know."
+  },
+  "tags": [
+   "Reflex",
+   "Nervous system",
+   "Spinal cord"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-brain-lateralization",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Split Brain (1960s)",
+  "teaser": "When Roger Sperry studied patients whose corpus callosum had been cut to stop seizures, he found a mind with two chambers: each half of the brain saw half the world and could act on it independently. The 'left brain, right brain' myth that followed oversimplified it.",
+  "imageUrl": "",
+  "byline": "Roger Sperry",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Split-brain experiments",
+   "durationMinutes": 30,
+   "instruction": "Read how Sperry's split-brain patients could name an object shown to the right eye but not the left - because language lives in the left hemisphere - while the 'silent' right hemisphere could still match and draw what it saw. Notice the myth to discard: personality is not left vs right; the two halves cooperate constantly, and Sperry's Nobel-winning finding is about specialization of tasks, not two selves."
+  },
+  "tags": [
+   "Brain",
+   "Neuroscience",
+   "Experiment"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mirror-neurons",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Mirror Neurons (1992)",
+  "teaser": "Neurons in a monkey's brain fired when the monkey watched another monkey grab a peanut - as if it were doing it itself. 'Mirror neurons' were hailed as the basis of empathy, imitation, and even language, though skeptics now warn the hype outran the evidence.",
+  "imageUrl": "",
+  "byline": "Rizzolatti and colleagues",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of mirror neurons",
+   "durationMinutes": 30,
+   "instruction": "Read how the neurons were found by accident - the experiment was about reaching, and a researcher's own hand movement set the cells off - and how the finding spread from monkeys to humans to grand theories of empathy and autism. Notice the sobering follow-up: many claims about mirror neurons, especially in humans, are hard to verify, and the cells' actual role remains genuinely unclear - a case study in how neuroscience hype spreads."
+  },
+  "tags": [
+   "Neuron",
+   "Brain",
+   "Empathy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-sleep-purpose",
+  "categoryId": "BIOLOGY",
+  "subtype": "Mystery",
+  "name": "Why We Sleep (1953-present)",
+  "teaser": "We spend a third of our lives asleep, and science still can't fully say why - but we know what happens without it: memory fragments, immune function drops, and the brain literally clears waste. REM sleep, where dreams happen, was only discovered in 1953.",
+  "imageUrl": "",
+  "byline": "Aserinsky and Kleitman",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mystery of sleep",
+   "durationMinutes": 30,
+   "instruction": "Read how Eugene Aserinsky, a graduate student, noticed his son's eyes darting during sleep and discovered REM - rapid eye movement - the stage where most dreaming occurs and brain activity rivals waking. Notice the leading theory: during deep sleep, the brain's glymphatic system flushes metabolic waste, which is why chronic sleep loss is now linked to Alzheimer's - sleep may be the brain's dishwasher."
+  },
+  "tags": [
+   "Sleep",
+   "Brain",
+   "Dreams"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-circadian-clock",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Body Clock (1971-2017)",
+  "teaser": "Every cell in your body keeps time - a 24-hour molecular clock that tells you when to sleep, eat, and even when your liver works hardest. Its mechanism was worked out in fruit flies, and its discovery won the 2017 Nobel.",
+  "imageUrl": "",
+  "byline": "Hall, Rosbash, and Young",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The molecular circadian clock",
+   "durationMinutes": 30,
+   "instruction": "Read how three researchers found the clockwork genes in fruit flies - a feedback loop of proteins that rises and falls over about 24 hours - and how that same mechanism ticks in your own cells. Notice the modern hazard: electric light lets us override the clock, and the 'social jet lag' of living against it is linked to obesity, diabetes, and mood disorders - your phone's blue light is fighting a clock that took three billion years to build."
+  },
+  "tags": [
+   "Clock",
+   "Sleep",
+   "Nobel"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-memory-formation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "How Memory Works (1953-2000s)",
+  "teaser": "A patient who lost the ability to form new memories taught us where memory lives: the hippocampus, a seahorse-shaped structure deep in the brain. Without it, the present evaporates within minutes - but old skills and old songs survive.",
+  "imageUrl": "",
+  "byline": "Henry Molaison and Brenda Milner",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The neuroscience of memory",
+   "durationMinutes": 35,
+   "instruction": "Read how Henry Molaison ('HM'), after surgery removed his hippocampus to treat epilepsy, could learn new motor skills but never remember learning them - proving memory is not one thing but a system of systems. Notice the everyday miracle: each memory is re-stored through the hippocampus during sleep, and every retrieval rewrites it slightly - which is why memories are records of the last time you remembered, not of the event itself."
+  },
+  "tags": [
+   "Memory",
+   "Brain",
+   "Hippocampus"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-placebo",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Placebo Effect (1955-present)",
+  "teaser": "A sugar pill can ease pain, lower blood pressure, and even change brain chemistry - as long as the patient believes it's real. The placebo effect is not 'all in your head'; it's the body's expectation machinery, and it's powerful enough that all drug trials must control for it.",
+  "imageUrl": "",
+  "byline": "Henry Beecher",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The placebo effect",
+   "durationMinutes": 25,
+   "instruction": "Read how the term entered medicine through trials comparing new drugs to inert 'sugar pills,' and how brain imaging now shows placebo pain relief activating real opioid pathways - the brain's own painkillers. Notice the ethical edge: doctors can't lie to patients to use placebos, but open-label placebos - honestly labeled pills that still work in some trials - are now a serious research frontier."
+  },
+  "tags": [
+   "Placebo",
+   "Brain",
+   "Medicine"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-hormones",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Hormones (1902)",
+  "teaser": "Chemical messengers that travel in the blood and command distant organs - the word 'hormone' means 'to set in motion.' The first one discovered was secretin, found when two British physiologists tied off a dog's intestine and watched its pancreas respond.",
+  "imageUrl": "",
+  "byline": "Bayliss and Starling",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of hormones",
+   "durationMinutes": 30,
+   "instruction": "Read how Bayliss and Starling proved that a chemical released from the gut, not a nerve, told the pancreas to secrete - overturning the belief that all body control was nervous, and coining the word 'hormone.' Notice the scale of the discovery's reach: every emotion you can name - hunger, fear, love, rage - runs partly on hormones, and endocrinology, the study of these messengers, grew directly from that 1902 experiment."
+  },
+  "tags": [
+   "Hormone",
+   "Endocrine",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-insulin",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Insulin (1921)",
+  "teaser": "A Canadian doctor and a medical student extracted insulin from dog pancreases, then treated a dying boy whose blood sugar had never responded to anything. Within a year, 'miracle cures' were reported worldwide - and the patent was sold to a university for one dollar so everyone could afford it.",
+  "imageUrl": "",
+  "byline": "Banting, Best, and Collip",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of insulin",
+   "durationMinutes": 30,
+   "instruction": "Read how Banting and Best tied off dog pancreatic ducts to isolate the islet secretion, and how a biochemist's purification steps made it safe enough for the first human injection - a 14-year-old boy who lived another 40 years on daily shots. Notice the detail that still shapes medicine: the patent was assigned to the University of Toronto for $1, with the founders insisting the discoverers of insulin 'belong to the world.'"
+  },
+  "tags": [
+   "Insulin",
+   "Diabetes",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-vitamin-deficiency",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Vitamins (1912)",
+  "teaser": "The idea that food contains tiny chemicals you can't live without - 'vital amines' - explained diseases like scurvy and beriberi that had killed sailors for centuries. The word was coined in 1912; the last essential vitamin was found in 1948.",
+  "imageUrl": "",
+  "byline": "Casimir Funk",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of vitamins",
+   "durationMinutes": 30,
+   "instruction": "Read how Funk coined 'vitamine' to describe the mysterious trace nutrients in rice bran and citrus, and how the vitamin theory unified a century of scattered observations - scurvy from missing C, rickets from missing D, pellagra from missing niacin. Notice the modern flip: in rich countries, deficiency is rare and the opposite problem - overdosing on supplements - is the new concern, but the discovery of vitamins is still one of the great life-extension events in human history."
+  },
+  "tags": [
+   "Vitamins",
+   "Nutrition",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-dna-fingerprinting",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "DNA Fingerprinting (1984)",
+  "teaser": "A geneticist studying inheritance realized that the repetitive 'junk' parts of DNA differ enough between people to identify them - and his discovery freed the first falsely accused man in 1986. DNA evidence now solves and overturns cases worldwide.",
+  "imageUrl": "",
+  "byline": "Alec Jeffreys",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The invention of DNA fingerprinting",
+   "durationMinutes": 30,
+   "instruction": "Read how Jeffreys, photographing the variable repetitive regions of DNA, saw patterns so individual they looked like barcodes - and how the technique was used to both convict and exonerate within two years of its discovery. Notice the tool's evolution: early DNA profiling needed a bloodstain the size of a coin; modern PCR-based methods work from a single cell, which is why decades-old cold cases can suddenly break open."
+  },
+  "tags": [
+   "DNA",
+   "Forensics",
+   "Invention"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-gene-editing-crispr",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "CRISPR (2012)",
+  "teaser": "A bacterial immune system - discovered in yogurt cultures - became the world's most precise gene-editing tool. With CRISPR, scientists can cut and rewrite DNA in any organism, and the two women who unlocked its mechanism won the 2020 Nobel.",
+  "imageUrl": "",
+  "byline": "Doudna and Charpentier",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of CRISPR gene editing",
+   "durationMinutes": 30,
+   "instruction": "Read how CRISPR was first noticed as a repeating pattern in bacterial DNA - a record of past viral attacks - and how Doudna and Charpentier showed the Cas9 enzyme could be programmed to cut any DNA sequence. Notice the stakes: CRISPR trials are now editing blood cells to cure sickle cell disease, and the tool that started in yogurt is rewriting the rules of medicine, agriculture, and - controversially - the human germline."
+  },
+  "tags": [
+   "CRISPR",
+   "Gene editing",
+   "Invention"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-gmo",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "Genetically Modified Crops (1983-1996)",
+  "teaser": "The first GM plant - a tobacco with a bacterial gene - led to crops engineered for herbicide tolerance and insect resistance that now cover hundreds of millions of acres. GMOs are among the most tested foods ever made, and among the most argued-about.",
+  "imageUrl": "",
+  "byline": "The plant biotechnologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The creation of genetically modified crops",
+   "durationMinutes": 30,
+   "instruction": "Read how the first transgenic plant was made in 1983 by inserting a bacterial gene into tobacco, and how Bt corn - engineered to make its own insecticide - and Roundup-ready soy transformed global agriculture in the 1990s. Notice the split personality of the topic: regulators in most countries found no health difference between GM and conventional foods, while the debate raged on about corporate control, patents, and environmental effects - a conflict between scientific consensus and public distrust."
+  },
+  "tags": [
+   "GMO",
+   "Agriculture",
+   "Biotech"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-cloning",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "Dolly the Sheep (1996)",
+  "teaser": "The first mammal cloned from an adult cell - a sheep named after Dolly Parton, because the cell came from a mammary gland. Dolly lived six years, had six lambs, and proved that a specialized cell's DNA still holds the blueprint for a whole organism.",
+  "imageUrl": "",
+  "byline": "Ian Wilmut and the Roslin Institute",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The cloning of Dolly",
+   "durationMinutes": 30,
+   "instruction": "Read how the Roslin team took a mammary cell's nucleus, put it into an emptied egg, and coaxed it to develop into a lamb - a feat that had been declared impossible because adult DNA seemed permanently specialized. Notice the afterlives of the technique: Dolly's method led to cloned pigs, cattle, and the stem-cell research that followed, while Dolly herself was put down early with a lung disease, which briefly - and wrongly - became a rumor that cloning ages you prematurely."
+  },
+  "tags": [
+   "Cloning",
+   "Dolly",
+   "Biotech"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-stem-cells",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Stem Cells (1961-2006)",
+  "teaser": "Cells that can become any other cell - the body's repair kit. Researchers first found them in bone marrow, then learned to grow them from embryos, and in 2006 a Japanese scientist won the Nobel by making 'induced pluripotent' stem cells from ordinary skin.",
+  "imageUrl": "",
+  "byline": "Till, McCulloch, and Yamanaka",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery and promise of stem cells",
+   "durationMinutes": 30,
+   "instruction": "Read how Till and McCulloch proved stem cells existed by showing single bone-marrow cells could rebuild an entire blood system, and how Shinya Yamanaka's 2006 discovery - adding four genes to skin cells to rewind them to a pluripotent state - made patient-specific stem cells without embryos. Notice the frontier: stem cell therapies already treat blood cancers, and trials are underway for Parkinson's, diabetes, and spinal cord injury - plus a gray market of unproven 'stem cell' clinics to be wary of."
+  },
+  "tags": [
+   "Stem cells",
+   "Medicine",
+   "Nobel"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-germ-theory",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Germ Theory (1861-1880s)",
+  "teaser": "The idea that invisible microbes cause disease - proposed for centuries and always ridiculed - was proven by Pasteur and Koch, who showed that specific germs cause specific diseases. It's the single most lifesaving idea in medicine, born of swan-necked flasks and agar plates.",
+  "imageUrl": "",
+  "byline": "Pasteur and Koch",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The proof of germ theory",
+   "durationMinutes": 30,
+   "instruction": "Read how Pasteur's swan-neck flask experiment showed that boiled broth stays sterile unless microbes enter from the air, and how Koch then proved that a specific bacterium causes a specific disease - the famous postulates that still guide microbiology. Notice the practical explosion: once germs were accepted, hand-washing, sterilization, vaccination, and antibiotics all became rational, and surgery changed from a gamble on infection into a controlled act."
+  },
+  "tags": [
+   "Germ theory",
+   "Pasteur",
+   "Medicine"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-pasteurization",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "Pasteurization (1864)",
+  "teaser": "A French chemist saved the wine industry by showing that brief heating kills the microbes that spoil it - a process named for him that now protects milk, juice, and beer worldwide. The same discovery launched the industrial food era.",
+  "imageUrl": "",
+  "byline": "Louis Pasteur",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The invention of pasteurization",
+   "durationMinutes": 25,
+   "instruction": "Read how Pasteur, called in to fix wine that was souring, found the spoilage was microbial and that heating to about 55-60 degrees killed the troublemakers without ruining the taste. Notice the ripple effects: pasteurization made milk safe to ship to cities, ending a scourge of milk-borne tuberculosis in children, and it became the template for every food-safety standard since - a chemist's fix that quietly saved millions of lives."
+  },
+  "tags": [
+   "Pasteur",
+   "Food",
+   "Invention"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-vaccination-immunology",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Herd Immunity (1923)",
+  "teaser": "When enough people are immune, a disease can't spread - even to those who can't be vaccinated. The concept, first formalized in the 1920s, is why vaccines protect more than the vaccinated, and why falling vaccination rates matter to everyone.",
+  "imageUrl": "",
+  "byline": "W.H. Frost and colleagues",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The concept of herd immunity",
+   "durationMinutes": 25,
+   "instruction": "Read how epidemiologists realized that immunization protects a community beyond the immunized individuals - each vaccinated person is a barrier the disease can't cross, and once enough barriers exist, outbreaks fizzle. Notice the threshold math: for measles, about 95% of the population must be immune to stop transmission, which is why even small dips in vaccination can produce sudden outbreaks in schools and cities."
+  },
+  "tags": [
+   "Immunity",
+   "Vaccine",
+   "Epidemiology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-epidemiology-birth",
+  "categoryId": "BIOLOGY",
+  "subtype": "Science",
+  "name": "Epidemiology (1854)",
+  "teaser": "The science of who gets sick and why was born in a London cholera outbreak when John Snow mapped deaths to a single water pump - before anyone knew germs existed. His map is the founding document of public health.",
+  "imageUrl": "",
+  "byline": "John Snow",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The birth of epidemiology",
+   "durationMinutes": 30,
+   "instruction": "Read how Snow plotted every cholera death on a street map and saw the cluster around the Broad Street pump - and how removing its handle ended the outbreak, even though the 'miasma' theory everyone believed was wrong. Notice what the story teaches: you can be right about the solution while wrong about the mechanism, and epidemiology - tracking patterns of disease - works whether or not you know the cause."
+  },
+  "tags": [
+   "Epidemiology",
+   "Cholera",
+   "Public health"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-antibiotic-mechanism",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "How Antibiotics Work (1940s)",
+  "teaser": "Antibiotics are mostly bacterial poisons - they attack bacterial structures and enzymes that human cells don't have, from cell walls to ribosome assembly. That selectivity is why they can kill bacteria without killing you.",
+  "imageUrl": "",
+  "byline": "The pharmacologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mechanisms of antibiotics",
+   "durationMinutes": 25,
+   "instruction": "Read how penicillin kills bacteria by jamming the enzyme that builds their cell walls - bacteria burst, human cells, which have no such wall, are untouched - and how other antibiotics block bacterial protein synthesis or DNA copying. Notice the fine print: selectivity is never perfect, which is why antibiotics can disturb gut flora, trigger allergies, and why taking them for viruses - which have none of those targets - does nothing at all."
+  },
+  "tags": [
+   "Antibiotic",
+   "Bacteria",
+   "Mechanism"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-resistance-plasmid",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Plasmid Network (1950s)",
+  "teaser": "Bacteria share antibiotic resistance through plasmids - small loops of DNA passed between cells like memo cards, even between unrelated species. A resistance gene from a farm pig can end up in a hospital bacterium within years.",
+  "imageUrl": "",
+  "byline": "The molecular microbiologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How resistance spreads through plasmids",
+   "durationMinutes": 25,
+   "instruction": "Read how plasmids were found to ferry resistance genes between bacteria through 'conjugation' - a bacterial version of mating - and how this horizontal transfer lets resistance move across the tree of life. Notice the public-health consequence: this is why doctors culture infections before choosing antibiotics, and why the 'superbug' problem is global - resistance respects no border and no species."
+  },
+  "tags": [
+   "Resistance",
+   "Plasmid",
+   "Bacteria"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-evolution-antibiotics-lab",
+  "categoryId": "BIOLOGY",
+  "subtype": "Experiment",
+  "name": "Evolution in a Flask (1988)",
+  "teaser": "Richard Lenski has been growing 12 populations of E. coli in his lab since 1988 - more than 70,000 generations - watching evolution happen in real time. In 2016, one population spontaneously evolved the ability to eat citrate, a feat once thought virtually impossible.",
+  "imageUrl": "",
+  "byline": "Richard Lenski",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Lenski's long-term evolution experiment",
+   "durationMinutes": 30,
+   "instruction": "Read how Lenski's flasks of E. coli, transferred daily for decades, have become the world's best-documented case of evolution in action - genome sequences, frozen ancestors, and all. Notice the prize moment: after 31,500 generations, one population evolved to use citrate as a food source, a metabolic shift that E. coli normally can't make - and the frozen ancestor samples let the team pinpoint the exact mutations that made it possible."
+  },
+  "tags": [
+   "Evolution",
+   "E. coli",
+   "Experiment"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-molecular-clock",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Molecular Clock (1962)",
+  "teaser": "Mutations accumulate at a roughly steady rate, so comparing DNA between species reveals when they split - the 'molecular clock' that dates everything from the human-chimp split to the origin of HIV. It also clocked an unsettling fact: humans and bananas share about 40% of their genes.",
+  "imageUrl": "",
+  "byline": "Emile Zuckerkandl and Linus Pauling",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The molecular clock",
+   "durationMinutes": 30,
+   "instruction": "Read how Zuckerkandl and Pauling noticed that proteins from different species differ more the longer they've been apart - a clock you can read - and how calibrating it with known fossil dates lets geneticists date unknown splits. Notice the sanity check it provides: the clock says humans and chimps diverged about 6-8 million years ago, matching the oldest hominin fossils, and it puts the last common ancestor of all life around 3.5-4 billion years ago."
+  },
+  "tags": [
+   "Molecular clock",
+   "Evolution",
+   "DNA"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-comparative-genomics",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "We Share 98.8% with Chimps (1975-2005)",
+  "teaser": "When genome sequencing compared humans and chimpanzees, the surprise wasn't the 98.8% similarity - it was that such similar genomes make such different creatures. The differences lie in when and where the shared genes are switched on.",
+  "imageUrl": "",
+  "byline": "The comparative genomics teams",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Comparing human and chimp genomes",
+   "durationMinutes": 30,
+   "instruction": "Read how sequencing both genomes revealed a handful of percent difference plus thousands of gene duplications and deletions - and how the real story is regulatory: many human-chimp gene sequences are identical, but their expression patterns in brain and other tissues differ sharply. Notice the philosophical ripple: the smallness of the genetic gap doesn't diminish human uniqueness, it relocates it - into development, regulation, and culture rather than raw gene count."
+  },
+  "tags": [
+   "Genome",
+   "Human",
+   "Chimpanzee"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-neanderthal-dna",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Neanderthal DNA in You (2010)",
+  "teaser": "The Neanderthal genome - sequenced from 40,000-year-old bone - revealed that most living humans outside Africa carry 1-2% Neanderthal DNA. Your immune system, skin, and even your risk of depression partly reflect genes from a species that went extinct 40,000 years ago.",
+  "imageUrl": "",
+  "byline": "Svante Paabo",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The sequencing of the Neanderthal genome",
+   "durationMinutes": 30,
+   "instruction": "Read how Paabo's team extracted DNA from ancient bones - a contamination nightmare - and assembled the first Neanderthal genome, then compared it to living humans. Notice the intimate findings: Neanderthal genes left in modern populations affect immune responses, hair, and pain sensitivity, and their hybridization with Homo sapiens happened multiple times - the 'extinct' species lives on, diluted, in most of us."
+  },
+  "tags": [
+   "Neanderthal",
+   "Genome",
+   "Human origins"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-denisovans",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Denisovans (2010)",
+  "teaser": "A pinky bone from a Siberian cave yielded a genome from a hominin nobody knew existed - the Denisovans, whose DNA survives most strongly in Papuan and Australian peoples. We know their genes better than their bones.",
+  "imageUrl": "",
+  "byline": "The Max Planck team",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of the Denisovans",
+   "durationMinutes": 30,
+   "instruction": "Read how DNA from a girl's finger bone, found in Denisova Cave, matched neither Neanderthals nor modern humans - a new branch of humanity identified from a single fragment. Notice the upside-down archaeology: we may know more about Denisovan genetics (including an immune variant and high-altitude adaptation) than about their anatomy, because no complete skeleton has been found - a species that exists mostly as data."
+  },
+  "tags": [
+   "Denisovan",
+   "Genome",
+   "Human origins"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-luca",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Last Universal Ancestor (c. 1970s)",
+  "teaser": "Every living thing on Earth descends from a single population - LUCA, the Last Universal Common Ancestor - that lived about 3.8 billion years ago. Its genes are still written in every cell you own, from your ribosomes to your DNA repair machines.",
+  "imageUrl": "",
+  "byline": "The molecular evolutionists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The search for LUCA",
+   "durationMinutes": 30,
+   "instruction": "Read how comparing core genes across all domains of life - bacteria, archaea, eukaryotes - reveals a common core that must have existed in the universal ancestor, including the genetic code itself. Notice what LUCA was and wasn't: probably a heat-loving microbe in an ocean vent, almost certainly one population among many - it's the ancestor that survived, not the only life at the time, and its genetic machinery is the reason you can read your own genome today."
+  },
+  "tags": [
+   "LUCA",
+   "Evolution",
+   "Origins"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-rna-world",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The RNA World (1986)",
+  "teaser": "Before DNA and proteins, life may have been made of RNA alone - a molecule that can both store information and speed up reactions. The discovery that RNA can act as an enzyme made the 'RNA world' hypothesis the leading story of life's origin.",
+  "imageUrl": "",
+  "byline": "Walter Gilbert",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The RNA world hypothesis",
+   "durationMinutes": 30,
+   "instruction": "Read how the hypothesis was named by Walter Gilbert after the discovery that some RNA molecules can catalyze chemical reactions - self-splicing introns - making RNA a plausible do-it-all molecule for early life. Notice the experimental payoff: labs have evolved RNA enzymes in test tubes and even built simple RNA-based replicators, supporting the idea that a chemical world of RNA preceded biology's DNA-protein division of labor."
+  },
+  "tags": [
+   "RNA",
+   "Origins",
+   "Life"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-abiogenesis-experiment",
+  "categoryId": "BIOLOGY",
+  "subtype": "Experiment",
+  "name": "The Miller-Urey Experiment (1953)",
+  "teaser": "Two graduate students zapped a flask of water, methane, ammonia, and hydrogen with sparks - simulating lightning on early Earth - and produced amino acids, the building blocks of proteins. It was the first lab test of how life's chemistry could begin.",
+  "imageUrl": "",
+  "byline": "Stanley Miller and Harold Urey",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Miller-Urey experiment",
+   "durationMinutes": 30,
+   "instruction": "Read how the 1953 experiment, built on Oparin's and Haldane's theories of a reducing early atmosphere, turned simple gases into organic molecules in a week - and how the amino acids it made are the same ones life uses. Notice the modern caveat: later analyses suggest the early atmosphere may have been less reducing than Miller assumed, and the experiment's real legacy is showing that organic chemistry is easy under plausible conditions - not that lightning made life, but that it could have made life's parts."
+  },
+  "tags": [
+   "Origins",
+   "Experiment",
+   "Chemistry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-panspermia",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Panspermia (1903-present)",
+  "teaser": "The idea that life arrived on Earth from space - hitchhiking on meteorites or comets - refuses to die, because microbes have proven astonishingly tough: some have survived months in the vacuum of space on the outside of the ISS.",
+  "imageUrl": "",
+  "byline": "Arrhenius and the astrobiologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The panspermia hypothesis",
+   "durationMinutes": 25,
+   "instruction": "Read how Svante Arrhenius proposed in 1903 that spores could be pushed between planets by radiation pressure, and how modern experiments found bacteria surviving exposed to space for years on the International Space Station's exterior. Notice the current version of the idea: 'lithopanspermia' - life hitching rides inside rocks blasted off planets by impacts - is testable, and it makes the question of whether we're alone a question about how widely life spreads, not just where it starts."
+  },
+  "tags": [
+   "Panspermia",
+   "Space",
+   "Origins"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-extremophile-space",
+  "categoryId": "BIOLOGY",
+  "subtype": "Experiment",
+  "name": "Life in Space (2007-2019)",
+  "teaser": "When scientists exposed dried bacteria, lichens, and even tiny animals called tardigrades to the vacuum, radiation, and cold of open space on the ISS exterior, most died - but the tardigrades survived, and some DNA even came back intact. Life's hardiness has redefined what we look for on Mars.",
+  "imageUrl": "",
+  "byline": "The ESA and NASA astrobiologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Testing organisms in space",
+   "durationMinutes": 30,
+   "instruction": "Read how the EXPOSE experiments flew samples on the ISS exterior and found that lichens and tardigrades can survive vacuum and UV radiation in a dormant state - and how these results shape planetary protection rules for Mars missions. Notice the real surprise: while most cells were killed by radiation, the survivors included organisms from Antarctica, showing that the most 'alien' place on Earth is where we find life's limits - and those limits are wider than anyone predicted."
+  },
+  "tags": [
+   "Space",
+   "Life",
+   "Experiment"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-tardigrades",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Tardigrades (1773)",
+  "teaser": "Tiny 'water bears' - less than a millimeter long - can survive boiling, freezing, radiation, vacuum, and decades without water, by drying into a glassy state called anhydrobiosis. They're the toughest animals known, and scientists once shot them from a gun to test their limits.",
+  "imageUrl": "",
+  "byline": "Johann Goeze and the tardigrade researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The extraordinary survival of tardigrades",
+   "durationMinutes": 25,
+   "instruction": "Read how tardigrades, first described in 1773, turn into 'tuns' - shriveled, glass-like balls - when dried, and can revive decades later, and how experiments have exposed them to space, radiation, and pressures of 6,000 atmospheres. Notice the catch: many extreme-survival claims come from the dried state, and some of the most famous tests were only done on a few species - but the water bear's toughness is real, and it's now a model organism for studying stress resistance and even cryopreservation."
+  },
+  "tags": [
+   "Tardigrade",
+   "Extremophile",
+   "Survival"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bioluminescence",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Living Light (c. 1880s)",
+  "teaser": "Fireflies, glow-worms, jellyfish, and deep-sea fish make their own light - using an enzyme called luciferase that turns chemical energy into photons with almost perfect efficiency. The light of a firefly is the coolest known: it wastes almost no heat.",
+  "imageUrl": "",
+  "byline": "The bioluminescence researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The chemistry of living light",
+   "durationMinutes": 30,
+   "instruction": "Read how bioluminescence works through luciferin and luciferase - a reaction so efficient that firefly light is called 'cold light' - and how different animals use it to lure prey, warn predators, or attract mates in synchrony. Notice the scientific payoff: green fluorescent protein (GFP), discovered in a glowing jellyfish, is now one of the most-used tools in biology, letting researchers watch genes light up inside living cells - a discovery that won the 2008 Nobel."
+  },
+  "tags": [
+   "Bioluminescence",
+   "Firefly",
+   "Light"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-camouflage",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Camouflage (c. 1900)",
+  "teaser": "From the peppered moth to the chameleon, animals hide by matching backgrounds, breaking outlines, and even changing color in real time. The study of camouflage inspired the dazzle-painted ships of World War I - warships covered in stripes that made range-finding impossible.",
+  "imageUrl": "",
+  "byline": "The naturalists and naval designers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The biology of camouflage",
+   "durationMinutes": 30,
+   "instruction": "Read how camouflage works through background matching, disruptive coloration that breaks the body's outline, and countershading - dark on top, light below, which cancels the shadow that gives animals away. Notice the crossover: when the US entered World War I, a zoologist named Abbott Thayer advised the Navy on disruptive camouflage, and his ship designs were the first 'dazzle' warships - biology and military engineering learning from each other."
+  },
+  "tags": [
+   "Camouflage",
+   "Evolution",
+   "Behavior"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mimicry",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Mimicry (1862)",
+  "teaser": "Some harmless animals wear the colors of dangerous ones - a trick called mimicry, discovered by Henry Bates among butterflies in the Amazon. The mimic's bluff works because predators learn to avoid the pattern after tasting the real thing.",
+  "imageUrl": "",
+  "byline": "Henry Walter Bates",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Batesian mimicry",
+   "durationMinutes": 30,
+   "instruction": "Read how Bates noticed that edible butterflies in the Amazon mimicked the warning colors of poisonous ones, and how he realized the bluff depends on frequency - if mimics become too common, predators 'forget' the danger and both species suffer. Notice the strangest cases: some harmless snakes mimic deadly coral snakes so precisely that herpetologists use a rhyme - 'red on yellow kills a fellow' - to tell them apart, and orchids that mimic female bees to get pollinated by males."
+  },
+  "tags": [
+   "Mimicry",
+   "Evolution",
+   "Butterfly"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-coevolution",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Coevolution (1964)",
+  "teaser": "Species evolve in response to each other - flowers and their pollinators, predators and prey, parasites and hosts - in an arms race with no finish line. The concept was named by Paul Ehrlich and Peter Raven studying butterflies and their toxic host plants.",
+  "imageUrl": "",
+  "byline": "Ehrlich and Raven",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The concept of coevolution",
+   "durationMinutes": 30,
+   "instruction": "Read how Ehrlich and Raven showed that butterflies and the plants they feed on have driven each other's evolution - plants evolving toxins, butterflies evolving resistance and then new enzymes - for millions of years. Notice the signature of coevolution everywhere: a hummingbird's bill matches a flower's tube length, a fig wasp fits its fig like a key, and the red queen's race the theory describes - running as fast as you can just to stay in place - is the dynamic behind much of life's diversity."
+  },
+  "tags": [
+   "Coevolution",
+   "Evolution",
+   "Ecology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-keystone-species",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Keystone Species (1969)",
+  "teaser": "A predator removes a link in the food web and the whole ecosystem collapses - the 'keystone species' idea, born when Robert Paine removed starfish from a tide pool and the mussels took over, wiping out 15 other species. One animal can hold an ecosystem together.",
+  "imageUrl": "",
+  "byline": "Robert Paine",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The keystone species concept",
+   "durationMinutes": 30,
+   "instruction": "Read how Paine's tide-pool experiment - pulling out every starfish from a small patch of Washington coast - let mussels crowd out the other species, proving that a single predator's presence supports diversity. Notice the concept's reach: sea otters, wolves in Yellowstone, and elephants are all keystone species whose loss ripples through their ecosystems - and the idea reshaped conservation, which now protects keystone animals as much as habitats."
+  },
+  "tags": [
+   "Ecology",
+   "Keystone",
+   "Ecosystem"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-food-web",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Food Web (1927)",
+  "teaser": "Who eats whom - the tangled map of feeding relationships that connects a plankton bloom to a whale, and a leaf to a hawk. The concept of food chains and webs showed that ecosystems are networks, not ladders.",
+  "imageUrl": "",
+  "byline": "Charles Elton",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The concept of food webs",
+   "durationMinutes": 25,
+   "instruction": "Read how Charles Elton formalized food chains and food webs in his 1927 textbook, showing energy flowing from plants to herbivores to predators, and how ecologists now measure the whole network - including the microbial loops that recycle nutrients at every level. Notice the practical use: when a pesticide is sprayed, food-web thinking explains why hawks - at the top - accumulate the poison, which is how DDT was traced to thinning eagle eggs and banned."
+  },
+  "tags": [
+   "Ecology",
+   "Food web",
+   "Energy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-carrying-capacity",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "Carrying Capacity (c. 1900)",
+  "teaser": "Every habitat can support only so many of a species - the 'carrying capacity' beyond which populations crash. The classic example is reindeer on an island: introduced in 1944, they multiplied to 6,000, then starved down to 42.",
+  "imageUrl": "",
+  "byline": "The ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Carrying capacity and population crashes",
+   "durationMinutes": 25,
+   "instruction": "Read how the concept of carrying capacity explains the classic boom-and-bust of species introduced to islands - the reindeer of St. Matthew Island ate their lichen to nothing and died in one winter - and how populations overshoot their limits when predators or disease are missing. Notice the human application that makes it uncomfortable: ecologists have long pointed out that the same math applies to human populations, and the debate over whether technology can raise our carrying capacity is one of the oldest fights in environmental science."
+  },
+  "tags": [
+   "Ecology",
+   "Population",
+   "Limits"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-ecological-succession",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Ecological Succession (1899)",
+  "teaser": "Bare rock becomes moss, then grass, then shrubs, then forest - a predictable sequence called succession, first studied on the sand dunes of Lake Michigan. Each community changes the soil until the next one can take over.",
+  "imageUrl": "",
+  "byline": "Henry Cowles",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Ecological succession",
+   "durationMinutes": 25,
+   "instruction": "Read how Cowles walked the Indiana dunes and realized that the plant communities were not random but a ladder of change - each stage preparing the ground for the next, from beach grass to oak forest. Notice the modern revision: ecologists now know succession is messier than the classic ladder - disturbances, chance, and arriving species all shape it - but the core idea, that disturbed ground follows predictable paths of recovery, still guides everything from fire management to restoring abandoned farmland."
+  },
+  "tags": [
+   "Ecology",
+   "Succession",
+   "Change"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-trophic-cascade",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Yellowstone Effect (1995)",
+  "teaser": "When wolves were returned to Yellowstone in 1995, they scared elk off the riverbanks, letting willows regrow, which brought back beavers, songbirds, and fish - a 'trophic cascade' running from the top predator down to the river itself. One species' return changed the course of rivers.",
+  "imageUrl": "",
+  "byline": "The Yellowstone wolf reintroduction",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Trophic cascades in Yellowstone",
+   "durationMinutes": 30,
+   "instruction": "Read how the reintroduction of 14 wolves in 1995 set off a cascade - elk browsing shifted, willows and aspens recovered, beavers returned, and even the rivers' shape changed as bank vegetation held the soil. Notice the scientific caution: recent studies have questioned how much of the 'cascade' is due to wolves versus drought, elk numbers, and other factors - the Yellowstone story is both a conservation triumph and a lesson in how hard it is to prove causality in ecology."
+  },
+  "tags": [
+   "Wolf",
+   "Ecosystem",
+   "Conservation"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-invasive-species",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Cane Toad Disaster (1935)",
+  "teaser": "Australia imported cane toads to eat beetles that were destroying sugar cane - and the toads ate everything but the beetles, then poisoned the native predators that ate them. There are now 200 million toads, spreading across a continent that can't stop them.",
+  "imageUrl": "",
+  "byline": "The Australian sugar growers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The cane toad invasion",
+   "durationMinutes": 30,
+   "instruction": "Read how the 1935 introduction - 102 toads released in Queensland - became one of the great cautionary tales of invasive species, as the toads' poison killed quolls, snakes, and crocodiles that tried to eat them, and nothing native eats them back. Notice the arms race that followed: the toads are now evolving longer legs to spread faster, while native predators are evolving to avoid them - an unintended evolution experiment running at continental scale."
+  },
+  "tags": [
+   "Invasive species",
+   "Toad",
+   "Australia"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-biodiversity-count",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "How Many Species? (1980s)",
+  "teaser": "We have named about 1.8 million species - and estimates of the real total range from 8 million to 100 million. In the 1980s, a scientist counted the insects in a single Panamanian tree and found 1,200 new species, some of which lived only on that one tree.",
+  "imageUrl": "",
+  "byline": "Terry Erwin",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Counting the species of the world",
+   "durationMinutes": 30,
+   "instruction": "Read how Erwin fogged a rainforest tree with insecticide and collected 1,200 beetle species new to science from its canopy alone, then multiplied up to guess the global total - a figure that has been debated ever since. Notice the stakes behind the counting: most of Earth's species are still unnamed, and habitat loss is removing them faster than we can catalog them - some estimates say we're losing species before science ever meets them."
+  },
+  "tags": [
+   "Biodiversity",
+   "Species",
+   "Counting"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-extinction-rates",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Sixth Extinction (1980s)",
+  "teaser": "The fossil record shows five mass extinctions - and many biologists argue we're now in a sixth, caused by one species: us. The rate of loss is estimated at 100-1,000 times the natural background, and unlike the others, this one has a choice in its future.",
+  "imageUrl": "",
+  "byline": "The conservation biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The sixth extinction",
+   "durationMinutes": 30,
+   "instruction": "Read how the five great extinctions - the asteroid that ended the dinosaurs, the Permian catastrophe that killed 90% of species - are visible in the rock record, and how current extinction rates are estimated by comparing fossil turnover with modern loss. Notice the contentious part: skeptics note that 'sixth extinction' claims rely on estimates and extrapolation, while conservationists counter that the trend lines - habitat loss, climate change, overexploitation - are measured facts, and the debate is really about how fast we're running, not whether."
+  },
+  "tags": [
+   "Extinction",
+   "Conservation",
+   "Biodiversity"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-coral-reef",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Coral Reef (c. 1800s)",
+  "teaser": "Coral reefs are built by animals - tiny polyps that glue limestone skeletons together and feed on algae that photosynthesize inside them. A reef is a partnership so close that when the water warms, the algae leave and the reef turns ghost-white: bleaching.",
+  "imageUrl": "",
+  "byline": "The coral biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The biology of coral reefs",
+   "durationMinutes": 30,
+   "instruction": "Read how a reef is a city of polyps with symbiotic algae that hand over up to 90% of their food - and how a temperature rise of just one degree can break the partnership, causing bleaching that can kill the reef. Notice the scale of the loss: half the Great Barrier Reef has bleached since 2016, and reefs that house a quarter of all marine species are among the fastest-disappearing ecosystems on Earth."
+  },
+  "tags": [
+   "Coral",
+   "Reef",
+   "Ocean"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-rainforest-strata",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Rainforest Canopy (1980s)",
+  "teaser": "Most rainforest life lives in the canopy - 30 meters up - in a world of leaves, orchids, and animals that never touch the ground. Scientists only began exploring it properly in the 1980s, with rope systems and canopy walkways.",
+  "imageUrl": "",
+  "byline": "The canopy biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The rainforest canopy",
+   "durationMinutes": 25,
+   "instruction": "Read how the canopy - a habitat as distinct from the forest floor as the ocean surface is from the deep - holds a large share of Earth's species, many still unnamed, and how biologists reached it first with mountaineering gear and later with cranes and walkways. Notice the fragility: when a forest is logged, the canopy goes first, and with it the richest layer of life - which is why canopy research has become a front line of conservation biology."
+  },
+  "tags": [
+   "Rainforest",
+   "Canopy",
+   "Ecology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-deep-ocean-life",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Life Without Sunlight (1977-2010s)",
+  "teaser": "The deep ocean below 1,000 meters is dark, cold, and crushing - yet it may hold more life than the sunlit world, from giant squid to microbes feeding on oil and stone. Every dive finds species no one has seen before.",
+  "imageUrl": "",
+  "byline": "The deep-sea expeditions",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of deep-ocean life",
+   "durationMinutes": 30,
+   "instruction": "Read how the deep sea was long assumed nearly lifeless - Victorian naturalists called it 'azoic' - until sampling and submersibles found worms, fish, and vast microbial communities surviving on chemosynthesis and falling marine snow. Notice the frontier still open: most deep-sea species are unknown, and mining companies are now seeking metals on the seabed before biology has catalogued what lives there - a race between discovery and exploitation."
+  },
+  "tags": [
+   "Ocean",
+   "Deep sea",
+   "Life"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-migration-butterfly",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Monarch Migration (1970s)",
+  "teaser": "Every autumn, monarch butterflies fly up to 3,000 miles from Canada to a few mountain groves in Mexico - a journey no single butterfly completes; it takes four generations to get there and one super-generation to return. How they navigate is still partly a mystery.",
+  "imageUrl": "",
+  "byline": "The monarch researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The monarch butterfly migration",
+   "durationMinutes": 25,
+   "instruction": "Read how monarchs find overwintering groves they have never seen, guided by the sun's position, Earth's magnetic field, and possibly a built-in compass in their antennae - and how the returning generation lives eight times longer than its parents to make the trip. Notice the danger to the migration: the milkweed the caterpillars need has been cleared across the Midwest, and monarch numbers have fallen so far that the migration is now considered an endangered phenomenon."
+  },
+  "tags": [
+   "Monarch",
+   "Migration",
+   "Butterfly"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bird-navigation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "How Birds Navigate (1950s)",
+  "teaser": "Migrating birds cross continents and oceans, then return to the same nest. The evidence points to a sun compass, a star compass, and a magnetic sense - some birds literally see Earth's magnetic field as a pattern overlaid on their vision.",
+  "imageUrl": "",
+  "byline": "The ornithologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The navigation of migratory birds",
+   "durationMinutes": 30,
+   "instruction": "Read how experiments with cages and altered magnetic fields showed birds use the sun's arc, the rotation of the stars, and an internal magnetic compass - and how studies found magnetic receptors in some birds' eyes that may let them see the field's direction. Notice the open questions: how a young bird knows its destination on a first migration, and how urbanization and light pollution are confusing the navigators - with birds colliding with lit buildings in the tens of millions each year."
+  },
+  "tags": [
+   "Migration",
+   "Birds",
+   "Navigation"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-elephant-communication",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Elephants' Infrasound (1984)",
+  "teaser": "Elephants talk in rumbles too low for humans to hear - infrasound that travels miles through the ground and air. Researchers discovered the hidden channel when they noticed elephants reacting to calls they couldn't hear.",
+  "imageUrl": "",
+  "byline": "Katy Payne",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of elephant infrasound",
+   "durationMinutes": 25,
+   "instruction": "Read how Katy Payne, sitting among elephants, felt a throbbing in the air she couldn't hear and realized the animals were communicating below human hearing - and how those rumbles coordinate herds, warn of danger, and even summon distant family members. Notice the ground-shaking extension: elephants also produce seismic vibrations they may feel through their feet, giving them a communication network that works through hills and forests - a channel of conversation we're only beginning to decode."
+  },
+  "tags": [
+   "Elephant",
+   "Communication",
+   "Sound"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-whale-song",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Whale Song (1967)",
+  "teaser": "Humpback whales sing songs that last up to 30 minutes, repeat for hours, evolve year by year, and are shared across entire ocean populations - a cultural tradition in a non-human animal. The recordings changed public opinion and helped end commercial whaling.",
+  "imageUrl": "",
+  "byline": "Roger Payne",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of humpback whale song",
+   "durationMinutes": 30,
+   "instruction": "Read how Roger Payne's recordings revealed that whales sing structured, evolving songs - all the males in a population learn the new version each season, a chain of cultural transmission passed like a folk song. Notice the political power of the discovery: Payne's album of whale songs, released in 1970, sold millions and is credited with helping turn the public against whaling - a scientific recording that became an environmental anthem."
+  },
+  "tags": [
+   "Whale",
+   "Song",
+   "Culture"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-tool-use-animals",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Animal Tools (1960)",
+  "teaser": "Jane Goodall watched a chimpanzee strip a twig, poke it into a termite mound, and fish out a meal - a moment that forced science to redefine what separates humans from animals. Since then, crows, dolphins, octopuses, and even fish have been caught using tools.",
+  "imageUrl": "",
+  "byline": "Jane Goodall",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of tool use in animals",
+   "durationMinutes": 30,
+   "instruction": "Read how Goodall's 1960 observation - a chimp named David Greybeard using grass stems to fish termites - made headlines because 'man the toolmaker' was supposed to be uniquely human, and how the definition has been shrinking ever since as more species are documented using objects. Notice the current frontier: New Caledonian crows craft hooked tools and pass the craft on culturally, and octopuses carry coconut shells as portable shelters - tool use, it turns out, is a general animal trick, not a human patent."
+  },
+  "tags": [
+   "Tools",
+   "Chimpanzee",
+   "Cognition"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-animal-culture",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Animal Culture (1950s)",
+  "teaser": "A single macaque on a Japanese island learned to wash sweet potatoes in the sea - and the habit spread through the troop, passed from mother to child for generations. 'Culture' - learned, shared behavior - is no longer a human-only word.",
+  "imageUrl": "",
+  "byline": "Kinji Imanishi and the Japanese primatologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of culture in animals",
+   "durationMinutes": 30,
+   "instruction": "Read how the 'potato-washing monkey' Imo and her troop showed behavior spreading by social learning, not instinct, and how researchers since then have documented local traditions in whales, birds, and apes - different dialects of song, different tool techniques, in different groups. Notice the scientific stake: if animals have culture, then some of their behavior is not genetically determined but historical, and the line between human and animal minds has to be redrawn."
+  },
+  "tags": [
+   "Culture",
+   "Monkey",
+   "Learning"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-octopus-intelligence",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Octopus Mind (2000s)",
+  "teaser": "An octopus has nine brains - one central and eight in its arms - and can solve puzzles, open jars, escape tanks, and even recognize individual people. Its intelligence evolved on a completely separate branch of the tree of life, making it our best example of an alien mind on Earth.",
+  "imageUrl": "",
+  "byline": "The cephalopod researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The intelligence of octopuses",
+   "durationMinutes": 30,
+   "instruction": "Read how octopuses' distributed nervous system lets each arm act with local autonomy - which is why a severed arm can still crawl - and how their problem-solving, camouflage control, and memory rival some vertebrates. Notice the philosophical hook: the last common ancestor of octopuses and humans was a simple worm-like creature, so octopus intelligence is a second, independent experiment in complex minds - the closest thing to meeting an alien intelligence without leaving the planet."
+  },
+  "tags": [
+   "Octopus",
+   "Intelligence",
+   "Mind"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-corvid-cognition",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Crow's Mind (2002)",
+  "teaser": "New Caledonian crows make hooked tools from twigs, plan several steps ahead, and remember faces for years - tests that place their intelligence alongside apes. A crow named Betty bent a wire into a hook to lift a bucket, a problem she'd never seen before.",
+  "imageUrl": "",
+  "byline": "The corvid researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The intelligence of crows",
+   "durationMinutes": 25,
+   "instruction": "Read how experiments with captive crows show causal reasoning, tool crafting, and even a rudimentary understanding of water displacement - and how wild crows recognize and mob individual researchers who once trapped them. Notice the lesson for brain size: a crow's brain is walnut-sized, yet packed with neurons at a density rivaling primates - a reminder that intelligence doesn't require a big brain, just the right wiring."
+  },
+  "tags": [
+   "Crow",
+   "Intelligence",
+   "Tool use"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-dolphin-self-awareness",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Mirror Test (1970)",
+  "teaser": "A dolphin examined its own body in a mirror, spending time inspecting marks placed on its skin - behavior that suggests self-recognition, an ability once considered uniquely human. Elephants, magpies, and great apes have since passed the same test.",
+  "imageUrl": "",
+  "byline": "Diana Reiss and Lori Marino",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mirror test and self-awareness",
+   "durationMinutes": 25,
+   "instruction": "Read how the mirror test - marking an animal and seeing if it investigates the mark in a mirror - was passed by dolphins, who twirled to inspect their own tail flukes, and by elephants, who touched the marks on their own heads. Notice the test's limits: failure in the mirror test doesn't prove a lack of self-awareness - dogs fail it but recognize their own scent - and the test measures one kind of self-knowledge, not a consciousness scoreboard."
+  },
+  "tags": [
+   "Dolphin",
+   "Self-awareness",
+   "Mirror test"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bats-echolocation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Echolocation (1938)",
+  "teaser": "Bats 'see' with sound - emitting ultrasonic calls and reading the returning echoes, building a 3-D image in darkness at astonishing speed. The discovery, made with a microphone that could hear bat frequencies, upended the idea that bats navigate by touch or smell.",
+  "imageUrl": "",
+  "byline": "Griffin and Galambos",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of echolocation in bats",
+   "durationMinutes": 30,
+   "instruction": "Read how Donald Griffin, using equipment built to detect the ultrasonic calls, showed that bats fly perfectly through invisible wires when they can hear their own echoes but crash when deafened - the proof that echolocation, not eyes, guides them. Notice the engineering echo: sonar and radar were developed on the same principles during World War II, and biologists and engineers have been stealing ideas from bat calls ever since, from self-driving sensors to ultrasound imaging."
+  },
+  "tags": [
+   "Bat",
+   "Echolocation",
+   "Sound"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bioluminescence-deep",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Light in the Deep (2000s)",
+  "teaser": "In the darkness below 1,000 meters, most animals make their own light - researchers estimate three-quarters of deep-sea species are bioluminescent. They use it to attract prey, confuse predators, and communicate in a world where darkness is permanent.",
+  "imageUrl": "",
+  "byline": "The deep-sea biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Bioluminescence in the deep sea",
+   "durationMinutes": 30,
+   "instruction": "Read how deep-sea surveys find that a majority of species - from jellyfish to fish with light organs under their eyes - produce light, often in blue-green wavelengths that travel furthest in water, and how some use counter-illumination to match the down-welling light and erase their silhouettes. Notice the human payoff: the glowing proteins and luciferases from these animals are now standard lab tools, and the genetic trick that lights up a deep-sea jellyfish is why you can watch glowing cells in biology class."
+  },
+  "tags": [
+   "Bioluminescence",
+   "Deep sea",
+   "Light"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mycorrhizae",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Wood Wide Web (1997)",
+  "teaser": "Most plants are connected underground by fungal threads - mycorrhizal networks that trade sugar for nutrients between roots, and can even move water, warning signals, and carbon between neighboring trees. The 'wood wide web' is real, though its size is debated.",
+  "imageUrl": "",
+  "byline": "Suzanne Simard",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of mycorrhizal networks",
+   "durationMinutes": 30,
+   "instruction": "Read how Simard's experiments with radioactive isotopes showed that a paper birch and a Douglas fir traded carbon through shared fungal connections - a tree 'mothering' seedlings of another species - and how the finding triggered a flood of research on underground networks. Notice the scientific caution that followed: ecologists warn the popular 'mother tree' framing overstates the networks' scale and intent - the fungal connections are real, but whether they're cooperation, competition, or accident is still being sorted out."
+  },
+  "tags": [
+   "Fungi",
+   "Trees",
+   "Network"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-plant-communication",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Plants Talk (1983)",
+  "teaser": "When a plant is chewed by insects, it releases chemicals that warn its neighbors - which then prepare their own defenses, sometimes by recruiting the insect's predators. The 'talking plants' idea was ridiculed, then replicated dozens of times.",
+  "imageUrl": "",
+  "byline": "The plant signaling researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Chemical communication between plants",
+   "durationMinutes": 25,
+   "instruction": "Read how the discovery that wounded plants emit volatile chemicals - which intact neighbors detect and respond to - survived years of skepticism and is now well established, including the classic case of acacia trees that warn each other and the herbivores that suffer for it. Notice the careful wording: plants don't 'scream' or 'choose' to help each other; they emit cues that happen to be perceivable, and the receivers' response evolved because it helps them - signaling, yes; conversation, only in a metaphor."
+  },
+  "tags": [
+   "Plant",
+   "Signaling",
+   "Communication"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-carnivorous-plants",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Meat-Eating Plants (1875)",
+  "teaser": "Darwin spent 16 years on carnivorous plants and wrote a whole book about them - 'I care more about Drosera than the origin of all the species in the world.' Venus flytraps, pitcher plants, and sundews capture insects to survive on poor soils.",
+  "imageUrl": "",
+  "byline": "Charles Darwin",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The biology of carnivorous plants",
+   "durationMinutes": 30,
+   "instruction": "Read how carnivorous plants evolved independently at least six times in nutrient-poor habitats, using modified leaves as traps - snap traps, pitfall pitchers, sticky sundews - and how Darwin's painstaking feeding experiments showed exactly what the plants digest and absorb. Notice the paradox at the heart of them: they still photosynthesize, and the animals are a supplement, not a meal plan - a plant that eats insects to buy the nitrogen its swampy home can't provide."
+  },
+  "tags": [
+   "Plant",
+   "Carnivorous",
+   "Darwin"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-venus-flytrap",
+  "categoryId": "BIOLOGY",
+  "subtype": "Structure",
+  "name": "The Venus Flytrap (1760s)",
+  "teaser": "The flytrap snaps shut in a tenth of a second, but only after two hairs are touched within 20 seconds - a counting mechanism that prevents wasting energy on false alarms. It's one of the fastest movements in the plant kingdom.",
+  "imageUrl": "",
+  "byline": "Arthur Dobbs and John Ellis",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mechanics of the Venus flytrap",
+   "durationMinutes": 25,
+   "instruction": "Read how the flytrap's hinged leaves sense prey through trigger hairs - two touches required, so raindrops don't set it off - and how the trap's closing uses stored pressure and a rapid cell-volume change, the botanical equivalent of a snap. Notice the trap's clever economy: if it snaps shut on a drop of water or an ant too small to be worth digesting, it reopens in a day; only a meal worth eating keeps it closed and triggers the slow digestive phase."
+  },
+  "tags": [
+   "Venus flytrap",
+   "Plant",
+   "Movement"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-plant-clock",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Plants Keep Time (1729-2010s)",
+  "teaser": "Before clocks existed, a French scientist noticed his mimosa plant opening and closing its leaves on a daily rhythm even in constant darkness - the first recorded observation of a biological clock. Plants use theirs to time flowering, photosynthesis, and defense.",
+  "imageUrl": "",
+  "byline": "Jean-Jacques d'Ortous de Mairan",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Circadian rhythms in plants",
+   "durationMinutes": 25,
+   "instruction": "Read how de Mairan's 1729 experiment - mimosa leaves kept moving in a dark closet - showed that daily rhythms are built in, not just responses to light, and how plant clocks are now known to time everything from stomatal opening to when a plant produces its chemical defenses. Notice the agricultural payoff: understanding the plant clock has helped breed crops for longer days and better yields, and researchers are even working on clock-matched lighting for greenhouses - farming by the plant's own schedule."
+  },
+  "tags": [
+   "Plant",
+   "Clock",
+   "Rhythm"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-plant-defenses",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Plants Fight Back (1970s)",
+  "teaser": "Plants can't run, but they can fight: thorns, toxins, and chemical weapons that make leaves taste terrible or even kill the herbivore. Some plants change their defenses on a schedule - bitter at night, milder by day, when the herbivores that matter are active.",
+  "imageUrl": "",
+  "byline": "The chemical ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The defenses of plants",
+   "durationMinutes": 30,
+   "instruction": "Read how plants deploy physical armor (thorns, silica, hairs) and chemical defenses - from caffeine and nicotine to cyanide, which some plants release only when chewed, like a landmine. Notice the arms race behind your groceries: plants defend themselves, so much of agriculture is about breeding or engineering those defenses down, and the 'taste' of many vegetables is, in part, the plant's chemical defense system that humans have learned to tolerate or enjoy."
+  },
+  "tags": [
+   "Plant",
+   "Defense",
+   "Chemistry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-nitrogen-cycle",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Nitrogen Cycle (1880s)",
+  "teaser": "The air is 78% nitrogen, but almost nothing can use it directly - the cycle that makes it usable runs through soil bacteria, which 'fix' nitrogen into a form plants can absorb. Half the nitrogen in your body was fixed by microbes, and the other half by the Haber-Bosch factory process that feeds the modern world.",
+  "imageUrl": "",
+  "byline": "The soil microbiologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The nitrogen cycle",
+   "durationMinutes": 30,
+   "instruction": "Read how nitrogen fixation - converting inert N2 gas into ammonia - is done by free-living bacteria, root-nodule symbionts like Rhizobium, and cyanobacteria, and how this biological trick underpins every food web. Notice the human intervention that changed the planet: the Haber-Bosch process, invented in 1909, fixes more nitrogen than all natural systems combined, feeding billions but also polluting rivers with runoff - humanity is now a geological force in the nitrogen cycle."
+  },
+  "tags": [
+   "Nitrogen",
+   "Soil",
+   "Cycle"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-carbon-cycle",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Carbon Cycle (1900s)",
+  "teaser": "Carbon moves from the air into plants, into animals, into the soil, and back - a cycle that keeps the planet's thermostat. The discovery of the greenhouse effect, and later of ocean acidification, showed that burning fossil fuels has shoved the cycle out of balance.",
+  "imageUrl": "",
+  "byline": "Arrhenius, Keeling, and the earth scientists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The carbon cycle",
+   "durationMinutes": 30,
+   "instruction": "Read how the carbon cycle - photosynthesis pulling CO2 down, respiration and decay releasing it - has kept the atmosphere in a narrow band for millions of years, and how the Keeling Curve's measurements of CO2 rising every year since 1958 provided the clearest evidence that we've pushed the cycle off balance. Notice the oceanic catch: the oceans absorb a third of our CO2, which slows warming but acidifies the water, and the same chemistry that makes a soda fizz is now eating away at coral and shellfish skeletons."
+  },
+  "tags": [
+   "Carbon",
+   "Climate",
+   "Cycle"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-phosphorus-cycle",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "The Phosphorus Cycle (1600s-2000s)",
+  "teaser": "Phosphorus is the bottleneck nutrient - no substitute, no gas phase, just rock that weathers slowly into soil. Modern farming mines phosphate rock, and scientists warn we may be approaching 'peak phosphorus,' with the best deposits running low this century.",
+  "imageUrl": "",
+  "byline": "The agronomists and geochemists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The phosphorus cycle",
+   "durationMinutes": 25,
+   "instruction": "Read how phosphorus moves from rock to soil to plants to animals and eventually to the ocean floor, where it stays for millions of years - a one-way street, unlike the nitrogen cycle, which is why phosphorus limits plant growth so often. Notice the modern problem: we mine billions of tons of phosphate a year, much ends up in rivers causing algal blooms, and the remaining reserves are concentrated in a few countries - a quiet resource question hiding inside your fertilizer bag."
+  },
+  "tags": [
+   "Phosphorus",
+   "Nutrient",
+   "Soil"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-pollination",
+  "categoryId": "BIOLOGY",
+  "subtype": "Process",
+  "name": "Pollination (1750s-2000s)",
+  "teaser": "Three-quarters of the world's flowering plants depend on animals - bees, birds, bats, even lizards - to move pollen from flower to flower. The partnership is so ancient that some flowers and their pollinators fit together like locks and keys.",
+  "imageUrl": "",
+  "byline": "Sprengel and the pollination ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The biology of pollination",
+   "durationMinutes": 30,
+   "instruction": "Read how pollination was first understood as a real process - and not just bee busywork - by Christian Sprengel in 1793, who realized flowers' colors and scents are advertisements, and how the bee-flower partnership evolved over 100 million years. Notice the current worry: bees and other pollinators are declining worldwide, and because one in three bites of food depends on animal pollination, the loss of a pollinator is not just an ecological story - it's a food supply story."
+  },
+  "tags": [
+   "Pollination",
+   "Bees",
+   "Flowers"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-honeybee-colony",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Honeybee Colony (1950s)",
+  "teaser": "A beehive is a superorganism: 50,000 individuals working as one, with a queen who is a mother, not a ruler, and workers who switch jobs by age - nurse, builder, forager - following their own clocks. The colony's dance language, decoded by Karl von Frisch, is the only known symbolic communication in animals.",
+  "imageUrl": "",
+  "byline": "Karl von Frisch",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The honeybee colony and its dance",
+   "durationMinutes": 30,
+   "instruction": "Read how the famous waggle dance - a forager's figure-eight that encodes direction and distance to food - was decoded by von Frisch and dismissed by his colleagues for years, and how the colony's division of labor emerges from simple rules rather than any central command. Notice the modern crisis: colony collapse disorder and pesticide exposure have made beekeeping a struggle, and the bees that pollinate a third of our crops are one of the most studied - and most endangered - animals on Earth."
+  },
+  "tags": [
+   "Bee",
+   "Colony",
+   "Dance"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-ant-colony",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Ant Superorganism (1900s)",
+  "teaser": "A single ant colony can number millions, operate like a single organism, and build structures - bridges, rafts, air-conditioned mounds - without any ant in charge. Individual ants follow simple rules; the colony's intelligence emerges from the crowd.",
+  "imageUrl": "",
+  "byline": "The myrmecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The ant colony as a superorganism",
+   "durationMinutes": 30,
+   "instruction": "Read how ant colonies solve problems - finding shortest paths, allocating workers, building living bridges - through stigmergy, where each ant's actions leave traces that guide others, with no leader needed. Notice the eerie applications: engineers now design swarm robotics and optimization algorithms copied directly from ant behavior, and the study of colony decision-making has reshaped how we think about distributed intelligence - in nature and in software."
+  },
+  "tags": [
+   "Ant",
+   "Colony",
+   "Swarm"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-social-insects",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Insect Societies (1859-1990s)",
+  "teaser": "Bees, ants, wasps, and termites evolved complex societies - and their selfless workers posed a problem for Darwin, who wondered how altruism could evolve by natural selection. The answer, found in the 1960s, was kinship: workers help raise relatives, so their genes live on through siblings.",
+  "imageUrl": "",
+  "byline": "Hamilton, Wilson, and the entomologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The evolution of social insects",
+   "durationMinutes": 30,
+   "instruction": "Read how Darwin flagged sterile workers as 'one special difficulty' for his theory, and how W.D. Hamilton's 1964 insight - that helping close relatives can spread your genes - solved it, launching the field of kin selection. Notice the fiercest controversy in biology: E.O. Wilson later argued that the real driver is colony-level selection, not kin selection, triggering a public feud with Hamilton's heirs - the social insect debate became biology's most personal war."
+  },
+  "tags": [
+   "Social insects",
+   "Evolution",
+   "Altruism"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-termites",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Termite Mound (c. 1900)",
+  "teaser": "Termites build mounds that can be 10 meters tall, with their own air-conditioning: the colony's tunnels channel the wind to keep the nest cool and the fungus gardens ventilated. They're among the planet's greatest animal engineers.",
+  "imageUrl": "",
+  "byline": "The termite researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Termite mound architecture",
+   "durationMinutes": 25,
+   "instruction": "Read how the mound's network of surface chimneys and inner tunnels uses wind and temperature differences to drive airflow through the colony, cooling it while the interior stays humid, and how the mound's orientation - north-south - tracks the sun to manage heat. Notice the human inspiration: architects have studied termite mounds for passive cooling designs, and the colony's farming - termites cultivate fungus gardens like tiny agriculturalists - makes them the oldest farmers on Earth."
+  },
+  "tags": [
+   "Termite",
+   "Architecture",
+   "Engineer"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-spider-silk",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Spider Silk (1700s-2000s)",
+  "teaser": "Spider silk is five times stronger than steel by weight, stretchier than rubber, and tougher than Kevlar - a single strand could stop a bee in flight. Scientists have spent decades trying to manufacture it, with limited success, because the spiders themselves refuse to be farmed.",
+  "imageUrl": "",
+  "byline": "The silk researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The extraordinary properties of spider silk",
+   "durationMinutes": 25,
+   "instruction": "Read how orb-weaver dragline silk combines strength and elasticity - a strand thinner than a human hair can bear the impact of an insect and absorb the energy - and how the silk's proteins, stored as liquid, are spun into fiber in the spider's body without any chemical bath. Notice the engineering holy grail: synthetic spider silk, made by genetically engineered goats, silkworms, or bacteria, is being pursued for everything from bulletproof vests to surgical thread - and the day it's cheap enough will change materials science."
+  },
+  "tags": [
+   "Spider",
+   "Silk",
+   "Material"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-snake-venom",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Snake Venom (c. 1800s-2000s)",
+  "teaser": "Snake venom is a cocktail of dozens of protein toxins, each tuned to shut down a specific part of prey biology - and those same toxins, purified and studied, became medicines: blood-pressure drugs from viper venom and blood thinners from pit viper venom.",
+  "imageUrl": "",
+  "byline": "The toxinologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The chemistry and medicine of snake venom",
+   "durationMinutes": 30,
+   "instruction": "Read how venom is a library of evolved protein weapons - neurotoxins that paralyze, hemotoxins that shred blood vessels, cytotoxins that melt tissue - and how the species' recipes vary even within a single snake's life. Notice the pharmacy inside the fangs: ACE inhibitors for blood pressure came from a Brazilian pit viper's venom, and anti-coagulant drugs from its relatives - the deadliest substances in nature keep turning out to be medicine in waiting."
+  },
+  "tags": [
+   "Snake",
+   "Venom",
+   "Medicine"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-scorpion-glow",
+  "categoryId": "BIOLOGY",
+  "subtype": "Mystery",
+  "name": "Scorpions Glow (1911)",
+  "teaser": "Under ultraviolet light, scorpions glow electric blue-green - and no one knows exactly why. The glow comes from chemicals in their cuticle, and theories range from sunscreen to prey detection to a way to tell night from day.",
+  "imageUrl": "",
+  "byline": "The scorpion biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mystery of scorpion fluorescence",
+   "durationMinutes": 20,
+   "instruction": "Read how the fluorescence - strongest in younger scorpions and in the thinnest parts of their armor - has been known for over a century without a settled explanation, and how UV lamps became standard field tools because the glow makes scorpions easy to find at night. Notice the leading hypotheses: the glow may be a sunscreen, a byproduct of hard cuticle, or a side effect with no function at all - a reminder that not every trait in nature is an adaptation."
+  },
+  "tags": [
+   "Scorpion",
+   "Glow",
+   "Mystery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-chameleon-color",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Chameleon Color (2015)",
+  "teaser": "Chameleons change color not with pigment but with crystals - tiny guanine nanocrystals in their skin that reflect different wavelengths when the cells expand or contract. The discovery, made in 2015, showed the color change is structural, not pigmentary.",
+  "imageUrl": "",
+  "byline": "The chameleon researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How chameleons change color",
+   "durationMinutes": 25,
+   "instruction": "Read how the 2015 study revealed layers of guanine nanocrystals in chameleon skin that act like tunable mirrors - relaxed cells reflect blue, stretched cells reflect yellow and red - and how the change is for communication and temperature, not just camouflage. Notice the confusion the discovery cleared up: color-changing was long credited to pigment cells, but chameleons use photonic crystals instead - an optical trick that materials scientists are now trying to copy for color-changing displays."
+  },
+  "tags": [
+   "Chameleon",
+   "Color",
+   "Crystal"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-cuttlefish-camouflage",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Cuttlefish's Skin (c. 1990s)",
+  "teaser": "A cuttlefish can change its color, pattern, and even skin texture in under a second - yet it's colorblind. How it matches its background without seeing color is one of the great unsolved mysteries of animal vision.",
+  "imageUrl": "",
+  "byline": "The cephalopod vision researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Cuttlefish camouflage and colorblindness",
+   "durationMinutes": 25,
+   "instruction": "Read how cuttlefish use chromatophores - elastic pigment sacs controlled by muscles - plus iridophores and papillae to vanish into any background, and how experiments show they do it despite lacking color vision, possibly sensing polarization or wavelength through their skin itself. Notice the engineering interest: the animals have inspired e-ink-like materials and soft robotics, and the mystery of their 'seeing skin' may one day yield displays that adapt to their environment."
+  },
+  "tags": [
+   "Cuttlefish",
+   "Camouflage",
+   "Vision"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-octopus-camouflage",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Octopus's Disguise (2000s)",
+  "teaser": "An octopus can mimic the color, texture, and shape of seaweed, coral, or rock - and some species imitate the appearance and movement of venomous animals like sea snakes and lionfish. Its skin is packed with up to millions of color cells per square centimeter.",
+  "imageUrl": "",
+  "byline": "The cephalopod biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The camouflage of octopuses",
+   "durationMinutes": 25,
+   "instruction": "Read how octopus skin is a living display: chromatophores change color in milliseconds, papillae raise bumps to match texture, and the nervous system controls the whole surface like a programmable display. Notice the astonishing cases of mimicry - the mimic octopus impersonates at least a dozen other species, changing shape, color, and swimming style to match its model - a predator pretending to be something scary by being many things at once."
+  },
+  "tags": [
+   "Octopus",
+   "Camouflage",
+   "Mimicry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-electric-eel",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Electric Eel (1775-2015)",
+  "teaser": "The electric eel isn't an eel - it's a knifefish - and its electric organs can discharge up to 800 volts, enough to stun a horse. New research shows it also uses electricity as a remote-control weapon, zapping hidden prey into twitching out of hiding.",
+  "imageUrl": "",
+  "byline": "Alexander von Humboldt and the modern researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The electric eel's shocking biology",
+   "durationMinutes": 25,
+   "instruction": "Read how the electric eel packs three organs that generate low-voltage sensing pulses and high-voltage hunting strikes, and how a 2015 study showed it uses its high-voltage zap to make concealed prey twitch, revealing their location - a form of active 'remote sensing' by taser. Notice the historical detail: Humboldt's 1800 account of fishermen fishing with electric eels, and the shock he got when he stepped on one, helped launch the modern study of bioelectricity."
+  },
+  "tags": [
+   "Electric eel",
+   "Electricity",
+   "Predator"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-anglerfish",
+  "categoryId": "BIOLOGY",
+  "subtype": "Structure",
+  "name": "The Anglerfish (c. 1800s-2000s)",
+  "teaser": "The deep-sea anglerfish carries its own glowing lure, dangling from a modified fin over a mouth full of needle teeth. In some species, males are tiny parasites that fuse permanently to the female's body - losing their own organs to become living sperm donors.",
+  "imageUrl": "",
+  "byline": "The deep-sea ichthyologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The bizarre biology of the anglerfish",
+   "durationMinutes": 25,
+   "instruction": "Read how the anglerfish's light comes from bioluminescent bacteria living in the lure, used to attract prey in the dark, and how its enormous mouth and stretchy stomach let it swallow animals larger than itself. Notice the strangest romance in nature: in species like the deep-sea angler, the dwarf male bites into the female and literally fuses with her, his bloodstream joining hers - a mating strategy that guarantees a male is available in a world where encounters are rare."
+  },
+  "tags": [
+   "Anglerfish",
+   "Deep sea",
+   "Bioluminescence"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-blobfish-misunderstood",
+  "categoryId": "BIOLOGY",
+  "subtype": "Mystery",
+  "name": "The 'Ugly' Blobfish (2013)",
+  "teaser": "The blobfish was voted the world's ugliest animal - based on photos of a specimen that had collapsed when hauled from deep water to the surface. In its natural habitat, under crushing pressure, the blobfish looks like an ordinary fish; the 'ugly' version is a decompression accident.",
+  "imageUrl": "",
+  "byline": "The deep-sea photographers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The misunderstood blobfish",
+   "durationMinutes": 20,
+   "instruction": "Read how the famous droopy-faced blobfish photos came from fish that imploded in shape as the pressure dropped, and how the 'world's ugliest animal' is, at 800 meters down, just a normal-looking fish adapted to crushing pressure. Notice the moral of the story: the blobfish became the mascot of the Ugly Animal Preservation Society - a campaign to protect overlooked species - and a lesson in how we judge animals by the wrong snapshot."
+  },
+  "tags": [
+   "Blobfish",
+   "Deep sea",
+   "Misconception"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-axolotl",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Axolotl (1864-2000s)",
+  "teaser": "An amphibian that never grows up: the axolotl keeps its larval form, complete with feathery external gills, its whole life - and can regenerate lost limbs, spinal cords, and even parts of its heart and brain without scarring. Scientists are studying it for human regenerative medicine.",
+  "imageUrl": "",
+  "byline": "The regenerative biology researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The axolotl's regenerative powers",
+   "durationMinutes": 30,
+   "instruction": "Read how the axolotl's 'neoteny' - retaining juvenile features into adulthood - is an accident of evolution in its Mexican lakes, and how its regeneration works: cells at the wound dedifferentiate, reform a blastema, and rebuild a perfect limb with the original pattern, even after repeated amputation. Notice the research frontier: by comparing the axolotl's genome and healing machinery with ours, scientists hope to unlock human regeneration - the animal that never grows up may teach us how to heal without scars."
+  },
+  "tags": [
+   "Axolotl",
+   "Regeneration",
+   "Amphibian"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-naked-mole-rat",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Naked Mole-Rat (1970s)",
+  "teaser": "The naked mole-rat is a hairless, nearly blind rodent that lives in colonies like an insect, barely ages, feels no pain from acid, and can survive 18 minutes without oxygen. Its cells seem resistant to cancer, and it may hold clues to longevity.",
+  "imageUrl": "",
+  "byline": "The naked mole-rat researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The remarkable biology of the naked mole-rat",
+   "durationMinutes": 30,
+   "instruction": "Read how the mole-rat lives in eusocial colonies - a queen breeds, workers dig - and shows negligible senescence: individuals can live 30 years, ten times longer than similar rodents, and their cells resist forming tumors. Notice the oxygen trick: when oxygen runs low, the mole-rat's metabolism switches to burning fructose, a pathway usually only plants and microbes use - an adaptation for life in crowded, airless burrows that scientists are now studying for human stroke and heart-attack treatment."
+  },
+  "tags": [
+   "Naked mole-rat",
+   "Longevity",
+   "Adaptation"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-turritopsis",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Immortal Jellyfish (1988)",
+  "teaser": "A tiny jellyfish, Turritopsis dohrnii, can reverse its life cycle - turning back from adult to polyp whenever it's stressed or damaged, theoretically forever. It's the only known animal that can cheat death by biological time travel.",
+  "imageUrl": "",
+  "byline": "The marine biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The immortal jellyfish",
+   "durationMinutes": 25,
+   "instruction": "Read how when the medusa stage is damaged or starving, the jellyfish's cells transdifferentiate - turning into a different cell type - and the animal regresses to its juvenile polyp form, then grows up again, a cycle that can repeat indefinitely. Notice the honest caveat: 'biologically immortal' doesn't mean unkillable - predators and accidents still end it - but the mechanism, cellular reprogramming, is a hot target for aging research."
+  },
+  "tags": [
+   "Jellyfish",
+   "Immortality",
+   "Aging"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-shark-senses",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Shark's Sixth Sense (1678-1960s)",
+  "teaser": "Sharks can detect the faint electric fields given off by all living animals, using organs called ampullae of Lorenzini - jelly-filled pores on their snouts. The sixth sense was identified in the 1960s and explains how sharks find hidden prey in murky water.",
+  "imageUrl": "",
+  "byline": "The shark biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The electroreception of sharks",
+   "durationMinutes": 25,
+   "instruction": "Read how the ampullae, discovered in the 1600s but understood only in the 1960s, sense voltage changes down to nanovolts - letting a shark detect the heartbeat of a fish buried in sand - and how hammerhead sharks use their wide heads to sweep a larger electric search area. Notice the ecological irony: humans kill millions of sharks a year for fins, while the animals' sensory superpowers - including detecting Earth's magnetic field for navigation - remain only partly mapped."
+  },
+  "tags": [
+   "Shark",
+   "Electroreception",
+   "Senses"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-great-white-migration",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The White Shark's Highway (2004)",
+  "teaser": "Satellite tags revealed great white sharks making a 20,000-kilometer round trip across the Pacific every year - to an open-ocean 'White Shark Café' that no one knew existed. The tagged sharks turned out to commute like commuters.",
+  "imageUrl": "",
+  "byline": "The tagging expeditions",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The migrations of great white sharks",
+   "durationMinutes": 25,
+   "instruction": "Read how pop-up satellite tags tracked white sharks from California to Hawaii and back each year, converging at a patch of open ocean where they dive repeatedly to depth, and how the discovery forced a rethink - the ocean's top predator is a long-distance migrant, not a local resident. Notice the conservation payoff: the tracking showed white sharks cross international boundaries, so protecting them requires ocean-scale agreements, not local reserves."
+  },
+  "tags": [
+   "Shark",
+   "Migration",
+   "Tracking"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-whale-fall",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Whale Fall (1987)",
+  "teaser": "When a whale dies and sinks, its body becomes a deep-sea oasis - a 'whale fall' that feeds scavengers for years, then specialist worms that eat the bones, and finally microbes that turn it into a chemical garden. One carcass can host 400 species.",
+  "imageUrl": "",
+  "byline": "The deep-sea biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The whale fall ecosystem",
+   "durationMinutes": 25,
+   "instruction": "Read how researchers discovered that a 40-ton whale carcass can support communities for decades - hagfish and sharks strip the flesh, then 'bone-eating worms' bore into the skeleton, and sulfide-eating microbes take over last, powering a whole ecosystem from a single corpse. Notice the theory it inspired: whale falls may act as 'stepping stones' for deep-sea species, letting vent communities hop across the ocean floor - a dead whale as a moving island."
+  },
+  "tags": [
+   "Whale",
+   "Deep sea",
+   "Ecosystem"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-migration-eel",
+  "categoryId": "BIOLOGY",
+  "subtype": "Mystery",
+  "name": "The Eel's Journey (2011)",
+  "teaser": "European eels swim 6,000 kilometers to spawn in one patch of the Sargasso Sea - then die. Their larvae drift back to Europe for three years. The migration was proved only in 2011, and the exact spawning site is still unknown.",
+  "imageUrl": "",
+  "byline": "The eel researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mysterious migration of the European eel",
+   "durationMinutes": 25,
+   "instruction": "Read how Aristotle believed eels were born of mud, and how it took two millennia and satellite tags to show adult eels leaving European rivers and crossing the Atlantic to the Sargasso Sea - where, still unobserved, they spawn and die. Notice the paradox that remains: no one has ever seen an eel spawn, the larvae's three-year drift back is largely inferred, and the species, once common in every European river, is now critically endangered."
+  },
+  "tags": [
+   "Eel",
+   "Migration",
+   "Mystery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-salmon-homing",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Salmon Come Home (1950s)",
+  "teaser": "Salmon return from the ocean to spawn in the exact stream where they hatched, navigating thousands of kilometers by smell, the sun, and Earth's magnetic field. The 'homing' was proved with marked fish: out of millions, they find their natal gravel bed.",
+  "imageUrl": "",
+  "byline": "The fisheries biologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The homing of Pacific salmon",
+   "durationMinutes": 25,
+   "instruction": "Read how salmon imprint on their home stream's chemical signature as juveniles, then use it - plus magnetic and solar cues - to return years later, often within meters of where they hatched, and how the migration ends in a spawning frenzy that kills the adults. Notice the stakes for humans: the salmon's return is timed by the river's chemistry and temperature, and dams, warming, and hatchery fish are scrambling that ancient timetable."
+  },
+  "tags": [
+   "Salmon",
+   "Homing",
+   "Migration"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-turtle-navigation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Sea Turtle's Compass (1990s)",
+  "teaser": "Sea turtles hatch on a beach, swim to the open ocean, and return decades later to nest on the same beach - navigating by Earth's magnetic field, which they read in two ways: a map sense for position and a compass sense for direction.",
+  "imageUrl": "",
+  "byline": "The sea turtle researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The magnetic navigation of sea turtles",
+   "durationMinutes": 25,
+   "instruction": "Read how experiments with magnetic fields shifted in the lab showed that turtles sense both intensity and angle of the field - giving them a global map - and how female loggerheads return to their natal beaches after 20 years at sea. Notice the vulnerability the same system creates: because the turtles follow magnetic contours, coastal development and light pollution can lure them astray, and the nests themselves are now protected on the very beaches the turtles somehow find again."
+  },
+  "tags": [
+   "Turtle",
+   "Navigation",
+   "Magnetism"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-barnacle-settlement",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Barnacle's Cue (1990s)",
+  "teaser": "Barnacles - the gray shells that crust every pier - spend their youth as swimming larvae, then glue themselves down for life after tasting the right chemical cue: other barnacles. Their glue is so strong it's being studied for surgical adhesives.",
+  "imageUrl": "",
+  "byline": "The marine settlement ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How barnacles choose where to settle",
+   "durationMinutes": 20,
+   "instruction": "Read how a barnacle larva explores a surface, tests it with a chemical-sensing foot, and commits forever only if it detects the settlement pheromone of its own species - a one-shot decision that explains why barnacles crowd together on the same docks. Notice the engineering interest: barnacle glue sets underwater and bonds to almost anything, and biomaterials researchers are copying its chemistry for glues that work on wet tissue - the humble barnacle as a surgical inspiration."
+  },
+  "tags": [
+   "Barnacle",
+   "Settlement",
+   "Glue"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-penguin-thermoregulation",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Emperor's Cold (1970s-2010s)",
+  "teaser": "Emperor penguins breed on Antarctic sea ice in winter, huddling in groups of thousands that rotate so each bird spends time in the warm core. Their feathers and fat keep them alive at -50 degrees, and their huddle is a masterpiece of heat-sharing.",
+  "imageUrl": "",
+  "byline": "The Antarctic researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How emperor penguins survive Antarctic winter",
+   "durationMinutes": 25,
+   "instruction": "Read how emperor penguins' four layers of feathers, a layer of fat, and counter-current blood flow in their feet let them stand on ice for months, and how the huddle - birds packed so tightly they shuffle like a slow-moving wave - lets the group survive the worst weather on Earth. Notice the modern threat: the sea ice they breed on is thinning, and satellite studies now track colonies by the darkness of their guano stains - a bird adapted to the harshest environment on Earth facing a climate it can't out-evolve."
+  },
+  "tags": [
+   "Penguin",
+   "Antarctic",
+   "Adaptation"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-kangaroo-hopping",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Why Kangaroos Hop (1970s)",
+  "teaser": "Hopping isn't just fast - it's efficient: at speed, a kangaroo's tendons store and return elastic energy like a pogo stick, so the faster it goes, the cheaper each hop gets. No other large animal moves this way, and the physics took decades to explain.",
+  "imageUrl": "",
+  "byline": "The biomechanics researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The physics of kangaroo hopping",
+   "durationMinutes": 25,
+   "instruction": "Read how studies measuring oxygen use showed kangaroos' hopping cost doesn't rise with speed - the tendons of the hind legs absorb and release energy like springs - and how the tail acts as a fifth leg and a counterbalance, adding power and stability. Notice the engineers' interest: roboticists study the kangaroo's spring-leg mechanics to build efficient hopping and running machines, and the animal's design is a masterclass in energy storage."
+  },
+  "tags": [
+   "Kangaroo",
+   "Hopping",
+   "Biomechanics"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-cheetah-sprint",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Cheetah's Sprint (2013)",
+  "teaser": "The cheetah reaches 100 km/h in three seconds, using a flexible spine that lets its stride length double mid-run. Filmed in high speed, cheetahs were found to brake and turn with such precision that their footfall timing changes on a hair.",
+  "imageUrl": "",
+  "byline": "The cheetah researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The biomechanics of the cheetah sprint",
+   "durationMinutes": 25,
+   "instruction": "Read how high-speed collars and camera traps revealed the cheetah's acceleration - faster than most sports cars - and its unmatched agility, with the spine acting like a spring and the tail as a counterweight through every turn. Notice the fragility behind the speed: sprinting burns enormous energy and risks overheating, so a cheetah's hunt is a short, explosive gamble - and with cub survival low and habitat shrinking, the fastest land animal is also one of the most endangered big cats."
+  },
+  "tags": [
+   "Cheetah",
+   "Speed",
+   "Hunting"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-hummingbird-flight",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Hummingbird's Hover (2000s)",
+  "teaser": "Hummingbirds can fly backward, upside down, and hover in place by beating their wings up to 80 times a second - the only birds that fly like insects. High-speed filming revealed they generate lift on both the downstroke and the upstroke, unlike any other bird.",
+  "imageUrl": "",
+  "byline": "The flight researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The hovering flight of hummingbirds",
+   "durationMinutes": 25,
+   "instruction": "Read how the hummingbird's wing beats in a figure-eight, generating lift on both strokes, and how its shoulder joint is modified to let the wing rotate almost 180 degrees - a design that allows precision hovering no other bird matches. Notice the cost of the trick: hovering burns energy so fast that hummingbirds must feed constantly and can enter nightly torpor - a slowed-down state - just to survive until dawn, living life at the metabolic limit."
+  },
+  "tags": [
+   "Hummingbird",
+   "Flight",
+   "Energy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bat-flight",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Bat's Wing (1990s)",
+  "teaser": "Bats are the only mammals that truly fly, and their wings - a membrane stretched over elongated fingers - are more maneuverable than birds' but less efficient. High-speed filming shows bats morphing their wing shape mid-stroke, a control surface with 20 joints.",
+  "imageUrl": "",
+  "byline": "The bat flight researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mechanics of bat flight",
+   "durationMinutes": 25,
+   "instruction": "Read how a bat's wing is a flexible membrane controlled by many joints and muscles, letting it change camber and shape on every stroke - the most maneuverable flight in nature - and how the membrane is so sensitive it senses airflow and stall like a living skin. Notice the engineering obsession: drone designers study bat wings for agile flight, but no robot yet matches the bat's ability to twist through branches in the dark using echolocation and a morphing wing."
+  },
+  "tags": [
+   "Bat",
+   "Flight",
+   "Wing"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-migration-gnus",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Great Migration (c. 1960s)",
+  "teaser": "Two million wildebeest, zebras, and gazelles circle the Serengeti every year, following the rains - the largest overland migration on Earth. The herds are so vast that a river crossing can take days, and crocodiles wait at the crossings.",
+  "imageUrl": "",
+  "byline": "The Serengeti ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The great wildebeest migration",
+   "durationMinutes": 25,
+   "instruction": "Read how the migration is driven by grass - the herds chase the seasonal rains that make the plains nutritious - and how the wildebeest's calving is synchronized into a few weeks so predators can't eat more than a fraction of the newborns. Notice the ecosystem engine: the herds' grazing and dung fertilize the plains, and their movement is so central that the migration is the reason the Serengeti-Mara ecosystem exists as it does - and why fencing the land, as agriculture threatens to, would collapse it."
+  },
+  "tags": [
+   "Wildebeest",
+   "Migration",
+   "Serengeti"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-lemming-suicide-myth",
+  "categoryId": "BIOLOGY",
+  "subtype": "Mystery",
+  "name": "The Lemming Myth (1958)",
+  "teaser": "Lemmings don't commit mass suicide - the famous cliff-jumping footage was staged by a Disney documentary crew, who herded the rodents off a cliff for the cameras. The myth persists because of real, periodic lemming crashes that puzzle ecologists.",
+  "imageUrl": "",
+  "byline": "The population ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The lemming suicide myth",
+   "durationMinutes": 20,
+   "instruction": "Read how the 1958 Disney film White Wilderness faked lemmings leaping into the sea, cementing a myth that has outlived its debunking, and how the real phenomenon - lemming populations that boom and crash on multi-year cycles - has genuinely puzzled scientists for a century. Notice the actual science: the crashes are likely driven by predators, food, and the lemmings' own three-to-four-year breeding cycles - a natural puzzle with a fictional explanation that refuses to die."
+  },
+  "tags": [
+   "Lemming",
+   "Myth",
+   "Population"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-crab-migration-christmas",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Red Crab March (1990s)",
+  "teaser": "Every year, millions of red crabs march from the forests of Christmas Island to the sea to spawn - a migration so dense that roads close and the island's conservation staff build crab bridges and tunnels. The march is triggered by the wet-season moon.",
+  "imageUrl": "",
+  "byline": "The Christmas Island conservation team",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The red crab migration",
+   "durationMinutes": 20,
+   "instruction": "Read how the red crabs' breeding migration - timed to the first rains of the wet season and the moon's phase - floods the island with millions of crabs crossing roads, gardens, and cliffs, and how the island's infrastructure is designed around the event, including a purpose-built 'crab tunnel.' Notice the danger: the march nearly collapsed when an invasive yellow crazy ant arrived, and the island now wages an ongoing battle to keep the ant from erasing one of the natural world's strangest spectacles."
+  },
+  "tags": [
+   "Crab",
+   "Migration",
+   "Island"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-synchronized-fireflies",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Firefly Waltz (c. 1970s)",
+  "teaser": "In Southeast Asia, thousands of fireflies flash in perfect synchrony - whole trees blinking on and off together. The synchronized display was long dismissed as an illusion; it's real, and it's a courtship signal so precise it's being studied as biological communication.",
+  "imageUrl": "",
+  "byline": "The firefly researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Synchronous firefly flashing",
+   "durationMinutes": 25,
+   "instruction": "Read how the male fireflies of the Great Smoky Mountains and Southeast Asia coordinate their flashes into waves, and how the females, perched below, answer with their own timed responses - a dialogue in light that researchers decoded by recording and playing back the flashes. Notice the modern threat: light pollution is drowning out the signal, which is why firefly populations - and their courtship - are declining across the globe."
+  },
+  "tags": [
+   "Firefly",
+   "Synchrony",
+   "Courtship"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-cicada-cycles",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The 17-Year Cicada (1600s)",
+  "teaser": "Periodical cicadas spend 17 years underground as nymphs, then emerge by the billions in the same few weeks, fill the air with a deafening chorus, mate, and die. Their prime-number life cycles - 13 and 17 years - are a puzzle: why prime?",
+  "imageUrl": "",
+  "byline": "The cicada researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The 17-year cicada cycles",
+   "durationMinutes": 25,
+   "instruction": "Read how the cicadas' synchronized emergence - millions per acre - overwhelms predators through sheer numbers, and how their 13- and 17-year cycles, both prime numbers, may have evolved to avoid synchronizing with predator cycles that emerge more often. Notice the strangeness of the underground life: the nymphs spend almost their entire existence sipping root sap in darkness, and the adults' above-ground life is measured in weeks - one of the longest lifespans of any insect, spent almost entirely out of sight."
+  },
+  "tags": [
+   "Cicada",
+   "Cycle",
+   "Prime numbers"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-locust-swarm",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Locust Swarm (c. 1900s-2020)",
+  "teaser": "Desert locusts can live alone as harmless grasshoppers - but when crowded, they transform: turning yellow, swarming, and forming plagues of billions that eat a day's food for 35 million people. The transformation is triggered by serotonin and touch.",
+  "imageUrl": "",
+  "byline": "The locust researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The phase change of locusts",
+   "durationMinutes": 30,
+   "instruction": "Read how locusts switch between 'solitary' and 'gregarious' forms - a change driven by crowding, which releases serotonin and alters their brain and body - and how a swarm can cover 1,000 square kilometers and strip entire regions of crops in days. Notice the modern management: authorities now monitor locusts in remote deserts and spray breeding grounds before swarms form - because once the plague takes wing, it is nearly unstoppable."
+  },
+  "tags": [
+   "Locust",
+   "Swarm",
+   "Transformation"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-army-ant-raids",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Army Ant Raid (c. 1900s)",
+  "teaser": "Army ants hunt in columns of millions, flushing out and overwhelming anything in their path - insects, spiders, even small vertebrates. Their raids are so effective that other animals - including birds - follow along to catch what escapes.",
+  "imageUrl": "",
+  "byline": "The ant researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The raids of army ants",
+   "durationMinutes": 25,
+   "instruction": "Read how army ants' coordinated raids emerge from simple chemical communication - a column of foragers that expands like a front, sweeping the forest floor - and how the colony's nomadic lifestyle means it bivouacs and marches on a precise cycle of weeks. Notice the symbiotic spectacle: antbirds follow the raiding columns to snap up fleeing insects, and some butterflies imitate antbird calls to get a seat at the feast - a raid that feeds an entire web of followers."
+  },
+  "tags": [
+   "Ant",
+   "Raid",
+   "Ecosystem"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-termite-farming",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Insect Farmers (1990s)",
+  "teaser": "Fungus-farming termites domesticated a crop 20 million years before humans - cultivating gardens of fungus in their mounds and feeding them chewed plant matter. The oldest farming society on Earth isn't human.",
+  "imageUrl": "",
+  "byline": "The termite symbiosis researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Fungus-farming termites",
+   "durationMinutes": 25,
+   "instruction": "Read how the termites' fungal gardens are fed with plant material the termites can't digest, and the fungus - which only lives in termite mounds - breaks it down and provides the colony's food, a mutualism so tight that neither partner survives without the other. Notice the evolutionary milestone: termites evolved farming around 20-30 million years ago, and their cultivar, Termitomyces, is domesticated in the same sense as wheat - a crop no longer found wild, shaped by its farmers."
+  },
+  "tags": [
+   "Termite",
+   "Farming",
+   "Fungus"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-leafcutter-ants",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Leafcutters' Garden (c. 1980s)",
+  "teaser": "Leafcutter ants cut leaf discs, carry them underground, and feed them to a fungus they cultivate - a farm the size of a car containing millions of workers. They're considered the dominant herbivore of the American tropics, harvesting more vegetation than any mammal.",
+  "imageUrl": "",
+  "byline": "The ant-fungus researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The farming of leafcutter ants",
+   "durationMinutes": 25,
+   "instruction": "Read how the ants' caste system - from giant soldiers to tiny gardener workers - runs a subterranean farm where leaves are processed, planted with fungus, and weeded of parasites, and how the colony's total leaf intake rivals that of cattle ranching in the same forests. Notice the arms race: some leaves are too toxic for the fungus, and the ants have learned to cut only the safe species - a sophisticated agricultural judgment made by a brain the size of a pinhead."
+  },
+  "tags": [
+   "Leafcutter ant",
+   "Farming",
+   "Symbiosis"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-fungal-network",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Fungus Underground (c. 1990s)",
+  "teaser": "Beneath a forest floor runs a fungal web that connects trees: mycorrhizal fungi trade soil nutrients to roots in exchange for sugar, and the shared network can move resources between trees of different species. It's one of the largest living structures on Earth.",
+  "imageUrl": "",
+  "byline": "The mycorrhizal ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mycorrhizal network",
+   "durationMinutes": 30,
+   "instruction": "Read how the fungal threads - a single individual can span kilometers - connect plant roots into a common underground economy, and how isotope experiments showed carbon moving from one tree to another through the shared fungal tissue. Notice the healthy skepticism: ecologists emphasize the network is not a conscious 'internet of trees' - the transfers happen because fungi move resources where they profit, and the popular 'tree conversation' framing overstates what the data supports."
+  },
+  "tags": [
+   "Fungus",
+   "Tree",
+   "Network"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-lichens",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Lichen Pact (1867)",
+  "teaser": "A lichen is not one organism but two - a fungus and an alga (or cyanobacterium) living together so tightly they form a new body. The partnership was a scientific scandal in the 1860s, and lichens are now models for symbiosis and sentinels for air pollution.",
+  "imageUrl": "",
+  "byline": "Simon Schwendener",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery that lichens are symbiotic",
+   "durationMinutes": 25,
+   "instruction": "Read how Schwendener's claim that lichens are fungal-algal partnerships was ridiculed for years - lichenologists refused to believe their study subjects were two organisms - and how the discovery was confirmed and became the founding case of symbiosis. Notice the consequences: lichens colonize bare rock, make soil, feed reindeer, and are so sensitive to sulfur dioxide that their presence or absence maps air pollution - the humble lichen is an environmental instrument."
+  },
+  "tags": [
+   "Lichen",
+   "Symbiosis",
+   "Fungus"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-coral-bleaching-mechanism",
+  "categoryId": "BIOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Bleaching Reaction (1980s)",
+  "teaser": "When water warms by even a degree or two, corals expel the algae that feed them - turning white in a stress response called bleaching. If the heat passes, the algae return; if it lingers, the coral starves. The phenomenon, unknown before the 1980s, now strikes reefs worldwide.",
+  "imageUrl": "",
+  "byline": "The coral reef researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mechanism of coral bleaching",
+   "durationMinutes": 25,
+   "instruction": "Read how the coral-algae partnership breaks down under heat stress - the algae, stressed, produce reactive oxygen, and the coral evicts them, losing 90% of its food - and how bleaching events that were once rare are now routine. Notice the distinction that matters: bleaching is not death - reefs can recover - but repeated, annual bleaching leaves no time for recovery, which is why scientists now describe the Great Barrier Reef's recent events as a crisis, not a curiosity."
+  },
+  "tags": [
+   "Coral",
+   "Bleaching",
+   "Climate"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-tide-pools",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Tide Pool (c. 1900s)",
+  "teaser": "A tide pool is a tiny ocean that drains and refills twice a day - a brutal habitat of temperature swings, crashing waves, and drying sun where animals must hold on, hide, or seal themselves in. Yet each pool is packed with life, from anemones to sculpins.",
+  "imageUrl": "",
+  "byline": "The intertidal ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The tide pool ecosystem",
+   "durationMinutes": 25,
+   "instruction": "Read how tide pool organisms are zoned by their tolerances - barnacles and snails that survive high up the shore, anemones and crabs that need more water - and how the pools' daily stress makes them model systems for studying competition and climate stress. Notice the practical edge: because tide pools are small and repeatable, ecologists have used them for decades of experiments - including the famous starfish removals that gave birth to the keystone species concept."
+  },
+  "tags": [
+   "Tide pool",
+   "Intertidal",
+   "Ecology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-mangroves",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Mangrove Forest (c. 1980s)",
+  "teaser": "Mangroves are trees that grow in saltwater, with roots that filter salt, breathe above the mud, and cradle entire ecosystems of fish, crabs, and birds. They're among the most carbon-dense forests on Earth - and they're being cleared faster than rainforests.",
+  "imageUrl": "",
+  "byline": "The mangrove ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The mangrove ecosystem",
+   "durationMinutes": 25,
+   "instruction": "Read how mangroves cope with seawater - filtering out salt, excreting it through leaves, and breathing through exposed 'pneumatophore' roots - and how their tangled root systems act as nurseries for a third of tropical fish species. Notice the two services in one tree: mangroves store several times more carbon per hectare than tropical forest and blunt storm surges and tsunamis - which is why their destruction is a climate, fisheries, and coastal-safety loss all at once."
+  },
+  "tags": [
+   "Mangrove",
+   "Coast",
+   "Ecosystem"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-wetlands",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Wetland (c. 1970s)",
+  "teaser": "Marshes, bogs, and swamps were long drained as useless - until science revealed they filter water, store carbon, absorb floods, and shelter species. Wetlands are now recognized as 'nature's kidneys,' and half the world's original wetlands have already been lost.",
+  "imageUrl": "",
+  "byline": "The wetland ecologists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The value of wetlands",
+   "durationMinutes": 25,
+   "instruction": "Read how wetlands clean water - plants and microbes removing nutrients and pollutants as water flows through - and how a single hectare of peatland can store as much carbon as several hectares of forest, and how coastal wetlands absorb storm surges. Notice the accounting problem: because their services are invisible, wetlands were drained for farms and cities across the world, and only in recent decades have governments started paying to restore the 'useless' land they once destroyed."
+  },
+  "tags": [
+   "Wetland",
+   "Ecosystem",
+   "Carbon"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-peat-bog",
+  "categoryId": "BIOLOGY",
+  "subtype": "Ecosystem",
+  "name": "The Bog's Archive (c. 1900s-2000s)",
+  "teaser": "Peat bogs - waterlogged, acidic, oxygen-free - preserve what falls into them: bodies, butter, and pollen, for thousands of years. Archaeologists call them time capsules, and climate scientists drill into them to read ancient pollen and carbon records.",
+  "imageUrl": "",
+  "byline": "The bog researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The archaeological and climatic record of bogs",
+   "durationMinutes": 25,
+   "instruction": "Read how bog conditions - cold, acid, no oxygen - mummify organic material so well that thousands-of-years-old bodies are found with skin and hair intact, and how the pollen layers in bog cores read like a diary of past forests and climates. Notice the double value: the same chemistry that preserves bodies also locks up carbon, which is why draining bogs - as farming has done for centuries - releases centuries of stored carbon in decades."
+  },
+  "tags": [
+   "Bog",
+   "Preservation",
+   "Carbon"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-bioluminescence-chemistry",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Firefly's Enzyme (1887-1950s)",
+  "teaser": "Fireflies glow through a reaction between luciferin and oxygen, catalyzed by luciferase - chemistry so efficient it wastes almost no heat. The enzyme's gene, borrowed from fireflies, now lights up cells, tracks infections, and even reports gene activity in mice.",
+  "imageUrl": "",
+  "byline": "Raphael Dubois",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of luciferase",
+   "durationMinutes": 25,
+   "instruction": "Read how Dubois, in 1887, showed that a glowing clam's light needs two components - a substrate (luciferin) and an enzyme (luciferase) - and how the same two-part system was found in fireflies and every other glowing organism. Notice the tool it became: luciferase genes are now standard laboratory reporters, letting scientists watch a gene switch on in a living animal, and firefly luciferase powered the assays behind many drug discoveries."
+  },
+  "tags": [
+   "Luciferase",
+   "Firefly",
+   "Biotech"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-magnetotactic-bacteria",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Compass Bacteria (1975)",
+  "teaser": "Some bacteria grow a chain of magnetic crystals inside their bodies and use it like a compass needle to swim downward, toward the sediment. Their navigation, discovered by Richard Blakemore, is the simplest magnetic sense in nature.",
+  "imageUrl": "",
+  "byline": "Richard Blakemore",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of magnetotactic bacteria",
+   "durationMinutes": 25,
+   "instruction": "Read how Blakemore found bacteria that consistently swam north under a microscope, then realized they contain magnetite crystals - biological compass needles - that align them with Earth's magnetic field to find the oxygen-poor mud they prefer. Notice the technology it inspired: the bacteria's magnetite chains are being studied for medical uses - magnetic targeting of drugs and MRI contrast - and their crystals are nearly perfect, a natural nanomaterial."
+  },
+  "tags": [
+   "Bacteria",
+   "Magnetism",
+   "Discovery"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-deep-biosphere",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "The Deep Biosphere (1990s)",
+  "teaser": "Miles beneath the seafloor, in rocks with no light, no oxygen, and little water, scientists have found living microbes - a 'deep biosphere' that may contain as much life as all the oceans. The organisms move at geological speeds, dividing once every hundred years.",
+  "imageUrl": "",
+  "byline": "The deep biosphere researchers",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of life deep underground",
+   "durationMinutes": 30,
+   "instruction": "Read how drilling expeditions found microbes in ocean-floor sediments and hard rock down to several kilometers, surviving on trace chemicals and hydrogen from water-rock reactions, and how estimates suggest this hidden biosphere rivals the surface in total biomass. Notice the two implications: the deep biosphere shows life can exist in conditions thought impossible - widening the search for life on Mars - and its microbes are so slow they may be the oldest living things on Earth, their generations measured in millennia."
+  },
+  "tags": [
+   "Deep biosphere",
+   "Microbe",
+   "Subsurface"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-lakes-frozen-life",
+  "categoryId": "BIOLOGY",
+  "subtype": "Discovery",
+  "name": "Lake Vostok (1996)",
+  "teaser": "A lake the size of Lake Ontario, sealed under 4 kilometers of Antarctic ice for millions of years, may hold life that evolved in isolation - a 'lost world' of microbes. Scientists have drilled to its surface and found DNA suggesting a unique community.",
+  "imageUrl": "",
+  "byline": "The Antarctic drilling teams",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The subglacial lake Vostok",
+   "durationMinutes": 25,
+   "instruction": "Read how radar surveys revealed the lake in the 1990s and how drilling through the ice sheet - with extreme care to avoid contaminating it - reached the water in 2012, and how samples found microbes that seem to differ from anything known, living in darkness under pressure and ice. Notice the astrobiological stakes: Vostok is the closest Earth analog to the ice-covered ocean of Jupiter's moon Europa, and the life found there may preview what we'd find on another world."
+  },
+  "tags": [
+   "Lake",
+   "Antarctic",
+   "Extremophile"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-tree-of-life",
+  "categoryId": "BIOLOGY",
+  "subtype": "Idea",
+  "name": "The Tree of Life (1837-2015)",
+  "teaser": "Darwin sketched a tree in his notebook to show that all species share ancestors - and molecular biology has since redrawn it, revealing that the branches of bacteria and archaea dominate the trunk, and animals are a twig. The newest tree includes genes, not just species.",
+  "imageUrl": "",
+  "byline": "Darwin and the molecular systematists",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The tree of life",
+   "durationMinutes": 30,
+   "instruction": "Read how Darwin's 1837 sketch of branching species became the organizing image of biology, and how DNA sequencing showed that the tree's deepest branches - bacteria and archaea - make up most of life's diversity, with plants, fungi, and animals huddled on one small twig. Notice the ongoing revision: the rise of horizontal gene transfer means life's history is a web as much as a tree, and some researchers now map it as a network - an update to the picture that has guided biology for 180 years."
+  },
+  "tags": [
+   "Tree of life",
+   "Evolution",
+   "Classification"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "biology-taxonomy-linnaeus",
+  "categoryId": "BIOLOGY",
+  "subtype": "Invention",
+  "name": "Linnaeus's Naming (1735)",
+  "teaser": "A Swedish botanist gave every species a two-part Latin name - Homo sapiens, Panthera leo - and organized life into nested ranks. His system, mocked as vanity, became the universal language of biology and survives, with updates, to this day.",
+  "imageUrl": "",
+  "byline": "Carl Linnaeus",
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Linnaean system of classification",
+   "durationMinutes": 25,
+   "instruction": "Read how Linnaeus, organizing plants for his own use, devised a system where every species has a genus and species name, and how he placed humans in the order Primates alongside apes and monkeys - a classification scandal in its day. Notice the irony of his legacy: Linnaeus believed species were fixed, but his naming system is exactly what evolutionary biology needed to track the tree of life - and his own genus, Homo, was later revised to include the fossil relatives he never imagined."
+  },
+  "tags": [
+   "Linnaeus",
+   "Classification",
+   "Names"
+  ],
+  "tier": 1
+ }
+]
