@@ -63,6 +63,7 @@ object CurioIcons {
     const val Check       = "check"            // ✓
     const val Add         = "add"              // +
     const val AutoAwesome = "auto_awesome"     // sparkles / logomark
+    const val Tune         = "tune"            // sliders — Preferences settings entry
     const val Inventory2  = "inventory_2"      // cabinet empty state
     const val SearchOff   = "search_off"       // no-results state
     const val History     = "history"          // topic history empty

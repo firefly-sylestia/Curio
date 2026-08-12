@@ -916,7 +916,7 @@ fun TopicRevealScreen(
                     // v22 — the no-AI pledge, bold so it leads the dialog's
                     // intent: research stays the user's own words.
                     Text(
-                        "Keep it human — no AI for your research. This is your curiosity, in your own words.",
+                        "Keep your research your own, and stay curious. This is your curiosity — in your own words.",
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )

@@ -915,7 +915,9 @@ private fun profileRoseAccent(): Color {
         CurioColors.HomeRosewoodDark
     } else if (AppPreferences.pastelColorsState) {
         val pinkHue = (base.h - 15f + 360f) % 360f
-        fromHsl(pinkHue, (base.s * 0.90f).coerceIn(0f, 0.80f), 0.82f)
+        // v26 — pastel headers get a touch more saturation (about +5%) so
+        // the rose banners pop a little without leaving the airy family.
+        fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.82f)
     } else {
         fromHsl(base.h, (base.s * 0.80f).coerceAtMost(0.40f), (base.l * 1.06f).coerceAtMost(0.70f))
     }

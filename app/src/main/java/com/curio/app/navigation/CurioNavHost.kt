@@ -695,6 +695,9 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_APPEARANCE) {
                 SettingsSectionScreen(navController = navController, page = SettingsPage.APPEARANCE)
             }
+            composable(CurioRoutes.SETTINGS_PREFERENCES) {
+                SettingsSectionScreen(navController = navController, page = SettingsPage.PREFERENCES)
+            }
             composable(CurioRoutes.SETTINGS_NOTIFICATIONS) {
                 SettingsSectionScreen(navController = navController, page = SettingsPage.NOTIFICATIONS)
             }

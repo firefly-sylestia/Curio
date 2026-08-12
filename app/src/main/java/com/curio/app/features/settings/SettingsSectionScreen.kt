@@ -78,7 +78,11 @@ import com.curio.app.ui.theme.CurioIcons
 /** Settings destination selected from the compact hub. */
 enum class SettingsPage(val title: String, val subtitle: String) {
     APPEARANCE("Appearance", "Theme, tint, and color mood"),
-    NOTIFICATIONS("Notifications", "Reminders and explore controls"),
+    // v26 — Preferences: the behavioral settings that aren't about how the
+    // app LOOKS or when it REMINDS you — search engine, explore sessions and
+    // the floating bubble, and the pet's chatter/games personality.
+    PREFERENCES("Preferences", "Search, explore, and pet behavior"),
+    NOTIFICATIONS("Notifications", "Reminders and notifications"),
     RECORDING("Recording", "Voice-note quality and dictation"),
     DATA("Backup & restore", "Keep your captures safe")
 }
@@ -130,6 +134,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
             item {
                 when (page) {
                     SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
+                    SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
                     SettingsPage.NOTIFICATIONS -> NotificationsSection(highlightKey)
                     SettingsPage.RECORDING -> RecordingSection(highlightKey)
                     SettingsPage.DATA -> DataSection(navController, highlightKey)
@@ -206,72 +211,32 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setPetEnabled(context, it)
             }
         }
-        // v23 — the floating pet and pet brain are always-on companions now
-        // (their Appearance toggles were removed); only chatter + games stay
-        // tunable below.
-        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
-        // the bubble more often, Quiet says less.
-        SettingsRowPulse(highlightKey == "appearance-pet-chatter") {
-            CompactSegmentedRow(
-                "Pet chatter",
-                listOf("Quiet", "Cozy", "Talkative"),
-                when (AppPreferences.petChatterState) {
-                    "quiet" -> 0
-                    "talkative" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetChatter(
-                    context,
-                    when (index) {
-                        0 -> "quiet"
-                        2 -> "talkative"
-                        else -> "cozy"
-                    }
-                )
-            }
-        }
-        // v16 — how often the pet starts its games on its own: Relaxed,
-        // Normal (default), or Eager.
-        SettingsRowPulse(highlightKey == "appearance-pet-games") {
-            CompactSegmentedRow(
-                "Pet games",
-                listOf("Relaxed", "Normal", "Eager"),
-                when (AppPreferences.petGameFrequencyState) {
-                    "relaxed" -> 0
-                    "eager" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetGameFrequency(
-                    context,
-                    when (index) {
-                        0 -> "relaxed"
-                        2 -> "eager"
-                        else -> "normal"
-                    }
-                )
-            }
-        }
+        // v26 — pet chatter + pet games moved to Preferences (the pet's
+        // behavior personality is a preference, not a look).
         // v23 — auto-open landed topic is always on now (its toggle was
         // removed) and custom reaction lines are permanently off (their
         // editor is no longer reachable, so the toggle was removed too).
     }
 }
 
+/**
+ * Preferences — the behavioral settings that aren't about how the app LOOKS
+ * (Appearance) or when it REMINDS you (Notifications): which search engine
+ * Explore opens, how explore sessions behave (timer / live notification /
+ * floating bubble), and the pet's personality (chatter + games). v26 — the
+ * rows moved here from Notifications and Appearance so Preferences is the
+ * home for "how Curio behaves" choices.
+ */
 @Composable
-private fun NotificationsSection(highlightKey: String? = null) {
+private fun PreferencesSection(highlightKey: String? = null) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
     var overlayEnabled by remember { mutableStateOf(AppPreferences.overlayBubbleEnabledState) }
     // v8.1 — live "Display over other apps" grant state + a flag that the
     // system special-access page was opened (so ON_RESUME knows whether a
     // grant — or a decline — just happened).
     var overlayUsable by remember { mutableStateOf(AppPreferences.overlayActuallyUsable(context)) }
     var overlaySettingsOpened by remember { mutableStateOf(false) }
-    // v23 — whether the Explore dialog shows its bubble opt-in row.
-    var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
     var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
     // v19 — the explore search-engine picker (which engine the "Explore in
@@ -282,9 +247,7 @@ private fun NotificationsSection(highlightKey: String? = null) {
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                reminderHour = AppPreferences.getReminderHour(context)
                 overlayEnabled = AppPreferences.isOverlayBubbleEnabled(context)
-                showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
                 liveNotificationsEnabled = AppPreferences.isLiveNotificationsEnabled(context)
                 exploreSessionsEnabled = AppPreferences.isExploreSessionsEnabled(context)
@@ -315,6 +278,176 @@ private fun NotificationsSection(highlightKey: String? = null) {
     val overlaySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { /* no-op — ON_RESUME is the source of truth */ }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) pendingEnable?.invoke()
+        pendingEnable = null
+    }
+    fun enableNotifications(action: () -> Unit) {
+        if (!permissionMissing) action() else {
+            pendingEnable = action
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // v19 — which search engine the "Explore in browser" button opens.
+        // A row that opens the engine picker; the subtitle shows the choice.
+        SettingsRowPulse(highlightKey == "pref-search-engine") {
+            CurioSettingsRow(
+                CurioIcons.Search,
+                "Search engine",
+                "Explore in browser opens ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}"
+            ) {
+                showSearchEngineDialog = true
+            }
+        }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "pref-sessions") {
+            CompactSwitchRow("Explore sessions", "Timer, reminder, and done prompt", exploreSessionsEnabled) {
+                exploreSessionsEnabled = it
+                AppPreferences.setExploreSessionsEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "pref-live") {
+            CompactSwitchRow("Live explore notification", "Ongoing timer with pause and stop", liveNotificationsEnabled) { enabled ->
+                if (enabled) enableNotifications {
+                    liveNotificationsEnabled = true
+                    AppPreferences.setLiveNotificationsEnabled(context, true)
+                } else {
+                    liveNotificationsEnabled = false
+                    AppPreferences.setLiveNotificationsEnabled(context, false)
+                }
+            }
+        }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "pref-bubble") {
+            CompactSwitchRow("Floating explore bubble", "Timer bubble over other apps", overlayEnabled) { enabled ->
+                if (enabled && !AppPreferences.overlayActuallyUsable(context)) {
+                    // Explicit intent — stop suppressing the prompt and
+                    // remember the settings trip so the return decides.
+                    AppPreferences.setOverlayAskDeclined(context, false)
+                    val launched = runCatching {
+                        overlaySettingsOpened = true
+                        overlaySettingsLauncher.launch(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:${context.packageName}")
+                            )
+                        )
+                    }
+                    if (launched.isFailure) overlaySettingsOpened = false
+                } else {
+                    overlayEnabled = enabled
+                    AppPreferences.setOverlayBubbleEnabled(context, enabled)
+                }
+            }
+        }
+        CurioSettingsDivider()
+        // v8.1 — the permission toggle itself: shows the live grant state
+        // and opens the system special-access page (on or off — the grant
+        // can't be flipped from the app). The switch re-reads reality on
+        // return, so granting here re-enables the bubble and future prompts.
+        SettingsRowPulse(highlightKey == "pref-overlay") {
+            CompactSwitchRow(
+                "Display over other apps",
+                if (overlayUsable) "Granted. The bubble can float over other apps"
+                else "System permission for the floating bubble",
+                overlayUsable
+            ) { enabled ->
+                // An explicit toggle is a fresh intent: it always opens the
+                // system page (grant OR revoke) and clears the declined flag.
+                AppPreferences.setOverlayAskDeclined(context, false)
+                val launched = runCatching {
+                    overlaySettingsOpened = true
+                    overlaySettingsLauncher.launch(
+                        Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:${context.packageName}")
+                        )
+                    )
+                }
+                if (launched.isFailure) overlaySettingsOpened = false
+            }
+        }
+        CurioSettingsDivider()
+        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
+        // the bubble more often, Quiet says less. Moved from Appearance (v26).
+        SettingsRowPulse(highlightKey == "pref-pet-chatter") {
+            CompactSegmentedRow(
+                "Pet chatter",
+                listOf("Quiet", "Cozy", "Talkative"),
+                when (AppPreferences.petChatterState) {
+                    "quiet" -> 0
+                    "talkative" -> 2
+                    else -> 1
+                }
+            ) { index ->
+                AppPreferences.setPetChatter(
+                    context,
+                    when (index) {
+                        0 -> "quiet"
+                        2 -> "talkative"
+                        else -> "cozy"
+                    }
+                )
+            }
+        }
+        CurioSettingsDivider()
+        // v16 — how often the pet starts its games on its own: Relaxed,
+        // Normal (default), or Eager. Moved from Appearance (v26).
+        SettingsRowPulse(highlightKey == "pref-pet-games") {
+            CompactSegmentedRow(
+                "Pet games",
+                listOf("Relaxed", "Normal", "Eager"),
+                when (AppPreferences.petGameFrequencyState) {
+                    "relaxed" -> 0
+                    "eager" -> 2
+                    else -> 1
+                }
+            ) { index ->
+                AppPreferences.setPetGameFrequency(
+                    context,
+                    when (index) {
+                        0 -> "relaxed"
+                        2 -> "eager"
+                        else -> "normal"
+                    }
+                )
+            }
+        }
+    }
+    if (showSearchEngineDialog) {
+        SearchEngineDialog(
+            current = SearchEngine.fromId(AppPreferences.searchEngineState),
+            onDismiss = { showSearchEngineDialog = false },
+            onSelected = { engine ->
+                AppPreferences.setSearchEngine(context, engine)
+                showSearchEngineDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun NotificationsSection(highlightKey: String? = null) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var reminderHour by remember { mutableStateOf(AppPreferences.getReminderHour(context)) }
+    // v23 — whether the Explore dialog shows its bubble opt-in row.
+    var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
+    val permissionMissing = Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                reminderHour = AppPreferences.getReminderHour(context)
+                showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    var pendingEnable by remember { mutableStateOf<(() -> Unit)?>(null) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) pendingEnable?.invoke()
         pendingEnable = null
@@ -368,60 +501,6 @@ private fun NotificationsSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "notif-sessions") {
-            CompactSwitchRow("Explore sessions", "Timer, reminder, and done prompt", exploreSessionsEnabled) {
-                exploreSessionsEnabled = it
-                AppPreferences.setExploreSessionsEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        // v19 — which search engine the "Explore in browser" button opens.
-        // A row that opens the engine picker; the subtitle shows the choice.
-        SettingsRowPulse(highlightKey == "notif-search-engine") {
-            CurioSettingsRow(
-                CurioIcons.Search,
-                "Search engine",
-                "Explore in browser opens ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}"
-            ) {
-                showSearchEngineDialog = true
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "notif-live") {
-            CompactSwitchRow("Live explore notification", "Ongoing timer with pause and stop", liveNotificationsEnabled) { enabled ->
-                if (enabled) enableNotifications {
-                    liveNotificationsEnabled = true
-                    AppPreferences.setLiveNotificationsEnabled(context, true)
-                } else {
-                    liveNotificationsEnabled = false
-                    AppPreferences.setLiveNotificationsEnabled(context, false)
-                }
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "notif-bubble") {
-            CompactSwitchRow("Floating explore bubble", "Timer bubble over other apps", overlayEnabled) { enabled ->
-                if (enabled && !AppPreferences.overlayActuallyUsable(context)) {
-                    // Explicit intent — stop suppressing the prompt and
-                    // remember the settings trip so the return decides.
-                    AppPreferences.setOverlayAskDeclined(context, false)
-                    val launched = runCatching {
-                        overlaySettingsOpened = true
-                        overlaySettingsLauncher.launch(
-                            Intent(
-                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                Uri.parse("package:${context.packageName}")
-                            )
-                        )
-                    }
-                    if (launched.isFailure) overlaySettingsOpened = false
-                } else {
-                    overlayEnabled = enabled
-                    AppPreferences.setOverlayBubbleEnabled(context, enabled)
-                }
-            }
-        }
-        CurioSettingsDivider()
         // v23 — the explore dialog's bubble opt-in row is hidden by default;
         // this re-shows it there as a single-line choice (no subtext).
         SettingsRowPulse(highlightKey == "notif-bubble-dialog") {
@@ -434,43 +513,6 @@ private fun NotificationsSection(highlightKey: String? = null) {
                 AppPreferences.setShowBubbleOptInDialog(context, it)
             }
         }
-        CurioSettingsDivider()
-        // v8.1 — the permission toggle itself: shows the live grant state
-        // and opens the system special-access page (on or off — the grant
-        // can't be flipped from the app). The switch re-reads reality on
-        // return, so granting here re-enables the bubble and future prompts.
-        SettingsRowPulse(highlightKey == "notif-overlay") {
-            CompactSwitchRow(
-                "Display over other apps",
-                if (overlayUsable) "Granted. The bubble can float over other apps"
-                else "System permission for the floating bubble",
-                overlayUsable
-            ) { enabled ->
-                // An explicit toggle is a fresh intent: it always opens the
-                // system page (grant OR revoke) and clears the declined flag.
-                AppPreferences.setOverlayAskDeclined(context, false)
-                val launched = runCatching {
-                    overlaySettingsOpened = true
-                    overlaySettingsLauncher.launch(
-                        Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:${context.packageName}")
-                        )
-                    )
-                }
-                if (launched.isFailure) overlaySettingsOpened = false
-            }
-        }
-    }
-    if (showSearchEngineDialog) {
-        SearchEngineDialog(
-            current = SearchEngine.fromId(AppPreferences.searchEngineState),
-            onDismiss = { showSearchEngineDialog = false },
-            onSelected = { engine ->
-                AppPreferences.setSearchEngine(context, engine)
-                showSearchEngineDialog = false
-            }
-        )
     }
 }
 

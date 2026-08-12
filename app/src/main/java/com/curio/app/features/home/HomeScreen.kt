@@ -1477,8 +1477,9 @@ private fun homeRoseAccent(): Color {
         // toward pink and lift it slightly so the pastel reads clean and airy,
         // not brown or terracotta. The small saturation lift keeps the pastel
         // lively without turning it neon. Other category pastels stay unchanged.
+        // v26 — about +5% more saturation so the pastel headers pop a little.
         val pinkHue = (base.h - 15f + 360f) % 360f
-        fromHsl(pinkHue, (base.s * 0.90f).coerceIn(0f, 0.80f), 0.82f)
+        fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.82f)
     } else {
         // v7.36 — the base is a soft dusty rose now; lift it a touch and
         // hold saturation modestly so the non-pastel Home banner reads as a

@@ -69,12 +69,22 @@ object UpdateChecker {
             if (release != null && release.tagName.isNotBlank()) return@withContext release
             // 2) No release published yet — fall back to the newest git tag
             //    (the authoritative build tag), so the check reports "up to
-            //    date" once a matching tag exists instead of failing.
+            //    date" once a matching tag exists instead of failing. The
+            //    tags endpoint doesn't guarantee order, so pick the tag that
+            //    compares NEWEST by version instead of trusting the array
+            //    position ("v1.0.0.1-test" beats "v1.0-beta" wherever it
+            //    sits in the list).
             fetch(TAGS_URL) { raw ->
                 val arr = JSONArray(raw)
                 if (arr.length() == 0) return@fetch null
-                val tag = arr.optJSONObject(0)?.optString("name").orEmpty()
-                if (tag.isBlank()) null
+                val tag = (0 until arr.length())
+                    .mapNotNull { arr.optJSONObject(it)?.optString("name").takeIf { n -> n.isNotBlank() } }
+                    .maxWithOrNull(
+                        Comparator { t1, t2 ->
+                            compareVersions(t1.removePrefix("v"), t2.removePrefix("v"))
+                        }
+                    )
+                if (tag.isNullOrBlank()) null
                 else UpdateInfo(
                     tagName = tag,
                     htmlUrl = "https://github.com/$REPO/releases/tag/$tag",
@@ -89,19 +99,45 @@ object UpdateChecker {
     }
 
     /** True when [latestTag] ("v1.0.1") is newer than [currentVersion] ("1.0.0"). */
-    fun isNewer(latestTag: String, currentVersion: String): Boolean {
-        val a = latestTag.removePrefix("v").trim().split('.').mapNotNull { it.toIntOrNull() }
-        val b = currentVersion.trim().split('.').mapNotNull { it.toIntOrNull() }
-        // Unparseable versions fall back to a plain string inequality so a
-        // differently-named tag still surfaces as "different".
-        if (a.isEmpty() || b.isEmpty()) return latestTag != currentVersion
-        val len = maxOf(a.size, b.size)
+    fun isNewer(latestTag: String, currentVersion: String): Boolean =
+        compareVersions(latestTag.removePrefix("v").trim(), currentVersion.trim()) > 0
+
+    /**
+     * Compares two version strings component-by-component. Tolerant of the
+     * prerelease-style suffixes this repo actually tags with
+     * ("v1.0.0.1-test", "v1.0-beta") — segments that used to be silently
+     * dropped by `toIntOrNull` ("1-test" → null) so a newer tag compared
+     * equal to the installed version and the check wrongly said "up to
+     * date". Returns > 0 when [a] is newer than [b].
+     */
+    private fun compareVersions(a: String, b: String): Int {
+        val aParts = a.split('.')
+        val bParts = b.split('.')
+        val len = maxOf(aParts.size, bParts.size)
         for (i in 0 until len) {
-            val x = a.getOrElse(i) { 0 }
-            val y = b.getOrElse(i) { 0 }
-            if (x != y) return x > y
+            val x = parseSegment(aParts.getOrElse(i) { "" })
+            val y = parseSegment(bParts.getOrElse(i) { "" })
+            if (x.num != y.num) return x.num.compareTo(y.num)
+            // Equal numeric cores: a bare number beats a prerelease suffix
+            // (1.0.0 > 1.0.0-beta); when both carry suffixes compare them
+            // as text ("1-test" > "0-beta").
+            if (x.suffix != y.suffix) {
+                if (x.suffix.isEmpty()) return 1
+                if (y.suffix.isEmpty()) return -1
+                return x.suffix.compareTo(y.suffix)
+            }
         }
-        return false
+        return 0
+    }
+
+    /** One dotted version segment — its numeric core + any prerelease tail. */
+    private data class VersionSegment(val num: Int, val suffix: String)
+
+    /** "1-test" → (1, "-test"), "0" → (0, ""), "" → (0, ""). */
+    private fun parseSegment(raw: String): VersionSegment {
+        val digits = raw.takeWhile { it.isDigit() }
+        val num = digits.toIntOrNull() ?: 0
+        return VersionSegment(num, raw.removePrefix(digits))
     }
 
     /**

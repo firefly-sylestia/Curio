@@ -51,3 +51,8 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • The Recents page now wears the torn-paper hero header that matches the rest of the app.
 • Deleting a capture now asks twice, then sends it to the Recycle bin instead of erasing it — recover it anytime from Settings → Safety & support → Recycle bin (Restore, Delete forever, or Empty bin).
 • The Cabinet sort control is now a dropdown (Date / Title / Category) with a universal arrow that flips ascending ↔ descending — same dropdown style in the Topic Browser (Default / Name / Year).
+• Settings grows a Preferences screen (right after Appearance): Search engine, Explore sessions, Live explore notification, the Floating bubble, and the pet's chatter + games personality now live together as one "how Curio behaves" home.
+• The Topic Browser's search and sort now ride the header, the category filter floats below it like the Cabinet, and a floating up-arrow appears when you scroll deep to jump back to the top.
+• Pastel headers (Home, Profile, Settings) got a touch more saturation so they pop a little.
+• The update check now correctly spots newer releases even when their version has a suffix (like v1.0.0.1-test) instead of saying you're up to date.
+• The no-AI pledge reads warmer: "Keep your research your own — and stay curious."
