@@ -50,7 +50,11 @@ fun CurioSettingsCard(
         } else {
             MaterialTheme.colorScheme.surfaceContainerLow
         },
-        tonalElevation = 3.dp,
+        // AMOLED: tonalElevation overlays the scheme's primary (the coral
+        // brand color) onto the container, which washed the pitch-black cards
+        // with a faint rose tint. Black cards need no tonal lift — the black-glass
+        // shine edge keeps them defined, so drop the elevation in AMOLED only.
+        tonalElevation = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) 0.dp else 3.dp,
         shadowElevation = 0.dp,
         border = border,
         modifier = modifier

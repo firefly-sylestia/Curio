@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -363,14 +365,27 @@ private fun NotificationsSection(highlightKey: String? = null) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 6.dp)) {
                 items(listOf(9, 12, 15, 18, 21)) { hour ->
                     val selected = hour == reminderHour
+                    // AMOLED: the selected chip was the coral primary; it
+                    // swaps to pitch-black glass (white text + hairline rim) to
+                    // match the switches and the app's AMOLED control language.
+                    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
                     Surface(
                         onClick = {
                             reminderHour = hour
                             AppPreferences.setReminderHour(context, hour)
                         },
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                        color = when {
+                            selected && isAmoled -> Color.Black
+                            selected -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+                        },
+                        contentColor = when {
+                            selected && isAmoled -> MaterialTheme.colorScheme.onSurface
+                            selected -> MaterialTheme.colorScheme.onPrimary
+                            else -> MaterialTheme.colorScheme.onSurface
+                        },
+                        border = if (selected && isAmoled) BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)) else null,
                         modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Text(
@@ -572,12 +587,29 @@ private fun CompactSegmentedRow(
 
 @Composable
 private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
+    // AMOLED: the scheme primary is the coral brand color, so the ON
+    // track lit pink. Pitch-black glass instead (black track, white knob,
+    // hairline white rim) — the app's AMOLED control language.
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, enabled = enabled, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            enabled = enabled,
+            onCheckedChange = onCheckedChange,
+            colors = if (isAmoled) {
+                SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.onSurface,
+                    checkedTrackColor = Color.Black,
+                    checkedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+            } else {
+                SwitchDefaults.colors()
+            }
+        )
     }
 }
 

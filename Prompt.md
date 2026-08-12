@@ -1,92 +1,27 @@
 # Prompt.md — Request Log
 
-## Current Request (IN PROGRESS): Web app creation — full feature parity
+## Current Request (COMPLETE): AMOLED cleanup on Profile + Settings (Android)
 
-**Date:** 2026-08-11
+**Date:** 2026-08-12
 
-**What was asked:** Create a web version of Curio that mirrors the Android app's UI design and database. The web app should:
-- Live in the `web/` directory
-- Not be included in the Android build
-- Use React + TypeScript with Vite and Tailwind CSS
-- Use IndexedDB for local storage (mirroring Room database)
-- No authentication required (local only)
-- Full feature parity with Android app
+**What was asked:** User reported a "weird color tint" on the Profile and Settings screens in AMOLED mode and asked to "make the buttons pitch black". They asked me to identify what they meant and confirm before changing anything. After one false start on the web app (user clarified they work in the Android app; the web change was reverted), the user confirmed via ask_user that the tint is: (1) the **pink toggles & chips** on Settings, and (2) the **rose tint on the card shells** on Profile (Progress & Achievements, Your lanes, Settings & preferences, Support & diagnostics). Scope confirmed: **Profile + Settings only**.
 
-**Changes made (so far):**
+**Root causes found:**
+1. **Rose tint on cards** — `CurioSettingsCard` sets `color = Color.Black` in AMOLED but kept `tonalElevation = 3.dp`. Material3's tonal elevation overlay blends the color scheme's `primary` (the coral brand color `CoralBlush` in `CurioAmoledColorScheme`) over the container — so every pitch-black card on Profile/Settings hub was washed with a faint rose tint.
+2. **Pink toggles** — `CompactSwitchRow` on the settings sub-screens used a plain `Switch`, whose checked track defaults to the scheme `primary` = coral pink in AMOLED.
+3. **Pink reminder-hour chips** — the selected time chip in `NotificationsSection` used `MaterialTheme.colorScheme.primary` (coral pink) when selected.
 
-1. **Project setup:**
-   - Created `web/` directory with React + TypeScript project via Vite
-   - Installed Tailwind CSS v3, React Router, and IDB (IndexedDB wrapper)
-   - Configured Tailwind with Curio's color palette
+**Changes made:**
+- `app/src/main/java/com/curio/app/ui/components/CurioSettingsCard.kt` — `tonalElevation` now drops to `0.dp` in AMOLED (kept at `3.dp` otherwise), killing the rose overlay. The black-glass `categoryEdgeShine` rim still keeps cards defined.
+- `app/src/main/java/com/curio/app/features/settings/SettingsSectionScreen.kt`:
+  - `CompactSwitchRow` — in AMOLED the switch wears pitch-black glass: `SwitchDefaults.colors(checkedTrackColor = Color.Black, checkedThumbColor = onSurface, checkedBorderColor = onSurface @ 25%)`; defaults elsewhere.
+  - `NotificationsSection` reminder-hour chips — in AMOLED the selected chip becomes `Color.Black` with white text + a 1dp hairline `onSurface` rim instead of the coral primary.
 
-2. **Type definitions (`web/src/types/index.ts`):**
-   - Defined TypeScript types mirroring Android data models
-   - CategoryId, CurioCategory, CaptureFormat, CurioTopic, ExploreAction
-   - CaptureEntity, CurioEntry, CaptureData variants
-   - PetDefinition, Quest, ThemeSettings, UserPreferences
+**Scope note (disclosed):** `CurioSettingsCard` is shared — the tonal-elevation fix also removes the same accidental rose wash from Quests and Onboarding cards in AMOLED (matching the component's documented "AMOLED cards are proper pitch black" intent). User was not re-asked; flag if they want those scoped out.
 
-3. **Category data (`web/src/data/categories.ts`):**
-   - All 21 categories with colors, icons, families
-   - Category color system (accent, ink, tint)
-   - Helper functions for gradients and lookups
+**Deliberately left alone (user did not flag them):** the Sage-green "Achievements" progress bar on Profile (v15 white-glass pattern was applied to the XP bar but missed here), the blue DustyBlue "Settings & preferences" tile, the yellow ButterYellow XP icon, and the rose 18% back pill on the Settings hero.
 
-4. **IndexedDB setup (`web/src/db/database.ts`):**
-   - Database schema matching Room's captures table
-   - CRUD operations for captures
-   - Indexes on category, date, and topic
-
-5. **Theme system (`web/src/theme/ThemeContext.tsx`):**
-   - React context for theme state
-   - Supports Curio/AMOLED/Material styles
-   - Dark/light mode, pastel colors, tint wash, hero gradient toggles
-   - Theme-aware color helper functions
-
-6. **Components:**
-   - `CurioCard` - Base card component with variants (default, hero, compact)
-   - `CategoryCard` - Grid display for categories
-   - `HeroCard` - Main spin screen card
-   - `BottomNav` - Bottom navigation bar
-
-7. **Screens:**
-   - `HomeScreen` - Hero, streak, category chips, recently explored
-   - `SpinScreen` - Category selector, spin dial, animation
-   - `CabinetScreen` - Saved entries grid with filtering
-   - `ProfileScreen` - Stats, achievements, pet display
-   - `SettingsScreen` - Theme toggles, data management
-   - `TopicRevealScreen` - Topic details, explore action, save flow
-
-8. **Routing (`web/src/App.tsx`):**
-   - React Router setup with all routes
-   - Placeholder screens for unimplemented features
-
-9. **Configuration:**
-   - Updated `.gitignore` to exclude web build artifacts
-   - Updated `AGENTS.md` to document web directory
-
-**What's done:**
-- Core project structure ✓
-- Type system ✓
-- Category data ✓
-- IndexedDB storage ✓
-- Theme system ✓
-- Basic components ✓
-- 6 main screens ✓
-- Routing ✓
-
-**What's remaining:**
-- Topic data loading from JSON assets
-- Pet system (designer, floating pet, dialogues)
-- Quest system
-- Explore sessions with timers
-- More components (CurioButton, CurioIcon, etc.)
-- Responsive design polish
-- Additional screens (Onboarding, Pet Designer, Quests, etc.)
-
-**Validation:**
-- Project structure created
-- TypeScript types defined
-- Components and screens created
-- No build validation yet (npm run build)
+**Validation:** No Gradle compile/build run locally (project rule — CI validates on push; the env has no Android SDK). Compose/M3 API usage (`SwitchDefaults.colors` named params, `Surface(tonalElevation)`) verified against Material3 1.5.0-alpha20 / BOM 2026.05.01 via docs research. Code reviewed by code-reviewer-deepseek-flash (no CI-breaking issues found).
 
 ## Previous Requests
 
