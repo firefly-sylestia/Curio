@@ -120,3 +120,4 @@ CI fix pushed earlier this turn: 28122f2 (Cabinet LazyGridItemInfo.offset.y — 
 - CI fix: SessionNoteFloatingPill's root Column used BoxScope-only Modifier.align — moved the align into a Box wrapper at the call site.
 - New "Deeper header color" preference (default ON) in Experiments → Paper & headers: CurioCategory.headerAccent() darkens themedAccent hue-preservingly (light 0.88, dark 0.94 lightness) and is applied to the three category-colored torn-hero fills (Cabinet, Entry Detail, Topic Reveal). Watermarks/ink untouched.
 - Committed + pushed (205b1d4 for astronomy; this batch on top).
+- Content marathon: geology.json 1000 topics merged + GEOLOGY isReady (v27k). Next lanes: medicine, psychology, mathematics, economics, language, engineering, oceans.

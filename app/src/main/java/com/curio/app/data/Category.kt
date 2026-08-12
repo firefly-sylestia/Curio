@@ -565,7 +565,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryStoneTint,
             iconGlyph     = "layers",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true  // v27k — 1000 topics shipped in assets/topics/geology.json
         ),
         CurioCategory(
             id            = CategoryId.MEDICINE,
