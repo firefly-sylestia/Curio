@@ -1,6 +1,22 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Session time in Topic History rows (Android)
+## Current Request (COMPLETE): CI fix — settings-import package + indicator drag API (Android)
+
+**Date:** 2026-08-12
+
+**What happened:** CI failed with ~20 errors, two real root causes:
+1. **TopicHistoryScreen.kt** — `settingsReadableInk`/`settingsRoseAccent` imports pointed at `com.curio.app.ui.theme`, but the shared helpers live in `com.curio.app.features.settings` (SettingsHubScreen). That single bug cascaded into ~18 downstream type-inference errors (produceState `Pair` pinned to `Nothing?`, `Map.Entry.copy` weirdness, String-vs-Int mismatches in the Liked/Disliked items, hero symbol pairs) — all resolved once the imports landed.
+2. **CurioScrollIndicator.kt:128** — `change.currentPosition.y` was ALSO unresolved: PointerInputChange's position properties are hidden in compose-ui 1.12.0-alpha03 (first attempt used `positionChange().y` — Boolean in this version; second used `currentPosition` — also gone).
+
+**Fix (2 files):**
+- **TopicHistoryScreen.kt** — imports corrected to `com.curio.app.features.settings.settingsReadableInk/settingsRoseAccent` (grouped before the ui.* imports, with a short comment); `produceState` explicitly typed `produceState<Pair<List<CurioTopic>, List<CurioTopic>>?>` so `initialValue = null` can't pin the type to `Nothing?`.
+- **CurioScrollIndicator.kt** — drag gesture rewritten from the raw `awaitEachGesture` + per-event position-math loop to the stable **`detectVerticalDragGestures`** (verified present in foundation 1.12.0-alpha03's DragGestureDetectorKt): `onDragStart`/`onDragEnd`/`onDragCancel` toggle `touched` (knob grows), `onVerticalDrag` consumes the change and maps `dragAmount` over knob travel to the scrollable range. Removed the now-dead imports (`awaitEachGesture`, `awaitFirstDown`, `changedToUp`).
+
+**Validation:** No local Gradle build (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash: correct + complete; three accepted notes — import placement tidied into a features.settings group, knob now grows on drag-start (after touch slop) instead of raw touch, and the "content fits" guard moved from an early-exit to a no-op inside the callback.
+
+## Previous Requests
+
+### Session time in Topic History rows (Android)
 
 **Date:** 2026-08-12
 
