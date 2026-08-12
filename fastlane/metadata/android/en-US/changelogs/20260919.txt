@@ -46,3 +46,6 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Manage Categories supports drag-to-reorder — long-press the ⋮ handle and drag a lane into place — plus a Reset order button.
 • The Spin page category sheet now links straight to Manage categories.
 • Reopening What are we exploring? shows your saved mix as you left it, every deck pre-selected, so you can tweak it instead of re-picking.
+• Topic Browser lists every category alphabetically out of the box, and the scroll knob now speed-scrolls — the further you drag, the faster it goes.
+• Tap the scroll knob to open the A–Z rail; it tracks the letter you are on as you scroll, and tapping a letter jumps straight there.
+• The Recents page now wears the torn-paper hero header that matches the rest of the app.

@@ -1,5 +1,6 @@
 package com.curio.app.features.recent
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -39,14 +39,16 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.UnexploredTopic
 import com.curio.app.data.formatSessionShort
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categorySurface
@@ -129,7 +131,9 @@ fun RecentScreen(navController: NavController) {
     val listState = rememberLazyListState()
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
@@ -139,46 +143,30 @@ fun RecentScreen(navController: NavController) {
                 modifier = Modifier.fillMaxSize()
             )
         }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                CurioBackButton(onClick = { navController.popBackStack() })
-                Column {
-                    Text(
-                        text = "Recents",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = "Your latest discoveries, all in one place",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
 
+        // v26 — the full page now wears the settings-family torn-rose hero
+        // (same as Manage Categories / Topic Database / Topic History): the
+        // feed scrolls up and disappears under the ragged tear instead of a
+        // plain back-button + title row.
+        ScreenEntrance {
             if (feed.isEmpty()) {
                 CurioEmptyState(
                     glyph = CurioIcons.History,
                     headline = "No discoveries yet",
                     subtext = "Explore a topic or save a capture. Your recent finds will show up here.",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                    modifier = Modifier.padding(top = SettingsHeroTotalHeight)
                 )
             } else {
-                Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = wideContentEdgePadding(), vertical = 18.dp),
+                    contentPadding = PaddingValues(
+                        start = wideContentEdgePadding(),
+                        end = wideContentEdgePadding(),
+                        top = SettingsHeroTotalHeight + 10.dp,
+                        bottom = 24.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(feed, key = { it.key }) { item ->
@@ -186,18 +174,27 @@ fun RecentScreen(navController: NavController) {
                     }
                     item { Spacer(Modifier.size(12.dp)) }
                 }
-                // Side scroll indicator — thin overlay knob, grows on touch.
-                CurioVerticalScrollIndicator(
-                    state = listState.scrollIndicatorState,
-                    onScrollBy = { listState.dispatchRawDelta(it) },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .fillMaxHeight()
-                        .padding(vertical = 8.dp)
-                )
-                }
             }
         }
+
+        if (feed.isNotEmpty()) {
+            // Side scroll indicator — thin overlay knob, grows on touch.
+            CurioVerticalScrollIndicator(
+                state = listState.scrollIndicatorState,
+                onScrollBy = { listState.dispatchRawDelta(it) },
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+                    .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+            )
+        }
+
+        // ── Torn rose hero on top — rows disappear under the tear. ──
+        SettingsHeroHeader(
+            title = "Recents",
+            subtitle = "Your latest discoveries, all in one place",
+            onBack = { navController.popBackStack() }
+        )
     }
 }
 

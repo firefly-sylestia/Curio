@@ -25,11 +25,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -63,6 +65,7 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -93,9 +96,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // resetting to a fresh blank list every time you come back.
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
-    // v8.54 — sort control: DEFAULT (category file order) / A–Z / Z–A /
-    // YEAR_NEWEST / YEAR_OLDEST. Saved like the search + filter so it
-    // survives reveal round-trips, tab switches, and rotation.
+    // v8.54 — sort control: DEFAULT (A–Z within each category, section
+    // headers kept) / A–Z / Z–A / YEAR_NEWEST / YEAR_OLDEST. Saved like the
+    // search + filter so it survives reveal round-trips, tab switches, and
+    // rotation.
     var sortMode by rememberSaveable { mutableStateOf(DatabaseSortMode.DEFAULT) }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
@@ -218,7 +222,13 @@ fun TopicDatabaseScreen(navController: NavController) {
                 buildList {
                     catalog.forEach { (cat, topics) ->
                         if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                        val shown = topics.mapNotNull { indexById[it.id] }.filter(matches)
+                        val shown = topics.mapNotNull { indexById[it.id] }
+                            .filter(matches)
+                            // v26 — the DEFAULT order is now A–Z WITHIN each
+                            // category (stable sort: ties keep file order), so
+                            // the browser reads alphabetically out of the box
+                            // while section headers still group the lanes.
+                            .sortedBy { it.nameKey }
                         if (shown.isEmpty()) return@forEach
                         if (effectiveCat == null) {
                             add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
@@ -301,6 +311,34 @@ fun TopicDatabaseScreen(navController: NavController) {
             savedScrollIndex = 0
             savedScrollOffset = 0
             listState.scrollToItem(0)
+        }
+    }
+
+    // ── A–Z fast-scroller (v26) — the scroll knob's letter rail: the active
+    //    letter is derived from the topic row at the top of the list, and
+    //    tapping a letter jumps to the first topic starting with it.
+    val alphabetLetters = remember { ('A'..'Z').map { it.toString() } }
+    val activeAlphabetIndex: Int? by remember(rows) {
+        derivedStateOf {
+            val last = (rows.size - 1).coerceAtLeast(0)
+            val start = listState.firstVisibleItemIndex.coerceIn(0, last)
+            for (i in start until rows.size) {
+                val name = rows[i].topic?.name
+                if (!name.isNullOrEmpty()) {
+                    val idx = alphabetLetters.indexOf(name.first().uppercaseChar().toString())
+                    if (idx >= 0) return@derivedStateOf idx
+                }
+            }
+            null
+        }
+    }
+    val alphabetScope = rememberCoroutineScope()
+    val onAlphabetSelect: (String) -> Unit = { letter ->
+        val target = rows.indexOfFirst {
+            it.topic?.name?.startsWith(letter, ignoreCase = true) == true
+        }
+        if (target >= 0) {
+            alphabetScope.launch { listState.scrollToItem(target.coerceIn(0, rows.lastIndex)) }
         }
     }
 
@@ -546,10 +584,14 @@ fun TopicDatabaseScreen(navController: NavController) {
                 }
             }
         }
-        // Side scroll indicator — thin overlay knob, grows on touch.
+        // Side scroll indicator — speed-scrolling knob (v26) with the A–Z
+        // fast-scroller rail (tap the knob to open it, tap a letter to jump).
         CurioVerticalScrollIndicator(
             state = listState.scrollIndicatorState,
             onScrollBy = { listState.dispatchRawDelta(it) },
+            alphabet = alphabetLetters,
+            activeAlphabetIndex = activeAlphabetIndex,
+            onAlphabetSelect = onAlphabetSelect,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
@@ -619,8 +661,9 @@ private fun DatabaseFilterChip(
 
 /**
  * How the Topic Database list is ordered. DEFAULT keeps the per-category
- * file order with section headers; the other modes flatten to one sorted
- * run (headers are hidden because a global sort breaks grouping).
+ * grouping — A–Z within each lane — with section headers; the other modes
+ * flatten to one sorted run (headers are hidden because a global sort
+ * breaks grouping).
  */
 private enum class DatabaseSortMode {
     DEFAULT, ALPHA_ASC, ALPHA_DESC, YEAR_NEWEST, YEAR_OLDEST
