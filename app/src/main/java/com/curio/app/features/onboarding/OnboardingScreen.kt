@@ -238,11 +238,14 @@ fun OnboardingScreen(navController: NavController) {
                         .statusBarsPadding()
                 ) {
                     // ── Brand wordmark + tagline — v7.112: enlarged again
-                    //    so Curio leads the intro without crowding the tagline ──
-                    Spacer(Modifier.height(26.dp))
+                    //    so Curio leads the intro without crowding the tagline.
+                    //    v22 — two steps up the type scale (displaySmall →
+                    //    displayLarge, labelSmall → labelLarge) with a no-AI
+                    //    pledge beneath: research stays the user's own words. ──
+                    Spacer(Modifier.height(18.dp))
                     Text(
                         text = "Curio",
-                        style = MaterialTheme.typography.displaySmall.copy(
+                        style = MaterialTheme.typography.displayLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 4.sp
                         ),
@@ -252,13 +255,20 @@ fun OnboardingScreen(navController: NavController) {
                     )
                     Text(
                         text = stringResource(R.string.app_tagline),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = heroInk().copy(alpha = 0.82f),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = heroInk().copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "Keep it human — no AI for your research.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = heroInk().copy(alpha = 0.72f),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(6.dp))
 
                     // ── Slide area — the pager fills the rest of the banner ──
                     HorizontalPager(
@@ -529,9 +539,12 @@ private fun OnboardingSlide(slide: OnboardingSlideData) {
             verticalArrangement = Arrangement.Center
         ) {
             // ── Step kicker — SHUFFLE / EXPLORE / KEEP ────────────────
+            // v22 — kicker/headline/subtext bumped larger with roomier
+            // spacing (labelMedium → labelLarge, headlineLarge →
+            // displayMedium, bodyLarge → 18sp) so the intro reads bolder.
             Text(
                 text = slide.kicker,
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 2.sp
                 ),
@@ -539,24 +552,27 @@ private fun OnboardingSlide(slide: OnboardingSlideData) {
                 textAlign = TextAlign.Center
             )
 
-            Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
 
             Text(
                 text = slide.headline,
-                style = MaterialTheme.typography.headlineLarge.copy(
+                style = MaterialTheme.typography.displayMedium.copy(
                     fontWeight = FontWeight.ExtraBold,
-                    lineHeight = if (compact) 34.sp else 42.sp
+                    lineHeight = if (compact) 40.sp else 52.sp
                 ),
                 color = ink,
                 textAlign = TextAlign.Center,
                 maxLines = 3
             )
 
-            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
+            Spacer(Modifier.height(if (compact) 10.dp else 14.dp))
 
             Text(
                 text = slide.subtext,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 26.sp
+                ),
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
                 maxLines = 4
@@ -613,7 +629,9 @@ private fun SetupSlide(
             PermissionCard(
                 glyph = CurioIcons.Notifications,
                 title = "Notifications",
-                subtitle = "Explore-session timer & reminders, plus the daily shuffle nudge",
+                // v22 — reasons, not descriptions: each permission explains
+                // WHY Curio uses it.
+                subtitle = "So your explore sessions get timed and we can nudge you back to write your finds down",
                 granted = notificationGranted,
                 onRequest = onRequestNotifications
             ) {
@@ -636,7 +654,7 @@ private fun SetupSlide(
             PermissionCard(
                 glyph = CurioIcons.Mic,
                 title = "Microphone",
-                subtitle = "Voice notes (Sound Bite) & voice attachments in your journal",
+                subtitle = "So you can capture ideas out loud the moment they strike — no typing needed",
                 granted = micGranted,
                 onRequest = onRequestMic
             )
@@ -647,7 +665,7 @@ private fun SetupSlide(
             PermissionCard(
                 glyph = CurioIcons.BubbleChart,
                 title = "Display over other apps",
-                subtitle = "Floating explore bubble while you research a topic",
+                subtitle = "So the explore bubble can float over any app while you research — your timer stays in view",
                 granted = overlayGranted,
                 onRequest = onRequestOverlay
             )
@@ -698,7 +716,10 @@ private fun PermissionCard(
                     subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
+                    // v22 — permission subtitles now carry the REASON (longer
+                    // than the old one-line descriptions), and the setup slide
+                    // scrolls — give them room instead of clipping mid-reason.
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -870,10 +891,10 @@ private fun ThemeSlide() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // ── Step kicker ───────────────────────────────────────────
+            // ── Step kicker — v22: bumped larger to match the intro slides ──
             Text(
                 text = "THEME",
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 2.sp
                 ),
@@ -881,20 +902,23 @@ private fun ThemeSlide() {
                 textAlign = TextAlign.Center
             )
 
-            Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
 
             Text(
                 text = "Pick your look",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
                 color = ink,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
 
             Text(
                 text = "Light, dark, or follow your phone, and keep Curio's soft pastel colors?",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 26.sp
+                ),
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center
             )

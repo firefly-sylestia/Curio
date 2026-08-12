@@ -1,6 +1,23 @@
 # Prompt.md — Request Log
 
-## Current Request (COMPLETE): Topic History upgrade — Liked/Disliked, Saved View-all, unpin dialog, Home-style hero (Android)
+## Current Request (COMPLETE): No-AI messaging + onboarding type-scale bumps + explore-bubble opt-in + permission reasons (Android)
+
+**Date:** 2026-08-12
+
+**What was asked:** (thread started as "can we detect when users use ChatGPT/Claude/Gemini during explore?") — pivoted to: (1) add "do not use AI for your research" text to onboarding and the explore dialog (bold); (2) add a no-AI tagline under the Curio wordmark + "Discover something new…" tagline; (3) make the Curio wordmark + sub-text two steps bigger and the SHUFFLE/EXPLORE/KEEP (+ THEME) slide texts larger with better spacing; (4) make the explore-session overlay bubble opt-in ("keep it opt out") with the opt-in in the explore dialog; (5) in "Make Curio yours", give each permission the REASON it's used instead of a description.
+
+**User confirmations:** bubble = default OFF with an opt-in switch in the explore dialog (Settings toggle stays); "Curio text 2 bigger" = two steps up the Material type scale.
+
+**What was built (3 files):**
+- **data/AppPreferences.kt** — `KEY_OVERLAY_BUBBLE_ENABLED` default flipped true→false (both `isOverlayBubbleEnabled` and the `overlayBubbleEnabledState` initial); existing users with a stored value keep it.
+- **features/onboarding/OnboardingScreen.kt** — wordmark block: Curio `displaySmall`→`displayLarge` (57sp, ExtraBold, letterSpacing 4sp), tagline `labelSmall`→`labelLarge`, NEW no-AI line ("Keep it human — no AI for your research.", labelMedium @0.72); OnboardingSlide + ThemeSlide bumps (kicker labelMedium→labelLarge, headline headlineLarge→displayMedium on the intro slides / headlineMedium→headlineLarge on Theme, subtext bodyLarge→18sp/26 with 2sp taller spacers); PermissionCard subtitles rewritten to REASONS (Notifications: "So your explore sessions get timed and we can nudge you back to write your finds down"; Microphone: "So you can capture ideas out loud the moment they strike — no typing needed"; Display over other apps: "So the explore bubble can float over any app while you research — your timer stays in view") and the card's `maxLines` raised 2→3 so the longer reasons don't get clipped on phones (reviewer catch).
+- **features/reveal/TopicRevealScreen.kt** — new `Switch` import; `bubbleOptIn` rememberSaveable state (defaults to the pref); explore dialog gains a BOLD no-AI pledge line (bodySmall Bold onSurface) + a bubble opt-in Row (BubbleChart glyph + "Show the explore bubble" + Switch); both action buttons apply `setOverlayBubbleEnabled(context, bubbleOptIn)` and clear `setOverlayAskDeclined` when opting in (so the existing overlay-permission gate can re-ask), before `startExploreSession`.
+
+**Validation:** No Gradle build locally (project rule — CI validates on push). Reviewed by code-reviewer-deepseek-flash: compile-safe (Switch import added, context in scope for rememberSaveable, dialog Column scope OK for weight); its actionable catch (permission reasons clipped at maxLines 2) fixed; two accepted notes — bubble pref can stay ON after a "Not now" on the permission dialog (mirrors Settings semantics), and the pref is persistent (last choice wins, not per-session).
+
+## Previous Requests
+
+### Topic History upgrade — Liked/Disliked, Saved View-all, unpin dialog, Home-style hero (Android) — COMPLETE
 
 **Date:** 2026-08-12
 

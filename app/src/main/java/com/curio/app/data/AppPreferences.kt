@@ -313,7 +313,9 @@ object AppPreferences {
     // OTHER apps (the browser) via SYSTEM_ALERT_WINDOW. Default ON; off
     // means the timer lives only in the notification (when live
     // notifications are on) — there is no in-app pill fallback.
-    var overlayBubbleEnabledState by mutableStateOf(true)
+    // v22 — default OFF: the bubble is now opt-in from the explore dialog
+    // (and the Settings toggle enables it anytime).
+    var overlayBubbleEnabledState by mutableStateOf(false)
         private set
 
     // v8.1 — whether the user has declined the "Display over other apps"
@@ -819,11 +821,13 @@ object AppPreferences {
     }
 
     /**
-     * Whether the floating explore bubble is on. Default ON. Off = the
-     * timer lives only in the notification (when live notifications are on).
+     * Whether the floating explore bubble is on. v22 — default OFF: the
+     * bubble is opt-in (the explore dialog's "Show the explore bubble"
+     * switch, or the Settings toggle). Off = the timer lives only in the
+     * notification (when live notifications are on).
      */
     fun isOverlayBubbleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_OVERLAY_BUBBLE_ENABLED, true)
+        prefs(context).getBoolean(KEY_OVERLAY_BUBBLE_ENABLED, false)
 
     fun setOverlayBubbleEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_OVERLAY_BUBBLE_ENABLED, enabled).apply()

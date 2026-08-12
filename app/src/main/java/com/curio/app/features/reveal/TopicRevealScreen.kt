@@ -45,6 +45,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -240,6 +241,13 @@ fun TopicRevealScreen(
     // recently-unexplored so Home can offer to resume it.
     var engaged by rememberSaveable { mutableStateOf(false) }
     var showExploreDialog by rememberSaveable { mutableStateOf(false) }
+    // v22 — explore-bubble opt-in inside the explore dialog. Defaults to the
+    // Settings pref (OFF for fresh installs); the choice is applied to prefs
+    // when an action is picked, so flipping it here is the same as the
+    // Settings toggle (persistent - last choice wins).
+    var bubbleOptIn by rememberSaveable {
+        mutableStateOf(AppPreferences.isOverlayBubbleEnabled(context))
+    }
 
     val latestBrowseMode by rememberUpdatedState(browseMode)
     val latestResolved by rememberUpdatedState(resolved)
@@ -916,6 +924,41 @@ fun TopicRevealScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    // v22 — the no-AI pledge, bold so it leads the dialog's
+                    // intent: research stays the user's own words.
+                    Text(
+                        "Keep it human — no AI for your research. This is your curiosity, in your own words.",
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    // ── v22 — opt-in for the floating explore bubble ──
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.BubbleChart,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            size = 18.dp
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Show the explore bubble",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "A small timer that floats over other apps while you explore",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Switch(checked = bubbleOptIn, onCheckedChange = { bubbleOptIn = it })
+                    }
                 }
             },
             confirmButton = {
@@ -924,6 +967,12 @@ fun TopicRevealScreen(
                         onClick = {
                             engaged = true
                             showExploreDialog = false
+                            // v22 — apply the bubble opt-in before starting:
+                            // opting in is an explicit intent, so a previously
+                            // declined "Display over other apps" ask re-opens
+                            // (mirrors the Settings toggle's behavior).
+                            AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
+                            if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors()
@@ -932,6 +981,8 @@ fun TopicRevealScreen(
                         onClick = {
                             engaged = true
                             showExploreDialog = false
+                            AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
+                            if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
                             startExploreSession(topic, buildYouTubeSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors()
