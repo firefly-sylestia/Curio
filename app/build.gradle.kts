@@ -191,8 +191,6 @@ dependencies {
     // Gson for JSON serialization (CaptureData -> Room blob)
     implementation(libs.com.google.code.gson.gson)
 
-    // Play Core In-App Updates (flexible update flow; no-ops on sideloads)
-    implementation(libs.google.play.app.update)
 
     testImplementation(libs.junit)
     debugImplementation(libs.androidx.ui.tooling)

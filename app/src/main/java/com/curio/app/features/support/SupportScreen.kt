@@ -2,8 +2,6 @@ package com.curio.app.features.support
 
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -24,12 +22,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.data.CategoryId
@@ -54,11 +55,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.infrastructure.CurioCrashReporter
-import com.curio.app.infrastructure.CurioInAppUpdate
-import com.google.android.play.core.appupdate.AppUpdateInfo
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.appupdate.AppUpdateOptions
-import com.google.android.play.core.install.model.AppUpdateType
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
@@ -69,7 +65,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import kotlinx.coroutines.async
+import java.io.File
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -81,10 +77,11 @@ import kotlinx.coroutines.launch
  *
  * Contents:
  *  - Updates: accurate version readout + a Check for updates row that runs
- *    on open, with an animated result card. v24 — the check asks Google Play
- *    for an in-app update first (flexible flow, "Update now"); on sideloads
- *    or when Play has nothing, it falls back to the GitHub release check and
- *    shows the FULL release notes inline (expandable).
+ *    on open, with an animated result card. v25 — GitHub-only: the check
+ *    fetches the latest release and the in-app updater downloads its APK
+ *    (with progress) then hands it to the system installer; the release
+ *    notes are shown inline (expandable). The v24 Google Play in-app
+ *    update was removed.
  *  - Feedback: Report a bug, Crash logs, Test crash.
  *  - About Curio: Replay intro + the open-source GitHub repository (merged
  *    here from the old Settings → About page).
@@ -97,18 +94,17 @@ fun SupportScreen(navController: NavController) {
     var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
     var resultVisible by remember { mutableStateOf(false) }
     val crashCount = remember { CurioCrashReporter.getCrashHistory(context).size }
-    // v24 — Google Play in-app update availability (null on sideloads) and
-    // the result card's expandable release notes.
-    var playUpdateInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
+    // v25 — GitHub-only update flow: the Play in-app update was removed and
+    // replaced with an in-app APK download from the release itself.
     var notesExpanded by remember { mutableStateOf(false) }
-    val updateManager = remember { AppUpdateManagerFactory.create(context) }
-    val updateLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { /* Play's update UI result — the user can retry from the card */ }
+    var downloadState by remember { mutableStateOf(UpdateDownloadUi.Idle) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
+    // True until the response's Content-Length is known — the bar runs
+    // indeterminate instead of pinning at a misleading 0%.
+    var downloadIndeterminate by remember { mutableStateOf(true) }
 
-    // Promo-mode toggle (v7.107) — tap the Version row five times to turn
-    // promo/demo-content mode ON, five times again to turn it OFF. The
-    // counter resets itself after a short pause so stray taps never fire.
+    // Version row five-tap (v24) — opens the Experiments screen (kept open);
+    // the counter resets itself after a short pause so stray taps never fire.
     var versionTaps by remember { mutableIntStateOf(0) }
     LaunchedEffect(versionTaps) {
         if (versionTaps in 1..4) {
@@ -122,19 +118,13 @@ fun SupportScreen(navController: NavController) {
         checkState = UpdateCheckUi.Checking
         resultVisible = false
         notesExpanded = false
+        downloadState = UpdateDownloadUi.Idle
+        downloadIndeterminate = true
         scope.launch {
-            // v24 — Play in-app update and the GitHub check run concurrently
-            // (a slow Play Store answer must not delay the GitHub fallback).
-            // Play installs only; sideloads report null and fall through.
-            val playDeferred = async { CurioInAppUpdate.available(context) }
+            // v25 — GitHub-only: fetch the latest release; the in-app updater
+            // downloads its APK when one is attached to the release.
             val gh = UpdateChecker.fetchLatestRelease()
-            val play = playDeferred.await()
             when {
-                play != null -> {
-                    playUpdateInfo = play
-                    updateInfo = gh
-                    checkState = UpdateCheckUi.PlayAvailable
-                }
                 gh != null && UpdateChecker.isNewer(gh.tagName, BuildConfig.VERSION_NAME) -> {
                     updateInfo = gh
                     checkState = UpdateCheckUi.GithubAvailable
@@ -149,6 +139,46 @@ fun SupportScreen(navController: NavController) {
         }
     }
 
+    // v25 — GitHub in-app updater: downloads the release APK with progress,
+    // then hands it to the system installer — the USER confirms the install
+    // (never auto-installed). Android 8+ asks once to allow installs from
+    // this source (REQUEST_INSTALL_PACKAGES).
+    fun downloadAndInstall(info: UpdateInfo) {
+        if (downloadState == UpdateDownloadUi.Downloading) return
+        val apkUrl = info.apkUrl ?: return
+        scope.launch {
+            downloadState = UpdateDownloadUi.Downloading
+            downloadProgress = 0f
+            downloadIndeterminate = true
+            val target = File(context.cacheDir, "downloads/curio-${info.tagName}.apk")
+            target.parentFile?.mkdirs()
+            val ok = UpdateChecker.downloadApk(apkUrl, target) { received, total ->
+                if (total > 0) {
+                    downloadIndeterminate = false
+                    downloadProgress = received.toFloat() / total
+                }
+            }
+            if (!ok) {
+                downloadState = UpdateDownloadUi.Failed
+                return@launch
+            }
+            downloadState = UpdateDownloadUi.Idle
+            // Launch the package installer — the user confirms the install.
+            runCatching {
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    target
+                )
+                val install = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(install)
+            }.onFailure { downloadState = UpdateDownloadUi.InstallFailed }
+        }
+    }
+
     // Auto-check on open so the release-notes preview appears immediately.
     LaunchedEffect(Unit) { runCheck() }
 
@@ -156,7 +186,6 @@ fun SupportScreen(navController: NavController) {
         UpdateCheckUi.Idle -> "Tap to check for the latest release"
         UpdateCheckUi.Checking -> "Checking for updates…"
         UpdateCheckUi.UpToDate -> "You're up to date · v${BuildConfig.VERSION_NAME}"
-        UpdateCheckUi.PlayAvailable -> "Update available on Google Play"
         UpdateCheckUi.GithubAvailable -> "New version: ${updateInfo?.tagName ?: ""}"
         UpdateCheckUi.Failed -> "Couldn't check · tap to retry"
     }
@@ -252,18 +281,11 @@ fun SupportScreen(navController: NavController) {
                                 info = updateInfo,
                                 notesExpanded = notesExpanded,
                                 onToggleNotes = { notesExpanded = !notesExpanded },
-                                onUpdateNow = {
-                                    val p = playUpdateInfo
-                                    if (p != null) {
-                                        runCatching {
-                                            updateManager.startUpdateFlowForResult(
-                                                p,
-                                                updateLauncher,
-                                                AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
-                                            )
-                                        }
-                                    }
-                                },
+                                downloadState = downloadState,
+                                downloadProgress = downloadProgress,
+                                downloadIndeterminate = downloadIndeterminate,
+                                onDownloadUpdate = { info?.let { downloadAndInstall(it) } },
+                                onRetryDownload = { info?.let { downloadAndInstall(it) } },
                                 onOpenRelease = { url ->
                                     runCatching {
                                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -347,24 +369,27 @@ fun SupportScreen(navController: NavController) {
 }
 
 /** The update result card — up-to-date / update-available / failed, with a
- *  release-notes preview when the API returned them. */
+ *  release-notes preview when the API returned them. v25 — a GitHub
+ *  download-and-install flow (with progress) replaces the removed Play path. */
 @Composable
 private fun UpdateResultCard(
     state: UpdateCheckUi,
     info: UpdateInfo?,
     notesExpanded: Boolean,
     onToggleNotes: () -> Unit,
-    onUpdateNow: () -> Unit,
+    downloadState: UpdateDownloadUi,
+    downloadProgress: Float,
+    downloadIndeterminate: Boolean,
+    onDownloadUpdate: () -> Unit,
+    onRetryDownload: () -> Unit,
     onOpenRelease: (String) -> Unit
 ) {
     if (state == UpdateCheckUi.Idle || state == UpdateCheckUi.Checking) return
     val (tint, title) = when (state) {
         UpdateCheckUi.UpToDate ->
             CurioColors.Sage to "You're on the latest version"
-        UpdateCheckUi.PlayAvailable ->
-            CurioColors.CoralBlush to "Update available on Google Play"
         UpdateCheckUi.GithubAvailable ->
-            CurioColors.CoralBlush to "New version on GitHub: ${info?.tagName ?: ""}"
+            CurioColors.CoralBlush to "New version: ${info?.tagName ?: ""}"
         else ->
             MaterialTheme.colorScheme.error to "Couldn't check for updates"
     }
@@ -411,34 +436,87 @@ private fun UpdateResultCard(
                 )
             }
             when (state) {
-                UpdateCheckUi.PlayAvailable -> {
-                    Spacer(Modifier.height(10.dp))
-                    Surface(
-                        onClick = onUpdateNow,
-                        shape = RoundedCornerShape(50),
-                        color = CurioColors.CoralBlush,
-                        contentColor = CurioColors.DeepPlum
-                    ) {
-                        Text(
-                            "Update now",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
-                        )
-                    }
-                }
                 UpdateCheckUi.GithubAvailable -> {
                     Spacer(Modifier.height(10.dp))
-                    Surface(
-                        onClick = { info?.htmlUrl?.let { onOpenRelease(it) } },
-                        shape = RoundedCornerShape(50),
-                        color = CurioColors.CoralBlush,
-                        contentColor = CurioColors.DeepPlum
-                    ) {
-                        Text(
-                            "Get it on GitHub",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
-                        )
+                    when (downloadState) {
+                        UpdateDownloadUi.Idle -> {
+                            // v25 — in-app updater: download the release APK
+                            // and let the system installer finish it (the
+                            // user confirms).
+                            if (info?.apkUrl != null) {
+                                Surface(
+                                    onClick = onDownloadUpdate,
+                                    shape = RoundedCornerShape(50),
+                                    color = CurioColors.CoralBlush,
+                                    contentColor = CurioColors.DeepPlum
+                                ) {
+                                    Text(
+                                        "Update now",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                                    )
+                                }
+                            }
+                            // Short secondary link to the release page.
+                            Text(
+                                "Open release",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = CurioColors.CoralBlush
+                                ),
+                                modifier = Modifier
+                                    .clickable { info?.htmlUrl?.let { onOpenRelease(it) } }
+                                    .padding(top = 10.dp, bottom = 2.dp)
+                            )
+                        }
+                        UpdateDownloadUi.Downloading -> {
+                            Column {
+                                // null progress = indeterminate (shown until
+                                // the response's Content-Length is known).
+                                LinearProgressIndicator(
+                                    progress = {
+                                        if (downloadIndeterminate) null
+                                        else downloadProgress.coerceIn(0f, 1f)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp),
+                                    color = CurioColors.CoralBlush,
+                                    trackColor = CurioColors.CoralBlush.copy(alpha = 0.20f)
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    if (downloadIndeterminate) "Downloading…"
+                                    else "Downloading… ${(downloadProgress * 100).toInt()}%",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        UpdateDownloadUi.Failed -> {
+                            Text(
+                                "Download didn't finish — try again",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.error
+                                ),
+                                modifier = Modifier
+                                    .clickable(onClick = onRetryDownload)
+                                    .padding(top = 4.dp, bottom = 2.dp)
+                            )
+                        }
+                        UpdateDownloadUi.InstallFailed -> {
+                            Text(
+                                "Couldn't open the installer — try again",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.error
+                                ),
+                                modifier = Modifier
+                                    .clickable(onClick = onRetryDownload)
+                                    .padding(top = 4.dp, bottom = 2.dp)
+                            )
+                        }
                     }
                 }
                 UpdateCheckUi.UpToDate -> {
@@ -462,4 +540,7 @@ private fun UpdateResultCard(
     }
 }
 
-private enum class UpdateCheckUi { Idle, Checking, UpToDate, PlayAvailable, GithubAvailable, Failed }
+private enum class UpdateCheckUi { Idle, Checking, UpToDate, GithubAvailable, Failed }
+
+/** v25 — GitHub in-app updater states (download → system installer). */
+private enum class UpdateDownloadUi { Idle, Downloading, Failed, InstallFailed }

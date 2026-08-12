@@ -1,20 +1,25 @@
 # Prompt.md — Research & Analysis Tracking
 
-## Current Request (COMPLETE): Keep Play in-app-update code, fix the CI compile errors
+## Current Request (IN PROGRESS — NOT COMMITTED, per user: "dont push unless i say"): GitHub-only in-app updater; remove Play code
 
 **Date:** 2026-08-12
 
-**What was asked:** User first suggested removing the Play in-app-update code entirely, then reconsidered: "why u deleting it fi it maybe or tell me how to add things if needed and make it not fail the ci" — KEEP the code (in case it's needed later), explain how it works, and make CI pass.
+**What was asked:** "how do we add in app updates though with only github" → user decided (ask_user): build the GitHub in-app updater AND keep a short browser link; ALWAYS-ON (no toggle); the USER confirms the install (never auto-install). Then: "remove the play something and also dont push unless i say."
 
-**Root cause of CI failure:** `CurioInAppUpdate.kt` has `object CurioInAppUpdate` (members: `isInstalledFromPlay`, `available`, `finishInstall`) plus a top-level `@Composable fun CurioInAppUpdateHost()`. Inside the host, the calls were written UNQUALIFIED (`isInstalledFromPlay(context)`, `finishInstall(manager)`). Object members are only in scope inside the object's own body — from the top-level host they are `Unresolved reference` compile errors. (This was present since the v24 addition; the AppUpdateType import fix masked it in earlier logs.)
+**Key design constraint:** Google Play's in-app-update API is hardwired to Play-installed apps and can never work for GitHub APKs — so the updater downloads the release APK from GitHub and hands it to the system installer.
 
-**Fix:** qualified the three host call sites — `CurioInAppUpdate.isInstalledFromPlay(context)` (host manager gate) and `CurioInAppUpdate.finishInstall(manager)` ×2 (install listener + ON_RESUME observer). `available()`'s internal `isInstalledFromPlay` call is fine (same-object member). Added a comment in the host + an AGENTS.md note documenting the gotcha.
+**Done (all uncommitted in the working tree):**
+- **Play Core removed entirely:** deleted `infrastructure/CurioInAppUpdate.kt`, removed `CurioInAppUpdateHost()` from MainActivity, removed the Play path from SupportScreen (imports, `playUpdateInfo`, `updateManager`, `updateLauncher`, `PlayAvailable` enum state, the async play check), removed `playAppUpdate = "2.1.0"` from libs.versions.toml and `implementation(libs.google.play.app.update)` from app/build.gradle.kts.
+- **GitHub in-app updater built:**
+  - `UpdateChecker`: `UpdateInfo.apkUrl` (parsed from the release's GitHub API `assets` array, first `.apk`), `parseApkAsset()`, and `downloadApk(url, targetFile, onProgress)` — streams with a 64 KB buffer on Dispatchers.IO, follows redirects, rethrows CancellationException.
+  - `SupportScreen`: `UpdateDownloadUi { Idle, Downloading, Failed }` + `downloadProgress`; `downloadAndInstall()` downloads to `cacheDir/downloads/curio-<tag>.apk`, then launches the installer via `FileProvider` (`ACTION_VIEW`, `application/vnd.android.package-archive`, `FLAG_GRANT_READ_URI_PERMISSION`) — the USER confirms. UpdateResultCard shows "Update now" (in-app), a short "Open release" link (replaces "Get it on GitHub"), a LinearProgressIndicator + percent while downloading, and a retry line on failure.
+  - `xml/file_paths.xml`: added `cache-path apk_downloads` → `downloads/`.
+  - `AndroidManifest.xml`: added `REQUEST_INSTALL_PACKAGES`.
+- **Bug found while validating:** my parseApkAsset KDoc contained the literal `/*` sequence (`apk/release/*.apk`). Kotlin block comments NEST, so it opened a nested comment, the KDoc's `*/` only closed depth 1, and the rest of the file became an unterminated comment — a REAL compile error CI would have caught. Reworded the KDoc. (The braces checker + line-bisection pinpointed it.)
+- Docs updated: changelog (20260919.txt), app/AGENTS.md (v25 GitHub updater bullet + `/*`-in-comment gotcha).
 
-**How the feature works (kept as-is):**
-- `SupportScreen` "Check for updates" runs `CurioInAppUpdate.available(context)` (Play Core `app-update` 2.1.0) and the GitHub `UpdateChecker.fetchLatestRelease()` concurrently. If Play reports a FLEXIBLE update AND the app was installed from Play (`getInstallerPackageName == com.android.vending`), the card shows "Update available on Google Play" + "Update now" (`startUpdateFlowForResult` via `StartIntentSenderForResult` launcher). Otherwise it falls back to the GitHub release card with full expandable notes.
-- `CurioInAppUpdateHost()` in MainActivity registers an `InstallStateUpdatedListener` + ON_RESUME observer that auto-completes a finished flexible download.
-- Re-enabling later: nothing to do — code + dependency (`playAppUpdate = "2.1.0"` in libs.versions.toml, `libs.google.play.app.update` in app/build.gradle.kts) are intact. To hard-disable: remove the dependency, the file, the host call in MainActivity, and the Play path in SupportScreen.
+**Validation:** braces + `git diff --check` clean; zero `CurioInAppUpdate`/`AppUpdate`/Play references remain in app/, toml, or build.gradle.kts.
 
-**Validation:** braces + `git diff --check` clean; all three host references qualified.
+**NOT done (user instruction):** no commit, no push. Changes sit in the working tree for review.
 
-**Next:** push + CI should go green.
+**Next:** user reviews → then commit + push on their say-so.

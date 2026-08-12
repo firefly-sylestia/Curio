@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -17,7 +18,10 @@ data class UpdateInfo(
     /** Page to open when an update is available (release page / tag page). */
     val htmlUrl: String,
     /** Release notes body — present only when a real release exists. */
-    val releaseNotes: String? = null
+    val releaseNotes: String? = null,
+    /** Direct download URL for the release's APK asset — null when the
+     *  release has no APK attached (then only the release page is offered). */
+    val apkUrl: String? = null
 )
 
 /**
@@ -58,7 +62,8 @@ object UpdateChecker {
                 UpdateInfo(
                     tagName = obj.optString("tag_name"),
                     htmlUrl = obj.optString("html_url"),
-                    releaseNotes = obj.optString("body").takeIf { it.isNotBlank() }
+                    releaseNotes = obj.optString("body").takeIf { it.isNotBlank() },
+                    apkUrl = parseApkAsset(obj.optJSONArray("assets"))
                 )
             }
             if (release != null && release.tagName.isNotBlank()) return@withContext release
@@ -97,6 +102,69 @@ object UpdateChecker {
             if (x != y) return x > y
         }
         return false
+    }
+
+    /**
+     * Finds the release's APK asset — the first `.apk` in the GitHub
+     * release's `assets` array. The release workflow uploads the signed
+     * release APK (from the `apk/release` output dir) to every release, so
+     * this is the direct download used by the in-app updater.
+     */
+    private fun parseApkAsset(assets: JSONArray?): String? {
+        if (assets == null) return null
+        for (i in 0 until assets.length()) {
+            val asset = assets.optJSONObject(i) ?: continue
+            if (asset.optString("name").endsWith(".apk", ignoreCase = true)) {
+                return asset.optString("browser_download_url").takeIf { it.isNotBlank() }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Downloads [url] (the release APK) into [target], reporting progress
+     * via [onProgress] (bytes received, total — total is 0 when unknown).
+     *
+     * Returns true on a complete download, false on ANY failure (offline,
+     * HTTP error, IO error). Cancellation rethrows so a cancelled download
+     * (user left the screen) propagates instead of being swallowed.
+     */
+    suspend fun downloadApk(
+        url: String,
+        target: File,
+        onProgress: (received: Long, total: Long) -> Unit
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val conn = URL(url).openConnection() as HttpURLConnection
+            try {
+                conn.connectTimeout = 15_000
+                conn.readTimeout = 20_000
+                // GitHub asset URLs redirect to objects.githubusercontent.com.
+                conn.instanceFollowRedirects = true
+                if (conn.responseCode != HttpURLConnection.HTTP_OK) return@withContext false
+                val total = conn.contentLengthLong
+                target.outputStream().use { out ->
+                    conn.inputStream.use { input ->
+                        val buf = ByteArray(64 * 1024)
+                        var received = 0L
+                        while (true) {
+                            val n = input.read(buf)
+                            if (n < 0) break
+                            out.write(buf, 0, n)
+                            received += n
+                            onProgress(received, total)
+                        }
+                    }
+                }
+                true
+            } finally {
+                conn.disconnect()
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
     }
 
     /** GETs [url] and parses the 200 body with [parse]; null on any non-200. */
