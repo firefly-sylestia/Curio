@@ -11,9 +11,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.appupdate.AppUpdateType
-import com.google.android.play.core.tasks.Task
 import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -58,8 +57,8 @@ object CurioInAppUpdate {
     }
 
     /**
-     * Completes a downloaded flexible update. The chained [Task] call keeps
-     * the invocation unambiguous even if a deprecated void overload of
+     * Completes a downloaded flexible update. The chained addOnSuccessListener
+     * keeps the invocation unambiguous even if a deprecated void overload of
      * [AppUpdateManager.completeUpdate] is present.
      */
     fun finishInstall(manager: AppUpdateManager) {

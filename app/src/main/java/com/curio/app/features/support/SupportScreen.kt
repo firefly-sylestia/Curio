@@ -59,7 +59,7 @@ import com.curio.app.infrastructure.CurioInAppUpdate
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
-import com.google.android.play.core.appupdate.AppUpdateType
+import com.google.android.play.core.install.model.AppUpdateType
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
