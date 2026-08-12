@@ -111,11 +111,11 @@ fun ExperimentsScreen(navController: NavController) {
             item { CurioSectionLabel("Paper & headers") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Header cut lines", "Tilted corner strokes + three ticks top-right", AppPreferences.paperHeaderCutsState) {
+                    ExperimentSwitchRow("Title cut lines", "Two short lines under header titles", AppPreferences.paperHeaderCutsState) {
                         AppPreferences.setPaperHeaderCutsEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Stamped pin holes", "Punch-hole circles down the header's left edge", AppPreferences.paperHeaderHolesState) {
+                    ExperimentSwitchRow("Stamped pin holes", "See-through punch holes on the paper stat card (needs the card on)", AppPreferences.paperHeaderHolesState) {
                         AppPreferences.setPaperHeaderHolesEnabled(context, it)
                     }
                     CurioSettingsDivider()

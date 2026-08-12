@@ -92,7 +92,7 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.PaperHeaderAccents
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -594,17 +594,6 @@ private fun ProfileHero(
                 .height(ProfileHeroHeight)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // v27 — experimental paper accents (OFF by default; toggle in
-                // Settings → Experiments → Paper & headers).
-                if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
-                    PaperHeaderAccents(
-                        ink = symbolTint,
-                        pinHoles = AppPreferences.paperHeaderHolesState,
-                        cornerLines = AppPreferences.paperHeaderCutsState,
-                        topTicks = AppPreferences.paperHeaderCutsState,
-                        modifier = Modifier.matchParentSize()
-                    )
-                }
                 // Mirrored watermark collage — your last-explored lane's
                 // family symbols pop around the banner edges (the Home
                 // quest hero's exact construction; wildcard before the
@@ -689,6 +678,11 @@ private fun ProfileHero(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            // v27 — experimental paper-title underline (two
+                            // short lines under the name; OFF by default).
+                            if (AppPreferences.paperHeaderCutsState) {
+                                PaperTitleLines(ink = ink)
+                            }
                             Text(
                                 taglineForStreak(displayStreak),
                                 style = MaterialTheme.typography.bodyMedium,

@@ -62,3 +62,4 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Pet games are now their own little world: camouflage lets you tap the faint ghost to find it (no more mid-game teleports), and every game winds down to a calm idle when it ends instead of darting off.
 • Fixed: the Home button in the bottom bar now always works — even after opening the Cabinet from your Profile (the tab switch used to cancel itself and look dead).
 • Light mode readability: the pale brand colors (coral, butter, sage) used as icons and text were washing out on the cream background — they now switch to deep readable inks in light mode while keeping the bright pastels in dark mode.
+• Paper & headers experiments redone: the two short lines now sit under the header title text, and the stamped pin holes moved to the Streak · Cabinet · Topics card — punched straight through so the hero shows behind them.

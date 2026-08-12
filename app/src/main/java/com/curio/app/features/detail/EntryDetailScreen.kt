@@ -146,7 +146,7 @@ import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
 import com.curio.app.ui.components.rememberMoodBoardZoomState
 import com.curio.app.ui.components.shareComposableCard
-import com.curio.app.ui.components.PaperHeaderAccents
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.data.AppPreferences
@@ -450,17 +450,6 @@ fun EntryDetailScreen(
                     .clip(heroTornShape)
                     .background(heroStart)
             ) {
-                // v27 — experimental paper accents (OFF by default; toggle in
-                // Settings → Experiments → Paper & headers).
-                if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
-                    PaperHeaderAccents(
-                        ink = heroInk,
-                        pinHoles = AppPreferences.paperHeaderHolesState,
-                        cornerLines = AppPreferences.paperHeaderCutsState,
-                        topTicks = AppPreferences.paperHeaderCutsState,
-                        modifier = Modifier.matchParentSize()
-                    )
-                }
                 // ── Hero watermark — a scatter of the entry's category-family
                 //     symbols (instruments for Music, camera kit for Movies,
                 //     books for Books, art tools for Visual Art, lab symbols
@@ -512,6 +501,11 @@ fun EntryDetailScreen(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
+                    // v27 — experimental paper-title underline (two short
+                    // lines under the entry title; OFF by default).
+                    if (AppPreferences.paperHeaderCutsState) {
+                        PaperTitleLines(ink = heroInk)
+                    }
                     Spacer(Modifier.height(18.dp))
 
                     // ── Frosted date / mood / session / type grid card — the

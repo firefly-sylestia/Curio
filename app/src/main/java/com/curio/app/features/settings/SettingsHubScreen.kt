@@ -81,7 +81,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
-import com.curio.app.ui.components.PaperHeaderAccents
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
@@ -204,17 +204,6 @@ fun SettingsHeroHeader(
                     .height(bannerHeight)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // v27 — experimental paper accents (OFF by default; toggle in
-                // Settings → Experiments → Paper & headers).
-                if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
-                    PaperHeaderAccents(
-                        ink = symbolTint,
-                        pinHoles = AppPreferences.paperHeaderHolesState,
-                        cornerLines = AppPreferences.paperHeaderCutsState,
-                        topTicks = AppPreferences.paperHeaderCutsState,
-                        modifier = Modifier.matchParentSize()
-                    )
-                }
                 // Mirrored watermark collage — the wildcard family's symbols
                 // pop around the banner edges (settings is category-neutral;
                 // the Profile hero's exact collage construction).
@@ -357,6 +346,11 @@ fun SettingsHeroHeader(
                                     color = ink,
                                     maxLines = 1
                                 )
+                                // v27 — experimental paper-title underline (two
+                                // short lines under the title text; OFF by default).
+                                if (AppPreferences.paperHeaderCutsState) {
+                                    PaperTitleLines(ink = ink)
+                                }
                                 Text(
                                     subtitle,
                                     style = MaterialTheme.typography.labelMedium,

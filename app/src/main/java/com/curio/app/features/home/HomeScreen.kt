@@ -59,7 +59,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -105,7 +113,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.PaperHeaderAccents
+import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.pet.CurioPetHome
@@ -397,13 +405,6 @@ fun HomeScreen(navController: NavController) {
                         // v27 — experimental paper accents (OFF by default;
                         // toggle in Settings → Experiments → Paper & headers).
                         if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
-                            PaperHeaderAccents(
-                                ink = questInk,
-                                pinHoles = AppPreferences.paperHeaderHolesState,
-                                cornerLines = AppPreferences.paperHeaderCutsState,
-                                topTicks = AppPreferences.paperHeaderCutsState,
-                                modifier = Modifier.matchParentSize()
-                            )
                         }
                         // v7.33 — detail-style mirrored watermark collage: the
                         // quest family's symbols (casino, star, sparkle, …)
@@ -484,6 +485,11 @@ fun HomeScreen(navController: NavController) {
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.fillMaxWidth()
                             )
+                            // v27 — experimental paper-title underline (two
+                            // short lines under the name; OFF by default).
+                            if (AppPreferences.paperHeaderCutsState) {
+                                PaperTitleLines(ink = questInk)
+                            }
                             // Flex spacer — pins the stat card to the bottom
                             // of the banner, just above the tear.
                             Spacer(Modifier.weight(1f))
@@ -500,9 +506,14 @@ fun HomeScreen(navController: NavController) {
                                 lerp(heroFill, Color(0xFF2A211C), 0.50f)
                             else
                                 lerp(heroFill, Color(0xFFFFF6EB), 0.62f)
+                            // v27 — the paper card can carry REAL punch holes
+                            // (Stamped pin holes experiment): the fill is drawn
+                            // as an EvenOdd path so the hole circles stay
+                            // transparent and the hero banner shows through.
+                            val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
                             Surface(
                                 shape = RoundedCornerShape(20.dp),
-                                color = if (paperStatsOn) paperStatBg else Color.Transparent,
+                                color = if (holesOn) Color.Transparent else if (paperStatsOn) paperStatBg else Color.Transparent,
                                 border = BorderStroke(1.dp, questInk.copy(alpha = if (paperStatsOn) 0.26f else 0.28f)),
                                 shadowElevation = if (paperStatsOn) 3.dp else 0.dp
                             ) {
@@ -511,10 +522,37 @@ fun HomeScreen(navController: NavController) {
                                 // content, so a plain background() would bleed
                                 // square corners past the rounded border.
                                 Box(
-                                    modifier = if (paperStatsOn)
-                                        Modifier.background(paperStatBg, RoundedCornerShape(20.dp))
-                                    else
-                                        Modifier.background(
+                                    modifier = when {
+                                        holesOn -> Modifier.drawWithCache {
+                                            val holeR = 5.dp.toPx()
+                                            val holeY = 13.dp.toPx()
+                                            val path = Path().apply {
+                                                addRoundRect(
+                                                    RoundRect(Rect(Offset.Zero, size), CornerRadius(20.dp.toPx()))
+                                                )
+                                                repeat(3) { i ->
+                                                    val cx = size.width * (i + 1) / 4f
+                                                    addCircle(Offset(cx, holeY), holeR, Path.Direction.CW)
+                                                }
+                                                fillType = PathFillType.EvenOdd
+                                            }
+                                            onDrawBehind {
+                                                drawPath(path, paperStatBg)
+                                                // A faint pressed rim around each
+                                                // hole — the paper edge catching light.
+                                                repeat(3) { i ->
+                                                    val cx = size.width * (i + 1) / 4f
+                                                    drawCircle(
+                                                        color = questInk.copy(alpha = 0.15f),
+                                                        radius = holeR + 1.5.dp.toPx(),
+                                                        center = Offset(cx, holeY),
+                                                        style = Stroke(width = 1.5.dp.toPx())
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        paperStatsOn -> Modifier.background(paperStatBg, RoundedCornerShape(20.dp))
+                                        else -> Modifier.background(
                                             Brush.verticalGradient(
                                                 listOf(
                                                     heroFill.copy(alpha = 0.12f),
@@ -523,6 +561,7 @@ fun HomeScreen(navController: NavController) {
                                             ),
                                             RoundedCornerShape(20.dp)
                                         )
+                                    }
                                 ) {
                                     Row(
                                         modifier = Modifier
