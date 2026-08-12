@@ -123,3 +123,4 @@ CI fix pushed earlier this turn: 28122f2 (Cabinet LazyGridItemInfo.offset.y — 
 - Content marathon: geology.json 1000 topics merged + GEOLOGY isReady (v27k). Next lanes: medicine, psychology, mathematics, economics, language, engineering, oceans.
 - v27l: updater rewritten to hit releases LIST (prerelease-aware) + isNewer = different-tag; heroBlueState pref (OFF default) + HomeAzure/HomeAzureDark; azure branch in homeRoseAccent/profileRoseAccent/settingsRoseAccent; Quests CurrentQuestCard routed through settingsRoseAccent; Appearance toggle added; pushed.
 - v27l teaser rewrite: astronomy.json done (1000/1000 rich, 74-134w each, avg 103w; 0 validation problems; committed). Next: technologies (1000), geology (1000).
+- v27m teaser rewrite: technologies.json done (1000/1000 rich, 101-260w each, 0 validation problems). Next: elevation-vs-borders app-wide conversion (user: use elevation everywhere, all themes incl AMOLED).
