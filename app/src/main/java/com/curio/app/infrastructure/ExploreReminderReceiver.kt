@@ -42,6 +42,20 @@ class ExploreReminderReceiver : BroadcastReceiver() {
             // handed to the write-it-down page (only "Done exploring"
             // navigates).
             val session = ExploreSessionStore.getActiveSession(context)
+            // v27 — the shared note + captured screenshots must survive the
+            // teardown: hand them off (with the pause-aware elapsed time) to
+            // the write package BEFORE clearing the session, so the
+            // write-it-down page can attach them to the entry.
+            if (session != null && intent.action == ACTION_STOP) {
+                ExploreSessionStore.handoffWriteSession(
+                    context = context,
+                    categoryId = session.categoryId,
+                    topicName = session.topicName,
+                    elapsedMillis = session.elapsedMillis(),
+                    note = session.note,
+                    screenshots = session.screenshotPaths
+                )
+            }
             ExploreSessionStore.clearSession(context)
             ExploreReminderScheduler.cancel(context)
             ExploreSessionService.stop(context)

@@ -15,6 +15,15 @@
     <!-- Explore-session timer: persistent elapsed-time notification + done reminder -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- v27 — session screenshots: the bubble captures one frame via
+         MediaProjection (Android 14+ requires this dedicated FGS type), and
+         the device-screenshot watcher reads Pictures/Screenshots to
+         auto-attach the user's own shots (READ_MEDIA_IMAGES on 13+). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <!-- Android 11+ package visibility: without this, resolveActivity() /
          queryIntentActivities() return nothing for OTHER apps' activities,
@@ -70,15 +79,28 @@
 
         <!-- Explore sessions: elapsed-timer foreground notification + "are
              you done?" reminder, rebuilt after reboot so a session never
-             silently dies in the background. -->
+             silently dies in the background. v27 — mediaProjection type
+             added for the bubble's one-frame screenshot capture. -->
         <service
             android:name=".infrastructure.ExploreSessionService"
             android:exported="false"
-            android:foregroundServiceType="specialUse">
+            android:foregroundServiceType="specialUse|mediaProjection">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="exploreSessionTimer" />
         </service>
+
+        <!-- v27 — transparent host for the system screen-capture consent
+             dialog (the bubble floats over other apps with no Activity
+             behind it, but MediaProjection consent must be requested from
+             an Activity). Launches on top of whatever the user is in,
+             finishes itself as soon as the user answers. -->
+        <activity
+            android:name=".infrastructure.ScreenCaptureRequestActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <receiver
             android:name=".infrastructure.ExploreReminderReceiver"

@@ -64,6 +64,11 @@ class MainActivity : ComponentActivity() {
         // Load the persisted explore-session flow state (active session +
         // recently explored/unexplored lists) before any screen reads it.
         ExploreSessionStore.seed(this)
+        // v27 — watch for device screenshots while a session (or a handed-off
+        // write package) is live, so the user's own shots auto-join the
+        // session. Permission-gated internally; the bubble's own capture
+        // button works without it.
+        com.curio.app.infrastructure.DeviceScreenshotWatcher.start(this)
         // Load the persisted quests/levels state (XP, journey, daily quests,
         // achievements) before any screen reads it.
         CurioQuests.seed(this)

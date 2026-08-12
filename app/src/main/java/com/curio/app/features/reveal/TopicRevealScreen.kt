@@ -327,6 +327,15 @@ fun TopicRevealScreen(
         }
     }
 
+    // v27 — READ_MEDIA_IMAGES lets the device-screenshot watcher auto-attach
+    // the user's own screenshots (Pictures/Screenshots) to the session.
+    // Best-effort: denial only disables auto-attach; the bubble's own
+    // screenshot button (MediaProjection) works without it. Asked once when
+    // an explore starts and the permission is missing.
+    val requestMediaRead = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> }
+
     // ── Floating explore bubble permission ────────────────────────�����───
     //    "Display over other apps" has no runtime dialog on Android 10+, so
     //    Allow opens the system special-access page; ON_RESUME below resumes
@@ -467,6 +476,16 @@ fun TopicRevealScreen(
         // to their callbacks.
         if (AppPreferences.exploreServiceShouldRun(context)) {
             ExploreSessionService.start(context, session)
+        }
+        // v27 — best-effort READ_MEDIA_IMAGES for the device-screenshot
+        // watcher (auto-attaches the user's own shots to the session).
+        // Fire-and-forget: never blocks the explore, and denial only turns
+        // off auto-attach — the bubble's own capture button still works.
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            runCatching { requestMediaRead.launch(Manifest.permission.READ_MEDIA_IMAGES) }
         }
         openExploreBrowserAndGoHome(session)
     }

@@ -162,6 +162,12 @@ object CurioIcons {
     const val TaskAlt         = "task_alt"              // current quest
     const val Database        = "database"              // v7.89 — Browse Topics drawer entry (verified in font subset)
     const val SupportAgent    = "support_agent"          // v7.89 — Support & diagnostics drawer entry (verified in font subset)
+    // v27 — explore-session attachments (all verified in the bundled font
+    // subset: edit_note + photo_camera + photo_library ship in the hero
+    // watermark family lists).
+    const val Note            = "edit_note"             // shared session note
+    const val Screenshot      = "photo_camera"          // capture the screen
+    const val PhotoLibrary    = "photo_library"         // add screenshots from the gallery
 
     /**
      * Per-family symbol sets for the saved-entry hero's decorative watermark

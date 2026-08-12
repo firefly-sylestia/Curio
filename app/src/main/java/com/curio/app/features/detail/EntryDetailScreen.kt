@@ -136,6 +136,8 @@ import com.curio.app.data.TopicCatalog
 import com.curio.app.data.shortName
 import com.curio.app.features.capture.formats.FilledStar
 import com.curio.app.navigation.CurioRoutes
+import coil.compose.rememberAsyncImagePainter
+import java.io.File
 import com.curio.app.ui.components.CurioMoodBoardBackdrop
 import com.curio.app.ui.components.MoodBoardExport
 import com.curio.app.ui.components.MoodBoardFloatingCards
@@ -693,6 +695,17 @@ fun EntryDetailScreen(
                             }
                         }
                     }
+                }
+
+                // ── Session attachments (v27) — the explore session's
+                // SHARED note + captured screenshots, attached at save time.
+                // Shown between the tags and the format body.
+                if (resolvedEntry.sessionNote != null || resolvedEntry.sessionScreenshots.isNotEmpty()) {
+                    SessionNoteBlock(
+                        entry = resolvedEntry,
+                        category = cat,
+                        navController = navController
+                    )
                 }
 
                 // ── Format body ────────────────────────────────────────
@@ -2841,6 +2854,110 @@ private fun FrostedExportButton(
 }
 
 @Composable
+/**
+ * v27 — the explore session's attachments block on the entry detail page:
+ * the SHARED session note (universal — the same note that rode in on every
+ * entry saved from the session) plus the captured screenshots as tappable
+ * thumbnails (bubble capture + auto-attached device shots). Tap opens the
+ * lightbox. Rendered between the tags and the format body.
+ */
+@Composable
+private fun SessionNoteBlock(
+    entry: CurioEntry,
+    category: CurioCategory,
+    navController: NavController
+) {
+    val accent = category.themedAccent()
+    val ink = category.categoryInk()
+    val tintWash = AppPreferences.tintWashEffective()
+    Column(
+        modifier = Modifier
+            .padding(horizontal = detailBodyGutter())
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // ── Shared session note ──────────────────────────────────────
+        entry.sessionNote?.takeIf { it.isNotBlank() }?.let { note ->
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = if (tintWash) category.tint.copy(alpha = 0.14f)
+                        else MaterialTheme.colorScheme.surfaceContainerHigh,
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.4f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = accent.copy(alpha = 0.14f)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Note,
+                            contentDescription = null,
+                            tint = ink,
+                            size = 18.dp,
+                            modifier = Modifier.padding(6.dp)
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = "Session note",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (tintWash) ink.copy(alpha = 0.7f)
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = note,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (tintWash) ink else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+
+        // ── Session screenshots — tappable thumbnails → lightbox ────
+        if (entry.sessionScreenshots.isNotEmpty()) {
+            Text(
+                text = "Session screenshots",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                entry.sessionScreenshots.forEach { path ->
+                    val file = remember(path) { File(path) }
+                    val painter = rememberAsyncImagePainter(file)
+                    Surface(
+                        onClick = {
+                            navController.navigate(
+                                CurioRoutes.lightbox(Uri.fromFile(file).toString())
+                            )
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+                        modifier = Modifier.size(96.dp)
+                    ) {
+                        androidx.compose.foundation.Image(
+                            painter = painter,
+                            contentDescription = "Session screenshot",
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.GalleryWall ?: return
     val density = androidx.compose.ui.platform.LocalDensity.current

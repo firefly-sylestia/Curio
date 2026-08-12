@@ -40,7 +40,14 @@ data class CaptureEntity(
     // v5 — recycle bin: nullable soft-delete timestamp (NULL = live). Room
     // migration v4→v5 adds the column (nullable, no default) so existing rows
     // read as live; the main list queries filter `deletedAt IS NULL`.
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    // v6 — the session's shared note (TEXT, nullable — null = no note). Room
+    // migration v5→v6 adds the column with no default; existing rows read null.
+    val sessionNote: String? = null,
+    // v6 — session screenshots as a Gson JSON array string ("[\"a\",\"b\"]").
+    // Room migration v5→v6 adds the column with DEFAULT '[]' so existing rows
+    // read as no screenshots; backup restore normalizes defensively.
+    val sessionScreenshotsJson: String = "[]"
 )
 
 /**
@@ -145,7 +152,9 @@ fun CurioEntry.toEntity(): CaptureEntity = CaptureEntity(
     formatDataJson = Gson().toJson(captureData),
     tagsJson = Gson().toJson(tags),
     isLegacy = isLegacy,
-    sessionTimeMillis = sessionTimeMillis
+    sessionTimeMillis = sessionTimeMillis,
+    sessionNote = sessionNote,
+    sessionScreenshotsJson = Gson().toJson(sessionScreenshots)
 )
 
 /**
@@ -219,8 +228,27 @@ fun CaptureEntity.toEntry(): CurioEntry {
         tags = deserializeTags(tagsJson),
         isLegacy = this.isLegacy,
         sessionTimeMillis = this.sessionTimeMillis,
-        deletedAt = this.deletedAt
+        deletedAt = this.deletedAt,
+        sessionNote = this.sessionNote?.takeIf { it.isNotBlank() },
+        sessionScreenshots = deserializeStringList(sessionScreenshotsJson)
     )
+}
+
+/**
+ * Parse a stored JSON array-of-strings column defensively — legacy rows,
+ * null blobs, or malformed JSON all degrade to an empty list instead of
+ * crashing the Cabinet grid or the detail page.
+ */
+private fun deserializeStringList(json: String?): List<String> {
+    if (json.isNullOrBlank()) return emptyList()
+    return try {
+        val type = object : TypeToken<List<String>>() {}.type
+        (Gson().fromJson<List<String>>(json, type) ?: emptyList())
+            .filter { it.isNotBlank() }
+            .distinct()
+    } catch (_: Exception) {
+        emptyList()
+    }
 }
 
 /**
