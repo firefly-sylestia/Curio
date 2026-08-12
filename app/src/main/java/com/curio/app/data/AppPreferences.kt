@@ -255,6 +255,12 @@ object AppPreferences {
     var paperStatCardsState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
+    // v27j — header fill depth. ON by default: the torn-hero headers wear a
+    // slightly DARKER version of the category's painter accent. Turning it
+    // off restores the exact pre-toggle accent. Watermark glyphs, ink and
+    // everything else are untouched — only the banner fill color deepens.
+    var headerDeepState by mutableStateOf(true)
+        private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
     // vertical gradient.
@@ -479,6 +485,7 @@ object AppPreferences {
         paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
+        headerDeepState = isHeaderDeepEnabled(context)
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
@@ -707,6 +714,7 @@ object AppPreferences {
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
+    private const val KEY_HEADER_DEEP = "header_deep"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -742,6 +750,15 @@ object AppPreferences {
     fun setPaperStatTearEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_STAT_TEAR, enabled).apply()
         paperStatTearState = enabled
+    }
+
+    /** Whether the torn-hero headers wear a slightly darker category accent (default ON). */
+    fun isHeaderDeepEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HEADER_DEEP, true)
+
+    fun setHeaderDeepEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HEADER_DEEP, enabled).apply()
+        headerDeepState = enabled
     }
 
     // ── Dual-accent blend gradient (v10 toggle) ────────────────────────

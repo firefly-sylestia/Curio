@@ -125,6 +125,7 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -1388,7 +1389,9 @@ private fun HeroCard(
     val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
 
     val action = resolved?.exploreAction
-    val accent = cat.themedAccent()
+    // v27j — header fill depth: a slightly darker painter accent by default
+    // (toggle in Experiments → Paper & headers).
+    val accent = cat.headerAccent()
     val heroGradient = CurioGradients.cardGradient(accent)
     // v7.5 — pastel mode lightens the hero gradient, so the pill content
     // flips from white to the deep accent (light) / light twin (dark).

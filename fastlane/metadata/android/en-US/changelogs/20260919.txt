@@ -82,3 +82,5 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • The session note is now a floating button on the save page — it stays on screen while you scroll, and tapping it opens a paper editor that rides up above the keyboard.
 • Attached photos in Field Notes, Reel Notes and Marginalia can finally be deleted — every thumbnail has a small × to remove it.
 • Quick-mix presets are proper now: Science, Entertainment, Arts & Stories, History & Ideas, Everything, plus a Clear chip that deselects everything in one tap. "Mixed · N" labels show the total topics in the mix, and the Spin category sheet has the Original / New pages like the full picker.
+• Content: Technologies lane passes 1000 topics (computing, internet, AI, robotics, cybersecurity, energy, aerospace, fintech, smart home, health tech) and goes fully live.
+• Experiments → Paper & headers gains "Deeper header color" (on by default): torn-hero headers wear a slightly darker category accent; turn it off for the exact original color.

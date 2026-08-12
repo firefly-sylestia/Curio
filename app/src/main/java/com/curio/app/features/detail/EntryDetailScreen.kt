@@ -159,6 +159,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
@@ -342,15 +343,18 @@ fun EntryDetailScreen(
         // uses the device-palette card blend here.
         val blendActive = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
             !(isCurioDarkTheme() && !AppPreferences.pastelColorsState)
+        // v27j — header fill depth: the hero wears a slightly darker painter
+        // accent by default (toggle in Experiments → Paper & headers).
+        val heroAccent = cat.headerAccent()
         val heroStart = if (blendActive) {
-            val blendStart = CurioGradients.cardGradient(cat.themedAccent()).first()
+            val blendStart = CurioGradients.cardGradient(heroAccent).first()
             // Keep the frosted-glass ink legible: if the blend's first stop
             // is too pale against [heroInk] (the white/onAccent content),
             // fall back to the deep category hold instead.
             if (contrastRatio(blendStart, heroInk) >= 3.0f) blendStart
-            else CurioGradients.categoryCardFill(cat.themedAccent(), isCurioDarkTheme())
+            else CurioGradients.categoryCardFill(heroAccent, isCurioDarkTheme())
         } else {
-            CurioGradients.categoryCardFill(cat.themedAccent(), isCurioDarkTheme())
+            CurioGradients.categoryCardFill(heroAccent, isCurioDarkTheme())
         }
         // v7.28 — the hero is a SOLID category color, no gradient. The depth
         // comes from the torn-paper seam: the solid banner is clipped by a

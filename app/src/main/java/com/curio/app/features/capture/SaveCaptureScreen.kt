@@ -727,20 +727,24 @@ fun SaveCaptureScreen(
             // Shows the note text once typed; tapping opens the compact paper
             // editor popup right above, which rides the IME while typing.
             if (hasSessionAttachments) {
-                SessionNoteFloatingPill(
-                    cat = cat,
-                    note = sessionNote,
-                    expanded = showNoteEditor,
-                    onToggle = { showNoteEditor = !showNoteEditor },
-                    onNoteChange = {
-                        sessionNote = it
-                        if (editEntryId == null) {
-                            ExploreSessionStore.setPendingNote(
-                                context, cat.id, topic?.name.orEmpty(), it
-                            )
+                // align() is a BoxScope modifier, so the pill itself stays
+                // alignment-free and the Box wrapper pins it bottom-end.
+                Box(modifier = Modifier.align(Alignment.BottomEnd)) {
+                    SessionNoteFloatingPill(
+                        cat = cat,
+                        note = sessionNote,
+                        expanded = showNoteEditor,
+                        onToggle = { showNoteEditor = !showNoteEditor },
+                        onNoteChange = {
+                            sessionNote = it
+                            if (editEntryId == null) {
+                                ExploreSessionStore.setPendingNote(
+                                    context, cat.id, topic?.name.orEmpty(), it
+                                )
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
@@ -1211,7 +1215,6 @@ private fun SessionNoteFloatingPill(
     val accent = cat.themedAccent()
     Column(
         modifier = Modifier
-            .align(Alignment.BottomEnd)
             .imePadding()
             .padding(end = 16.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.End,

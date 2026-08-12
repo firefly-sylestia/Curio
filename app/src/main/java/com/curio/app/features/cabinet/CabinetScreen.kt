@@ -111,6 +111,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -646,7 +647,9 @@ private fun CabinetHeroHeader(
     // category's color instead of snapping.
     val targetFill = when {
         legacyMode -> MaterialTheme.colorScheme.tertiary
-        activeCat != null -> activeCat.themedAccent()
+        // v27j — header fill depth: a slightly darker painter accent by
+        // default (toggle in Experiments → Paper & headers).
+        activeCat != null -> activeCat.headerAccent()
         else -> settingsRoseAccent()
     }
     val targetInk = when {

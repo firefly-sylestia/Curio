@@ -532,7 +532,8 @@ object CurioCategories {
             tint          = CurioColors.CategorySlateTint,
             iconGlyph     = "smart_display",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true  // v27j — 1000 topics shipped in assets/topics/technologies.json
         ),
         CurioCategory(
             id            = CategoryId.ASTRONOMY,

@@ -126,6 +126,10 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Torn paper edges", "Torn edges on the stat card — extended tear on top", AppPreferences.paperStatTearState) {
                         AppPreferences.setPaperStatTearEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Deeper header color", "Torn-hero headers wear a slightly darker category accent (on by default)", AppPreferences.headerDeepState) {
+                        AppPreferences.setHeaderDeepEnabled(context, it)
+                    }
                 }
             }
             item { CurioSectionLabel("Promo") }
