@@ -108,7 +108,10 @@ fun CurioInAppUpdateHost() {
     // sideloaded GitHub builds never touch Play Core. Defensive on top: if
     // Play Core can't initialize the host simply does nothing.
     val manager = remember {
-        if (!isInstalledFromPlay(context)) null
+        // This host is a top-level composable, so the object's members must
+        // be reached through the CurioInAppUpdate qualifier (unqualified
+        // references here are compile errors — v25 CI fix).
+        if (!CurioInAppUpdate.isInstalledFromPlay(context)) null
         else runCatching { AppUpdateManagerFactory.create(context) }.getOrNull()
     }
     if (manager == null) return
@@ -116,7 +119,7 @@ fun CurioInAppUpdateHost() {
     DisposableEffect(manager) {
         val listener = InstallStateUpdatedListener { state ->
             if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                finishInstall(manager)
+                CurioInAppUpdate.finishInstall(manager)
             }
         }
         manager.registerListener(listener)
@@ -124,7 +127,7 @@ fun CurioInAppUpdateHost() {
             if (event == Lifecycle.Event.ON_RESUME) {
                 manager.appUpdateInfo.addOnSuccessListener { info ->
                     if (info.installStatus() == InstallStatus.DOWNLOADED) {
-                        finishInstall(manager)
+                        CurioInAppUpdate.finishInstall(manager)
                     }
                 }
             }
