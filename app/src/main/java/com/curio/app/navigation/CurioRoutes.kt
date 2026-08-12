@@ -144,7 +144,6 @@ object CurioRoutes {
     const val SETTINGS_NOTIFICATIONS = "settings/notifications"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
-    const val SETTINGS_ABOUT = "settings/about"
     const val EXPERIMENTS = "experiments"
     const val MANAGE_CATEGORIES = "manage-categories"
     const val TOPIC_HISTORY = "topic-history"

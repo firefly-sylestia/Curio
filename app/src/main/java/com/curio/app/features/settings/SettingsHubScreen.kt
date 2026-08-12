@@ -513,7 +513,9 @@ private val SettingsSections = listOf(
                 headerSubtitle = "Backups and restore",
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
-                    SettingsRowEntry(CurioIcons.Info, "About Curio", "Replay intro and app details", CurioRoutes.SETTINGS_ABOUT)
+                    // v24 — merged into the shared Support & diagnostics page
+                    // (same screen Profile's "Support & diagnostics" opens).
+                    SettingsRowEntry(CurioIcons.Info, "Support & diagnostics", "Updates, reports, help & app details", CurioRoutes.SUPPORT)
                 )
             )
         )
@@ -572,9 +574,10 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
     // ── About ────────────────────────────────────────────────────────
-    SettingsDeepRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again", CurioRoutes.SETTINGS_ABOUT, SettingsPage.ABOUT, "about-intro"),
-    SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.SETTINGS_ABOUT, SettingsPage.ABOUT, "about-version"),
-    SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.SETTINGS_ABOUT, SettingsPage.ABOUT, "about-update")
+    // v24 — About content lives on the shared Support & diagnostics page.
+    SettingsDeepRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again", CurioRoutes.SUPPORT),
+    SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.SUPPORT),
+    SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.SUPPORT)
 )
 
 /** One flat search result — the matching row plus its section context so

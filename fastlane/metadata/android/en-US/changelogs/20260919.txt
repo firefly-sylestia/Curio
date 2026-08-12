@@ -29,3 +29,5 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Explore session time now shows right under the topic on the save/edit page — “explored 12m” beside the category — matching the detail view’s Session segment.
 • The scroll indicator’s knob now drags gently: slow, smooth scrolling only, and only the knob itself responds to touch, so tapping the strip does nothing.
 • Settings → Appearance was tidied: the floating pet, pet brain and auto-open landed topic are always on now (their toggles are gone), and custom reaction lines stay off permanently since their editor is no longer reachable.
+• Support & diagnostics is now the single home for updates, feedback, replay intro and the project link — the old Settings → About Curio page was merged into it, and the page is reachable from both Settings and Profile.
+• Check for updates got better: it asks Google Play for an in-app update first (downloads and installs without leaving the app; sideloaded APK builds gracefully fall back to the GitHub release), and the result card now shows the full release notes with a Show more / Show less toggle instead of a clipped preview.

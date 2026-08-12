@@ -2,6 +2,8 @@ package com.curio.app.features.support
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -46,12 +48,18 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
+import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.infrastructure.CurioCrashReporter
+import com.curio.app.infrastructure.CurioInAppUpdate
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.appupdate.AppUpdateType
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
@@ -62,6 +70,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -73,9 +82,13 @@ import kotlinx.coroutines.launch
  *
  * Contents:
  *  - Updates: accurate version readout + a Check for updates row that runs
- *    on open, with an animated result card and a release-notes preview.
+ *    on open, with an animated result card. v24 — the check asks Google Play
+ *    for an in-app update first (flexible flow, "Update now"); on sideloads
+ *    or when Play has nothing, it falls back to the GitHub release check and
+ *    shows the FULL release notes inline (expandable).
  *  - Feedback: Report a bug, Crash logs, Test crash.
- *  - Project: link to the open-source GitHub repository.
+ *  - About Curio: Replay intro + the open-source GitHub repository (merged
+ *    here from the old Settings → About page).
  */
 @Composable
 fun SupportScreen(navController: NavController) {
@@ -85,6 +98,14 @@ fun SupportScreen(navController: NavController) {
     var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
     var resultVisible by remember { mutableStateOf(false) }
     val crashCount = remember { CurioCrashReporter.getCrashHistory(context).size }
+    // v24 — Google Play in-app update availability (null on sideloads) and
+    // the result card's expandable release notes.
+    var playUpdateInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
+    var notesExpanded by remember { mutableStateOf(false) }
+    val updateManager = remember { AppUpdateManagerFactory.create(context) }
+    val updateLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { /* Play's update UI result — the user can retry from the card */ }
 
     // Promo-mode toggle (v7.107) — tap the Version row five times to turn
     // promo/demo-content mode ON, five times again to turn it OFF. The
@@ -101,17 +122,29 @@ fun SupportScreen(navController: NavController) {
         if (checkState == UpdateCheckUi.Checking) return
         checkState = UpdateCheckUi.Checking
         resultVisible = false
+        notesExpanded = false
         scope.launch {
-            val info = UpdateChecker.fetchLatestRelease()
-            if (info == null || info.tagName.isBlank()) {
-                checkState = UpdateCheckUi.Failed
-            } else {
-                updateInfo = info
-                checkState = if (UpdateChecker.isNewer(info.tagName, BuildConfig.VERSION_NAME)) {
-                    UpdateCheckUi.UpdateAvailable
-                } else {
-                    UpdateCheckUi.UpToDate
+            // v24 — Play in-app update and the GitHub check run concurrently
+            // (a slow Play Store answer must not delay the GitHub fallback).
+            // Play installs only; sideloads report null and fall through.
+            val playDeferred = async { CurioInAppUpdate.available(context) }
+            val gh = UpdateChecker.fetchLatestRelease()
+            val play = playDeferred.await()
+            when {
+                play != null -> {
+                    playUpdateInfo = play
+                    updateInfo = gh
+                    checkState = UpdateCheckUi.PlayAvailable
                 }
+                gh != null && UpdateChecker.isNewer(gh.tagName, BuildConfig.VERSION_NAME) -> {
+                    updateInfo = gh
+                    checkState = UpdateCheckUi.GithubAvailable
+                }
+                gh != null -> {
+                    updateInfo = gh
+                    checkState = UpdateCheckUi.UpToDate
+                }
+                else -> checkState = UpdateCheckUi.Failed
             }
             resultVisible = true
         }
@@ -124,7 +157,8 @@ fun SupportScreen(navController: NavController) {
         UpdateCheckUi.Idle -> "Tap to check for the latest release"
         UpdateCheckUi.Checking -> "Checking for updates…"
         UpdateCheckUi.UpToDate -> "You're up to date · v${BuildConfig.VERSION_NAME}"
-        UpdateCheckUi.UpdateAvailable -> "Update available: ${updateInfo?.tagName ?: ""}"
+        UpdateCheckUi.PlayAvailable -> "Update available on Google Play"
+        UpdateCheckUi.GithubAvailable -> "New version: ${updateInfo?.tagName ?: ""}"
         UpdateCheckUi.Failed -> "Couldn't check · tap to retry"
     }
 
@@ -219,6 +253,20 @@ fun SupportScreen(navController: NavController) {
                             UpdateResultCard(
                                 state = checkState,
                                 info = updateInfo,
+                                notesExpanded = notesExpanded,
+                                onToggleNotes = { notesExpanded = !notesExpanded },
+                                onUpdateNow = {
+                                    val p = playUpdateInfo
+                                    if (p != null) {
+                                        runCatching {
+                                            updateManager.startUpdateFlowForResult(
+                                                p,
+                                                updateLauncher,
+                                                AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
+                                            )
+                                        }
+                                    }
+                                },
                                 onOpenRelease = { url ->
                                     runCatching {
                                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -257,10 +305,22 @@ fun SupportScreen(navController: NavController) {
                         ) { CurioCrashReporter.testCrash() }
                     }
                 }
-                item { CurioSectionLabel("Project") }
+                // ── About Curio — merged here from the old Settings → About
+                //    page (v24): Replay intro + the project link. One page,
+                //    reached from Settings and Profile alike.
+                item { CurioSectionLabel("About Curio") }
                 item {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        CurioCardHeader(CurioIcons.Info, "Open source", "Free, on-device, and yours")
+                        CurioCardHeader(CurioIcons.Info, "About Curio", "The app, the journey, and its source")
+                        CurioSettingsRow(
+                            CurioIcons.Replay,
+                            "Replay intro",
+                            "See the welcome screens again"
+                        ) {
+                            CurioOnboardingState.reset(context)
+                            navController.navigate(CurioRoutes.ONBOARDING) { launchSingleTop = true }
+                        }
+                        CurioSettingsDivider()
                         CurioSettingsRow(
                             CurioIcons.Info,
                             "GitHub repository",
@@ -295,14 +355,19 @@ fun SupportScreen(navController: NavController) {
 private fun UpdateResultCard(
     state: UpdateCheckUi,
     info: UpdateInfo?,
+    notesExpanded: Boolean,
+    onToggleNotes: () -> Unit,
+    onUpdateNow: () -> Unit,
     onOpenRelease: (String) -> Unit
 ) {
     if (state == UpdateCheckUi.Idle || state == UpdateCheckUi.Checking) return
     val (tint, title) = when (state) {
         UpdateCheckUi.UpToDate ->
             CurioColors.Sage to "You're on the latest version"
-        UpdateCheckUi.UpdateAvailable ->
-            CurioColors.CoralBlush to "Update available: ${info?.tagName ?: ""}"
+        UpdateCheckUi.PlayAvailable ->
+            CurioColors.CoralBlush to "Update available on Google Play"
+        UpdateCheckUi.GithubAvailable ->
+            CurioColors.CoralBlush to "New version on GitHub: ${info?.tagName ?: ""}"
         else ->
             MaterialTheme.colorScheme.error to "Couldn't check for updates"
     }
@@ -333,39 +398,71 @@ private fun UpdateResultCard(
                     notes,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 5,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = if (notesExpanded) Int.MAX_VALUE else 5,
+                    overflow = if (notesExpanded) TextOverflow.Visible else TextOverflow.Ellipsis
                 )
-            }
-            if (state == UpdateCheckUi.UpdateAvailable && info != null) {
-                Spacer(Modifier.height(10.dp))
-                Surface(
-                    onClick = { onOpenRelease(info.htmlUrl) },
-                    shape = RoundedCornerShape(50),
-                    color = CurioColors.CoralBlush,
-                    contentColor = CurioColors.DeepPlum
-                ) {
-                    Text(
-                        "Get it on GitHub",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
-                    )
-                }
-            } else if (state == UpdateCheckUi.UpToDate && info != null) {
-                Spacer(Modifier.height(6.dp))
+                // v24 — the full release notes inline, not a clipped preview.
                 Text(
-                    "View release notes",
-                    style = MaterialTheme.typography.labelLarge.copy(
+                    if (notesExpanded) "Show less" else "Show more",
+                    style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.SemiBold,
                         color = CurioColors.CoralBlush
                     ),
                     modifier = Modifier
-                        .clickable { onOpenRelease(info.htmlUrl) }
-                        .padding(top = 4.dp)
+                        .clickable(onClick = onToggleNotes)
+                        .padding(top = 6.dp)
                 )
+            }
+            when (state) {
+                UpdateCheckUi.PlayAvailable -> {
+                    Spacer(Modifier.height(10.dp))
+                    Surface(
+                        onClick = onUpdateNow,
+                        shape = RoundedCornerShape(50),
+                        color = CurioColors.CoralBlush,
+                        contentColor = CurioColors.DeepPlum
+                    ) {
+                        Text(
+                            "Update now",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                        )
+                    }
+                }
+                UpdateCheckUi.GithubAvailable -> {
+                    Spacer(Modifier.height(10.dp))
+                    Surface(
+                        onClick = { info?.htmlUrl?.let { onOpenRelease(it) } },
+                        shape = RoundedCornerShape(50),
+                        color = CurioColors.CoralBlush,
+                        contentColor = CurioColors.DeepPlum
+                    ) {
+                        Text(
+                            "Get it on GitHub",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                        )
+                    }
+                }
+                UpdateCheckUi.UpToDate -> {
+                    if (info != null) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "View release notes",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = CurioColors.CoralBlush
+                            ),
+                            modifier = Modifier
+                                .clickable { onOpenRelease(info.htmlUrl) }
+                                .padding(top = 4.dp)
+                        )
+                    }
+                }
+                else -> Unit
             }
         }
     }
 }
 
-private enum class UpdateCheckUi { Idle, Checking, UpToDate, UpdateAvailable, Failed }
+private enum class UpdateCheckUi { Idle, Checking, UpToDate, PlayAvailable, GithubAvailable, Failed }

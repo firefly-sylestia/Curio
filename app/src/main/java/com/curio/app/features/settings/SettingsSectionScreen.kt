@@ -61,7 +61,6 @@ import com.curio.app.data.AudioQualitySettings
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.SearchEngine
-import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -72,7 +71,6 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
-import com.curio.app.ui.components.CurioUpdateCheckRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
@@ -83,8 +81,7 @@ enum class SettingsPage(val title: String, val subtitle: String) {
     APPEARANCE("Appearance", "Theme, tint, and color mood"),
     NOTIFICATIONS("Notifications", "Reminders and explore controls"),
     RECORDING("Recording", "Voice-note quality and dictation"),
-    DATA("Backup & restore", "Keep your captures safe"),
-    ABOUT("About Curio", "Help and app details")
+    DATA("Backup & restore", "Keep your captures safe")
 }
 
 @Composable
@@ -137,7 +134,6 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
                     SettingsPage.NOTIFICATIONS -> NotificationsSection(highlightKey)
                     SettingsPage.RECORDING -> RecordingSection(highlightKey)
                     SettingsPage.DATA -> DataSection(navController, highlightKey)
-                    SettingsPage.ABOUT -> AboutSection(navController, highlightKey)
                 }
             }
         }
@@ -525,35 +521,6 @@ private fun DataSection(navController: NavController, highlightKey: String? = nu
         CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "data-workspace") {
             CurioSettingsInfoRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace")
-        }
-    }
-}
-
-@Composable
-private fun AboutSection(navController: NavController, highlightKey: String? = null) {
-    val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxWidth()) {
-        CurioCardHeader(CurioIcons.Info, "About Curio", "Help and app details")
-        SettingsRowPulse(highlightKey == "about-intro") {
-            CurioSettingsRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again") {
-                CurioOnboardingState.reset(context)
-                navController.navigate(CurioRoutes.ONBOARDING) { launchSingleTop = true }
-            }
-        }
-        CurioSettingsDivider()
-        // Version straight from the build — VERSION_NAME is the release tag
-        // this APK was built from (e.g. "1.0.0"), VERSION_CODE is the
-        // per-build number, so the readout is always accurate.
-        SettingsRowPulse(highlightKey == "about-version") {
-            CurioSettingsInfoRow(
-                CurioIcons.Info,
-                "Version",
-                "${com.curio.app.BuildConfig.VERSION_NAME} · build ${com.curio.app.BuildConfig.VERSION_CODE}"
-            )
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "about-update") {
-            CurioUpdateCheckRow()
         }
     }
 }

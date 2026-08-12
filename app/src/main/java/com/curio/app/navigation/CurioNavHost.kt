@@ -702,9 +702,6 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_DATA) {
                 BackupToolsScreen(navController = navController)
             }
-            composable(CurioRoutes.SETTINGS_ABOUT) {
-                SettingsSectionScreen(navController = navController, page = SettingsPage.ABOUT)
-            }
             composable(CurioRoutes.EXPERIMENTS) {
                 ExperimentsScreen(navController = navController)
             }

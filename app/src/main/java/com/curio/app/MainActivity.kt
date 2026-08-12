@@ -14,6 +14,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.infrastructure.CurioCrashReporter
+import com.curio.app.infrastructure.CurioInAppUpdateHost
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
@@ -78,6 +79,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             CurioTheme {
+                // v24 — the in-app-update host finishes approved flexible
+                // downloads at the root, so it survives navigation.
+                CurioInAppUpdateHost()
                 CurioNavHost()
             }
         }
