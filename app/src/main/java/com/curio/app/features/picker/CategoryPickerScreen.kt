@@ -58,6 +58,37 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
+
+/**
+ * v27l — display rank for the expanded (new) lanes on the picker's New page.
+ * Groups related fields together: life sciences, chemistry, earth & space,
+ * math, technology, then human sciences. Unknown ids fall back to a high
+ * rank so they sort after every ranked lane (then alpha by display name).
+ */
+private fun newLaneRank(id: CategoryId): Int = when (id) {
+    // Life sciences
+    CategoryId.BIOLOGY -> 0
+    CategoryId.ANIMALS -> 1
+    CategoryId.PLANTS -> 2
+    CategoryId.MEDICINE -> 3
+    // Chemistry
+    CategoryId.CHEMISTRY -> 4
+    // Earth & space
+    CategoryId.ASTRONOMY -> 5
+    CategoryId.GEOLOGY -> 6
+    CategoryId.OCEANS -> 7
+    // Mathematics
+    CategoryId.MATHEMATICS -> 8
+    // Technology
+    CategoryId.TECHNOLOGIES -> 9
+    CategoryId.ENGINEERING -> 10
+    // Human sciences
+    CategoryId.PSYCHOLOGY -> 11
+    CategoryId.LANGUAGE -> 12
+    CategoryId.HISTORY -> 13
+    CategoryId.ECONOMICS -> 14
+    else -> 100
+}
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.pet.PetLandmarks
@@ -93,9 +124,12 @@ fun CategoryPickerScreen(navController: NavController) {
     // v27i — the NEW-lanes page reads `all` directly so it can show the
     // not-yet-shipped lanes as Coming soon tiles (they're filtered out of
     // `visible` until their content ships).
-    val newLanes = CurioCategories.all.filter {
-        it.id in CategoryId.newLanes && it.id !in AppPreferences.hiddenCategoriesState
-    }
+    // v27l — the New page groups the expanded lanes logically instead of
+    // creation order: life sciences, chemistry, earth & space, math, tech,
+    // then human sciences. Everything not in the rank falls back to alpha.
+    val newLanes = CurioCategories.all
+        .filter { it.id in CategoryId.newLanes && it.id !in AppPreferences.hiddenCategoriesState }
+        .sortedBy { cat -> newLaneRank(cat.id) }
     val originalLanes = categories.filter { it.id !in CategoryId.newLanes }
     // v26 — reopen with the persisted deck: a mixed selection comes back in
     // multi-select with every lane ticked, so the user can SEE and CHANGE
