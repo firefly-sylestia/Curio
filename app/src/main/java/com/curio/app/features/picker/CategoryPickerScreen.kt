@@ -193,7 +193,7 @@ fun CategoryPickerScreen(navController: NavController) {
         ) {
             deckPresets.forEach { preset ->
                 val active = multiSelectMode &&
-                    preset.lanes(categories).all { it.routeSlug in selectedSlugs }
+                    preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
                 PickerPresetChip(
                     label = preset.label,
                     glyph = preset.glyph,
