@@ -510,7 +510,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryBrownTint,
             iconGlyph     = "pets",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true  // v27i — 1016 topics shipped in assets/topics/animals.json
         ),
         CurioCategory(
             id            = CategoryId.PLANTS,
