@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.lifecycleScope
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureRepository
 import com.curio.app.data.CurioDatabase
@@ -12,7 +13,9 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
+import kotlinx.coroutines.launch
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen
@@ -59,6 +62,9 @@ class MainActivity : ComponentActivity() {
         // Initialize Room database and repository singleton
         val db = CurioDatabase.getInstance(this)
         CurioRepositoryHolder.init(db.captureDao())
+        // v27 — auto-delete recycle-bin captures that passed their retention
+        // window (runs again whenever the recycle bin opens).
+        lifecycleScope.launch { RecycleBinExpiry.purgeExpired(this@MainActivity) }
 
         AppPreferences.initThemeMode(this)
         // Load the persisted explore-session flow state (active session +

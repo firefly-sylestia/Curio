@@ -171,7 +171,6 @@ import com.curio.app.ui.theme.glyph
 import com.curio.app.ui.theme.notePaperHighlight
 import com.curio.app.ui.theme.notePaperInk
 import com.curio.app.ui.theme.PatrickHandFontFamily
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -2853,7 +2852,6 @@ private fun FrostedExportButton(
     }
 }
 
-@Composable
 /**
  * v27 — the explore session's attachments block on the entry detail page:
  * the SHARED session note (universal — the same note that rode in on every
@@ -2958,6 +2956,7 @@ private fun SessionNoteBlock(
     }
 }
 
+@Composable
 private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.GalleryWall ?: return
     val density = androidx.compose.ui.platform.LocalDensity.current

@@ -263,6 +263,7 @@ private data class CrashCategory(
     val label: String, val description: String, val recovery: String, val color: Color
 )
 
+@Composable
 private fun detectCategory(log: String): CrashCategory {
     val l = log.lowercase()
     return when {

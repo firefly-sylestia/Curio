@@ -48,8 +48,9 @@ object ScreenFrameCapturer {
             mpm.getMediaProjection(resultCode, data)
         } catch (e: Exception) {
             Log.e(TAG, "getMediaProjection failed", e)
-            return null
+            null
         }
+        if (projection == null) return null
         var virtualDisplay: VirtualDisplay? = null
         var reader: ImageReader? = null
         return try {

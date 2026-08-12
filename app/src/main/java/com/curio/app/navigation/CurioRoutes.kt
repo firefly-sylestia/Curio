@@ -242,7 +242,7 @@ fun NavController.navigateToTab(route: String) {
     // the HOME root; anything else — a pushed screen, or a tab route with a
     // pushed screen beneath it — gets the explicit pop so the tap never
     // looks dead.
-    val below = currentBackStackEntry?.previousBackStackEntry?.destination?.route
+    val below = previousBackStackEntry?.destination?.route
     val genuineTabInstance = current in CurioRoutes.bottomNavRoutes &&
         below == CurioRoutes.HOME
     if (current != null && !genuineTabInstance) {

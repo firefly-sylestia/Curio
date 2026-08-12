@@ -248,7 +248,7 @@ fun CurioVerticalScrollIndicator(
                                 touched = true
                                 drag(down.id) { change ->
                                     change.consume()
-                                    accumulate(change.positionChange().y)
+                                    accumulate(change.position.y - change.previousPosition.y)
                                 }
                                 touched = false
                             } else if (alphabet != null) {

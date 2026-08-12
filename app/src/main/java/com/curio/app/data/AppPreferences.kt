@@ -109,6 +109,10 @@ object AppPreferences {
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
+    // v27 — recycle-bin retention: how many days soft-deleted captures stay
+    // before being auto-deleted forever (0 = keep forever). Default 30 days.
+    private const val KEY_RECYCLE_BIN_EXPIRY_DAYS = "recycle_bin_expiry_days"
+    private const val DEFAULT_RECYCLE_BIN_EXPIRY_DAYS = 30
     // v8.1 — "don't nag" flag: once the user declines the "Display over
     // other apps" permission (dismisses the prompt or returns from system
     // settings without granting), all AUTOMATIC overlay prompts are
@@ -309,6 +313,7 @@ object AppPreferences {
     // Explore browser button. Reactive so the Topic Reveal dialog copy and
     // the Settings row update the moment it changes.
     var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
+    var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
     // Live explore notifications — the persistent chronometer notification
@@ -481,6 +486,7 @@ object AppPreferences {
         smartDensityModeState = getSmartDensityMode(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         searchEngineState = getSearchEngine(context)
+        recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
@@ -824,6 +830,15 @@ object AppPreferences {
     fun setSearchEngine(context: Context, engine: SearchEngine) {
         prefs(context).edit().putString(KEY_SEARCH_ENGINE, engine.id).apply()
         searchEngineState = engine.id
+    }
+
+    /** v27 — recycle-bin retention window in days (0 = keep forever). */
+    fun getRecycleBinExpiryDays(context: Context): Int =
+        prefs(context).getInt(KEY_RECYCLE_BIN_EXPIRY_DAYS, DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
+
+    fun setRecycleBinExpiryDays(context: Context, days: Int) {
+        prefs(context).edit().putInt(KEY_RECYCLE_BIN_EXPIRY_DAYS, days).apply()
+        recycleBinExpiryDaysState = days
     }
 
     /** Whether the explore-session flow (timer/reminder/done prompt) is on. */

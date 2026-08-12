@@ -240,7 +240,7 @@ fun SaveCaptureScreen(
             val path = SessionShots.copyFrom(context, uri)
             if (path != null) {
                 if (editEntryId == null) {
-                    ExploreSessionStore.appendPendingScreenshot(cat.id, topic?.name.orEmpty(), path)
+                    ExploreSessionStore.appendPendingScreenshot(context, cat.id, topic?.name.orEmpty(), path)
                 } else {
                     editSessionScreenshots = editSessionScreenshots + path
                 }
@@ -250,7 +250,7 @@ fun SaveCaptureScreen(
     fun removeSessionScreenshot(path: String) {
         SessionShots.delete(context, path)
         if (editEntryId == null) {
-            ExploreSessionStore.removePendingScreenshot(cat.id, topic?.name.orEmpty(), path)
+            ExploreSessionStore.removePendingScreenshot(context, cat.id, topic?.name.orEmpty(), path)
         } else {
             editSessionScreenshots = editSessionScreenshots.filterNot { it == path }
         }
@@ -420,7 +420,7 @@ fun SaveCaptureScreen(
                             // a later save of the same topic can't inherit a
                             // stale duration.
                             ExploreSessionStore.clearWriteSessionHandoff(
-                                resolvedTopic.categoryId, resolvedTopic.name
+                                context, resolvedTopic.categoryId, resolvedTopic.name
                             )
                             StreakTracker.recordActivity(context)
                             // Feed the quests system — NEW saves drive journey +
@@ -687,7 +687,7 @@ fun SaveCaptureScreen(
                                 sessionNote = it
                                 if (editEntryId == null) {
                                     ExploreSessionStore.setPendingNote(
-                                        cat.id, topic?.name.orEmpty(), it
+                                        context, cat.id, topic?.name.orEmpty(), it
                                     )
                                 }
                             },
@@ -1144,8 +1144,7 @@ private fun SessionAttachmentsCard(
         // ── Screenshots — auto-added during the session, shared, each
         // removable with a small cross. The add tile stays so a session with
         // no shots yet can still pick one from the gallery.
-        {
-            Text(
+        Text(
                 text = "Session screenshots",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onSurface
@@ -1222,7 +1221,6 @@ private fun SessionAttachmentsCard(
             }
         }
     }
-}
     }
 }
 
