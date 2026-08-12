@@ -650,14 +650,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // non-pastel keep the classic card gradient (the muted pastel twins
     // already match the dark peeks).
     val deckGradient = if (pastelMode && !darkMode && !isMixedDeck) {
-        // v7.12 — pastel crown depth: when the toggle is on, the top stop
-        // gets a subtle 5% black deepen instead of the old 4% white lift,
-        // so the card reads with a gentle darker crown for depth.
-        val topCrown = if (AppPreferences.pastelCrownDepthState) {
-            lerp(deckAccent, Color.Black, 0.05f)
-        } else {
-            lerp(deckAccent, Color.White, 0.04f)
-        }
+        // v25 — Pastel crown depth PASSED: always ON — the top stop carries
+        // a subtle 5% black deepen for a gentle darker crown (the old 4%
+        // white-lift fallback is gone; its toggle was removed from
+        // Experiments).
+        val topCrown = lerp(deckAccent, Color.Black, 0.05f)
         listOf(
             topCrown,
             lightAccentTint(deckAccent, saturation = 0.22f, lightness = 0.80f)
@@ -937,6 +934,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             val resolved = resolveTopicForSlot(0, hand, cycleIndex, landedTopic)
             if (resolved != null) {
                 landingAlreadyOpened = true
+                // v25 — pin the tapped topic as the landed topic: the NavHost
+                // disposes Spin while Reveal is open, so the hand re-deals on
+                // return. Without this pin, tapping a card on the idle deck
+                // (no landed topic yet) came back to a DIFFERENT random front
+                // card. The pin clears on the next swipe or spin, exactly
+                // like a real landing.
+                landedTopicName = resolved.name
                 isOpening = true
                 // Give the settled ticket time to grow before the reveal
                 // destination enters. This mirrors the automatic landing
@@ -2329,7 +2333,9 @@ private fun HeroTicketCard(
     val hPx = with(density) { h.toPx() }
     // v7.13 — Main card toggles read directly from reactive state so
     // flipping any toggle recomposes the hero card instantly.
-    val heroGradientOn = AppPreferences.heroGradientState
+    // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
+    // toggle was removed from Experiments and the read is hardcoded here.
+    val heroGradientOn = true
     val heroBorderOn = AppPreferences.heroBorderState
     val heroShadowOn = AppPreferences.heroShadowState
     // v24 — the dual-accent hero gradient experiment was rejected (ugly

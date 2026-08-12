@@ -73,11 +73,9 @@ fun ExperimentsScreen(navController: NavController) {
             item { CurioSectionLabel("Spin visuals") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
+                    // v25 — the Enhanced main gradient experiment PASSED
+                    // (always ON), so its toggle was removed here.
                     CurioCardHeader(CurioIcons.Layers, "Main card", "Hero ticket looks")
-                    ExperimentSwitchRow("Enhanced main gradient", "Richer top-lit depth on the hero card", AppPreferences.heroGradientState) {
-                        AppPreferences.setHeroGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
                     // v24 — the dual-accent hero gradient experiment was
                     // rejected (ugly golden blend); always OFF, so its toggle
                     // was removed here.
@@ -105,16 +103,9 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                 }
             }
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // v24 — the 3D shuffle button is decided: always on by
-                    // default, so its experiment toggle was removed here.
-                    CurioCardHeader(CurioIcons.Layers, "Deck & controls", "Pastel accents")
-                    ExperimentSwitchRow("Pastel crown depth", "A subtle darker crown on pastel cards", AppPreferences.pastelCrownDepthState) {
-                        AppPreferences.setPastelCrownDepthEnabled(context, it)
-                    }
-                }
-            }
+            // v25 — the Deck & controls card is gone: the 3D shuffle button
+            // (always on) and Pastel crown depth (PASSED, always on) both had
+            // their toggles removed, leaving the card empty.
             // v24 — the Layout & input section was removed: Smart Spin layout
             // is gone for good (the deck always uses its natural size) and
             // Smart density's control moved out; Voice-to-text still lives in

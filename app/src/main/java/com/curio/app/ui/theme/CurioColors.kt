@@ -346,7 +346,9 @@ object CurioGradients {
         // End on the ACTIVE theme's background so cards always echo the
         // surface behind them — cream in light, midnight in dark, pure
         // black in AMOLED, the device's dynamic background in Material.
-        val start = if (AppPreferences.pastelColorsState && AppPreferences.pastelCrownDepthState) {
+        // v25 — Pastel crown depth PASSED: always ON, so its toggle was
+        // removed from Experiments and the pastel crown read is fixed.
+        val start = if (AppPreferences.pastelColorsState) {
             // v7.12 — subtle 5% black deepen at the very top of pastel
             // gradients so every pastel card reads with a gentle darker
             // crown instead of a uniform pastel from edge to edge.

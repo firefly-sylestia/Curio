@@ -34,3 +34,6 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • The 3D shuffle button is always on now — its toggle was removed from Settings → Experiments (Deck & controls).
 • Experiment cleanup: the dual-accent hero gradient (ugly golden blend), deck card shadows (weird while cards animate), tail-fade peek motion, and Smart Spin layout are all gone — those options were removed from Experiments and the losing looks are off for good. The Layout & input section was removed from Experiments; Voice-to-text still lives in Settings → Recording.
 • The Version row five-tap now opens the Experiments screen (and keeps it open) instead of toggling promo mode. Promo mode is off by default and lives in Experiments — Settings → Experiments → Promo mode — where its own page turns it on and off.
+• Tapping a card on the Spin deck no longer swaps to a different random topic when you come back — the card you opened stays at the front of the deck.
+• The Explore button on Topic Reveal now always starts a real explore session — including from Browse Topics — with the timer, recents and done-mark, instead of silently opening a search page.
+• Enhanced main gradient and Pastel crown depth passed: always on now, and their toggles were removed from Settings → Experiments.

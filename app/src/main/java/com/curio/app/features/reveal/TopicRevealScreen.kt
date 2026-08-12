@@ -102,7 +102,6 @@ import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
-import com.curio.app.data.openSilentExplore
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -260,19 +259,10 @@ fun TopicRevealScreen(
             showExploreDialog = true
         }
     }
-    // v8.12 — browse-mode (opened from the Topic Database) gets a SILENT
-    // Explore action: it opens the topic's search page without recording
-    // quests, passport, pet events, recents or a timer. Express Yourself is
-    // separate and remains the deliberate write-about-it path.
-    val latestOnSilentExplore by rememberUpdatedState<() -> Unit> {
-        // Browse mode has no tour navigation. During a tour, only dismiss the
-        // guide; never launch a browser as a side effect of a demonstrated tap.
-        if (TourController.active) {
-            TourController.skip()
-        } else {
-            latestResolved?.let { topic -> openSilentExplore(context, topic) }
-        }
-    }
+    // v25 — browse-mode Explore (opened from the Topic Database) now runs the
+    // REAL explore session — same dialog, timer, recents and done-mark as the
+    // Spin deck — instead of the old silent out-of-app search (v8.12). The
+    // user asked why Explore didn't start a session from the browser.
     val latestOnAlready by rememberUpdatedState<() -> Unit> {
         if (TourController.active) {
             // Tour taps demonstrate controls only. End the tour instead of
@@ -634,7 +624,6 @@ fun TopicRevealScreen(
                         resolved = latestResolved,
                         onExplore = latestOnExplore,
                         onAlready = latestOnAlready,
-                        onSilentExplore = if (latestBrowseMode) latestOnSilentExplore else null,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
@@ -1142,8 +1131,6 @@ private fun RevealActionRow(
     resolved: CurioTopic?,
     onExplore: () -> Unit,
     onAlready: () -> Unit,
-    // v8.12 — browse mode: a non-tracking explore (no quests/passport/pet).
-    onSilentExplore: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
@@ -1209,8 +1196,10 @@ private fun RevealActionRow(
                             onClick = onExplore
                         )
                     }
-                } else if (onSilentExplore != null) {
-                    // Browse mode: Explore opens the search page silently.
+                } else {
+                    // v25 — browse-mode Explore runs the REAL explore session
+                    // (dialog → timer → recents → done-mark), same as the
+                    // Spin deck — no more silent out-of-app search.
                     PetLandmark(
                         id = "start-exploring",
                         kind = PetLandmarks.Kind.FUN,
@@ -1224,7 +1213,7 @@ private fun RevealActionRow(
                             label = "Explore",
                             metrics = m,
                             modifier = lm.weight(1f),
-                            onClick = onSilentExplore
+                            onClick = onExplore
                         )
                     }
                 }
@@ -1395,7 +1384,9 @@ private fun HeroCard(
     //    deck's front ticket; otherwise a plain vertical gradient.
     val dark = isCurioDarkTheme()
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
-    val heroGradientOn = AppPreferences.heroGradientState
+    // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
+    // toggle was removed from Experiments and the read is hardcoded here.
+    val heroGradientOn = true
     val heroBorderOn = AppPreferences.heroBorderState
     // v24 — the dual-accent hero gradient experiment was rejected (ugly
     // golden blend); always OFF, so the blend branch below is dead.
