@@ -75,6 +75,16 @@ const SettingsItem: React.FC<{
   );
 };
 
+const SEARCH_ENGINES = [
+  { id: 'google', label: 'Google' },
+  { id: 'duckduckgo', label: 'DuckDuckGo' },
+  { id: 'bing', label: 'Bing' },
+  { id: 'brave', label: 'Brave' },
+  { id: 'ecosia', label: 'Ecosia' },
+  { id: 'startpage', label: 'Startpage' },
+  { id: 'yahoo', label: 'Yahoo' },
+];
+
 const ThemePicker: React.FC<{ selected: string; onSelect: (theme: string) => void }> = ({ selected, onSelect }) => {
   const { isDark } = useTheme();
   const themes = [
@@ -108,6 +118,7 @@ export const SettingsScreen: React.FC = () => {
   });
   const [petChatter, setPetChatter] = useState(localStorage.getItem('curio-pet-chatter') || 'cozy');
   const [petGames, setPetGames] = useState(localStorage.getItem('curio-pet-games') || 'normal');
+  const [searchEngine, setSearchEngine] = useState(localStorage.getItem('curio-search-engine') || 'google');
 
   const handleSettingChange = (key: string, value: boolean) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -124,6 +135,11 @@ export const SettingsScreen: React.FC = () => {
   const handlePetGames = (val: string) => {
     setPetGames(val);
     localStorage.setItem('curio-pet-games', val);
+  };
+
+  const handleSearchEngine = (val: string) => {
+    setSearchEngine(val);
+    localStorage.setItem('curio-search-engine', val);
   };
 
   return (
@@ -168,6 +184,15 @@ export const SettingsScreen: React.FC = () => {
             <CurioSectionHeader title="Notifications" />
             <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={settings.notifications} onChange={(v) => handleSettingChange('notifications', v)} label="Enable Notifications" description="Receive reminders and updates" /></div>
+              <div className="px-4 pb-3">
+                <SegmentedRow
+                  label="Search engine"
+                  description="Used by Explore in browser"
+                  options={SEARCH_ENGINES.map(e => ({ value: e.id, label: e.label }))}
+                  selected={searchEngine}
+                  onChange={handleSearchEngine}
+                />
+              </div>
             </div>
           </div>
           <div className="mb-6">

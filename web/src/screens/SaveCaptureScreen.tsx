@@ -5,8 +5,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryBySlug } from '../data/categories';
+import { loadTopicsForCategory } from '../data/topics';
 import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
-import type { CurioCategory, CaptureFormat, CaptureData, JournalMood } from '../types';
+import type { CurioCategory, CurioTopic, CaptureFormat, CaptureData, JournalMood } from '../types';
 import { JOURNAL_MOODS } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
 import { ScreenEntrance } from '../animations';
@@ -15,6 +16,10 @@ import { ScreenEntrance } from '../animations';
 const paperFont = "'Patrick Hand', cursive";
 const getPaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
 const paperInputClass = "w-full bg-transparent resize-none outline-none placeholder:opacity-30";
+const CAPTURE_DRAFT_KEY = '__curioCaptureDraft';
+const setCaptureDraft = (format: CaptureFormat, data: CaptureData) => {
+  (window as any)[CAPTURE_DRAFT_KEY] = { format, data };
+};
 
 // ─── Paper color palette ─────────────────────────────────────────────
 const PAPER_COLORS: Record<string, { bg: string; bgDark: string; ink: string; inkDark: string }> = {
@@ -329,6 +334,7 @@ const SoundBiteEditor: React.FC<{
 
   const canSave = (recorderState === 'STOPPED' && !!audioData) || !!note.trim();
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
+  useEffect(() => { setCaptureDraft('SoundBite', dataRef.current as CaptureData); }, [audioData, title, note, mood, quotes]);
 
   // Expose data to parent
   const dataRef = useRef<any>(null);
@@ -440,6 +446,7 @@ const ReelNotesEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (v
   const [mood, setMood] = useState<JournalMood | null>(null);
   const canSave = rating > 0 || !!review.trim();
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
+  useEffect(() => { setCaptureDraft('ReelNotes', { rating, review, mood } as CaptureData); }, [rating, review, mood]);
   const ink = getPaperInk(isDark);
   return (
     <div className="space-y-5">
@@ -477,6 +484,7 @@ const MarginaliaEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (
   const [mood, setMood] = useState<JournalMood | null>(null);
   const canSave = !!journalEntry.trim() || quotes.length > 0;
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
+  useEffect(() => { setCaptureDraft('Marginalia', { journalEntry, quotes, mood } as CaptureData); }, [journalEntry, quotes, mood]);
   const addQuote = () => { if (newQuote.trim()) { setQuotes([...quotes, { text: newQuote.trim() }]); setNewQuote(''); } };
   const ink = getPaperInk(isDark);
   return (
@@ -521,6 +529,7 @@ const GalleryWallEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: 
   const [mood, setMood] = useState<JournalMood | null>(null);
   const canSave = !!caption.trim();
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
+  useEffect(() => { setCaptureDraft('GalleryWall', { caption, images: [], mood } as CaptureData); }, [caption, mood]);
   const ink = getPaperInk(isDark);
   return (
     <div className="space-y-5">
@@ -559,6 +568,7 @@ const FieldNotesEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (
   const [mood, setMood] = useState<JournalMood | null>(null);
   const canSave = !!observed.trim() || !!surprised.trim() || !!learnNext.trim();
   useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
+  useEffect(() => { setCaptureDraft('FieldNotes', { observed, surprised, learnNext, mood } as CaptureData); }, [observed, surprised, learnNext, mood]);
   const ink = getPaperInk(isDark);
   const fields = [
     { k: 'observed', v: observed, set: setObserved, icon: 'visibility', label: 'Observed', ph: 'What did you observe?' },
@@ -593,6 +603,8 @@ export const SaveCaptureScreen: React.FC = () => {
   const { categorySlug, topicName } = useParams();
   const { isDark, isAmoled } = useTheme();
   const [category, setCategory] = useState<CurioCategory | null>(null);
+  const [topic, setTopic] = useState<CurioTopic | null>(null);
+  const [sessionStartedAt] = useState(() => Date.now());
   const [selectedFormat, setSelectedFormat] = useState<CaptureFormat>('SoundBite');
   const [canSave, setCanSave] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -602,11 +614,17 @@ export const SaveCaptureScreen: React.FC = () => {
   const [formatKey, setFormatKey] = useState(0);
 
   useEffect(() => {
-    if (categorySlug) {
+    const loadTopic = async () => {
+      if (!categorySlug) return;
       const found = getCategoryBySlug(categorySlug);
-      if (found) setCategory(found);
-    }
-  }, [categorySlug]);
+      if (!found) return;
+      setCategory(found);
+      setSelectedFormat(found.defaultFormat);
+      const topics = await loadTopicsForCategory(found.id);
+      setTopic(topics.find(t => t.id === topicName) || null);
+    };
+    loadTopic();
+  }, [categorySlug, topicName]);
 
   // Reset canSave on format change
   useEffect(() => { setCanSave(false); }, [selectedFormat]);
@@ -619,7 +637,8 @@ export const SaveCaptureScreen: React.FC = () => {
   };
 
   const buildCaptureData = (): CaptureData => {
-    // For SoundBite, use the ref set on window
+    const draft = (window as any)[CAPTURE_DRAFT_KEY];
+    if (draft?.format === selectedFormat) return draft.data as CaptureData;
     const sbData = (window as any).__soundBiteData?.current;
     switch (selectedFormat) {
       case 'SoundBite': return {
@@ -642,21 +661,22 @@ export const SaveCaptureScreen: React.FC = () => {
     if (!category) return;
     setIsSaving(true);
     try {
-      const topicDisplayName = topicName?.replace(/-/g, ' ') || 'Unknown Topic';
+      const topicDisplayName = topic?.name || topicName?.replace(/-/g, ' ') || 'Unknown Topic';
       const captureData = buildCaptureData();
       const entry = {
         id: generateId(),
-        topicId: `${category.id.toLowerCase()}-${Date.now()}`,
+        topicId: topic?.id || `${category.id.toLowerCase()}-${Date.now()}`,
         categoryId: category.id,
         topicName: topicDisplayName,
-        topicSubtype: 'Topic',
-        topicTeaser: 'A fascinating topic to explore.',
+        topicSubtype: topic?.subtype || 'Topic',
+        topicTeaser: topic?.teaser || 'A fascinating topic to explore.',
         format: selectedFormat,
         capturedAtMillis: Date.now(),
         title: topicDisplayName,
         formatDataJson: JSON.stringify(captureData),
         tagsJson: serializeTags(tags),
         isLegacy: false,
+        sessionTimeMillis: Date.now() - sessionStartedAt,
       };
       await captureRepository.insert(entry);
       const prev = parseInt(localStorage.getItem('curio-total-topics') || '0');
@@ -705,7 +725,7 @@ export const SaveCaptureScreen: React.FC = () => {
             </div>
             <div>
               <p className="text-sm font-bold" style={{ color: getTextColor(isDark) }}>
-                {topicName?.replace(/-/g, ' ') || 'Unknown Topic'}
+                {topic?.name || topicName?.replace(/-/g, ' ') || 'Unknown Topic'}
               </p>
               <p className="text-xs opacity-60" style={{ color: getTextColor(isDark) }}>{category.displayName}</p>
             </div>

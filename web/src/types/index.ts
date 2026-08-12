@@ -148,6 +148,7 @@ export interface CaptureEntity {
   formatDataJson: string;
   tagsJson: string;
   isLegacy: boolean;
+  sessionTimeMillis?: number;
 }
 
 // Curio Entry (domain object)
@@ -160,6 +161,7 @@ export interface CurioEntry {
   capturedAtMillis: number;
   tags: string[];
   isLegacy: boolean;
+  sessionTimeMillis?: number;
 }
 
 // Pet System
