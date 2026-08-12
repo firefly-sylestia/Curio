@@ -700,7 +700,7 @@ private fun BoxScope.DatabaseStickyChipBar(
         derivedStateOf {
             val first = listState.layoutInfo.visibleItemsInfo.firstOrNull()
             if (first == null) 0f
-            else ((barBottomPx - first.offset.y) / thresholdPx).coerceIn(0f, 1f)
+            else ((barBottomPx - first.offset) / thresholdPx).coerceIn(0f, 1f)
         }
     }
     val frostShift = FastOutSlowInEasing.transform(progress)

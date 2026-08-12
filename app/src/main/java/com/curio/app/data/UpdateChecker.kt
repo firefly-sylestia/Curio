@@ -78,7 +78,7 @@ object UpdateChecker {
                 val arr = JSONArray(raw)
                 if (arr.length() == 0) return@fetch null
                 val tag = (0 until arr.length())
-                    .mapNotNull { arr.optJSONObject(it)?.optString("name").takeIf { n -> n.isNotBlank() } }
+                    .mapNotNull { arr.optJSONObject(it)?.optString("name")?.takeIf { n -> n.isNotBlank() } }
                     .maxWithOrNull(
                         Comparator { t1, t2 ->
                             compareVersions(t1.removePrefix("v"), t2.removePrefix("v"))
