@@ -542,7 +542,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryNavyTint,
             iconGlyph     = "dark_mode",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true  // v27j — 1000 topics shipped in assets/topics/astronomy.json
         ),
         CurioCategory(
             id            = CategoryId.HISTORY,
