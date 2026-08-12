@@ -153,6 +153,8 @@ object CurioRoutes {
     const val BUG_REPORT = "bug-report"
     const val SUPPORT = "support"
     const val PROMO = "promo"
+    // v26 — recycle bin for soft-deleted captures (Settings entry).
+    const val RECYCLE_BIN = "recycle-bin"
     const val DATABASE = "database"
     const val FIELDMIND_OBSERVATION = "fieldmind-observation"
     // v8.34 — the Pet designer playground (custom pet look, Settings entry).

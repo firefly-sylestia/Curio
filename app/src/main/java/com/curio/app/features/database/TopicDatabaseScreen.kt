@@ -58,6 +58,8 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.components.CurioSortDropdown
+import com.curio.app.ui.components.CurioSortOption
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -96,11 +98,20 @@ fun TopicDatabaseScreen(navController: NavController) {
     // resetting to a fresh blank list every time you come back.
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
-    // v8.54 — sort control: DEFAULT (A–Z within each category, section
-    // headers kept) / A–Z / Z–A / YEAR_NEWEST / YEAR_OLDEST. Saved like the
-    // search + filter so it survives reveal round-trips, tab switches, and
-    // rotation.
-    var sortMode by rememberSaveable { mutableStateOf(DatabaseSortMode.DEFAULT) }
+    // v26 — sort control: a dropdown (Default / Name / Year) plus a
+    // universal ascending/descending arrow. Saved like the search + filter so
+    // it survives reveal round-trips, tab switches, and rotation.
+    var tdSortField by rememberSaveable { mutableStateOf(DatabaseSortField.DEFAULT.name) }
+    var tdSortAscending by rememberSaveable { mutableStateOf(false) }
+    // Map the (field, direction) pair onto the existing sort modes: Default
+    // keeps per-lane A–Z with headers; Name/Year obey the arrow.
+    val sortMode = when (DatabaseSortField.valueOf(tdSortField)) {
+        DatabaseSortField.DEFAULT -> DatabaseSortMode.DEFAULT
+        DatabaseSortField.NAME -> if (tdSortAscending) DatabaseSortMode.ALPHA_ASC
+        else DatabaseSortMode.ALPHA_DESC
+        DatabaseSortField.YEAR -> if (tdSortAscending) DatabaseSortMode.YEAR_OLDEST
+        else DatabaseSortMode.YEAR_NEWEST
+    }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
     // the list first composes with zero rows and a restored LazyListState gets
@@ -456,55 +467,22 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 )
                             }
                         }
-                        // v8.54 — sort control: A–Z / Z–A / Newest / Oldest (by year).
-                        // Direction is explicit so sorting never depends on a hidden toggle state.
+                        // v26 — sort control: a dropdown (Default / Name / Year)
+                        // plus a universal ascending/descending arrow toggle.
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            item("sort-label") {
-                                Text(
-                                    text = "Sort",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                    modifier = Modifier.padding(start = 2.dp)
-                                )
-                            }
-                            item("sort-alpha-asc") {
-                                DatabaseSortChip(
-                                    label = "A–Z",
-                                    glyph = CurioIcons.ArrowUpward,
-                                    selected = sortMode == DatabaseSortMode.ALPHA_ASC,
-                                    onClick = { sortMode = DatabaseSortMode.ALPHA_ASC }
-                                )
-                            }
-                            item("sort-alpha-desc") {
-                                DatabaseSortChip(
-                                    label = "Z–A",
-                                    glyph = CurioIcons.ArrowDownward,
-                                    selected = sortMode == DatabaseSortMode.ALPHA_DESC,
-                                    onClick = { sortMode = DatabaseSortMode.ALPHA_DESC }
-                                )
-                            }
-                            item("sort-newest") {
-                                DatabaseSortChip(
-                                    label = "Newest",
-                                    glyph = CurioIcons.ArrowDownward,
-                                    selected = sortMode == DatabaseSortMode.YEAR_NEWEST,
-                                    onClick = {
-                                        sortMode = if (sortMode == DatabaseSortMode.YEAR_NEWEST) DatabaseSortMode.DEFAULT
-                                        else DatabaseSortMode.YEAR_NEWEST
-                                    }
-                                )
-                            }
-                            item("sort-oldest") {
-                                DatabaseSortChip(
-                                    label = "Oldest",
-                                    glyph = CurioIcons.ArrowUpward,
-                                    selected = sortMode == DatabaseSortMode.YEAR_OLDEST,
-                                    onClick = {
-                                        sortMode = if (sortMode == DatabaseSortMode.YEAR_OLDEST) DatabaseSortMode.DEFAULT
-                                        else DatabaseSortMode.YEAR_OLDEST
-                                    }
+                            item("sort") {
+                                CurioSortDropdown(
+                                    options = listOf(
+                                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default"),
+                                        CurioSortOption(DatabaseSortField.NAME.name, "Name"),
+                                        CurioSortOption(DatabaseSortField.YEAR.name, "Year")
+                                    ),
+                                    selectedKey = tdSortField,
+                                    ascending = tdSortAscending,
+                                    onSelect = { tdSortField = it },
+                                    onToggleDirection = { tdSortAscending = !tdSortAscending }
                                 )
                             }
                         }
@@ -669,6 +647,9 @@ private enum class DatabaseSortMode {
     DEFAULT, ALPHA_ASC, ALPHA_DESC, YEAR_NEWEST, YEAR_OLDEST
 }
 
+/** Sort fields for the sort dropdown (v26) — the arrow toggles direction. */
+private enum class DatabaseSortField { DEFAULT, NAME, YEAR }
+
 /**
  * Best-effort publication/birth year for sorting. Topics have no dedicated
  * year field, so read it from the first available source: a `(Year)` in the
@@ -692,45 +673,6 @@ private fun topicYear(topic: CurioTopic): Int? {
         DECADE_YEAR.find(tag)?.let { return it.groupValues[1].toInt() * 10 }
     }
     return null
-}
-
-/** Small toggle chip for the sort row — icon + label, mirrors [DatabaseFilterChip]. */
-@Composable
-private fun DatabaseSortChip(
-    label: String,
-    glyph: String? = null,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerLow,
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
-        ) {
-            if (glyph != null) {
-                CurioIcon(
-                    glyph, null,
-                    tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 14.dp
-                )
-            }
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
 }
 
 /** Category section header shown while browsing All. */

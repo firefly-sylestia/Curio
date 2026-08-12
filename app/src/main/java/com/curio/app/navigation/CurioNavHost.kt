@@ -95,6 +95,7 @@ import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
 import com.curio.app.features.topichistory.TopicHistoryScreen
 import com.curio.app.features.recent.RecentScreen
+import com.curio.app.features.recyclebin.RecycleBinScreen
 import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
@@ -174,6 +175,7 @@ private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.TOPIC_HISTORY,
     CurioRoutes.MANAGE_CATEGORIES,
     CurioRoutes.RECENTS_ALL,
+    CurioRoutes.RECYCLE_BIN,
     CurioRoutes.SUPPORT,
     CurioRoutes.BUG_REPORT,
     CurioRoutes.DATABASE
@@ -710,6 +712,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.TOPIC_HISTORY) {
                 TopicHistoryScreen(navController = navController)
+            }
+            composable(CurioRoutes.RECYCLE_BIN) {
+                RecycleBinScreen(navController = navController)
             }
             composable(CurioRoutes.RECENTS_ALL) {
                 RecentScreen(navController = navController)

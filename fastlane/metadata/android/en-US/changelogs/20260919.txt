@@ -49,3 +49,5 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Topic Browser lists every category alphabetically out of the box, and the scroll knob now speed-scrolls — the further you drag, the faster it goes.
 • Tap the scroll knob to open the A–Z rail; it tracks the letter you are on as you scroll, and tapping a letter jumps straight there.
 • The Recents page now wears the torn-paper hero header that matches the rest of the app.
+• Deleting a capture now asks twice, then sends it to the Recycle bin instead of erasing it — recover it anytime from Settings → Safety & support → Recycle bin (Restore, Delete forever, or Empty bin).
+• The Cabinet sort control is now a dropdown (Date / Title / Category) with a universal arrow that flips ascending ↔ descending — same dropdown style in the Topic Browser (Default / Name / Year).

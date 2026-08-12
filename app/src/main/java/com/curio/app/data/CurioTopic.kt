@@ -118,7 +118,13 @@ data class CurioEntry(
      * and persisted separately from the synthetic topic/category used to
      * render the imported entry.
      */
-    val isLegacy: Boolean = false
+    val isLegacy: Boolean = false,
+    /**
+     * v26 — recycle bin: when non-null, this entry sits in the recycle bin
+     * (deleted at that timestamp) instead of the Cabinet. Set by the DAO's
+     * soft-delete; the recycle bin screen shows it with a restore/purge.
+     */
+    val deletedAt: Long? = null
 ) {
     /** One-line preview for Cabinet cards. */
     val bodyPreview: String get() = captureData.toPreview()

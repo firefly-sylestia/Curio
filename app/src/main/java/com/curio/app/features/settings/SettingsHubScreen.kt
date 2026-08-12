@@ -510,6 +510,8 @@ private val SettingsSections = listOf(
                 headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
+                    // v26 — recycle bin for soft-deleted captures.
+                    SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN),
                     // v24 — merged into the shared Support & diagnostics page
                     // (same screen Profile's "Support & diagnostics" opens).
                     SettingsRowEntry(CurioIcons.Info, "Support & diagnostics", "Updates, reports, help & app details", CurioRoutes.SUPPORT)

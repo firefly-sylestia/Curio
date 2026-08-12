@@ -1,0 +1,131 @@
+package com.curio.app.ui.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcons
+
+/** One selectable sort field for [CurioSortDropdown]. */
+data class CurioSortOption(
+    val key: String,
+    val label: String
+)
+
+/**
+ * v26 — shared sort control: a pill whose LABEL zone opens a dropdown of
+ * [options], while the trailing ARROW is its own tap zone that toggles
+ * ascending/descending universally (⬆ = ascending, ⬇ = descending) for
+ * whichever field is selected. Used by the Cabinet hero and the Topic
+ * Database so every sort in the app reads the same way.
+ *
+ * @param ink the tint for the pill glass + glyphs — hero callers pass their
+ *   hero ink; plain screens pass the theme primary.
+ */
+@Composable
+fun CurioSortDropdown(
+    options: List<CurioSortOption>,
+    selectedKey: String,
+    ascending: Boolean,
+    onSelect: (String) -> Unit,
+    onToggleDirection: () -> Unit,
+    modifier: Modifier = Modifier,
+    ink: Color = MaterialTheme.colorScheme.primary,
+    emphasized: Boolean = false
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selected = options.firstOrNull { it.key == selectedKey }
+    val fill = if (emphasized) ink.copy(alpha = 0.42f) else ink.copy(alpha = 0.18f)
+
+    Box(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // ── Label zone — opens the dropdown ──
+            Surface(
+                onClick = { expanded = true },
+                shape = RoundedCornerShape(50),
+                color = fill
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(start = 14.dp, end = 10.dp, top = 7.dp, bottom = 7.dp)
+                ) {
+                    Text(
+                        text = selected?.label.orEmpty(),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ink
+                    )
+                    CurioIcon(
+                        name = CurioIcons.KeyboardArrowDown,
+                        contentDescription = "Choose sort field",
+                        tint = ink.copy(alpha = 0.7f),
+                        size = 14.dp
+                    )
+                }
+            }
+            // ── Arrow zone — toggles ascending/descending ──
+            Surface(
+                onClick = onToggleDirection,
+                shape = CircleShape,
+                color = fill
+            ) {
+                CurioIcon(
+                    name = if (ascending) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,
+                    contentDescription = if (ascending) {
+                        "Ascending. Tap for descending"
+                    } else {
+                        "Descending. Tap for ascending"
+                    },
+                    tint = ink,
+                    size = 18.dp,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(20.dp)
+                )
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(18.dp),
+            tonalElevation = 0.dp,
+            shadowElevation = 10.dp
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = option.label,
+                            fontWeight = if (option.key == selectedKey) FontWeight.Bold
+                            else FontWeight.Normal
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onSelect(option.key)
+                    }
+                )
+            }
+        }
+    }
+}

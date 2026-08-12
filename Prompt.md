@@ -1,22 +1,23 @@
 # Prompt.md — Research & Analysis Tracking
 
-## Current Request (COMPLETE): Topic Browser scroll speed + A–Z fast-scroller + alphabetical default + Recents header
+## Current Request (COMPLETE): Recycle bin + double-confirm delete + sort dropdowns
 
 **Date:** 2026-08-12
 
 **What was asked:**
-1. Topic Browser scroll is "too slow" — tackle the lag and make it speed-scroll (the more you drag, the faster it gets).
-2. Show topics alphabetically by default per category.
-3. When tapping the scroll knob, show the alphabet, changing as you scroll.
-4. The Recents screen header doesn't match the UI — make it match.
+1. Deleting a saved capture should be double-confirmation.
+2. Deletes should go to a recycle bin, recoverable from Settings.
+3. The Cabinet sort option should be a dropdown with different sorts, and its arrow should be a universal ascending/descending toggle.
+4. Same dropdown in "other sorting options" (Topic Browser).
 
-**Changes (3 files + docs):**
-- **`ui/components/CurioScrollIndicator.kt`** — speed-scroll: the knob's drag now ramps on cumulative travel (`speed = 1 + (|cum|/160).coerceAtMost(3)`, per-event cap 180→240px; reversing the drag decays the ramp back to the gentle 2.5x crawl). New optional **A–Z fast-scroller**: params `alphabet: List<String>?`, `activeAlphabetIndex: Int?`, `onAlphabetSelect: (String) -> Unit`. Tapping the knob (total travel < 24px = tap, distinguished via a `dragTotalPx` accumulator) toggles a 26dp letter rail on the strip's outer edge; the strip animates 28→54dp and the knob stays in a fixed 28dp TopStart strip (with `contentAlignment = TopEnd` restored so the knob hugs the strip's right edge). Active letter highlights (primary, bold, 12sp); tapping a letter fires `onAlphabetSelect`. Rail only renders when `alphabet != null` — the other 8 indicator users are untouched.
-- **`features/database/TopicDatabaseScreen.kt`** — DEFAULT sort is now **A–Z within each category** (`.sortedBy { it.nameKey }` in the DEFAULT rows branch, stable so ties keep file order; section headers kept; the A–Z chip still flattens globally). Wired the fast-scroller: `alphabetLetters` = A–Z, `activeAlphabetIndex` derived via `remember(rows) { derivedStateOf { ... } }` reading `listState.firstVisibleItemIndex` and walking to the first topic row (`name.first().uppercaseChar()`), `onAlphabetSelect` scrolls to the first row whose topic name starts with the letter (`scrollToItem` in a scope.launch).
-- **`features/recent/RecentScreen.kt`** — header rebuilt in the settings-family torn-rose hero: `SettingsHeroHeader("Recents", …)` + `SettingsHeroTotalHeight` content padding + `ScreenEntrance`; the plain back-button/status-bar row (and `CurioBackButton`/`statusBarsPadding` imports) removed; feed scrolls under the tear; indicator padded below the hero; empty state padded down by the hero height. Matches Manage Categories / Topic Database / Topic History.
+**Changes:**
+- **Data layer:** `CaptureEntity.deletedAt: Long?` (nullable); Room v4→v5 with `MIGRATION_4_5` (`ALTER TABLE captures ADD COLUMN deletedAt INTEGER`); all live DAO queries now filter `deletedAt IS NULL`; new `softDeleteById(s)` / `getTrashedFlow` / `getTrashedById` / `restoreById` / `restoreAll` / `purgeById` / `purgeTrashed` / `countTrashed`; repository wrappers; `CurioEntry.deletedAt` defaulted field threaded through `CaptureEntity.toEntry()`. `deleteById(s)` stays a HARD delete (FieldMind import cleanup).
+- **Two-step delete:** new `ui/components/CurioTwoStepDialog.kt` — step 1 "Move to Recycle bin?" → step 2 final "Delete …?" (error-styled), step resets on every dismiss. Wired into Cabinet bulk delete and Entry Detail; both now call `softDelete*` and NO LONGER delete media (media is only removed by the Recycle bin's permanent purge).
+- **Recycle bin:** new `features/recyclebin/RecycleBinScreen.kt` (settings-family hero + watermark + list; Restore / Delete forever / Empty bin; purge removes audio + images), route `RECYCLE_BIN` (registered in NavHost + pop-screen list), Settings → Safety & support → "Recycle bin" row.
+- **Sort dropdowns:** new `ui/components/CurioSortDropdown.kt` — label zone opens the field dropdown, the trailing arrow is its own tap zone toggling ascending/descending universally. Cabinet: `sortNewestFirst` → `cabinetSortField` (DATE/TITLE/CATEGORY) + `sortAscending`, sort pill replaced. Topic Database: `sortMode` → `tdSortField` (DEFAULT/NAME/YEAR) + `tdSortAscending` mapped onto the existing `DatabaseSortMode`; the old `DatabaseSortChip` row removed.
 
-**Validation:** braces (3 files) + `git diff --check` clean; imports verified; no unused imports left in RecentScreen. Code-reviewer agent glitched (no findings delivered) → the change was reviewed manually: caught and fixed a layout regression (strip Box lost `contentAlignment = TopEnd`, which would have drawn the knob at the strip's left edge) and a smart-cast issue (rail `if (railOpen)` → `if (railOpen && alphabet != null)`).
+**Validation:** braces (14 files) + `git diff --check` clean; leftover-ref greps clean. Code review caught a compile blocker — `categorySurface()` (top-level theme extension) was not imported in RecycleBinScreen — fixed, plus the unused `Spacer` import removed and `options.first()` made null-safe.
 
-**Interpretations made:** "alphabetically by default per category" = DEFAULT mode sorts A–Z within each category while keeping section headers (the global A–Z chip still flattens); speed-scroll = acceleration on cumulative drag distance, not a proportional knob-position map (the earlier "slow-only" constraint is superseded); the alphabet rail applies to the Topic Database only.
+**Interpretations:** "other sorting options" = the Topic Browser sort row (the app's only other sort); recycle-bin purge keeps a single confirm since the two-step applies to the initial delete.
 
 **Next:** none pending.

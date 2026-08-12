@@ -39,17 +39,61 @@ class CaptureRepository(private val dao: CaptureDao) {
     suspend fun getById(id: String): CurioEntry? =
         dao.getById(id)?.toEntry()
 
-    /** Delete a capture by ID. */
+    /** Permanently delete a capture by ID (recycle-bin purge / import cleanup). */
     suspend fun deleteById(id: String) {
         dao.deleteById(id)
     }
 
-    /** Delete several captures in one Room transaction-friendly batch. */
+    /** Permanently delete several captures (recycle-bin purge). */
     suspend fun deleteByIds(ids: Collection<String>) {
         if (ids.isNotEmpty()) dao.deleteByIds(ids.toList())
     }
 
-    /** Count total captures. */
+    // ── Recycle bin (v5) ───────────────────────────────────────────────────
+
+    /** Move a capture to the recycle bin — it stays recoverable. */
+    suspend fun softDeleteById(id: String) {
+        dao.softDeleteById(id, System.currentTimeMillis())
+    }
+
+    /** Move several captures to the recycle bin in one statement. */
+    suspend fun softDeleteByIds(ids: Collection<String>): Int {
+        if (ids.isEmpty()) return 0
+        return dao.softDeleteByIds(ids.toList(), System.currentTimeMillis())
+    }
+
+    /** Observe recycled captures (newest-deleted first) as [CurioEntry]s. */
+    fun observeTrashed(): Flow<List<CurioEntry>> =
+        dao.getTrashedFlow()
+            .map { entities -> entities.map { it.toEntry() } }
+            .flowOn(Dispatchers.Default)
+
+    /** Get one recycled capture by ID (null when not in the bin). */
+    suspend fun getTrashedById(id: String): CurioEntry? =
+        dao.getTrashedById(id)?.toEntry()
+
+    /** Restore a capture from the recycle bin back into the Cabinet. */
+    suspend fun restoreById(id: String) {
+        dao.restoreById(id)
+    }
+
+    /** Restore every recycled capture at once. */
+    suspend fun restoreAll() {
+        dao.restoreAll()
+    }
+
+    /** Permanently delete one recycled capture. */
+    suspend fun purgeById(id: String) {
+        dao.purgeById(id)
+    }
+
+    /** Permanently delete every recycled capture. Returns the deleted count. */
+    suspend fun purgeTrashed(): Int = dao.purgeTrashed()
+
+    /** Count captures currently in the recycle bin. */
+    suspend fun countTrashed(): Int = dao.countTrashed()
+
+    /** Count total captures (live entries only). */
     suspend fun count(): Int = dao.count()
 
     /** Wipe every capture (restore-from-backup). Returns deleted count. */

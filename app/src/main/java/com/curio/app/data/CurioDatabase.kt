@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CaptureEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -54,6 +54,17 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v4 → v5 (v26): recycle bin. Adds the nullable `deletedAt` column —
+         * NULL means live, a timestamp means the capture sits in the recycle
+         * bin. Existing rows stay live (NULL), so no backfill is needed.
+         */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE captures ADD COLUMN deletedAt INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -68,7 +79,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

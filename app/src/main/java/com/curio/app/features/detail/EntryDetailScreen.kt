@@ -50,13 +50,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -109,6 +107,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.NotePaperCard
 import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.components.buildRichAnnotated
@@ -120,9 +119,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
-import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.CaptureData
-import com.curio.app.data.ImageStorageManager
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.JournalMood
@@ -154,12 +151,9 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
-import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.curioDialogActionButtonColors
-import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.readableAccentInk
@@ -730,32 +724,19 @@ fun EntryDetailScreen(
     }
 
     if (deleteDialogVisible) {
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { deleteDialogVisible = false },
-            title = { Text("Delete this entry?") },
-            text = { Text("This capture will be permanently removed from your Cabinet.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    deleteDialogVisible = false
-                    scope.launch {
-                        // Delete every SoundBite recording — recursing through
-                        // OpenNotebook wrappers and Portfolio sections.
-                        resolvedEntry.captureData.audioFilePaths().forEach { path ->
-                            AudioStorageManager.deleteAudio(context, path)
-                        }
-                        // Delete restored-from-backup image files for this
-                        // entry (provider-picked photos live in their source
-                        // app and need no cleanup here).
-                        ImageStorageManager.deleteImagesForEntry(context, resolvedEntry.id)
-                        runCatching { CurioRepositoryHolder.repo.deleteById(resolvedEntry.id) }
-                        navController.popBackStack()
-                    }
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = { deleteDialogVisible = false }, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+        // v26 — double confirmation + recycle bin: the capture moves to the
+        // recycle bin (media is kept so a restore works); nothing is erased.
+        CurioTwoStepDeleteDialog(
+            visible = deleteDialogVisible,
+            title = "this capture",
+            body = "This capture moves to the Recycle bin.",
+            onDismiss = { deleteDialogVisible = false },
+            onConfirmed = {
+                deleteDialogVisible = false
+                scope.launch {
+                    runCatching { CurioRepositoryHolder.repo.softDeleteById(resolvedEntry.id) }
+                    navController.popBackStack()
+                }
             }
         )
     }
