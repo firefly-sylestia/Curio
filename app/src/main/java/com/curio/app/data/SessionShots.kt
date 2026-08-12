@@ -47,6 +47,34 @@ object SessionShots {
     }
 
     /**
+     * Restores one session screenshot from a backup's bytes (v5 — session
+     * screenshots now ride the in-app backup like audio + image
+     * attachments). Writes to `filesDir/session-shots/{key}.png` and
+     * returns its absolute path.
+     *
+     * @throws IllegalArgumentException when [key] could escape the session-
+     *   shots directory (same hardening as
+     *   [ImageStorageManager.restoreImage] — a crafted backup must never
+     *   write outside it).
+     */
+    fun restore(context: Context, key: String, bytes: ByteArray): String {
+        if (key.isBlank() || key.contains("/") || key.contains("\\") ||
+            key == "." || key == ".."
+        ) {
+            throw IllegalArgumentException("Unsafe session-shot key: $key")
+        }
+        val root = shotsDir(context)
+        val destFile = File(root, "$key.png")
+        destFile.writeBytes(bytes)
+        // Belt-and-braces: confirm the resolved path is still contained.
+        if (!destFile.canonicalPath.startsWith(root.canonicalPath)) {
+            destFile.delete()
+            throw IllegalStateException("Session-shot path escaped the session-shots directory")
+        }
+        return destFile.absolutePath
+    }
+
+    /**
      * Deletes one session screenshot. Hardened like [ImageStorageManager]:
      * only ever removes files inside the session-shots directory, so a
      * crafted path can never delete outside it.

@@ -237,9 +237,10 @@ fun CaptureEntity.toEntry(): CurioEntry {
 /**
  * Parse a stored JSON array-of-strings column defensively — legacy rows,
  * null blobs, or malformed JSON all degrade to an empty list instead of
- * crashing the Cabinet grid or the detail page.
+ * crashing the Cabinet grid or the detail page. Internal so the backup
+ * manager can resolve `sessionScreenshotsJson` paths for export/restore.
  */
-private fun deserializeStringList(json: String?): List<String> {
+internal fun deserializeStringList(json: String?): List<String> {
     if (json.isNullOrBlank()) return emptyList()
     return try {
         val type = object : TypeToken<List<String>>() {}.type
