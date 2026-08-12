@@ -458,6 +458,12 @@ fun settingsRoseAccent(): Color {
         // collage + back pill instead of a tinted fill.
         return Color.Black
     }
+    // v27l — optional sky-azure hero: when enabled, the shared hero wears
+    // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
+    if (AppPreferences.heroBlueState) {
+        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
+        else CurioColors.HomeAzure
+    }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
         // Shared dark hero companion used by Settings, Cabinet, and Onboarding.

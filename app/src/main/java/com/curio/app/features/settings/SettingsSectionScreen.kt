@@ -198,6 +198,15 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v27l — optional sky-azure hero variant for the shared torn banner
+        // (Home / Profile / Settings / Cabinet). Default OFF — the rose
+        // stays.
+        SettingsRowPulse(highlightKey == "appearance-hero") {
+            CompactSwitchRow("Sky azure hero", "The shared hero banner wears airy azure instead of rose", AppPreferences.heroBlueState) {
+                AppPreferences.setHeroBlueEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "appearance-entry") {
             CompactSwitchRow("Entry date & mood", "Date, mood, and attachments on saved entries", AppPreferences.entryMetaEnabledState) {
                 AppPreferences.setEntryMetaEnabled(context, it)

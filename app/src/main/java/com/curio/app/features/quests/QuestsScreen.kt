@@ -81,13 +81,13 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.BadgeTier
 import com.curio.app.ui.components.CurioBadgeMedal
@@ -514,11 +514,9 @@ private fun CurrentQuestCard(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val roseHero = if (isCurioDarkTheme()) {
-        CurioColors.HomeRosewoodDark
-    } else {
-        CurioColors.HomeRosewood
-    }
+    // v27l — follows the shared hero family so the azure hero option applies
+    // here too (settingsRoseAccent already branches on heroBlueState).
+    val roseHero = settingsRoseAccent()
     CurioSettingsCard(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

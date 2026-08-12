@@ -4,7 +4,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -33,9 +32,10 @@ data class UpdateInfo(
  * (e.g. "1.0.0") — exactly the tag the APK was built from, minus the leading
  * "v" — so the comparison is a straight version-component compare.
  *
- * The latest-release endpoint 404s until the FIRST release is actually
- * published, so [fetchLatestRelease] falls back to the newest git tag — the
- * checker works from day one instead of showing a failure state.
+ * The check hits the releases LIST (which includes prereleases — the
+ * /releases/latest endpoint silently skips them, so beta tags like
+ * "v1.0-beta2" were never detected) and falls back to the newest git tag
+ * only when no release has been published yet.
  *
  * No new dependencies: a plain [HttpURLConnection] GET against the public
  * GitHub API (no auth needed; the unauthenticated rate limit is plenty for a
@@ -43,7 +43,11 @@ data class UpdateInfo(
  */
 object UpdateChecker {
     private const val REPO = "firefly-sylestia/Curio"
-    private const val LATEST_RELEASE_URL = "https://api.github.com/repos/$REPO/releases/latest"
+    // The releases LIST (newest first) instead of /releases/latest — the
+    // latest endpoint silently SKIPS prereleases, and this repo's beta tags
+    // (v1.0-beta, v1.0-beta2) are published as prereleases. The list returns
+    // every release, so a beta tag is detected as an update too.
+    private const val RELEASES_URL = "https://api.github.com/repos/$REPO/releases?per_page=50"
     private const val TAGS_URL = "https://api.github.com/repos/$REPO/tags"
 
     /**
@@ -56,17 +60,28 @@ object UpdateChecker {
         // rethrown — a cancelled check (user left the screen) must propagate
         // instead of being swallowed into a misleading "failed" state.
         try {
-            // 1) Latest published release — carries release notes + release page.
-            val release = fetch(LATEST_RELEASE_URL) { raw ->
-                val obj = JSONObject(raw)
-                UpdateInfo(
-                    tagName = obj.optString("tag_name"),
-                    htmlUrl = obj.optString("html_url"),
-                    releaseNotes = obj.optString("body").takeIf { it.isNotBlank() },
-                    apkUrl = parseApkAsset(obj.optJSONArray("assets"))
-                )
+            // 1) Releases list, newest first — INCLUDES prereleases (the
+            //    /releases/latest endpoint skips them, which is why beta tags
+            //    were never detected). Pick the newest published release,
+            //    carrying release notes + release page + APK assets.
+            val release = fetch(RELEASES_URL) { raw ->
+                val arr = JSONArray(raw)
+                for (i in 0 until arr.length()) {
+                    val obj = arr.optJSONObject(i) ?: continue
+                    if (obj.optBoolean("draft")) continue
+                    val tag = obj.optString("tag_name").takeIf { it.isNotBlank() } ?: continue
+                    return@fetch UpdateInfo(
+                        tagName = tag,
+                        htmlUrl = obj.optString("html_url").ifBlank {
+                            "https://github.com/$REPO/releases/tag/$tag"
+                        },
+                        releaseNotes = obj.optString("body").takeIf { it.isNotBlank() },
+                        apkUrl = parseApkAsset(obj.optJSONArray("assets"))
+                    )
+                }
+                null
             }
-            if (release != null && release.tagName.isNotBlank()) return@withContext release
+            if (release != null) return@withContext release
             // 2) No release published yet — fall back to the newest git tag
             //    (the authoritative build tag), so the check reports "up to
             //    date" once a matching tag exists instead of failing. The
@@ -98,9 +113,20 @@ object UpdateChecker {
         }
     }
 
-    /** True when [latestTag] ("v1.0.1") is newer than [currentVersion] ("1.0.0"). */
-    fun isNewer(latestTag: String, currentVersion: String): Boolean =
-        compareVersions(latestTag.removePrefix("v").trim(), currentVersion.trim()) > 0
+    /**
+     * True when [latestTag] ("v1.0-beta2") is newer than the installed
+     * [currentVersion] ("1.0.0").
+     *
+     * This repo ships every build as a git tag, so any tag that differs from
+     * the installed one is a newer build — pure numeric comparison breaks on
+     * the beta scheme ("1.0.0.1-test" outranks "1.0-beta2" numerically even
+     * though beta2 is the newest published release). Different tag ⇒ update.
+     */
+    fun isNewer(latestTag: String, currentVersion: String): Boolean {
+        val a = latestTag.removePrefix("v").trim()
+        val b = currentVersion.trim()
+        return a != b
+    }
 
     /**
      * Compares two version strings component-by-component. Tolerant of the
