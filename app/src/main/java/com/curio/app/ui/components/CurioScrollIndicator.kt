@@ -6,7 +6,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollIndicatorState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,14 +22,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
-import kotlinx.coroutines.launch
 
 /**
  * Curio side scroll indicator — a thin overlay knob on the right edge of a
@@ -49,16 +53,18 @@ import kotlinx.coroutines.launch
  *    content (no layout shift).
  *  - Thin when idle (3dp, faint), grows to a 9dp handle when the user
  *    touches it, so it reads quietly until it's needed.
- *  - Dragging the KNOB SPEED-SCROLLS (v26): the further the knob is dragged
- *    in one continuous gesture, the faster the list scrolls — a ramp on the
- *    cumulative travel (starting at the same gentle 1:2.5 crawl), so a small
- *    nudge is precise and a long drag covers ground quickly. Only the knob
- *    itself responds to touch — the empty strip above/below does nothing,
- *    and there is no tap-to-position jump.
- *  - Optional A–Z fast-scroller (v26, when [alphabet] is non-null): tapping
- *    the knob toggles a letter rail on the strip's outer edge; the active
- *    letter highlights as the list scrolls, and tapping a letter fires
- *    [onAlphabetSelect] so the caller can jump to that section.
+ *  - Dragging the KNOB SPEED-SCROLLS (v26c): the knob's travel maps 1:1 onto
+ *    the whole list (drag the knob halfway → the list lands halfway), so a
+ *    long list naturally scrolls fast per knob px, and a sustained drag
+ *    ramps the rate further on top. Pointer events accumulate into one
+ *    per-frame drain loop — a smooth scroll per frame instead of a coroutine
+ *    per event. Only the knob itself responds to touch — the empty strip
+ *    above/below does nothing, and there is no tap-to-position jump.
+ *  - Optional A–Z fast-scroller (v26, when [alphabet] is non-null): TAPPING
+ *    the knob toggles a letter rail on the strip's outer edge (v26c — a
+ *    dedicated tap check, because drag gestures never report a pure tap);
+ *    the active letter highlights as the list scrolls, and tapping a letter
+ *    fires [onAlphabetSelect] so the caller can jump to that section.
  *  - The knob color follows the theme's surface ink.
  *  - Hidden entirely when the content fits in the viewport (or when the
  *    state is null).
@@ -93,17 +99,35 @@ fun CurioVerticalScrollIndicator(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
-    val scope = rememberCoroutineScope()
     // The hit strip's measured height in px (from onSizeChanged).
     var barHeightPx by remember { mutableFloatStateOf(0f) }
     // Grows the knob while the user is touching it.
     var touched by remember { mutableStateOf(false) }
     // v26 — A–Z rail open (toggled by tapping the knob when [alphabet] is set).
     var showAlphabet by remember { mutableStateOf(false) }
-    // v26 — speed-scroll accumulators: signed cumulative travel (drives the
-    // speed ramp) and the total absolute travel (distinguishes tap vs drag).
-    var dragCumulative by remember { mutableFloatStateOf(0f) }
-    var dragTotalPx by remember { mutableFloatStateOf(0f) }
+    // v26c — per-frame scroll accumulator: the gesture handler only adds to
+    // [pendingDelta]; a single drain loop below applies it once per frame,
+    // so rapid pointer events coalesce into one smooth scroll per frame
+    // instead of one coroutine per event (the old lag/jitter).
+    var pendingDelta by remember { mutableFloatStateOf(0f) }
+    // v26c — the drain loop: every frame, apply whatever the knob has
+    // accumulated (capped relative to the list's scrollable range so a flick
+    // can't burst), then reset. Frame-paced, so it sleeps between frames.
+    val currentOnScrollBy by rememberUpdatedState(onScrollBy)
+    LaunchedEffect(state) {
+        while (true) {
+            withFrameNanos { }
+            val s = state ?: continue
+            val scrollable = (s.contentSize - s.viewportSize).toFloat()
+            if (scrollable <= 0f) continue
+            val cap = maxOf(MinFrameDeltaPx, scrollable * FrameDeltaFraction)
+            val delta = pendingDelta.coerceIn(-cap, cap)
+            if (delta != 0f) {
+                pendingDelta = 0f
+                currentOnScrollBy(delta)
+            }
+        }
+    }
 
     val knobWidth by animateDpAsState(if (touched) 9.dp else 3.dp, tween(140), label = "curioIndicatorWidth")
     val knobAlpha by animateFloatAsState(if (touched) 0.80f else 0.30f, tween(140), label = "curioIndicatorAlpha")
@@ -191,50 +215,47 @@ fun CurioVerticalScrollIndicator(
                     .pointerInput(state, hitHeightPx > 0f, alphabet != null) {
                         // No knob (content fits / no state yet) → nothing to grab.
                         if (hitHeightPx <= 0f) return@pointerInput
-                        detectVerticalDragGestures(
-                            onDragStart = {
-                                touched = true
-                                dragCumulative = 0f
-                                dragTotalPx = 0f
-                            },
-                            onDragEnd = {
-                                touched = false
-                                dragCumulative = 0f
-                                // A tap with no real travel toggles the A–Z
-                                // fast-scroller when this screen provides one.
-                                if (alphabet != null && dragTotalPx < TapThresholdPx) {
-                                    showAlphabet = !showAlphabet
-                                }
-                                dragTotalPx = 0f
-                            },
-                            onDragCancel = {
-                                touched = false
-                                dragCumulative = 0f
-                                dragTotalPx = 0f
-                            },
-                            onVerticalDrag = { change, dragAmount ->
-                                change.consume()
-                                dragTotalPx += abs(dragAmount)
+                        // v26c — manual tap-vs-drag: `detectVerticalDragGestures`
+                        // never reports a pure tap (its onDragEnd only fires
+                        // after touch slop), which is why the A–Z rail could
+                        // never open. Track the travel ourselves — a pointer
+                        // that goes up before slop is a TAP.
+                        awaitEachGesture {
+                            val down = awaitFirstDown()
+                            var gestureCumulative = 0f
+                            // Add one pointer delta to the per-frame
+                            // accumulator, scaled by the knob's 1:1 travel map
+                            // (long list → faster per knob px) and the ramp.
+                            fun accumulate(amount: Float) {
+                                if (amount == 0f) return
                                 val s = state
-                                if (s != null && dragAmount != 0f) {
-                                    val scrollable = (s.contentSize - s.viewportSize).toFloat()
-                                    if (scrollable > 0f) {
-                                        // Speed scroll — the more the knob is
-                                        // dragged in ONE gesture, the faster the
-                                        // list scrolls (a ramp on cumulative
-                                        // travel), clamped so a flick can't
-                                        // burst. Reversing the drag decays the
-                                        // ramp back toward the gentle crawl.
-                                        dragCumulative += dragAmount
-                                        val speed = 1f + (abs(dragCumulative) / SpeedRampPx)
-                                            .coerceAtMost(SpeedRampBoost)
-                                        val delta = (dragAmount * KnobScrollRatio * speed)
-                                            .coerceIn(-KnobMaxDeltaPx, KnobMaxDeltaPx)
-                                        scope.launch { onScrollBy(delta) }
-                                    }
-                                }
+                                val scrollable = s?.let {
+                                    (it.contentSize - it.viewportSize).toFloat()
+                                } ?: 0f
+                                val travel = geometry.value.maxOffsetPx
+                                if (scrollable <= 0f || travel <= 0f) return
+                                gestureCumulative += amount
+                                val ratio = (scrollable / travel).coerceAtLeast(1f)
+                                val ramp = 1f + (abs(gestureCumulative) / SpeedRampPx)
+                                    .coerceAtMost(SpeedRampBoost)
+                                pendingDelta += amount * ratio * ramp
                             }
-                        )
+                            val drag = awaitVerticalTouchSlopOrCancellation(down.id) { change, over ->
+                                change.consume()
+                                accumulate(over)
+                            }
+                            if (drag != null) {
+                                touched = true
+                                drag(down.id) { change ->
+                                    change.consume()
+                                    accumulate(change.positionChange().y)
+                                }
+                                touched = false
+                            } else if (alphabet != null) {
+                                // Pure tap on the knob → toggle the A–Z rail.
+                                showAlphabet = !showAlphabet
+                            }
+                        }
                     }
             )
         }
@@ -275,22 +296,19 @@ fun CurioVerticalScrollIndicator(
     }
 }
 
-/** Base scroll ratio — 1 finger px scrolls ~2.5 content px. A gentle crawl
- *  that ramps up as the drag continues (see [SpeedRampPx]). */
-private const val KnobScrollRatio = 2.5f
-
 /** Cumulative drag (px) that reaches the FULL speed ramp — after this much
  *  travel the rate multiplies by 1 + [SpeedRampBoost]. */
 private const val SpeedRampPx = 160f
 
 /** How many extra base-ratios the ramp adds at full travel (max speed = 1+boost). */
-private const val SpeedRampBoost = 3f
+private const val SpeedRampBoost = 2f
 
-/** Per-drag-event scroll cap (px) — even at full ramp a flick can't burst. */
-private const val KnobMaxDeltaPx = 240f
+/** Per-frame scroll cap floor (px) — the smallest jump a frame may make. */
+private const val MinFrameDeltaPx = 400f
 
-/** Total travel (px) under which a touch counts as a TAP (toggles the A–Z rail). */
-private const val TapThresholdPx = 24f
+/** The per-frame cap also scales with list length: up to this fraction of
+ *  the scrollable range per frame keeps long lists fast without bursts. */
+private const val FrameDeltaFraction = 0.08f
 
 /** Extra vertical padding around the knob's touch target (px). */
 private const val KnobTouchPadPx = 14f
