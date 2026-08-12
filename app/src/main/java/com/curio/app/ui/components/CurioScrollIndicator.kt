@@ -5,8 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollIndicatorState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -26,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -109,38 +107,30 @@ fun CurioVerticalScrollIndicator(
             .width(28.dp)
             .onSizeChanged { barHeightPx = it.height.toFloat() }
             .pointerInput(state) {
-                awaitEachGesture {
-                    // Nothing to indicate (or not measured yet) — skip.
-                    if (state == null || state.contentSize <= state.viewportSize || state.viewportSize <= 0) {
-                        return@awaitEachGesture
-                    }
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    touched = true
-                    val pointerId = down.id
-                    try {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
-                            if (change.changedToUp()) break
-                            // Delta from the raw pointer positions — stable
-                            // API across compose versions (positionChange()
-                            // changed shape in newer foundations).
-                            val dy = change.currentPosition.y - change.previousPosition.y
-                            if (dy == 0f) continue
-                            change.consume()
+                // Drag-to-scroll via the stable drag-gesture detector: it
+                // hands us the pixel delta directly, so we never touch
+                // per-event position math (which changed shape across
+                // compose versions). The knob grows while a drag is active
+                // and shrinks back on release.
+                detectVerticalDragGestures(
+                    onDragStart = { touched = true },
+                    onDragEnd = { touched = false },
+                    onDragCancel = { touched = false },
+                    onVerticalDrag = { change, dragAmount ->
+                        change.consume()
+                        val s = state
+                        if (s != null && dragAmount != 0f) {
                             val g = geometry.value
-                            val scrollable = (state.contentSize - state.viewportSize).toFloat()
+                            val scrollable = (s.contentSize - s.viewportSize).toFloat()
                             if (g.maxOffsetPx > 1f && scrollable > 0f) {
                                 // Same ratio as the thumb: drag distance over
                                 // knob travel times the total scrollable range.
-                                val delta = dy / g.maxOffsetPx * scrollable
+                                val delta = dragAmount / g.maxOffsetPx * scrollable
                                 scope.launch { onScrollBy(delta) }
                             }
                         }
-                    } finally {
-                        touched = false
                     }
-                }
+                )
             },
         contentAlignment = Alignment.TopEnd
     ) {

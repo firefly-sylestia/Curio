@@ -57,6 +57,10 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.formatSessionShort
+// settingsRoseAccent/settingsReadableInk live in the settings package
+// (SettingsHubScreen) — the same shared helpers the Onboarding/Cabinet heroes use.
+import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
@@ -73,8 +77,6 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
-import com.curio.app.ui.theme.settingsReadableInk
-import com.curio.app.ui.theme.settingsRoseAccent
 
 /**
  * Topic History — see Curio topic-history contract.
@@ -109,7 +111,7 @@ fun TopicHistoryScreen(navController: NavController) {
     // Null until the first resolution completes, so the empty state never
     // flashes before the catalog lookups land (a user with only likes would
     // otherwise see a one-frame "No shuffles yet").
-    val sentimentsState = produceState(
+    val sentimentsState = produceState<Pair<List<CurioTopic>, List<CurioTopic>>?>(
         initialValue = null,
         AppPreferences.topicSentimentsState
     ) {
