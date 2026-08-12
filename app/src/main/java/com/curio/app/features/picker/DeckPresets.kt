@@ -28,7 +28,9 @@ import com.curio.app.ui.theme.CurioIcon
 data class DeckPreset(
     val label: String,
     val glyph: String,
-    val ids: List<CategoryId>
+    val ids: List<CategoryId>,
+    /** v27k — a "Clear" preset: deselects every lane instead of ticking a mix. */
+    val clearAll: Boolean = false
 ) {
     /**
      * Resolves the preset's lanes against the currently visible categories.
@@ -45,28 +47,44 @@ data class DeckPreset(
 }
 
 /**
- * v27i — the 5 quick mixes. "Everything" is special: an empty lane list means
- * every visible category at tap time (it can't be a static list because the
- * visible set changes with Manage Categories).
+ * v27k — the quick-mix presets. Real mixes this time: Science, Entertainment,
+ * Arts & Stories, and History & Ideas group the lanes people actually browse
+ * together, plus Everything (all visible) and Clear (deselect all — the fast
+ * way to start an empty mix). Presets only tick lanes that are visible at tap
+ * time (hidden lanes and not-yet-shipped lanes drop out), so a preset never
+ * silently overrides Manage Categories.
  */
 val deckPresets = listOf(
-    DeckPreset("Brainy", "psychology", listOf(
+    DeckPreset("Science", "science", listOf(
         CategoryId.SCIENTISTS, CategoryId.DISCOVERIES,
-        CategoryId.MATHEMATICS, CategoryId.PSYCHOLOGY
+        CategoryId.BIOLOGY, CategoryId.CHEMISTRY,
+        CategoryId.ANIMALS, CategoryId.PLANTS,
+        CategoryId.ASTRONOMY, CategoryId.MEDICINE,
+        CategoryId.GEOLOGY, CategoryId.PSYCHOLOGY,
+        CategoryId.MATHEMATICS, CategoryId.TECHNOLOGIES,
+        CategoryId.ENGINEERING, CategoryId.ECONOMICS
     )),
-    DeckPreset("Stories", "menu_book", listOf(
-        CategoryId.AUTHORS, CategoryId.BOOKS,
-        CategoryId.MYTHOLOGY, CategoryId.LANGUAGE
-    )),
-    DeckPreset("Screens", "movie", listOf(
+    DeckPreset("Entertainment", "movie", listOf(
         CategoryId.FILMS, CategoryId.SERIES,
-        CategoryId.ANIME, CategoryId.GAMES
+        CategoryId.ANIME, CategoryId.MANGA, CategoryId.MANHWA,
+        CategoryId.GAMES, CategoryId.SPORTS,
+        CategoryId.SONGS, CategoryId.ALBUMS, CategoryId.INTERNET
     )),
-    DeckPreset("Sounds", "album", listOf(
-        CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS
+    DeckPreset("Arts & Stories", "palette", listOf(
+        CategoryId.PAINTERS, CategoryId.ARTWORKS,
+        CategoryId.ARTISTS, CategoryId.AUTHORS, CategoryId.BOOKS,
+        CategoryId.DIRECTORS, CategoryId.MYTHOLOGY, CategoryId.FOOD
+    )),
+    DeckPreset("History & Ideas", "history", listOf(
+        CategoryId.HISTORY, CategoryId.SCIENTISTS,
+        CategoryId.DISCOVERIES, CategoryId.MYTHOLOGY,
+        CategoryId.LANGUAGE, CategoryId.AUTHORS
     )),
     // Everything = all visible categories (empty list is resolved at tap time).
-    DeckPreset("Everything", "casino", emptyList())
+    DeckPreset("Everything", "casino", emptyList()),
+    // Clear = deselect every lane (stays in multi-select so the mix can be
+    // rebuilt from scratch without closing the picker).
+    DeckPreset("Clear", "close", emptyList(), clearAll = true)
 )
 
 /** Small pill chip for a quick-mix preset. */

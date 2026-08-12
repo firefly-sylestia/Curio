@@ -49,6 +49,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.TopicJsonLoader
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
@@ -127,6 +128,18 @@ fun CategoryPickerScreen(navController: NavController) {
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug
     }
 
+    // v27k — total topics across the ticked lanes (the Mix button shows the
+    // pool size, not the lane count).
+    var selectedTopicCount by remember { mutableStateOf(0) }
+    LaunchedEffect(selectedSlugs) {
+        val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
+        selectedTopicCount = if (CategoryId.WILDCARD in ids) {
+            TopicJsonLoader.countCanonicalTopics()
+        } else {
+            ids.sumOf { TopicJsonLoader.countFor(it) }
+        }
+    }
+
     // ── v27i — the two pages (Original / New) + a scope for tab jumps ──
     val pagerState = rememberPagerState(pageCount = { 2 })
     val scope = rememberCoroutineScope()
@@ -192,17 +205,26 @@ fun CategoryPickerScreen(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             deckPresets.forEach { preset ->
-                val active = multiSelectMode &&
-                    preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
+                val active = if (preset.clearAll) {
+                    multiSelectMode && selectedSlugs.isEmpty()
+                } else {
+                    multiSelectMode &&
+                        preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
+                }
                 PickerPresetChip(
                     label = preset.label,
                     glyph = preset.glyph,
                     selected = active,
                     onClick = {
-                        val lanes = preset.lanes(categories)
-                        if (lanes.isNotEmpty()) {
+                        if (preset.clearAll) {
                             multiSelectMode = true
-                            selectedSlugs = lanes.map { it.id.routeSlug }
+                            selectedSlugs = emptyList()
+                        } else {
+                            val lanes = preset.lanes(categories)
+                            if (lanes.isNotEmpty()) {
+                                multiSelectMode = true
+                                selectedSlugs = lanes.map { it.id.routeSlug }
+                            }
                         }
                     }
                 )
@@ -373,7 +395,7 @@ fun CategoryPickerScreen(navController: NavController) {
                 ) {
                     CurioIcon(CurioIcons.Check, null, size = 18.dp)
                     Text(
-                        text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · ${selectedSlugs.size}",
+                        text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -405,7 +427,7 @@ fun CategoryPickerScreen(navController: NavController) {
 /** Small page-tab pill for the Original / New pager. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PickerPageTab(
+fun PickerPageTab(
     label: String,
     count: Int,
     selected: Boolean,

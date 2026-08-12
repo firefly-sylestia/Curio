@@ -213,14 +213,6 @@ class ExploreSessionService : Service() {
                 if (current.paused) ExploreSessionStore.resumeSession(this)
                 else ExploreSessionStore.pauseSession(this)
             }
-            // v27 — the bubble's screenshot button was granted consent (or
-            // already holds a token from a previous tap): capture one frame
-            // on a background thread and append it to the session. The
-            // render() below keeps the notification/bubble honest.
-            ACTION_CAPTURE -> {
-                val consent = captureConsent ?: return render()
-                captureScreenshot(consent.first, consent.second)
-            }
         }
         // A fresh explicit start — a new explore session, or a re-arm after
         // settings/permission changes — gets a clean overlay slate. The
@@ -287,50 +279,6 @@ class ExploreSessionService : Service() {
                     .setAction(ExploreReminderReceiver.ACTION_STOP)
             )
         }
-    }
-
-    /**
-     * v27 — captures one screen frame with the granted MediaProjection
-     * consent and appends it to the active session. Runs on a background
-     * thread; the projection is created and stopped entirely within it.
-     *
-     * Android 14+: the capturing app must have a foreground service running
-     * with the mediaProjection type before the projection is created. The
-     * explore service is already foreground with specialUse; for the capture
-     * it re-promotes to mediaProjection-only (the two types can't combine)
-     * and then re-promotes back to specialUse once the frame is saved.
-     */
-    private fun captureScreenshot(resultCode: Int, data: Intent) {
-        // Re-promote on the main thread (startForeground is required from a
-        // lifecycle context); the capture itself runs on a background thread.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val notif = bubbleOnlyNotification(
-                ExploreSessionStore.getActiveSession(this) ?: return
-            )
-            runCatching {
-                startForeground(
-                    NOTIFICATION_ID,
-                    notif,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                )
-            }
-        }
-        Thread {
-            try {
-                val path = ScreenFrameCapturer.capture(this, resultCode, data)
-                if (path != null) {
-                    ExploreSessionStore.addSessionScreenshot(this, path)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Session screenshot capture failed", e)
-            } finally {
-                mainHandler.post {
-                    // Restore the normal specialUse FGS type and refresh the
-                    // notification + bubble (new screenshot count).
-                    render()
-                }
-            }
-        }.start()
     }
 
     /** Puts the service into the foreground with [notification]. */
@@ -612,23 +560,6 @@ class ExploreSessionService : Service() {
                             onNoteChange = { note ->
                                 ExploreSessionStore.setSessionNote(this@ExploreSessionService, note)
                             },
-                            // v27 — the screenshot button. A token from a
-                            // previous tap (or the system consent dialog)
-                            // captures one frame without re-asking; otherwise
-                            // launch the transparent consent activity on top
-                            // of whatever app the user is in.
-                            onScreenshot = {
-                                if (captureConsent != null) {
-                                    captureNow(this@ExploreSessionService)
-                                } else {
-                                    runCatching {
-                                        startActivity(
-                                            Intent(this@ExploreSessionService, ScreenCaptureRequestActivity::class.java)
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        )
-                                    }
-                                }
-                            },
                             // v27 — the Finish button ends the session exactly
                             // like the notification's "Done exploring": hand
                             // off note + screenshots, clear, and hand the
@@ -899,10 +830,6 @@ class ExploreSessionService : Service() {
         overlayOwner = null
         bubbleUnavailable = false
         bubbleRetryCount = 0
-        // v27 — the MediaProjection consent is session-scoped; drop it so a
-        // later session re-asks the system dialog instead of reusing a
-        // stale token.
-        captureConsent = null
         super.onDestroy()
     }
 
@@ -911,9 +838,6 @@ class ExploreSessionService : Service() {
         const val EXTRA_SESSION = "explore_session_json"
         const val ACTION_TOGGLE_PAUSE = "com.curio.app.action.TOGGLE_EXPLORE_PAUSE"
         const val ACTION_SYNC = "com.curio.app.action.SYNC_EXPLORE_SESSION"
-        // v27 — the bubble's screenshot button: capture one frame with the
-        // stashed MediaProjection consent and append it to the session.
-        const val ACTION_CAPTURE = "com.curio.app.action.CAPTURE_EXPLORE_SCREENSHOT"
         const val CHANNEL_ID = "explore_session_timer"
         const val NOTIFICATION_ID = 4211
         // How often the live notification re-renders (progress bar + text).
@@ -977,33 +901,6 @@ class ExploreSessionService : Service() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to sync explore service", e)
-            }
-        }
-
-        /**
-         * v27 — the granted MediaProjection consent (resultCode + data),
-         * stashed by [ScreenCaptureRequestActivity] after the system dialog,
-         * reused for later bubble captures without re-asking. Cleared when
-         * the session ends (see [stop]).
-         */
-        @Volatile
-        var captureConsent: Pair<Int, Intent>? = null
-
-        /**
-         * v27 — asks the service to capture one frame using the stashed
-         * consent. Called by [ScreenCaptureRequestActivity] right after the
-         * user grants the system screen-capture dialog.
-         */
-        fun captureNow(context: Context) {
-            if (CurioCrashReporter.isSafeMode(context)) return
-            try {
-                ContextCompat.startForegroundService(
-                    context,
-                    Intent(context, ExploreSessionService::class.java)
-                        .setAction(ACTION_CAPTURE)
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to start screenshot capture", e)
             }
         }
 

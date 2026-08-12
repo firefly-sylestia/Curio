@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -625,10 +626,17 @@ fun SaveCaptureScreen(
         }
 
         // ── Scrollable format body ───────────────────────────────────────
-        Column(
+        // v27k — wrapped in a Box so the shared session-note pill can float
+        // over the scrolling content (pinned above the save CTA, reachable
+        // no matter how far the body is scrolled).
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
             // v7.98 — the format body fills the page: 16dp side margins
@@ -699,18 +707,7 @@ fun SaveCaptureScreen(
                     if (hasSessionAttachments) {
                         SessionAttachmentsCard(
                             cat = cat,
-                            note = sessionNote,
                             screenshots = sessionScreenshots,
-                            showNoteEditor = showNoteEditor,
-                            onToggleNoteEditor = { showNoteEditor = !showNoteEditor },
-                            onNoteChange = {
-                                sessionNote = it
-                                if (editEntryId == null) {
-                                    ExploreSessionStore.setPendingNote(
-                                        context, cat.id, topic?.name.orEmpty(), it
-                                    )
-                                }
-                            },
                             onAddScreenshot = {
                                 addScreenshotLauncher.launch(
                                     androidx.activity.result.PickVisualMediaRequest(
@@ -721,6 +718,29 @@ fun SaveCaptureScreen(
                             onRemoveScreenshot = { path -> removeSessionScreenshot(path) }
                         )
                     }
+            }
+            }
+
+            // ── Floating session-note pill (v27k) — pinned inside the
+            // scroll area (a Box sibling of the body) so the shared note
+            // stays reachable no matter how far the format body is scrolled.
+            // Shows the note text once typed; tapping opens the compact paper
+            // editor popup right above, which rides the IME while typing.
+            if (hasSessionAttachments) {
+                SessionNoteFloatingPill(
+                    cat = cat,
+                    note = sessionNote,
+                    expanded = showNoteEditor,
+                    onToggle = { showNoteEditor = !showNoteEditor },
+                    onNoteChange = {
+                        sessionNote = it
+                        if (editEntryId == null) {
+                            ExploreSessionStore.setPendingNote(
+                                context, cat.id, topic?.name.orEmpty(), it
+                            )
+                        }
+                    }
+                )
             }
         }
 
@@ -1063,19 +1083,16 @@ private fun TagEditorRow(
 }
 
 /**
- * v27 — the explore session's attachments card on the save page: the
- * SHARED session note (universal — one note per session, attached to every
- * entry saved from it) and the captured screenshots (bubble capture +
- * auto-attached device shots), each removable with a small cross.
+ * v27k — the explore session's attachments card on the save page: the
+ * shared session screenshots (auto-attached device shots, each removable
+ * with a small cross). The SHARED NOTE moved to the floating pill above the
+ * save CTA (see [SessionNoteFloatingPill]) so it stays reachable while the
+ * format body is scrolled.
  */
 @Composable
 private fun SessionAttachmentsCard(
     cat: CurioCategory,
-    note: String,
     screenshots: List<String>,
-    showNoteEditor: Boolean,
-    onToggleNoteEditor: () -> Unit,
-    onNoteChange: (String) -> Unit,
     onAddScreenshot: () -> Unit,
     onRemoveScreenshot: (String) -> Unit
 ) {
@@ -1086,85 +1103,12 @@ private fun SessionAttachmentsCard(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // ── Header: title + floating note button ────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "From your explore session",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            // Small floating note button — expands the shared-note editor.
-            // v27h — always a SOLID accent pill with on-accent content: the
-            // old tint-wash fill washed out against the tinted page in light
-            // mode, so the button read as a faint ghost.
-            Surface(
-                onClick = onToggleNoteEditor,
-                shape = RoundedCornerShape(50),
-                color = accent,
-                border = BorderStroke(1.dp, lerp(accent, Color.White, 0.25f).copy(alpha = 0.6f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    CurioIcon(
-                        name = CurioIcons.Note,
-                        contentDescription = null,
-                        tint = cat.onAccent(),
-                        size = 16.dp
-                    )
-                    Text(
-                        text = if (showNoteEditor) "Done" else "Session note",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = cat.onAccent()
-                    )
-                }
-            }
-        }
-
-        // ── Shared note editor (universal — not per-take) ──────────
-        // v27h — the editor wears the note-PAPER look (theme-aware cream/
-        // dark sheet with its own readable ink) instead of the faint tint
-        // wash that washed out on tinted pages — the note always reads.
-        if (showNoteEditor) {
-            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
-            Surface(
-                shape = RoundedCornerShape(18.dp),
-                color = notePaperSurface(NotePaperColor.CREAM),
-                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = "Shared session note",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = paperInkColor.copy(alpha = 0.85f)
-                    )
-                    OutlinedTextField(
-                        value = note,
-                        onValueChange = { onNoteChange(it.take(240)) },
-                        placeholder = { Text("What stayed with you? (one note per session)") },
-                        minLines = 2,
-                        maxLines = 4,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = "Shown on every entry saved from this session.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = paperInkColor.copy(alpha = 0.6f)
-                    )
-                }
-            }
-        }
+        // ── Header — title only; the note button floats above the save CTA ─
+        Text(
+            text = "From your explore session",
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
 
         // ── Screenshots — auto-added during the session, shared, each
         // removable with a small cross. The add tile stays so a session with
@@ -1246,6 +1190,105 @@ private fun SessionAttachmentsCard(
             }
         }
     }
+    }
+}
+
+/**
+ * v27k — the shared session note's FLOATING button on the save page.
+ * Pinned inside the scroll area (bottom-end, above the save CTA) so it stays
+ * on screen no matter how far the format body is scrolled. Shows the note
+ * text once anything is typed; tapping toggles a compact paper editor popup
+ * right above, which rides the IME so typing never hides it.
+ */
+@Composable
+private fun SessionNoteFloatingPill(
+    cat: CurioCategory,
+    note: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    onNoteChange: (String) -> Unit
+) {
+    val accent = cat.themedAccent()
+    Column(
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .imePadding()
+            .padding(end = 16.dp, bottom = 14.dp),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // ── Compact note editor popup — paper look, same copy as before ──
+        if (expanded) {
+            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = notePaperSurface(NotePaperColor.CREAM),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
+                shadowElevation = 6.dp,
+                modifier = Modifier.fillMaxWidth(0.94f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "Shared session note",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = paperInkColor.copy(alpha = 0.85f)
+                    )
+                    OutlinedTextField(
+                        value = note,
+                        onValueChange = { onNoteChange(it.take(240)) },
+                        placeholder = { Text("What stayed with you? (one note per session)") },
+                        minLines = 2,
+                        maxLines = 4,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "Shown on every entry saved from this session.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = paperInkColor.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
+        // ── The floating button itself — accent pill, shows the note ──
+        Surface(
+            onClick = onToggle,
+            shape = RoundedCornerShape(50),
+            color = accent,
+            border = BorderStroke(1.dp, lerp(accent, Color.White, 0.25f).copy(alpha = 0.6f)),
+            shadowElevation = 6.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Note,
+                    contentDescription = null,
+                    tint = cat.onAccent(),
+                    size = 16.dp
+                )
+                Text(
+                    text = if (note.isNotBlank()) note.take(24) else "Session note",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = cat.onAccent(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (expanded) {
+                    CurioIcon(
+                        name = CurioIcons.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = cat.onAccent(),
+                        size = 16.dp
+                    )
+                }
+            }
+        }
     }
 }
 

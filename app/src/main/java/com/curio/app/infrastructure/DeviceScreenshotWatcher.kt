@@ -35,8 +35,7 @@ import java.util.HashSet
  * Lifecycle: registered from MainActivity while the app is alive; each
  * change event does a cheap MediaStore query for rows newer than the last
  * seen one. Requires READ_MEDIA_IMAGES (33+) / READ_EXTERNAL_STORAGE —
- * when missing, the watcher silently no-ops (the bubble's own capture
- * button is the permission-free path).
+ * when missing, the watcher silently no-ops.
  */
 object DeviceScreenshotWatcher {
 

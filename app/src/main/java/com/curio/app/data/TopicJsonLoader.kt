@@ -186,6 +186,22 @@ object TopicJsonLoader {
             }
     }
 
+    /**
+     * Counts the topics in one category's file without constructing or
+     * caching CurioTopic objects. Used for the "Mixed · N topics" deck
+     * labels, where only a truthful total is needed. Wildcard resolves to
+     * the canonical total across all categories.
+     */
+    suspend fun countFor(id: CategoryId): Int = withContext(Dispatchers.IO) {
+        if (id == CategoryId.WILDCARD) return@withContext countCanonicalTopics()
+        val am = assets ?: return@withContext 0
+        runCatching {
+            am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
+                JSONArray(it.readText()).length()
+            }
+        }.getOrDefault(0)
+    }
+
     /** Clears the cache. Safe to call from Android memory callbacks. */
     fun clearCache() {
         // Advance the generation and clear under the same monitor used by

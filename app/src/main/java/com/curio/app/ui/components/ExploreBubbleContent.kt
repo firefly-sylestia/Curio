@@ -64,7 +64,7 @@ import kotlinx.coroutines.delay
  * The explore-timer bubble's visual content — kept SHORT on purpose: the
  * category glyph, the topic name and the live elapsed time on the compact
  * pill; the expanded panel adds icon-only controls, a shared session note,
- * a screenshot button, and a Finish action. No verb/target lines or
+ * and a Finish action. No verb/target lines or
  * descriptions — those live in the done-prompt, not on a floating pill.
  *
  * Two states, swapped INSTANTLY (v27 — the old morph animation between the
@@ -74,7 +74,7 @@ import kotlinx.coroutines.delay
  *    readout. Tapping it expands.
  *  - **Expanded**: a rounded card panel. Header (glyph + topic + elapsed +
  *    minimize chevron), then a compact ICON-ONLY control row — Pause /
- *    Resume, Hide, and Screenshot (with a count badge when shots exist) —
+ *    Resume, Hide —
  *    then the shared session note field, then the Finish button that ends
  *    the session and opens the write-it-down page.
  *
@@ -104,8 +104,6 @@ fun ExploreBubbleContent(
     onHide: () -> Unit,
     // v27 — the note field writes the session's SHARED note live.
     onNoteChange: (String) -> Unit,
-    // v27 — screenshot button: capture a frame (or launch the consent flow).
-    onScreenshot: () -> Unit,
     // v27 — Finish button: end the session and open the write-it-down page.
     onFinish: () -> Unit,
     // v27 — focus changes on the note field; the service makes the overlay
@@ -227,7 +225,6 @@ fun ExploreBubbleContent(
                     onNoteChange(note)
                 },
                 onNoteFocusChange = onNoteFocusChange,
-                onScreenshot = onScreenshot,
                 onFinish = onFinish,
                 onMinimize = { minimized = true }
             )
@@ -309,7 +306,6 @@ private fun ExpandedPanel(
     onHide: () -> Unit,
     onNoteChange: (String) -> Unit,
     onNoteFocusChange: (Boolean) -> Unit,
-    onScreenshot: () -> Unit,
     onFinish: () -> Unit,
     onMinimize: () -> Unit
 ) {
@@ -368,35 +364,6 @@ private fun ExpandedPanel(
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onHide
             )
-            // Screenshot — shows a count badge once shots exist.
-            Box {
-                BubbleIconButton(
-                    icon = CurioIcons.Screenshot,
-                    contentDescription = "Capture a screenshot for this session",
-                    tint = if (AppPreferences.pastelColorsState) ink else accent,
-                    onClick = onScreenshot
-                )
-                if (session.screenshotPaths.isNotEmpty()) {
-                    Surface(
-                        shape = CircleShape,
-                        color = accent,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .size(16.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = session.screenshotPaths.size.coerceAtMost(9).toString(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = MaterialTheme.typography.labelSmall.fontSize * 0.75f
-                                ),
-                                color = category.onAccent()
-                            )
-                        }
-                    }
-                }
-            }
         }
 
         // ── Shared session note (v27) — one note per session, attached

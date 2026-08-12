@@ -329,9 +329,8 @@ fun TopicRevealScreen(
 
     // v27 — READ_MEDIA_IMAGES lets the device-screenshot watcher auto-attach
     // the user's own screenshots (Pictures/Screenshots) to the session.
-    // Best-effort: denial only disables auto-attach; the bubble's own
-    // screenshot button (MediaProjection) works without it. Asked once when
-    // an explore starts and the permission is missing.
+    // Best-effort: denial only disables auto-attach. Asked once when an
+    // explore starts and the permission is missing.
     val requestMediaRead = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ -> }

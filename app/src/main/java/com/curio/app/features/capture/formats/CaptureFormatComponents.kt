@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -244,6 +245,30 @@ fun ImageThumb(
                     tint = accent,
                     size = 28.dp
                 )
+            }
+        }
+        // v27k — the remove badge: a small cross on a dark scrim at the top-
+        // end corner so it reads over any photo. [onRemove] was already wired
+        // by every format (Field Notes, Reel Notes, Marginalia) but never
+        // rendered — attached images had no way to be deleted.
+        if (imageUri != null) {
+            Surface(
+                onClick = onRemove,
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.55f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(3.dp)
+                    .size(22.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        name = CurioIcons.Close,
+                        contentDescription = "Remove attached image",
+                        tint = Color.White,
+                        size = 14.dp
+                    )
+                }
             }
         }
     }
