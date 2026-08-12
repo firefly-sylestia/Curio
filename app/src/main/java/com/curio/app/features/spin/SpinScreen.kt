@@ -25,6 +25,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -110,6 +111,8 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
 import com.curio.app.data.TourController
+import com.curio.app.features.picker.PickerPresetChip
+import com.curio.app.features.picker.deckPresets
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioQuests
@@ -3985,6 +3988,36 @@ private fun CategoryPickerSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                     )
+
+                    // ── v27i — quick-mix preset chips (same row as the
+                    //    full-screen picker): tap to enter multi-select with
+                    //    exactly those lanes ticked, so the mix can be seen
+                    //    and adjusted before Mix — it never silently launches
+                    //    a deck you can't see.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        deckPresets.forEach { preset ->
+                            val active = multiSelectMode &&
+                                preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
+                            PickerPresetChip(
+                                label = preset.label,
+                                glyph = preset.glyph,
+                                selected = active,
+                                onClick = {
+                                    val lanes = preset.lanes(categories)
+                                    if (lanes.isNotEmpty()) {
+                                        multiSelectMode = true
+                                        selectedSlugs = lanes.map { it.id.routeSlug }.toSet()
+                                    }
+                                }
+                            )
+                        }
+                    }
 
                     // ── Tile grid filling the screen ────────────────
                     // v7.4 — the grid sits inside a WEIGHTED Box that is a
