@@ -298,14 +298,6 @@ The `web/` directory contains a standalone React + TypeScript web application th
 - IndexedDB for local storage (mirrors Room database)
 - React Router for navigation
 
-**Web topic data (`web/src/data/topics/*.json`) is its own copy of the
-Android topic set** (same ids, 21 categories) and has historically drifted
-into stale TRUNCATED teasers. The Android assets
-(`app/src/main/assets/topics/`) are the source of truth; run
-`node scripts/sync_web_teasers.js` to re-sync every web teaser that is
-shorter than its Android counterpart (the quick-fact word-count audit:
-no teaser may drop below 50 words).
-
 **Key features:**
 - Full UI parity with Android app (Home, Spin, Cabinet, Profile, Settings)
 - 21 categories with matching colors and themes

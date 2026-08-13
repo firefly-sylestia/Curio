@@ -1,34 +1,5 @@
 # Prompt.md — Request log
 
-## Current request — quick-fact check: web teasers under 50 words (v28)
-
-### What was asked
-"Continue the quick fact check — do it on your own, whichever you prefer:
-the topics with less than 50 words."
-
-### What was done
-Audited both topic sets. Android (`app/src/main/assets/topics/`, 14,226
-topics) is healthy — min 70 words. The WEB copy
-(`web/src/data/topics/`, 6,497 topics, same ids) had **4,494 teasers
-under 50 words** — every one a stale TRUNCATED PREFIX of the Android
-text (6,303 truncated total; only 2 short-but-not-prefix, and 189 web
-teasers already ≥ Android length). Since the Android assets are the
-source of truth (desktop reads them directly), the fix is a data sync
-rather than hand-writing 4,500+ facts:
-- New `scripts/sync_web_teasers.js` — for every web topic whose Android
-text is LONGER, copies the full Android teaser verbatim (leaves the 189
-already-complete ones alone). Synced 6,308 teasers across all 21 web
-files.
-- Verified: web audit now **0 under 50 words** (min 70, same floor as
-Android), all 21 web JSON files parse, `validate_topics.js` passes,
-verbatim-equality spot-check on a synced entry, diff is teaser-only.
-- Root AGENTS.md web section documents the script as the re-sync tool.
-
-### Validation
-Web quick-fact audit 0 under 50, JSON validity OK, `git diff --check`
-clean. No Gradle locally (env rule) — CI on push is the gate. Docs: root
-AGENTS.md web section.
-
 ## Current request — Settings tear color in dark mode + detail hero tear flatlines (v28)
 
 ### What was asked
