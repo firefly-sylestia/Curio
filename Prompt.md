@@ -1,6 +1,20 @@
 # Prompt.md — Request log
 
-## Current request — desktop full parity (milestone 3) + workflow hardening (v27t)
+## Current request — CI fix: desktop `org.jetbrains.kotlin.jvm` unknown-version plugin collision (pushed b669f0c)
+
+### What was asked
+User pasted a CI failure: `desktop/build.gradle.kts` line 10 fails with `Error resolving plugin [id: 'org.jetbrains.kotlin.jvm', version: '2.3.21']` → "already on the classpath with an unknown version, so compatibility cannot be checked".
+
+### Root cause
+`org.jetbrains.kotlin.plugin.compose` (declared `apply false` in the root build) pulls the Kotlin Gradle Plugin onto the shared buildscript classpath transitively, which leaves `org.jetbrains.kotlin.jvm` on the classpath with an *unknown* version. The `:desktop` module then requests `org.jetbrains.kotlin.jvm` with an explicit version (from the catalog) and the `AlreadyOnClasspathPluginResolver` can't verify compatibility. The two prior `resolutionStrategy.eachPlugin { useVersion("2.3.21") }` attempts didn't help because `useVersion` pins the *requested* version, not the *classpath* version.
+
+### Fix
+`build.gradle.kts` — added `alias(libs.plugins.kotlin.jvm) apply false` to the root `plugins {}` block, so the Kotlin JVM plugin lands on the shared classpath with a *known* version (2.3.21) and the desktop request resolves cleanly. Committed + pushed to Alpha for CI validation.
+
+### Validation
+No Gradle locally (env rule) — the `desktop` CI job on push is the gate.
+
+## Prior — desktop full parity (milestone 3) + workflow hardening (v27t)
 
 ### What was asked
 "Do the rest of the desktop things full parity. And workflow build properly."
