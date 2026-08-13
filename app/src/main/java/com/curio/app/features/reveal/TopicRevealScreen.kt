@@ -966,6 +966,11 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
+                // v27r — the two explore actions are PILL-shaped buttons, each
+                // a leading icon + short label so nothing wraps or truncates
+                // in the width-constrained dialog: the globe (travel_explore)
+                // searches the user's chosen engine, the rounded play tile
+                // (youtube_activity) searches YouTube.
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(
                         onClick = {
@@ -984,14 +989,18 @@ fun TopicRevealScreen(
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors(),
-                        // v27n — the two action labels sit side by side in a
-                        // width-constrained dialog, so each stays on ONE line
-                        // (tight padding + ellipsis fallback instead of
-                        // wrapping into a broken two-line button).
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
                     ) {
+                        CurioIcon(
+                            name = CurioIcons.TravelExplore,
+                            contentDescription = null,
+                            tint = curioDialogActionColor(),
+                            size = 18.dp
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Text(
-                            "Explore in browser",
+                            "Explore",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1007,10 +1016,18 @@ fun TopicRevealScreen(
                             startExploreSession(topic, buildYouTubeSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors(),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
                     ) {
+                        CurioIcon(
+                            name = CurioIcons.YouTubeActivity,
+                            contentDescription = null,
+                            tint = curioDialogActionColor(),
+                            size = 18.dp
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Text(
-                            "Explore in YouTube",
+                            "YouTube",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

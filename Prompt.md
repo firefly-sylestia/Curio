@@ -2,7 +2,22 @@
 
 ## Current request — fix blurry/broken backgrounds from the elevation commit (fe3da7a)
 
-**Status:** Implemented. Commits: `1adf0bd` (first pass — user's listed items) + uncommitted app-wide extension pass + v27q selection-flatten pass (this working tree, commit pending — not pushed per user's standing no-push rule).
+**Status:** Implemented. Commits: `1adf0bd` (first pass) + `e34a79e` (app-wide opaque-fill extension + v27q selection flatten) + v27r explore-button/badge/passport pass (this working tree, commit pending — not pushed per user's standing no-push rule).
+
+## v27r — explore dialog buttons, badge borders, passport check (fourth request)
+
+### What was asked
+1. "Explore in browser" / "Explore in YouTube" text gets cut in the explore dialog → resize or swap in a browser icon (for the user's chosen default engine) + a YouTube icon, and give the buttons a pill shape.
+2. Badges look bad / "weirdly getting cut" → **return the border**. (The category-pill elevation part of the earlier message was explicitly ignored.)
+3. Check the quest passport stamps are alright.
+
+### What was done
+- **Explore dialog (TopicRevealScreen)** — the two `TextButton`s are now PILL-shaped (`RoundedCornerShape(50)`) with a leading icon + short label so nothing truncates: `travel_explore` globe + "Explore" (opens the user's chosen engine via `buildEngineSearchUrl`) and `youtube_activity` rounded play tile + "YouTube" (opens `buildYouTubeSearchUrl`). Icons tinted with `curioDialogActionColor()`, 18dp + 6dp gap. Both glyphs verified present in `material_symbols_outlined.ttf`; new `CurioIcons.TravelExplore` / `CurioIcons.YouTubeActivity` constants added (no brand glyphs exist in the Material Symbols font, so the generic globe/play-tile stands in for the engine / YouTube — the Settings row already names the chosen engine).
+- **Badges (CurioBadges.kt)** — restored the pre-fe3da7a ring borders and REMOVED all shadows (the outer coin shadow clipped at the shelf edges — the "weirdly getting cut"): inner glyph plate ring (1.5dp white@0.55 unlocked / 1dp outlineVariant@0.5 locked), ribbon gem rim (1dp white@0.85), earned-marker rim (1.5dp white), locked-silhouette rim (1dp outlineVariant@0.7), and the "+N" tile's sage ring (`BorderStroke(1.dp, sage@0.28)`). v27n's opaque fills kept. `androidx.compose.ui.draw.shadow` import removed (no shadows left).
+- **Passport (QuestsScreen PassportStamp)** — checked and verified structurally sound (opaque fills + flat 2dp); restored the stamp's 1dp ring border (accent ring for UNSEEN, neutral outline otherwise) so stamps read like stamps again, keeping the flat 2dp elevation.
+
+### Validation
+Braces balanced, `git diff --check` clean, no leftover `shadow` refs in CurioBadges.kt, glyph names confirmed in the icon font, imports verified (BorderStroke added to CurioBadges + QuestsScreen). Docs: `app/AGENTS.md` v27r note. No build locally — CI on push.
 
 ### What was asked
 After commit `fe3da7a` ("elevation over borders app-wide") many buttons/cards show **blurry + broken backgrounds**; the user listed: badges next to your name in Profile, the Profile Level·Saved·Lanes pane, the Lanes card, a "C avatar in cabinet", the category chips, and the Spin deck peek cards (which show a "boxy thing" while animating). User instruction: identify + confirm the issue, ask, then fix.

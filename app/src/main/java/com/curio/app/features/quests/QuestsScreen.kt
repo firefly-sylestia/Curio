@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -1668,7 +1669,9 @@ private fun PassportStamp(
         shape = RoundedCornerShape(16.dp),
         color = when (stamp) {
             // v27n — OPAQUE stamp fills (the old 10–45% alphas let the
-            // elevation shadow bleed through).
+            // elevation shadow bleed through). v27r — the stamp's ring
+            // border is back (the elevation pass removed it); UNSEEN stamps
+            // wear their accent ring, the rest a neutral outline.
             CurioPassport.Stamp.MASTERED ->
                 lerp(MaterialTheme.colorScheme.surfaceContainerLow, curioSageInk(), 0.12f)
             CurioPassport.Stamp.UNSEEN ->
@@ -1676,6 +1679,11 @@ private fun PassportStamp(
             else ->
                 lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.surfaceVariant, 0.45f)
         },
+        border = BorderStroke(
+            1.dp,
+            if (stamp == CurioPassport.Stamp.UNSEEN) ink.copy(alpha = 0.45f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        ),
         shadowElevation = 2.dp,
         modifier = modifier
     ) {

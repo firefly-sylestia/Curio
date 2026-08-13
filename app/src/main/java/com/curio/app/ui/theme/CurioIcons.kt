@@ -96,6 +96,8 @@ object CurioIcons {
     const val AspectRatio = "aspect_ratio" // ▭ — Smart Spin layout (small-screen fit)
     const val PhotoSizeSelectLarge = "photo_size_select_large" // ⤢ size — Smart density layout (deck scale)
     const val PlayArrow   = "play_arrow"
+    const val TravelExplore = "travel_explore"   // globe + magnifier — explore in the user's chosen engine
+    const val YouTubeActivity = "youtube_activity" // rounded play tile — explore in YouTube
     const val Pause       = "pause"
     const val Stop        = "stop"
     const val Timer       = "timer"
