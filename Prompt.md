@@ -1,5 +1,36 @@
 # Prompt.md — Request log
 
+## Current request — handcrafted quick facts for web topics under 50 words (v28)
+
+### What was asked
+"Noooooo — I want full real HANDCRAFTED quick facts from web, not that
+[Android-text sync]. Revert and do it again properly." (Earlier: "the
+quick fact check — the topics with less than 50 words, do it on your own.")
+
+### What was done
+1. **Reverted the Android-teaser sync** (`2f5ab5e`) — web JSONs restored,
+   `scripts/sync_web_teasers.js` + the AGENTS.md note removed. Copying
+   Android text is NOT what the user wants: each web topic needs an
+   ORIGINAL, handcrafted quick fact in the web's own voice.
+2. **Audit:** 4,494 web topics have teasers under 50 words (of 6,497),
+   across 20 remaining categories (directors 440, films 429, painters
+   428, authors 424, artists 419, scientists 394, wildcard 394, books
+   335, discoveries 205, albums 202, artworks 165, then the small ones:
+   sports 76, manga 75, manhwa 64, games 65, anime 61, internet 61,
+   mythology 60, series 60, songs 60).
+3. **Batch 1 DONE — food.json (77/77):** every dish now has an original
+   handcrafted 50+ word quick fact (history, technique, story), written
+   fresh, no Android text. Min 60 words, 0 under 50. Committed `f19a973`
+   (teaser-only diff, 2-space indent preserved).
+
+### Plan (continuing, category by category)
+Each batch is handcrafted prose (no templating), delivered via a one-off
+script that writes teaser-only diffs, then the script is deleted. Batches
+remain: directors, films, painters, authors, artists, scientists,
+wildcard, books, discoveries, albums, artworks, sports, manga, manhwa,
+games, anime, internet, mythology, series, songs. Not pushed (user's
+standing instruction).
+
 ## Current request — Settings tear color in dark mode + detail hero tear flatlines (v28)
 
 ### What was asked
