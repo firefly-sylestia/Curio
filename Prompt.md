@@ -1,6 +1,6 @@
 # Prompt.md — Request log
 
-## Current request — CI fix: desktop build script + Kotlin source errors (b669f0c, 0f63f12, e27615d)
+## Current request — CI fix: desktop build + Android app compile errors (b669f0c, 0f63f12, e27615d, 5d01a18)
 
 ### Round 1 — plugin collision (b669f0c)
 
@@ -29,6 +29,9 @@ Once the desktop script compiled, `:desktop:compileKotlin` surfaced three indepe
 
 ### Round 4 — "other" APK build failure (kotlin.jvm not found — TRANSIENT)
 A separate CI run failed at the ROOT `build.gradle.kts` with `Plugin [id: 'org.jetbrains.kotlin.jvm', version: '2.3.21', apply: false] was not found` (could not resolve the plugin marker). Verified the marker `org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:2.3.21` EXISTS on Maven Central, and the sibling desktop job resolved it fine in the same push — so this is a transient resolver/network blip, not a code issue. Re-run if it recurs.
+
+### Round 5 — Android app compile error (5d01a18)
+With the desktop build finally compiling, the verify job advanced to the Android app and hit a pre-existing bug: `HomeScreen.kt:593` used `Size(...)` (the `androidx.compose.ui.geometry.Size` constructor, in the diary-spiral punch-hole ring drawing) without importing it. Added `import androidx.compose.ui.geometry.Size`. This had been masked the whole time because CI never got past the `:desktop` build. Only this one error was reported (debug + release), so the app should now compile.
 
 ## Prior — desktop full parity (milestone 3) + workflow hardening (v27t)
 
