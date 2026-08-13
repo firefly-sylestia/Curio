@@ -15204,7 +15204,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Earth Observation",
-  "teaser": "Watching Earth from above.",
+  "teaser": "Earth observation watches the planet from space: satellites track land use, glaciers, groundwater, volcanoes, and earthquakes in near real time. Geology uses these eyes to map deformation before eruptions, measure ice loss, and watch rivers shift course. The data is free and global, giving geologists a view no field campaign could match. From orbit, the Earth's geological heartbeat — slowly rising volcanoes, creeping faults, melting glaciers — is visible at a glance.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15223,7 +15223,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Remote Sensing",
-  "teaser": "Sensing without touching.",
+  "teaser": "Remote sensing measures the Earth from a distance using reflected light, heat, and radar. Satellites and aircraft scan the surface in wavelengths invisible to the eye, revealing mineral composition, moisture, and temperature. Geologists use it to map rock types, find ore deposits, and track environmental change across whole regions. A single satellite image can cover an area that would take months to walk — remote sensing is fieldwork at orbital scale.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15242,7 +15242,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Satellite Imagery",
-  "teaser": "Pictures from orbit.",
+  "teaser": "Satellite imagery gives geologists a global, repeatable view: optical images show the surface, thermal images show heat, and radar sees through clouds and darkness. Different mineral signatures appear as different colours in processed images, helping map geology and find ores. Time-lapse sequences reveal erosion, volcanic growth, and ice retreat year by year. Free archives like Landsat's 50-year record make the satellite era geology's best historical archive.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15261,7 +15261,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Geographic Information Systems",
-  "teaser": "Mapping data on the Earth.",
+  "teaser": "Geographic Information Systems (GIS) store, overlay, and analyse spatial data — the geologist's digital map table. Layers of geology, faults, elevation, land use, and hazard zones stack on top of each other, revealing relationships invisible in any single map. GIS models landslide susceptibility, maps aquifer recharge, and plans mine sites. Nearly every geological map produced today is a GIS project, and the field's analytical power comes from the software's ability to combine layers.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15280,7 +15280,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Topographic Maps",
-  "teaser": "The contour maps of terrain.",
+  "teaser": "Topographic maps show the shape of the land with contour lines — each connecting points of equal elevation. Closely spaced contours mean steep slopes; wide spacing means gentle ground. Geologists read topography to find faults, folds, and landslides, and to plan routes. The contour pattern reveals geology: ridges mark hard rock, valleys mark weak zones, and circular contours betray craters or domes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15299,7 +15299,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Contour Lines",
-  "teaser": "The elevation lines.",
+  "teaser": "Contour lines are the geologist's shorthand for the third dimension: lines of equal elevation that map hills, valleys, and slopes on a flat sheet. Contours never cross, and their spacing tells slope steepness. V-shapes point upstream in valleys and downstream on ridges, a quick trick for reading drainage. Digital elevation models have replaced paper contours for many tasks, but the contour remains the language every geologist and hiker learns first.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15318,7 +15318,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Modern Geologic Mapping",
-  "teaser": "Digital field mapping.",
+  "teaser": "Modern geologic mapping combines boots with bytes: field geologists log outcrops on tablets with GPS, while drones, satellite imagery, and geophysics fill the gaps. Maps are compiled digitally, draped over elevation models, and shared online in real time. The result is faster, more detailed, and more accurate mapping than the pioneers imagined — yet the core method is unchanged. A modern geological map is still a human reading of the outcrops, just with better instruments.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15337,7 +15337,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Drones in Geology",
-  "teaser": "The flying field tools.",
+  "teaser": "Drones give geologists a cheap pair of eyes in the sky: they photograph cliffs, map outcrops, and measure landslides and volcanoes without climbing them. Photogrammetry stitches hundreds of drone photos into 3D models precise to centimetres, letting geologists measure rock faces from a desk. Drones monitor erupting volcanoes, survey mine pits, and inspect unstable slopes — work too dangerous or expensive for humans on foot. A small quadcopter is now standard field kit.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15356,7 +15356,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Bathymetry",
-  "teaser": "Mapping the seafloor.",
+  "teaser": "Bathymetry maps the depth and shape of the seafloor, the submarine cousin of topography. Sound waves from ships measure depth; modern multibeam systems image the ocean floor in stunning detail, revealing ridges, trenches, seamounts, and underwater landslides. Bathymetry is essential for navigation, cable routing, tsunami modelling, and understanding plate tectonics — the ocean floor's mid-ocean ridges and subduction zones are its grandest features. Most of the seafloor is still only coarsely mapped.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15375,7 +15375,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Sonar Mapping",
-  "teaser": "Echo-mapping the deep.",
+  "teaser": "Sonar mapping images the seafloor with sound: a ship emits pings and times the echoes, building a depth profile of the ocean bottom. Single-beam sonar traces one line; multibeam systems fan out dozens of beams to map swathes at once, and side-scan sonar images texture. Sonar surveys mapped the mid-ocean ridges that proved plate tectonics, and still chart the unmapped seafloor.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15394,7 +15394,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Paleogeography",
-  "teaser": "Mapping ancient lands.",
+  "teaser": "Paleogeography reconstructs what the Earth looked like at past moments: which lands were continents, where seas and mountains lay, and how they moved. Geologists assemble the picture from rock types, fossils, and magnetic data — desert sandstones mark old dune fields, reef fossils mark ancient tropics, and glacial deposits mark old poles. Paleogeographic maps show Pangaea assembling and splitting, oceans opening and closing. They are the geography of deep time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15413,7 +15413,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Map the Past",
-  "teaser": "Geologic history in layers.",
+  "teaser": "Dating maps assign ages to the layers and structures on a geological map, turning a picture of rocks into a timeline. Geologists use fossils, radiometric dates, and cross-cutting relations to say when each unit formed, colouring the map by age. Comparing maps of different regions lets geologists correlate events across continents. A dated map is the closest thing geology has to a time machine.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15432,7 +15432,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Map Coordinates",
-  "teaser": "Finding places on Earth.",
+  "teaser": "Coordinate systems locate every point on Earth: latitude and longitude, the global grid of degrees, and projected systems like UTM that flatten the curved Earth onto maps. Geologists record outcrops, sample sites, and fault traces by coordinates, and GPS pins them to metres. Choosing the right coordinate system matters — mixing systems has misplaced mines and entire survey campaigns. Beneath every geological map lies a coordinate system that keeps the world aligned.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15451,7 +15451,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Map Projections",
-  "teaser": "Flattening the globe.",
+  "teaser": "Map projections flatten the spherical Earth onto paper or screens, and every one distorts something — area, shape, distance, or direction. Mercator preserves direction but inflates polar regions; equal-area projections preserve size but bend shapes. Geologists choose projections to match their task: navigation, area measurement, or global plate motion. The choice affects measurements subtly but really, so field data must record which projection it used. Projections are the lens through which we see the map.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15470,7 +15470,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Surveying",
-  "teaser": "Measuring the land.",
+  "teaser": "Surveying measures positions and elevations precisely, the foundation of all mapping. Surveyors use total stations, levels, and now GPS to fix points on the ground, and their networks anchor everything from property boundaries to construction to geological mapping. Geologists depend on surveys for accurate outcrop positions, cross-sections, and deformation monitoring. Surveying is ancient — the pyramids were surveyed with ropes — but its modern instruments measure millimetres from satellites.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15489,7 +15489,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Field Mapping Tools",
-  "teaser": "The geologist's kit.",
+  "teaser": "The field geologist's kit has barely changed at its core: rock hammer, hand lens, compass, notebook, and map. Modern additions include GPS, tablets, and cameras, but the essentials remain the classic tools. The compass clinometer measures strike and dip; the hand lens identifies minerals; the hammer samples rock; and the notebook records everything. New tools like drones and portable spectrometers extend reach, yet the hammer still sets the pace of field geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15508,7 +15508,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Using Earth Observations",
-  "teaser": "Satellites for geology.",
+  "teaser": "Earth observation applications touch every branch of geology: InSAR maps earthquake deformation, satellite gravity tracks groundwater loss, thermal imaging monitors volcanoes, and optical data maps vegetation stress over mines. Observing systems warn of landslides, droughts, and eruptions, and guide emergency response. The applications grow each year as satellites multiply and data becomes open. From disaster response to resource management, the orbital view has become a geologist's first look.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15527,7 +15527,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Geologic Databases",
-  "teaser": "The data of the Earth.",
+  "teaser": "Geological data is now digital and vast: geological maps, borehole logs, geochemical analyses, and seismic records live in databases that geologists query like search engines. National surveys publish open data; industry shares well logs; and researchers build global compilations of rock ages, earthquakes, and minerals. Machine learning mines these archives for patterns — mineral prospectivity, landslide susceptibility, earthquake forecasting. The challenge is no longer gathering data but connecting and trusting it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15546,7 +15546,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "Open Geologic Data",
-  "teaser": "Free data for everyone.",
+  "teaser": "Open geological data is a quiet revolution: national surveys now publish maps, boreholes, and geochemistry online, free for anyone to use. Geologists, students, and citizens can download and remix official data, powering everything from mineral exploration to hazard research. Open data accelerates discovery — a researcher in one country can test theories on another's geology overnight. The movement has transformed how geology is done, from guarded archives to shared knowledge.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15565,7 +15565,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Mapping & Observation",
   "name": "The Future of Earth Mapping",
-  "teaser": "Mapping the planet ahead.",
+  "teaser": "The future of mapping is continuous and automated: satellites watch deformation weekly, drones map on demand, and machine learning drafts geological maps from imagery at unprecedented speed. Geological mapping will move from a one-time product to a living model, updated as new data arrives. Yet field geology will remain — algorithms can see patterns, but ground truth still comes from boots and hammers. The future map is real-time, global, and always being corrected.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15584,7 +15584,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Stratigraphy",
-  "teaser": "The study of rock layers.",
+  "teaser": "Stratigraphy is the study of rock layers — their order, composition, and meaning. It rests on simple laws: layers form horizontally, the oldest at the bottom, each layer younger than the one below. Stratigraphers read these stacks to reconstruct ancient environments and to correlate layers across continents. Stratigraphy is the backbone of geology — it gives us the geological time scale, the fossil record, and the location of most oil and coal deposits.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15603,7 +15603,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Superposition",
-  "teaser": "The oldest on the bottom.",
+  "teaser": "Superposition is geology's first law: in an undisturbed stack of layers, each layer is younger than the one beneath it. Stated in 1669 by Nicolaus Steno, it seems obvious — but it unlocked deep time. Without it, no chronology, no time scale, no way to order the fossil record. Geologists use it daily, reading the order of events from the order of layers in a canyon wall or core.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15622,7 +15622,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Original Horizontality",
-  "teaser": "Layers born flat.",
+  "teaser": "Original horizontality, Steno's second law, holds that sediment layers form flat and horizontal — so tilted or folded layers must have been deformed after they formed. That simple principle lets geologists recognize mountain-building events: steeply tilted beds record ancient compression. It also means the angle of tilt can be measured to reconstruct deformation. When a geologist sees vertical strata, they are seeing rock that was once flat, later stood on end.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15641,7 +15641,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Lateral Continuity",
-  "teaser": "Layers that once connected.",
+  "teaser": "Lateral continuity, Steno's third law, states that layers extend in all directions until they thin out or hit a barrier — so matching layers found far apart were once connected. This lets geologists correlate strata across valleys and continents: the same limestone in two mountains was once one continuous seafloor. It is the basis for tracing coal seams, aquifers, and oil layers underground.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15660,7 +15660,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Cross-Cutting Relationships",
-  "teaser": "The newer cuts the older.",
+  "teaser": "The law of cross-cutting relationships, stated by James Hutton, holds that any feature cutting through rock is younger than the rock it cuts: a fault that slices a layer formed after that layer; an intrusion piercing strata is younger than them. This simple rule orders almost all geological history. A canyon cut into a plateau, a dyke cutting granite, a fault offsetting a fold — each cross-cutting relation is a date in the rock record.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15679,7 +15679,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Inclusions",
-  "teaser": "The fragments that date rocks.",
+  "teaser": "The law of inclusions states that a rock fragment contained within another rock is older than the rock containing it — the inclusion formed first. Pebbles in a conglomerate are older than the cement holding them; blocks of wall rock in an igneous intrusion are older than the magma. The rule is a powerful dating tool for contact relations. Finding an older rock 'foreign' inside a younger one is a direct statement of relative age.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15698,7 +15698,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Faunal Succession",
-  "teaser": "Life in ordered layers.",
+  "teaser": "The principle of faunal succession holds that fossils appear and disappear in a consistent order through the rock record — the same fossils occupy the same strata everywhere. William Smith used it to correlate layers across England; it is why fossils can date rocks. Trilobites mark the Cambrian, ammonites the Jurassic, and index fossils pin down precise ages. Faunal succession turned layers of rock into a global timeline of life.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15717,7 +15717,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Bedding Planes",
-  "teaser": "The natural layer boundaries.",
+  "teaser": "Bedding planes are the surfaces between sedimentary layers — the pages of the rock record. Each plane marks a pause or change in deposition: a flood, a quiet interval, a shift in current. Bedding is primary structure, formed as layers accumulate, and it often controls how rock splits and weathers. Geologists measure bedding to determine layer orientation and to recognize folding. Sandstone, shale, and limestone stacks are all divided by bedding planes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15736,7 +15736,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Facies",
-  "teaser": "The environmental faces of rock.",
+  "teaser": "A facies is a rock unit's total character — rock type, fossils, and structures — reflecting the environment where it formed. A reef facies, beach facies, and deep-sea facies can be the same age but look completely different. Walther's law states that facies found side by side laterally also stack vertically as environments shift. Reading facies maps ancient shorelines and reefs — and finds the oil trapped in them.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15755,7 +15755,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Transgressions",
-  "teaser": "Seas advancing over land.",
+  "teaser": "A marine transgression is the sea advancing over the land, recorded as shallow-water deposits stacked over deeper ones... in reverse: beach sand over river gravel, then offshore mud over the sand. As sea level rises, the shoreline migrates inland and each environment leaves its deposit in order. Transgressive sequences appear as deepening-upward stacks — sandstone, then shale, then limestone — marking sea-level rises.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15774,7 +15774,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Regressions",
-  "teaser": "Seas retreating from land.",
+  "teaser": "A regression is the sea retreating from the land, recorded as deepening marine deposits covered by shallow ones — the reverse of a transgression. As sea level falls, shoreline environments march seaward, stacking shallower layers over deeper ones. Regressive sequences appear as shallowing-upward stacks: limestone, then shale, then sandstone and coal. They often record ice ages, uplift, or sediment filling a basin — and they host many of the world's coal and oil deposits.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15793,7 +15793,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Sequence Stratigraphy",
-  "teaser": "Layers shaped by sea level.",
+  "teaser": "Sequence stratigraphy reads rock layers as packages bounded by unconformities — sequences, each recording a full cycle of sea-level rise and fall. Within a sequence, deposits record transgression, highstand, and regression, shaped by eustatic sea-level change and subsidence. The method lets geologists correlate layers across basins and predict where reservoirs, seals, and source rocks lie. Born from seismic reflection in the 1970s, sequence stratigraphy transformed petroleum exploration.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15812,7 +15812,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Chronostratigraphy",
-  "teaser": "Time in the layers.",
+  "teaser": "Chronostratigraphy orders rock layers by time rather than rock type: it divides the rock record into time-rock units — systems, series, and stages — each spanning a defined interval of geological time. Unlike lithostratigraphy, which follows rock bodies, chronostratigraphy follows time lines, so its boundaries are dated by fossils and isotopes. It is the skeleton of the geological time scale, letting geologists say precisely when a layer formed, worldwide.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15831,7 +15831,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Biostratigraphy",
-  "teaser": "Dating with fossils.",
+  "teaser": "Biostratigraphy dates and correlates rock layers using fossils: the principle that each interval of time has a distinctive set of organisms. Index fossils — widespread species that existed briefly — are the workhorses, pinning layers to specific ages. Foraminifera and ammonites, evolving quickly and drifting widely, date marine rocks; pollen dates terrestrial ones. Biostratigraphy was the first global dating method, and it still anchors the time scale wherever radiometric dates are lacking.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15850,7 +15850,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Lithostratigraphy",
-  "teaser": "Naming the rock units.",
+  "teaser": "Lithostratigraphy organizes rock into units by their physical character: formations, members, and beds — the mappable bodies geologists draw on maps. A formation is a distinctive, thick, mappable layer or stack, named after a type locality. Unlike time units, lithostratigraphic units follow rock bodies, which can cross time lines. The Grand Canyon's Kaibab, Toroweap, and Coconino formations are lithostratigraphic units. Lithostratigraphy is the practical backbone of geological mapping.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15869,7 +15869,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Type Sections",
-  "teaser": "The reference exposures.",
+  "teaser": "A type section is the reference exposure that defines a stratigraphic unit — the place geologists return to compare everything else against. When a formation or stage is named, its type section documents the unit's full thickness and character. Type sections become standard references worldwide, so their protection matters to geologists. If the type section is poor or altered, the unit's definition suffers. Choosing a good type section is a geological act of lasting consequence.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15888,7 +15888,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Stratigraphic Correlation",
-  "teaser": "Matching layers across distance.",
+  "teaser": "Stratigraphic correlation matches layers in different places to show they formed at the same time or belong to the same unit. Geologists correlate with fossils (biostratigraphy), rock character (lithostratigraphy), magnetic signatures, and geochemical fingerprints. Correlating layers across a basin reveals its structure and history; correlating across continents reveals ancient connections. Correlation is how isolated outcrops become a coherent geological story.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15907,7 +15907,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Types of Unconformities",
-  "teaser": "The gaps in the record.",
+  "teaser": "Unconformities are gaps in the rock record — surfaces where time is missing because erosion or non-deposition removed layers. The three classic types are angular unconformities, where tilted layers are truncated by flat ones; disconformities, where parallel layers are separated by an erosion surface; and nonconformities, where sedimentary rock rests on eroded igneous or metamorphic basement. Each gap records uplift, erosion, and lost time — the missing pages of geological history.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15926,7 +15926,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Nonconformities",
-  "teaser": "The buried basement gaps.",
+  "teaser": "A nonconformity is an unconformity where sedimentary layers rest directly on eroded igneous or metamorphic rock — ancient basement exposed by deep erosion, then buried by new sediment. The boundary marks a vast gap in time: the basement may be billions of years old, the overlying rock a few hundred million. The Great Unconformity at the Grand Canyon's base, where 500-million-year-old sandstone sits on 1.8-billion-year-old schist, is the most famous example on Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15945,7 +15945,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Stratigraphy",
   "name": "Modern Stratigraphy",
-  "teaser": "New tools for old layers.",
+  "teaser": "Modern stratigraphy is a multi-tool science: geologists date layers with radiometric isotopes, correlate them with magnetic reversals and geochemistry, and image them with seismic reflection. Astronomically tuned cycles in sediment — Milankovitch pacing — give stratigraphy precision to tens of thousands of years. Ice cores, lake varves, and marine muds extend the record to the present. The old hammer-and-fossil science is now one of the most quantitative disciplines in geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15964,7 +15964,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Magma Chambers",
-  "teaser": "The reservoirs beneath volcanoes.",
+  "teaser": "Magma chambers are the reservoirs of molten rock beneath volcanoes, fed from deep sources and feeding eruptions. Seismic imaging reveals them as zones of partially molten rock, often kilometres to tens of kilometres across. Magma rises, accumulates, and differentiates in these chambers until pressure fails the overlying rock and eruption begins. Monitoring chambers through ground deformation and gas is the key to forecasting eruptions.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15983,7 +15983,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcano Shapes",
-  "teaser": "Reading a volcano's style.",
+  "teaser": "Volcanoes come in distinct shapes for distinct magma: shield volcanoes are broad, gentle domes built by runny basalt, like Hawaii; stratovolcanoes are steep, layered cones of alternating lava and ash, like Fuji and Vesuvius; cinder cones are small piles of ejected fragments; and lava domes are bulbous plugs of sticky lava. The shape betrays the magma: runny lava spreads flat, sticky lava piles steep. Volcano shape is magma chemistry made visible.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16002,7 +16002,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Lava Viscosity",
-  "teaser": "Why some lava crawls.",
+  "teaser": "Lava viscosity — its resistance to flow — controls everything about an eruption. Basaltic lava is runny, flows fast and far, and erupts gently; rhyolitic lava is stiff, moves slowly, and traps gas, erupting explosively. Viscosity depends on silica content, temperature, and gas: more silica and cooler lava mean stiffer flow. The Hawaiian lava lakes and the deadly Mount Pelée dome are two ends of the same spectrum. Viscosity is the volcano's personality.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16021,7 +16021,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Explosivity",
-  "teaser": "Why some eruptions blast.",
+  "teaser": "A volcano's explosivity is set by its magma's gas content and viscosity: sticky magma holds gas until pressure shatters it into ash and pumice; runny magma lets gas escape gently. The most explosive eruptions — Krakatoa, Tambora, Pinatubo — blasted ash into the stratosphere, cooling the climate. Water meeting magma also flashes to steam, driving violent blasts. The same volcano can erupt gently and then explosively.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16040,7 +16040,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "The Volcanic Explosivity Index",
-  "teaser": "Rating eruption size.",
+  "teaser": "The Volcanic Explosivity Index (VEI) rates eruptions on a scale of 0 to 8, like a volcano's Richter scale. It measures erupted volume, column height, and duration: a VEI 0 trickles lava, while a VEI 8 — a supereruption like Yellowstone's past blasts — ejects over 1,000 cubic kilometres and can alter climate for years. Pinatubo was VEI 6, Krakatoa VEI 6, Tambora VEI 7. The scale lets scientists compare eruptions across time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16059,7 +16059,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Eruption Styles",
-  "teaser": "The many ways volcanoes erupt.",
+  "teaser": "Eruptions come in styles named for their characteristic behaviour: Hawaiian eruptions fountain runny lava; Strombolian eruptions burst in rhythmic firework explosions; Vulcanian blasts eject dense ash clouds; Plinian columns shoot ash and gas tens of kilometres high; and Surtseyan eruptions happen underwater, flashing steam. The style reflects magma composition and water access. A volcano can switch styles within a single eruption, which is why forecasting is so challenging.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16078,7 +16078,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Fissure Eruptions",
-  "teaser": "Lava from long cracks.",
+  "teaser": "Fissure eruptions pour lava from long cracks in the ground rather than a central vent. Basalt floods from these fissures can build vast lava fields and, in supereruptions, continental flood basalts covering millions of square kilometres — like the Deccan Traps, possibly linked to the dinosaur extinction. Iceland's Laki fissure eruption in 1783 emitted enough gas to cool the Northern Hemisphere and caused widespread famine. Fissure eruptions are among the most voluminous on Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16097,7 +16097,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Phreatic Eruptions",
-  "teaser": "Steam blasts from water.",
+  "teaser": "Phreatic eruptions occur when water — groundwater, snow, or a lake — meets hot rock or magma and flashes violently to steam, blasting rock and ash without new magma. They are the explosive surprise of volcano tourism: Whakaari in New Zealand erupted phreatically in 2019, killing 22 with no warning. Because no fresh magma is involved, phreatic blasts are extremely hard to forecast, and can precede larger eruptions.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16116,7 +16116,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcanic Lightning",
-  "teaser": "Storms inside eruption clouds.",
+  "teaser": "Volcanic lightning crackles inside eruption columns as ash particles collide and build static charge — the same triboelectric charging that sparks in thunderclouds, but concentrated in the ash plume. The 2022 Hunga Tonga eruption generated thousands of lightning bolts, some of the most intense ever recorded. Lightning streaks through the column, illuminating it dramatically and helping scientists track plume height and charge. It is one of the most spectacular collisions of geology and weather.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16135,7 +16135,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcano Earthquakes",
-  "teaser": "The tremors before eruptions.",
+  "teaser": "Volcanoes are restless before they erupt: magma rising through rock cracks it and shakes it, generating swarms of small earthquakes. Seismometers detect these swarms, which usually intensify and shallows as eruption approaches. Harmonic tremor — a continuous, rhythmic vibration from moving magma — is a classic eruption precursor. Seismicity is the most reliable monitoring tool volcanologists have; it gives the earliest warning that magma is on the move.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16154,7 +16154,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Ground Deformation",
-  "teaser": "The swelling of volcanoes.",
+  "teaser": "Magma pushing up inflates the ground above it, tilting and stretching the surface by millimetres to metres. Geologists measure this deformation with GPS, tiltmeters, and satellite radar (InSAR), building a picture of where magma is accumulating. Deformation can reveal an eruption's onset, location, and even its size, days to months in advance. Mount St. Helens inflated for months before its 1980 blast; Kilauea's summit rose and fell with every eruption cycle.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16173,7 +16173,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcano Gas Monitoring",
-  "teaser": "Sniffing eruption warnings.",
+  "teaser": "Volcanoes exhale gases that betray their state: carbon dioxide and sulphur dioxide rise as magma approaches the surface, and their ratios and volumes change before eruptions. Scientists measure gas with ground sensors, aircraft, and satellites, and use drones to sample hazardous plumes. Increasing SO₂ flux often precedes eruptions, while a drop can signal magma blocking the conduit. Gas monitoring is a key early-warning tool — the volcano's breath is read from afar.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16192,7 +16192,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Satellites and Volcanoes",
-  "teaser": "Watching eruptions from space.",
+  "teaser": "Satellites watch volcanoes from orbit: thermal sensors detect hot lava and new heat, InSAR measures ground inflation to centimetres, and gas instruments track SO₂ plumes. Global monitoring now catches eruptions on remote islands and in war zones that ground teams cannot reach. Satellites also map lava flows after eruptions, guiding hazard response. For the world's 1,500 active volcanoes, many unmonitored on the ground, satellites are the first line of watch.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16211,7 +16211,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Lava Lakes",
-  "teaser": "The pools of molten rock.",
+  "teaser": "Lava lakes are persistent pools of molten lava in craters or vents, kept molten by continuous upwelling from below. They are rare — only a handful exist, including Kilauea's Halema'uma'u and Erta Ale in Ethiopia — and they behave like breathing oceans of fire, rising and falling with the volcano's pulse. They offer scientists a direct window into magma movement and allow direct sampling of erupting lava.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16230,7 +16230,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcanic Islands",
-  "teaser": "Islands born of eruptions.",
+  "teaser": "Volcanic islands are born where volcanoes build above sea level — at hotspots, subduction zones, and rifts. Each island's geology records its birth and aging: fresh lava, then weathering, soil, and erosion, then reefs and subsidence. The Hawaiian chain shows the whole lifecycle — active volcanoes on the Big Island, eroding islands down the chain, and sunken seamounts beyond. Volcanic islands are among the youngest land on Earth, and among the most hazardous.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16249,7 +16249,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Underwater Volcanoes",
-  "teaser": "The hidden eruptions.",
+  "teaser": "Most of Earth's volcanism happens underwater: mid-ocean ridges erupt continuously, building new seafloor, and thousands of submarine volcanoes and seamounts dot the ocean basins. Underwater eruptions build the oceanic crust and feed hydrothermal vent ecosystems. The 2022 Hunga Tonga–Hunga Ha'apai eruption was one of the most powerful ever recorded, punching a plume into the stratosphere and triggering tsunamis. Submarine eruptions are only now being watched in real time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16268,7 +16268,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcanic Soils",
-  "teaser": "The fertile ash ground.",
+  "teaser": "Volcanic ash and lava become some of the world's most fertile soils: Andisols, formed from ash, hold water and nutrients superbly, supporting agriculture around volcanoes from Java to Ecuador. Ash layers also become valuable time markers — tephra layers record individual eruptions and date archaeological sites. Volcanic rocks weather into clay-rich soil that sustains dense populations. The same volcano that destroys farmland with an eruption builds it back richer over centuries.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16287,7 +16287,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Reading Eruption History",
-  "teaser": "The past in the layers.",
+  "teaser": "The rocks a volcano leaves behind are a diary of its past eruptions: thick pyroclastic layers record explosive blasts, columnar basalt records quiet lava flows, and interbedded soils mark quiet intervals. Dating these layers — with radiocarbon, argon, and tephrochronology — lets geologists reconstruct a volcano's eruption history and recurrence interval. That history underpins hazard maps and warning systems. A volcano's future is written, in part, in its past deposits.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16306,7 +16306,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Cities Near Volcanoes",
-  "teaser": "Living beside fire.",
+  "teaser": "Over 800 million people live within 100 kilometres of an active volcano, and several great cities sit in their shadow: Naples near Vesuvius, Seattle near Mount Rainier, Jakarta near several volcanoes. Each city's risk depends on its hazards — lahars, ash, lava — and its preparedness. Volcano observatories map risks and run drills; the 1991 Pinatubo evacuation, based on scientific warning, saved tens of thousands of lives.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16325,7 +16325,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Volcano Science",
   "name": "Volcanoes and Climate",
-  "teaser": "Eruptions cooling the planet.",
+  "teaser": "Volcanoes affect climate far beyond their craters: major eruptions inject sulphur dioxide into the stratosphere, forming aerosol haze that reflects sunlight and cools the planet for years. Tambora's 1815 blast caused the 'year without a summer'; Pinatubo cooled global temperatures by about half a degree. Supereruptions could cool the world by several degrees, disrupting agriculture. Scientists now study volcanic forcing alongside human emissions — volcanoes are nature's wild card in the climate system.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
