@@ -6,10 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -64,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -628,7 +627,7 @@ fun PetDesignerScreen(navController: NavController) {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
                             color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                            shadowElevation = 2.dp,
                             onClick = { toast = "More pets are on the way!" },
                             modifier = Modifier.weight(1f)
                         ) {
@@ -1383,7 +1382,7 @@ private fun ImportMenuOption(
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        shadowElevation = 2.dp,
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -1473,7 +1472,7 @@ private fun AccessoryRow(
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -2024,11 +2023,7 @@ private fun ImportPngDialog(
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-                                border = BorderStroke(
-                                    width = if (armed) 2.dp else 1.dp,
-                                    color = if (armed) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
-                                ),
+                                shadowElevation = if (armed) 4.dp else 2.dp,
                                 onClick = { onArmSlot(key) },
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -2087,11 +2082,7 @@ private fun ImportPngDialog(
                         Surface(
                             shape = RoundedCornerShape(9.dp),
                             color = rgbColor,
-                            border = BorderStroke(
-                                2.dp,
-                                if (used) MaterialTheme.colorScheme.primary
-                                else Color.White.copy(alpha = 0.7f)
-                            ),
+                            shadowElevation = if (used) 4.dp else 2.dp,
                             onClick = { onPickColor(imported.rgb) },
                             modifier = Modifier.size(36.dp)
                         ) {}
@@ -2182,10 +2173,7 @@ private fun ColorEditorCard(
         Surface(
             shape = RoundedCornerShape(14.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(
-                1.dp,
-                if (hexError) CurioColors.WarmCoralRed else MaterialTheme.colorScheme.outlineVariant
-            ),
+            shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -2268,7 +2256,7 @@ private fun ColorEditorCard(
                             .then(
                                 if (selected) {
                                     Modifier
-                                        .border(2.dp, Color.White.copy(alpha = 0.85f), RoundedCornerShape(8.dp))
+                                        .shadow(3.dp, RoundedCornerShape(8.dp))
                                         .padding(2.dp)
                                 } else Modifier
                             )
@@ -2306,7 +2294,7 @@ private fun ColorEditorCard(
                             .then(
                                 if (selected) {
                                     Modifier
-                                        .border(2.dp, Color.White.copy(alpha = 0.85f), RoundedCornerShape(8.dp))
+                                        .shadow(3.dp, RoundedCornerShape(8.dp))
                                         .padding(2.dp)
                                 } else Modifier
                             )
@@ -2365,10 +2353,8 @@ private fun ColorPreviewColumn(label: String, hex: String, accent: Boolean, modi
                 .size(52.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(hexColor(hex))
-                .border(
-                    2.dp,
-                    if (accent) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                .shadow(
+                    if (accent) 4.dp else 2.dp,
                     RoundedCornerShape(14.dp)
                 )
         )
@@ -2521,7 +2507,7 @@ private fun AnimationGalleryCard(
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        shadowElevation = 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {
@@ -2988,10 +2974,7 @@ private fun FrameThumb(
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
+        shadowElevation = if (selected) 4.dp else 2.dp,
         onClick = onClick
     ) {
         Column(
@@ -3253,11 +3236,7 @@ private fun PickerCard(
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
+        shadowElevation = if (selected) 4.dp else 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {
@@ -3383,10 +3362,7 @@ private fun ImportCard(
         Surface(
             shape = RoundedCornerShape(14.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(
-                1.dp,
-                if (error) CurioColors.WarmCoralRed else MaterialTheme.colorScheme.outlineVariant
-            ),
+            shadowElevation = 2.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
@@ -3552,10 +3528,7 @@ private fun PaletteRow(
         shape = RoundedCornerShape(16.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
         else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
+        shadowElevation = if (selected) 4.dp else 2.dp,
         onClick = onSelect,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -3721,11 +3694,7 @@ private fun QuickPaletteRow(
             Surface(
                 shape = CircleShape,
                 color = hexColor(design.colorOf(slot.key)),
-                border = BorderStroke(
-                    if (selectedKey == slot.key) 3.dp else 1.dp,
-                    if (selectedKey == slot.key) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.outlineVariant
-                ),
+                shadowElevation = if (selectedKey == slot.key) 4.dp else 2.dp,
                 onClick = { onSelect(slot.key) },
                 modifier = Modifier.size(if (selectedKey == slot.key) 38.dp else 32.dp)
             ) {}
@@ -3853,11 +3822,9 @@ private fun PixelGrid(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(CurioColors.SoftCream)
-            .border(
-                width = if (tool != null) 2.dp else 1.dp,
-                color = if (tool != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-                else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                shape = RoundedCornerShape(12.dp)
+            .shadow(
+                if (tool != null) 4.dp else 2.dp,
+                RoundedCornerShape(12.dp)
             )
     ) {
         // v8.36 — zoom: cells grow so small parts (faces, details) are easy
@@ -4248,7 +4215,7 @@ private fun ActionPreview(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         Column(
@@ -4327,7 +4294,7 @@ private fun CustomActionEditor(
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+            shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
@@ -4435,7 +4402,7 @@ private fun CustomActionEditor(
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+            shadowElevation = 2.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(118.dp)
@@ -4503,7 +4470,7 @@ private fun CustomPetCard(
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+            shadowElevation = 2.dp,
             onClick = onClick,
             modifier = modifier
         ) {
@@ -4533,11 +4500,7 @@ private fun CustomPetCard(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
+        shadowElevation = if (active) 4.dp else 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {
@@ -4615,7 +4578,7 @@ private fun EditorPickPrompt(onOpenPicker: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+        shadowElevation = 2.dp,
         onClick = onOpenPicker,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -4670,7 +4633,7 @@ private fun EditorTargetHeader(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -4881,11 +4844,7 @@ private fun PetLibraryCard(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (current) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
+        shadowElevation = if (current) 4.dp else 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {
@@ -4986,7 +4945,7 @@ private fun EvolutionChoiceDialog(
                     containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
                     else MaterialTheme.colorScheme.surfaceVariant
                 ),
-                border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Row(

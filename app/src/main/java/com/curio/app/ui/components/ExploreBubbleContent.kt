@@ -3,7 +3,6 @@ package com.curio.app.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -180,14 +179,9 @@ fun ExploreBubbleContent(
     Surface(
         shape = RoundedCornerShape(if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        border = BorderStroke(
-            1.dp,
-            pillBorderColor.copy(alpha = if (AppPreferences.pastelColorsState) 0.78f else 0.50f)
-        ),
-        // No elevation shadow: the old 8dp shadow rendered BEYOND the
-        // overlay window's bounds and the window clipped it into a hard,
-        // boxy edge around the pill. The crisp accent border carries the
-        // definition now.
+        // Overlay windows clip elevation shadows into a hard, boxy edge
+        // around the pill, so the bubble stays flat — its definition
+        // comes from the container step + accent glow, not a shadow.
         shadowElevation = 0.dp,
         modifier = modifier
             .then(dragModifier)
@@ -570,10 +564,6 @@ private fun BubbleIconButton(
         onClick = onClick,
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(
-            1.dp,
-            tint.copy(alpha = if (AppPreferences.pastelColorsState) 0.58f else 0.35f)
-        ),
         shadowElevation = 0.dp
     ) {
         CurioIcon(

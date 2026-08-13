@@ -3,9 +3,7 @@ package com.curio.app.features.profile
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -301,7 +300,7 @@ fun ProfileScreen(navController: NavController) {
                     // Keep the whole gamification story together: XP explains
                     // the current level, the quest row opens the full journey,
                     // and the badge preview shows the immediate payoff.
-                    CurioSettingsCard(border = null) {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                         ProgressAndAchievementsCard(
                             xp = displayXp,
                             progress = progress.first,
@@ -317,7 +316,7 @@ fun ProfileScreen(navController: NavController) {
             if (categoryCounts.isNotEmpty()) {
                 item {
                     Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
-                        CurioSettingsCard(border = null) {
+                        CurioSettingsCard(shadowElevation = 0.dp) {
                             LanesCard(
                                 counts = categoryCounts,
                                 onCabinet = { navController.navigate(CurioRoutes.CABINET) { launchSingleTop = true } }
@@ -328,7 +327,7 @@ fun ProfileScreen(navController: NavController) {
             }
             item {
                 Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
-                    CurioSettingsCard(border = null) {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                         SettingsNavCard(
                             onOpenSettings = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } }
                         )
@@ -337,7 +336,7 @@ fun ProfileScreen(navController: NavController) {
             }
             item {
                 Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
-                    CurioSettingsCard(border = null) {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                         SupportCard(
                             crashCount = crashCount,
                             onOpenSupport = { navController.navigate(CurioRoutes.SUPPORT) { launchSingleTop = true } }
@@ -408,7 +407,6 @@ fun ProfileScreen(navController: NavController) {
         // the solid hero-color pill off the banner, and it eases into the
         // frost rim as the pill pops out (Home's TopBarPill always wears its
         // border).
-        val pillBorder = BorderStroke(1.dp, pillRim)
         Row(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -428,7 +426,6 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
-                border = pillBorder,
                 shadowElevation = 6.dp * frostShift,
                 disableRipple = true
             )
@@ -436,8 +433,7 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
                 bg = pillBg,
                 iconTint = pillIcon,
-                elevation = 6.dp * frostShift,
-                border = pillBorder
+                elevation = 6.dp * frostShift
             )
         }
     }
@@ -452,14 +448,12 @@ private fun ProfileSearchPill(
     onClick: () -> Unit,
     bg: Color,
     iconTint: Color,
-    elevation: Dp,
-    border: BorderStroke?
+    elevation: Dp
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
         shape = CircleShape,
         color = bg,
-        border = border,
         shadowElevation = elevation,
         modifier = Modifier
             .size(42.dp)
@@ -658,9 +652,12 @@ private fun ProfileHero(
                             Box(
                                 modifier = m
                                     .size(72.dp)
+                                    // v27n — shadow FIRST so it renders behind
+                                    // the opaque fill (the old order smeared a
+                                    // dark blur on top of the avatar).
+                                    .shadow(2.dp, CircleShape)
                                     .clip(CircleShape)
-                                    .background(fill)
-                                    .border(BorderStroke(1.dp, ink.copy(alpha = 0.30f)), CircleShape),
+                                    .background(fill),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -736,17 +733,22 @@ private fun ProfileHero(
                     Surface(
                         shape = RoundedCornerShape(20.dp),
                         color = Color.Transparent,
-                        border = BorderStroke(1.dp, ink.copy(alpha = 0.28f)),
-                        shadowElevation = 0.dp
+                        shadowElevation = 3.dp
                     ) {
                         Box(
                             modifier = Modifier.background(
+                                // v27n — OPAQUE pane gradient: the old
+                                // 12–55% alpha fill let the elevation shadow
+                                // bleed through (blurry broken pane). The
+                                // opaque blends resolve to the same perceived
+                                // tints over the banner while keeping the
+                                // shadow clean behind them.
                                 Brush.verticalGradient(
                                     listOf(
-                                        fill.copy(alpha = 0.12f),
+                                        lerp(fill, Color.White, 0.06f),
                                         if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                                            CurioColors.HomeRosewood.copy(alpha = 0.30f)
-                                        else lerp(fill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                            lerp(fill, CurioColors.HomeRosewood, 0.30f)
+                                        else lerp(fill, Color.White, 0.26f)
                                     )
                                 ),
                                 RoundedCornerShape(20.dp)
@@ -917,6 +919,12 @@ private fun profileRoseAccent(): Color {
         // black plate and the rose accent comes through the watermark
         // collage + the sticky pills instead of a tinted fill.
         return Color.Black
+    }
+    // v27l — optional sky-azure hero: when enabled, the shared hero wears
+    // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
+    if (AppPreferences.heroBlueState) {
+        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
+        else CurioColors.HomeAzure
     }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
@@ -1139,8 +1147,15 @@ private fun LanesCard(counts: Map<CategoryId, Int>, onCabinet: () -> Unit) {
                 val category = CurioCategories.byId(categoryId)
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = category.themedAccent().copy(alpha = 0.14f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, category.themedAccent().copy(alpha = 0.20f))
+                    // v27n — OPAQUE category-tinted tile (was 14% alpha, which
+                    // let the elevation shadow bleed through); the opaque lerp
+                    // keeps the same tint over the card surface.
+                    color = lerp(
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        category.themedAccent(),
+                        0.14f
+                    ),
+                    shadowElevation = 2.dp
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         CurioIcon(category.iconGlyph, null, tint = category.themedAccent(), size = 20.dp)

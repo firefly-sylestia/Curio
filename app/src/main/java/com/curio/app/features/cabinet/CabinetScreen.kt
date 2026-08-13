@@ -9,9 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -108,7 +106,6 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.headerAccent
@@ -917,7 +914,6 @@ private fun BoxScope.CabinetStickyChipBar(
                     // Opaque unselected pill — the chip reads as a solid
                     // surface over the backdrop, not a see-through wash.
                     chipSurface = surface,
-                    chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     popProgress = popProgress,
                     elevation = elevation,
                     selected = selectedFilter == null && !showLegacyOnly,
@@ -947,9 +943,6 @@ private fun BoxScope.CabinetStickyChipBar(
                     // Opaque category pill — full-strength chip surface so
                     // the tinted pill reads solid on the backdrop.
                     chipSurface = surface,
-                    chipBorder = cat.categoryBorder(
-                        fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ),
                     popProgress = popProgress,
                     elevation = elevation,
                     selected = selectedFilter == cat.id && !showLegacyOnly,
@@ -978,7 +971,6 @@ private fun BoxScope.CabinetStickyChipBar(
                         tint = MaterialTheme.colorScheme.tertiaryContainer,
                         ink = MaterialTheme.colorScheme.onTertiaryContainer,
                         chipSurface = surface,
-                        chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         popProgress = popProgress,
                         elevation = elevation,
                         selected = showLegacyOnly,
@@ -1079,8 +1071,7 @@ private fun CabinetHeroActionPill(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        border = BorderStroke(1.dp, ink.copy(alpha = 0.42f)),
-        shadowElevation = 0.dp
+        shadowElevation = 3.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
@@ -1113,12 +1104,13 @@ private fun FilterChipLite(
     tint: Color,
     ink: Color,
     chipSurface: Color = MaterialTheme.colorScheme.surfaceVariant,
-    chipBorder: BorderStroke? = null,
-    // v7.96 — premium pop: the capsule wears a soft vertical sheen (top
-    // light / slightly deeper base) instead of a flat fill; as [popProgress]
-    // goes 0→1 the unselected label blooms toward [accent] and the pill
-    // lifts with [elevation]'s shadow — the per-pill color pop on top of
-    // the scale pop. Selected chips keep their accent-container gradient.
+    // v27n — the capsule is defined by its fill + elevation shadow, no
+    // outline ring. v7.96 — premium pop: the capsule wears a soft vertical
+    // sheen (top light / slightly deeper base) instead of a flat fill; as
+    // [popProgress] goes 0→1 the unselected label blooms toward [accent]
+    // and the pill lifts with [elevation]'s shadow — the per-pill color pop
+    // on top of the scale pop. Selected chips keep their accent-container
+    // gradient.
     popProgress: Float = 0f,
     elevation: Dp = 0.dp,
     selected: Boolean,
@@ -1153,13 +1145,6 @@ private fun FilterChipLite(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
                 .background(fillBrush)
-                .then(
-                    if (selected || chipBorder == null) {
-                        Modifier
-                    } else {
-                        Modifier.border(chipBorder, RoundedCornerShape(50))
-                    }
-                )
                 .padding(horizontal = 16.dp, vertical = 9.dp)
         ) {
             Text(

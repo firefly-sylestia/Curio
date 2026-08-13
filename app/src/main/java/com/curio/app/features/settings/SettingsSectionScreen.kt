@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -195,6 +194,15 @@ private fun AppearanceSection(highlightKey: String? = null) {
         SettingsRowPulse(highlightKey == "appearance-pastel") {
             CompactSwitchRow("Pastel colors", "Soft category accents and page tints", AppPreferences.pastelColorsState) {
                 AppPreferences.setPastelColorsEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        // v27l — optional sky-azure hero variant for the shared torn banner
+        // (Home / Profile / Settings / Cabinet). Default OFF — the rose
+        // stays.
+        SettingsRowPulse(highlightKey == "appearance-hero") {
+            CompactSwitchRow("Sky azure hero", "The shared hero banner wears airy azure instead of rose", AppPreferences.heroBlueState) {
+                AppPreferences.setHeroBlueEnabled(context, it)
             }
         }
         CurioSettingsDivider()
@@ -444,7 +452,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                             selected -> MaterialTheme.colorScheme.onPrimary
                             else -> MaterialTheme.colorScheme.onSurface
                         },
-                        border = if (selected && isAmoled) BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)) else null,
+                        shadowElevation = if (selected) 3.dp else 1.dp,
                         modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Text(

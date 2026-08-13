@@ -1,6 +1,5 @@
 package com.curio.app.features.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,10 +50,7 @@ fun AudioQualityDialog(
                         onClick = { onSelected(quality) },
                         shape = RoundedCornerShape(16.dp),
                         color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else Color.Transparent,
-                        border = BorderStroke(
-                            1.dp,
-                            if (selected) curioDialogActionColor() else MaterialTheme.colorScheme.outlineVariant
-                        ),
+                        shadowElevation = if (selected) 3.dp else 1.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -115,10 +111,7 @@ fun SearchEngineDialog(
                         onClick = { onSelected(engine) },
                         shape = RoundedCornerShape(16.dp),
                         color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else Color.Transparent,
-                        border = BorderStroke(
-                            1.dp,
-                            if (selected) curioDialogActionColor() else MaterialTheme.colorScheme.outlineVariant
-                        ),
+                        shadowElevation = if (selected) 3.dp else 1.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(

@@ -3,7 +3,6 @@ package com.curio.app.features.home
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -537,7 +537,6 @@ fun HomeScreen(navController: NavController) {
                             Surface(
                                 shape = statShape,
                                 color = if (holesOn) Color.Transparent else if (paperStatsOn) paperStatBg else Color.Transparent,
-                                border = BorderStroke(1.dp, questInk.copy(alpha = if (paperStatsOn) 0.26f else 0.28f)),
                                 shadowElevation = if (paperStatsOn) 3.dp else 0.dp
                             ) {
                                 // The fill must wear the card's own shape —
@@ -1248,7 +1247,6 @@ private fun TopBarPill(
     Surface(
         shape = shape,
         color = bg,
-        border = BorderStroke(1.dp, rim),
         shadowElevation = elevation,
         modifier = Modifier
             .size(42.dp)
@@ -1570,6 +1568,12 @@ private fun homeRoseAccent(): Color {
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
         return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
     }
+    // v27l — optional sky-azure hero: when enabled, the shared hero wears
+    // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
+    if (AppPreferences.heroBlueState) {
+        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
+        else CurioColors.HomeAzure
+    }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
         // One shared deep companion keeps this hero family atmospheric in
@@ -1665,7 +1669,7 @@ private fun FirstTimeEmpty(
                     // secondary button never reads as a foreign cream pill
                     // on the tinted first-run card.
                     color = lerp(surface, MaterialTheme.colorScheme.surfaceContainerLow, 0.5f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    shadowElevation = 2.dp
                 ) {
                     Text(
                         "Pick a lane",
@@ -2085,7 +2089,7 @@ private fun ExploreTopicRow(
                             // Same hairline rim as the detail page's #tag
                             // chips — the deep ink text + pastel fill alone
                             // read muddy on the tinted card (v7.32).
-                            border = BorderStroke(1.dp, accent.copy(alpha = 0.4f))
+                            shadowElevation = 2.dp
                         ) {
                             Text(
                                 text = tag,
@@ -2151,8 +2155,7 @@ private fun CurrentlyExploringCard(
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(),
-        shadowElevation = 0.dp,
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
@@ -2176,7 +2179,7 @@ private fun CurrentlyExploringCard(
                 onClick = onStop,
                 shape = CircleShape,
                 color = accent.copy(alpha = 0.14f),
-                border = BorderStroke(1.dp, exploreInk.copy(alpha = 0.35f)),
+                shadowElevation = 2.dp,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(10.dp)
@@ -2263,7 +2266,8 @@ private fun CurrentlyExploringCard(
                     OutlinedButton(
                         onClick = onKeepExploring,
                         shape = RoundedCornerShape(50),
-                        border = BorderStroke(1.dp, exploreInk.copy(alpha = 0.55f)),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                        border = BorderStroke(0.dp, Color.Transparent),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = exploreInk),
                         modifier = Modifier.weight(1f)
                     ) {

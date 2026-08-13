@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -215,11 +214,7 @@ private fun NotebookChoiceRow(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = if (selected) tint else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (selected) accent.copy(alpha = 0.5f)
-                    else MaterialTheme.colorScheme.outline
-        ),
+        shadowElevation = if (selected) 3.dp else 1.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -231,11 +226,7 @@ private fun NotebookChoiceRow(
             Surface(
                 shape = CircleShape,
                 color = if (selected) accent else Color.Transparent,
-                border = BorderStroke(
-                    width = 2.dp,
-                    color = if (selected) accent
-                            else MaterialTheme.colorScheme.outline
-                ),
+                shadowElevation = if (selected) 2.dp else 0.dp,
                 modifier = Modifier.size(20.dp)
             ) {
                 if (selected) {

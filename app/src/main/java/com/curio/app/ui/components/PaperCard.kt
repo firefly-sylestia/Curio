@@ -6,10 +6,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -187,8 +186,7 @@ fun PaperCard(
         Surface(
             shape = shape,
             color = notePaperSurface(paperColor),
-            shadowElevation = 1.dp,
-            border = BorderStroke(1.dp, notePaperBorder(paperColor)),
+            shadowElevation = 3.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = minHeight)
@@ -1566,8 +1564,7 @@ fun TornPaperCard(
     Surface(
         shape = tornShape,
         color = surface,
-        shadowElevation = 0.dp,
-        border = BorderStroke(1.dp, edge),
+        shadowElevation = 3.dp,
         modifier = modifier.heightIn(min = minHeight).rotate(rotation)
     ) {
         Box {
@@ -1903,11 +1900,7 @@ private fun CompactPaperChip(
         shape = RoundedCornerShape(50),
         color = if (active) accent.copy(alpha = 0.18f)
                 else MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(
-            1.dp,
-            if (active) accent.copy(alpha = 0.65f)
-            else MaterialTheme.colorScheme.outlineVariant
-        )
+        shadowElevation = if (active) 3.dp else 1.dp
     ) {
         Text(
             text = label,
@@ -1947,11 +1940,7 @@ fun NotePaperColorToggle(
             shape = RoundedCornerShape(10.dp),
             color = if (expanded) accent.copy(alpha = 0.18f)
                     else MaterialTheme.colorScheme.surfaceContainerHighest,
-            border = BorderStroke(
-                1.dp,
-                if (expanded) accent.copy(alpha = 0.65f)
-                else MaterialTheme.colorScheme.outlineVariant
-            )
+            shadowElevation = if (expanded) 3.dp else 1.dp
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
@@ -1965,7 +1954,7 @@ fun NotePaperColorToggle(
                     modifier = Modifier
                         .size(14.dp)
                         .background(notePaperSurface(color), CircleShape)
-                        .border(1.dp, notePaperBorder(color), CircleShape)
+                        .shadow(1.dp, CircleShape)
                 )
                 CurioIcon(
                     name = CurioIcons.Palette,
@@ -1997,13 +1986,7 @@ fun NotePaperColorToggle(
                         enabled = enabled,
                         shape = CircleShape,
                         color = notePaperSurface(candidate),
-                        border = BorderStroke(
-                            if (selected) 2.dp else 1.dp,
-                            if (selected) accent
-                            else notePaperBorder(candidate).copy(alpha = 0.85f)
-                        ),
-                        // Each swatch announces itself by color name; the
-                        // check icon is purely visual (no invisible-icon hack).
+                        shadowElevation = if (selected) 3.dp else 1.dp,
                         modifier = Modifier
                             .size(if (selected) 24.dp else 20.dp)
                             .semantics {

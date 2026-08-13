@@ -180,6 +180,12 @@ object CurioColors {
     val HomeRosewood     = Color(0xFFCF8B94)
     /** Dark-mode companion for the shared Home/Profile/Settings hero family. */
     val HomeRosewoodDark  = Color(0xFF713849)
+    // v27l — the optional sky-azure hero variant: a brighter, fresher azure
+    // (the Science/Sky hue at sky-300-ish saturation, held a touch softer
+    // than neon) for light, and a deep muted azure companion for dark mode
+    // (same L/S as HomeRosewoodDark).
+    val HomeAzure        = Color(0xFF9ED2EF)
+    val HomeAzureDark    = Color(0xFF385C71)
 
     /** Tinted (20% alpha) versions of the legacy accents for backgrounds. */
     val LilacTint     = Lilac.copy(alpha = 0.20f)

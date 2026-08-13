@@ -16,11 +16,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -157,7 +155,6 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
@@ -515,7 +512,7 @@ fun EntryDetailScreen(
                         Surface(
                             shape = RoundedCornerShape(50),
                             color = heroCardInk.copy(alpha = 0.12f),
-                            border = BorderStroke(1.dp, heroCardInk.copy(alpha = 0.28f))
+                            shadowElevation = 2.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
@@ -565,8 +562,7 @@ fun EntryDetailScreen(
                     Surface(
                         shape = RoundedCornerShape(18.dp),
                         color = Color.Transparent,
-                        border = BorderStroke(1.dp, heroCardInk.copy(alpha = 0.32f)),
-                        shadowElevation = 0.dp
+                        shadowElevation = 2.dp
                     ) {
                         // The card's content Box: the Row below defines the
                         // height, and the frosted pane + glass tint match its
@@ -720,7 +716,7 @@ fun EntryDetailScreen(
                                     shape = RoundedCornerShape(50),
                                     color = if (AppPreferences.tintWashEffective()) cat.tint.copy(alpha = 0.14f)
                                             else MaterialTheme.colorScheme.surfaceVariant,
-                                    border = BorderStroke(1.dp, cat.themedAccent().copy(alpha = 0.4f))
+                                    shadowElevation = 2.dp
                                 ) {
                                     Text(
                                         text = "#$tag",
@@ -964,7 +960,6 @@ private fun Modifier.heroFrostPlate(
     shadow(elevation, shape, clip = false)
         .clip(shape)
         .background(frostBrush)
-        .border(1.dp, ink.copy(alpha = 0.32f), shape)
 
 /**
  * Scroll-linked controls kept separate from the detail body so paper canvases,
@@ -1061,8 +1056,7 @@ private fun BoxScope.DetailStickyBar(
                 containerColor = Color(0xFFF2F5F8).copy(alpha = 0.92f),
                 shape = RoundedCornerShape(18.dp),
                 tonalElevation = 0.dp,
-                shadowElevation = 10.dp,
-                border = BorderStroke(1.dp, heroCardInk.copy(alpha = 0.22f))
+                shadowElevation = 10.dp
             ) {
                 DropdownMenuItem(
                     text = { Text("Share", color = heroCardInk) },
@@ -1445,7 +1439,6 @@ private fun QuickFactCard(
                 .fillMaxWidth()
                 .clip(paneShape)
                 .background(paneFill)
-                .border(1.dp, ink.copy(alpha = 0.22f), paneShape)
                 .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Column {
@@ -1499,7 +1492,7 @@ private fun PortfolioRender(entry: CurioEntry, category: CurioCategory, navContr
                     shape = RoundedCornerShape(50),
                     color = if (selected) category.themedAccent()
                             else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    border = if (selected) null else category.categoryBorder(),
+                    shadowElevation = if (selected) 3.dp else 1.dp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Row(
@@ -1733,8 +1726,7 @@ private fun SoundBiteRender(
                     // mode-only color (murky, near-invisible on dark); in dark
                     // mode use the pastel ink twin so the capsule bars read.
                     tint = if (isCurioDarkTheme()) category.categoryInk() else category.tint,
-                    surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    border = category.categoryBorder()
+                    surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
                 )
             }
 
@@ -1778,7 +1770,7 @@ private fun SoundBiteRender(
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = category.themedAccent().copy(alpha = 0.10f),
-                            border = BorderStroke(1.dp, category.themedAccent().copy(alpha = 0.35f)),
+                            shadowElevation = 2.dp,
                             modifier = Modifier.weight(1f)
                         ) {
                             Column(
@@ -1831,7 +1823,7 @@ private fun SoundBiteRender(
                             },
                             shape = RoundedCornerShape(8.dp),
                             color = category.themedAccent().copy(alpha = 0.10f),
-                            border = BorderStroke(1.dp, category.themedAccent().copy(alpha = 0.40f))
+                            shadowElevation = 2.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -1909,8 +1901,7 @@ private fun AudioPlayerBar(
     playedAccent: Color,
     ink: Color,
     tint: Color,
-    surface: Color,
-    border: BorderStroke?
+    surface: Color
 ) {
     val context = LocalContext.current
     // v5.8 — saveable so rotation keeps the playback position + playing
@@ -2024,7 +2015,7 @@ private fun AudioPlayerBar(
     Surface(
         shape = RoundedCornerShape(50),
         color = surface,
-        border = border,
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -2454,8 +2445,7 @@ private fun MarginaliaRender(entry: CurioEntry, category: CurioCategory, navCont
                 playedAccent = if (isCurioDarkTheme()) category.categoryInk() else category.themedAccent(),
                 ink = category.categoryInk(),
                 tint = if (isCurioDarkTheme()) category.categoryInk() else category.tint,
-                surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                border = category.categoryBorder()
+                surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
             )
         }
     }
@@ -2844,7 +2834,7 @@ private fun FrostedExportButton(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = Color.Transparent,
-        border = BorderStroke(1.dp, frostInk.copy(alpha = 0.20f)),
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         Box(Modifier.fillMaxWidth()) {
@@ -2920,7 +2910,7 @@ private fun SessionNoteBlock(
             Surface(
                 shape = RoundedCornerShape(18.dp),
                 color = notePaperSurface(NotePaperColor.CREAM),
-                border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
+                shadowElevation = 3.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -2979,7 +2969,7 @@ private fun SessionNoteBlock(
                             )
                         },
                         shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+                        shadowElevation = 2.dp,
                         modifier = Modifier.size(96.dp)
                     ) {
                         androidx.compose.foundation.Image(
@@ -3023,11 +3013,9 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
         // surface hides the page watermark so only the board's
         // [CurioMoodBoardBackdrop] shows.
         color = category.categorySurfaceMoodBoard(),
-            shadowElevation = 0.dp,
-            // Faint category rule — the saved board sits on the tinted page,
-            // so a slim theme-aware border (accent in light, light twin in
-            // dark via categoryInk) keeps it from blending into the wash.
-            border = BorderStroke(1.dp, category.categoryInk().copy(alpha = 0.26f)),
+            // The saved board sits on the tinted page — the elevation lift
+            // keeps it from blending into the wash.
+            shadowElevation = 3.dp,
             // v7.17 — the whole board (and its in-place zoom overlay) draws
             // ABOVE the caption + quote cards that follow it in this Column:
             // the zoomed image overflows the card, and later siblings would
@@ -3092,8 +3080,7 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
                         onClick = { navController.navigate(CurioRoutes.editMoodBoard(entry.id)) { launchSingleTop = true } },
                         shape = RoundedCornerShape(50),
                         color = category.categorySurface(MaterialTheme.colorScheme.surface).copy(alpha = 0.9f),
-                        border = category.categoryBorder(),
-                        shadowElevation = 0.dp,
+                        shadowElevation = 2.dp,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(12.dp)
@@ -3115,8 +3102,7 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
                         onClick = { boardExpanded = true },
                         shape = RoundedCornerShape(50),
                         color = category.categorySurface(MaterialTheme.colorScheme.surface).copy(alpha = 0.9f),
-                        border = category.categoryBorder(),
-                        shadowElevation = 0.dp,
+                        shadowElevation = 2.dp,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(12.dp)
@@ -3648,7 +3634,7 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-        border = category.categoryBorder(),
+        shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -3735,9 +3721,7 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-                        border = category.categoryBorder(
-                            fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        ),
+                        shadowElevation = 2.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(

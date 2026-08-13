@@ -1,6 +1,59 @@
 # Prompt.md — Request log
 
-## Current request (v26 — Topic Browser header rebuild + back-to-top arrow)
+## Current request — fix blurry/broken backgrounds from the elevation commit (fe3da7a)
+
+**Status:** Implemented (committed, not pushed — user's standing no-push rule).
+
+### What was asked
+After commit `fe3da7a` ("elevation over borders app-wide") many buttons/cards show **blurry + broken backgrounds**; the user listed: badges next to your name in Profile, the Profile Level·Saved·Lanes pane, the Lanes card, a "C avatar in cabinet", the category chips, and the Spin deck peek cards (which show a "boxy thing" while animating). User instruction: identify + confirm the issue, ask, then fix.
+
+### Root cause (two Compose shadow rules being violated)
+
+**A. `Modifier.shadow()` placed AFTER `.background()` in a modifier chain** — the shadow modifier is INNER, so its `drawBehind` runs after the background draws → the dark blurred shadow is painted **ON TOP of the fill**. Correct order is `shadow → clip → background` (shadow behind, fill covers the inner blur).
+- `CurioBadges.kt` — 4 spots: locked silhouette (L350), inner glyph plate (L359), ribbon gem (L397), earned marker (L408) — all `.clip(CircleShape).background(...).shadow(2.dp, CircleShape)`.
+- `ProfileScreen.kt` L657 — profile avatar `.clip(CircleShape).background(fill).shadow(2.dp, CircleShape)`.
+- `SpinScreen.kt` PeekCard — `Surface(color = Transparent, shadowElevation = 2.dp)` with the fill applied via a `.background()` on the Surface's own modifier param (OUTSIDE the surface internals) → fill draws first, then the Surface shadow paints on top of the card. Also **v24 explicitly REJECTED deck-card shadows** ("weird look while the cards animate", `shadowsOn = false` hardcoded) — the 2dp Surface shadow re-introduces exactly that (the "boxy thing").
+
+**B. `shadowElevation` on a Surface whose fill is TRANSLUCENT (alpha < 1)** — the shadow is drawn behind the shape and shows **THROUGH the translucent fill** → muddy/broken interior. Elevation only renders cleanly on opaque fills.
+- `ProfileScreen.kt` L~730 — Level·Saved·Lanes pane: Surface `color = Transparent`, `shadowElevation = 3.dp`, inner Box wears a 12–55% alpha gradient → shadow visible through it.
+- `ProfileScreen.kt` L~1139 — LanesCard lane tiles: `color = accent.copy(alpha = 0.14f)`, `shadowElevation = 2.dp`.
+- `CabinetScreen.kt` L~1074 — CabinetHeroActionPill (Search/Sort/Select/Cancel glass pills): `color = ink@30–65%`, `shadowElevation = 3.dp`. (commit ae83130 had deliberately added the border for these to read on the rose banner; the elevation commit removed it.)
+- `CurioBadges.kt` L~471 — "+N" tile: `color = sage@13%`, `shadowElevation = 2.dp`.
+- `CurioCategoryChip.kt` — `FilterChip` elevation; selected container is `category.tint` = accent **@20% alpha** → the chip shadow shows through the translucent selected fill.
+
+### Verified NOT broken (no change needed)
+- `CurioSettingsCard` (opaque `surfaceContainerLow` fill), `CurioEntryCard` (opaque fill), `CurioCategoryCard` (fill is inside Surface content → covers shadow), `FilterChipLite` (same), `CurioSearchField` (opaque).
+
+### Proposed fix (awaiting user approval)
+1. Reorder shadow modifiers to be BEHIND the fill where the fill is opaque (profile avatar).
+2. Remove the blurry inner `.shadow()`s in the badges and restore the crisp ring borders they replaced (the coin design) — or one clean outer shadow behind the whole medal.
+3. Remove `shadowElevation` from translucent surfaces (stat pane, lane tiles, cabinet glass pills, "+N" tile, selected chips) and restore the hairline borders they had before fe3da7a (ae83130's legibility intent).
+4. Deck peek cards: `shadowElevation` back to `0.dp` (Surface stays flat per its own comment; layered shadow stays off per v24 closeout) → kills the boxy animation artifact.
+
+### User decisions (ask_user)
+1. **"C avatar in cabinet"** = the round **profile avatar** (initial letter) — they misremembered its location; no avatar exists in CabinetScreen.
+2. **Strategy:** keep shadows everywhere, **make translucent fills opaque** (not full revert, not border-restore).
+
+### What was done
+Per the confirmed strategy — elevation stays, fills become opaque, misplaced shadows reordered, deck shadow removed:
+- **CurioBadges.kt** — ONE clean shadow on the outer coin Box (behind the opaque metal); locked silhouette + gem + earned marker shadows moved BEFORE their clip+fill (was: smear on top); glyph-plate shadow removed (it had no fill — pure blur over the metal); locked fills made opaque (secret keeps a darker blend); "+N" tile fill → opaque `lerp(surfaceContainerLow, sage, 0.13f)`.
+- **ProfileScreen.kt** — avatar: `.shadow(2.dp, CircleShape)` moved before `.clip().background(fill)`; Level·Saved·Lanes pane gradient made opaque (12–55% alpha → opaque lerps resolving to the same tints); LanesCard tiles → opaque `lerp(surfaceContainerLow, accent, 0.14f)`.
+- **CurioCategoryChip.kt** — selected fill `category.tint` (accent @ 20% alpha, bled the chip shadow) → opaque `lerp(surface, accent, 0.20f)`.
+- **SpinScreen.kt PeekCard** — `shadowElevation` 2dp → 0dp: the elevation commit re-added the v24-REJECTED deck shadow ("weird look while cards animate") — that is the boxy thing during the reel; Surface stays flat per its own contract.
+
+### Validation
+- Braces balanced (all 4 files), `git diff --check` clean, all new imports used (`lerp` added to CurioBadges + CurioCategoryChip; ProfileScreen already had it).
+- No compile/build possible locally (no SDK) — CI on push is the gate.
+- DOX pass: root `AGENTS.md` compile-safety rule 11 (shadow order + opaque fills + no deck elevation); `app/AGENTS.md` v27n note.
+
+### Not changed (same-class spots, flag for follow-up if the user wants a wider pass)
+- CabinetHeroActionPill / SettingsHeroActionPill glass pills (ink @ 30–65% + 3dp shadow — subtle bleed; user didn't list them, so left as-is).
+- QuestsScreen / TopicRevealScreen / EntryDetailScreen / CategoryPicker coming-soon tiles — other translucent-fill + shadow spots from the same commit.
+
+## Previous request (v26 — Topic Browser header rebuild + back-to-top arrow)
+
+
+## Previous request (v26 — Topic Browser header rebuild + back-to-top arrow)
 
 **Status:** Implemented, uncommitted in working tree (user's standing rule: no push unless asked).
 
@@ -121,3 +174,9 @@ CI fix pushed earlier this turn: 28122f2 (Cabinet LazyGridItemInfo.offset.y — 
 - New "Deeper header color" preference (default ON) in Experiments → Paper & headers: CurioCategory.headerAccent() darkens themedAccent hue-preservingly (light 0.88, dark 0.94 lightness) and is applied to the three category-colored torn-hero fills (Cabinet, Entry Detail, Topic Reveal). Watermarks/ink untouched.
 - Committed + pushed (205b1d4 for astronomy; this batch on top).
 - Content marathon: geology.json 1000 topics merged + GEOLOGY isReady (v27k). Next lanes: medicine, psychology, mathematics, economics, language, engineering, oceans.
+- v27l: updater rewritten to hit releases LIST (prerelease-aware) + isNewer = different-tag; heroBlueState pref (OFF default) + HomeAzure/HomeAzureDark; azure branch in homeRoseAccent/profileRoseAccent/settingsRoseAccent; Quests CurrentQuestCard routed through settingsRoseAccent; Appearance toggle added; pushed.
+- v27l teaser rewrite: astronomy.json done (1000/1000 rich, 74-134w each, avg 103w; 0 validation problems; committed). Next: technologies (1000), geology (1000).
+- v27m teaser rewrite: technologies.json done (1000/1000 rich, 101-260w each, 0 validation problems). Next: elevation-vs-borders app-wide conversion (user: use elevation everywhere, all themes incl AMOLED).
+- v27n elevation pass: app-wide border→elevation conversion complete (37 files). All BorderStroke/Modifier.border card outlines replaced with shadowElevation (+ tonal steps); AMOLED black fills → surfaceContainerLow step (shadows invisible on pure black); selected states raise elevation (4–8dp). Only exception: M3 FilterChip's required border param is 0dp transparent (canonical no-border). Technologies 1000/1000 teasers done + pushed earlier. CI-compile checks (braces, imports, remnants) all pass.
+- v27o CI-compile fixes for the elevation pass (10 spots): duplicate shadowElevation args in EntryDetail mood board, Home floating pill + session card, TopicReveal tags pill, Spin deck surface, ExploreBubble icon button; OutlinedButton (Home) now uses ButtonDefaults.buttonElevation + 0dp border; PetDesigner Card uses CardDefaults.cardElevation; CurioCategoryChip drops the unsupported selectedElevation; ExploreBubble overlay stays flat (windows clip shadows). Plus the "Explore in YouTube" dialog button no longer wraps (maxLines=1 + ellipsis + tighter padding). All brace/dup/elev checks pass.
+- v27p ink-contrast fix (CategoryInk.kt): computed WCAG contrast for every old+new accent in light/pastel — mid-lightness accents (green/lime/sky/amber/emerald/teal/red/fuchsia/blue/coral) read 2.0-4.0:1 as text ink. Added readableLightInk (same-hue, L=0.24) + needsLightDeepInk (luminance>0.105) rule; categoryInk/readableAccentInk/categoryInkFor deepen only mid-lights, onAccent pastel-light always uses the deep twin, pastelFillInk light branch deepened 0.30->0.24. Verified all 22 accents >= 4.5:1 on wash/card/pastel fills.

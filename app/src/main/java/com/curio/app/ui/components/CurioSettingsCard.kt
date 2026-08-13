@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
@@ -34,30 +34,29 @@ import com.curio.app.ui.theme.CurioIcon
  */
 
 /** 28dp paper card — the shared container for Profile and Settings cards.
- *  [border] defaults to the soft hairline outline; pass `null` for a
- *  borderless box (the Settings-hub sections and Profile cards wear this). */
+ *  Elevation (not an outline) defines the card on the page; pass a custom
+ *  [shadowElevation] to lift or flatten it. AMOLED cards wear the scheme's
+ *  faint grey step (real shadows are invisible on pure black, so the
+ *  container step IS the elevation there). */
 @Composable
 fun CurioSettingsCard(
-    border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f)),
+    shadowElevation: Dp = 4.dp,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(28.dp),
-        // v9.x — AMOLED settings cards are proper pitch black; the black-glass
-        // shine edge keeps them readable on the pure-black page.
-        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            Color.Black
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerLow
-        },
+        // v27n — every theme wears the faint container step as its elevation
+        // (the black-glass shine edge keeps AMOLED cards defined on pure
+        // black; the old hairline outline is gone).
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         // AMOLED: tonalElevation overlays the scheme's primary (the coral
         // brand color) onto the container, which washed the pitch-black cards
-        // with a faint rose tint. Black cards need no tonal lift — the black-glass
-        // shine edge keeps them defined, so drop the elevation in AMOLED only.
+        // with a faint rose tint. The black-glass shine edge keeps them
+        // defined, so drop the tonal lift in AMOLED only — shadowElevation
+        // stays so the card reads as raised.
         tonalElevation = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) 0.dp else 3.dp,
-        shadowElevation = 0.dp,
-        border = border,
+        shadowElevation = shadowElevation,
         modifier = modifier
             .fillMaxWidth()
             .categoryEdgeShine(RoundedCornerShape(28.dp))

@@ -85,3 +85,10 @@ Curie now guides the first-run Tour: she comes out of her home, walks to real co
 • Content: Technologies lane passes 1000 topics (computing, internet, AI, robotics, cybersecurity, energy, aerospace, fintech, smart home, health tech) and goes fully live.
 • Experiments → Paper & headers gains "Deeper header color" (on by default): torn-hero headers wear a slightly darker category accent; turn it off for the exact original color.
 • Content: Geology lane passes 1000 topics (rocks, minerals, plate tectonics, earthquakes, volcanoes, glaciers, fossils, caves, ocean geology, deep time, famous geologists) and goes fully live.
+• Fix: update check now finds beta releases — the checker reads the full GitHub releases list (which includes prereleases) instead of the latest-release endpoint that silently skips them, and any different published tag counts as an update.
+• New Appearance option: "Sky azure hero" — the shared torn hero banner (Home, Profile, Settings, Cabinet, Quests, Onboarding) can wear a brighter airy azure instead of the rose, with a deep azure twin for dark mode. Default stays rose.
+• Content: every one of the 1000 astronomy topics now carries a rich, fun quick fact (74-134 words each) written in the explore-first style of the original lanes.
+• Content: all 1000 technologies topics now carry rich, explore-style quick facts (100+ words each) in the same voice as the original lanes.
+• Visual refresh: outlines are gone app-wide — cards, chips, pills and sheets now separate with real elevation (soft shadows), in every theme including AMOLED (where the scheme's faint grey step stands in for shadows on pure black). Selected/active states lift higher instead of drawing rings.
+• Fix: the explore dialog's action labels (Explore in browser / Explore in YouTube) now stay on one line instead of breaking into two.
+• Fix: category-colored text (Cabinet banner, filter chips, icons, wildcard glyphs) is now readable in light and pastel mode — mid-light accents like the new green/lime lanes and the old sky/amber/red/blue families resolve to a deep same-hue ink that passes 4.5:1 contrast, and pastel-fill text deepens too.

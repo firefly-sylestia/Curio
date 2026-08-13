@@ -9,7 +9,6 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -704,7 +703,7 @@ private fun PermissionCard(
     extraContent: @Composable ColumnScope.() -> Unit = {}
 ) {
     val accent = MaterialTheme.colorScheme.primary
-    CurioSettingsCard(border = null) {
+    CurioSettingsCard(shadowElevation = 0.dp) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -1022,7 +1021,7 @@ private fun ThemeSlide() {
             Spacer(Modifier.height(if (compact) 12.dp else 16.dp))
 
             // ── Pastel toggle — borderless box, the setup-card language ──
-            CurioSettingsCard(border = null) {
+            CurioSettingsCard(shadowElevation = 0.dp) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -1072,7 +1071,7 @@ private fun ThemeModeChip(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = if (selected) ink else ink.copy(alpha = 0.14f),
-        border = if (selected) null else BorderStroke(1.dp, ink.copy(alpha = 0.45f))
+        shadowElevation = if (selected) 4.dp else 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -1184,7 +1183,7 @@ private fun SearchEngineChip(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = if (selected) ink else ink.copy(alpha = 0.14f),
-        border = if (selected) null else BorderStroke(1.dp, ink.copy(alpha = 0.45f))
+        shadowElevation = if (selected) 4.dp else 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),

@@ -1,7 +1,6 @@
 package com.curio.app.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -42,7 +41,6 @@ import kotlinx.coroutines.CancellationException
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.cardContentInk
@@ -112,10 +110,11 @@ fun CurioCategoryCard(
     // Idle cards wear the category's tinted surface — the page wash, but a
     // touch stronger — so unselected tiles sit on the washed page as soft
     // tints of their own color instead of shouting in full brightness.
-    // v9.x — AMOLED idle tiles are PROPER pitch black; the category identity
-    // lives on the accent-tinted edge shine instead.
+    // v27n — AMOLED idle tiles wear the scheme's faint container step as
+    // their elevation (the old pitch-black tile + hairline outline read flat;
+    // the container step + accent-tinted edge shine keep the tile defined).
     val idleSurface = when (AppPreferences.themeStyleState) {
-        AppPreferences.THEME_STYLE_AMOLED -> Color.Black
+        AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surfaceContainerLow
         // v12 — Material: a soft category-tinted tile on the hue-neutral
         // page — the old plain device-grey tile read dull and disconnected
         // from the deck's category colors.
@@ -130,13 +129,11 @@ fun CurioCategoryCard(
     }
     val idleInk = category.categoryInk()
     val cardInk = category.cardContentInk()
-    val cardBorder = when (AppPreferences.themeStyleState) {
-        AppPreferences.THEME_STYLE_AMOLED -> BorderStroke(
-            1.dp,
-            category.categoryInk().copy(alpha = if (isSelected) 0.72f else 0.38f)
-        )
-        else -> if (isSelected) BorderStroke(2.dp, cardInk) else category.categoryBorder()
-    }
+    // v27n — elevation replaces the outline: cards lift off the page with a
+    // soft shadow (raised further when selected), and AMOLED tiles swap the
+    // old pure-black fill + hairline for the scheme's faint container step,
+    // since real shadows are invisible on pure black.
+    val cardElevation = if (isSelected) 8.dp else 3.dp
     // Live topic count — reads the warm cache immediately, then reloads (a
     // cache hit) if the pool was ever cleared (e.g. onTrimMemory) so the
     // card never latches a stale "0 topics". With the catalog warmed during
@@ -157,12 +154,8 @@ fun CurioCategoryCard(
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = Color.Transparent,
-        shadowElevation = 0.dp,
+        shadowElevation = cardElevation,
         tonalElevation = 0.dp,
-        border = if (comingSoon) BorderStroke(
-            1.dp,
-            category.categoryInk().copy(alpha = 0.22f)
-        ) else cardBorder,
         modifier = modifier
             .fillMaxWidth()
             .height(104.dp)

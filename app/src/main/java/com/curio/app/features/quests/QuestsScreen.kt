@@ -11,9 +11,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -81,13 +80,13 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.BadgeTier
 import com.curio.app.ui.components.CurioBadgeMedal
@@ -514,11 +513,9 @@ private fun CurrentQuestCard(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val roseHero = if (isCurioDarkTheme()) {
-        CurioColors.HomeRosewoodDark
-    } else {
-        CurioColors.HomeRosewood
-    }
+    // v27l — follows the shared hero family so the azure hero option applies
+    // here too (settingsRoseAccent already branches on heroBlueState).
+    val roseHero = settingsRoseAccent()
     CurioSettingsCard(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1038,7 +1035,7 @@ private fun DailyCard(
                 Surface(
                     shape = RoundedCornerShape(50),
                     color = curioSageInk().copy(alpha = 0.14f),
-                    border = BorderStroke(1.dp, curioSageInk().copy(alpha = 0.30f))
+                    shadowElevation = 2.dp
                 ) {
                     Text(
                         "+${xpPop?.first ?: 0} XP",
@@ -1211,7 +1208,7 @@ private fun BonusLockedRow(coreRemaining: Int) {
                 .size(34.dp)
                 .clip(RoundedCornerShape(11.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(11.dp)),
+                .shadow(2.dp, RoundedCornerShape(11.dp)),
             contentAlignment = Alignment.Center
         ) {
             CurioIcon(
@@ -1483,11 +1480,7 @@ private fun BadgeTile(
         shape = RoundedCornerShape(20.dp),
         color = if (unlocked) accent.copy(alpha = 0.10f)
         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
-        border = BorderStroke(
-            1.dp,
-            if (unlocked) accent.copy(alpha = 0.30f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-        ),
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         Column(
@@ -1667,11 +1660,7 @@ private fun PassportStamp(
             CurioPassport.Stamp.UNSEEN -> accent.copy(alpha = 0.10f)
             else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
         },
-        border = BorderStroke(
-            1.dp,
-            if (stamp == CurioPassport.Stamp.UNSEEN) ink.copy(alpha = 0.45f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-        ),
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         Column(

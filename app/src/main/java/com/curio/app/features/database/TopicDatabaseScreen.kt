@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -164,8 +163,12 @@ fun TopicDatabaseScreen(navController: NavController) {
     // so without its own lane here those topics would never be browsable.
     // Always present (the browser is an explicit browse-all surface) even if
     // Wildcard is hidden from the tab pickers in Manage Categories.
+    // v27l — the filter pills + browse sections run alphabetically by
+    // display name (Wildcard naturally sits near the end), so lanes are
+    // easy to find instead of following the deck's default order.
     val visibleCategories = (CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD)))
         .distinctBy { it.id }
+        .sortedBy { it.displayName.lowercase() }
     // The merged wildcard pool duplicates every canonical topic, so the
     // Wildcard lane shows ONLY the hand-curated wildcard.json originals —
     // the ten lanes keep their own topics and the sections never overlap.
@@ -655,8 +658,7 @@ private fun DatabaseFilterChip(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = if (selected) tint else MaterialTheme.colorScheme.surfaceContainerLow,
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        shadowElevation = if (selected) 4.dp else 2.dp
     ) {
         Text(
             text = if (count > 0) "$label $count" else label,

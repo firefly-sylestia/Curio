@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -364,7 +363,7 @@ private fun JournalVoiceNoteRow(
             onClick = onRecord,
             shape = RoundedCornerShape(12.dp),
             color = tint,
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.5f))
+            shadowElevation = 2.dp
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -389,7 +388,7 @@ private fun JournalVoiceNoteRow(
         AudioRecorder.State.PAUSED -> Surface(
             shape = RoundedCornerShape(12.dp),
             color = tint,
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.5f))
+            shadowElevation = 2.dp
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -431,7 +430,7 @@ private fun JournalVoiceNoteRow(
         AudioRecorder.State.STOPPED -> Surface(
             shape = RoundedCornerShape(12.dp),
             color = tint,
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.5f))
+            shadowElevation = 2.dp
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),

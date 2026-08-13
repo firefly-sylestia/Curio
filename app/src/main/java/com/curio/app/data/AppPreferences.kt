@@ -67,6 +67,7 @@ object AppPreferences {
     private const val KEY_SAVES_WEEK_COUNTS = "saves_week_counts"
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
+    private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
     // v7.7 — experimental peek-card redesign, four independent toggles so
     // each upgrade can be A/B'd on its own: top-lit gradient fill, tinted
@@ -196,6 +197,12 @@ object AppPreferences {
     // Default ON (v7.x — the soft look is the app's shipped default now).
     // Seeded from prefs in [initThemeMode].
     var pastelColorsState by mutableStateOf(true)
+        private set
+
+    // Sky-azure hero variant (v27l) — when ON, the shared torn hero
+    // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
+    // azure instead of the rose-wood. Default OFF (rose stays).
+    var heroBlueState by mutableStateOf(false)
         private set
 
     // Pastel crown depth (v7.12, EXPERIMENTAL) — when pastel mode is ON
@@ -472,6 +479,7 @@ object AppPreferences {
         themeStyleState = getThemeStyle(context)
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
+        heroBlueState = isHeroBlueEnabled(context)
         promoModeState = isPromoModeEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
@@ -556,6 +564,16 @@ object AppPreferences {
     fun setPastelCrownDepthEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PASTEL_CROWN_DEPTH, enabled).apply()
         pastelCrownDepthState = enabled
+    }
+
+    // ── Sky-azure hero (v27l) ─────────────────────────────────────────
+    /** Whether the shared torn hero wears the airy pastel azure (default off). */
+    fun isHeroBlueEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HERO_BLUE, false)
+
+    fun setHeroBlueEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HERO_BLUE, enabled).apply()
+        heroBlueState = enabled
     }
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────

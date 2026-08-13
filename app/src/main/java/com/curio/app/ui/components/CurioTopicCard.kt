@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -47,7 +46,6 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.categoryBorder
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
@@ -115,18 +113,14 @@ fun CurioEntryCard(
         // surfaceContainerHigh lift is replaced by the black-glass shine
         // edge, so the cards read as boxes without sacrificing OLED black.
         color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            Color.Black
+            MaterialTheme.colorScheme.surfaceContainerLow
         } else {
             cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
         },
-        border = if (selected) {
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        } else {
-            cat.categoryBorder(
-                fallback = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-            )
-        },
-        shadowElevation = 0.dp,
+        // v27n — elevation replaces the outline: selected cards lift higher
+        // (raised instead of ringed), AMOLED cards wear the faint container
+        // step since shadows are invisible on pure black.
+        shadowElevation = if (selected) 8.dp else 3.dp,
         tonalElevation = 1.dp
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -357,7 +351,6 @@ private fun EntryFormatBadges(entry: CurioEntry) {
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.surface),
                 modifier = Modifier.size(18.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -378,7 +371,6 @@ private fun FormatBadgeCircle(glyph: String) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surface),
         modifier = Modifier.size(18.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {

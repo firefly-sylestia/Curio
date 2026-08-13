@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -389,8 +388,7 @@ fun SettingsHeroActionPill(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        border = BorderStroke(1.dp, ink.copy(alpha = 0.42f)),
-        shadowElevation = 0.dp,
+        shadowElevation = 3.dp,
         modifier = modifier
     ) {
         Row(
@@ -457,6 +455,12 @@ fun settingsRoseAccent(): Color {
         // black plate and the rose accent comes through the watermark
         // collage + back pill instead of a tinted fill.
         return Color.Black
+    }
+    // v27l — optional sky-azure hero: when enabled, the shared hero wears
+    // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
+    if (AppPreferences.heroBlueState) {
+        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
+        else CurioColors.HomeAzure
     }
     val base = toHsl(CurioColors.HomeRosewood)
     return if (isCurioDarkTheme()) {
@@ -557,7 +561,7 @@ fun SettingsHubScreen(navController: NavController) {
                         grouped.forEach { (sectionLabel, results) ->
                             item(span = { GridItemSpan(maxLineSpan) }) { CurioSectionLabel(sectionLabel) }
                             item {
-                                CurioSettingsCard(border = null) {
+                                CurioSettingsCard(shadowElevation = 0.dp) {
                                     results.forEachIndexed { index, result ->
                                         if (index > 0) CurioSettingsDivider()
                                         CurioSettingsRow(result.row.icon, result.row.title, result.row.subtitle) {
@@ -581,7 +585,7 @@ fun SettingsHubScreen(navController: NavController) {
                     item(span = { GridItemSpan(maxLineSpan) }) { CurioSectionLabel(section.label) }
                     section.cards.forEach { card ->
                         item {
-                            CurioSettingsCard(border = null) {
+                            CurioSettingsCard(shadowElevation = 0.dp) {
                                 if (card.headerIcon != null && card.headerTitle != null && card.headerSubtitle != null) {
                                     CurioCardHeader(card.headerIcon, card.headerTitle, card.headerSubtitle)
                                 }

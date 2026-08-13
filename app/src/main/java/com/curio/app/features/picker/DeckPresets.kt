@@ -1,6 +1,5 @@
 package com.curio.app.features.picker
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -105,11 +104,7 @@ fun PickerPresetChip(
         } else {
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         },
-        border = BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
-        ),
+        shadowElevation = if (selected) 3.dp else 1.dp,
         modifier = Modifier
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {

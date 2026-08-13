@@ -1,6 +1,5 @@
 package com.curio.app.features.capture.formats
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -291,10 +290,7 @@ fun AddImageButton(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         color = tint,
-        border = BorderStroke(
-            width = 1.dp,
-            color = accent.copy(alpha = 0.5f)
-        ),
+        shadowElevation = 2.dp,
         modifier = modifier.size(80.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -716,7 +712,7 @@ fun QuoteCardsSection(
             enabled = enabled,
             shape = RoundedCornerShape(14.dp),
             color = paperSurface().copy(alpha = 0.6f),
-            border = BorderStroke(1.dp, paperBorder()),
+            shadowElevation = 3.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -897,8 +893,7 @@ fun MoodChipsRow(
                     onClick = { onMoodChange(if (selected) null else m) },
                     shape = RoundedCornerShape(50),
                     color = chipBg,
-                    border = if (selected) null
-                            else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    shadowElevation = if (selected) 3.dp else 1.dp,
                     modifier = Modifier.scale(chipScale)
                 ) {
                     Row(

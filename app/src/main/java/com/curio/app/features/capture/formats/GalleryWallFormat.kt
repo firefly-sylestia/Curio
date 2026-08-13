@@ -5,7 +5,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.curio.app.data.CaptureData
 import com.curio.app.data.NotePaperColor
 import com.curio.app.data.NotePaperStyle
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -582,7 +581,7 @@ private fun MoodBoardCanvas(
         // Faint accent rule — the board sits on the tinted page, so a slim
         // category-colored border keeps it from visually blending into the
         // wash (full-screen editor is on a plain dialog background, no need).
-        border = if (fullScreen) null else BorderStroke(1.dp, accent.copy(alpha = 0.26f)),
+        shadowElevation = if (fullScreen) 0.dp else 2.dp,
         // v7.17 — the inline editor canvas draws ABOVE the caption field +
         // quote cards below it, so the double-tap zoom overlay (which
         // overflows the canvas) never hides behind them. The full-screen

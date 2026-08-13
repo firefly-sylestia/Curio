@@ -6,9 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -268,7 +268,14 @@ fun CurioBadgeMedal(
     val questionSize = with(density) { (medalSize * 0.42f).toSp() }
 
     Box(
-        modifier = modifier.size(medalSize),
+        modifier = modifier
+            .size(medalSize)
+            // v27n — ONE clean shadow behind the whole coin: the opaque metal
+            // base covers the inner blur, so only the soft lift around the
+            // edge reads. The old per-part shadows (applied AFTER their
+            // fills) smeared dark blur over the metal and made the medals
+            // look broken.
+            .shadow(2.dp, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         // A soft halo behind the rarest metals (platinum + secret).
@@ -337,32 +344,34 @@ fun CurioBadgeMedal(
             }
         } else {
             // Locked silhouette — Secret badges wear a darker, violet-tinted one.
+            // v27n — shadow FIRST (behind the fill) and the fill OPAQUE: the
+            // old order drew the shadow on top of a translucent fill, smearing
+            // dark blur over the silhouette.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .shadow(2.dp, CircleShape)
                     .clip(CircleShape)
                     .background(
                         if (tier == BadgeTier.SECRET) {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+                            lerp(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                0.22f
+                            )
                         } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                            MaterialTheme.colorScheme.surfaceVariant
                         }
                     )
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f), CircleShape)
             )
         }
-        // The inner ring and its glyph.
+        // The inner glyph plate — the coin's edge is implied by the metal
+        // gradient (the medal's shadow now lives on the outer coin Box, so no
+        // per-part shadow smears blur over the metal here).
         Box(
             modifier = Modifier
                 .fillMaxSize(0.80f)
-                .clip(CircleShape)
-                .then(
-                    if (unlocked) {
-                        Modifier.border(1.5.dp, Color.White.copy(alpha = 0.55f), CircleShape)
-                    } else {
-                        Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
-                    }
-                ),
+                .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
             when {
@@ -398,9 +407,11 @@ fun CurioBadgeMedal(
                     .align(Alignment.TopCenter)
                     .offset(y = (medalSize * -0.05f))
                     .size(medalSize * 0.26f)
+                    // v27n — shadow before the clip+fill so it renders BEHIND
+                    // the opaque gem (the old order drew it on top).
+                    .shadow(2.dp, CircleShape)
                     .clip(CircleShape)
                     .background(Brush.linearGradient(listOf(Color.White, accent)))
-                    .border(1.dp, Color.White.copy(alpha = 0.85f), CircleShape)
             )
         }
         // Earned marker — a gold check, or a sparkle on secret badges.
@@ -409,9 +420,10 @@ fun CurioBadgeMedal(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .size(medalSize * 0.31f)
+                    // v27n — shadow behind the opaque marker fill, not on top.
+                    .shadow(2.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(if (tier == BadgeTier.SECRET) accent else CurioColors.ButterYellow)
-                    .border(1.5.dp, Color.White, CircleShape),
+                    .background(if (tier == BadgeTier.SECRET) accent else CurioColors.ButterYellow),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
@@ -473,8 +485,16 @@ fun CurioBadgeStrip(
                 Surface(
                     onClick = onViewAll,
                     shape = CircleShape,
-                    color = curioSageInk().copy(alpha = 0.13f),
-                    border = BorderStroke(1.dp, curioSageInk().copy(alpha = 0.28f))
+                    // v27n — OPAQUE sage-tinted fill (was 13% alpha, which let
+                    // the elevation shadow bleed through and read as a blurry
+                    // disc); the opaque lerp resolves to the same tint over
+                    // the card surface.
+                    color = lerp(
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        curioSageInk(),
+                        0.13f
+                    ),
+                    shadowElevation = 2.dp
                 ) {
                     Box(
                         modifier = Modifier.size(medalSize),

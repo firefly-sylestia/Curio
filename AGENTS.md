@@ -104,6 +104,17 @@ definition file**. Do not assume parameter names from memory.
     `DevFullAppTestRunner` in Developer Settings can verify constructors,
     settings toggles, and database operations without a full Gradle build.
 
+11. **SHADOW ORDER + OPAQUE FILLS** — `Modifier.shadow()` must come BEFORE
+    the fill in the chain (`.shadow(e).clip(shape).background(color)`), never
+    after — a shadow placed after the background paints a dark blur ON TOP of
+    the fill ("blurry broken background"). `shadowElevation` on a Surface only
+    renders cleanly when the fill is OPAQUE: translucent/glass fills (alpha <
+    1) let the shadow bleed through, so use an opaque `lerp(fill, accent,
+    alpha)` blend instead of `color.copy(alpha = …)`. Never add elevation to
+    ANIMATING deck cards — v24 rejected deck shadows ("weird look while the
+    cards animate"); the v27n elevation pass silently re-added a 2dp halo and
+    it regressed into a boxy artifact during the reel.
+
 ### ✅ DO COMMIT AND PUSH AFTER EVERY FIX
 
 After **every completed fix or change**, agents MUST commit and push before

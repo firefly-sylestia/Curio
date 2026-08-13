@@ -1,10 +1,10 @@
 package com.curio.app.ui.theme
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
@@ -27,13 +27,15 @@ fun CurioCategory.categoryInk(): Color {
     // The DEEP accent (not themedAccent) in light mode: pastel mode softens
     // themedAccent but text/icons on plain surfaces must stay deep to read.
     if (isCurioDarkTheme()) return lightAccent
-    // v7.5 — pastel mode: accents that are already pale (the mixed-deck
-    // blend, the wildcard coral) can't serve as their own ink on the light
-    // surfaces — a pastel-on-pastel would wash out (e.g. a mixed deck's
-    // non-selected pills). Return a deep twin of the same hue, mirroring
-    // [onAccent]'s pale-accent rule. Deep accents stay themselves.
-    if (AppPreferences.pastelColorsState && accent.isPale()) return deepHueInk(accent)
-    return accent
+    // v27p — light mode (plain AND pastel): mid-lightness accents (the new
+    // green/lime lanes, the old sky/amber/red/blue families, the pale
+    // wildcard coral) can't serve as their own ink on the light surfaces —
+    // the washed page and pastel fills drop them below ~4.5:1 (e.g. green
+    // text on the green page wash reads ~3.8:1). Return a deep twin of the
+    // SAME hue so accent text and icons stay readable; genuinely deep
+    // accents (brown, navy, indigo, plum, tech slate…) keep themselves
+    // exactly as before.
+    return if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
 }
 
 /**
@@ -99,7 +101,7 @@ fun CurioCategory.headerAccent(): Color {
 @Composable
 fun CurioCategory.readableAccentInk(): Color {
     if (isCurioDarkTheme()) return lightAccent
-    return if (accent.isPale()) deepHueInk(accent) else accent
+    return if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
 }
 
 /**
@@ -130,7 +132,12 @@ fun CurioCategory.onAccent(): Color = when {
     // The wildcard's accent is ALREADY a pastel pink — a deep hue twin (the
     // brand maroon) reads on it, not the pale accent itself.
     accent.isPale() -> CurioColors.DeepPlum
-    else -> accent
+    // v27p — pastel light: content on the airy pastel fills flips to a DEEP
+    // same-hue ink (the design contract), but the old `accent` as ink still
+    // dropped even deep accents below 4.5:1 on the light pastel (indigo
+    // 4.1, violet 3.7, green 3.6). The deep twin pins lightness low enough
+    // that every category's pastel text passes.
+    else -> readableLightInk(accent)
 }
 
 /**
@@ -183,8 +190,11 @@ fun pastelFillInk(fill: Color): Color = when {
     !AppPreferences.pastelColorsState -> Color.White
     isCurioDarkTheme() -> lerp(fill, Color.White, 0.85f)
     else -> {
+        // v27p — deepen the light pastel-fill ink (0.30 -> 0.24 lightness)
+        // so even green/yellow pastels (Chemistry, Biology, the mixed-deck
+        // blends) keep their dark ink above 4.5:1.
         val a = toHsl(fill)
-        fromHsl(a.h, a.s.coerceIn(0.15f, 0.60f), 0.30f)
+        fromHsl(a.h, a.s.coerceIn(0.15f, 0.60f), 0.24f)
     }
 }
 
@@ -198,8 +208,9 @@ fun pastelFillInk(fill: Color): Color = when {
  */
 internal fun CurioCategory.categoryInkFor(pastel: Boolean, dark: Boolean): Color = when {
     dark -> lightAccent
-    pastel && accent.isPale() -> deepHueInk(accent)
-    else -> accent
+    // v27p — same light-mode rule as [categoryInk]: deepen mid-lightness
+    // accents so watermark glyphs track the text ink exactly.
+    else -> if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
 }
 
 /**
@@ -225,6 +236,29 @@ internal fun deepHueInk(color: Color): Color {
     val a = toHsl(color)
     return fromHsl(a.h, a.s.coerceIn(0.15f, 0.60f), 0.30f)
 }
+
+/**
+ * v27p — LIGHT-mode readable ink of the SAME hue as an accent. Mid-lightness
+ * accents (green, lime, sky, amber, emerald, teal, red, fuchsia, blue — and
+ * the pale wildcard coral) read far lighter than their hue suggests once
+ * gamma is applied, so the old L=0.30 deep twin still left e.g. green text
+ * at ~4:1 on the washed page. Pinning lightness to 0.24 gets every
+ * category's accent text over 4.5:1 on the light page, card and pastel
+ * fills (checked against the whole palette, old + new lanes).
+ */
+internal fun readableLightInk(color: Color): Color {
+    val a = toHsl(color)
+    return fromHsl(a.h, a.s.coerceIn(0.20f, 0.55f), 0.24f)
+}
+
+/**
+ * v27p — whether an accent needs its deep twin as LIGHT-mode ink: accents
+ * whose gamma-corrected luminance passes ~0.105 read below ~4.5:1 on the
+ * light surfaces (green/lime/sky/amber/emerald/teal/red/fuchsia/blue and
+ * the pale wildcard coral). Deep accents (brown, navy, indigo, plum, tech
+ * slate, forest…) stay under the bar and keep themselves as ink.
+ */
+private fun Color.needsLightDeepInk(): Boolean = luminance() > 0.105f
 
 /**
  * Theme-aware wash color for a category-aware page BACKGROUND (Spin, Topic
@@ -338,8 +372,7 @@ fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorSche
  * mid-tone is desaturated toward a neutral grey (deep accents otherwise
  * read muddy over midnight) and blended a touch stronger than the page wash
  * so the chip LIFTS off the tinted background instead of sinking into it —
- * less saturated, more contrast. The crisp edge comes from
- * [categoryBorder]'s light-twin hairline. Honors the Settings tint toggle —
+ * less saturated, more contrast. Honors the Settings tint toggle —
  * when it's off, [base] is returned unchanged so chips go back to the plain
  * theme surface.
  */
@@ -373,34 +406,6 @@ private fun lightSurfaceTint(accent: Color): Color =
     // fills instead of dissolving into the background.
     if (AppPreferences.pastelColorsState) lightAccentTint(accent, saturation = 0.28f, lightness = 0.86f)
     else lightAccentTint(accent, saturation = 0.36f, lightness = 0.86f)
-
-/**
- * Theme-aware border for CARDS and BUTTONS that wear a tinted surface on a
- * tinted page background.
- *
- * Tinted surfaces ([categorySurface], `category.tint`, etc.) sit on a
- * category-washed page, so without a rule they can visually melt into the
- * background. This returns a slim theme-aware edge — deep accent in light
- * mode, light twin in dark (same resolution as [categoryInk]) — at a low
- * alpha so the card/button reads as a distinct surface without a hard line.
- *
- * Honors the Settings tint toggle: when it's off, [fallback] is returned
- * (null by default = no border), so plain-theme pages keep their exact
- * pre-tint look.
- */
-@Composable
-fun CurioCategory.categoryBorder(fallback: BorderStroke? = null): BorderStroke? {
-    if (!AppPreferences.tintWashEffective()) {
-        // Material keeps a quiet accent hairline so cards/pills read defined
-        // on the hue-neutral surfaces (AMOLED wears its own black-glass
-        // borders; Curio-with-tint-off falls back to the caller's default).
-        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-            return BorderStroke(1.dp, categoryInk().copy(alpha = 0.26f))
-        }
-        return fallback
-    }
-    return BorderStroke(1.dp, categoryInk().copy(alpha = 0.30f))
-}
 
 /**
  * Per-family dark-mode wash tuning.
