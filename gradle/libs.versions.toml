@@ -40,10 +40,10 @@ leakcanary = "2.14"
 uiUnit = "1.11.2"
 osmdroid = "6.1.18"
 graphicsShapes = "1.0.1"
-// v27t — Compose Multiplatform desktop port: the Kotlin app as a native
-// Windows .exe (and macOS/Linux). 1.11.1 is the latest stable CMP release;
-// the plugin is always compatible with the newest Kotlin, so it pairs with
-// the repo's Kotlin 2.3.21.
+# v27t — Compose Multiplatform desktop port: the Kotlin app as a native
+# Windows .exe (and macOS/Linux). 1.11.1 is the latest stable CMP release;
+# the plugin is always compatible with the newest Kotlin, so it pairs with
+# the repo's Kotlin 2.3.21.
 composeMultiplatform = "1.11.1"
 kotlinxSerializationJson = "1.8.0"
 
