@@ -109,6 +109,7 @@ import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
@@ -636,6 +637,11 @@ fun TopicRevealScreen(
                             // ── 2.5 Action row — Express yourself / Explore ─────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
+                // v29 — when the topic carries reading/watching progress
+                // (books: pages, anime: episodes) the floating progress
+                // button straddles the hero's bottom edge, so the action
+                // row drops a little lower to stay clear of it.
+                val progressFloatGap = if (resolved?.progressTarget != null) 40.dp else 16.dp
                 RevealContentEntrance(delayMillis = 40) {
                     RevealActionRow(
                         cat = cat,
@@ -643,7 +649,7 @@ fun TopicRevealScreen(
                         resolved = latestResolved,
                         onExplore = latestOnExplore,
                         onAlready = latestOnAlready,
-                        modifier = Modifier.padding(top = 16.dp)
+                        modifier = Modifier.padding(top = progressFloatGap)
                     )
                 }
 
@@ -1533,8 +1539,13 @@ private fun HeroCard(
         label = "revealHeroHeight"
     )
 
+    // v29 — the hero sits in a Box so the floating progress button can
+    // straddle the card's bottom edge (half on the hero, half floating in
+    // the gap above the action row). Only rendered for topics that carry a
+    // progress target (books: pages, anime: episodes).
+    Box(modifier = modifier.fillMaxWidth()) {
     Surface(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(heroHeight)
             .then(
@@ -1758,6 +1769,23 @@ private fun HeroCard(
             } // inner background Box
         } // BoxWithConstraints
     } // HeroCard Surface
+
+    // ── Floating progress button — straddles the hero's bottom edge. ──
+    // v29 — the long accent-shaped control floats half-on the card so it
+    // reads as a button hovering over the hero; tapping opens the progress
+    // editor (slider + Finished/Reset) which writes to TopicProgressStore.
+    val heroTopic = resolved
+    if (heroTopic != null) {
+        CurioProgressPill(
+            topic = heroTopic,
+            accent = cat.themedAccent(),
+            contentColor = cat.onAccent(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = 22.dp)
+        )
+    }
+    } // HeroCard floating Box
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

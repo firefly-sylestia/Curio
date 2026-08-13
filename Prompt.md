@@ -1,6 +1,52 @@
 # Prompt.md — Request log
 
-## Current request — app-only quick-fact check: NOTHING under 30/50 words (v28)
+## Current request — topic expansion to 1000 + v29 per-topic progress (pages/episodes)
+
+### What was asked
+1. "Continue expanding the topics to 1000, keep quick facts 35–70 words."
+   (Everything → 1000; new entries tier 1 marquee — "remember to add the
+   best one"; "don't ever trim entries bruh — it's fine if over 1000".)
+2. "Add book page counts and anime episode counts. In Cabinet add a
+   progress count. In detail view too, make it a floating option."
+3. User decisions (ask_user): floating long-shaped accent button with a
+   progress view, clickable to edit; reveal card + cabinet + detail;
+   always-on (no toggle).
+4. "Analyze and tell me how many entries are low tier" — answered: only
+   pre-existing long-tail; all my additions flipped to tier 1.
+5. "Commit and push everything, then continue." — pushed `5365d4a`.
+
+### Done (pushed 5365d4a)
+- **Expansion:** films, history, albums → exactly 1000 unique topics each
+  (35–70 word quick facts, tier 1 marquee, no dup ids/names).
+- **Pet eyes:** scroll-following removed entirely — eyes aim only at real
+  taps/hover, canceled once a drag starts.
+- **Dark mode:** `curioDarkOutline` function + its 'Card outlines' settings
+  option removed (full border audit); AMOLED hairline border added BACK on
+  the main deck card.
+- **v29 progress groundwork:** `pageCount`/`episodeCount` on CurioTopic +
+  JSON loader; `TopicProgressStore` (SharedPreferences JSON, reactive
+  Compose state, seeded in MainActivity); `CurioProgressPill` component
+  (long accent pill, % ring + count + slim bar + Edit hint, tap → slider
+  editor dialog with Finished/Reset/Save).
+
+### Done (this round, committed NOT pushed — user says when to push)
+- **Wiring:** floating `CurioProgressPill` on the reveal hero (straddles the
+  bottom edge, action row drops 16→40dp when progress exists), a compact
+  strip at the bottom of Cabinet entry cards, and a floating button over
+  the EntryDetail hero bottom edge. All three read/write the same
+  TopicProgressStore.
+- **Data:** books.json — all 500 topics now carry `pageCount` (497 curated
+  from a dictionary of widely-cited paperback counts, 0 estimated after
+  accent folding). anime.json — 39 TV series carry `episodeCount`; 22
+  films deliberately skipped (a film has no episodes to track).
+- **Docs:** CURIO_DATA_PLAN.md v29 schema-drift note; this Prompt.md.
+
+### Validation
+Brace balance OK (4 files), JSON parses, all books have pageCount > 0,
+all TV anime episodeCount > 0, no dup ids/names in expanded files. No
+Gradle locally (env rule) — CI on push is the gate.
+
+## Prior — app-only quick-fact check: NOTHING under 30/50 words (v28)
 
 ### What was asked
 "Ignore the web — just focus on the app. Re-analyse and tell me [what has

@@ -244,9 +244,24 @@ fun CurioEntryCard(
                     EntryFormatBadges(entry)
                 }
             }
+            // v29 — per-topic progress (books: pages, anime: episodes): a
+            // compact long accent strip at the bottom of the card that also
+            // works as a tap-to-edit control. Reads the SAME TopicProgressStore
+            // as the reveal card and the detail hero, so marking progress
+            // anywhere follows the topic everywhere.
+            if (entry.topic.progressTarget != null) {
+                Spacer(Modifier.height(8.dp))
+                CurioProgressPill(
+                    topic = entry.topic,
+                    accent = accent,
+                    contentColor = cat.onAccent(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
+
 
 /**
  * A scaled-down version of the torn-hero watermark: a mirrored pair of

@@ -104,6 +104,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.NotePaperCard
@@ -714,6 +715,22 @@ fun EntryDetailScreen(
                         }
                         }
                     }
+                }
+                // v29 — floating progress button for books (pages) and
+                // anime (episodes): a long accent-shaped control hovering
+                // over the hero's bottom edge. Tapping opens the progress
+                // editor (slider + Finished/Reset) — the SAME
+                // TopicProgressStore as the reveal card and the Cabinet
+                // cards, so progress follows the topic everywhere.
+                if (resolvedEntry.topic.progressTarget != null) {
+                    CurioProgressPill(
+                        topic = resolvedEntry.topic,
+                        accent = cat.themedAccent(),
+                        contentColor = cat.onAccent(),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .offset(y = 12.dp)
+                    )
                 }
             }
 

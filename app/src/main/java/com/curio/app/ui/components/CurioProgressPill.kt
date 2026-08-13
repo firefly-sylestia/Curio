@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,6 +69,9 @@ fun CurioProgressPill(
 
     Box(
         modifier = modifier
+            // v29 — soft float shadow so the control reads as a button
+            // hovering over the card (shadow BEFORE the fill, per DOX).
+            .shadow(4.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .background(fill)
             .clickable { showEditor = true }

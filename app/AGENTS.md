@@ -224,6 +224,22 @@ app/src/main/java/com/curio/app/
   accumulates the vertical travel of a press-drag and fires the roll once
   it clearly scrolls, gated to one roll per ~350ms so a fast fling gives a
   few discrete rolls instead of restarting every frame.
+- **v29 — per-topic progress (pages read / episodes watched).**
+  `CurioTopic` gained optional `pageCount` (BOOKS) and `episodeCount`
+  (ANIME) — both parsed by `TopicJsonLoader`, both absent from legacy
+  JSON (null = no progress tracking; anime films deliberately carry no
+  `episodeCount`, a film has no episodes to track). Progress itself lives
+  in `data/TopicProgressStore.kt` — a SharedPreferences JSON map keyed by
+  topic id, exposed as reactive Compose state (`progressState`), seeded
+  once from `MainActivity.onCreate`, and shared by every surface: the
+  Topic Reveal hero, the Cabinet entry cards, and the EntryDetail hero.
+  The shared control is `ui/components/CurioProgressPill.kt`: a LONG
+  accent-shaped floating button (% ring + count + slim bar + Edit hint),
+  tap → slider editor dialog (0..target with Reset/Finished/Save). On the
+  reveal hero it straddles the card's bottom edge (the action row drops
+  16→40dp when progress exists); on Cabinet cards it's a compact strip in
+  the card body; on EntryDetail it floats over the hero's bottom edge.
+  Always-on (no experiment toggle, per user decision).
 - **v28 — scrolling pets look UP/DOWN in a line, never a circle.** The v27v
   "roll" played a FULL 2π CIRCLE of the eyes on every scroll — it read as
   the pet's eyes spinning whenever you scrolled. Replaced with a vertical
@@ -240,8 +256,13 @@ app/src/main/java/com/curio/app/
   the wheel — but a touch finger moves OPPOSITE to the content (swiping
   UP scrolls the page DOWN), so on a phone scrolling down made the pet
   look UP. The touch branch now inverts the finger delta
-  (`dy > 0 → -1, else 1`), so the pet always looks the way the CONTENT
+  (`dy > 0 → -1, else 1`), so  the pet always looks the way the CONTENT
   moves — consistent with the wheel branch (scrolling down = look down).
+  **v29 removal:** scroll-following is GONE entirely — the user wanted the
+  eyes "normal again, no scroll following". `scrollDir`/`scrollTick`/the
+  scrollLook Animatable are removed; the eyes aim only at real taps/hover
+  (the tracker cancels the aim as soon as a press starts dragging), so
+  scrolling no longer moves the gaze at all.
 - **v28 — dark-mode elevation visibility: soft light glow + hairline
   outline.** Compose's black shadows are INVISIBLE on the app's midnight
   surfaces, so dark mode now draws elevation two extra ways via two new
@@ -262,6 +283,9 @@ app/src/main/java/com/curio/app/
   tiles), Topic Reveal (already-there button, teaser card), and the
   Category Picker's preset chips + Original/New page tabs + Mix button.
   Glow must precede the fill in the modifier chain (rule 11).
+  **v29 removal:** the user rejected the outline look — `curioDarkOutline`
+  (and its `darkOutlineState` pref + 'Card outlines' settings row) is
+  REMOVED entirely; only `curioDarkGlow` remains (dark-mode-only).
 - **v28 — AMOLED is BORDER-FREE (full border-removal audit).** Two
   systematic border sources were removed from AMOLED: (1)
   `Modifier.categoryEdgeShine` no longer draws its full-edge HAIRLINE RING
@@ -273,7 +297,11 @@ app/src/main/java/com/curio/app/
   v28 hairline) never draws in AMOLED either. The AMOLED raised look is
   now top-lit glass shine + the v28 soft glow — no rings. Intentional
   design borders kept: CurioBadges coin rims + the Quests passport stamp
-  ring (both are element identity, not elevation).
+  ring (both are element identity, not elevation). **v29 exception:** the
+  user asked for a border BACK on the AMOLED MAIN deck card only —
+  `categoryEdgeShine` gained an `amoledHairline` param (default false)
+  that redraws the hairline ring just for that card; everything else stays
+  border-free.
 - **v28 — Spin FilterSheet: live chip search + 1dp chips.** The deck's
   filter bottom sheet (`FilterSheet` in `SpinScreen.kt`) gained a
   `CurioSearchField` under the subtitle: typing narrows EVERY chip group
