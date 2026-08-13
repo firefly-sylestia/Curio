@@ -110,6 +110,10 @@ object AppPreferences {
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
+    // v27s — the music service the "Watch in" explore action opens for
+    // Album / Artist / Song topics (YouTube Music by default; Apple Music,
+    // Spotify).
+    private const val KEY_MUSIC_SERVICE = "music_service"
     // v27 — recycle-bin retention: how many days soft-deleted captures stay
     // before being auto-deleted forever (0 = keep forever). Default 30 days.
     private const val KEY_RECYCLE_BIN_EXPIRY_DAYS = "recycle_bin_expiry_days"
@@ -327,6 +331,9 @@ object AppPreferences {
     // Explore browser button. Reactive so the Topic Reveal dialog copy and
     // the Settings row update the moment it changes.
     var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
+    // v27s — the chosen music service id ("youtube_music", "apple_music",
+    // "spotify") for the "Watch in" action on Album / Artist / Song topics.
+    var musicServiceState by mutableStateOf(MusicService.YOUTUBE_MUSIC.id)
     var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
@@ -503,6 +510,7 @@ object AppPreferences {
         smartDensityModeState = getSmartDensityMode(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         searchEngineState = getSearchEngine(context)
+        musicServiceState = getMusicService(context)
         recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
@@ -877,6 +885,19 @@ object AppPreferences {
     fun setSearchEngine(context: Context, engine: SearchEngine) {
         prefs(context).edit().putString(KEY_SEARCH_ENGINE, engine.id).apply()
         searchEngineState = engine.id
+    }
+
+    /**
+     * v27s — the user's chosen music service id for the "Watch in" explore
+     * action, defaulting to YouTube Music so existing behavior is unchanged
+     * until they switch.
+     */
+    fun getMusicService(context: Context): String =
+        prefs(context).getString(KEY_MUSIC_SERVICE, null) ?: MusicService.YOUTUBE_MUSIC.id
+
+    fun setMusicService(context: Context, service: MusicService) {
+        prefs(context).edit().putString(KEY_MUSIC_SERVICE, service.id).apply()
+        musicServiceState = service.id
     }
 
     /** v27 — recycle-bin retention window in days (0 = keep forever). */

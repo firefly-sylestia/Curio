@@ -96,11 +96,15 @@ import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TourController
+import com.curio.app.data.MusicService
+import com.curio.app.data.SearchEngine
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreSearchUrl
+import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
+import com.curio.app.data.isMusicTopic
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -115,8 +119,10 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
+import com.curio.app.ui.theme.BrandMonogram
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.brandTile
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
@@ -890,6 +896,14 @@ fun TopicRevealScreen(
     if (showExploreDialog && resolved != null) {
         val topic = resolved
         val action = topic.exploreAction
+        // v27s — music topics (Album / Artist / Song) route the second pill
+        // to the user's chosen music service; everything else stays YouTube.
+        val musicTopic = topic.isMusicTopic()
+        val watchService = MusicService.fromId(AppPreferences.musicServiceState)
+        val (engineTile, engineLetter) = SearchEngine.fromId(AppPreferences.searchEngineState).brandTile()
+        val (watchTile, watchGlyph) =
+            if (musicTopic) watchService.brandTile()
+            else Color(0xFFFF0000) to CurioIcons.YouTubeActivity
         // v11 — the dialog wears the shared Curio dialog theme: the card-
         // matching 24dp shape, the pastel-aware container, and the readable
         // action ink (deep rose on light/pastel so the buttons never wash
@@ -921,8 +935,9 @@ fun TopicRevealScreen(
                     Text(
                         // v23 — the browser button searches the user's chosen
                         // engine (pickable in onboarding + Settings), so the
-                        // copy stays engine-neutral.
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open YouTube.",
+                        // copy stays engine-neutral. v27s — music topics name
+                        // the chosen music service instead of YouTube.
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open ${if (musicTopic) watchService.displayName else "YouTube"}.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -932,9 +947,11 @@ fun TopicRevealScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     // v22 — the no-AI pledge, bold so it leads the dialog's
-                    // intent: research stays the user's own words.
+                    // intent: research stays the user's own words. v27s — the
+                    // avoid-AI note is spelled out: read real sources, skip
+                    // the AI summaries.
                     Text(
-                        "Keep your research your own, and stay curious. This is your curiosity — in your own words.",
+                        "Keep your research your own — skip the AI summaries and read the real sources. Stay curious: this is your curiosity, in your own words.",
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -992,10 +1009,11 @@ fun TopicRevealScreen(
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
                     ) {
-                        CurioIcon(
-                            name = CurioIcons.TravelExplore,
-                            contentDescription = null,
-                            tint = curioDialogActionColor(),
+                        // v27s — the engine's own brand tile (color + letter)
+                        // so the pill shows WHICH engine the button opens.
+                        BrandMonogram(
+                            tileColor = engineTile,
+                            letter = engineLetter,
                             size = 18.dp
                         )
                         Spacer(Modifier.width(6.dp))
@@ -1013,21 +1031,28 @@ fun TopicRevealScreen(
                                 AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
                                 if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
                             }
-                            startExploreSession(topic, buildYouTubeSearchUrl(topic))
+                            // v27s — music topics open the chosen music
+                            // service; everything else searches YouTube.
+                            startExploreSession(
+                                topic,
+                                if (musicTopic) buildMusicServiceSearchUrl(topic, watchService)
+                                else buildYouTubeSearchUrl(topic)
+                            )
                         },
                         colors = curioDialogActionButtonColors(),
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
                     ) {
-                        CurioIcon(
-                            name = CurioIcons.YouTubeActivity,
-                            contentDescription = null,
-                            tint = curioDialogActionColor(),
+                        // v27s — the service's brand tile (or the YouTube
+                        // tile for non-music topics) ahead of the label.
+                        BrandMonogram(
+                            tileColor = watchTile,
+                            glyph = watchGlyph,
                             size = 18.dp
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            "YouTube",
+                            "Watch in",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
