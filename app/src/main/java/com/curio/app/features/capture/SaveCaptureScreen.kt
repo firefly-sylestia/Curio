@@ -1020,8 +1020,14 @@ private fun TagEditorRow(
                 tags.forEach { tag ->
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = if (AppPreferences.tintWashEffective()) tint.copy(alpha = 0.14f)
-                                else MaterialTheme.colorScheme.surfaceVariant,
+                        // v27n — opaque tinted chip (was the accent tint at
+                        // 14% alpha, which let the elevation shadow bleed
+                        // through).
+                        color = if (AppPreferences.tintWashEffective()) {
+                            lerp(MaterialTheme.colorScheme.surface, tint.copy(alpha = 1f), 0.14f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        },
                         shadowElevation = 2.dp
                     ) {
                         Row(
@@ -1167,8 +1173,13 @@ private fun SessionAttachmentsCard(
                 Surface(
                     onClick = onAddScreenshot,
                     shape = RoundedCornerShape(14.dp),
-                    color = if (tintWash) cat.tint.copy(alpha = 0.14f)
-                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    // v27n — opaque tinted tile (was the accent tint at 14%
+                    // alpha, which let the elevation shadow bleed through).
+                    color = if (tintWash) {
+                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.accent, 0.14f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
                     shadowElevation = 2.dp,
                     modifier = Modifier.size(84.dp)
                 ) {
@@ -1516,7 +1527,9 @@ private fun FormatBodyForCategory(
                     shape = RoundedCornerShape(50),
                     color = if (i == activeIndex) category.themedAccent()
                             else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    shadowElevation = if (i == activeIndex) 3.dp else 1.dp,
+                    // v27q — flat 2dp: selection reads through the solid
+                    // accent fill.
+                    shadowElevation = 2.dp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Row(
@@ -1642,7 +1655,7 @@ private fun FormatBodyForCategory(
                         initialData = current.seed as? CaptureData.FieldNotes
                     )
                     CaptureFormat.OpenNotebook -> OpenNotebookFormat(
-                        category.themedAccent(), category.tint,
+                        category.themedAccent(),
                         { current.canSave = it },
                         { current.data = it?.withMood(current.mood) },
                         initialData = current.seed as? CaptureData.OpenNotebook,
@@ -1761,10 +1774,13 @@ private fun FormatChip(
             if (active.format != fmt) onSwitch(fmt)
         },
         shape = RoundedCornerShape(50),
-        color = if (AppPreferences.tintWashEffective() && active.format == fmt) category.tint
+        // v27q — the tint-wash fill is the OPAQUE 20% lerp (the raw tint is
+        // translucent and let the shadow bleed); elevation stays flat 2dp.
+        color = if (AppPreferences.tintWashEffective() && active.format == fmt)
+                lerp(MaterialTheme.colorScheme.surface, category.accent, 0.20f)
                 else if (active.format == fmt) category.themedAccent()
                 else category.categorySurface(MaterialTheme.colorScheme.surface),
-        shadowElevation = if (active.format == fmt) 3.dp else 1.dp,
+        shadowElevation = 2.dp,
         modifier = Modifier.padding(vertical = 2.dp)
     ) {
         Row(

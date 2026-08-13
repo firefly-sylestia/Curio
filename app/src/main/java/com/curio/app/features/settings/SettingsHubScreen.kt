@@ -51,6 +51,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -378,12 +379,21 @@ fun SettingsHeroActionPill(
     glyph: String? = null,
     contentDescription: String? = null,
     emphasized: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v27n — the banner fill behind the pill (the opaque-fill conversion
+    // needs it to resolve the same perceived tint); defaults to the shared
+    // settings hero rose since every call site rides that banner.
+    backdropOverride: Color? = null
 ) {
     // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
     // banner (especially in light mode), so hero actions like search / sort
     // read as invisible. The glass stays frosted but clearly visible.
-    val fill = if (emphasized) ink.copy(alpha = 0.55f) else ink.copy(alpha = 0.30f)
+    // v27n — the pill fill is now OPAQUE (ink lerped into the hero banner
+    // fill at the old glass alpha): a translucent fill let the elevation
+    // shadow bleed through as a blurry broken background, and the opaque
+    // lerp resolves to the exact same perceived tint on the banner.
+    val backdrop = backdropOverride ?: settingsRoseAccent()
+    val fill = if (emphasized) lerp(ink, backdrop, 0.45f) else lerp(ink, backdrop, 0.70f)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),

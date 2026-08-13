@@ -1914,7 +1914,8 @@ private fun CompactChip(
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else chipSurface,
-        shadowElevation = if (selected) 3.dp else 1.dp,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))
@@ -3704,7 +3705,8 @@ private fun VerticalDeckButton(
             if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
             else cat.themedButtonFill()
         } else deckControlSurface(cat),
-        shadowElevation = if (selected) 6.dp else 3.dp,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         modifier = modifier
             .size(width = 54.dp, height = 112.dp)
             // v9.x — Material buttons keep their category identity as the
@@ -3759,7 +3761,8 @@ private fun DeckControlButton(
             if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
             else cat.themedButtonFill()
         } else deckControlSurface(cat),
-        shadowElevation = if (selected) 6.dp else 3.dp,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         modifier = modifier
             .height(62.dp)
             // v9.x — Material buttons keep their category identity as the

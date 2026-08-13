@@ -511,8 +511,11 @@ fun EntryDetailScreen(
                         Spacer(Modifier.height(10.dp))
                         Surface(
                             shape = RoundedCornerShape(50),
+                            // v27n — this pill sits ON the frosted hero card:
+                            // a translucent glass fill can't hold an elevation
+                            // shadow (it bleeds through), so it stays flat.
                             color = heroCardInk.copy(alpha = 0.12f),
-                            shadowElevation = 2.dp
+                            shadowElevation = 0.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
@@ -561,8 +564,11 @@ fun EntryDetailScreen(
                         CurioIcons.Inventory2 else formatGlyph(resolvedEntry.format)
                     Surface(
                         shape = RoundedCornerShape(18.dp),
+                        // v27n — frosted glass pane over the hero: the
+                        // translucent frost can't hold an elevation shadow
+                        // (it bleeds through), so the pane stays flat.
                         color = Color.Transparent,
-                        shadowElevation = 2.dp
+                        shadowElevation = 0.dp
                     ) {
                         // The card's content Box: the Row below defines the
                         // height, and the frosted pane + glass tint match its
@@ -714,8 +720,14 @@ fun EntryDetailScreen(
                             resolvedEntry.tags.forEach { tag ->
                                 Surface(
                                     shape = RoundedCornerShape(50),
-                                    color = if (AppPreferences.tintWashEffective()) cat.tint.copy(alpha = 0.14f)
-                                            else MaterialTheme.colorScheme.surfaceVariant,
+                                    // v27n — opaque tinted tag chip (was the
+                                    // 20%-accent tint at 14% alpha, which let
+                                    // the elevation shadow bleed through).
+                                    color = if (AppPreferences.tintWashEffective()) {
+                                        lerp(MaterialTheme.colorScheme.surface, cat.accent, 0.14f)
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    },
                                     shadowElevation = 2.dp
                                 ) {
                                     Text(
@@ -1492,7 +1504,9 @@ private fun PortfolioRender(entry: CurioEntry, category: CurioCategory, navContr
                     shape = RoundedCornerShape(50),
                     color = if (selected) category.themedAccent()
                             else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    shadowElevation = if (selected) 3.dp else 1.dp,
+                    // v27q — flat 2dp: selection reads through the solid
+                    // accent fill.
+                    shadowElevation = 2.dp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Row(
@@ -1769,7 +1783,9 @@ private fun SoundBiteRender(
                     if (noteTranscribing || noteError != null) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = category.themedAccent().copy(alpha = 0.10f),
+                            // v27n — opaque accent-tinted fill (was 10% alpha,
+                            // which let the elevation shadow bleed through).
+                            color = lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.10f),
                             shadowElevation = 2.dp,
                             modifier = Modifier.weight(1f)
                         ) {
@@ -1822,7 +1838,8 @@ private fun SoundBiteRender(
                                 else if (voiceToTextEnabled) notePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                             },
                             shape = RoundedCornerShape(8.dp),
-                            color = category.themedAccent().copy(alpha = 0.10f),
+                            // v27n — opaque accent-tinted fill (was 10% alpha).
+                            color = lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.10f),
                             shadowElevation = 2.dp
                         ) {
                             Row(
@@ -2833,8 +2850,10 @@ private fun FrostedExportButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
+        // v27n — frosted glass button: the translucent wash + white frost
+        // can't hold an elevation shadow (it bleeds through), stays flat.
         color = Color.Transparent,
-        shadowElevation = 2.dp,
+        shadowElevation = 0.dp,
         modifier = modifier
     ) {
         Box(Modifier.fillMaxWidth()) {
@@ -3720,7 +3739,9 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                 structuredRows.forEach { (label, value) ->
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                        // v27n — opaque row (was 72% alpha, which let the
+                        // elevation shadow bleed through).
+                        color = MaterialTheme.colorScheme.surface,
                         shadowElevation = 2.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {

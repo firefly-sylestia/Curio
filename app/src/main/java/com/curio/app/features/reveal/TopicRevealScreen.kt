@@ -779,7 +779,9 @@ fun TopicRevealScreen(
                     Surface(
                         modifier = Modifier.weight(1f, fill = false),
                         shape = RoundedCornerShape(50),
-                        color = cat.themedAccent().copy(alpha = 0.22f),
+                        // v27n — opaque tinted fill (was 22% alpha, which let
+                        // the elevation shadow bleed through).
+                        color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.22f),
                         shadowElevation = 2.dp
                     ) {
                         Text(
@@ -1346,7 +1348,11 @@ private fun RevealAlreadyButton(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        color = if (enabled) surface else surface.copy(alpha = 0.45f),
+        // v27n — the disabled fill is OPAQUE too (the 45% alpha let the
+        // elevation shadow bleed through): an opaque blend toward the page
+        // background keeps the muted disabled look.
+        color = if (enabled) surface
+                else lerp(MaterialTheme.colorScheme.background, surface, 0.45f),
         shadowElevation = 3.dp,
         modifier = modifier
             .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
@@ -1872,7 +1878,8 @@ private fun SentimentButton(
         onClick = onClick,
         shape = CircleShape,
         color = if (active) accent else MaterialTheme.colorScheme.surfaceVariant,
-        shadowElevation = if (active) 4.dp else 2.dp
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),

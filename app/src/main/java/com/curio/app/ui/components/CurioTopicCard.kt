@@ -117,10 +117,10 @@ fun CurioEntryCard(
         } else {
             cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
         },
-        // v27n — elevation replaces the outline: selected cards lift higher
-        // (raised instead of ringed), AMOLED cards wear the faint container
-        // step since shadows are invisible on pure black.
-        shadowElevation = if (selected) 8.dp else 3.dp,
+        // v27q — elevation is a flat 2dp in both states: selection reads
+        // through the check badge in the header corner, not a raise (the old
+        // 8/3 raise smeared the card while it animated).
+        shadowElevation = 2.dp,
         tonalElevation = 1.dp
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {

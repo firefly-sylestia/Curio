@@ -99,11 +99,31 @@ app/src/main/java/com/curio/app/
   `Modifier.shadow()` must precede the fill in the chain (shadow-after-
   background paints a blur ON TOP of the fill); `shadowElevation` only
   renders cleanly on OPAQUE fills — translucent/glass fills are replaced by
-  opaque `lerp(fill, accent, alpha)` blends (avatar, badge medals, chips,
-  Level·Saved·Lanes pane, lane tiles, "+N" badge tile). The Spin deck peek
-  cards stay FLAT (`shadowElevation = 0.dp`) — v24 rejected deck shadows
-  (they animate weirdly) and the elevation pass re-adding a 2dp halo caused
-  the boxy artifact during the reel.
+  opaque `lerp(fill, accent, alpha)` blends (app-wide pass: badge medals,
+  avatar, chips, stat pane, lane tiles, hero glass pills, tag/tick pills,
+  quest cards/stamps, capture formats, picker/preset rows, editor toolbars,
+  coming-soon tiles). Hero pills resolve the banner fill as their blend
+  backdrop: `CabinetHeroActionPill` receives it via the hero `trailing`
+  slot, `SettingsHeroActionPill` defaults to `settingsRoseAccent()`,
+  `CurioSortDropdown` takes it as a required `backdrop` param. TRUE frosted
+  glass over heroes/imagery gets `shadowElevation = 0` instead (glass can't
+  hold a shadow — it bleeds through). The Spin deck peek cards stay FLAT
+  (`shadowElevation = 0.dp`) — v24 rejected deck shadows (they animate
+  weirdly) and the elevation pass re-adding a 2dp halo caused the boxy
+  artifact during the reel.
+- **v27q — NO selection raises: elevation is a FLAT 2dp in both states
+  for every selectable chip/card/row/tile** (was 3/1, 4/2, 6/3, 8/3, 3/0
+  raises). Selection must read through a FILL change instead: SOLID
+  accent fill with on-accent content (`themedAccent()`+`onAccent()`,
+  `primary`+`onPrimary`, `curioDialogActionColor()`+`dialogRowSelectedInk()`
+  [white except AMOLED black], or `accent`+`pastelFillInk(accent)` for
+  generic accents) — never a translucent lerp (bleeds the shadow) and
+  never an elevation raise. Existing non-elevation cues stay: topic-card
+  check badge, category-card solid gradient, pet "Your pet" pill, swatch
+  check marks. Exceptions: non-selection state toggles keep their own
+  elevation (3D button, paper-stats toggle, field-border toggle,
+  fullscreen capture), and the fan-deck's per-card depth shadows are deck
+  order, not selection.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

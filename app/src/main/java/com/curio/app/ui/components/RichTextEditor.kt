@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -71,6 +72,7 @@ import com.curio.app.ui.theme.notePaperHighlight
 import com.curio.app.ui.theme.notePaperInk
 import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.paperControlAccent
+import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.paperHighlight
 import com.curio.app.ui.theme.PatrickHandFontFamily
 
@@ -1078,8 +1080,13 @@ private fun ToolToggleButton(
     // the theme's muted tokens, expanded blooms in the accent container —
     // no hardcoded dark-mode alphas.
     val ink = if (expanded) accent else MaterialTheme.colorScheme.onSurfaceVariant
-    val fill = if (expanded) accent.copy(alpha = 0.18f)
-               else MaterialTheme.colorScheme.surfaceContainerHighest
+    // v27n — the expanded fill is OPAQUE (was 18% alpha, which let the
+    // elevation shadow bleed through).
+    val fill = if (expanded) {
+        lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.18f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    }
     val rim = if (expanded) accent.copy(alpha = 0.65f)
               else MaterialTheme.colorScheme.outlineVariant
     Surface(
@@ -1098,9 +1105,11 @@ private fun ToolToggleButton(
             if (dot != null) {
                 Box(
                     modifier = Modifier
+                        // v27n — shadow BEFORE the fill (was painted on top
+                        // of the color dot).
+                        .shadow(1.dp, CircleShape)
                         .size(12.dp)
                         .background(dot, CircleShape)
-                        .shadow(1.dp, CircleShape)
                 )
             }
             CurioIcon(
@@ -1132,9 +1141,11 @@ private fun FormatToolButton(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(10.dp),
-        color = if (active) accent.copy(alpha = 0.18f)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = if (active) 3.dp else 1.dp,
+        // v27q — the active tool fills with the SOLID accent (was an 18%
+        // lerp, which read muddy and let the shadow bleed); the glyph flips
+        // to the pastel-aware on-fill ink; elevation stays flat 2dp.
+        color = if (active) accent else MaterialTheme.colorScheme.surfaceContainerHighest,
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         CurioIcon(
@@ -1142,8 +1153,8 @@ private fun FormatToolButton(
             contentDescription = label,
             // Theme-aware: inactive tools follow the theme's muted ink (which
             // reads on the dock surface AND the floating bar in every theme),
-            // active tools bloom in the accent.
-            tint = if (active) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+            // active tools flip to the on-fill ink on the solid accent.
+            tint = if (active) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurfaceVariant,
             size = 16.dp,
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
         )

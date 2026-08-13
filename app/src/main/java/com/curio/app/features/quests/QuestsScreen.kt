@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -1034,7 +1035,9 @@ private fun DailyCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = curioSageInk().copy(alpha = 0.14f),
+                    // v27n — opaque sage-tinted fill (was 14% alpha, which let
+                    // the elevation shadow bleed through).
+                    color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, curioSageInk(), 0.14f),
                     shadowElevation = 2.dp
                 ) {
                     Text(
@@ -1205,10 +1208,13 @@ private fun BonusLockedRow(coreRemaining: Int) {
     ) {
         Box(
             modifier = Modifier
+                // v27n — shadow FIRST (behind the fill) and the fill OPAQUE:
+                // the old order painted the shadow on top of a translucent
+                // fill, smearing blur over the tile.
+                .shadow(2.dp, RoundedCornerShape(11.dp))
                 .size(34.dp)
                 .clip(RoundedCornerShape(11.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                .shadow(2.dp, RoundedCornerShape(11.dp)),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             CurioIcon(
@@ -1478,8 +1484,13 @@ private fun BadgeTile(
     val secretLocked = !unlocked && tier == BadgeTier.SECRET
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = if (unlocked) accent.copy(alpha = 0.10f)
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
+        // v27n — OPAQUE fills (the old 10–40% alphas let the elevation
+        // shadow bleed through as a blurry broken background).
+        color = if (unlocked) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.10f)
+        } else {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.surfaceVariant, 0.40f)
+        },
         shadowElevation = 2.dp,
         modifier = modifier
     ) {
@@ -1656,9 +1667,14 @@ private fun PassportStamp(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = when (stamp) {
-            CurioPassport.Stamp.MASTERED -> curioSageInk().copy(alpha = 0.12f)
-            CurioPassport.Stamp.UNSEEN -> accent.copy(alpha = 0.10f)
-            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            // v27n — OPAQUE stamp fills (the old 10–45% alphas let the
+            // elevation shadow bleed through).
+            CurioPassport.Stamp.MASTERED ->
+                lerp(MaterialTheme.colorScheme.surfaceContainerLow, curioSageInk(), 0.12f)
+            CurioPassport.Stamp.UNSEEN ->
+                lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.10f)
+            else ->
+                lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.surfaceVariant, 0.45f)
         },
         shadowElevation = 2.dp,
         modifier = modifier

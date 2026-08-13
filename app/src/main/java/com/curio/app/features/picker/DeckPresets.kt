@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CategoryId
@@ -99,12 +100,11 @@ fun PickerPresetChip(
     Surface(
         onClick = onClick,
         shape = shape,
-        color = if (selected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-        },
-        shadowElevation = if (selected) 3.dp else 1.dp,
+        // v27q — selection reads as a SOLID primary fill with onPrimary
+        // content; elevation stays a flat 2dp in both states.
+        color = if (selected) MaterialTheme.colorScheme.primary
+                else lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceVariant, 0.70f),
+        shadowElevation = 2.dp,
         modifier = Modifier
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
@@ -117,13 +117,13 @@ fun PickerPresetChip(
                 name = glyph,
                 contentDescription = null,
                 size = 14.dp,
-                tint = if (selected) MaterialTheme.colorScheme.primary
+                tint = if (selected) MaterialTheme.colorScheme.onPrimary
                        else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = if (selected) MaterialTheme.colorScheme.primary
+                color = if (selected) MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

@@ -2,7 +2,7 @@
 
 ## Current request — fix blurry/broken backgrounds from the elevation commit (fe3da7a)
 
-**Status:** Implemented (committed, not pushed — user's standing no-push rule).
+**Status:** Implemented. Commits: `1adf0bd` (first pass — user's listed items) + uncommitted app-wide extension pass + v27q selection-flatten pass (this working tree, commit pending — not pushed per user's standing no-push rule).
 
 ### What was asked
 After commit `fe3da7a` ("elevation over borders app-wide") many buttons/cards show **blurry + broken backgrounds**; the user listed: badges next to your name in Profile, the Profile Level·Saved·Lanes pane, the Lanes card, a "C avatar in cabinet", the category chips, and the Spin deck peek cards (which show a "boxy thing" while animating). User instruction: identify + confirm the issue, ask, then fix.
@@ -34,21 +34,34 @@ After commit `fe3da7a` ("elevation over borders app-wide") many buttons/cards sh
 1. **"C avatar in cabinet"** = the round **profile avatar** (initial letter) — they misremembered its location; no avatar exists in CabinetScreen.
 2. **Strategy:** keep shadows everywhere, **make translucent fills opaque** (not full revert, not border-restore).
 
-### What was done
+### What was done — first pass (user's listed items)
 Per the confirmed strategy — elevation stays, fills become opaque, misplaced shadows reordered, deck shadow removed:
 - **CurioBadges.kt** — ONE clean shadow on the outer coin Box (behind the opaque metal); locked silhouette + gem + earned marker shadows moved BEFORE their clip+fill (was: smear on top); glyph-plate shadow removed (it had no fill — pure blur over the metal); locked fills made opaque (secret keeps a darker blend); "+N" tile fill → opaque `lerp(surfaceContainerLow, sage, 0.13f)`.
 - **ProfileScreen.kt** — avatar: `.shadow(2.dp, CircleShape)` moved before `.clip().background(fill)`; Level·Saved·Lanes pane gradient made opaque (12–55% alpha → opaque lerps resolving to the same tints); LanesCard tiles → opaque `lerp(surfaceContainerLow, accent, 0.14f)`.
 - **CurioCategoryChip.kt** — selected fill `category.tint` (accent @ 20% alpha, bled the chip shadow) → opaque `lerp(surface, accent, 0.20f)`.
 - **SpinScreen.kt PeekCard** — `shadowElevation` 2dp → 0dp: the elevation commit re-added the v24-REJECTED deck shadow ("weird look while cards animate") — that is the boxy thing during the reel; Surface stays flat per its own contract.
 
-### Validation
-- Braces balanced (all 4 files), `git diff --check` clean, all new imports used (`lerp` added to CurioBadges + CurioCategoryChip; ProfileScreen already had it).
-- No compile/build possible locally (no SDK) — CI on push is the gate.
-- DOX pass: root `AGENTS.md` compile-safety rule 11 (shadow order + opaque fills + no deck elevation); `app/AGENTS.md` v27n note.
+### What was done — app-wide extension pass (second request, 24 files)
+User asked to extend the same opaque-fill fix app-wide (hero glass pills, Quests, Reveal, Entry Detail, coming-soon tiles, the small explored/unexplored pills in Home/Recent, and everything else the sweep found). Two rules applied consistently:
+1. **Opaque-lerp fill** (`lerp(backdrop, color, oldAlpha)`) wherever the element sits on a flat surface — kills the shadow bleed with a pixel-similar tint.
+2. **`shadowElevation = 0`** on true frosted glass over heroes/imagery — glass can't hold a shadow (it bleeds through); the frost defines it.
+3. **Reorder `.shadow()` before `.clip()/.background()`** for the order-bug chains (shadow was painting on top of fills).
 
-### Not changed (same-class spots, flag for follow-up if the user wants a wider pass)
-- CabinetHeroActionPill / SettingsHeroActionPill glass pills (ink @ 30–65% + 3dp shadow — subtle bleed; user didn't list them, so left as-is).
-- QuestsScreen / TopicRevealScreen / EntryDetailScreen / CategoryPicker coming-soon tiles — other translucent-fill + shadow spots from the same commit.
+Fixed: hero pills — CabinetHeroActionPill (opaque `lerp(ink, bannerFill, 1-alpha)`, banner fill threaded through the hero trailing slot + all 7 call sites), SettingsHeroActionPill (`backdropOverride ?: settingsRoseAccent()`), CurioSortDropdown (required `backdrop`, both call sites updated). Chips/pills/tiles: SaveCapture tag chips + add-gallery tile, SoundBite record card + mic tile, CaptureFormatComponents add-quote, Home explored-tag pill + currently-exploring stop button, Recent tag pill, Quests +XP pill + quest stage cards + passport stamps + dim tile (also reordered), TopicReveal tag chips + disabled action, EntryDetail #tags + transcribing note card + voice button + structured rows (opaque) + hero session pill + frosted button + frosted hero pane (shadow 0), GalleryWall inline mood board (opaque accent-lerp; full-screen keeps translucent tint, has no shadow), CategoryPicker + DeckPresets option rows, Onboarding option pills, PetDesigner palette slots + editor target + prompt + 4 swatch/canvas order bugs, PromoStatusCard + promo chips (opaque rose-lerp + reorder), Support update card, Settings/RecycleBin dialog rows (opaque selected, transparent rows get NO shadow), RichTextEditor + PaperCard toolbar chips (opaque active) + color-dot order bugs, CurioCategoryCard coming-soon tiles (opaque).
+
+Left translucent by design (negligible or intentional frosted glass over imagery): ≥90% alpha fills (GalleryWall 780/923, EntryDetail 1071/3100/3122, MoodBoardZoom 634), OpenNotebook radio (selected opaque / unselected no shadow), Spin 3D button (gradient is content, covers the shadow), Home stats (opaque when shadowed), Profile/Reveal 18% glass pills at 0dp.
+
+### What was done — v27q selection-flatten pass (third request)
+User: "keep selected 2 and else 2 too in elevation, and use select highlight color change for selected" → confirmed **all selected-raise elements app-wide**, selected state reads as a **SOLID accent fill**. Executed:
+- **Elevation flattened to a flat 2.dp in BOTH states** for every selectable chip/card/row/tile: category chip, topic card (was 8/3), category card (8/3), spin compact chips + deck control pills (6/3), database filter chips (4/2), Cabinet FilterChipLite (was `elevation.coerceAtLeast(3.dp)`), picker page tabs + preset chips, settings hour chips (3/1), onboarding theme/search chips (4/2), PetDesigner (armed slot, used swatch, color swatches, frame thumbs, picker cards, palette rows, palette dots, custom-pet card, library card), Reveal sentiment button, EntryDetail/SaveCapture section chips, mood chips, notebook choice rows, RecycleBin/Settings dialog rows (3/0), RichTextEditor + PaperCard toolbar chips (3/1), PaperCard color swatches.
+- **Solid accent selected fills** (content flips to on-accent ink): category chip `themedAccent()`+`onAccent()`; picker/preset `primary`+`onPrimary`; dialog rows `curioDialogActionColor()` with `dialogRowSelectedInk()`/`recycleRowSelectedInk()` (white, black in AMOLED) + unselected rows now opaque `surfaceContainerHigh` so the flat 2dp shadow is clean; database + Cabinet pills + notebook rows `accent`+`pastelFillInk(accent)` (Cabinet category accent switched `categoryInk()`→`themedAccent()`, ink→`onAccent()`); editor/paper toolbar `accent`+`pastelFillInk(accent)`; SaveCapture wash-ON fill → opaque `lerp(surface, accent, 0.20f)`; PetDesigner armed slot `primary`+`onPrimary`, swatch selection via contrast-aware check (no shadow).
+- **Existing non-elevation cues kept**: topic-card check badge, category-card solid gradient, pet "Your pet" pill, paper swatch check, palette dot size raise (38 vs 32dp).
+- **Deliberately left**: non-selection toggles (3D button, paper-stats toggle, field-border, fullscreen capture) keep their own elevation; fan-deck per-card depth shadows are deck order; OpenNotebook's tiny radio dot keeps its 2dp/0dp (opaque fill, anti-smudge).
+
+### Validation
+- Braces balanced (full-repo check), `git diff --check` clean, every `lerp(` import verified present (stale imports removed from CurioCategoryChip/SettingsSharedComponents/RecycleBin/CategoryPicker), all `backdrop` call sites wired (Cabinet 25 uses, SortDropdown 3, SettingsHeroActionPill default), new `pastelFillInk`/`onAccent`/`themedAccent` imports verified used.
+- No compile/build possible locally (no SDK) — CI on push is the gate.
+- DOX pass: root `AGENTS.md` compile-safety rule 11 (shadow order + opaque fills + no deck elevation); `app/AGENTS.md` v27n note updated for the app-wide scope + v27q flat-2dp no-selection-raise rule.
 
 ## Previous request (v26 — Topic Browser header rebuild + back-to-top arrow)
 

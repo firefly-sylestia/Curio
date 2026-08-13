@@ -2022,8 +2022,17 @@ private fun ImportPngDialog(
                             }
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-                                shadowElevation = if (armed) 4.dp else 2.dp,
+                                // v27q — the armed (selected) slot fills with
+                                // the SOLID accent; elevation stays flat 2dp.
+                                color = if (armed) MaterialTheme.colorScheme.primary
+                                        else lerp(
+                                            MaterialTheme.colorScheme.surfaceContainerLow,
+                                            MaterialTheme.colorScheme.surfaceVariant,
+                                            0.55f
+                                        ),
+                                contentColor = if (armed) MaterialTheme.colorScheme.onPrimary
+                                               else MaterialTheme.colorScheme.onSurface,
+                                shadowElevation = 2.dp,
                                 onClick = { onArmSlot(key) },
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -2048,7 +2057,8 @@ private fun ImportPngDialog(
                                         Text(
                                             if (filled) "Color saved" else "Choose target",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = if (armed) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                                                   else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
@@ -2082,10 +2092,23 @@ private fun ImportPngDialog(
                         Surface(
                             shape = RoundedCornerShape(9.dp),
                             color = rgbColor,
-                            shadowElevation = if (used) 4.dp else 2.dp,
+                            // v27q — flat 2dp: the used (selected) swatch is
+                            // marked by a contrast-aware check, not a raise.
+                            shadowElevation = 2.dp,
                             onClick = { onPickColor(imported.rgb) },
                             modifier = Modifier.size(36.dp)
-                        ) {}
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                if (used) {
+                                    CurioIcon(
+                                        name = CurioIcons.Check,
+                                        contentDescription = null,
+                                        tint = if (rgbColor.luminance() > 0.5f) Color(0xFF2A2015) else Color.White,
+                                        size = 16.dp
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
                 Spacer(Modifier.height(4.dp))
@@ -2250,16 +2273,13 @@ private fun ColorEditorCard(
                     val selected = hexDraft == hex
                     Box(
                         modifier = Modifier
+                            // v27q — no selected shadow (elevation is flat
+                            // 2dp app-wide): selection reads as the check +
+                            // inset ring, contrast-aware on light swatches.
                             .size(30.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(hexColor(hex))
-                            .then(
-                                if (selected) {
-                                    Modifier
-                                        .shadow(3.dp, RoundedCornerShape(8.dp))
-                                        .padding(2.dp)
-                                } else Modifier
-                            )
+                            .then(if (selected) Modifier.padding(2.dp) else Modifier)
                             .clickable { hexDraft = hex; hsl = hexToHsl(hex) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -2267,7 +2287,7 @@ private fun ColorEditorCard(
                             CurioIcon(
                                 name = CurioIcons.Check,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = if (hexColor(hex).luminance() > 0.5f) Color(0xFF2A2015) else Color.White,
                                 size = 16.dp
                             )
                         }
@@ -2288,16 +2308,13 @@ private fun ColorEditorCard(
                     val selected = hexDraft == hex
                     Box(
                         modifier = Modifier
+                            // v27q — no selected shadow (elevation is flat
+                            // 2dp app-wide): selection reads as the check +
+                            // inset ring, contrast-aware on light swatches.
                             .size(30.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(hexColor(hex))
-                            .then(
-                                if (selected) {
-                                    Modifier
-                                        .shadow(3.dp, RoundedCornerShape(8.dp))
-                                        .padding(2.dp)
-                                } else Modifier
-                            )
+                            .then(if (selected) Modifier.padding(2.dp) else Modifier)
                             .clickable { hexDraft = hex; hsl = hexToHsl(hex) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -2305,7 +2322,7 @@ private fun ColorEditorCard(
                             CurioIcon(
                                 name = CurioIcons.Check,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = if (hexColor(hex).luminance() > 0.5f) Color(0xFF2A2015) else Color.White,
                                 size = 16.dp
                             )
                         }
@@ -2350,13 +2367,14 @@ private fun ColorPreviewColumn(label: String, hex: String, accent: Boolean, modi
         Spacer(Modifier.height(6.dp))
         Box(
             modifier = Modifier
-                .size(52.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(hexColor(hex))
+                // v27n — shadow BEFORE the clip+fill (was painted on top).
                 .shadow(
                     if (accent) 4.dp else 2.dp,
                     RoundedCornerShape(14.dp)
                 )
+                .size(52.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(hexColor(hex))
         )
         Spacer(Modifier.height(6.dp))
         Text(
@@ -2973,8 +2991,9 @@ private fun FrameThumb(
 ) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        shadowElevation = if (selected) 4.dp else 2.dp,
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         onClick = onClick
     ) {
         Column(
@@ -2995,7 +3014,7 @@ private fun FrameThumb(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                 ),
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -3235,8 +3254,11 @@ private fun PickerCard(
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        shadowElevation = if (selected) 4.dp else 2.dp,
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                       else MaterialTheme.colorScheme.onSurface,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {
@@ -3255,7 +3277,8 @@ private fun PickerCard(
             Text(
                 subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -3526,9 +3549,13 @@ private fun PaletteRow(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-        else MaterialTheme.colorScheme.surface,
-        shadowElevation = if (selected) 4.dp else 2.dp,
+        // v27q — the selected row fills with the SOLID accent; content
+        // flips to onPrimary; elevation stays flat 2dp.
+        color = if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surface,
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                       else MaterialTheme.colorScheme.onSurface,
+        shadowElevation = 2.dp,
         onClick = onSelect,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -3551,7 +3578,8 @@ private fun PaletteRow(
                 Text(
                     "Key \"${slot.key}\" · #$hex",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                           else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
                 )
             }
@@ -3559,7 +3587,7 @@ private fun PaletteRow(
                 Text(
                     "Paint",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
             Spacer(Modifier.width(8.dp))
@@ -3694,7 +3722,9 @@ private fun QuickPaletteRow(
             Surface(
                 shape = CircleShape,
                 color = hexColor(design.colorOf(slot.key)),
-                shadowElevation = if (selectedKey == slot.key) 4.dp else 2.dp,
+                // v27q — flat 2dp: selection reads through the size raise
+                // (38dp vs 32dp), not a shadow raise.
+                shadowElevation = 2.dp,
                 onClick = { onSelect(slot.key) },
                 modifier = Modifier.size(if (selectedKey == slot.key) 38.dp else 32.dp)
             ) {}
@@ -3819,13 +3849,15 @@ private fun PixelGrid(
     val blueprint = if (showBlueprint) blueprintRows else null
     BoxWithConstraints(
         modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(CurioColors.SoftCream)
+            // v27n — shadow BEFORE the clip+fill (was painted on top of the
+            // cream canvas).
             .shadow(
                 if (tool != null) 4.dp else 2.dp,
                 RoundedCornerShape(12.dp)
             )
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(CurioColors.SoftCream)
     ) {
         // v8.36 — zoom: cells grow so small parts (faces, details) are easy
         // to edit. When the zoomed grid still fits the screen it stays
@@ -4500,7 +4532,8 @@ private fun CustomPetCard(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = if (active) 4.dp else 2.dp,
+        // v27q — flat 2dp: the active card reads through its "Your pet" pill.
+        shadowElevation = 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {
@@ -4577,7 +4610,8 @@ private fun CustomPetCard(
 private fun EditorPickPrompt(onOpenPicker: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+        // v27n — opaque fill (was 55% alpha).
+        color = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primaryContainer, 0.55f),
         shadowElevation = 2.dp,
         onClick = onOpenPicker,
         modifier = Modifier.fillMaxWidth()
@@ -4844,7 +4878,8 @@ private fun PetLibraryCard(
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = if (current) 4.dp else 2.dp,
+        // v27q — flat 2dp: the current pet reads through its "Your pet" pill.
+        shadowElevation = 2.dp,
         onClick = onClick,
         modifier = modifier
     ) {

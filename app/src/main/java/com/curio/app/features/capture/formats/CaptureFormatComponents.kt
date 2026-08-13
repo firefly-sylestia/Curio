@@ -711,7 +711,9 @@ fun QuoteCardsSection(
             onClick = { onAddCard?.invoke() ?: state.addCard(newCardStyle(), newCardColor()) },
             enabled = enabled,
             shape = RoundedCornerShape(14.dp),
-            color = paperSurface().copy(alpha = 0.6f),
+            // v27n — opaque paper-tinted fill (was 60% alpha, which let the
+            // elevation shadow bleed through).
+            color = lerp(MaterialTheme.colorScheme.surface, paperSurface(), 0.60f),
             shadowElevation = 3.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -893,7 +895,9 @@ fun MoodChipsRow(
                     onClick = { onMoodChange(if (selected) null else m) },
                     shape = RoundedCornerShape(50),
                     color = chipBg,
-                    shadowElevation = if (selected) 3.dp else 1.dp,
+                    // v27q — flat 2dp: selection reads through the solid
+                    // accent fill.
+                    shadowElevation = 2.dp,
                     modifier = Modifier.scale(chipScale)
                 ) {
                     Row(

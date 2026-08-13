@@ -2085,7 +2085,9 @@ private fun ExploreTopicRow(
                         // unexplored earlier and came back to (resumed).
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = accent.copy(alpha = 0.14f),
+                            // v27n — opaque tinted pill (was 14% alpha, which
+                            // let the elevation shadow bleed through).
+                            color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
                             // Same hairline rim as the detail page's #tag
                             // chips — the deep ink text + pastel fill alone
                             // read muddy on the tinted card (v7.32).
@@ -2178,7 +2180,8 @@ private fun CurrentlyExploringCard(
             Surface(
                 onClick = onStop,
                 shape = CircleShape,
-                color = accent.copy(alpha = 0.14f),
+                // v27n — opaque tinted stop button (was 14% alpha).
+                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
                 shadowElevation = 2.dp,
                 modifier = Modifier
                     .align(Alignment.TopEnd)

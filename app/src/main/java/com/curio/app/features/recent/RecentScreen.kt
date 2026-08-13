@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -344,7 +345,9 @@ private fun RecentTopicRow(
                     if (tag != null) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = accent.copy(alpha = 0.14f),
+                            // v27n — opaque tinted pill (was 14% alpha, which
+                            // let the elevation shadow bleed through).
+                            color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
                             // Same hairline rim as Home's explore-topic rows —
                             // the deep ink text + pastel fill alone read
                             // muddy on the tinted card.

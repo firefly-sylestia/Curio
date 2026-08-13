@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
@@ -50,14 +51,20 @@ fun CurioSortDropdown(
     onToggleDirection: () -> Unit,
     modifier: Modifier = Modifier,
     ink: Color = MaterialTheme.colorScheme.primary,
-    emphasized: Boolean = false
+    emphasized: Boolean = false,
+    // v27n — the banner fill behind the pill (the opaque-fill conversion
+    // needs it to resolve the same perceived tint on the hero).
+    backdrop: Color
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selected = options.firstOrNull { it.key == selectedKey }
     // v27 — match the deepened hero pill glass: the old 18% fill vanished
     // on the rose banner, and the sort control had no border at all — the
     // capsules now read clearly next to the other hero actions.
-    val fill = if (emphasized) ink.copy(alpha = 0.55f) else ink.copy(alpha = 0.30f)
+    // v27n — the fill is now OPAQUE (ink lerped into the banner at the old
+    // glass alpha): a translucent fill let the elevation shadow bleed
+    // through as a blurry broken background.
+    val fill = if (emphasized) lerp(ink, backdrop, 0.45f) else lerp(ink, backdrop, 0.70f)
 
     Box(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {

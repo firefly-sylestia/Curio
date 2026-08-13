@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
@@ -396,7 +397,9 @@ private fun UpdateResultCard(
     }
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = tint.copy(alpha = 0.10f),
+        // v27n — opaque tinted fill (was 10% alpha, which let the elevation
+        // shadow bleed through).
+        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, tint, 0.10f),
         shadowElevation = 3.dp,
         modifier = Modifier
             .fillMaxWidth()

@@ -452,7 +452,9 @@ private fun PreferencesSection(highlightKey: String? = null) {
                             selected -> MaterialTheme.colorScheme.onPrimary
                             else -> MaterialTheme.colorScheme.onSurface
                         },
-                        shadowElevation = if (selected) 3.dp else 1.dp,
+                        // v27q — flat 2dp: selection reads through the solid
+                        // primary/black fill, not a raise.
+                        shadowElevation = 2.dp,
                         modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Text(

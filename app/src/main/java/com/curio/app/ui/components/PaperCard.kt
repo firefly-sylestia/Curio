@@ -71,6 +71,7 @@ import com.curio.app.ui.theme.notePaperRule
 import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.paperAccent
 import com.curio.app.ui.theme.paperInk
+import com.curio.app.ui.theme.pastelFillInk
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
@@ -1898,14 +1899,15 @@ private fun CompactPaperChip(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        color = if (active) accent.copy(alpha = 0.18f)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = if (active) 3.dp else 1.dp
+        // v27q — the active chip fills with the SOLID accent; the label
+        // flips to the pastel-aware on-fill ink; elevation stays flat 2dp.
+        color = if (active) accent else MaterialTheme.colorScheme.surfaceContainerHighest,
+        shadowElevation = 2.dp
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (active) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (active) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
         )
     }
@@ -1932,15 +1934,16 @@ fun NotePaperColorToggle(
     var expanded by remember { mutableStateOf(false) }
     // Theme-aware on the dock/page: collapsed follows the theme's muted
     // tokens, expanded blooms in the accent (no hardcoded dark-mode bumps).
-    val ink = if (expanded) accent else MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (expanded) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurfaceVariant
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Surface(
             onClick = { expanded = !expanded },
             enabled = enabled,
             shape = RoundedCornerShape(10.dp),
-            color = if (expanded) accent.copy(alpha = 0.18f)
-                    else MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = if (expanded) 3.dp else 1.dp
+            // v27q — the expanded chip fills with the SOLID accent; the
+            // label flips to the pastel-aware on-fill ink; flat 2dp.
+            color = if (expanded) accent else MaterialTheme.colorScheme.surfaceContainerHighest,
+            shadowElevation = 2.dp
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
@@ -1952,9 +1955,11 @@ fun NotePaperColorToggle(
                 // the circular fill (border defaults to RectangleShape).
                 Box(
                     modifier = Modifier
+                        // v27n — shadow BEFORE the fill (was painted on top
+                        // of the color dot).
+                        .shadow(1.dp, CircleShape)
                         .size(14.dp)
                         .background(notePaperSurface(color), CircleShape)
-                        .shadow(1.dp, CircleShape)
                 )
                 CurioIcon(
                     name = CurioIcons.Palette,
@@ -1986,7 +1991,8 @@ fun NotePaperColorToggle(
                         enabled = enabled,
                         shape = CircleShape,
                         color = notePaperSurface(candidate),
-                        shadowElevation = if (selected) 3.dp else 1.dp,
+                        // v27q — flat 2dp: selection reads through the check.
+                        shadowElevation = 2.dp,
                         modifier = Modifier
                             .size(if (selected) 24.dp else 20.dp)
                             .semantics {

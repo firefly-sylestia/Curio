@@ -129,11 +129,10 @@ fun CurioCategoryCard(
     }
     val idleInk = category.categoryInk()
     val cardInk = category.cardContentInk()
-    // v27n — elevation replaces the outline: cards lift off the page with a
-    // soft shadow (raised further when selected), and AMOLED tiles swap the
-    // old pure-black fill + hairline for the scheme's faint container step,
-    // since real shadows are invisible on pure black.
-    val cardElevation = if (isSelected) 8.dp else 3.dp
+    // v27q — elevation is a flat 2dp in both states: the selected tile
+    // already wears the full solid-accent gradient, so it never needs to
+    // raise (the old 8/3 raise was the blurry-shadow bug class).
+    val cardElevation = 2.dp
     // Live topic count — reads the warm cache immediately, then reloads (a
     // cache hit) if the pool was ever cleared (e.g. onTrimMemory) so the
     // card never latches a stale "0 topics". With the catalog warmed during
@@ -174,8 +173,12 @@ fun CurioCategoryCard(
                 .fillMaxSize()
                 .background(
                     if (isSelected) Brush.verticalGradient(gradient)
+                    // v27n — coming-soon tile fill is OPAQUE (was 50% alpha,
+                    // which let the elevation shadow bleed through as a blurry
+                    // disc; the faint edge shine + label carry the "locked"
+                    // dimness now).
                     else if (comingSoon) SolidColor(
-                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f)
+                        MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     else SolidColor(idleSurface),
                     RoundedCornerShape(22.dp)

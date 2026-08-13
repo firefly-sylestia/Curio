@@ -63,6 +63,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.pet.PetLandmark
@@ -80,6 +81,7 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.pastelFillInk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -585,6 +587,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     onSelect = { tdSortField = it },
                     onToggleDirection = { tdSortAscending = !tdSortAscending },
                     ink = ink,
+                    backdrop = settingsRoseAccent(),
                     emphasized = true
                 )
                 // Search pill — the pet landmark moved with the search box
@@ -639,16 +642,14 @@ private data class DatabaseRow(
 private fun DatabaseFilterChip(
     label: String,
     count: Int,
-    selectedInk: Color,
     accent: Color = MaterialTheme.colorScheme.primary,
-    tint: Color = MaterialTheme.colorScheme.primaryContainer,
     selected: Boolean,
     onClick: () -> Unit,
     // v26 — the floating chip bar pops each pill on scroll: the label
     // blooms toward its accent as the pill pops (Cabinet's per-pill pop).
     popProgress: Float = 0f
 ) {
-    val labelColor = if (selected) selectedInk
+    val labelColor = if (selected) pastelFillInk(accent)
     else lerp(
         MaterialTheme.colorScheme.onSurfaceVariant,
         accent,
@@ -657,8 +658,11 @@ private fun DatabaseFilterChip(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (selected) tint else MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = if (selected) 4.dp else 2.dp
+        // v27q — selection reads as a SOLID accent fill with pastel-aware
+        // ink (the old primaryContainer/category-tint fills were translucent
+        // and let the shadow bleed); elevation stays a flat 2dp.
+        color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 2.dp
     ) {
         Text(
             text = if (count > 0) "$label $count" else label,
@@ -735,9 +739,7 @@ private fun BoxScope.DatabaseStickyChipBar(
                 DatabaseFilterChip(
                     label = "All",
                     count = totalTopics,
-                    selectedInk = MaterialTheme.colorScheme.onPrimaryContainer,
                     accent = MaterialTheme.colorScheme.primary,
-                    tint = MaterialTheme.colorScheme.primaryContainer,
                     selected = selectedCat == null,
                     onClick = onSelectAll,
                     popProgress = popProgress
@@ -752,9 +754,7 @@ private fun BoxScope.DatabaseStickyChipBar(
                 DatabaseFilterChip(
                     label = cat.displayName,
                     count = list.size,
-                    selectedInk = cat.accent,
-                    accent = cat.accent,
-                    tint = cat.tint,
+                    accent = cat.themedAccent(),
                     selected = selectedCat == cat.id,
                     onClick = { onSelectCategory(cat.id) },
                     popProgress = popProgress

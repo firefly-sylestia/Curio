@@ -471,12 +471,11 @@ fun PickerPageTab(
     Surface(
         onClick = onClick,
         shape = shape,
-        color = if (selected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-        } else {
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
-        },
-        shadowElevation = if (selected) 3.dp else 1.dp,
+        // v27q — selection reads as a SOLID primary fill with onPrimary
+        // content; elevation stays a flat 2dp in both states.
+        color = if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 2.dp,
         modifier = Modifier
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
@@ -488,13 +487,13 @@ fun PickerPageTab(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) MaterialTheme.colorScheme.primary
+                color = if (selected) MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "$count",
                 style = MaterialTheme.typography.labelMedium,
-                color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                color = if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }

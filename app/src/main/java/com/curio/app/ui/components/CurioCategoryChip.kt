@@ -9,12 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioCategory
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.onAccent
+import com.curio.app.ui.theme.themedAccent
 
 /**
  * A Curio category chip — used in Home's category chip row (§3), Category
@@ -23,8 +23,9 @@ import com.curio.app.ui.theme.categoryInk
  * Visual rules:
  * - Unselected: outlined chip on `surface`, glyph + label in
  *   `onSurfaceVariant`.
- * - Selected: filled chip in the category's `tint` (accent @ 20% alpha),
- *   glyph + label in the category's `accent`, no border (clean filled look).
+ * - Selected: SOLID category-accent fill with on-accent glyph + label, no
+ *   border; elevation stays a flat 2dp in both states (v27q — selection
+ *   reads through the fill, not a raise).
  * - Single-select within a row — selection state is owned by the parent
  *   screen, this chip just renders.
  *
@@ -39,15 +40,6 @@ fun CurioCategoryChip(
     modifier: Modifier = Modifier,
     label: String = category.displayName
 ) {
-    // v27n — the selected chip fill is OPAQUE: `category.tint` is the accent
-    // at 20% alpha, and a translucent container lets the chip's elevation
-    // shadow bleed through (blurry broken chip). The opaque 20% lerp over
-    // the surface resolves to the same tint.
-    val selectedChipFill = lerp(
-        MaterialTheme.colorScheme.surface,
-        category.accent,
-        0.20f
-    )
     FilterChip(
         selected = selected,
         onClick = onClick,
@@ -65,29 +57,28 @@ fun CurioCategoryChip(
                 // categoryInk (the deep accent in light / light twin in dark),
                 // NOT themedAccent — in pastel mode the pastel accent would
                 // disappear on the light chip surface.
-                tint = if (selected) category.categoryInk()
+                tint = if (selected) category.onAccent()
                        else MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 18.dp
             )
         },
         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = if (selected) selectedChipFill
+            containerColor = if (selected) category.themedAccent()
                              else MaterialTheme.colorScheme.surface,
-            labelColor = if (selected) category.categoryInk()
+            labelColor = if (selected) category.onAccent()
                          else MaterialTheme.colorScheme.onSurfaceVariant,
-            iconColor = if (selected) category.categoryInk()
+            iconColor = if (selected) category.onAccent()
                        else MaterialTheme.colorScheme.onSurfaceVariant,
-            selectedContainerColor = selectedChipFill,
-            selectedLabelColor = category.categoryInk(),
-            selectedLeadingIconColor = category.categoryInk()
+            selectedContainerColor = category.themedAccent(),
+            selectedLabelColor = category.onAccent(),
+            selectedLeadingIconColor = category.onAccent()
         ),
-        // v27n — elevation replaces the outline: chips lift off the page
-        // (higher when selected) instead of drawing a hairline ring.
+        // v27q — selection reads through the SOLID accent fill + on-accent
+        // content; elevation stays a flat 2dp in both states so chips never
+        // raise (the old 4/2 raise was the blurry-shadow bug class).
         border = BorderStroke(0.dp, Color.Transparent),
-        elevation = FilterChipDefaults.filterChipElevation(
-            elevation = if (selected) 4.dp else 2.dp
-        )
+        elevation = FilterChipDefaults.filterChipElevation(elevation = 2.dp)
     )
 }
 
