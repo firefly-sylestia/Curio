@@ -70,9 +70,11 @@ object PetPointer {
     var press by mutableStateOf<Offset?>(null)
     /**
      * v28 — scroll direction for the pet's eye look: +1 = scrolling down
-     * (finger/wheel moving down the screen), -1 = scrolling up, 0 = none.
-     * Sprites glance VERTICALLY along this line while scrolling — they
-     * never spin in a circle (the old full 2π roll was unnatural).
+     * (the CONTENT moves down the screen: mouse wheel down, or a touch
+     * finger swiping UP — on touch the finger moves opposite to the
+     * content), -1 = scrolling up, 0 = none. Sprites glance VERTICALLY
+     * along this line while scrolling — they never spin in a circle (the
+     * old full 2π roll was unnatural).
      */
     var scrollDir by mutableStateOf(0f)
         private set
@@ -138,7 +140,12 @@ object PetPointer {
                             if (abs(dy) > with(density) { 2.dp.toPx() } &&
                                 System.nanoTime() - lastScrollNanos > 60_000_000L
                             ) {
-                                scrollDir = if (dy > 0f) 1f else -1f
+                                // Touch-drag: the finger moves OPPOSITE to
+                                // the content — swiping UP scrolls the page
+                                // DOWN, so the pet looks the way the content
+                                // moves (consistent with the wheel branch
+                                // above: scrolling down = look down).
+                                scrollDir = if (dy > 0f) -1f else 1f
                                 scrollTick++
                                 lastScrollNanos = System.nanoTime()
                             }

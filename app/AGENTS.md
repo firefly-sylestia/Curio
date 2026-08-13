@@ -232,10 +232,16 @@ app/src/main/java/com/curio/app/
   scrolls use `scrollDelta.y`'s sign and touch-drag scrolls use the
   finger's INCREMENTAL vertical travel (2dp threshold + 60ms gate). Each
   sprite runs a `scrollLook` Animatable keyed on `scrollTick`: ease to the
-  scroll direction (150ms), HOLD while scroll events keep arriving
+  scroll  direction (150ms), HOLD while scroll events keep arriving
   (restarting the effect), then settle back to neutral ~400ms after the
   last event. The scroll look wins over the pointer aim while active, so
-  dragging never mixes the aim with a spin.
+  dragging never mixes the aim with a spin. **v28 touch-direction fix:**
+  the touch-drag branch fed the raw finger delta into the SAME mapping as
+  the wheel — but a touch finger moves OPPOSITE to the content (swiping
+  UP scrolls the page DOWN), so on a phone scrolling down made the pet
+  look UP. The touch branch now inverts the finger delta
+  (`dy > 0 → -1, else 1`), so the pet always looks the way the CONTENT
+  moves — consistent with the wheel branch (scrolling down = look down).
 - **v28 — dark-mode elevation visibility: soft light glow + hairline
   outline.** Compose's black shadows are INVISIBLE on the app's midnight
   surfaces, so dark mode now draws elevation two extra ways via two new

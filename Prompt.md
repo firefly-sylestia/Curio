@@ -58,6 +58,27 @@ hole. All three now share a real through-hole structure:
 ### Validation
 Brace balance OK (1 file), `git diff --check` clean. No Gradle locally
 (env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullet.
+
+## Current request — pet looks UP when scrolling DOWN on touch (v28)
+
+### What was asked
+"The pet isn't following my finger scroll — it just changes its eye
+direction based on where I'm swiping. Even though it's above and my
+scrolling is happening down, it looks up. Fix it."
+
+### What was done
+`CurioPetSprite.kt` — the touch-drag branch fed the raw finger delta into
+the SAME scrollDir mapping as the mouse wheel, but on touch the finger
+moves OPPOSITE to the content: swiping UP scrolls the page DOWN. So on a
+phone, scrolling down made the pet look UP (following the finger, not the
+scroll). The touch branch now INVERTS the finger delta
+(`dy > 0 → scrollDir -1`, `dy < 0 → +1`), so the pet always looks the way
+the CONTENT moves — consistent with the wheel branch (scrolling down =
+look down). Doc comments updated to the content-direction definition.
+
+### Validation
+Brace balance OK (1 file), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullet.
 Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
 
 ## Prior — AMOLED border-removal audit + category picker rows (v28)
