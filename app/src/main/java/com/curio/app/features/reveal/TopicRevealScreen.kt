@@ -112,6 +112,8 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
@@ -124,7 +126,7 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
-import com.curio.app.ui.theme.headerAccent
+import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -1406,6 +1408,9 @@ private fun RevealAlreadyButton(
                 else lerp(MaterialTheme.colorScheme.background, surface, 0.45f),
         shadowElevation = 3.dp,
         modifier = modifier
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
+            .curioDarkOutline(RoundedCornerShape(50))
             .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
             // Give the writing action a real, forgiving tap target across its
             // entire weighted half of the row. The old inner padding made the
@@ -1461,10 +1466,27 @@ private fun HeroCard(
     val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
 
     val action = resolved?.exploreAction
-    // v27j — header fill depth: a slightly darker painter accent by default
-    // (toggle in Experiments → Paper & headers).
-    val accent = cat.headerAccent()
-    val heroGradient = CurioGradients.cardGradient(accent)
+    val dark = isCurioDarkTheme()
+    // v28 — the reveal hero uses the SAME accent source as the Spin ticket
+    // (themedAccent, NOT the headerAccent() deepen): the hero morphs out of
+    // the ticket, so its gradient must read pixel-identical. The old
+    // headerAccent() deepen made the reveal hero a shade darker than the
+    // ticket in LIGHT mode (dark's 0.94 factor hid it).
+    val accent = cat.themedAccent()
+    // v28 — mirror the Spin ticket's gradient recipe EXACTLY in every
+    // theme: pastel light uses the ticket's pastel crown + on-hue tint
+    // stops; everything else uses the shared card gradient. The old
+    // cardGradient-only recipe diverged from the ticket in pastel light
+    // (the ticket's second stop IS the tint, cardGradient's is only 30%
+    // toward it) — the morph visibly shifted color on light pastel pages.
+    val heroGradient = if (AppPreferences.pastelColorsState && !dark) {
+        listOf(
+            lerp(accent, Color.Black, 0.05f),
+            lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
+        )
+    } else {
+        CurioGradients.cardGradient(accent)
+    }
     // v7.5 — pastel mode lightens the hero gradient, so the pill content
     // flips from white to the deep accent (light) / light twin (dark).
     // Match the Spin ticket's ink formula exactly so the morph reads as
@@ -1475,7 +1497,6 @@ private fun HeroCard(
     //    reads as the same surface during the morph. When heroGradientOn
     //    is enabled, the hero gets the same top-lit diagonal sweep as the
     //    deck's front ticket; otherwise a plain vertical gradient.
-    val dark = isCurioDarkTheme()
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
     // toggle was removed from Experiments and the read is hardcoded here.
@@ -1755,7 +1776,11 @@ private fun TeaserCard(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
         shadowElevation = 3.dp,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(3.dp, RoundedCornerShape(24.dp))
+            .curioDarkOutline(RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(

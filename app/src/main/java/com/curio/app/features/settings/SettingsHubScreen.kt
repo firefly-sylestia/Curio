@@ -81,6 +81,8 @@ import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -411,6 +413,9 @@ fun SettingsHeroActionPill(
         color = fill,
         shadowElevation = 3.dp,
         modifier = modifier
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
+            .curioDarkOutline(RoundedCornerShape(50))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),

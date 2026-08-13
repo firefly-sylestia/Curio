@@ -1,6 +1,55 @@
 # Prompt.md — Request log
 
-## Current request — pet eyes: scroll look up/down in a line, no circular spin (v28)
+## Current request — dark-mode elevation visibility + reveal gradient match (v28)
+
+### What was asked
+1. "In dark mode the elevation isn't visible — what can we do about that?"
+2. "In LIGHT mode the Topic Reveal screen hero gradient doesn't match the
+   main card (Spin) hero gradient; dark mode is perfect — fix light mode."
+
+### User decision (ask_user)
+Dark elevation: BOTH a faint light outline AND a soft light glow — "make
+ the soft light glow default on, add the other as option in Appearance".
+Implemented as two Appearance toggles: "Glow shadows" (default ON) and
+"Card outlines" (default ON), both dark-mode-only.
+
+### Done — dark elevation (ui/components/DarkElevation.kt, NEW)
+- `Modifier.curioDarkGlow(elevation, shape)` — dark mode only: a soft
+  WHITE-tinted shadow (16% alpha) so elevation reads as a gentle lift on
+  near-black (black shadows are invisible there). Light mode adds nothing.
+- `Modifier.curioDarkOutline(shape)` — dark mode only: a faint light
+  hairline (12% white) along the surface edge.
+- Prefs `darkGlowState` (default true) + `darkOutlineState` (default
+  true), loaded in init; Appearance rows added after "Sky azure hero".
+- Wired into the shared elevated components + main screens: CurioSettings-
+  Card, CurioSearchField, CurioEntryCard, CurioCategoryCard, FilterChipLite
+  (Cabinet chips), Settings/Cabinet hero action pills, CurioSortDropdown
+  (both pills), CurioTopBar, PaperCard surfaces (paper card, torn slip,
+  CompactPaperChip, paper toggle, color dots), Settings dialog option rows,
+  Home (stat card, both recents rows, sticky top pills, session card, stop
+  button, pick-a-lane), Profile (paper stat pane, lanes tiles), Topic
+  Reveal (already-there button, teaser card). Glow precedes the fill in
+  every chain (rule 11).
+
+### Done — reveal gradient light-mode fix (TopicRevealScreen.kt)
+- Root cause: the reveal `HeroCard` used `cat.headerAccent()` (light-mode
+  factor 0.88 — a shade DARKER than the Spin ticket's `themedAccent()`)
+  AND rebuilt the gradient via `cardGradient` while the ticket uses a
+  different pastel-light recipe (ticket's 2nd stop IS the on-hue tint,
+  cardGradient's is only 30% toward it). Dark's 0.94 factor hid the accent
+  gap, so dark looked "perfect".
+- Fix: the hero now mirrors the ticket EXACTLY — `themedAccent()` + the
+  same pastel-light stops (`lerp(accent, Black, 0.05)` →
+  `lightAccentTint(accent, 0.22, 0.80)`) in pastel light, `cardGradient`
+  everywhere else. Pixel-identical morph in every theme. `headerAccent`
+  import removed, `lightAccentTint` added.
+
+### Validation
+Brace balance OK (15+ files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullets.
+Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — pet eyes: scroll look up/down in a line, no circular spin (v28)
 
 ### What was asked
 "What you did to the pet eyes — now they're not moving naturally, and they

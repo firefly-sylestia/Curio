@@ -59,6 +59,10 @@ fun CurioSettingsCard(
         shadowElevation = shadowElevation,
         modifier = modifier
             .fillMaxWidth()
+            // v28 — dark mode: soft light glow + faint hairline so the
+            // elevation reads on midnight (black shadows are invisible).
+            .curioDarkGlow(shadowElevation, RoundedCornerShape(28.dp))
+            .curioDarkOutline(RoundedCornerShape(28.dp))
             .categoryEdgeShine(RoundedCornerShape(28.dp))
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }

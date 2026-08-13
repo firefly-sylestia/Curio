@@ -93,6 +93,8 @@ import com.curio.app.ui.components.CurioSortOption
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.pet.PetLandmark
@@ -1091,7 +1093,11 @@ private fun CabinetHeroActionPill(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        shadowElevation = 3.dp
+        shadowElevation = 3.dp,
+        // v28 — dark mode elevation visibility (glow + hairline).
+        modifier = Modifier
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
+            .curioDarkOutline(RoundedCornerShape(50))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
@@ -1159,7 +1165,11 @@ private fun FilterChipLite(
         shape = RoundedCornerShape(50),
         color = Color.Transparent,
         // v27q — flat 2dp in both states (no selected raise).
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        // v28 — dark mode elevation visibility (glow + hairline).
+        modifier = Modifier
+            .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            .curioDarkOutline(RoundedCornerShape(50))
     ) {
         Box(
             modifier = Modifier

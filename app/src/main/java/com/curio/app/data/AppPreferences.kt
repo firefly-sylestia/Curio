@@ -68,6 +68,11 @@ object AppPreferences {
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
+    // v28 — dark-mode elevation visibility: black shadows vanish on
+    // near-black surfaces, so dark mode can draw a soft LIGHT glow shadow
+    // (default ON) and a faint light hairline outline (Appearance options).
+    private const val KEY_DARK_GLOW = "dark_glow"
+    private const val KEY_DARK_OUTLINE = "dark_outline"
     private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
     // v7.7 — experimental peek-card redesign, four independent toggles so
     // each upgrade can be A/B'd on its own: top-lit gradient fill, tinted
@@ -207,6 +212,15 @@ object AppPreferences {
     // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
     // azure instead of the rose-wood. Default OFF (rose stays).
     var heroBlueState by mutableStateOf(false)
+        private set
+
+    // v28 — dark-mode elevation: black shadows are invisible on the
+    // midnight surfaces, so dark mode draws a soft LIGHT glow shadow
+    // (default ON) and a faint light hairline outline on elevated surfaces
+    // (both Appearance options). Light mode is untouched either way.
+    var darkGlowState by mutableStateOf(true)
+        private set
+    var darkOutlineState by mutableStateOf(true)
         private set
 
     // Pastel crown depth (v7.12, EXPERIMENTAL) — when pastel mode is ON
@@ -495,6 +509,8 @@ object AppPreferences {
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
+        darkGlowState = isDarkGlowEnabled(context)
+        darkOutlineState = isDarkOutlineEnabled(context)
         promoModeState = isPromoModeEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
@@ -596,6 +612,25 @@ object AppPreferences {
     fun setHeroBlueEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_BLUE, enabled).apply()
         heroBlueState = enabled
+    }
+
+    // ── Dark-mode elevation (v28) ────────────────────────────────────
+    /** Whether dark mode draws the soft light glow shadow (default on). */
+    fun isDarkGlowEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DARK_GLOW, true)
+
+    fun setDarkGlowEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DARK_GLOW, enabled).apply()
+        darkGlowState = enabled
+    }
+
+    /** Whether dark mode draws the faint light outline (default on). */
+    fun isDarkOutlineEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DARK_OUTLINE, true)
+
+    fun setDarkOutlineEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DARK_OUTLINE, enabled).apply()
+        darkOutlineState = enabled
     }
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────

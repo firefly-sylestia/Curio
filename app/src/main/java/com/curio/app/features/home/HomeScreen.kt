@@ -97,6 +97,8 @@ import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
@@ -579,7 +581,14 @@ fun HomeScreen(navController: NavController) {
                             Surface(
                                 shape = statShape,
                                 color = Color.Transparent,
-                                shadowElevation = if (paperStatsOn) 3.dp else 0.dp
+                                shadowElevation = if (paperStatsOn) 3.dp else 0.dp,
+                                // v28 — dark mode elevation visibility
+                                // (glow + hairline on the paper card).
+                                modifier = if (paperStatsOn) {
+                                    Modifier
+                                        .curioDarkGlow(3.dp, statShape)
+                                        .curioDarkOutline(statShape)
+                                } else Modifier
                             ) {
                                 // The fill must wear the card's own shape —
                                 // Surface does not clip its content, so a plain
@@ -1262,6 +1271,9 @@ private fun TopBarPill(
         shadowElevation = elevation,
         modifier = Modifier
             .size(42.dp)
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(elevation, shape)
+            .curioDarkOutline(shape)
             // Material's default indication is a circular ripple. On these
             // small floating pills it expands beyond the color fade and reads
             // as a circular visual glitch, so remove the ripple and let the
@@ -1502,7 +1514,11 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
         color = cat.categorySurface(),
         // v27u — recents rows sit on a soft 2dp lift.
         shadowElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
+            .curioDarkOutline(RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier
@@ -1682,7 +1698,11 @@ private fun FirstTimeEmpty(
                     // secondary button never reads as a foreign cream pill
                     // on the tinted first-run card.
                     color = lerp(surface, MaterialTheme.colorScheme.surfaceContainerLow, 0.5f),
-                    shadowElevation = 2.dp
+                    shadowElevation = 2.dp,
+                    // v28 — dark mode elevation visibility.
+                    modifier = Modifier
+                        .curioDarkGlow(2.dp, RoundedCornerShape(50))
+                        .curioDarkOutline(RoundedCornerShape(50))
                 ) {
                     Text(
                         "Pick a lane",
@@ -2071,7 +2091,11 @@ private fun ExploreTopicRow(
         color = category.categorySurface(),
         // v27u — recents rows sit on a soft 2dp lift.
         shadowElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
+            .curioDarkOutline(RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier
@@ -2177,6 +2201,9 @@ private fun CurrentlyExploringCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(24.dp))
+            .curioDarkOutline(RoundedCornerShape(24.dp))
     ) {
         Box {
             // Watermark glyph — the session's category, like the hero's.
@@ -2202,6 +2229,9 @@ private fun CurrentlyExploringCard(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(10.dp)
+                    // v28 — dark mode elevation visibility.
+                    .curioDarkGlow(2.dp, CircleShape)
+                    .curioDarkOutline(CircleShape)
             ) {
                 CurioIcon(
                     name = CurioIcons.Stop,

@@ -159,6 +159,9 @@ fun CurioCategoryCard(
             .fillMaxWidth()
             .height(104.dp)
             .scale(scale)
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(cardElevation, RoundedCornerShape(22.dp))
+            .curioDarkOutline(RoundedCornerShape(22.dp))
             // v9.x — the theme-style edge shine: AMOLED black-glass and
             // Material both wear the category-colored rim light. Coming-soon
             // tiles wear a much fainter rim so they read as "locked".

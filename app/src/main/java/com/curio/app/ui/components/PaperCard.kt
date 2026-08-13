@@ -190,6 +190,9 @@ fun PaperCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = minHeight)
+                // v28 — dark mode elevation visibility (glow + hairline).
+                .curioDarkGlow(3.dp, shape)
+                .curioDarkOutline(shape)
                 // Reserve the soft torn seam's small lower extent inside
                 // the measured surface so it cannot collide with the next
                 // field in a stacked editor.
@@ -1574,7 +1577,12 @@ fun TornPaperCard(
         shape = tornShape,
         color = surface,
         shadowElevation = 3.dp,
-        modifier = modifier.heightIn(min = minHeight).rotate(rotation)
+        modifier = modifier
+            .heightIn(min = minHeight)
+            .rotate(rotation)
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(3.dp, tornShape)
+            .curioDarkOutline(tornShape)
     ) {
         Box {
             // One Canvas: the grain texture + soft creases + (optionally)
@@ -1913,7 +1921,11 @@ private fun CompactPaperChip(
         // accent itself as label ink; elevation stays flat 2dp.
         color = if (active) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
                 else MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        // v28 — dark mode elevation visibility (glow + hairline).
+        modifier = Modifier
+            .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            .curioDarkOutline(RoundedCornerShape(50))
     ) {
         Text(
             text = label,
@@ -1955,7 +1967,11 @@ fun NotePaperColorToggle(
             // MODERATED accent tint, not a solid block; flat 2dp.
             color = if (expanded) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
                     else MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 2.dp
+            shadowElevation = 2.dp,
+            // v28 — dark mode elevation visibility (glow + hairline).
+            modifier = Modifier
+                .curioDarkGlow(2.dp, RoundedCornerShape(10.dp))
+                .curioDarkOutline(RoundedCornerShape(10.dp))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
@@ -2007,6 +2023,9 @@ fun NotePaperColorToggle(
                         shadowElevation = 2.dp,
                         modifier = Modifier
                             .size(if (selected) 24.dp else 20.dp)
+                            // v28 — dark mode elevation visibility.
+                            .curioDarkGlow(2.dp, CircleShape)
+                            .curioDarkOutline(CircleShape)
                             .semantics {
                                 contentDescription =
                                     "${candidate.name.lowercase()} paper" + if (selected) " (selected)" else ""

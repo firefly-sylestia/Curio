@@ -236,6 +236,36 @@ app/src/main/java/com/curio/app/
   (restarting the effect), then settle back to neutral ~400ms after the
   last event. The scroll look wins over the pointer aim while active, so
   dragging never mixes the aim with a spin.
+- **v28 — dark-mode elevation visibility: soft light glow + hairline
+  outline.** Compose's black shadows are INVISIBLE on the app's midnight
+  surfaces, so dark mode now draws elevation two extra ways via two new
+  composable modifiers in `ui/components/DarkElevation.kt`:
+  `Modifier.curioDarkGlow(elevation, shape)` — a soft WHITE-tinted shadow
+  (16% alpha) that reads as a gentle lift on near-black — and
+  `Modifier.curioDarkOutline(shape)` — a faint light hairline (12% white)
+  along the surface edge, the standard dark-UI card language. Both are
+  dark-mode-only (light mode renders exactly as before: the Surface's own
+  black shadowElevation) and are driven by two Appearance toggles
+  (`darkGlowState` default ON, `darkOutlineState` default ON — the glow is
+  the default-on look, the outline is the Appearance option). Wired into
+  the shared elevated components + main screens: CurioSettingsCard,
+  CurioSearchField, CurioEntryCard, CurioCategoryCard, FilterChipLite,
+  hero action pills (Settings/Cabinet), CurioSortDropdown, CurioTopBar,
+  PaperCard surfaces, dialog option rows, Home (stat card, recents rows,
+  sticky top pills, session card, pick-a-lane), Profile (stat pane, lanes
+  tiles), Topic Reveal (already-there button, teaser card). Glow must
+  precede the fill in the modifier chain (rule 11).
+- **v28 — Topic Reveal hero gradient matches the Spin ticket in LIGHT
+  mode.** The reveal hero's `HeroCard` used `cat.headerAccent()` (a
+  0.88-deepened accent in light mode, v27j) while the Spin ticket wears
+  `themedAccent()` — so the morph read a shade darker in light (dark's
+  0.94 factor hid it). It also rebuilt the gradient via `cardGradient`
+  while the ticket uses a different pastel-light recipe (its second stop
+  IS the on-hue tint; cardGradient's is only 30% toward it). The hero now
+  mirrors the ticket EXACTLY: `themedAccent()` + the same pastel-light
+  stops (`lerp(accent, Black, 0.05)` → `lightAccentTint(0.22, 0.80)`) in
+  pastel light, `cardGradient` everywhere else — pixel-identical morph in
+  every theme.
 - **v27v — custom pet designs ALWAYS win + custom-pet procedural defaults.**
   (1) The sprite's design resolution (`CurioPetSprite`) forced
   `evolutionDesign(BABY, null)` for ANY baby-stage pet (level < 15) — so

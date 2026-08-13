@@ -96,6 +96,8 @@ import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
@@ -755,7 +757,12 @@ private fun ProfileHero(
                     Surface(
                         shape = statShape,
                         color = Color.Transparent,
-                        shadowElevation = 3.dp
+                        shadowElevation = 3.dp,
+                        // v28 — dark mode elevation visibility (glow +
+                        // hairline on the paper card).
+                        modifier = Modifier
+                            .curioDarkGlow(3.dp, statShape)
+                            .curioDarkOutline(statShape)
                     ) {
                         Box(
                             modifier = when {
@@ -1187,7 +1194,11 @@ private fun LanesCard(counts: Map<CategoryId, Int>, onCabinet: () -> Unit) {
                         category.themedAccent(),
                         0.14f
                     ),
-                    shadowElevation = 2.dp
+                    shadowElevation = 2.dp,
+                    // v28 — dark mode elevation visibility.
+                    modifier = Modifier
+                        .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
+                        .curioDarkOutline(RoundedCornerShape(16.dp))
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         CurioIcon(category.iconGlyph, null, tint = category.themedAccent(), size = 20.dp)

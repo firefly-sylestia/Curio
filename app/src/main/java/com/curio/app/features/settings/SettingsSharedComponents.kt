@@ -23,6 +23,8 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioQuality
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -70,7 +72,11 @@ fun AudioQualityDialog(
                         contentColor = if (selected) dialogRowSelectedInk()
                                        else MaterialTheme.colorScheme.onSurface,
                         shadowElevation = 2.dp,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // v28 — dark mode elevation visibility.
+                            .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
+                            .curioDarkOutline(RoundedCornerShape(16.dp))
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp),
@@ -140,7 +146,11 @@ fun SearchEngineDialog(
                         contentColor = if (selected) dialogRowSelectedInk()
                                        else MaterialTheme.colorScheme.onSurface,
                         shadowElevation = 2.dp,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // v28 — dark mode elevation visibility.
+                            .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
+                            .curioDarkOutline(RoundedCornerShape(16.dp))
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp),
@@ -210,7 +220,11 @@ fun MusicServiceDialog(
                         contentColor = if (selected) dialogRowSelectedInk()
                                        else MaterialTheme.colorScheme.onSurface,
                         shadowElevation = 2.dp,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // v28 — dark mode elevation visibility.
+                            .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
+                            .curioDarkOutline(RoundedCornerShape(16.dp))
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp),

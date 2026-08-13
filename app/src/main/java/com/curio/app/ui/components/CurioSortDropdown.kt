@@ -74,7 +74,11 @@ fun CurioSortDropdown(
                 onClick = { expanded = true },
                 shape = RoundedCornerShape(50),
                 color = fill,
-                shadowElevation = 2.dp
+                shadowElevation = 2.dp,
+                // v28 — dark mode elevation visibility (glow + hairline).
+                modifier = Modifier
+                    .curioDarkGlow(2.dp, RoundedCornerShape(50))
+                    .curioDarkOutline(RoundedCornerShape(50))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -101,7 +105,11 @@ fun CurioSortDropdown(
                 onClick = onToggleDirection,
                 shape = CircleShape,
                 color = fill,
-                shadowElevation = 2.dp
+                shadowElevation = 2.dp,
+                // v28 — dark mode elevation visibility (glow + hairline).
+                modifier = Modifier
+                    .curioDarkGlow(2.dp, CircleShape)
+                    .curioDarkOutline(CircleShape)
             ) {
                 CurioIcon(
                     name = if (ascending) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,
