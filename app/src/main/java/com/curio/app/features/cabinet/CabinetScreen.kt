@@ -109,6 +109,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.headerAccent
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -659,7 +660,10 @@ private fun CabinetHeroHeader(
     }
     val targetInk = when {
         legacyMode -> MaterialTheme.colorScheme.onTertiary
-        activeCat != null -> activeCat.onAccent()
+        // v28 — dark mode: white/creamish hero text (the tinted light twin
+        // would read as pastel title over the deep banner); light keeps the
+        // pastel-aware on-accent ink exactly as before.
+        activeCat != null -> activeCat.heroHeaderInk()
         else -> settingsReadableInk(targetFill)
     }
     val fill by animateColorAsState(targetFill, tween(CurioMotion.Durations.Morph), label = "cabinetHeroFill")

@@ -1,6 +1,35 @@
 # Prompt.md — Request log
 
-## Current request — 3D steel rings (3 styles), Home tint pills, torn-edge rework, paper detail card (v27v)
+## Current request — dark-mode hero header text white/creamish on all screens (v28)
+
+### What was asked
+"In hero header text in all screen keep the text white or creamish in dark
+mode only."
+
+### What was done
+New `CurioCategory.heroHeaderInk()` in `CategoryInk.kt`: LIGHT mode keeps
+the existing pastel-aware `onAccent()` resolution exactly (deep ink on
+airy pastel fills, white on deep accents); DARK mode always resolves
+WHITE/creamish — `pastelFillInk(themedAccent())`, the same cream-white
+blend the shared rose heroes already use (85% toward white keeps a hue
+whisper, never a tinted light twin as title text). Applied to the three
+category-tinted heroes that used `onAccent()` directly:
+- Cabinet's active-filter banner (`CabinetHeroHeader` — `targetInk`).
+- The saved-entry detail hero (`heroInk` in `EntryDetailScreen` — title,
+  back button, meta pills).
+- Home's hero-tint experiment title + sticky menu/profile pills
+  (`questInk` in `HomeScreen`).
+Home/Profile/Settings/History/Quests heroes already resolved creamish via
+their `*ReadableInk` helpers — unchanged. `onAccent` import removed from
+HomeScreen (now unused there); EntryDetail/Cabinet keep theirs (still
+used elsewhere in those files).
+
+### Validation
+Brace balance OK (4 files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullet.
+Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — 3D steel rings (3 styles), Home tint pills, torn-edge rework, paper detail card (v27v)
 
 ### What was asked
 "The hole rings aren't that — I meant spring-like rings through the holes

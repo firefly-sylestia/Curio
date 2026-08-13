@@ -128,7 +128,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.onAccent
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
@@ -233,7 +233,10 @@ fun HomeScreen(navController: NavController) {
     // of always falling back to the rose accent.
     val heroTintOn = homeTintOn && !homeTintFollowLane && AppPreferences.homeHeroTintState
     val heroFill = if (heroTintOn) homeTintCat.themedAccent() else homeRoseAccent()
-    val questInk = if (heroTintOn) homeTintCat.onAccent() else homeReadableInk(heroFill)
+    // v28 — dark mode: the tinted hero's title + sticky pills stay
+    // white/creamish (never the category's tinted light twin); light mode
+    // keeps the pastel-aware on-accent ink as before.
+    val questInk = if (heroTintOn) homeTintCat.heroHeaderInk() else homeReadableInk(heroFill)
     // Publish the wash so the Scaffold-level bottom nav (which can't read
     // this screen's state) blends with the tinted Home page.
     LaunchedEffect(homeBg) {

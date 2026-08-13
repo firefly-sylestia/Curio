@@ -163,6 +163,7 @@ import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -261,7 +262,9 @@ fun EntryDetailScreen(
     // (glyph, title, frosted bar, watermark scatter) flips from white to the
     // theme-aware onAccent ink — deep accent in light, light twin in dark.
     // White when pastel mode is off, preserving the exact pre-pastel look.
-    val heroInk = cat.onAccent()
+    // v28 — dark mode hero title text is always white/creamish (never the
+    // tinted light twin) so the banner headline stays crisp light-on-deep.
+    val heroInk = cat.heroHeaderInk()
     val darkNonPastel = isCurioDarkTheme() && !AppPreferences.pastelColorsState
     // Dark non-pastel hero cards use a quiet midnight frost instead of the
     // former bright-white glass. Light and pastel modes retain the established
