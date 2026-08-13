@@ -88,6 +88,26 @@ enum class SettingsPage(val title: String, val subtitle: String) {
     DATA("Backup & restore", "Keep your captures safe")
 }
 
+/**
+ * v27t — the rows of one settings page, standalone. Rendered by
+ * [SettingsSectionScreen] behind its hero, and reused by the wide two-pane
+ * hub ([SettingsHubScreen]) so the tablet Settings screen shows the nav list
+ * on the left and the selected page's options on the right.
+ */
+@Composable
+internal fun SettingsPageContent(
+    page: SettingsPage,
+    navController: NavController,
+    highlightKey: String? = null
+) {
+    when (page) {
+        SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
+        SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
+        SettingsPage.RECORDING -> RecordingSection(highlightKey)
+        SettingsPage.DATA -> DataSection(navController, highlightKey)
+    }
+}
+
 @Composable
 fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
     // ── Deep-search highlight (v8.0) — the hub's search hands over the exact
@@ -133,12 +153,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         ) {
             item { CurioSectionLabel(page.title) }
             item {
-                when (page) {
-                    SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
-                    SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
-                    SettingsPage.RECORDING -> RecordingSection(highlightKey)
-                    SettingsPage.DATA -> DataSection(navController, highlightKey)
-                }
+                SettingsPageContent(page, navController, highlightKey)
             }
         }
         // Side scroll indicator — thin overlay knob, grows on touch.

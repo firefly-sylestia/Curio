@@ -1068,8 +1068,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // BoxWithConstraints scope rather than inside the Row/Column below:
         // the nested layout lambdas can't resolve this scope's maxWidth as
         // an implicit receiver, which broke the CI build.
+        // v27t — the deck now scales UP on tablets/landscape (cap raised
+        // from 1.0 to 1.6): the front ticket and the two peek cards grow
+        // with the stage instead of staying phone-sized in empty gutters.
+        // The proportional fan keeps exactly 2 peek cards at any scale.
         val wideFit = ((maxWidth - 130.dp) / 360.dp).coerceIn(
-            if (compactHeight) 0.62f else 0.78f, 1f
+            if (compactHeight) 0.62f else 0.78f, 1.6f
         )
         // ── Watermark backdrop — every category glyph scattered around ──
         //    the screen in a muted shade, behind all content, so the quiet
