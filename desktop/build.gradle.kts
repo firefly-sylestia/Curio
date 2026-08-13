@@ -1,0 +1,46 @@
+// ── Curio Desktop — Compose Multiplatform (JVM) port ────────────────────────
+//
+// Milestone 1: a native desktop window (Windows .exe via jpackage, plus
+// macOS/Linux) that runs the Curio shell with the Spin deck + topic browser
+// reading the SAME topic JSON files the Android app ships. The Android
+// module stays untouched; this module compiles independently.
+//
+// The topic assets are referenced in-place (no copy) so content edits in
+// app/src/main/assets/topics are picked up by the desktop build automatically.
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.multiplatform)
+}
+
+kotlin {
+    jvmToolchain(17)
+    sourceSets {
+        main {
+            // Reuse the Android app's topic JSON files as-is (single source
+            // of truth — no duplicate assets in git).
+            resources.srcDir("../app/src/main/assets/topics")
+        }
+    }
+}
+
+dependencies {
+    implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
+    // Topic JSON parsing (same serializer the Android app uses).
+    implementation(libs.com.google.code.gson.gson)
+}
+
+compose.desktop {
+    application {
+        mainClass = "com.curio.desktop.MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Msi, TargetFormat.Dmg, TargetFormat.Deb)
+            packageName = "Curio"
+            packageVersion = "1.0.0"
+            description = "Curio — discover the things you love, one curious spin at a time."
+            vendor = "Curio"
+        }
+    }
+}

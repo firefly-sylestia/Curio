@@ -1,8 +1,34 @@
 # Prompt.md — Request log
 
-## Current request — fix blurry/broken backgrounds from the elevation commit (fe3da7a)
+## Current request — start the Compose Multiplatform desktop port (v27t)
 
-**Status:** Implemented. Commits: `1adf0bd` (first pass) + `e34a79e` (app-wide opaque-fill extension + v27q selection flatten) + v27r explore-button/badge/passport pass (this working tree, commit pending — not pushed per user's standing no-push rule).
+### What was asked
+"fix the app freeze when i take a screenshot during explore session. and fix cl and start the desktop port" (CL = the pet-eyes CI log the user pasted).
+
+### What was done
+1. **CI fix (pushed `805a430`)** — `CurioPetSprite` pointer tracker used wrong APIs: `awaitPointerEventScope` doesn't exist on `PointerInputScope` (removed), `PointerEventType` vs `PointerType` swapped in the when (now compares `event.type` to `PointerEventType.*`), `isSpecified` doesn't exist on `Offset` (null checks instead).
+2. **Screenshot freeze (pushed `3a52267`)** — `DeviceScreenshotWatcher.scan()` ran on the MAIN thread (ContentObserver with main Looper) and did a MediaStore query + full file copy (`SessionShots.copyFrom`) right as the system was still writing the screenshot → the app froze during explore sessions. Fixed: the observer now spawns a `Dispatchers.IO` coroutine for query+copy; the main thread only toggles a `needsScan` flag.
+3. **Desktop port started (this commit)** — new `:desktop` module (Compose Multiplatform 1.11.1, JVM 17, `org.jetbrains.compose` plugin already added to the catalog):
+   - `desktop/build.gradle.kts` — CMP desktop application (mainClass `com.curio.desktop.MainKt`, jpackage `nativeDistributions` for Msi/Dmg/Deb); resources point at `../app/src/main/assets/topics` so the desktop build reads the SAME topic JSON files (no asset duplication).
+   - `DesktopCatalog.kt` — desktop mirror of the topic schema (nullable `byline`/`tier` + `safe*` accessors — Gson bypasses Kotlin default-arg constructors, verified 6675 missing bylines / 591 missing tiers in the real files) + the 36-lane table + wildcard merge.
+   - `Main.kt` — window shell: brand sidebar (all 36 lanes with live counts), Spin/Browse mode pills, the spin deck (front ticket + 2 peek cards — kept 2 per the standing rule), reveal card (teaser, byline pill, explore action), browse list. Palette mirrors CurioColors (SoftCream/SoftSand/CreamWhite/CoralBlush/CoralInk/Butter).
+   - `settings.gradle.kts` — `include(":desktop")`.
+   - CI — new `desktop` job in `.github/workflows/android.yml` runs `:desktop:build` on every push so the port can't rot (native packaging deferred to a future release workflow).
+   - Docs — root AGENTS.md gained a Desktop App (desktop/) section + child index entry.
+
+### Not yet ported (milestone 2+)
+Room data layer, preferences store, capture/sessions, notifications, floating overlay — each needs a desktop stub. UI parity with Android (incl. the tablet-layout pass + web parity effort) is the ongoing goal; the shuffle deck stays 2 peek cards.
+
+### Validation
+Brace balance clean on both new files; full code re-read for API correctness (desktop CMP APIs only: `rememberWindowState(width,height)`, `lightColorScheme`, `CardDefaults.cardElevation`, `Modifier.offset(x,y)`); no Gradle locally (env rule) — the new `desktop` CI job is the gate. 
+
+## Prior this-session (pushed before the desktop port)
+- Preset toggle-undo in the category picker + removed the Everything preset (wildcard covers it) — pushed `61c4396`.
+- Tablet/landscape layout pass: shell cap 720→880dp (inner 640→800dp), Settings two-pane master-detail on wide windows (full nav list left + page content right), spin deck wide-fit cap 1.0→1.6 (deck + 2 peeks scale up) — pushed `e7b5600`.
+- Pet eyes follow the pointer (hover/press/wheel, saturates ~200dp) — pushed `75216ef` (compile-fixed in `805a430`).
+- Music-service setting (YouTube Music/Apple Music/Spotify) + engine brand monogram tiles on the Explore pill + "Watch in" pill + avoid-AI pledge copy — pushed `a17739e` (web parity included).
+
+## Older — elevation/blurry-background saga (fe3da7a origin)
 
 ## v27r — readability/saturation audit, hero sort+search, section headers, browser UX (fifth request)
 

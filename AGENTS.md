@@ -223,6 +223,42 @@ Do not create historical design/status documents for routine changes. Keep durab
 - Store changelogs use `versionCode` (integer) — see `fastlane/AGENTS.md`
 - In-app changelog: detailed (unlimited). Store changelog: brief (≤500 chars)
 
+## Desktop App (desktop/)
+
+The `desktop/` directory is the **Compose Multiplatform (JVM) port** of the
+Android app — the same Kotlin codebase running as a native Windows `.exe`
+(via jpackage, plus macOS/Linux). It is a separate Gradle module (`:desktop`)
+that compiles independently of the Android `:app` module.
+
+**Current state (milestone 1):** the desktop shell — brand sidebar with all
+36 lanes, the Spin deck (front ticket + 2 peek cards), the reveal card, and a
+Browse list. It reads the SAME topic JSON files as Android by pointing the
+module's resources at `app/src/main/assets/topics` (no duplicate assets —
+content edits flow into both builds automatically). Data classes are desktop
+mirrors of the Android schema; fields absent from legacy JSON (`byline`,
+`tier`) are nullable with `safe*` accessors because Gson bypasses Kotlin
+default-parameter constructors.
+
+**Key facts:**
+- `desktop/build.gradle.kts` — CMP plugin (`org.jetbrains.compose`), JVM 17
+  toolchain, `compose.material3` + Gson only (no Android APIs yet).
+- `desktop/src/main/kotlin/com/curio/desktop/Main.kt` — window + shell UI.
+- `desktop/src/main/kotlin/com/curio/desktop/DesktopCatalog.kt` — topic
+  loader (Gson) + the 36-lane category table.
+- CI: the `desktop` job in `.github/workflows/android.yml` compiles and
+  builds the module on every push (`:desktop:build`), so the port can't
+  silently rot. Native packaging (.exe/.dmg/.deb) ships via a future
+  desktop release workflow.
+
+**To run locally:** `./gradlew :desktop:run` (this environment forbids
+running Gradle — CI validates instead).
+
+**Not yet ported** (milestone 2+): Room data layer (desktop persistence),
+SharedPreferences→settings store, capture/sessions, notifications,
+floating overlay, and the remaining Android-only services — each needs a
+desktop stub. UI parity with Android (per the tablet-layout pass + web
+parity effort) is the ongoing goal; the shuffle deck must stay 2 peek cards.
+
 ## Web App (web/)
 
 The `web/` directory contains a standalone React + TypeScript web application that mirrors the Android app's UI and functionality. It is a separate project from the Android app and is NOT included in the Android build.
@@ -254,4 +290,6 @@ npm run dev
 - [app/CURIO_DATA_PLAN.md](app/CURIO_DATA_PLAN.md) — Curio topic data contract
 - [gradle/AGENTS.md](gradle/AGENTS.md) — Gradle version catalog and wrapper
 - [fastlane/AGENTS.md](fastlane/AGENTS.md) — Android store metadata and release notes
+- [desktop/](desktop/) — Compose Multiplatform desktop port (see the
+  Desktop App section above)
 - [.github/AGENTS.md](.github/AGENTS.md) — GitHub CI/CD and issue templates

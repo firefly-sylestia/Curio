@@ -40,6 +40,12 @@ leakcanary = "2.14"
 uiUnit = "1.11.2"
 osmdroid = "6.1.18"
 graphicsShapes = "1.0.1"
+// v27t — Compose Multiplatform desktop port: the Kotlin app as a native
+// Windows .exe (and macOS/Linux). 1.11.1 is the latest stable CMP release;
+// the plugin is always compatible with the newest Kotlin, so it pairs with
+// the repo's Kotlin 2.3.21.
+composeMultiplatform = "1.11.1"
+kotlinxSerializationJson = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -108,6 +114,8 @@ haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

@@ -33,3 +33,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Curio"
 include(":app")
+include(":desktop")
