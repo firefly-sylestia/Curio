@@ -1,6 +1,8 @@
 # Prompt.md — Request log
 
-## Current request — CI fix: desktop `org.jetbrains.kotlin.jvm` unknown-version plugin collision (pushed b669f0c)
+## Current request — CI fix: desktop build script errors (pushed b669f0c + 0f63f12)
+
+### Round 1 — plugin collision (b669f0c)
 
 ### What was asked
 User pasted a CI failure: `desktop/build.gradle.kts` line 10 fails with `Error resolving plugin [id: 'org.jetbrains.kotlin.jvm', version: '2.3.21']` → "already on the classpath with an unknown version, so compatibility cannot be checked".
@@ -13,6 +15,11 @@ User pasted a CI failure: `desktop/build.gradle.kts` line 10 fails with `Error r
 
 ### Validation
 No Gradle locally (env rule) — the `desktop` CI job on push is the gate.
+
+### Round 2 — script compile errors (0f63f12)
+After round 1 landed, CI got past plugin resolution but `desktop/build.gradle.kts` failed to compile as a Kotlin DSL script:
+- `TargetFormat` unresolved → added `import org.jetbrains.compose.desktop.application.dsl.TargetFormat`.
+- `compose.material3` (String accessor) deprecated → a script error in CMP 1.11+. Replaced with a direct catalog dependency: added `composeMaterial3 = "1.11.0-alpha07"` + `compose-material3` to `libs.versions.toml` (the material3 version bundled with CMP 1.11.1, decoupled from the CMP plugin version since 1.8) and `implementation(libs.compose.material3)` in the desktop module. TOML re-validated with `tomllib`.
 
 ## Prior — desktop full parity (milestone 3) + workflow hardening (v27t)
 
