@@ -48,6 +48,7 @@ import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
 import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.floor
@@ -70,6 +71,14 @@ object PetPointer {
     /** Increments on every wheel-scroll — the sprite plays a quick eye-roll. */
     var rollTick by mutableStateOf(0)
         private set
+    /**
+     * v27v — increments on EVERY pointer event (hover, press, drag, scroll,
+     * release). Sprites key their 2-second look-timeout on it: while events
+     * keep arriving the eyes stay aimed, and ~2s after the last one they
+     * ease back to the neutral glance.
+     */
+    var activityTick by mutableStateOf(0)
+        private set
 
     /**
      * Attach to the app root: tracks hover, press and scroll so the pet's
@@ -77,6 +86,14 @@ object PetPointer {
      */
     @Composable
     fun trackerModifier(): Modifier = Modifier.pointerInput(Unit) {
+        // v27v — touch-scroll detection. On touch devices vertical scrolling
+        // is a DRAG of Move events (wheel-only `Scroll` events never fire),
+        // so accumulate the vertical travel of a press-drag and roll the
+        // eyes once it clearly scrolls — with a short time gate so a fast
+        // fling fires a few discrete rolls instead of restarting every frame.
+        var pressStart: Offset? = null
+        var verticalAccum = 0f
+        var lastScrollNanos = 0L
         awaitPointerEventScope {
             while (true) {
                 // NOTE: use the EVENT's type (PointerEventType) for
@@ -85,10 +102,32 @@ object PetPointer {
                 val event = awaitPointerEvent()
                 val change = event.changes.firstOrNull() ?: continue
                 position = change.position
+                activityTick++
                 when (event.type) {
                     PointerEventType.Scroll -> rollTick++
-                    PointerEventType.Press -> press = change.position
-                    PointerEventType.Release -> press = null
+                    PointerEventType.Press -> {
+                        press = change.position
+                        pressStart = change.position
+                        verticalAccum = 0f
+                    }
+                    PointerEventType.Move -> {
+                        val start = pressStart
+                        if (start != null) {
+                            verticalAccum += abs(change.position.y - start.y)
+                            if (verticalAccum > with(density) { 24.dp.toPx() } &&
+                                System.nanoTime() - lastScrollNanos > 350_000_000L
+                            ) {
+                                rollTick++
+                                lastScrollNanos = System.nanoTime()
+                                verticalAccum = 0f
+                            }
+                        }
+                    }
+                    PointerEventType.Release -> {
+                        press = null
+                        pressStart = null
+                        verticalAccum = 0f
+                    }
                     else -> Unit
                 }
             }
@@ -544,10 +583,25 @@ fun CurioPetSprite(
     // compute where the cursor is relative to it, so the eyes aim at the
     // pointer (or the held press point), capped so they never leave the
     // head. A wheel scroll plays a quick full-circle eye roll.
+    // v27v — the look TIMES OUT: while pointer events keep arriving the eyes
+    // aim at full strength, and ~2s after the last one (or once the press is
+    // released) they ease back to the neutral glance — the pet stops staring
+    // at the last scroll/tap point when you're not touching the screen.
     var spriteCenter by remember { mutableStateOf<Offset?>(null) }
     val pointerPos = PetPointer.position
     val pressPos = PetPointer.press
     val lookAt = pressPos ?: pointerPos
+    val lookStrength = remember { Animatable(1f) }
+    LaunchedEffect(PetPointer.activityTick, PetPointer.press, pointerAware) {
+        if (!pointerAware) return@LaunchedEffect
+        lookStrength.snapTo(1f)
+        // While the finger is held down (long-press / button hold) the look
+        // stays; only schedule the fade-out once it's been released.
+        if (PetPointer.press == null) {
+            delay(2_000)
+            lookStrength.animateTo(0f, tween(450, easing = FastOutSlowInEasing))
+        }
+    }
     val rollAnim = remember { Animatable(0f) }
     LaunchedEffect(PetPointer.rollTick) {
         if (PetPointer.rollTick > 0 && pointerAware) {
@@ -556,12 +610,13 @@ fun CurioPetSprite(
         }
     }
     val lookCells: Offset =
-        if (pointerAware && spriteCenter != null && lookAt != Offset.Unspecified) {
+        if (pointerAware && spriteCenter != null && lookAt != Offset.Unspecified && lookStrength.value > 0f) {
             val d = lookAt - spriteCenter!!
             val dist = d.getDistance().coerceAtLeast(1f)
             // Aim saturates within ~200dp — a farther cursor keeps pointing
-            // the same direction without the eyes over-tracking.
-            val prox = (dist / with(density) { 200.dp.toPx() }).coerceIn(0f, 1f)
+            // the same direction without the eyes over-tracking. Scaled by
+            // the v27v timeout so the aim eases back to neutral when idle.
+            val prox = (dist / with(density) { 200.dp.toPx() }).coerceIn(0f, 1f) * lookStrength.value
             if (rollAnim.value > 0f) {
                 Offset(cos(rollAnim.value), sin(rollAnim.value)) * 1.15f * prox
             } else {

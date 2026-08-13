@@ -1,6 +1,37 @@
 # Prompt.md — Request log
 
-## Current request — Home Recents rows lift + tag pills trim (v27u)
+## Current request — Pet eyes: stop looking after 2s, respond to touch scroll (v27v)
+
+### What was asked
+"The pet keeps looking while following the scroll and tap — it should stop
+after ~2s and not keep animating when I'm not scrolling. Does it respond to
+vertical scrolling? And tapping something / tap-and-holding a button didn't
+make it look."
+
+### Root cause
+`PetPointer.position` was NEVER cleared — the eyes aimed at the last
+pointer position forever (the "keeps staring" bug). Touch vertical
+scrolling is a DRAG of `Move` events; wheel-only `Scroll` events never fire
+on phones, so the eye-roll only ever worked with a mouse wheel. And the
+look was keyed to the raw press/position, so it vanished with the event.
+
+### Fix (CurioPetSprite.kt)
+- `PetPointer.activityTick` bumps on EVERY pointer event; each sprite runs
+  a `lookStrength` Animatable keyed on it: snap full while events arrive,
+  then ease to neutral 2s after the last one (or when a held press
+  releases) — the pet stops staring when idle.
+- Touch-scroll detection: the tracker accumulates the vertical travel of a
+  press-drag and fires `rollTick` once it clearly scrolls, gated to one
+  roll per ~350ms so a fast fling rolls a few discrete times.
+- The look now holds while the finger is down (tap-and-hold / button
+  hold) and lingers 2s after a quick tap — taps visibly aim the eyes.
+
+### Validation
+Brace balance OK, `git diff --check` clean. No Gradle locally (env rule) —
+CI on push is the gate. Docs: app/AGENTS.md v27v bullet. Commit made, NOT
+pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — Home Recents rows lift + tag pills trim (v27u)
 
 ### What was asked
 "In Home screen recent give the recent topics an elevation of 2 and the
