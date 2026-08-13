@@ -54,20 +54,32 @@ jobs:
         run: ./gradlew.bat :desktop:build --stacktrace
 
       # jpackage needs the WiX Toolset to produce the .msi installer. The
-      # chocolatey package installs WiX 3.11 to the standard location; we
-      # expose it to jpackage via the WIX env var and PATH.
+      # runner image ships it (choco confirms the package is present), but
+      # the install FOLDER is versioned and changes between runners (v3.11,
+      # v3.14, ...) — the old hardcoded v3.11 path broke once the image
+      # moved to WiX 3.14. Discover the folder instead. jpackage actually
+      # locates the toolset itself (it scans Program Files for "WiX Toolset
+      # v*"), so WIX/PATH here are belt-and-braces: WIX keeps the standard
+      # %WIX% convention (installation ROOT, which contains bin\), and PATH
+      # gets the bin dir so candle.exe/light.exe are callable directly.
       - name: Install WiX Toolset (for the .msi installer)
         shell: pwsh
         run: |
           choco install wixtoolset --yes --no-progress
-          $wix = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
-          if (-not (Test-Path "$wix\candle.exe")) {
-            Write-Error "WiX Toolset not found at $wix after install"
+          $wixRoot = Get-ChildItem "C:\Program Files (x86)\WiX Toolset*" -Directory |
+              Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $wixRoot) {
+            Write-Error "WiX Toolset not found under 'C:\Program Files (x86)\WiX Toolset*'"
             exit 1
           }
-          "WIX=$wix" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "$wix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          echo "WiX Toolset ready: $wix"
+          $wixBin = Join-Path $wixRoot.FullName "bin"
+          if (-not (Test-Path (Join-Path $wixBin "candle.exe"))) {
+            Write-Error "candle.exe not found at $wixBin - WiX install looks broken"
+            exit 1
+          }
+          "WIX=$($wixRoot.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "$wixBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "WiX Toolset ready: $($wixRoot.FullName) (bin: $wixBin)"
 
       # Builds the Windows-only distributions from nativeDistributions
       # (Msi — Dmg/Deb are macOS/Linux formats and are skipped on Windows):

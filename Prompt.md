@@ -1,6 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — cut-line rework + book rings in holes + paper card expansion (v27u)
+## Current request — CI fix: WiX path check failed on the runner's WiX 3.14
+
+### What was asked
+User pasted a desktop-release CI failure: `choco install wixtoolset` reports
+"wixtoolset v3.14.1.20250415 already installed" (0/1 packages), then
+`Write-Error: WiX Toolset not found at C:\Program Files (x86)\WiX Toolset
+v3.11\bin after install` — exit 1.
+
+### Root cause
+The workflow hardcoded the WiX path to `...\WiX Toolset v3.11\bin`, but the
+windows-latest runner image now ships WiX **3.14** at `...\WiX Toolset
+v3.14\bin` — the `Test-Path` check failed.
+
+### Research (JDK source)
+Fetched `jdk.jpackage.internal.WixTool` (OpenJDK master): jpackage NEVER
+reads the `WIX` env var. It first looks for tools on the PATH, then scans
+`%ProgramFiles%` / `%ProgramFiles(x86)%` for dirs matching `WiX Toolset v*`
+(newest first) and resolves `<dir>\bin\candle.exe` / `light.exe`. So the
+workflow's WIX value was inert, and the whole hardcoded-path approach was
+fragile by construction.
+
+### Fix
+`desktop-release.yml` — the WiX step now DISCOVERS the install folder
+(`Get-ChildItem "C:\Program Files (x86)\WiX Toolset*" -Directory` sorted
+by name descending, first hit), verifies `bin\candle.exe`, then sets
+`WIX` to the installation ROOT (standard `%WIX%` convention) and adds the
+`bin` dir to PATH (belt-and-braces — jpackage finds the toolset itself).
+Comment updated. `.github/AGENTS.md` desktop-release bullet updated
+(versioned folder, discovery, WIX=root).
+
+### Validation
+No local PowerShell/Windows (env rule) — the workflow runs on tag push /
+manual dispatch. PowerShell syntax follows the file's existing pwsh style.
+
+## Prior — cut-line rework + book rings in holes + paper card expansion (v27u)
 
 ### What was asked
 1. "Title cut lines" experiment: the two lines need to be a little SHORTER,

@@ -53,7 +53,12 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 - Requires NO secrets — the desktop port has no signing story yet (jpackage
   code signing is optional and unconfigured).
 - Installs the **WiX Toolset** via chocolatey (jpackage needs it to build
-  the `.msi`) and exposes it via `WIX`/`PATH`.
+  the `.msi`) and exposes it via `WIX`/`PATH`. The install folder is
+  VERSIONED (v3.11, v3.14, ...) and changes between runner images — the
+  step DISCOVERS it (`WiX Toolset*` glob) instead of hardcoding a version.
+  jpackage itself locates the toolset by scanning Program Files, so
+  `WIX`/`PATH` are belt-and-braces: `WIX` = installation root (the standard
+  `%WIX%` convention), `PATH` = the `bin` dir.
 - Compiles the module FIRST (`:desktop:build`) so code errors fail fast
   with a clear log before the slow WiX/jpackage steps, then runs
   `:desktop:packageDistributionForCurrentOS` — on Windows this builds the
