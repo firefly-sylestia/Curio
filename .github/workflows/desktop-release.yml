@@ -45,6 +45,14 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      # Fail fast on code/data errors BEFORE spending minutes on WiX +
+      # jpackage: the compile+jar build is the same gate the desktop CI job
+      # runs on every push, so a red log here is a code problem, not a
+      # packaging problem.
+      - name: Compile the desktop module first
+        shell: pwsh
+        run: ./gradlew.bat :desktop:build --stacktrace
+
       # jpackage needs the WiX Toolset to produce the .msi installer. The
       # chocolatey package installs WiX 3.11 to the standard location; we
       # expose it to jpackage via the WIX env var and PATH.

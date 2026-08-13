@@ -54,9 +54,11 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
   code signing is optional and unconfigured).
 - Installs the **WiX Toolset** via chocolatey (jpackage needs it to build
   the `.msi`) and exposes it via `WIX`/`PATH`.
-- Runs `:desktop:packageDistributionForCurrentOS` — on Windows this builds
-  the app image (contains `Curio.exe`) plus the `.msi` installer; `Dmg`/
-  `Deb` are macOS/Linux formats and are skipped.
+- Compiles the module FIRST (`:desktop:build`) so code errors fail fast
+  with a clear log before the slow WiX/jpackage steps, then runs
+  `:desktop:packageDistributionForCurrentOS` — on Windows this builds the
+  app image (contains `Curio.exe`) plus the `.msi` installer; `Dmg`/`Deb`
+  are macOS/Linux formats and are skipped.
 - Zips the app image into a **portable** `Curio-Windows-{version}-portable.zip`
   and uploads both it and the `.msi` to the release.
 - **Tag version is the package version:** exports `RELEASE_VERSION` (tag

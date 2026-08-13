@@ -45,6 +45,12 @@ object DesktopPreferences {
         }
     }
 
+    /** Wipes every stored preference (Settings → Reset all preferences). */
+    fun clear() {
+        data.clear()
+        runCatching { file.delete() }
+    }
+
     fun getBoolean(key: String, default: Boolean): Boolean =
         get(key, if (default) "1" else "0") == "1"
 

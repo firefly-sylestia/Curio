@@ -1,6 +1,24 @@
 # Prompt.md — Request log
 
-## Current request — Windows .exe installers in CI (v27t, desktop release workflow)
+## Current request — desktop full parity (milestone 3) + workflow hardening (v27t)
+
+### What was asked
+"Do the rest of the desktop things full parity. And workflow build properly."
+
+### What was done
+Desktop app restructured from a single-pane shell into Android-parity four-tab layout:
+- **`Main.kt`** — now just the entry: window geometry, theme schemes, shared `CurioShellState`/`shell` (internal, with a persisted `screen` tab), bottom nav (Home · Spin · Cabinet · Settings). The old sidebar + mode-pill header are gone (lanes moved to a chip bar).
+- **`DesktopCommon.kt`** — `DesktopPill` (with `enabled`), `ScreenHeader`, `LaneChipsRow` (36 lanes, tap → select + jump to Spin).
+- **`DesktopHome.kt`** — rose hero banner (Streak · Cabinet · Topics stat chips; streak = consecutive save-days, topics total computed off the UI thread via `produceState`+`Dispatchers.Default`), lane chips, SPIN A LANE CTA, saved-count link to Cabinet.
+- **`DesktopSpin.kt`** — lane chip bar + Spin/Browse pills + deck (2 peeks) + reveal + **Save to Cabinet** pill + browse list (moved from Main).
+- **`DesktopCabinet.kt`** — saved discoveries from `DesktopEntryStore` (new JSON store at `~/.curio/entries.json`, reactive via Compose state): open (jumps to Spin reveal) / remove / empty state.
+- **`DesktopSettings.kt`** — Appearance (Light/Dark), Data (Clear entries, Reset all preferences via `DesktopPreferences.clear()`), About.
+- **Workflow hardening** — `desktop-release.yml` now compiles `:desktop:build` FIRST (fast-fail before WiX/jpackage) so code errors surface clearly.
+
+### Validation
+Braces balanced (9 files), `git diff --check` clean, no stale refs to the removed sidebar/MainPane/ModePill, YAML still parses, imports verified per file. No Gradle locally (env rule) — the `desktop` CI job gates compile on push; the release workflow exercises packaging on tag/manual dispatch.
+
+## Prior — Windows .exe installers in CI (v27t, desktop release workflow)
 
 ### What was asked
 "Build the Windows .exe installers in CI with a desktop release workflow."

@@ -230,12 +230,17 @@ Android app — the same Kotlin codebase running as a native Windows `.exe`
 (via jpackage, plus macOS/Linux). It is a separate Gradle module (`:desktop`)
 that compiles independently of the Android `:app` module.
 
-**Current state (milestones 1–2):** the desktop shell — brand sidebar with all
-36 lanes, the Spin deck (front ticket + 2 peek cards), the reveal card, a
-Browse list, plus a **persisted preferences store** (`DesktopPreferences`:
-tiny JSON at `~/.curio/prefs.json` via Gson) and a **dark theme**. The
-selected lane, last landed topic, window size/position and the Light/Dark
-theme toggle survive restarts; the window resumes its geometry. It reads the
+**Current state (milestones 1–3):** the desktop app mirrors the Android app's
+four-tab structure — **Home** (rose hero with Streak · Cabinet · Topics
+stats, lane chips, spin CTA), **Spin** (lane chip bar, the deck with front
+ticket + 2 peek cards, reveal card with a **Save to Cabinet** pill, and a
+Browse list), **Cabinet** (saved discoveries persisted to
+`~/.curio/entries.json` via `DesktopEntryStore`, with open/remove), and
+**Settings** (Light/Dark theme, clear entries, reset preferences, about). A
+bottom nav bar (Home · Spin · Cabinet · Settings) mirrors the Android app.
+Plus a **persisted preferences store** (`DesktopPreferences`: tiny JSON at
+`~/.curio/prefs.json` via Gson): the active tab, selected lane, last landed
+topic, window size/position and the theme survive restarts. It reads the
 SAME topic JSON files as Android by pointing the module's resources at
 `app/src/main/assets/topics` (no duplicate assets — content edits flow into
 both builds automatically). Data classes are desktop mirrors of the Android
@@ -246,13 +251,23 @@ constructors.
 **Key facts:**
 - `desktop/build.gradle.kts` — CMP plugin (`org.jetbrains.compose`), JVM 17
   toolchain, `compose.material3` + Gson only (no Android APIs yet).
-- `desktop/src/main/kotlin/com/curio/desktop/Main.kt` — window + shell UI
-  (geometry persistence in `main()`/`saveWindowGeometry`, shell state wired
-  to the prefs store, light/dark `MaterialTheme` schemes).
+- `desktop/src/main/kotlin/com/curio/desktop/Main.kt` — app entry + window
+  geometry (`main()`/`saveWindowGeometry`), theme schemes, the shared
+  `CurioShellState`/`shell` object (internal, consumed by every screen),
+  the bottom-nav screen host.
+- `desktop/src/main/kotlin/com/curio/desktop/DesktopCommon.kt` — shared
+  `DesktopPill`, `ScreenHeader`, `LaneChipsRow`.
+- `desktop/src/main/kotlin/com/curio/desktop/DesktopHome.kt` /
+  `DesktopSpin.kt` / `DesktopCabinet.kt` / `DesktopSettings.kt` — the four
+  screens (deck + reveal live in DesktopSpin; entries in DesktopCabinet).
 - `desktop/src/main/kotlin/com/curio/desktop/DesktopCatalog.kt` — topic
   loader (Gson) + the 36-lane category table.
 - `desktop/src/main/kotlin/com/curio/desktop/DesktopPreferences.kt` — the
-  JSON preferences store (`~/.curio/prefs.json`, Gson, best-effort load).
+  JSON preferences store (`~/.curio/prefs.json`, Gson, best-effort load,
+  `clear()` for the reset action).
+- `desktop/src/main/kotlin/com/curio/desktop/DesktopEntryStore.kt` — the
+  JSON saved-entries store (`~/.curio/entries.json`, reactive via Compose
+  state).
 - CI: the `desktop` job in `.github/workflows/android.yml` compiles and
   builds the module on every push (`:desktop:build`), so the port can't
   silently rot. Native Windows installers (`.exe` app image + `.msi`)
@@ -264,13 +279,12 @@ constructors.
 **To run locally:** `./gradlew :desktop:run` (this environment forbids
 running Gradle — CI validates instead).
 
-**Not yet ported** (milestone 3+): Room data layer (real saved entries,
-capture/sessions), notifications, floating overlay, and the remaining
-Android-only services — each needs a desktop stub. macOS `.dmg` and Linux
-`.deb` packaging is already declared in `targetFormats` but has no release
-job yet (add runners per OS when wanted). UI parity with Android (per the
-tablet-layout pass + web parity effort) is the ongoing goal; the shuffle
-deck must stay 2 peek cards.
+**Not yet ported** (milestone 4+): capture/sessions, quests/pet, the
+floating overlay, and the remaining Android-only services — each needs a
+desktop stub. macOS `.dmg` and Linux `.deb` packaging is already declared
+in `targetFormats` but has no release job yet (add runners per OS when
+wanted). UI parity with Android (per the tablet-layout pass + web parity
+effort) is the ongoing goal; the shuffle deck must stay 2 peek cards.
 
 ## Web App (web/)
 
