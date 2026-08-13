@@ -268,6 +268,22 @@ app/src/main/java/com/curio/app/
   now top-lit glass shine + the v28 soft glow — no rings. Intentional
   design borders kept: CurioBadges coin rims + the Quests passport stamp
   ring (both are element identity, not elevation).
+- **v28 — Spin FilterSheet: live chip search + 1dp chips.** The deck's
+  filter bottom sheet (`FilterSheet` in `SpinScreen.kt`) gained a
+  `CurioSearchField` under the subtitle: typing narrows EVERY chip group
+  (Type / Genre / Era / Origin / Franchise) live via a `filteredGroups`
+  derivation (case-insensitive substring), and an empty search shows
+  "No filters match …" instead of the plain empty message. The sheet's
+  `CompactChip` selectable chips dropped from 2dp to 1dp elevation (cards
+  2dp / chips 1dp) so they read as chips, not tiles.
+- **v28 — Category card selected state: SATURATED, not darker.**
+  `CurioCategoryCard`'s selected fill used `cardGradient` whose start is
+  black-DARKENED (`categoryCardFill` 10% light / 28% dark) plus a
+  `cardContentInk` sheen that is a deep ink in pastel light — so tapping
+  a tile read DARKER than the idle tint. Selected now blooms to the raw
+  saturated `category.accent` melting into the page, content flips to
+  white (`selectedInk`), and the sheen is a true white 14% glow. `cardInk`
+  / `cardContentInk` import removed.
 - **v28 — Category Picker rows tightened.** The quick-mix preset chips and
   the Original/New page tabs both wore `categoryEdgeShine` (a white ring
   in AMOLED — the "huge borders") and the preset row's 6dp vertical

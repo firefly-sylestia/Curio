@@ -128,6 +128,7 @@ import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
+import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -1581,10 +1582,24 @@ private fun FilterSheet(
     onDismiss: () -> Unit,
     onApply: (tags: Set<String>, subtypes: Set<String>) -> Unit
 ) {
-    val subtypes = groups.types
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var draftFilters by remember(initialFilters) { mutableStateOf(initialFilters) }
     var draftSubtypes by remember(initialSubtypes) { mutableStateOf(initialSubtypes) }
+    // v28 — filter search: type into the sheet and every chip group (Type /
+    // Genre / Era / Origin / Franchise) narrows live, so a 100+ tag
+    // category is scannable instead of a wall of chips.
+    var filterQuery by remember { mutableStateOf("") }
+    val needle = filterQuery.trim()
+    val filteredGroups = remember(groups, needle) {
+        if (needle.isEmpty()) groups
+        else FilterGroups(
+            types = groups.types.filter { it.contains(needle, ignoreCase = true) },
+            genres = groups.genres.filter { it.contains(needle, ignoreCase = true) },
+            eras = groups.eras.filter { it.contains(needle, ignoreCase = true) },
+            origins = groups.origins.filter { it.contains(needle, ignoreCase = true) },
+            franchises = groups.franchises.filter { it.contains(needle, ignoreCase = true) }
+        )
+    }
     val activeCount = draftFilters.size + draftSubtypes.size
     // v8.21 — tell the pet a drawer is up so it comes over to peek.
     LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
@@ -1652,6 +1667,14 @@ private fun FilterSheet(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
             )
 
+            // ── v28 — filter search: narrow the chips live ──────────
+            CurioSearchField(
+                query = filterQuery,
+                onQueryChange = { filterQuery = it },
+                placeholder = "Search filters",
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+            )
+
             // ── Active filter summary chips — this is what was missing ─
             if (activeCount > 0) {
                 Column(
@@ -1694,14 +1717,15 @@ private fun FilterSheet(
                 Spacer(Modifier.height(14.dp))
             }
 
-            val hasAny = subtypes.size > 1 ||
-                groups.genres.isNotEmpty() ||
-                groups.eras.isNotEmpty() ||
-                groups.origins.isNotEmpty() ||
-                groups.franchises.isNotEmpty()
+            val hasAny = filteredGroups.types.size > 1 ||
+                filteredGroups.genres.isNotEmpty() ||
+                filteredGroups.eras.isNotEmpty() ||
+                filteredGroups.origins.isNotEmpty() ||
+                filteredGroups.franchises.isNotEmpty()
             if (!hasAny) {
                 Text(
-                    text = "No filters for this category yet.",
+                    text = if (needle.isNotEmpty()) "No filters match \"$needle\""
+                           else "No filters for this category yet.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -1729,11 +1753,11 @@ private fun FilterSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (subtypes.size > 1) {
+                    if (filteredGroups.types.size > 1) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Type", Modifier.padding(bottom = 2.dp))
                         }
-                        items(subtypes) { st ->
+                        items(filteredGroups.types) { st ->
                             CompactChip(
                                 label = st,
                                 selected = st in draftSubtypes,
@@ -1746,14 +1770,14 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.genres.isNotEmpty()) {
+                    if (filteredGroups.genres.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel(
                                 "Genres",
-                                Modifier.padding(top = if (subtypes.size > 1) 6.dp else 0.dp, bottom = 2.dp)
+                                Modifier.padding(top = if (filteredGroups.types.size > 1) 6.dp else 0.dp, bottom = 2.dp)
                             )
                         }
-                        items(groups.genres) { tag ->
+                        items(filteredGroups.genres) { tag ->
                             CompactChip(
                                 label = tag,
                                 selected = tag in draftFilters,
@@ -1766,11 +1790,11 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.eras.isNotEmpty()) {
+                    if (filteredGroups.eras.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Era", Modifier.padding(top = 6.dp, bottom = 2.dp))
                         }
-                        items(groups.eras) { era ->
+                        items(filteredGroups.eras) { era ->
                             CompactChip(
                                 label = era,
                                 selected = era in draftFilters,
@@ -1783,11 +1807,11 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.origins.isNotEmpty()) {
+                    if (filteredGroups.origins.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Origin", Modifier.padding(top = 6.dp, bottom = 2.dp))
                         }
-                        items(groups.origins) { origin ->
+                        items(filteredGroups.origins) { origin ->
                             CompactChip(
                                 label = origin,
                                 selected = origin in draftFilters,
@@ -1800,14 +1824,14 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.franchises.isNotEmpty()) {
+                    if (filteredGroups.franchises.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel(
                                 "Franchise",
-                                Modifier.padding(top = if (subtypes.size > 1) 6.dp else 6.dp, bottom = 2.dp)
+                                Modifier.padding(top = if (filteredGroups.types.size > 1) 6.dp else 6.dp, bottom = 2.dp)
                             )
                         }
-                        items(groups.franchises) { franchise ->
+                        items(filteredGroups.franchises) { franchise ->
                             CompactChip(
                                 label = franchise,
                                 selected = franchise in draftFilters,
@@ -1915,8 +1939,9 @@ private fun CompactChip(
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else chipSurface,
-        // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = 2.dp,
+        // v28 — elevation 1: filter chips sit one step below cards (cards
+        // 2dp / chips 1dp) so they read as chips, not tiles.
+        shadowElevation = 1.dp,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))

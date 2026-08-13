@@ -1,6 +1,36 @@
 # Prompt.md — Request log
 
-## Current request — AMOLED border-removal audit + category picker rows (v28)
+## Current request — filter sheet search, chip elevation, saturated selected cards (v28)
+
+### What was asked
+1. "In filters add a search function, and give the filter chips an
+   elevation of 1."
+2. "In the category picker cards the unselected look good, but when I
+   select them they get darker — fix it. Make it saturated maybe, not
+   darker."
+
+### What was done
+1. **Spin FilterSheet** (`SpinScreen.kt`) — the deck's filter bottom sheet
+   (Type / Genre / Era / Origin / Franchise chips) now has a live
+   `CurioSearchField` under the subtitle: typing narrows every chip group
+   via a `filteredGroups` derivation (case-insensitive substring), and an
+   empty search shows "No filters match …". The selectable `CompactChip`
+   dropped 2dp → 1dp elevation (cards 2 / chips 1 hierarchy).
+2. **CurioCategoryCard selected state** — root cause: the selected fill
+   used `cardGradient` (start black-darkened 10% light / 28% dark) AND a
+   `cardContentInk` sheen that resolves to a deep ink in pastel light —
+   so selecting read DARKER than the idle tint. Now the selected crown is
+   the raw saturated `category.accent` melting into the page (brighter +
+   more vivid), content flips to white (`selectedInk`), and the sheen is a
+   true white 14% glow. Removed the now-unused `cardInk` /
+   `cardContentInk` import.
+
+### Validation
+Brace balance OK (2 files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullets.
+Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — AMOLED border-removal audit + category picker rows (v28)
 
 ### What was asked
 1. "In AMOLED mode the app still uses borders — do a FULL border removal

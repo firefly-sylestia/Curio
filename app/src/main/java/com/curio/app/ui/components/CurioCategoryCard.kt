@@ -43,7 +43,6 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.cardContentInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
@@ -99,10 +98,20 @@ fun CurioCategoryCard(
     )
 
     val isWildcard = category.id == CategoryId.WILDCARD
-    // Full-card gradient — the same theme-aware treatment as the main cards,
-    // so tiles and hero tickets always share one shade language. Used ONLY
-    // for the selected (proper bright) state.
-    val gradient = CurioGradients.cardGradient(category.themedAccent())
+    // v28 — the SELECTED card blooms to the SATURATED raw category accent:
+    // the old cardGradient start was black-DARKENED (10% light / 28% dark),
+    // so tapping a tile made it read DARKER than the idle tint — the exact
+    // complaint. The selected crown is now the full-saturation researched
+    // accent melting into the page: brighter and more vivid, never darker.
+    val saturated = category.accent
+    val selectedGradient = listOf(
+        saturated,
+        lerp(saturated, MaterialTheme.colorScheme.background, 0.30f)
+    )
+    // Selected content reads WHITE on the saturated crown (the pastel-aware
+    // cardContentInk is a deep ink designed for the airy pastel fills).
+    val selectedInk = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+        MaterialTheme.colorScheme.onSurface else Color.White
     val cardColor = CurioGradients.categoryCardFill(
         category.themedAccent(),
         isCurioDarkTheme()
@@ -128,7 +137,6 @@ fun CurioCategoryCard(
         else -> category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
     }
     val idleInk = category.categoryInk()
-    val cardInk = category.cardContentInk()
     // v27q — elevation is a flat 2dp in both states: the selected tile
     // already wears the full solid-accent gradient, so it never needs to
     // raise (the old 8/3 raise was the blurry-shadow bug class).
@@ -175,7 +183,7 @@ fun CurioCategoryCard(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    if (isSelected) Brush.verticalGradient(gradient)
+                    if (isSelected) Brush.verticalGradient(selectedGradient)
                     // v27n — coming-soon tile fill is OPAQUE (was 50% alpha,
                     // which let the elevation shadow bleed through as a blurry
                     // disc; the faint edge shine + label carry the "locked"
@@ -203,14 +211,15 @@ fun CurioCategoryCard(
             //    the selected tile reads as clearly raised, distinct from the
             //    idle tile (no check badge).
             if (isSelected) {
-                // v7.5 — the sheen wears the theme-aware onAccent ink (white
-                // when pastel mode is off, a deep/light ink on the pastel
-                // gradient in pastel mode) so it reads on the lightened fill.
+                // v28 — a TRUE light glow over the saturated crown so the
+                // selected tile reads raised and bright (the old cardInk
+                // sheen was a deep ink in pastel light — it DARKENED the
+                // tile). White 14% reads as a highlight on the vivid fill.
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            cardInk.copy(alpha = 0.14f),
+                            Color.White.copy(alpha = 0.14f),
                             RoundedCornerShape(22.dp)
                         )
                 )
@@ -224,7 +233,7 @@ fun CurioCategoryCard(
                 name = category.iconGlyph,
                 contentDescription = null,
                 tint = when {
-                    isSelected -> lerp(cardColor, cardInk, 0.55f).copy(alpha = 0.18f)
+                    isSelected -> lerp(cardColor, selectedInk, 0.55f).copy(alpha = 0.18f)
                     comingSoon -> idleInk.copy(alpha = 0.08f)
                     else -> idleInk.copy(alpha = 0.16f)
                 },
@@ -248,7 +257,7 @@ fun CurioCategoryCard(
                         text = category.displayName,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = when {
-                            isSelected -> cardInk
+                            isSelected -> selectedInk
                             comingSoon -> MaterialTheme.colorScheme.onSurfaceVariant
                             else -> MaterialTheme.colorScheme.onSurface
                         },
@@ -262,7 +271,7 @@ fun CurioCategoryCard(
                             else -> "$topicCount topics"
                         },
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (isSelected) cardInk.copy(alpha = 0.85f)
+                        color = if (isSelected) selectedInk.copy(alpha = 0.85f)
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (comingSoon) 0.8f else 1f),
                         maxLines = 1
                     )
