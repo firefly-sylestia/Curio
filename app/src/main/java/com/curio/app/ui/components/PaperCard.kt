@@ -1263,6 +1263,10 @@ private class SoftTearParams(
     val ripple = with(density) { (1.3f + rnd.nextFloat() * 0.9f).dp.toPx() } *
         (if (detail) 1.12f else 1f)
     val rippleWaves = (if (detail) 8f else 7f) + rnd.nextFloat() * (if (detail) 4.5f else 4f)
+    // Detail-only mid-frequency meander amplitudes (see [broadDisp]) —
+    // hoisted here because [density] is only in scope during construction.
+    val meanderA = with(density) { 2.1.dp.toPx() }
+    val meanderB = with(density) { 1.3.dp.toPx() }
     // Seeded tilt — the whole edge drifts from left to right so the torn
     // SEAM visibly cants while the card rectangle stays level (the tilt
     // lives inside the tear path, never a rotation of the card). It's a
@@ -1286,11 +1290,18 @@ private class SoftTearParams(
         val rhythmic = sin(waveAngle) * tooth * 0.58f
         val main = (valueNoise(patternSeed, normalizedX * waves, phase) - 0.5f) * 2f * tooth * 0.58f
         val deepWave = (valueNoise(patternSeed + 101, normalizedX * (waves * 0.42f), phase + 17f) - 0.5f) * 2f * deep
-        // Detail seams always carry one deterministic secondary oscillation.
-        // It is small enough to stay natural, but guarantees visible movement
-        // even when the seeded noise and primary wave happen to cancel out.
+        // Detail seams always carry a deterministic mid-frequency meander.
+        // The old single 5.6π oscillation ran at nearly the SAME wavelength
+        // as the main wave, so for unlucky seeds it reinforced the wave's
+        // flat plateaus instead of breaking them — the hero edge read as
+        // huge straight lines. Two phase-offset, incommensurate octaves
+        // (17π ≈ 8.5 cycles and 23π ≈ 11.5 cycles across the width) cannot
+        // both sit flat at the same spot, so the seam ALWAYS meanders on a
+        // ~35-45dp scale while staying small enough to read as natural paper.
         val detailVariation = if (detail) {
-            sin(normalizedX * (Math.PI * 5.6).toFloat() + phase * 0.37f) * tooth * 0.22f
+            val d1 = sin(normalizedX * (Math.PI * 17f).toFloat() + phase * 0.31f) * meanderA
+            val d2 = sin(normalizedX * (Math.PI * 23f).toFloat() + phase * 0.73f) * meanderB
+            d1 + d2
         } else {
             0f
         }

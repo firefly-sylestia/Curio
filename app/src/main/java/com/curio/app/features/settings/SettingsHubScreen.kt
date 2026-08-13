@@ -176,10 +176,14 @@ fun SettingsHeroHeader(
             .fillMaxWidth()            .height(totalHeight)
         ) {
             // ── Under-sheet — the shared white paper layer, so the tear stays
-            // bright beneath the rose hero in every theme. AMOLED: the sheet
-            // turns a soft rose so the torn edge keeps reading through the
-            // up-bites of the pure-black banner (black-on-black would hide
-            // the seam), carrying the accent of the color.
+            // bright beneath the rose hero in EVERY theme (light + dark). This
+            // matches the app-wide hero pattern (Home uses the same warm
+            // cream [0xFFFDFCF9]) — the Settings hero was the only one using
+            // the theme surface, so in dark mode its tear read midnight-dark
+            // while every other screen's tear stayed white paper. AMOLED:
+            // the sheet turns a soft rose so the torn edge keeps reading
+            // through the up-bites of the pure-black banner (black-on-black
+            // would hide the seam), carrying the accent of the color.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,17 +192,19 @@ fun SettingsHeroHeader(
                 .clip(sheetShape)                    .background(
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
                         CurioColors.HomeRosewood.copy(alpha = 0.45f)
-                    else MaterialTheme.colorScheme.surface
+                    else Color(0xFFFDFCF9)
                 )
 
         )
-        // ── Torn-edge shadow — hairline dark rim under the seam.
+        // ── Torn-edge shadow — hairline dark rim under the seam (same
+        // black rim as Home's hero, in every theme — NOT the theme
+        // onSurface, which resolves white-ish in dark mode).
         Box(
             modifier = Modifier
                 .fillMaxWidth()                .height(bannerHeight)
                 .offset(y = 1.dp)
                 .clip(heroTornShape)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f))
+                .background(Color.Black.copy(alpha = 0.20f))
             )
             // ── Solid rose banner, torn bottom edge ────────────────────────
             Surface(

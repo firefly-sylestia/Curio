@@ -349,6 +349,24 @@ app/src/main/java/com/curio/app/
   experiment title + sticky pills (`questInk`). Home/Profile/Settings/History
   heroes already resolved creamish via their `*ReadableInk` helpers —
   unchanged.
+- **v28 — Settings hero tear is WHITE paper in dark mode + detail hero
+  tears never flatten.** (1) The Settings hero under-sheet was the ONLY
+  hero using `MaterialTheme.colorScheme.surface` (midnight in dark mode)
+  with an `onSurface` rim (white-ish in dark) — so the Settings tear read
+  dark/gray while every other screen's tear stayed white. It now matches
+  the app-wide pattern: warm cream `0xFFFDFCF9` sheet + the same black
+  0.20 rim as Home, in EVERY theme (AMOLED keeps its rose 0.45 sheet so
+  the seam reads through the pure-black banner). (2) The detail-only
+  "guaranteed movement" oscillation in `SoftTearParams.broadDisp` ran at
+  ~2.8 cycles — nearly the SAME wavelength as the main wave — so for
+  unlucky seeds it reinforced the wave's flat plateaus and the detail
+  hero's torn edge read as huge straight lines (the white sheet stayed
+  bumpy because its exposed lip uses its own restrained rhythm). Replaced
+  with two phase-offset, incommensurate mid-frequency octaves (17π ≈ 8.5
+  and 23π ≈ 11.5 cycles, ~2.1dp + ~1.3dp, amplitudes hoisted to
+  `meanderA`/`meanderB` since `density` is only in constructor scope):
+  the seam now ALWAYS meanders on a ~35-45dp scale for every entry hash,
+  in both the hero clip and its aligned under-sheet (same `disp`).
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

@@ -1,33 +1,37 @@
 # Prompt.md — Request log
 
-## Current request — filter sheet search, chip elevation, saturated selected cards (v28)
+## Current request — Settings tear color in dark mode + detail hero tear flatlines (v28)
 
 ### What was asked
-1. "In filters add a search function, and give the filter chips an
-   elevation of 1."
-2. "In the category picker cards the unselected look good, but when I
-   select them they get darker — fix it. Make it saturated maybe, not
-   darker."
+1. "In dark mode the tear color is different inside settings — fix it."
+2. "Fix the tears in detail view: some get huge straight lines on the hero
+   card; only the white tear stays consistent."
 
 ### What was done
-1. **Spin FilterSheet** (`SpinScreen.kt`) — the deck's filter bottom sheet
-   (Type / Genre / Era / Origin / Franchise chips) now has a live
-   `CurioSearchField` under the subtitle: typing narrows every chip group
-   via a `filteredGroups` derivation (case-insensitive substring), and an
-   empty search shows "No filters match …". The selectable `CompactChip`
-   dropped 2dp → 1dp elevation (cards 2 / chips 1 hierarchy).
-2. **CurioCategoryCard selected state** — root cause: the selected fill
-   used `cardGradient` (start black-darkened 10% light / 28% dark) AND a
-   `cardContentInk` sheen that resolves to a deep ink in pastel light —
-   so selecting read DARKER than the idle tint. Now the selected crown is
-   the raw saturated `category.accent` melting into the page (brighter +
-   more vivid), content flips to white (`selectedInk`), and the sheen is a
-   true white 14% glow. Removed the now-unused `cardInk` /
-   `cardContentInk` import.
+1. **Settings hero tear now white in dark mode** (`SettingsHubScreen.kt`)
+   — the under-sheet was the ONLY hero using
+   `MaterialTheme.colorScheme.surface` (midnight in dark) with an
+   `onSurface.copy(0.20)` rim (white-ish in dark), so the Settings tear
+   read dark/gray while Home/Profile/Cabinet/History tears stayed white.
+   Now matches the app-wide pattern: warm cream `0xFFFDFCF9` sheet +
+   Home's black 0.20 rim, in every theme (AMOLED keeps its rose 0.45
+   sheet so the seam reads through the pure-black banner).
+2. **Detail hero tears never flatten** (`PaperCard.kt`) — the detail-only
+   guaranteed-movement oscillation was a single 5.6π sine (~2.8 cycles),
+   nearly the SAME wavelength as the main wave, so for unlucky seeds it
+   reinforced the wave's flat plateaus → long straight stretches on the
+   hero's torn edge (the white sheet stayed bumpy because its exposed lip
+   uses its own restrained rhythm). Replaced with two phase-offset,
+   incommensurate mid-frequency octaves (17π ≈ 8.5 and 23π ≈ 11.5 cycles,
+   2.1dp + 1.3dp) — they can't both sit flat at the same spot, so the
+   seam ALWAYS meanders on a ~35-45dp scale. Amplitudes hoisted to
+   `meanderA`/`meanderB` constructor props (`density` is only in
+   constructor scope). Hero clip + aligned under-sheet share the same
+   `disp`, so they stay pixel-aligned.
 
 ### Validation
 Brace balance OK (2 files), `git diff --check` clean. No Gradle locally
-(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullets.
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullet.
 Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
 
 ## Prior — AMOLED border-removal audit + category picker rows (v28)
