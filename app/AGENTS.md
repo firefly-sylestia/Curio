@@ -192,8 +192,21 @@ app/src/main/java/com/curio/app/
   `ui/components/PaperStatCard.kt` render the opaque paper fill + 3-hole
   EvenOdd punch + rims/rings, used by Home's Streak · Cabinet · Topics bar
   AND Profile's Level · Saved · Lanes pane (same toggles: paper card,
-  holes, rings, torn edges; Profile's tear seed 0x6B4E3E). All behind the
-  experiment toggles, defaults OFF.
+  holes,  rings, torn edges; Profile's tear seed 0x6B4E3E). (6) NEW "Home tint"
+  experiments (Settings → Experiments → Home tint, all default OFF):
+  "Home tint" — the Home background + bottom nav wear a category's
+  `categoryBackgroundWash()` (Home was previously always plain; the wash is
+  published to the nav chrome via `CurioNavTint.homeWash` so the bar blends
+  on the Home route); "Hero tint too" — the quest hero swaps the rose for
+  the category's `themedAccent()` with `onAccent()` ink; "Follow my Spin
+  lane" — the tint follows the category picked on Spin
+  (`getLastSpinCategories`, single lane, else Wildcard) and WINS over the
+  manual toggles (Hero tint + Tint category gray out in Experiments);
+  "Tint category" — a manual single-select picker (default Surprise /
+  Wildcard). The Streak · Cabinet · Topics card takes a 5% whisper of the
+  category shade (`lerp(fill, accent, 0.05f)`) — creamy, not colored.
+  Toggles: `homeTintState` / `homeHeroTintState` /
+  `homeTintFollowLaneState` / `homeTintCategoryIdState`.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

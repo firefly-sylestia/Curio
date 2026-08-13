@@ -425,9 +425,10 @@ fun curioDialogActionColor(): Color {
  * TextButton colors for dialog actions — dark readable ink in light mode.
  * v27u — optional [containerColor] turns the transparent TextButton into a
  * visible soft-tinted pill (the explore dialog's two action pills).
+ * `Color.Unspecified` (the default) means no container fill.
  */
 @Composable
-fun curioDialogActionButtonColors(containerColor: Color? = null): ButtonColors =
+fun curioDialogActionButtonColors(containerColor: Color = Color.Unspecified): ButtonColors =
     ButtonDefaults.textButtonColors(
         contentColor = curioDialogActionColor(),
         containerColor = containerColor

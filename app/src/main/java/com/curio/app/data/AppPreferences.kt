@@ -267,6 +267,11 @@ object AppPreferences {
     var paperStatCardsState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
+    /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
+    var homeTintState by mutableStateOf(false)
+    var homeHeroTintState by mutableStateOf(false)
+    var homeTintFollowLaneState by mutableStateOf(false)
+    var homeTintCategoryIdState by mutableStateOf(CategoryId.WILDCARD.name)
     // v27j — header fill depth. ON by default: the torn-hero headers wear a
     // slightly DARKER version of the category's painter accent. Turning it
     // off restores the exact pre-toggle accent. Watermark glyphs, ink and
@@ -502,6 +507,10 @@ object AppPreferences {
         paperHoleRingsState = isPaperHoleRingsEnabled(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
+        homeTintState = isHomeTintEnabled(context)
+        homeHeroTintState = isHomeHeroTintEnabled(context)
+        homeTintFollowLaneState = isHomeTintFollowLaneEnabled(context)
+        homeTintCategoryIdState = getHomeTintCategory(context)
         headerDeepState = isHeaderDeepEnabled(context)
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
@@ -742,6 +751,10 @@ object AppPreferences {
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
+    private const val KEY_HOME_TINT = "home_tint"
+    private const val KEY_HOME_HERO_TINT = "home_hero_tint"
+    private const val KEY_HOME_TINT_FOLLOW_LANE = "home_tint_follow_lane"
+    private const val KEY_HOME_TINT_CATEGORY = "home_tint_category"
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
     private const val KEY_HEADER_DEEP = "header_deep"
 
@@ -770,6 +783,43 @@ object AppPreferences {
     fun setPaperHoleRingsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_HOLE_RINGS, enabled).apply()
         paperHoleRingsState = enabled
+    }
+
+    /** Whether Home's background + bottom nav wear the category tint (experimental, default off). */
+    fun isHomeTintEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_TINT, false)
+
+    fun setHomeTintEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_TINT, enabled).apply()
+        homeTintState = enabled
+    }
+
+    /** Whether the Home quest hero ALSO wears the tint (experimental, default off). */
+    fun isHomeHeroTintEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_HERO_TINT, false)
+
+    fun setHomeHeroTintEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_HERO_TINT, enabled).apply()
+        homeHeroTintState = enabled
+    }
+
+    /** Whether the Home tint follows the category picked on Spin (experimental, default off). */
+    fun isHomeTintFollowLaneEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_TINT_FOLLOW_LANE, false)
+
+    fun setHomeTintFollowLaneEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_TINT_FOLLOW_LANE, enabled).apply()
+        homeTintFollowLaneState = enabled
+    }
+
+    /** The manually picked category for the Home tint (default wildcard). */
+    fun getHomeTintCategory(context: Context): String =
+        prefs(context).getString(KEY_HOME_TINT_CATEGORY, CategoryId.WILDCARD.name)
+            ?: CategoryId.WILDCARD.name
+
+    fun setHomeTintCategory(context: Context, id: CategoryId) {
+        prefs(context).edit().putString(KEY_HOME_TINT_CATEGORY, id.name).apply()
+        homeTintCategoryIdState = id.name
     }
 
     /** Whether the Home Streak · Cabinet · Topics bar wears a solid paper card (experimental, default off). */

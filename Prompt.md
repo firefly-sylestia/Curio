@@ -1,6 +1,57 @@
 # Prompt.md — Request log
 
-## Current request — CI fix: WiX path check failed on the runner's WiX 3.14
+## Current request — Home tint experiments: bg + navbar take the category tint (v27u)
+
+### What was asked
+"Make the Home screen background + its navbar take the color of the
+category tint (not the hero) — an option in Experiments, plus another
+option with the hero taking the color as well. And the Streak·Cabinet stat
+card background takes a little of that color too — creamy, ~5% of the
+category tint."
+
+### User decisions (ask_user)
+- Tint source: the category chosen on the SPIN page — as an optional
+toggle. The 2 existing color options stay; they turn off + gray out when
+that (follow-lane) experiment is on. Add an option to explicitly pick a
+category color; when off, keep the previous (rose/cream) colors.
+- Navbar: the BOTTOM nav bar.
+
+### Design
+New "Home tint" section in Experiments (all default OFF):
+1. **Home tint** — Home background + bottom nav wear the category's
+   `categoryBackgroundWash()` (Home was always plain before). The wash is
+   published to the Scaffold-level nav chrome via the existing
+   `CurioNavTint` out-of-band pattern (new `homeWash`; the bar/rail read it
+   for the HOME route, animated 420ms like the others).
+2. **Hero tint too** — the quest hero swaps rose for `themedAccent()` +
+   `onAccent()` ink (grayed when Home tint off or follow-lane on).
+3. **Follow my Spin lane** — tint follows `getLastSpinCategories` (single
+   lane; mix/empty → Wildcard). ON → the manual toggles (Hero tint + Tint
+   category) gray out; the lane wins.
+4. **Tint category** — manual single-select chip picker (default Surprise/
+   Wildcard), persisted `homeTintCategoryIdState`.
+The Streak · Cabinet · Topics card takes a 5% whisper of the category
+shade (`lerp(fill, accent, 0.05f)`) on both the paper fill and the glass
+gradient stops — creamy, not colored.
+
+### Files
+AppPreferences (4 toggles + category pref), CurioBottomNav (homeWash +
+container color), HomeScreen (bg + hero + stat 5% + wash publish),
+ExperimentsScreen (section + picker dialog with CurioCategoryChip).
+
+### CI fix (same push)
+CI on the previous push failed compiling `CurioTheme.kt`: `containerColor:
+Color?` (from the v27u pill change) isn't valid for
+`ButtonDefaults.textButtonColors(containerColor: Color)` — non-nullable.
+Fixed by defaulting to `Color.Unspecified` instead of null (call sites
+either omit it or pass a computed non-null `lerp` Color, so no call-site
+changes).
+
+### Validation
+Brace balance OK (4 files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v27u bullet.
+
+## Prior — CI fix: WiX path check failed on the runner's WiX 3.14
 
 ### What was asked
 User pasted a desktop-release CI failure: `choco install wixtoolset` reports

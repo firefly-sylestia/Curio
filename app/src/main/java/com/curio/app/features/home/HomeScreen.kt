@@ -110,6 +110,7 @@ import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioForwardArrow
+import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
@@ -124,8 +125,10 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
@@ -205,6 +208,29 @@ private data class HomeHeroPair(
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
+    // v27u — Home tint experiments (Settings → Experiments → Home tint):
+    // the Home background + bottom nav can wear a category's tint. When
+    // "Follow my Spin lane" is on it wins over the manual picker (the
+    // manual toggles gray out in Experiments); otherwise the picker's
+    // category is used. Everything is OFF by default — Home stays plain.
+    val homeTintFollowLane = AppPreferences.homeTintFollowLaneState
+    val homeTintOn = homeTintFollowLane || AppPreferences.homeTintState
+    val homeTintCat: CurioCategory = if (homeTintFollowLane) {
+        val lane = runCatching { AppPreferences.getLastSpinCategories(context).singleOrNull() }
+            .getOrNull() ?: CategoryId.WILDCARD
+        CurioCategories.byId(lane)
+    } else {
+        val id = runCatching { CategoryId.valueOf(AppPreferences.homeTintCategoryIdState) }
+            .getOrDefault(CategoryId.WILDCARD)
+        CurioCategories.byId(id)
+    }
+    val homeBg = if (homeTintOn) homeTintCat.categoryBackgroundWash()
+        else MaterialTheme.colorScheme.background
+    // Publish the wash so the Scaffold-level bottom nav (which can't read
+    // this screen's state) blends with the tinted Home page.
+    LaunchedEffect(homeBg) {
+        CurioNavTint.publishHomeWash(if (homeTintOn) homeBg else null)
+    }
     val displayName = remember { AppPreferences.getDisplayName(context) }
     // Saved-shelf unsave confirmation — set when the user taps the remove
     // bookmark on a saved quote row; the dialog confirms before removal.
@@ -301,12 +327,13 @@ fun HomeScreen(navController: NavController) {
         },
         gesturesEnabled = drawerState.isOpen || drawerState.isAnimationRunning
     ) {
-        // v6.7 — Home sits on the plain theme background: the category tint
-        // wash is removed from Home (other screens still tint via Settings).
+        // v6.7 — Home sits on the plain theme background (the category tint
+        // wash was removed from Home); v27u — the "Home tint" experiment can
+        // restore a category-tinted background.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(homeBg)
         ) {
             // ── Watermark backdrop — muted category glyphs behind all ──
             //    content (same treatment as the Spin page). The quest is
@@ -351,11 +378,14 @@ fun HomeScreen(navController: NavController) {
             // chip row is gone). The banner wears the muted rose-wood hero
             // accent — in pastel mode (the shipped default) it resolves to
             // the airy rose-wood pastel twin, otherwise the calm base.
-            val heroFill = homeRoseAccent()
+            // v27u — "Hero tint too" swaps the rose for the tint category's
+            // accent (readable on-accent ink follows).
+            val heroTintOn = homeTintOn && !homeTintFollowLane && AppPreferences.homeHeroTintState
+            val heroFill = if (heroTintOn) homeTintCat.themedAccent() else homeRoseAccent()
             // Use the actual pastel fill as the ink source too, so the
             // cleaner pink-rose hue carries through the greeting, stat icons
             // and hero watermark instead of falling back to a brown raw accent.
-            val questInk = homeReadableInk(heroFill)
+            val questInk = if (heroTintOn) homeTintCat.onAccent() else homeReadableInk(heroFill)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -505,8 +535,13 @@ fun HomeScreen(navController: NavController) {
                             // "Paper stat card" experiment is on.
                             val paperStatsOn = AppPreferences.paperStatCardsState
                             // v27u — shared paper color (same cream/rose-brown
-                            // blend Profile's stat pane uses).
-                            val paperStatBg = paperStatCardColor(heroFill)
+                            // blend Profile's stat pane uses). With the Home
+                            // tint on, the stat card takes a 5% whisper of the
+                            // category shade — creamy, not colored.
+                            val statGlass = if (homeTintOn) lerp(heroFill, homeTintCat.accent, 0.05f) else heroFill
+                            val paperStatBg = paperStatCardColor(heroFill).let { base ->
+                                if (homeTintOn) lerp(base, homeTintCat.accent, 0.05f) else base
+                            }
                             // v27h — the Topics stat always shows the TRUE
                             // catalog total: the splash warm-cache seeds the
                             // first frame, then a lightweight IO count of the
@@ -557,8 +592,8 @@ fun HomeScreen(navController: NavController) {
                                         else -> Modifier.background(
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    heroFill.copy(alpha = 0.12f),
-                                                    lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                                    statGlass.copy(alpha = 0.12f),
+                                                    lerp(statGlass, Color.White, 0.26f).copy(alpha = 0.55f)
                                                 )
                                             ),
                                             RoundedCornerShape(20.dp)
