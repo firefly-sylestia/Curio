@@ -206,7 +206,11 @@ app/src/main/java/com/curio/app/
   Wildcard). The Streak · Cabinet · Topics card takes a 5% whisper of the
   category shade (`lerp(fill, accent, 0.05f)`) — creamy, not colored.
   Toggles: `homeTintState` / `homeHeroTintState` /
-  `homeTintFollowLaneState` / `homeTintCategoryIdState`.
+  `homeTintFollowLaneState` / `homeTintCategoryIdState`. (7) Home's
+  Recents rows (`ExploreTopicRow` + `RecentEntryRow`, both opaque category
+  fills) lift from 0dp to a soft 2dp elevation, and the small
+  Unexplored/Resumed tag pills inside them trim from 2dp to 1dp so they
+  read as chips on the card instead of floating tiles.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

@@ -1493,7 +1493,8 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = cat.categorySurface(),
-        shadowElevation = 0.dp,
+        // v27u — recents rows sit on a soft 2dp lift.
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -2061,7 +2062,8 @@ private fun ExploreTopicRow(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = category.categorySurface(),
-        shadowElevation = 0.dp,
+        // v27u — recents rows sit on a soft 2dp lift.
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -2096,7 +2098,9 @@ private fun ExploreTopicRow(
                             // Same hairline rim as the detail page's #tag
                             // chips — the deep ink text + pastel fill alone
                             // read muddy on the tinted card (v7.32).
-                            shadowElevation = 2.dp
+                            // v27u — pill lift trimmed to 1dp so it reads as
+                            // a chip on the card rather than a floating tile.
+                            shadowElevation = 1.dp
                         ) {
                             Text(
                                 text = tag,

@@ -1,6 +1,27 @@
 # Prompt.md — Request log
 
-## Current request — Home tint experiments: bg + navbar take the category tint (v27u)
+## Current request — Home Recents rows lift + tag pills trim (v27u)
+
+### What was asked
+"In Home screen recent give the recent topics an elevation of 2 and the
+pills of unexplore/resume etc an elevation of 1."
+
+### Done
+- `ExploreTopicRow` (recent topic rows: Explored / Unexplored / Resumed)
+  and `RecentEntryRow` (recent saved entries — same feed, same card
+  family) lift from `shadowElevation = 0.dp` to `2.dp`. Both fills are
+  opaque `category.categorySurface()` (v27n-safe: no shadow bleed).
+- The small Unexplored/Resumed tag pills inside `ExploreTopicRow` trim
+  from `2.dp` to `1.dp` so they read as chips on the card rather than
+  floating tiles (fill is the opaque `lerp(surfaceContainerLow, accent,
+  0.14f)`, so the 1dp shadow still renders cleanly).
+
+### Validation
+Brace balance OK, `git diff --check` clean. No Gradle locally (env rule) —
+CI on push is the gate. Docs: app/AGENTS.md v27u bullet. Commit made, NOT
+pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — Home tint experiments: bg + navbar take the category tint (v27u)
 
 ### What was asked
 "Make the Home screen background + its navbar take the color of the
