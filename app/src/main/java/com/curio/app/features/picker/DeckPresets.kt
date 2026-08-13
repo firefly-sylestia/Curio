@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategory
 import com.curio.app.ui.components.categoryEdgeShine
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioIcon
 
 /**
@@ -105,10 +106,12 @@ fun PickerPresetChip(
                 else lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceVariant, 0.70f),
         shadowElevation = 2.dp,
         modifier = Modifier
+            // v28 — dark mode: soft glow + top-lit shine, no border rings.
+            .curioDarkGlow(2.dp, shape)
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

@@ -1,6 +1,47 @@
 # Prompt.md — Request log
 
-## Current request — dark-mode elevation visibility + reveal gradient match (v28)
+## Current request — AMOLED border-removal audit + category picker rows (v28)
+
+### What was asked
+1. "In AMOLED mode the app still uses borders — do a FULL border removal
+   audit, and suggest something else for a better look."
+2. "The category picker screen (from Spin): the preset and Original/New
+   rows have HUGE borders and the spacing between those two rows is high
+   — fix it."
+
+### Border audit — the two systematic sources, both removed from AMOLED
+1. **`Modifier.categoryEdgeShine`** — drew a full-edge HAIRLINE RING on
+   every card/pill/button in AMOLED + Material (white @ 0.10–0.26 alpha).
+   In AMOLED the ring is now skipped (`hairlineAlpha = 0`); the TOP-LIT
+   GLASS shine is strengthened (0.45→0.52 with accent / 0.22→0.30
+   without) because it's now the sole edge cue. Material keeps its accent
+   rim (its identity). The default Curio style was already border-free.
+2. **`curioDarkOutline`** (v28 hairline) — now never draws in AMOLED
+   (pure black wants no rings).
+
+### The "better look" for AMOLED (suggested + implemented)
+Raised surfaces on pure black now read as **top-lit glass + soft glow**
+(no rings, no borders): the strengthened top-edge shine gives the
+"light catching the top edge" cue and the v28 `curioDarkGlow` (soft
+white 16% shadow) gives the lift. Intentional design borders kept:
+CurioBadges coin rims + the Quests passport stamp ring (element
+identity, not elevation).
+
+### Category picker fixes (CategoryPickerScreen.kt + DeckPresets.kt)
+- The "huge borders" were `categoryEdgeShine`'s AMOLED white ring on the
+  preset chips + Original/New tabs + Mix button — gone with the audit.
+- Row spacing tightened: preset row padding vertical 6dp → top 4 / bottom
+  1; tabs row top 1 / bottom 4; chip internal vertical padding 6dp → 4dp
+  (both pills) — the two rows sit together now.
+- Both pills + the Mix button gained `.curioDarkGlow` so the AMOLED look
+  is complete (top shine + glow, no ring).
+
+### Validation
+Brace balance OK (4 files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullets.
+Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — dark-mode elevation visibility + reveal gradient match (v28)
 
 ### What was asked
 1. "In dark mode the elevation isn't visible — what can we do about that?"

@@ -253,8 +253,28 @@ app/src/main/java/com/curio/app/
   hero action pills (Settings/Cabinet), CurioSortDropdown, CurioTopBar,
   PaperCard surfaces, dialog option rows, Home (stat card, recents rows,
   sticky top pills, session card, pick-a-lane), Profile (stat pane, lanes
-  tiles), Topic Reveal (already-there button, teaser card). Glow must
-  precede the fill in the modifier chain (rule 11).
+  tiles), Topic Reveal (already-there button, teaser card), and the
+  Category Picker's preset chips + Original/New page tabs + Mix button.
+  Glow must precede the fill in the modifier chain (rule 11).
+- **v28 — AMOLED is BORDER-FREE (full border-removal audit).** Two
+  systematic border sources were removed from AMOLED: (1)
+  `Modifier.categoryEdgeShine` no longer draws its full-edge HAIRLINE RING
+  in AMOLED (`hairlineAlpha = 0` — white rings around every pill/card read
+  as clunky "borders" on pure black); the TOP-LIT GLASS shine is
+  strengthened (0.45→0.52 with accent, 0.22→0.30 without) since it's now
+  the sole edge cue. Material keeps its accent rim (its identity); the
+  default Curio style was already border-free. (2) `curioDarkOutline` (the
+  v28 hairline) never draws in AMOLED either. The AMOLED raised look is
+  now top-lit glass shine + the v28 soft glow — no rings. Intentional
+  design borders kept: CurioBadges coin rims + the Quests passport stamp
+  ring (both are element identity, not elevation).
+- **v28 — Category Picker rows tightened.** The quick-mix preset chips and
+  the Original/New page tabs both wore `categoryEdgeShine` (a white ring
+  in AMOLED — the "huge borders") and the preset row's 6dp vertical
+  padding pushed the two rows apart. The AMOLED ring removal + the row
+  spacing tweaks (preset row padding vertical 6dp → top 4/bottom 1, tabs
+  row top 1/bottom 4, chip vertical padding 6dp → 4dp) pull the rows
+  together; both pills + the Mix button also gained the soft glow.
 - **v28 — Topic Reveal hero gradient matches the Spin ticket in LIGHT
   mode.** The reveal hero's `HeroCard` used `cat.headerAccent()` (a
   0.88-deepened accent in light mode, v27j) while the Spin ticket wears

@@ -59,6 +59,13 @@ fun Modifier.curioDarkGlow(elevation: Dp, shape: Shape): Modifier {
  */
 @Composable
 fun Modifier.curioDarkOutline(shape: Shape, thickness: Dp = 1.dp): Modifier {
-    if (!isCurioDarkTheme() || !AppPreferences.darkOutlineState) return this
+    // v28 — AMOLED is BORDER-FREE (the border-removal audit): the hairline
+    // outline never draws there — pure black wants no rings. The soft glow
+    // ([curioDarkGlow]) + the top-lit glass shine carry the raised look on
+    // AMOLED instead.
+    if (!isCurioDarkTheme() ||
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ||
+        !AppPreferences.darkOutlineState
+    ) return this
     return border(thickness, curioDarkOutlineColor(), shape)
 }
