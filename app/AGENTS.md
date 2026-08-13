@@ -367,6 +367,24 @@ app/src/main/java/com/curio/app/
   `meanderA`/`meanderB` since `density` is only in constructor scope):
   the seam now ALWAYS meanders on a ~35-45dp scale for every entry hash,
   in both the hero clip and its aligned under-sheet (same `disp`).
+- **v28 — hole rings now THREAD THROUGH the hole (all 3 styles).** The
+  v27v rings were drawn as flat ellipses LARGER than the punch hole and
+  centered on it, so they read as metal rings glued AROUND the hole
+  ("just changes the look of the hole"). All three styles in
+  `PaperStatCard.kt` now share a real through-hole structure:
+  `drawHoleInterior` shades the punched opening dark (a deep pocket, so
+  anything drawn inside reads as BEHIND the paper), the wire's BACK arc is
+  a dark, smaller-radius arc receding inside the hole (coil/split/oblique
+  each with their own back angles), the FRONT arc rides the hole rim in
+  bright steel — its tube half over the opening, half on the paper — and
+  darkened 26° DIVES at each end of the front arc show the wire sinking
+  back in, plus the shared contact shadow. "coil" = spiral-notebook wire
+  (front arc 145°→395° at 1.02×holeR, back arc 35°→145° at 0.72×holeR);
+  "split" = keyring loop (front top half 160°→360° at 1.05×holeR, back
+  bottom half 20°→160° at 0.82×holeR, split gap at 260°, rim shade over
+  the back wire); "oblique" = foreshortened coil bulging out of the hole
+  (front ellipse 1.35×holeR, back arc inside, per-hole tilt). All three
+  now visibly pass through the hole instead of decorating it.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

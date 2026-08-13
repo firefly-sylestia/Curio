@@ -32,6 +32,32 @@
 ### Validation
 Brace balance OK (2 files), `git diff --check` clean. No Gradle locally
 (env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullet.
+
+## Current request — hole rings must THREAD through the hole (v28)
+
+### What was asked
+"Those rings styles, all 3 of them — I don't see them going through the
+hole. All just changes the look of the hole."
+
+### What was done
+`PaperStatCard.kt` — all three ring styles were flat ellipses LARGER than
+and centered on the punch hole, so they read as rings drawn AROUND the
+hole. All three now share a real through-hole structure:
+1. `drawHoleInterior` — shades the punched opening dark (deep pocket
+   cue), so anything drawn inside reads as behind the paper.
+2. BACK arc — dark, smaller-radius arc recessed inside the hole
+   (coil 0.72×holeR at the hole bottom; split 0.82×holeR bottom half with
+   a rim shade where the hole edge passes in front; oblique 0.72×holeR).
+3. FRONT arc — bright steel riding the hole rim over the paper (coil
+   1.02×holeR from 145°→395°; split 1.05×holeR top half 160°→360° with
+   the split gap at 260° + glint; oblique a foreshortened 1.35×holeR
+   ellipse bulging out, per-hole tilted).
+4. DIVES — a darkened 26° run at each end of the front arc where the
+   wire visibly sinks back into the hole, + the shared contact shadow.
+
+### Validation
+Brace balance OK (1 file), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v28 bullet.
 Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
 
 ## Prior — AMOLED border-removal audit + category picker rows (v28)

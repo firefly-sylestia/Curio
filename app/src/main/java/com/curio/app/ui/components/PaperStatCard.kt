@@ -33,13 +33,17 @@ import com.curio.app.ui.theme.isCurioDarkTheme
  * classic 3-hole column is punched through the LEFT edge as an EvenOdd path
  * (the page behind shows through the holes) and each hole wears either the
  * pressed two-tone diary-spiral rim ([ringsOn] = false) or a 3D steel ring
- * through the hole ([ringsOn] = true). The [ringStyle] selects the look:
- * "coil" — a spring-like wire coil through the hole (front arc over the
- * paper, back arc receding into the hole); "split" — a closed metal torus
- * whose top arc sits proud above the paper; "oblique" — a few short coil
- * segments angled out of the hole toward the viewer. With holes off it is
- * simply the opaque paper fill in the card's shape — no translucent fills
- * anywhere (v27n shadow rule).
+ * through the hole ([ringsOn] = true) — each style draws the wire as a
+ * real THREADED ring: a dark shaded hole interior, a dark back arc
+ * receding inside the hole (behind the paper), a bright front arc riding
+ * the hole rim over the paper, and darkened dives where the wire sinks
+ * back in. The [ringStyle] selects the look: "coil" — a spiral-notebook
+ * binding wire (front arc over the rim, back arc recessed in the hole);
+ * "split" — a closed keyring / split-ring loop (top half over paper,
+ * bottom half inside the hole, split gap near the top); "oblique" — the
+ * coil foreshortened at an angle, bulging out of the hole toward the
+ * viewer. With holes off it is simply the opaque paper fill in the card's
+ * shape — no translucent fills anywhere (v27n shadow rule).
  */
 fun Modifier.paperStatCardFill(
     shape: Shape,
@@ -159,190 +163,275 @@ private fun DrawScope.drawRingContactShadow(center: Offset, holeR: Float, ink: C
 }
 
 /**
- * "coil" — a spring-like wire coil through the hole (the closest match to
- * a spiral notebook binding). The ring is a foreshortened ellipse whose
- * FRONT arc tubes over the paper in bright metal while the BACK arc
- * recedes darkly INTO the hole, with a specular highlight on top and the
- * contact shadow where the wire leaves the paper.
+ * The dark INTERIOR of a punch hole — the punched opening reads as a real
+ * hole IN the paper (a deep shadowed pocket), so any wire drawn inside it
+ * reads as passing BEHIND the sheet instead of lying flat on the hole.
+ * Drawn for every ring style before the wire, so the back arc always has
+ * a dark recess to recede into.
  */
-private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
-    val rx = holeR + 1.6.dp.toPx() // wire centerline — pokes past the hole
-    val ry = rx * 0.82f            // mild foreshortening
-    val metalW = 3.1.dp.toPx()
-    val topLeft = Offset(center.x - rx, center.y - ry)
-    val ringSize = Size(rx * 2f, ry * 2f)
-    val steel = Brush.linearGradient(
-        colors = steelGradient,
-        start = Offset(center.x, center.y - ry),
-        end = Offset(center.x, center.y + ry)
+private fun DrawScope.drawHoleInterior(center: Offset, holeR: Float, ink: Color) {
+    // Soft dark fill across the whole opening + a deeper rim ring on the
+    // inside edge (light from the top-left, like the pressed rim).
+    drawCircle(
+        color = ink.copy(alpha = 0.18f),
+        radius = holeR,
+        center = center
     )
-    // ── Back arc (bottom half) — recedes into the hole, darkened. ──────
-    drawArc(
-        brush = Brush.linearGradient(
-            colors = listOf(Color(0xFF6E675E), Color(0xFF4A453E)),
-            start = Offset(center.x, center.y),
-            end = Offset(center.x, center.y + ry)
-        ),
-        startAngle = 180f,
-        sweepAngle = 180f,
-        useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    drawCircle(
+        color = ink.copy(alpha = 0.34f),
+        radius = holeR,
+        center = Offset(center.x, center.y - holeR * 0.18f),
+        style = Stroke(width = 1.1.dp.toPx())
     )
-    // ── Front arc (top half) — bright metal tubing OVER the paper. ─────
-    drawArc(
-        brush = steel,
-        startAngle = 0f,
-        sweepAngle = 180f,
-        useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
-    )
-    // Specular highlight riding the front arc's upper edge.
-    drawArc(
-        color = Color.White.copy(alpha = 0.92f),
-        startAngle = 200f,
-        sweepAngle = 45f,
-        useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW * 0.28f, cap = StrokeCap.Round)
-    )
-    // Darken the wire where it dives into the hole on both sides.
-    drawArc(
-        color = Color(0xFF3A362F).copy(alpha = 0.55f),
-        startAngle = 88f,
-        sweepAngle = 22f,
-        useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
-    )
-    drawArc(
-        color = Color(0xFF3A362F).copy(alpha = 0.55f),
-        startAngle = 268f,
-        sweepAngle = 22f,
-        useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
-    )
-    drawRingContactShadow(center, holeR, ink)
 }
 
 /**
- * "split" — a closed metal torus (keyring / split-ring binder look). The
- * whole loop is a steel tube with a bright top edge; the bottom arc dips
- * into the hole where the paper rim shades it, and a specular glint rides
- * the top-left curve. Reads as a solid ring rather than a spring.
+ * "coil" — a spiral-notebook binding wire threaded THROUGH the hole. The
+ * hole interior is shaded dark (a real opening); the wire's BACK arc loops
+ * behind the paper, seen recessed inside the hole's bottom, while its
+ * FRONT arc rides over the hole rim in bright steel — half its tube over
+ * the opening, half on the paper — with darkened dives where it re-enters
+ * the hole and a specular on top. Reads as a wire passing through, not a
+ * ring drawn around the hole.
  */
-private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color) {
-    val rx = holeR + 1.5.dp.toPx()
-    val ry = rx * 0.90f
-    val metalW = 3.4.dp.toPx()
-    val topLeft = Offset(center.x - rx, center.y - ry)
-    val ringSize = Size(rx * 2f, ry * 2f)
-    // Full tube with a vertical steel gradient (bright top → dark bottom).
+private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
+    val frontR = holeR * 1.02f  // front wire rides the hole rim
+    val backR = holeR * 0.72f   // back wire — visibly INSIDE the hole
+    val metalW = 3.0.dp.toPx()
+    val frontTopLeft = Offset(center.x - frontR, center.y - frontR)
+    val frontSize = Size(frontR * 2f, frontR * 2f)
+    val backTopLeft = Offset(center.x - backR, center.y - backR)
+    val backSize = Size(backR * 2f, backR * 2f)
+
+    drawHoleInterior(center, holeR, ink)
+
+    // ── Back arc — the wire BEHIND the paper, seen through the hole. ───
+    drawArc(
+        brush = Brush.linearGradient(
+            colors = listOf(Color(0xFF5A554C), Color(0xFF332F29)),
+            start = Offset(center.x, center.y - backR),
+            end = Offset(center.x, center.y + backR)
+        ),
+        startAngle = 35f,
+        sweepAngle = 110f,
+        useCenter = false,
+        topLeft = backTopLeft,
+        size = backSize,
+        style = Stroke(width = metalW * 0.9f, cap = StrokeCap.Round)
+    )
+
+    // ── Front arc — bright steel OVER the paper, riding the hole rim. ──
     drawArc(
         brush = Brush.linearGradient(
             colors = steelGradient,
-            start = Offset(center.x, center.y - ry),
-            end = Offset(center.x, center.y + ry)
+            start = Offset(center.x, center.y - frontR),
+            end = Offset(center.x, center.y + frontR)
         ),
-        startAngle = 0f,
-        sweepAngle = 360f,
+        startAngle = 145f,
+        sweepAngle = 250f,
         useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
+        topLeft = frontTopLeft,
+        size = frontSize,
         style = Stroke(width = metalW, cap = StrokeCap.Round)
     )
-    // The split: a tiny dark gap at the top-right where the ring opens.
+
+    // Darkened dives where the front wire sinks back INTO the hole.
     drawArc(
-        color = Color(0xFF3A362F),
-        startAngle = 315f,
-        sweepAngle = 14f,
+        color = Color(0xFF3A362F).copy(alpha = 0.55f),
+        startAngle = 145f,
+        sweepAngle = 26f,
         useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
+        topLeft = frontTopLeft,
+        size = frontSize,
         style = Stroke(width = metalW, cap = StrokeCap.Round)
     )
-    // Specular glint along the top-left curve.
     drawArc(
-        color = Color.White.copy(alpha = 0.90f),
-        startAngle = 230f,
-        sweepAngle = 42f,
+        color = Color(0xFF3A362F).copy(alpha = 0.55f),
+        startAngle = 9f,
+        sweepAngle = 26f,
         useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW * 0.30f, cap = StrokeCap.Round)
+        topLeft = frontTopLeft,
+        size = frontSize,
+        style = Stroke(width = metalW, cap = StrokeCap.Round)
     )
-    // Paper rim shades the bottom arc where it dips into the hole.
+
+    // Specular highlight riding the front arc's top.
     drawArc(
-        color = ink.copy(alpha = 0.30f),
-        startAngle = 92f,
-        sweepAngle = 56f,
+        color = Color.White.copy(alpha = 0.92f),
+        startAngle = 252f,
+        sweepAngle = 40f,
         useCenter = false,
-        topLeft = topLeft,
-        size = ringSize,
-        style = Stroke(width = metalW * 0.75f, cap = StrokeCap.Round)
+        topLeft = frontTopLeft,
+        size = frontSize,
+        style = Stroke(width = metalW * 0.28f, cap = StrokeCap.Round)
     )
+
     drawRingContactShadow(center, holeR, ink)
 }
 
 /**
- * "oblique" — a few short coil segments angled out of the hole toward the
- * viewer (a chunky stylized "sticking out" spring). Three short tube
- * segments step diagonally across the hole, each a bright-to-dark steel
- * arc with its own specular, so the coil reads as springing OUT of the
- * paper toward the camera.
+ * "split" — a closed steel keyring / split-ring binder loop threaded
+ * through the hole. The ring's TOP half is a bright tube riding over the
+ * paper; its BOTTOM half recedes behind the sheet, seen dark inside the
+ * shaded hole, with the classic split gap near the top and a glint on the
+ * upper-left curve.
+ */
+private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color) {
+    val frontR = holeR * 1.05f
+    val backR = holeR * 0.82f
+    val metalW = 3.2.dp.toPx()
+    val frontTopLeft = Offset(center.x - frontR, center.y - frontR)
+    val frontSize = Size(frontR * 2f, frontR * 2f)
+    val backTopLeft = Offset(center.x - backR, center.y - backR)
+    val backSize = Size(backR * 2f, backR * 2f)
+
+    drawHoleInterior(center, holeR, ink)
+
+    // ── Back half — inside the hole, behind the paper. ──────────────────
+    drawArc(
+        brush = Brush.linearGradient(
+            colors = listOf(Color(0xFF575249), Color(0xFF322E28)),
+            start = Offset(center.x, center.y - backR),
+            end = Offset(center.x, center.y + backR)
+        ),
+        startAngle = 20f,
+        sweepAngle = 140f,
+        useCenter = false,
+        topLeft = backTopLeft,
+        size = backSize,
+        style = Stroke(width = metalW * 0.92f, cap = StrokeCap.Round)
+    )
+    // The hole's edge passes in front of the back wire — shade it there.
+    drawArc(
+        color = ink.copy(alpha = 0.35f),
+        startAngle = 30f,
+        sweepAngle = 120f,
+        useCenter = false,
+        topLeft = backTopLeft,
+        size = backSize,
+        style = Stroke(width = metalW * 0.7f, cap = StrokeCap.Round)
+    )
+
+    // ── Front half — bright steel tube riding OVER the paper. ───────────
+    drawArc(
+        brush = Brush.linearGradient(
+            colors = steelGradient,
+            start = Offset(center.x, center.y - frontR),
+            end = Offset(center.x, center.y + frontR)
+        ),
+        startAngle = 160f,
+        sweepAngle = 200f,
+        useCenter = false,
+        topLeft = frontTopLeft,
+        size = frontSize,
+        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    )
+    // The split: a tiny dark gap near the top where the ring opens.
+    drawArc(
+        color = Color(0xFF3A362F),
+        startAngle = 260f,
+        sweepAngle = 13f,
+        useCenter = false,
+        topLeft = frontTopLeft,
+        size = frontSize,
+        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    )
+    // Specular glint along the upper-left curve.
+    drawArc(
+        color = Color.White.copy(alpha = 0.90f),
+        startAngle = 205f,
+        sweepAngle = 38f,
+        useCenter = false,
+        topLeft = frontTopLeft,
+        size = frontSize,
+        style = Stroke(width = metalW * 0.30f, cap = StrokeCap.Round)
+    )
+
+    drawRingContactShadow(center, holeR, ink)
+}
+
+/**
+ * "oblique" — the binding coil seen at an angle, springing OUT of the
+ * hole toward the viewer. A foreshortened, per-hole tilted ring whose
+ * front arc bulges clearly onto the paper (bright steel) while its back
+ * arc recedes darkly inside the shaded hole — the most pronounced
+ * "through the hole" read of the three.
  */
 private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, index: Int) {
     // Per-ring phase shift so the three holes don't all tilt identically.
     val phase = index * 30f
-    val rx = holeR + 1.2.dp.toPx()
-    val ry = rx * 0.55f
-    val metalW = 3.0.dp.toPx()
-    // Three segments stepping along a diagonal — like a spring seen at an
-    // angle, each turn poking slightly out of the hole toward the viewer.
-    repeat(3) { s ->
-        val t = (s - 1) * 0.42f
-        val cx = center.x + t * rx * 0.55f
-        val cy = center.y + t * ry * 0.75f
-        val topLeft = Offset(cx - rx, cy - ry)
-        val ringSize = Size(rx * 2f, ry * 2f)
-        // Alternate light/dark turns so depth reads through the coil.
-        val colors = if (s % 2 == 0) {
-            listOf(Color(0xFFF6F2EA), Color(0xFFC9C2B4), Color(0xFF8E877B))
-        } else {
-            listOf(Color(0xFFB9B2A6), Color(0xFF8E877B), Color(0xFF6A645A))
-        }
-        rotate(degrees = phase + s * 9f, pivot = Offset(cx, cy)) {
-            drawArc(
-                brush = Brush.linearGradient(
-                    colors = colors,
-                    start = Offset(cx, cy - ry),
-                    end = Offset(cx, cy + ry)
-                ),
-                startAngle = 0f,
-                sweepAngle = 300f,
-                useCenter = false,
-                topLeft = topLeft,
-                size = ringSize,
-                style = Stroke(width = metalW, cap = StrokeCap.Round)
-            )
-            drawArc(
-                color = Color.White.copy(alpha = 0.85f),
-                startAngle = 235f + s * 14f,
-                sweepAngle = 30f,
-                useCenter = false,
-                topLeft = topLeft,
-                size = ringSize,
-                style = Stroke(width = metalW * 0.26f, cap = StrokeCap.Round)
-            )
-        }
+    val frontR = holeR * 1.35f  // front bulge — clearly past the hole rim
+    val ry = frontR * 0.62f     // foreshortened
+    val backR = holeR * 0.72f
+    val metalW = 2.9.dp.toPx()
+    val topLeft = Offset(center.x - frontR, center.y - ry)
+    val size = Size(frontR * 2f, ry * 2f)
+    val backTopLeft = Offset(center.x - backR, center.y - backR)
+    val backSize = Size(backR * 2f, backR * 2f)
+
+    drawHoleInterior(center, holeR, ink)
+
+    // ── Back arc — inside the hole, behind the paper. ───────────────────
+    drawArc(
+        brush = Brush.linearGradient(
+            colors = listOf(Color(0xFF575249), Color(0xFF322E28)),
+            start = Offset(center.x, center.y - backR),
+            end = Offset(center.x, center.y + backR)
+        ),
+        startAngle = 30f,
+        sweepAngle = 120f,
+        useCenter = false,
+        topLeft = backTopLeft,
+        size = backSize,
+        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    )
+
+    // ── Front arc — bright steel bulging OUT of the hole onto the paper.
+    rotate(degrees = phase + 8f, pivot = center) {
+        drawArc(
+            brush = Brush.linearGradient(
+                colors = steelGradient,
+                start = Offset(center.x, center.y - ry),
+                end = Offset(center.x, center.y + ry)
+            ),
+            startAngle = 150f,
+            sweepAngle = 240f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = size,
+            style = Stroke(width = metalW, cap = StrokeCap.Round)
+        )
+        // Dives where the front wire sinks back into the hole.
+        drawArc(
+            color = Color(0xFF3A362F).copy(alpha = 0.55f),
+            startAngle = 150f,
+            sweepAngle = 26f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = size,
+            style = Stroke(width = metalW, cap = StrokeCap.Round)
+        )
+        drawArc(
+            color = Color(0xFF3A362F).copy(alpha = 0.55f),
+            startAngle = 364f,
+            sweepAngle = 26f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = size,
+            style = Stroke(width = metalW, cap = StrokeCap.Round)
+        )
+        // Specular highlight riding the front arc's top.
+        drawArc(
+            color = Color.White.copy(alpha = 0.88f),
+            startAngle = 252f,
+            sweepAngle = 38f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = size,
+            style = Stroke(width = metalW * 0.26f, cap = StrokeCap.Round)
+        )
     }
+
     drawRingContactShadow(center, holeR, ink)
 }
 
