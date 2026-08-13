@@ -7,6 +7,8 @@
 //
 // The topic assets are referenced in-place (no copy) so content edits in
 // app/src/main/assets/topics are picked up by the desktop build automatically.
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.compose)
@@ -26,7 +28,9 @@ kotlin {
 
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
+    // `compose.material3` (the String accessor) is deprecated in CMP 1.11+ —
+    // declare the artifact directly via the catalog (version tracks the CMP release).
+    implementation(libs.compose.material3)
     // Topic JSON parsing (same serializer the Android app uses).
     implementation(libs.com.google.code.gson.gson)
 }

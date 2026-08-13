@@ -45,6 +45,10 @@ graphicsShapes = "1.0.1"
 # the plugin is always compatible with the newest Kotlin, so it pairs with
 # the repo's Kotlin 2.3.21.
 composeMultiplatform = "1.11.1"
+# Material3 for the :desktop module ships on its own alpha cadence (decoupled
+# from the CMP plugin version since 1.8). 1.11.0-alpha07 is the material3
+# version bundled with Compose Multiplatform 1.11.1.
+composeMaterial3 = "1.11.0-alpha07"
 kotlinxSerializationJson = "1.8.0"
 
 [libraries]
@@ -111,6 +115,10 @@ androidx-graphics-shapes = { group = "androidx.graphics", name = "graphics-shape
 
 # Haze - Real backdrop blur for glassmorphism effects
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+
+# Compose Multiplatform material3 (desktop port) — declared directly because
+# the `compose.material3` String accessor is deprecated in CMP 1.11+.
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
