@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Desktop mirror of the Android `assets/topics/*.json` schema.
+ * Desktop mirror of the Android app's `assets/topics` JSON schema.
  *
  * Fields that are absent from some category files (`byline` in legacy lanes,
  * `tier` in a few older topics) are nullable — Gson instantiates Kotlin data

@@ -104,7 +104,7 @@ fun main() = application {
     val savedX = DesktopPreferences.getInt(PREF_WIN_X, -1)
     val savedY = DesktopPreferences.getInt(PREF_WIN_Y, -1)
     if (savedX >= 0 && savedY >= 0) {
-        state.position = WindowPosition(savedX, savedY)
+        state.position = WindowPosition.Absolute(savedX.dp, savedY.dp)
     }
     Window(
         onCloseRequest = {
@@ -124,9 +124,9 @@ private fun saveWindowGeometry(state: WindowState) {
     DesktopPreferences.setInt(PREF_WIN_W, size.width.value.toInt())
     DesktopPreferences.setInt(PREF_WIN_H, size.height.value.toInt())
     val pos = state.position
-    if (pos.isSpecified) {
-        DesktopPreferences.setInt(PREF_WIN_X, pos.x)
-        DesktopPreferences.setInt(PREF_WIN_Y, pos.y)
+    if (pos is WindowPosition.Absolute) {
+        DesktopPreferences.setInt(PREF_WIN_X, pos.x.value.toInt())
+        DesktopPreferences.setInt(PREF_WIN_Y, pos.y.value.toInt())
     }
 }
 

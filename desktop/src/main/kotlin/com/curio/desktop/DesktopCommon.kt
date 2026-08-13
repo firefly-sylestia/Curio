@@ -25,9 +25,10 @@ import androidx.compose.ui.unit.sp
 internal fun DesktopPill(
     label: String,
     active: Boolean,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    // onClick is last so callers can use a trailing lambda (Compose convention).
+    onClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     Surface(
