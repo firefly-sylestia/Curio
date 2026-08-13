@@ -113,7 +113,6 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
-import com.curio.app.ui.components.curioDarkOutline
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
@@ -1410,7 +1409,6 @@ private fun RevealAlreadyButton(
         modifier = modifier
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(3.dp, RoundedCornerShape(50))
-            .curioDarkOutline(RoundedCornerShape(50))
             .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
             // Give the writing action a real, forgiving tap target across its
             // entire weighted half of the row. The old inner padding made the
@@ -1780,7 +1778,6 @@ private fun TeaserCard(
             .fillMaxWidth()
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(3.dp, RoundedCornerShape(24.dp))
-            .curioDarkOutline(RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(

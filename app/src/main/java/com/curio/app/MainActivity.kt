@@ -70,6 +70,9 @@ class MainActivity : ComponentActivity() {
         // Load the persisted explore-session flow state (active session +
         // recently explored/unexplored lists) before any screen reads it.
         ExploreSessionStore.seed(this)
+        // v29 — load per-topic reading/watching progress before any screen
+        // (reveal / Cabinet / detail) reads it.
+        TopicProgressStore.seed(this)
         // v27 — watch for device screenshots while a session (or a handed-off
         // write package) is live, so the user's own shots auto-join the
         // session. Permission-gated internally; the bubble's own capture

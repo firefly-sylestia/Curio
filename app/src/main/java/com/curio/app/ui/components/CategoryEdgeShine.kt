@@ -30,9 +30,18 @@ import com.curio.app.data.AppPreferences
  * @param intensity Scales the hairline + top-shine alphas (1f = full shine,
  *   lower = a quieter whisper — used for the main Spin card's subtle
  *   category tint).
+ * @param amoledHairline Restores the full-edge hairline ring in AMOLED for
+ *   this surface (the v28 audit removed the AMOLED ring app-wide; the main
+ *   deck card opts back in so the hero card keeps a readable edge on pure
+ *   black). Ignored outside AMOLED.
  */
 @Composable
-fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null, intensity: Float = 1f): Modifier {
+fun Modifier.categoryEdgeShine(
+    shape: Shape,
+    accent: Color? = null,
+    intensity: Float = 1f,
+    amoledHairline: Boolean = false,
+): Modifier {
     val style = AppPreferences.themeStyleState
     if (style != AppPreferences.THEME_STYLE_AMOLED && style != AppPreferences.THEME_STYLE_MATERIAL) return this
     val amoled = style == AppPreferences.THEME_STYLE_AMOLED
@@ -47,15 +56,16 @@ fun Modifier.categoryEdgeShine(shape: Shape, accent: Color? = null, intensity: F
             is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
         }
         val shine = accent ?: Color.White
-        // v28 — AMOLED is BORDER-FREE (the full border-removal audit): the
-        // full-edge hairline RING is gone on AMOLED — white rings around
-        // every pill/card read as clunky "borders" on pure black. The
-        // raised look on AMOLED now comes from the TOP-LIT GLASS shine
-        // (strengthened — it's the sole edge cue) + the v28 soft glow
-        // shadow, a cleaner modern look than a border. Material keeps its
-        // accent rim (that's the Material identity); the default Curio
+        // v28 — AMOLED is BORDER-FREE app-wide (the full border-removal
+        // audit): the full-edge hairline RING is gone on AMOLED — white
+        // rings around every pill/card read as clunky "borders" on pure
+        // black. The raised look on AMOLED comes from the TOP-LIT GLASS
+        // shine (strengthened — it's the sole edge cue) + the v28 soft glow
+        // shadow. The main Spin deck card opts back in via amoledHairline so
+        // the hero card keeps a readable edge on pure black. Material keeps
+        // its accent rim (that's the Material identity); the default Curio
         // style stays border-free as always.
-        val hairlineAlpha = if (amoled) 0f
+        val hairlineAlpha = if (amoled && !amoledHairline) 0f
             else (if (accent != null) 0.30f else 0.14f) * effective
         val topAlpha = (if (accent != null) 0.52f else 0.30f) * effective
         val hairlineW = 1.dp.toPx()

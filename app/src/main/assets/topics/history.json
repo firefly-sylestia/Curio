@@ -701,7 +701,7 @@
       "Germany",
       "Cities"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-domesday-book",
@@ -1713,7 +1713,7 @@
       "Czechoslovakia",
       "Reform"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-watergate",
@@ -9479,7 +9479,7 @@
       "Egypt",
       "Knowledge"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-olympic-games",
@@ -9501,7 +9501,7 @@
       "Sport",
       "Religion"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-execution-charles-i",
@@ -9523,7 +9523,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-suez-canal-opening",
@@ -9545,7 +9545,7 @@
       "Engineering",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-scramble-for-africa",
@@ -9567,7 +9567,7 @@
       "Colonialism",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-assassination-franz-ferdinand",
@@ -9589,7 +9589,7 @@
       "War",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-october-revolution",
@@ -9611,7 +9611,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-stock-market-crash-1929",
@@ -9633,7 +9633,7 @@
       "Economy",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kristallnacht",
@@ -9655,7 +9655,7 @@
       "Nazism",
       "History"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hiroshima-bombing",
@@ -9677,7 +9677,7 @@
       "War",
       "Science"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bronze-age-collapse",
@@ -9699,7 +9699,7 @@
       "Collapse",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-pax-romana",
@@ -9721,7 +9721,7 @@
       "Empire",
       "Peace"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-abbasid-golden-age",
@@ -9743,7 +9743,7 @@
       "Science",
       "Baghdad"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-industrial-revolution",
@@ -9765,7 +9765,7 @@
       "Industry",
       "Economy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-victorian-era",
@@ -9787,7 +9787,7 @@
       "Empire",
       "Society"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-roaring-twenties",
@@ -9809,7 +9809,7 @@
       "Culture",
       "Economy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kush-kingdoms",
@@ -9831,7 +9831,7 @@
       "Nubia",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-minoan-civilization",
@@ -9853,7 +9853,7 @@
       "Crete",
       "Civilization"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-indus-valley-civilization",
@@ -9875,7 +9875,7 @@
       "Civilization",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-olmec-civilization",
@@ -9897,7 +9897,7 @@
       "Civilization",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kingdom-ghana",
@@ -9919,7 +9919,7 @@
       "Ghana",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-khmer-empire",
@@ -9941,7 +9941,7 @@
       "Cambodia",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-songhai-empire",
@@ -9963,7 +9963,7 @@
       "Songhai",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-inca-empire",
@@ -9985,7 +9985,7 @@
       "Inca",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kingdom-benin",
@@ -10007,7 +10007,7 @@
       "Nigeria",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-zimbabwe",
@@ -10029,7 +10029,7 @@
       "Zimbabwe",
       "Archaeology"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-aksumite-obelisks",
@@ -10051,7 +10051,7 @@
       "Ethiopia",
       "Architecture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-tours",
@@ -10073,7 +10073,7 @@
       "War",
       "Islam"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-agincourt",
@@ -10095,7 +10095,7 @@
       "France",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-gettysburg",
@@ -10117,7 +10117,7 @@
       "Civil War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-somme",
@@ -10139,7 +10139,7 @@
       "France",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-midway",
@@ -10161,7 +10161,7 @@
       "Pacific",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dien-bien-phu",
@@ -10183,7 +10183,7 @@
       "France",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-printing-press",
@@ -10205,7 +10205,7 @@
       "Print",
       "Ideas"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-abolition-slave-trade",
@@ -10227,7 +10227,7 @@
       "Abolition",
       "Human Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-opening-japan",
@@ -10249,7 +10249,7 @@
       "America",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sepoy-rebellion",
@@ -10271,7 +10271,7 @@
       "Britain",
       "Revolt"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hatshepsut",
@@ -10293,7 +10293,7 @@
       "Pharaoh",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-genghis-khan",
@@ -10315,7 +10315,7 @@
       "Empire",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-leonardo-da-vinci",
@@ -10337,7 +10337,7 @@
       "Art",
       "Science"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-suleiman-magnificent",
@@ -10359,7 +10359,7 @@
       "Empire",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ivan-terrible",
@@ -10381,7 +10381,7 @@
       "Tsar",
       "Terror"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-akbar-great",
@@ -10403,7 +10403,7 @@
       "Mughal",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nzinga-ndongo",
@@ -10425,7 +10425,7 @@
       "Angola",
       "Resistance"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-peter-great",
@@ -10447,7 +10447,7 @@
       "Reform",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-catherine-great",
@@ -10469,7 +10469,7 @@
       "Empire",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-toussaint-louverture",
@@ -10491,7 +10491,7 @@
       "Haiti",
       "Revolution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-napoleon-bonaparte",
@@ -10513,7 +10513,7 @@
       "Empire",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-harriet-tubman",
@@ -10535,7 +10535,7 @@
       "Freedom",
       "Heroism"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-florence-nightingale",
@@ -10557,7 +10557,7 @@
       "Medicine",
       "Reform"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gandhi",
@@ -10579,7 +10579,7 @@
       "Independence",
       "Nonviolence"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nelson-mandela",
@@ -10601,7 +10601,7 @@
       "South Africa",
       "Freedom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-suffragette-movement",
@@ -10623,7 +10623,7 @@
       "America",
       "Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-abolitionist-movement",
@@ -10645,7 +10645,7 @@
       "America",
       "Human Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-chartist-movement",
@@ -10667,7 +10667,7 @@
       "Politics",
       "Reform"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-taiping-rebellion",
@@ -10689,7 +10689,7 @@
       "Rebellion",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-may-fourth-movement",
@@ -10711,7 +10711,7 @@
       "Nationalism",
       "Ideas"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-non-aligned-movement",
@@ -10733,7 +10733,7 @@
       "Diplomacy",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-lisbon-earthquake",
@@ -10755,7 +10755,7 @@
       "Lisbon",
       "Disaster"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-irish-potato-famine",
@@ -10777,7 +10777,7 @@
       "Britain",
       "Famine"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-spanish-flu",
@@ -10799,7 +10799,7 @@
       "Medicine",
       "History"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-kanto-earthquake",
@@ -10821,7 +10821,7 @@
       "Disaster",
       "Earthquake"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-treaty-guadalupe-hidalgo",
@@ -10843,7 +10843,7 @@
       "Mexico",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-treaty-kanagawa",
@@ -10865,7 +10865,7 @@
       "America",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-treaty-brest-litovsk",
@@ -10887,7 +10887,7 @@
       "Germany",
       "World War I"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-munich-agreement",
@@ -10909,7 +10909,7 @@
       "Diplomacy",
       "World War II"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-camp-david-accords",
@@ -10931,7 +10931,7 @@
       "Egypt",
       "Israel"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-good-friday-agreement",
@@ -10953,7 +10953,7 @@
       "Britain",
       "Peace"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-compass",
@@ -10975,7 +10975,7 @@
       "Navigation",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gunpowder",
@@ -10997,7 +10997,7 @@
       "War",
       "Technology"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-steam-engine",
@@ -11019,7 +11019,7 @@
       "Invention",
       "Industry"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-telegraph",
@@ -11041,7 +11041,7 @@
       "Invention",
       "Communication"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-telephone",
@@ -11063,7 +11063,7 @@
       "Invention",
       "Communication"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-light-bulb",
@@ -11085,7 +11085,7 @@
       "Invention",
       "Technology"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-automobile",
@@ -11107,7 +11107,7 @@
       "Invention",
       "Industry"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-airplane",
@@ -11129,7 +11129,7 @@
       "Invention",
       "Aviation"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bank-england",
@@ -11151,7 +11151,7 @@
       "Money",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-east-india-company",
@@ -11173,7 +11173,7 @@
       "Britain",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-red-cross",
@@ -11195,7 +11195,7 @@
       "Humanitarian",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-united-nations",
@@ -11217,7 +11217,7 @@
       "Peace",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-european-union",
@@ -11239,7 +11239,7 @@
       "Politics",
       "Union"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-council-nicaea",
@@ -11261,7 +11261,7 @@
       "Religion",
       "Council"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-council-trent",
@@ -11283,7 +11283,7 @@
       "Religion",
       "Reform"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-yalta-conference",
@@ -11305,7 +11305,7 @@
       "Diplomacy",
       "Cold War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bandung-conference",
@@ -11327,7 +11327,7 @@
       "Africa",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-peloponnesian-war",
@@ -11349,7 +11349,7 @@
       "War",
       "Athens"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-punic-wars",
@@ -11371,7 +11371,7 @@
       "Carthage",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-crusades",
@@ -11393,7 +11393,7 @@
       "Middle East",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-boer-war",
@@ -11415,7 +11415,7 @@
       "Britain",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-winter-war",
@@ -11437,7 +11437,7 @@
       "Soviet Union",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-vietnam-war",
@@ -11459,7 +11459,7 @@
       "Cold War",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-alexander-persia",
@@ -11481,7 +11481,7 @@
       "Persia",
       "Conquest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mongol-conquest-china",
@@ -11503,7 +11503,7 @@
       "Mongolia",
       "Conquest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-conquest-aztecs",
@@ -11525,7 +11525,7 @@
       "Spain",
       "Conquest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-lewis-clark",
@@ -11547,7 +11547,7 @@
       "Exploration",
       "Journey"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-tang-dynasty",
@@ -11569,7 +11569,7 @@
       "Dynasty",
       "Golden Age"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ming-dynasty",
@@ -11591,7 +11591,7 @@
       "Dynasty",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-qing-dynasty",
@@ -11613,7 +11613,7 @@
       "Dynasty",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-habsburg-dynasty",
@@ -11635,7 +11635,7 @@
       "Dynasty",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-romanov-dynasty",
@@ -11657,7 +11657,7 @@
       "Dynasty",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-constantinople",
@@ -11679,7 +11679,7 @@
       "City",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-venice",
@@ -11701,7 +11701,7 @@
       "City",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-timbuktu",
@@ -11723,7 +11723,7 @@
       "Mali",
       "City"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hellenistic-age",
@@ -11745,7 +11745,7 @@
       "Culture",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-golden-age-athens",
@@ -11767,7 +11767,7 @@
       "Athens",
       "Golden Age"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-carolingian-renaissance",
@@ -11789,7 +11789,7 @@
       "Learning",
       "Charlemagne"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-italian-renaissance",
@@ -11811,7 +11811,7 @@
       "Art",
       "Culture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dutch-golden-age",
@@ -11833,7 +11833,7 @@
       "Trade",
       "Golden Age"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-progressive-era",
@@ -11855,7 +11855,7 @@
       "Reform",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gilded-age",
@@ -11877,7 +11877,7 @@
       "Industry",
       "Society"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-prohibition-jazz-age",
@@ -11899,7 +11899,7 @@
       "Culture",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-space-race",
@@ -11921,7 +11921,7 @@
       "Space",
       "Science"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-information-age",
@@ -11943,7 +11943,7 @@
       "Internet",
       "Revolution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-byzantine-empire",
@@ -11965,7 +11965,7 @@
       "Empire",
       "Constantinople"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ottoman-empire",
@@ -11987,7 +11987,7 @@
       "Empire",
       "Middle East"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mughal-empire",
@@ -12009,7 +12009,7 @@
       "Mughal",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mali-empire",
@@ -12031,7 +12031,7 @@
       "Mali",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-viking-vinland",
@@ -12053,7 +12053,7 @@
       "Exploration",
       "America"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-discovery-americas",
@@ -12075,7 +12075,7 @@
       "Exploration",
       "Encounter"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-pyramid",
@@ -12097,7 +12097,7 @@
       "Architecture",
       "Achievement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-canal-du-midi",
@@ -12119,7 +12119,7 @@
       "Engineering",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dreyfus-affair",
@@ -12141,7 +12141,7 @@
       "Justice",
       "Scandal"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-teapot-dome",
@@ -12163,7 +12163,7 @@
       "Politics",
       "Scandal"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-warring-states",
@@ -12185,7 +12185,7 @@
       "War",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-three-kingdoms",
@@ -12207,7 +12207,7 @@
       "War",
       "Dynasty"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-elizabethan-era",
@@ -12229,7 +12229,7 @@
       "Golden Age",
       "Culture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-era-good-feelings",
@@ -12251,7 +12251,7 @@
       "Politics",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-robber-barons",
@@ -12273,7 +12273,7 @@
       "Industry",
       "Wealth"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-triangular-trade",
@@ -12295,7 +12295,7 @@
       "Trade",
       "Slavery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-manorial-system",
@@ -12317,7 +12317,7 @@
       "Economy",
       "Society"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-guild-system",
@@ -12339,7 +12339,7 @@
       "Craft",
       "Economy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mercantile-system",
@@ -12361,7 +12361,7 @@
       "Economy",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-japanese-feudalism",
@@ -12383,7 +12383,7 @@
       "Samurai",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-troy",
@@ -12405,7 +12405,7 @@
       "Troy",
       "Legend"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-masada",
@@ -12427,7 +12427,7 @@
       "Israel",
       "Siege"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-leningrad",
@@ -12449,7 +12449,7 @@
       "Soviet Union",
       "Siege"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-sarajevo",
@@ -12471,7 +12471,7 @@
       "War",
       "Siege"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-trial-socrates",
@@ -12493,7 +12493,7 @@
       "Athens",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-trial-galileo",
@@ -12515,7 +12515,7 @@
       "Science",
       "Trial"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-trial-oscar-wilde",
@@ -12537,7 +12537,7 @@
       "Justice",
       "Scandal"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-japan-industrial-revolution",
@@ -12559,7 +12559,7 @@
       "Industry",
       "Reform"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-iranian-revolution",
@@ -12581,7 +12581,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cook-pacific-voyages",
@@ -12603,7 +12603,7 @@
       "Exploration",
       "Voyage"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-race-south-pole",
@@ -12625,7 +12625,7 @@
       "Exploration",
       "Expedition"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-challenger-expedition",
@@ -12647,7 +12647,7 @@
       "Ocean",
       "Expedition"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mariana-trench-descent",
@@ -12669,7 +12669,7 @@
       "Exploration",
       "Science"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dday-landings",
@@ -12691,7 +12691,7 @@
       "Normandy",
       "Operation"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-operation-barbarossa",
@@ -12713,7 +12713,7 @@
       "Soviet Union",
       "Operation"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-suez-crisis",
@@ -12735,7 +12735,7 @@
       "Egypt",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-overlord-planning",
@@ -12757,7 +12757,7 @@
       "Strategy",
       "Operation"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-civil-rights-movement",
@@ -12779,7 +12779,7 @@
       "Civil Rights",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-anti-apartheid-movement",
@@ -12801,7 +12801,7 @@
       "Freedom",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-womens-liberation",
@@ -12823,7 +12823,7 @@
       "Feminism",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-green-revolution",
@@ -12845,7 +12845,7 @@
       "Science",
       "Food"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-open-source-movement",
@@ -12867,7 +12867,7 @@
       "Software",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-financial-crisis-2008",
@@ -12889,7 +12889,7 @@
       "Finance",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-eurozone-crisis",
@@ -12911,7 +12911,7 @@
       "Economy",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bay-pigs",
@@ -12933,7 +12933,7 @@
       "Cold War",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-falklands-war",
@@ -12955,7 +12955,7 @@
       "Argentina",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-romantic-movement",
@@ -12977,7 +12977,7 @@
       "Art",
       "Culture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-labor-movement",
@@ -12999,7 +12999,7 @@
       "America",
       "Labor"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-temperance-movement",
@@ -13021,7 +13021,7 @@
       "Reform",
       "Prohibition"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-pan-african-movement",
@@ -13043,7 +13043,7 @@
       "Freedom",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-conservation-movement",
@@ -13065,7 +13065,7 @@
       "Environment",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-american-indian-movement",
@@ -13087,7 +13087,7 @@
       "Native Rights",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-rosetta-stone",
@@ -13109,7 +13109,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-penicillin-discovery",
@@ -13131,7 +13131,7 @@
       "Science",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dna-structure",
@@ -13153,7 +13153,7 @@
       "Biology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dead-sea-cave4",
@@ -13175,7 +13175,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mastery-fire",
@@ -13197,7 +13197,7 @@
       "Fire",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-roanoke-mystery",
@@ -13219,7 +13219,7 @@
       "Mystery",
       "Colony"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-amber-room",
@@ -13241,7 +13241,7 @@
       "Art",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-voynich-manuscript",
@@ -13263,7 +13263,7 @@
       "Book",
       "Code"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mary-celeste",
@@ -13285,7 +13285,7 @@
       "Mystery",
       "Ship"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-phaistos-disc",
@@ -13307,7 +13307,7 @@
       "Mystery",
       "Writing"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gallic-wars",
@@ -13329,7 +13329,7 @@
       "Gaul",
       "Conquest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-reconquista",
@@ -13351,7 +13351,7 @@
       "Portugal",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-napoleon-russia-1812",
@@ -13373,7 +13373,7 @@
       "Napoleon",
       "Campaign"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sherman-march",
@@ -13395,7 +13395,7 @@
       "Civil War",
       "Campaign"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-new-deal",
@@ -13417,7 +13417,7 @@
       "Economy",
       "Program"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-leap-forward",
@@ -13439,7 +13439,7 @@
       "Famine",
       "Program"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-apollo-program",
@@ -13461,7 +13461,7 @@
       "NASA",
       "Program"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-axial-age",
@@ -13483,7 +13483,7 @@
       "Ideas",
       "World"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-northern-song",
@@ -13505,7 +13505,7 @@
       "Technology",
       "Dynasty"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-age-sail",
@@ -13527,7 +13527,7 @@
       "Trade",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-belle-epoque",
@@ -13549,7 +13549,7 @@
       "Europe",
       "Culture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-weimar-republic",
@@ -13571,7 +13571,7 @@
       "Democracy",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-swinging-sixties",
@@ -13593,7 +13593,7 @@
       "Youth",
       "Protest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-peace-prague",
@@ -13615,7 +13615,7 @@
       "War",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-war-1812",
@@ -13637,7 +13637,7 @@
       "Britain",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-spanish-civil-war",
@@ -13659,7 +13659,7 @@
       "Civil War",
       "Fascism"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-six-day-war",
@@ -13681,7 +13681,7 @@
       "Israel",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-iran-iraq-war",
@@ -13703,7 +13703,7 @@
       "Iran",
       "Iraq"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-discovery-troy",
@@ -13725,7 +13725,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-titanic-wreck-discovery",
@@ -13747,7 +13747,7 @@
       "Discovery",
       "Exploration"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-exoplanets",
@@ -13769,7 +13769,7 @@
       "Astronomy",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-league-nations",
@@ -13791,7 +13791,7 @@
       "Peace",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ramesses-ii",
@@ -13813,7 +13813,7 @@
       "Pharaoh",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cyrus-great",
@@ -13835,7 +13835,7 @@
       "Empire",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-augustus",
@@ -13857,7 +13857,7 @@
       "Empire",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-saladin",
@@ -13879,7 +13879,7 @@
       "Crusades",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-queen-elizabeth-i",
@@ -13901,7 +13901,7 @@
       "Monarchy",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-georgian-era",
@@ -13923,7 +13923,7 @@
       "Empire",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-edo-period",
@@ -13945,7 +13945,7 @@
       "Culture",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-antebellum-south",
@@ -13967,7 +13967,7 @@
       "Slavery",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-reconstruction-era",
@@ -13989,7 +13989,7 @@
       "Civil War",
       "Reconstruction"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-interwar-years",
@@ -14011,7 +14011,7 @@
       "Between the Wars",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-scottish-enlightenment",
@@ -14033,7 +14033,7 @@
       "Ideas",
       "Enlightenment"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-arts-crafts-movement",
@@ -14055,7 +14055,7 @@
       "Art",
       "Design"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-american-suffrage",
@@ -14077,7 +14077,7 @@
       "Women",
       "Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-eighteenth-amendment",
@@ -14099,7 +14099,7 @@
       "Law",
       "Prohibition"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-burgess-shale",
@@ -14121,7 +14121,7 @@
       "Fossils",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-lascaux-caves",
@@ -14143,7 +14143,7 @@
       "Prehistory",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-lucy-discovery",
@@ -14165,7 +14165,7 @@
       "Anthropology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-cannae",
@@ -14187,7 +14187,7 @@
       "Rome",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-adrianople",
@@ -14209,7 +14209,7 @@
       "Goths",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-zama",
@@ -14231,7 +14231,7 @@
       "Carthage",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-blenheim",
@@ -14253,7 +14253,7 @@
       "War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-jutland",
@@ -14275,7 +14275,7 @@
       "Naval",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-crossing-rubicon",
@@ -14297,7 +14297,7 @@
       "Civil War",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bataan-death-march",
@@ -14319,7 +14319,7 @@
       "Philippines",
       "War Crimes"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-trail-of-tears",
@@ -14341,7 +14341,7 @@
       "Native Rights",
       "Removal"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-venice-arsenal",
@@ -14363,7 +14363,7 @@
       "Venice",
       "Industry"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kingdom-aksum",
@@ -14385,7 +14385,7 @@
       "Ethiopia",
       "Kingdom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-khazar-khaganate",
@@ -14407,7 +14407,7 @@
       "Judaism",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-millet-system",
@@ -14429,7 +14429,7 @@
       "Society",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-caste-system",
@@ -14451,7 +14451,7 @@
       "Society",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-tohoku-disaster",
@@ -14473,7 +14473,7 @@
       "Disaster",
       "Earthquake"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hurricane-katrina",
@@ -14495,7 +14495,7 @@
       "Disaster",
       "Hurricane"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-rna-discovery",
@@ -14517,7 +14517,7 @@
       "Biology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ozone-hole",
@@ -14539,7 +14539,7 @@
       "Environment",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-higgs-boson",
@@ -14561,7 +14561,7 @@
       "Physics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hammurabi",
@@ -14583,7 +14583,7 @@
       "Law",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-pericles",
@@ -14605,7 +14605,7 @@
       "Athens",
       "Democracy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cleopatra",
@@ -14627,7 +14627,7 @@
       "Rome",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-alfred-great",
@@ -14649,7 +14649,7 @@
       "Vikings",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kublai-khan",
@@ -14671,7 +14671,7 @@
       "Mongolia",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mary-wollstonecraft",
@@ -14693,7 +14693,7 @@
       "Ideas",
       "Women"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-frederick-douglass",
@@ -14715,7 +14715,7 @@
       "Freedom",
       "Abolition"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-marie-curie",
@@ -14737,7 +14737,7 @@
       "Physics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-new-zealand-suffrage",
@@ -14759,7 +14759,7 @@
       "Women",
       "Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-haymarket-affair",
@@ -14781,7 +14781,7 @@
       "Labor",
       "Protest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-seneca-falls",
@@ -14803,7 +14803,7 @@
       "Women",
       "Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-smithsonian",
@@ -14825,7 +14825,7 @@
       "Science",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nobel-prize",
@@ -14847,7 +14847,7 @@
       "Peace",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bbc",
@@ -14869,7 +14869,7 @@
       "Media",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bronze-age",
@@ -14891,7 +14891,7 @@
       "Metals",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ice-age",
@@ -14913,7 +14913,7 @@
       "Humanity",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-1930s",
@@ -14935,7 +14935,7 @@
       "Politics",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-republic-texas",
@@ -14957,7 +14957,7 @@
       "Independence",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-free-city-danzig",
@@ -14979,7 +14979,7 @@
       "Danzig",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-edict-milan",
@@ -15001,7 +15001,7 @@
       "Religion",
       "Law"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-concordat-worms",
@@ -15023,7 +15023,7 @@
       "Religion",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-treaty-ghent",
@@ -15045,7 +15045,7 @@
       "Britain",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-harris-treaty",
@@ -15067,7 +15067,7 @@
       "America",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-anglo-japanese-alliance",
@@ -15089,7 +15089,7 @@
       "Britain",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-treaty-san-francisco",
@@ -15111,7 +15111,7 @@
       "Diplomacy",
       "Peace"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-gaugamela",
@@ -15133,7 +15133,7 @@
       "Persia",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-pharsalus",
@@ -15155,7 +15155,7 @@
       "Civil War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-las-navas",
@@ -15177,7 +15177,7 @@
       "Reconquista",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-lepanto",
@@ -15199,7 +15199,7 @@
       "Naval",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-plassey",
@@ -15221,7 +15221,7 @@
       "Britain",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-delhi-1857",
@@ -15243,7 +15243,7 @@
       "Britain",
       "Revolt"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-alexander-india",
@@ -15265,7 +15265,7 @@
       "Greece",
       "Campaign"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gothic-war",
@@ -15287,7 +15287,7 @@
       "Italy",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sack-constantinople-1204",
@@ -15309,7 +15309,7 @@
       "Crusades",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-late-middle-ages",
@@ -15331,7 +15331,7 @@
       "Crisis",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cromwell-commonwealth",
@@ -15353,7 +15353,7 @@
       "Republic",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-long-depression",
@@ -15375,7 +15375,7 @@
       "Crisis",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-queen-zenobia",
@@ -15397,7 +15397,7 @@
       "Palmyra",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mansa-musa",
@@ -15419,7 +15419,7 @@
       "Mali",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mimar-sinan",
@@ -15441,7 +15441,7 @@
       "Architecture",
       "Figure"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-william-wilberforce",
@@ -15463,7 +15463,7 @@
       "Abolition",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-isambard-brunel",
@@ -15485,7 +15485,7 @@
       "Engineering",
       "Figure"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-charles-lindbergh",
@@ -15507,7 +15507,7 @@
       "Aviation",
       "Figure"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-x-rays-discovery",
@@ -15529,7 +15529,7 @@
       "Physics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-peopling-americas",
@@ -15551,7 +15551,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nebra-sky-disc",
@@ -15573,7 +15573,7 @@
       "Astronomy",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-otzi-iceman",
@@ -15595,7 +15595,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-antikythera-mechanism",
@@ -15617,7 +15617,7 @@
       "Technology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-insulin-discovery",
@@ -15639,7 +15639,7 @@
       "Science",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-neolithic-revolution",
@@ -15661,7 +15661,7 @@
       "Civilization",
       "Revolution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-commercial-revolution",
@@ -15683,7 +15683,7 @@
       "Economy",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-transportation-revolution",
@@ -15705,7 +15705,7 @@
       "America",
       "Technology"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cuban-revolution",
@@ -15727,7 +15727,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-transistor",
@@ -15749,7 +15749,7 @@
       "Technology",
       "Invention"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-library-congress",
@@ -15771,7 +15771,7 @@
       "Books",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sorbonne",
@@ -15793,7 +15793,7 @@
       "Education",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-royal-society",
@@ -15815,7 +15815,7 @@
       "Science",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dark-ages-debate",
@@ -15837,7 +15837,7 @@
       "Debate",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-chola-empire",
@@ -15859,7 +15859,7 @@
       "Empire",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-british-age-reform",
@@ -15881,7 +15881,7 @@
       "Reform",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-alesia",
@@ -15903,7 +15903,7 @@
       "Gaul",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-manzikert",
@@ -15925,7 +15925,7 @@
       "Seljuk",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-sekigahara",
@@ -15947,7 +15947,7 @@
       "Samurai",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-borodino",
@@ -15969,7 +15969,7 @@
       "Napoleon",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-encomienda-system",
@@ -15991,7 +15991,7 @@
       "Colonialism",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-factory-system",
@@ -16013,7 +16013,7 @@
       "Industry",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-crown-colony-system",
@@ -16035,7 +16035,7 @@
       "Colonialism",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-justinian",
@@ -16057,7 +16057,7 @@
       "Empire",
       "Law"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-theodora",
@@ -16079,7 +16079,7 @@
       "Empress",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hulegu-ilkhanate",
@@ -16101,7 +16101,7 @@
       "Persia",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-tamerlane",
@@ -16123,7 +16123,7 @@
       "Conquest",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-paleolithic-era",
@@ -16145,7 +16145,7 @@
       "Stone Age",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-chalcolithic-age",
@@ -16167,7 +16167,7 @@
       "Technology",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-long-19th-century",
@@ -16189,7 +16189,7 @@
       "Empire",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-short-20th-century",
@@ -16211,7 +16211,7 @@
       "Era",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-plague-justinian",
@@ -16233,7 +16233,7 @@
       "Pandemic",
       "Disaster"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-childrens-crusade",
@@ -16255,7 +16255,7 @@
       "Crusades",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-edict-nantes",
@@ -16277,7 +16277,7 @@
       "Religion",
       "Law"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-exhibition",
@@ -16299,7 +16299,7 @@
       "Exhibition",
       "Industry"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-scopes-trial",
@@ -16321,7 +16321,7 @@
       "Science",
       "Trial"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-transatlantic-flight",
@@ -16343,7 +16343,7 @@
       "Flight",
       "Achievement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-night-long-knives",
@@ -16365,7 +16365,7 @@
       "Nazism",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-electron-discovery",
@@ -16387,7 +16387,7 @@
       "Physics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-atomic-nucleus",
@@ -16409,7 +16409,7 @@
       "Physics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cosmic-microwave-background",
@@ -16431,7 +16431,7 @@
       "Cosmology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-freedom-peoples-rights",
@@ -16453,7 +16453,7 @@
       "Politics",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-swadeshi-movement",
@@ -16475,7 +16475,7 @@
       "Nationalism",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hukbalahap-rebellion",
@@ -16497,7 +16497,7 @@
       "Rebellion",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-environmental-movement",
@@ -16519,7 +16519,7 @@
       "Science",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-austro-prussian-war",
@@ -16541,7 +16541,7 @@
       "Austria",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-chaco-war",
@@ -16563,7 +16563,7 @@
       "War",
       "Bolivia"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-italo-ethiopian-war",
@@ -16585,7 +16585,7 @@
       "Ethiopia",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-long-march",
@@ -16607,7 +16607,7 @@
       "Revolution",
       "Campaign"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-el-alamein",
@@ -16629,7 +16629,7 @@
       "Africa",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-guadalcanal-campaign",
@@ -16651,7 +16651,7 @@
       "Pacific",
       "Campaign"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-salamis",
@@ -16673,7 +16673,7 @@
       "Persia",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-metaurus",
@@ -16695,7 +16695,7 @@
       "Carthage",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-teutoburg",
@@ -16717,7 +16717,7 @@
       "Germany",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-poitiers",
@@ -16739,7 +16739,7 @@
       "France",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-pavia",
@@ -16761,7 +16761,7 @@
       "Habsburg",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-naseby",
@@ -16783,7 +16783,7 @@
       "Civil War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-leyte-gulf",
@@ -16805,7 +16805,7 @@
       "Pacific",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-french-wars-religion",
@@ -16827,7 +16827,7 @@
       "Religion",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-zulu-kingdom",
@@ -16849,7 +16849,7 @@
       "Zulu",
       "Kingdom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-edwardian-era",
@@ -16871,7 +16871,7 @@
       "Era",
       "Society"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hundred-flowers",
@@ -16893,7 +16893,7 @@
       "Politics",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-invention-zero",
@@ -16915,7 +16915,7 @@
       "Mathematics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-vaccination-discovery",
@@ -16937,7 +16937,7 @@
       "Medicine",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-radiocarbon-dating",
@@ -16959,7 +16959,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hannibal",
@@ -16981,7 +16981,7 @@
       "War",
       "Figure"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-julius-caesar",
@@ -17003,7 +17003,7 @@
       "Politics",
       "Figure"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-theodoric-great",
@@ -17025,7 +17025,7 @@
       "Goths",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-robert-bruce",
@@ -17047,7 +17047,7 @@
       "Independence",
       "Ruler"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-elizabeth-cady-stanton",
@@ -17069,7 +17069,7 @@
       "Women",
       "Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bank-amsterdam",
@@ -17091,7 +17091,7 @@
       "Money",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-academie-francaise",
@@ -17113,7 +17113,7 @@
       "Language",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-wright-first-flight",
@@ -17135,7 +17135,7 @@
       "Aviation",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-avery-dna",
@@ -17157,7 +17157,7 @@
       "Biology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dorothy-hodgkin",
@@ -17179,7 +17179,7 @@
       "Chemistry",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-seafloor-spreading",
@@ -17201,7 +17201,7 @@
       "Geology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-crispr",
@@ -17223,7 +17223,7 @@
       "Biology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-boyne",
@@ -17245,7 +17245,7 @@
       "Britain",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-fontenoy",
@@ -17267,7 +17267,7 @@
       "War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-quiberon-bay",
@@ -17289,7 +17289,7 @@
       "France",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-manila-bay",
@@ -17311,7 +17311,7 @@
       "America",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-enlightened-despotism",
@@ -17333,7 +17333,7 @@
       "Politics",
       "Ideas"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-futurist-movement",
@@ -17355,7 +17355,7 @@
       "Art",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dada-movement",
@@ -17377,7 +17377,7 @@
       "Art",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-british-suffrage-early",
@@ -17399,7 +17399,7 @@
       "Women",
       "Rights"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-july-crisis",
@@ -17421,7 +17421,7 @@
       "World War I",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-armistice-1918",
@@ -17443,7 +17443,7 @@
       "Peace",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-twenty-one-demands",
@@ -17465,7 +17465,7 @@
       "Japan",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-meiji-era",
@@ -17487,7 +17487,7 @@
       "Reform",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-taisho-democracy",
@@ -17509,7 +17509,7 @@
       "Democracy",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-swiss-confederacy",
@@ -17531,7 +17531,7 @@
       "Republic",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-commonwealth-nations",
@@ -17553,7 +17553,7 @@
       "Empire",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-regency-algiers",
@@ -17575,7 +17575,7 @@
       "Piracy",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kingdom-hawaii",
@@ -17597,7 +17597,7 @@
       "Kingdom",
       "Colonialism"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gold-standard",
@@ -17619,7 +17619,7 @@
       "Money",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-yarmuk",
@@ -17641,7 +17641,7 @@
       "Byzantine",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-talas",
@@ -17663,7 +17663,7 @@
       "Islam",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-hattin",
@@ -17685,7 +17685,7 @@
       "Saladin",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-kosovo",
@@ -17707,7 +17707,7 @@
       "Serbia",
       "Ottoman"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-nagashino",
@@ -17729,7 +17729,7 @@
       "Samurai",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-rocroi",
@@ -17751,7 +17751,7 @@
       "Spain",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-vicksburg",
@@ -17773,7 +17773,7 @@
       "Civil War",
       "Siege"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-coral-sea",
@@ -17795,7 +17795,7 @@
       "Pacific",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-altamira-caves",
@@ -17817,7 +17817,7 @@
       "Prehistory",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-knossos-excavation",
@@ -17839,7 +17839,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sahara-rock-art",
@@ -17861,7 +17861,7 @@
       "Prehistory",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-salt-march",
@@ -17883,7 +17883,7 @@
       "Nonviolence",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-zapatista-uprising",
@@ -17905,7 +17905,7 @@
       "Indigenous",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-klondike-gold-rush",
@@ -17927,7 +17927,7 @@
       "Gold",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-little-ice-age",
@@ -17949,7 +17949,7 @@
       "Europe",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-al-qarawiyyin",
@@ -17971,7 +17971,7 @@
       "Education",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-al-azhar",
@@ -17993,7 +17993,7 @@
       "Education",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-london-stock-exchange",
@@ -18015,7 +18015,7 @@
       "Finance",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-eclipse-einstein-1919",
@@ -18037,7 +18037,7 @@
       "Physics",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-golden-spike",
@@ -18059,7 +18059,7 @@
       "Railroad",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-meridian-conference",
@@ -18081,7 +18081,7 @@
       "Time",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-republic-china",
@@ -18103,7 +18103,7 @@
       "Revolution",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-soviet-union",
@@ -18125,7 +18125,7 @@
       "Communism",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-leuctra",
@@ -18147,7 +18147,7 @@
       "Sparta",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-chaldiran",
@@ -18169,7 +18169,7 @@
       "Iran",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-karbala",
@@ -18191,7 +18191,7 @@
       "Shiism",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-mohacs",
@@ -18213,7 +18213,7 @@
       "Ottoman",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-sedan",
@@ -18235,7 +18235,7 @@
       "Germany",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-marne",
@@ -18257,7 +18257,7 @@
       "France",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-linear-b-decipherment",
@@ -18279,7 +18279,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-pluto-discovery",
@@ -18301,7 +18301,7 @@
       "Astronomy",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-aids-discovery",
@@ -18323,7 +18323,7 @@
       "Epidemic",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-velvet-revolution",
@@ -18345,7 +18345,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-tunisian-revolution",
@@ -18367,7 +18367,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-crusader-states",
@@ -18389,7 +18389,7 @@
       "Crusades",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-jacobean-era",
@@ -18411,7 +18411,7 @@
       "Scotland",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-high-qing",
@@ -18433,7 +18433,7 @@
       "Empire",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-victoria-albert-museum",
@@ -18455,7 +18455,7 @@
       "Museum",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-rhodes-scholarships",
@@ -18477,7 +18477,7 @@
       "Education",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-boston-massacre",
@@ -18499,7 +18499,7 @@
       "Revolution",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-continental-congress",
@@ -18521,7 +18521,7 @@
       "Revolution",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-lewis-clark-departure",
@@ -18543,7 +18543,7 @@
       "Exploration",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-port-royal-experiment",
@@ -18565,7 +18565,7 @@
       "Civil War",
       "Freedom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-rio-de-la-plata",
@@ -18587,7 +18587,7 @@
       "Independence",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-boer-republics",
@@ -18609,7 +18609,7 @@
       "Boer",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-indenture-system",
@@ -18631,7 +18631,7 @@
       "Labor",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-wampum-system",
@@ -18653,7 +18653,7 @@
       "Trade",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-buxar",
@@ -18675,7 +18675,7 @@
       "Britain",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-alamo",
@@ -18697,7 +18697,7 @@
       "Mexico",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-san-jacinto",
@@ -18719,7 +18719,7 @@
       "Mexico",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-tsushima",
@@ -18741,7 +18741,7 @@
       "Russia",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-bulge",
@@ -18763,7 +18763,7 @@
       "Ardennes",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-peking-man",
@@ -18785,7 +18785,7 @@
       "Anthropology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nazca-lines",
@@ -18807,7 +18807,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hittite-discovery",
@@ -18829,7 +18829,7 @@
       "Archaeology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-anti-corn-law-league",
@@ -18851,7 +18851,7 @@
       "Reform",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-free-silver-movement",
@@ -18873,7 +18873,7 @@
       "Economy",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-khrushchev-thaw",
@@ -18895,7 +18895,7 @@
       "Politics",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sengoku-period",
@@ -18917,7 +18917,7 @@
       "Samurai",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-japan-lost-decade",
@@ -18939,7 +18939,7 @@
       "Economy",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-japan-economic-miracle",
@@ -18961,7 +18961,7 @@
       "Economy",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-grameen-bank",
@@ -18983,7 +18983,7 @@
       "Finance",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-wto",
@@ -19005,7 +19005,7 @@
       "Economy",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-zeppelin",
@@ -19027,7 +19027,7 @@
       "Airships",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-spindletop",
@@ -19049,7 +19049,7 @@
       "Oil",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-afl-nfl-merger",
@@ -19071,7 +19071,7 @@
       "Sport",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-dutch-republic",
@@ -19093,7 +19093,7 @@
       "Republic",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-republic-ireland",
@@ -19115,7 +19115,7 @@
       "Independence",
       "State"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-jagir-system",
@@ -19137,7 +19137,7 @@
       "Mughal",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sound-toll",
@@ -19159,7 +19159,7 @@
       "Trade",
       "System"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-issus",
@@ -19181,7 +19181,7 @@
       "Persia",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-chalons",
@@ -19203,7 +19203,7 @@
       "Huns",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-vouille",
@@ -19225,7 +19225,7 @@
       "Franks",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-stamford-bridge",
@@ -19247,7 +19247,7 @@
       "Vikings",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-crecy",
@@ -19269,7 +19269,7 @@
       "France",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-bosworth",
@@ -19291,7 +19291,7 @@
       "Wars of the Roses",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-flodden",
@@ -19313,7 +19313,7 @@
       "England",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-lutzen",
@@ -19335,7 +19335,7 @@
       "Thirty Years' War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-culloden",
@@ -19357,7 +19357,7 @@
       "Jacobites",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-cowpens",
@@ -19379,7 +19379,7 @@
       "Revolution",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-siege-yorktown",
@@ -19401,7 +19401,7 @@
       "Revolution",
       "Siege"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-new-orleans",
@@ -19423,7 +19423,7 @@
       "Britain",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-shiloh",
@@ -19445,7 +19445,7 @@
       "Civil War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-antietam",
@@ -19467,7 +19467,7 @@
       "Civil War",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-kursk",
@@ -19489,7 +19489,7 @@
       "Soviet Union",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-iwo-jima",
@@ -19511,7 +19511,7 @@
       "Pacific",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-milankovitch-cycles",
@@ -19533,7 +19533,7 @@
       "Climate",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-human-genome-project",
@@ -19555,7 +19555,7 @@
       "Genetics",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-piltdown-hoax",
@@ -19577,7 +19577,7 @@
       "Anthropology",
       "Hoax"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cat-and-mouse-act",
@@ -19599,7 +19599,7 @@
       "Women",
       "Protest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-solidarity-movement",
@@ -19621,7 +19621,7 @@
       "Labor",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-chipko-movement",
@@ -19643,7 +19643,7 @@
       "Environment",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-byzantine-iconoclasm",
@@ -19665,7 +19665,7 @@
       "Religion",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-genroku-era",
@@ -19687,7 +19687,7 @@
       "Culture",
       "Era"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-weimar-hyperinflation",
@@ -19709,7 +19709,7 @@
       "Economy",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-bis",
@@ -19731,7 +19731,7 @@
       "Institution",
       "Economy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-vatican-museums",
@@ -19753,7 +19753,7 @@
       "Art",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ritz-hotel",
@@ -19775,7 +19775,7 @@
       "Hospitality",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-modern-olympics",
@@ -19797,7 +19797,7 @@
       "Sport",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-thanksgiving",
@@ -19819,7 +19819,7 @@
       "Pilgrims",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-awakening",
@@ -19841,7 +19841,7 @@
       "Religion",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-luna-3-far-side",
@@ -19863,7 +19863,7 @@
       "Moon",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kingdom-kongo",
@@ -19885,7 +19885,7 @@
       "Congo",
       "Kingdom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-theme-system",
@@ -19907,7 +19907,7 @@
       "System",
       "Military"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-spice-route",
@@ -19929,7 +19929,7 @@
       "Spices",
       "Ocean"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-levee-en-masse",
@@ -19951,7 +19951,7 @@
       "Revolution",
       "Military"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-haldighati",
@@ -19973,7 +19973,7 @@
       "Mughal",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-adwa",
@@ -19995,7 +19995,7 @@
       "Ethiopia",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-warsaw-1920",
@@ -20017,7 +20017,7 @@
       "Soviet Union",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-atlantic",
@@ -20039,7 +20039,7 @@
       "Atlantic",
       "Naval"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hipparchus-catalog",
@@ -20061,7 +20061,7 @@
       "Astronomy",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-taung-child",
@@ -20083,7 +20083,7 @@
       "Anthropology",
       "Discovery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-comuneros-revolt",
@@ -20105,7 +20105,7 @@
       "Revolt",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-underground-railroad",
@@ -20127,7 +20127,7 @@
       "Freedom",
       "Movement"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-divergence",
@@ -20149,7 +20149,7 @@
       "Debate",
       "History"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-stonehenge-builders",
@@ -20171,7 +20171,7 @@
       "Stonehenge",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-british-museum",
@@ -20193,7 +20193,7 @@
       "Museum",
       "Institution"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-jamestown-founding",
@@ -20215,7 +20215,7 @@
       "Colony",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-zheng-he-voyages",
@@ -20237,7 +20237,7 @@
       "Exploration",
       "Voyage"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-thera-eruption",
@@ -20259,7 +20259,7 @@
       "Volcano",
       "Disaster"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-kadesh",
@@ -20281,7 +20281,7 @@
       "Hittites",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-joseon-dynasty",
@@ -20303,7 +20303,7 @@
       "Dynasty",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-panipat",
@@ -20325,7 +20325,7 @@
       "Mughal",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-defenestration-prague",
@@ -20347,7 +20347,7 @@
       "Religion",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-northern-war",
@@ -20369,7 +20369,7 @@
       "Sweden",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-ashanti-empire",
@@ -20391,7 +20391,7 @@
       "Ghana",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-triangle-shirtwaist",
@@ -20413,7 +20413,7 @@
       "Labor",
       "Disaster"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-battle-tannenberg",
@@ -20435,7 +20435,7 @@
       "Germany",
       "Battle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-gallipoli-campaign",
@@ -20457,7 +20457,7 @@
       "Ottoman",
       "Campaign"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sykes-picot",
@@ -20479,7 +20479,7 @@
       "Empire",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-balfour-declaration",
@@ -20501,7 +20501,7 @@
       "Britain",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-katyn-massacre",
@@ -20523,7 +20523,7 @@
       "Soviet Union",
       "Atrocity"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-warsaw-ghetto-uprising",
@@ -20545,7 +20545,7 @@
       "Warsaw",
       "Resistance"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-berlin-crisis-1961",
@@ -20567,7 +20567,7 @@
       "Berlin",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-tlatelolco-massacre",
@@ -20589,7 +20589,7 @@
       "Politics",
       "Massacre"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-munich-massacre",
@@ -20611,7 +20611,7 @@
       "Terrorism",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-iran-hostage-crisis",
@@ -20633,7 +20633,7 @@
       "America",
       "Crisis"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-jonestown",
@@ -20655,7 +20655,7 @@
       "Cult",
       "Tragedy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-tiananmen-1989",
@@ -20677,7 +20677,7 @@
       "Politics",
       "Protest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kosovo-war",
@@ -20699,7 +20699,7 @@
       "NATO",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-great-fire-rome",
@@ -20721,7 +20721,7 @@
       "Disaster",
       "Nero"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-plague-athens",
@@ -20743,7 +20743,7 @@
       "Athens",
       "Pandemic"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-colossus-rhodes",
@@ -20765,7 +20765,7 @@
       "Rhodes",
       "Wonder"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mausoleum-halicarnassus",
@@ -20787,7 +20787,7 @@
       "Wonder",
       "Architecture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-temple-artemis",
@@ -20809,7 +20809,7 @@
       "Ephesus",
       "Wonder"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-colosseum",
@@ -20831,7 +20831,7 @@
       "Architecture",
       "Spectacle"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-pantheon-rome",
@@ -20853,7 +20853,7 @@
       "Architecture",
       "Engineering"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-hagia-sophia",
@@ -20875,7 +20875,7 @@
       "Architecture",
       "Constantinople"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-leaning-tower-pisa",
@@ -20897,7 +20897,7 @@
       "Pisa",
       "Architecture"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-florence-dome",
@@ -20919,7 +20919,7 @@
       "Florence",
       "Engineering"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sistine-chapel",
@@ -20941,7 +20941,7 @@
       "Michelangelo",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-vitruvian-man",
@@ -20963,7 +20963,7 @@
       "Leonardo",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-popol-vuh",
@@ -20985,7 +20985,7 @@
       "Maya",
       "Book"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-aztec-calendar-stone",
@@ -21007,7 +21007,7 @@
       "Aztec",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-inca-quipu",
@@ -21029,7 +21029,7 @@
       "System",
       "Records"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-inca-roads",
@@ -21051,7 +21051,7 @@
       "Engineering",
       "Roads"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-machu-picchu",
@@ -21073,7 +21073,7 @@
       "Inca",
       "Site"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-atahualpa-ransom",
@@ -21095,7 +21095,7 @@
       "Inca",
       "Conquest"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-manila-galleon",
@@ -21117,7 +21117,7 @@
       "Spain",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-potosi-mines",
@@ -21139,7 +21139,7 @@
       "Silver",
       "Economy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-belgian-congo",
@@ -21161,7 +21161,7 @@
       "Colonialism",
       "Atrocity"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-maji-maji",
@@ -21183,7 +21183,7 @@
       "Rebellion",
       "Colonialism"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-herero-genocide",
@@ -21205,7 +21205,7 @@
       "Genocide",
       "Colonialism"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kingdom-dahomey",
@@ -21227,7 +21227,7 @@
       "Benin",
       "Kingdom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-oyo-empire",
@@ -21249,7 +21249,7 @@
       "Nigeria",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nok-culture",
@@ -21271,7 +21271,7 @@
       "Nigeria",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kanem-bornu",
@@ -21293,7 +21293,7 @@
       "Chad",
       "Empire"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sokoto-caliphate",
@@ -21315,7 +21315,7 @@
       "Nigeria",
       "Caliphate"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-kilwa-sultanate",
@@ -21337,7 +21337,7 @@
       "Tanzania",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-zanzibar-slave-trade",
@@ -21359,7 +21359,7 @@
       "Slavery",
       "Trade"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-barbary-war",
@@ -21381,7 +21381,7 @@
       "North Africa",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-palmares-quilombo",
@@ -21403,7 +21403,7 @@
       "Resistance",
       "Freedom"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-monroe-doctrine",
@@ -21425,7 +21425,7 @@
       "Foreign Policy",
       "Doctrine"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-mexican-revolution",
@@ -21447,7 +21447,7 @@
       "Revolution",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-cristero-war",
@@ -21469,7 +21469,7 @@
       "Religion",
       "War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-chilean-coup-1973",
@@ -21491,7 +21491,7 @@
       "Coup",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-argentine-dirty-war",
@@ -21513,7 +21513,7 @@
       "Dictatorship",
       "Atrocity"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-circus-maximus",
@@ -21535,7 +21535,7 @@
       "Spectacle",
       "Sport"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-school-athens",
@@ -21557,7 +21557,7 @@
       "Raphael",
       "Art"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-florentine-codex",
@@ -21579,7 +21579,7 @@
       "Aztec",
       "Book"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-good-neighbor-policy",
@@ -21601,7 +21601,7 @@
       "Latin America",
       "Diplomacy"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-sandinista-revolution",
@@ -21623,7 +21623,7 @@
       "Revolution",
       "Cold War"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-pinochet-regime",
@@ -21645,7 +21645,7 @@
       "Dictatorship",
       "Politics"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-nafta",
@@ -21667,7 +21667,7 @@
       "Trade",
       "Treaty"
     ],
-    "tier": 2
+    "tier": 1
   },
   {
     "id": "history-first-earth-photo",
@@ -21689,6 +21689,6 @@
       "Photography",
       "Event"
     ],
-    "tier": 2
+    "tier": 1
   }
 ]

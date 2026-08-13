@@ -3125,8 +3125,14 @@ private fun PeekCard(
                     .fillMaxSize()
                     .background(brush = fillBrush, shape = RoundedCornerShape(corner))
                     // v9.x — Material peeks keep the deck's category identity
-                    // as the accent rim on the device-colored fill.
-                    .categoryEdgeShine(RoundedCornerShape(corner), accent = accent)
+                    // as the accent rim on the device-colored fill. v28 — the
+                    // main card opts back into the AMOLED hairline so the
+                    // hero card keeps a readable edge on pure black.
+                    .categoryEdgeShine(
+                        RoundedCornerShape(corner),
+                        accent = accent,
+                        amoledHairline = true
+                    )
             ) {
                 Column(
                     modifier = Modifier

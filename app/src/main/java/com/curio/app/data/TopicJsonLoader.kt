@@ -272,6 +272,10 @@ object TopicJsonLoader {
         } else emptyList()
         val tier = obj.optInt("tier", 1)
         val byline = obj.optString("byline", "")
+        // v29 — optional progress metadata: books carry `pageCount`,
+        // anime carries `episodeCount` (absent/null → no progress tracking).
+        val pageCount = if (obj.has("pageCount")) obj.optInt("pageCount", 0).takeIf { it > 0 } else null
+        val episodeCount = if (obj.has("episodeCount")) obj.optInt("episodeCount", 0).takeIf { it > 0 } else null
         return CurioTopic(
             id            = id,
             categoryId    = categoryId,
@@ -282,7 +286,9 @@ object TopicJsonLoader {
             exploreAction = exploreAction,
             tags          = tags,
             tier          = tier,
-            byline        = byline
+            byline        = byline,
+            pageCount     = pageCount,
+            episodeCount  = episodeCount
         )
     }
 }

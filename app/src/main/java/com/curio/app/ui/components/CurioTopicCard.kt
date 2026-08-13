@@ -109,7 +109,6 @@ fun CurioEntryCard(
             // v9.x — theme-style edge shine (hairline + top shine).
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
-            .curioDarkOutline(RoundedCornerShape(20.dp))
             .categoryEdgeShine(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
         // v9.x — AMOLED cards are proper pitch black now: the old grey

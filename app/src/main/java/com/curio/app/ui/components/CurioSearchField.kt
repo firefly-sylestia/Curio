@@ -48,7 +48,6 @@ fun CurioSearchField(
             .fillMaxWidth()
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(3.dp, RoundedCornerShape(16.dp))
-            .curioDarkOutline(RoundedCornerShape(16.dp))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),

@@ -224,17 +224,11 @@ private fun AppearanceSection(highlightKey: String? = null) {
         CurioSettingsDivider()
         // v28 — dark-mode elevation visibility: black shadows vanish on the
         // midnight surfaces, so dark mode draws a soft light glow (default
-        // ON) and a faint light hairline outline (default ON). Both only
-        // affect dark mode — light mode is untouched.
+        // ON). The v28 hairline outline option was REMOVED — dark cards rely
+        // on the glow + shine instead. Light mode is untouched.
         SettingsRowPulse(highlightKey == "appearance-glow") {
             CompactSwitchRow("Glow shadows", "Dark mode: soft light glow so elevation stays visible", AppPreferences.darkGlowState) {
                 AppPreferences.setDarkGlowEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-outline") {
-            CompactSwitchRow("Card outlines", "Dark mode: faint light edge on elevated cards", AppPreferences.darkOutlineState) {
-                AppPreferences.setDarkOutlineEnabled(context, it)
             }
         }
         CurioSettingsDivider()
