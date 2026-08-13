@@ -4,7 +4,7 @@
   "name": "What Atoms Are",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The tiny building blocks that make up everything you can touch.",
+  "teaser": "Every material you can see, touch, or taste is built from atoms — roughly a hundred kinds of them, arranged in endless combinations. A single grain of sand holds more atoms than there are stars in the visible universe, and those atoms are mostly empty space. If an atom were the size of a stadium, its nucleus would be smaller than a marble at the center.",
   "byline": "Building blocks",
   "tags": [
    "atoms",
@@ -24,7 +24,7 @@
   "name": "The Nucleus",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The tiny dense core where nearly all of an atom's mass hides.",
+  "teaser": "At the center of every atom sits a nucleus packed with protons and neutrons — together they make up more than 99.9% of the atom's mass while occupying almost none of its volume. Protons carry a positive charge and define which element you're holding; neutrons add mass and help glue the nucleus together against the electric repulsion of all those same-charge protons.",
   "byline": "The atom's heart",
   "tags": [
    "nucleus",
@@ -44,7 +44,7 @@
   "name": "Electrons in Orbit",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The cloud of negatively charged particles that surrounds every nucleus.",
+  "teaser": "Orbiting the nucleus is a cloud of negatively charged electrons so light that roughly 1,800 of them weigh as much as a single proton. They arrange themselves in shells and orbitals around the atom, and chemistry is mostly the story of these electrons — how they move, share, and trade places between atoms. Everything from rust to perfume depends on that dance.",
   "byline": "The electron cloud",
   "tags": [
    "electrons",
@@ -64,7 +64,7 @@
   "name": "The Atomic Number",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The number that gives every element its identity.",
+  "teaser": "Every element gets its identity from one number: how many protons sit in its nucleus. Change that number and you change the element itself — add a proton to iron and you get cobalt; remove one and you get manganese. That's why the periodic table is arranged by atomic number, and why chemists treat it as the element's true fingerprint.",
   "byline": "Element ID",
   "tags": [
    "elements",
@@ -84,7 +84,7 @@
   "name": "Mass Number and Isotopes",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "Why atoms of the same element can weigh different amounts.",
+  "teaser": "The mass number adds protons and neutrons together, and it explains a curious thing: atoms of the same element can weigh different amounts. Those variants are called isotopes. Carbon-12 has six neutrons, carbon-13 has seven, and radioactive carbon-14 has eight — same element, different mass, and the reason carbon dating works at all.",
   "byline": "The weight variations",
   "tags": [
    "isotopes",
@@ -104,7 +104,7 @@
   "name": "Isotopes in Daily Life",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The heavier and lighter versions of elements used in medicine and dating.",
+  "teaser": "Isotopes aren't lab curiosities — they're part of daily life. The uranium in nuclear reactors is mostly U-238 with a sprinkle of fissionable U-235; doctors track tumors with radioactive tracers; and archaeologists date ancient remains using the slow decay of carbon-14. Even the water you drink contains a few molecules of heavier 'heavy water' made with deuterium, a hydrogen isotope with an extra neutron.",
   "byline": "The useful twins",
   "tags": [
    "isotopes",
@@ -124,7 +124,7 @@
   "name": "Valence Electrons",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The outermost electrons that decide how atoms bond.",
+  "teaser": "The electrons in an atom's outermost shell — its valence electrons — decide how it behaves chemically. Sodium has one and is eager to give it away; chlorine has seven and is desperate to gain one more; together they form table salt. The whole periodic table is organized around these outer electrons, which is why elements in the same column tend to react in similar ways.",
   "byline": "The bonding crew",
   "tags": [
    "electrons",
@@ -144,7 +144,7 @@
   "name": "Electron Shells",
   "categoryId": "CHEMISTRY",
   "subtype": "Atomic structure",
-  "teaser": "The layered energy levels electrons fill like seats in a theater.",
+  "teaser": "Electrons don't orbit at random distances — they fill fixed shells, each with a capacity (2, 8, 18, 32) that determines an element's chemistry. The shells fill from the inside out, and the outermost shell is what another atom 'sees.' That's why the noble gases, with completely full outer shells, refuse to react: they have nothing to gain from meeting anyone.",
   "byline": "The shell seats",
   "tags": [
    "electrons",
@@ -164,7 +164,7 @@
   "name": "How the Periodic Table Works",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The chart that organizes every element by its personality.",
+  "teaser": "The periodic table is a map of chemistry organized by atomic number, with rows (periods) showing shells filling up and columns (groups) gathering elements that share the same outer-electron personality. Lithium, sodium, and potassium — metals that fizz violently in water — sit in the same column because each has one outer electron. Read the structure and you can predict how an element will behave before you've touched it.",
   "byline": "The element map",
   "tags": [
    "periodic table",
@@ -184,7 +184,7 @@
   "name": "Mendeleev's Dream Table",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The chemist who organized the elements — and predicted missing ones.",
+  "teaser": "Dmitri Mendeleev arranged the known elements by atomic weight in 1869 — and famously left gaps where no element was known yet. He predicted the properties of those missing elements so precisely that when gallium, scandium, and germanium were discovered within fifteen years, their measured values matched his forecasts almost exactly. He reportedly saw the pattern in a dream.",
   "byline": "The table maker",
   "tags": [
    "periodic table",
@@ -204,7 +204,7 @@
   "name": "Predicting the Missing Elements",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The empty slots Mendeleev left — and the elements that filled them.",
+  "teaser": "When Mendeleev left blank spaces in his 1869 table, he didn't just note that elements were missing — he predicted their atomic weights, densities, and even how they'd react. Gallium, discovered in 1875, matched his 'eka-aluminum' prediction to within a fraction of a percent. It was the moment the periodic table stopped being a list and became a law of nature.",
   "byline": "The prophecy",
   "tags": [
    "periodic table",
@@ -224,7 +224,7 @@
   "name": "Reading the Periodic Table",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The numbers, symbols, and patterns packed into each element square.",
+  "teaser": "Reading the periodic table row by row is like watching atoms get built. Each step to the right adds one proton and one electron, and the properties swing wildly: sodium, a metal that explodes in water, sits one square from magnesium, a light structural metal, and only three squares from the gas chlorine. The rows (periods) end at the aloof noble gases — full shells, no reactions wanted.",
   "byline": "The element card",
   "tags": [
    "periodic table",
@@ -244,7 +244,7 @@
   "name": "Groups and Periods",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The columns and rows that sort elements by shared behavior.",
+  "teaser": "The table's grid carries meaning in both directions. Columns — groups — share the same number of outer electrons, so the alkali metals in group 1 all react violently with water, and the halogens in group 17 all form salts. Rows — periods — track filling shells, so elements get progressively less metallic as you move left to right, ending each row in an inert gas.",
   "byline": "The table grid",
   "tags": [
    "periodic table",
@@ -264,7 +264,7 @@
   "name": "The Alkali Metals",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The super-reactive metals that explode in water.",
+  "teaser": "Drop a lump of sodium in water and it skitters across the surface, fizzing furiously and sometimes igniting — the alkali metals in group 1 are that reactive because each has a single outer electron it's desperate to shed. Lithium, sodium, potassium, rubidium, and cesium all do this dance, each more violently than the last. It's chemistry at its most visible: a metal giving away its one loose electron.",
   "byline": "The fire starters",
   "tags": [
    "metals",
@@ -284,7 +284,7 @@
   "name": "The Alkaline Earth Metals",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The reactive metals behind bones, fireworks, and old flash photography.",
+  "teaser": "The alkaline earth metals in group 2 — beryllium, magnesium, calcium, and their kin — have two outer electrons to lose, making them reactive but calmer than their group-1 neighbors. Calcium builds your bones and shells; magnesium burns with a blinding white flame used in fireworks and flash photography. They're the 'useful metals': less explosive than sodium, more cooperative than the noble gases.",
   "byline": "The useful metals",
   "tags": [
    "metals",
@@ -304,7 +304,7 @@
   "name": "Transition Metals",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The colorful middle block that includes most everyday metals.",
+  "teaser": "The block of metals in the table's middle — iron, copper, gold, titanium, and dozens more — are chemistry's workhorses. Their partially filled inner shells let them take on many oxidation states, which is why iron can be Fe2+ or Fe3+, and why their compounds come in such a rainbow of colors. Most of the metals in your phone, your car, and your jewelry come from this block.",
   "byline": "The workhorse metals",
   "tags": [
    "metals",
@@ -324,7 +324,7 @@
   "name": "The Noble Gases",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The aloof gases that almost never react with anything.",
+  "teaser": "The noble gases — helium, neon, argon, krypton, xenon, radon — have completely filled outer electron shells, so they almost never react with anything. That aloofness makes them incredibly useful: helium lifts blimps, neon glows in signs, argon shields welds from oxygen, and xenon powers car headlights. They were the last group discovered because they were so unreactive that no one noticed them for years.",
   "byline": "The loners",
   "tags": [
    "gases",
@@ -344,7 +344,7 @@
   "name": "The Halogens",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The reactive nonmetals that team up with metals to make salts.",
+  "teaser": "The halogens — fluorine, chlorine, bromine, iodine, astatine — sit one electron short of a full shell, making them fiercely eager to grab an electron from anyone. That hunger makes them form salts with metals (sodium + chlorine = table salt) and makes fluorine the most reactive element of all. Chlorine purifies water, iodine keeps thyroids working, and fluorine strengthens toothpaste — dangerous alone, indispensable in compounds.",
   "byline": "The salt makers",
   "tags": [
    "nonmetals",
@@ -364,7 +364,7 @@
   "name": "The Nonmetals",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The right-side elements that play by different rules.",
+  "teaser": "Nonmetals occupy the upper right of the periodic table and play by different rules than metals: they're often gases or brittle solids, poor conductors, and hungry for electrons. Yet they run the show of life — carbon, nitrogen, oxygen, and hydrogen build every living thing, while chlorine, fluorine, and sulfur shape our chemistry. The split between metals and nonmetals is the table's deepest dividing line.",
   "byline": "The different side",
   "tags": [
    "nonmetals",
@@ -384,7 +384,7 @@
   "name": "The Metalloids",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The in-between elements that act like metals and nonmetals.",
+  "teaser": "Along the staircase separating metals from nonmetals sits a handful of elements — silicon, germanium, arsenic, boron, and a few others — that act like both. They conduct electricity better than nonmetals but worse than metals, which makes them perfect semiconductors. Silicon's dual nature turned the entire digital age into a chemistry story: the element that's neither fish nor fowl became the heart of every computer chip.",
   "byline": "The boundary dwellers",
   "tags": [
    "metalloids",
@@ -404,7 +404,7 @@
   "name": "The Rare Earths",
   "categoryId": "CHEMISTRY",
   "subtype": "The periodic table",
-  "teaser": "The two rows of heavy elements hidden at the bottom of the table.",
+  "teaser": "Two long rows sit detached at the bottom of the periodic table, pulled out to keep the table readable. The lanthanides — the 'rare earths' — are the engine of modern screens, magnets, and lasers; a single smartphone uses a dozen of them. The actinides are the heavy radioactive family that includes uranium and plutonium, the elements that power nuclear reactors and bombs.",
   "byline": "The hidden rows",
   "tags": [
    "elements",
@@ -424,7 +424,7 @@
   "name": "Hydrogen",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The simplest and most abundant element in the universe.",
+  "teaser": "Hydrogen is the simplest and most abundant element in the universe — one proton, one electron — and it makes up about 75% of all ordinary matter. Stars spend their lives fusing hydrogen into helium, which is why the Sun shines. On Earth it's almost never found alone; it's locked in water, in every living molecule, and in the fuel cells some engineers hope will power a hydrogen economy.",
   "byline": "The first element",
   "tags": [
    "hydrogen",
@@ -444,7 +444,7 @@
   "name": "Helium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element discovered on the Sun before it was found on Earth.",
+  "teaser": "Helium was discovered on the Sun before it was found on Earth — astronomers spotted its yellow spectral line during an 1868 eclipse and named it for the Greek sun god Helios. It took until 1895 to isolate it on Earth, and its lightness (second only to hydrogen) plus total non-reactivity make it perfect for balloons, MRI cooling, and deep-sea breathing gas.",
   "byline": "The solar find",
   "tags": [
    "helium",
@@ -464,7 +464,7 @@
   "name": "Carbon",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element that can bond with itself to build life itself.",
+  "teaser": "Carbon is the only element that can chain with itself in endless variety — four bonds, millions of arrangements — which makes it the backbone of every known life form. The same element forms diamond, graphite, and graphene, and it cycles endlessly through the air, oceans, rocks, and living tissue in the carbon cycle that sustains the biosphere.",
   "byline": "The backbone of life",
   "tags": [
    "carbon",
@@ -484,7 +484,7 @@
   "name": "Carbon's Many Faces",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "Diamond, graphite, and graphene — same element, wildly different materials.",
+  "teaser": "One element, wildly different materials: carbon's allotropes include diamond (each atom bonded to four others in a rigid tetrahedral lattice), graphite (flat sheets that slide past each other, hence pencil lead), and soccer-ball-shaped buckyballs. Add a single layer of graphite and you get graphene, the thinnest, strongest material ever measured — 200 times stronger than steel by weight.",
   "byline": "The shape-shifter",
   "tags": [
    "carbon",
@@ -504,7 +504,7 @@
   "name": "Graphene",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The one-atom-thick carbon sheet that won a Nobel Prize with sticky tape.",
+  "teaser": "Graphene was isolated in 2004 with sticky tape — literally peeling atom-thin layers off graphite until a single layer remained. Its discoverers won the Nobel Prize in 2010. The one-atom-thick sheet of carbon conducts electricity better than copper, is the strongest material ever tested, and has sparked a gold rush of research into flexible screens, faster chips, and super-strong composites.",
   "byline": "The wonder material",
   "tags": [
    "carbon",
@@ -524,7 +524,7 @@
   "name": "Oxygen",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The reactive gas that fuels fires and keeps you alive.",
+  "teaser": "Oxygen makes up 21% of the air and about 65% of your body, yet it didn't accumulate in the atmosphere until cyanobacteria began pumping it out two and a half billion years ago — a 'great oxidation' that wiped out most anaerobic life. Its hunger for electrons drives fire, rust, and respiration alike: every breath you take is chemistry powered by oxygen's appetite.",
   "byline": "The breath of life",
   "tags": [
    "oxygen",
@@ -544,7 +544,7 @@
   "name": "The Ozone Layer",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The thin oxygen shield high above that blocks the Sun's deadly rays.",
+  "teaser": "High in the stratosphere, a thin veil of ozone — three oxygen atoms bonded together — absorbs most of the Sun's ultraviolet radiation before it reaches the ground. Without it, DNA would be damaged by UV in minutes and life on land would be impossible. The ozone layer is so thin that, spread evenly, it would be barely a few millimeters thick at sea-level pressure.",
   "byline": "The sky shield",
   "tags": [
    "ozone",
@@ -564,7 +564,7 @@
   "name": "Nitrogen",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The invisible gas that makes up four-fifths of the air.",
+  "teaser": "Nitrogen makes up 78% of the air you breathe — four out of every five molecules — yet you inhale it and exhale it unchanged, because the triple bond holding its two atoms together is one of the strongest in chemistry. Only lightning, certain bacteria, or industrial processes can break that bond and turn nitrogen into forms life can use. It's the quiet giant of the atmosphere.",
   "byline": "The quiet giant",
   "tags": [
    "nitrogen",
@@ -584,7 +584,7 @@
   "name": "The Nitrogen Cycle",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "How the air's nitrogen becomes protein and returns to the sky.",
+  "teaser": "Nitrogen is everywhere in the air but almost nowhere life can touch it, so living things depend on a planet-sized recycling loop: bacteria 'fix' nitrogen into ammonia, plants build it into proteins, animals eat the plants, and decomposers return it to the soil and air. Humans now fix more nitrogen industrially than all natural processes combined — fertilizer chemistry that feeds half the world but also pollutes rivers and coasts.",
   "byline": "The great round trip",
   "tags": [
    "nitrogen",
@@ -604,7 +604,7 @@
   "name": "Phosphorus",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element discovered in urine that glows and drives life.",
+  "teaser": "Phosphorus glows in the dark — it was discovered in 1669 by an alchemist boiling urine, of all things, and the eerie blue-green light is why it was named 'the light bearer.' It's the P in every DNA and energy molecule (ATP), making it essential to all life, and it's mined from phosphate rock that's becoming scarce enough that some call peak phosphorus a coming crisis.",
   "byline": "The glow maker",
   "tags": [
    "phosphorus",
@@ -624,7 +624,7 @@
   "name": "Sulfur",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The yellow element behind rotten eggs, volcanoes, and matches.",
+  "teaser": "Sulfur is the element of smell: it's behind the reek of rotten eggs, skunk spray, garlic, and volcanic vents, and it's so distinct that atoms of sulfur in your molecules are what your nose hunts for. In the Middle Ages, brimstone (as it was called) was a component of gunpowder, and its compounds still drive vulcanized rubber, sulfuric acid, and the pungent chemistry of food.",
   "byline": "The smelly element",
   "tags": [
    "sulfur",
@@ -644,7 +644,7 @@
   "name": "Iron",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The strong metal at the core of your blood and your planet.",
+  "teaser": "Iron is the most abundant metal on Earth and the reason our planet has a magnetic field — the churning liquid iron core generates it. It's also the most common element by mass in the whole Earth, and every red-brown rock and rusty railing shows its signature. Your blood carries it in hemoglobin, which is why blood is red and why iron deficiency means tiredness.",
   "byline": "The strong metal",
   "tags": [
    "iron",
@@ -664,7 +664,7 @@
   "name": "Copper",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The reddish metal that wires the world and conducts electricity.",
+  "teaser": "Copper conducts electricity better than any metal except silver, which is why your wiring, motors, and phone circuits are full of it. Humans have worked it for over 10,000 years — the Copper Age predates the Bronze Age — and its antimicrobial surface kills bacteria on contact, a property hospitals now exploit on door handles and bed rails.",
   "byline": "The wire metal",
   "tags": [
    "copper",
@@ -684,7 +684,7 @@
   "name": "Aluminum",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The light metal that was once more precious than gold.",
+  "teaser": "Aluminum was once more precious than gold — in 1884, the Washington Monument's tip was capped with it as a display of wealth, because extracting it was absurdly expensive. Then electrolysis made it cheap, and this light, corrosion-resistant metal took over the modern world: planes, cans, foil, and window frames. It's the most abundant metal in Earth's crust, now almost too common to notice.",
   "byline": "The modern metal",
   "tags": [
    "aluminum",
@@ -704,7 +704,7 @@
   "name": "Gold",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The unchanging metal that civilizations have valued forever.",
+  "teaser": "Gold is so unreactive that a nugget pulled from a river is already pure — it never tarnishes, rusts, or combines with oxygen, which is why it's been currency, jewelry, and art for thousands of years. Nearly all the gold on Earth was forged in supernovas and neutron-star collisions billions of years ago, then delivered to our planet by meteorites during its formation.",
   "byline": "The eternal metal",
   "tags": [
    "gold",
@@ -724,7 +724,7 @@
   "name": "Silver",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The shining metal that quietly kills bacteria.",
+  "teaser": "Silver has been killing germs for thousands of years — Hippocrates listed it as a wound treatment, and the phrase 'born with a silver spoon' started as a claim that silver protects babies from disease. Its ions disrupt bacterial enzymes, which is why silver is used in bandages, water filters, and coatings on medical devices. Even today, a silver spoon really does stay cleaner than a steel one.",
   "byline": "The germ killer",
   "tags": [
    "silver",
@@ -744,7 +744,7 @@
   "name": "Mercury",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The only metal that is liquid at room temperature.",
+  "teaser": "Mercury is the only metal that's liquid at room temperature, which fascinated alchemists and made it the basis of thermometers and barometers for centuries. Its nickname 'quicksilver' describes how it beads and rolls. But mercury is also a potent neurotoxin that bioaccumulates in fish, which is why thermometers have been replaced by digital ones and why pregnant people are warned about tuna.",
   "byline": "The liquid metal",
   "tags": [
    "mercury",
@@ -764,7 +764,7 @@
   "name": "Gallium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The metal that melts in your hand.",
+  "teaser": "Gallium is a metal that melts in your hand — at 30°C, just below body temperature, a solid gallium spoon will liquefy in a cup of warm tea. It's safe to handle, which makes it a favorite chemistry party trick, and it's also genuinely useful: gallium arsenide powers LEDs, and gallium is the semiconductor behind your phone's 5G chips.",
   "byline": "The hand-melter",
   "tags": [
    "gallium",
@@ -784,7 +784,7 @@
   "name": "Cesium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element that keeps the world's atomic clocks ticking.",
+  "teaser": "Cesium defines the second: since 1967, one second has officially been the time it takes a cesium-133 atom to vibrate exactly 9,192,631,770 times. Atomic clocks using cesium are so accurate they'd drift by less than a second in 100 million years, and they're the heartbeat behind GPS, the internet, and global timekeeping. The element's name even comes from 'caesius,' Latin for sky blue.",
   "byline": "The clock keeper",
   "tags": [
    "cesium",
@@ -804,7 +804,7 @@
   "name": "Uranium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The heavy element that powers reactors and shaped the 20th century.",
+  "teaser": "Uranium is the heaviest naturally occurring element, and its nucleus is so big and unstable that splitting a single atom releases millions of times more energy than burning a single carbon atom. A one-kilogram pellet of enriched uranium yields as much energy as about 100 tons of coal. That's why a few dozen fuel rods can run an entire nuclear power plant.",
   "byline": "The heavy metal",
   "tags": [
    "uranium",
@@ -824,7 +824,7 @@
   "name": "Plutonium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The man-made element behind space probes and nuclear power.",
+  "teaser": "Plutonium barely exists in nature — it was created in 1940 by bombarding uranium in a cyclotron, and the first sample was used in the 'Fat Man' bomb dropped on Nagasaki. Its name honors Pluto, fitting for an element discovered at the solar system's edge of knowledge. Today it powers spacecraft batteries (radioisotope thermoelectric generators) and sits at the heart of nuclear weapons.",
   "byline": "The human element",
   "tags": [
    "plutonium",
@@ -844,7 +844,7 @@
   "name": "Tungsten",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The metal with the highest melting point, glowing in your light bulbs.",
+  "teaser": "Tungsten has the highest melting point of any metal — 3,422°C, nearly double that of steel — which is why lightbulb filaments and rocket nozzles are made from it. The name comes from Swedish for 'heavy stone.' It's also what makes drill bits and armor-piercing rounds so hard, and its alloy with carbon, tungsten carbide, is nearly as hard as diamond.",
   "byline": "The heat champion",
   "tags": [
    "tungsten",
@@ -864,7 +864,7 @@
   "name": "Titanium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The light, strong metal that goes into jets and joints.",
+  "teaser": "Titanium is as strong as steel but about 45% lighter, and it resists corrosion so well that saltwater barely touches it — the combination made it the aerospace metal of choice. It's biocompatible too, so it goes into hip replacements and dental implants without the body rejecting it. Despite being the ninth most common element, it's expensive to extract, which keeps it special.",
   "byline": "The aerospace metal",
   "tags": [
    "titanium",
@@ -884,7 +884,7 @@
   "name": "Lithium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The light metal powering your phone's battery.",
+  "teaser": "Lithium is the lightest metal, light enough to float on water, and its eagerness to give up an electron makes it the heart of rechargeable batteries. A lithium-ion cell stores more energy per kilogram than any practical predecessor, which is why it powers phones, laptops, and electric cars. The demand for lithium has turned salt flats in South America and Australia into strategic resource battlegrounds.",
   "byline": "The battery metal",
   "tags": [
    "lithium",
@@ -904,7 +904,7 @@
   "name": "Sodium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The explosive metal hiding quietly in table salt.",
+  "teaser": "Sodium is so reactive that a lump of it must be stored under oil — exposed to air, it oxidizes in seconds, and dropped in water it explodes in a fizzing fireball. Yet locked inside table salt, this violent metal becomes the very taste of life, and its ions regulate your nerves, muscles, and blood pressure. The element that attacks water is the same one keeping your body running.",
   "byline": "The hidden fire",
   "tags": [
    "sodium",
@@ -924,7 +924,7 @@
   "name": "Chlorine",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The green gas that keeps drinking water safe.",
+  "teaser": "Chlorine saved more lives than any medicine of its era: when cities began adding it to drinking water in the early 1900s, typhoid and cholera rates collapsed almost overnight. Its power comes from its brutality — chlorine rips electrons from bacterial cell walls, killing pathogens on contact. The same element, in other compounds, bleaches paper, makes PVC, and once served as a weapon in World War I.",
   "byline": "The water protector",
   "tags": [
    "chlorine",
@@ -944,7 +944,7 @@
   "name": "Fluorine",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The most reactive element of all — and the helper in your toothpaste.",
+  "teaser": "Fluorine is the most reactive element in the periodic table — it's so hungry for electrons that it attacks glass, water, and even some noble gases, and storing it safely took decades of work. Its compounds are equally extreme: Teflon's carbon-fluorine bonds are among the strongest known, and fluoride ions, in tiny amounts, strengthen tooth enamel by swapping into its crystal structure.",
   "byline": "The extreme reactant",
   "tags": [
    "fluorine",
@@ -964,7 +964,7 @@
   "name": "Iodine",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The violet element your thyroid needs in trace amounts.",
+  "teaser": "Your thyroid gland needs exactly the right amount of iodine — about 150 micrograms a day, a few grains' worth — to build the hormones that control your metabolism. Too little causes goiter and developmental problems, which is why table salt has been iodized since the 1920s. Iodine is also a classic antiseptic, turning wounds purple-brown as it kills bacteria with its oxidizing power.",
   "byline": "The trace essential",
   "tags": [
    "iodine",
@@ -984,7 +984,7 @@
   "name": "Bromine",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "One of only two elements that are liquid at room temperature.",
+  "teaser": "Bromine is one of only two elements that are liquid at room temperature (the other is mercury), a deep red-brown fuming substance with a choking smell. It's found in seawater, and its compounds once dominated photography as light-sensitive silver bromide. Today it's mainly used in flame retardants, though environmental concerns have pushed manufacturers to phase many of those out.",
   "byline": "The liquid nonmetal",
   "tags": [
    "bromine",
@@ -1004,7 +1004,7 @@
   "name": "Zinc",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The coating that keeps steel from rusting for decades.",
+  "teaser": "Zinc protects steel by sacrificing itself: when a scratch exposes the iron beneath a galvanized coating, the zinc corrodes instead, keeping the steel intact for decades. This is why galvanized buckets, fences, and bridge cables last so long in the weather. The same element is essential to your immune system and wound healing, which is why zinc lozenges and skin creams are so common.",
   "byline": "The rust guard",
   "tags": [
    "zinc",
@@ -1024,7 +1024,7 @@
   "name": "Lead",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The heavy metal once used in pipes and paint — and why we stopped.",
+  "teaser": "Lead is soft, heavy, and easy to work — the Romans used it for plumbing (plumbing comes from plumbum, Latin for lead) and even sweetened wine with lead acetate. The trouble is that lead is a potent neurotoxin that accumulates in the body, and its ban from paint and gasoline is one of public health's biggest wins. IQ studies show the cleanup measurably helped whole generations.",
   "byline": "The hidden danger",
   "tags": [
    "lead",
@@ -1044,7 +1044,7 @@
   "name": "Tin",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The metal that makes bronze and protects cans.",
+  "teaser": "Tin is the metal that made civilization's tableware: alloyed with copper it makes bronze, and alloyed with lead or copper it makes pewter, the shiny plates and mugs of old Europe. It's soft enough to bend by hand, which is why 'tin' cans are actually steel with a thin tin coating to resist rust. Tin's name even survives in the alchemist's symbol for the planet Jupiter.",
   "byline": "The alloy maker",
   "tags": [
    "tin",
@@ -1064,7 +1064,7 @@
   "name": "Nickel",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The hard, shiny metal in coins and stainless steel.",
+  "teaser": "Nickel is the workhorse of coins — the US five-cent piece and most modern coinage are nickel alloys, chosen for their silvery shine and resistance to corrosion. It's also the key ingredient in stainless steel, giving it strength and hardness, and in the rechargeable batteries of electric cars. Its name comes from a German miners' curse: 'Kupfernickel,' the false copper that wasn't.",
   "byline": "The coin metal",
   "tags": [
    "nickel",
@@ -1084,7 +1084,7 @@
   "name": "Chromium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element behind chrome's mirror shine and ruby's red.",
+  "teaser": "Chromium is the element behind chrome plating, the mirror-bright coating on car bumpers and faucets — its name means 'color' in Greek because its compounds come in vivid reds, oranges, greens, and yellows. A thin layer of chromium also makes stainless steel 'stainless': it forms an invisible oxide skin that seals the metal from rust. Rubies get their red from trace chromium atoms.",
   "byline": "The colorful metal",
   "tags": [
    "chromium",
@@ -1104,7 +1104,7 @@
   "name": "Manganese",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The essential additive that makes steel tough and rails durable.",
+  "teaser": "Manganese is steel's secret weapon: add a few percent to iron and the alloy becomes dramatically harder and tougher — nearly every steel girder, rail, and armor plate contains it. It also gets its name from Magnesia, the Greek region, and its dioxide powered early batteries and glassmaking. The dark purple permanganate salt is a classic lab disinfectant.",
   "byline": "The steel helper",
   "tags": [
    "manganese",
@@ -1124,7 +1124,7 @@
   "name": "Cobalt",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element that colors glass blue and powers modern batteries.",
+  "teaser": "Cobalt gives the world its most famous blues: cobalt blue glass, cobalt blue ceramics, and the deep blue pigment in stained glass and painters' palettes since the Middle Ages. The element's name comes from 'kobold,' a mischievous German goblin blamed when miners found ore that yielded no useful metal. Today cobalt is a critical battery metal — and a source of ethical concerns in mining.",
   "byline": "The blue maker",
   "tags": [
    "cobalt",
@@ -1144,7 +1144,7 @@
   "name": "Molybdenum",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The obscure metal that enzymes need to fix nitrogen.",
+  "teaser": "Molybdenum is a trace element your body needs in vanishingly small amounts — a few milligrams a year — yet it's essential: it sits at the active site of enzymes that break down amino acids and sulfites. Industrially it's a steel-hardening element used in jet engines and drill bits, and its name means 'lead-like' in Greek because early chemists confused its ore with lead ore.",
   "byline": "The enzyme helper",
   "tags": [
    "molybdenum",
@@ -1164,7 +1164,7 @@
   "name": "Selenium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element that can be toxic or essential depending on the dose.",
+  "teaser": "Selenium is the dose-dependent element: a little is essential — your enzymes use it to make antioxidants — but a lot is toxic, which is why it's named for Selene, the moon goddess of balance. Selenium's light sensitivity once made it the heart of early photocopiers, and its trace presence in soil determines whether a region's food supplies people adequately or dangerously.",
   "byline": "The dose-dependent",
   "tags": [
    "selenium",
@@ -1184,7 +1184,7 @@
   "name": "Silicon",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The metalloid that built the digital age.",
+  "teaser": "Silicon is the second most abundant element in Earth's crust and the soul of the digital age — nearly every computer chip is carved from a single crystal of it. Its power comes from being a perfect semiconductor: add tiny amounts of other elements and it flips between conducting and insulating on command, letting chips compute. The 'Silicon Valley' name honors the element that built it.",
   "byline": "The chip element",
   "tags": [
    "silicon",
@@ -1204,7 +1204,7 @@
   "name": "Germanium",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The element that powered the first transistor.",
+  "teaser": "Germanium was the original semiconductor — the world's first transistor, built at Bell Labs in 1947, used a sliver of it, and the early space program's computers ran on germanium circuits because it withstands radiation better than silicon. Silicon later won on cost and abundance, but germanium lives on in fiber optics, infrared lenses, and the night-vision scopes that bear its name.",
   "byline": "The first chip element",
   "tags": [
    "germanium",
@@ -1224,7 +1224,7 @@
   "name": "Arsenic",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The notorious poison with a surprising past in medicine and pigments.",
+  "teaser": "Arsenic is the classic poison — odorless, tasteless, and deadly, it earned the title 'powder of inheritance' in Renaissance Italy. Yet arsenic compounds were also medicines: the first effective treatment for syphilis, Salvarsan, was an arsenic compound, and arsenic-based drugs treated sleeping sickness into the 20th century. Today arsenic contaminates groundwater for millions in Bangladesh and elsewhere, a slow-motion poisoning on a scale no murderer could match.",
   "byline": "The famous poison",
   "tags": [
    "arsenic",
@@ -1244,7 +1244,7 @@
   "name": "Antimony",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The brittle element that flameproofs fabrics.",
+  "teaser": "Antimony is a brittle, silvery metalloid that has been part of cosmetics and medicines since antiquity — the kohl used as eyeliner in ancient Egypt was antimony sulfide. Its flame-retardant compounds keep plastics, electronics, and furniture from catching fire easily, and it's alloyed with lead in the batteries that start cars. It's also the element behind antimony trioxide, the fireproofing workhorse of the modern world.",
   "byline": "The flame retarder",
   "tags": [
    "antimony",
@@ -1264,7 +1264,7 @@
   "name": "Bismuth",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The rainbow crystal element that is nearly harmless to humans.",
+  "teaser": "Bismuth is a heavy metal famous for growing into iridescent rainbow stair-step crystals in the lab — the oxide coating on the surface splits light like a soap bubble. It's remarkably safe for a heavy metal (pepto-bismol is a bismuth compound), and it's one of the few elements that expands as it freezes, like water. Its low melting point makes it a substitute for lead in fishing weights and shot.",
   "byline": "The rainbow metal",
   "tags": [
    "bismuth",
@@ -1284,7 +1284,7 @@
   "name": "Krypton",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The noble gas that gave Superman his name and neon signs their range.",
+  "teaser": "Krypton is a colorless, almost totally inert noble gas — the superman comic took its name from it precisely because it means 'hidden' in Greek. It was discovered in 1898 as a residue left after boiling away liquid air. Krypton had a moment of glory in science too: from 1960 to 1983, the official meter was defined by the wavelength of light emitted by krypton-86 atoms.",
   "byline": "The hidden noble",
   "tags": [
    "krypton",
@@ -1304,7 +1304,7 @@
   "name": "Xenon",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The noble gas that powers bright headlights and anesthesia.",
+  "teaser": "Xenon is the noble gas that powers the brightest headlights on the road — xenon arc lamps burn hotter and whiter than halogen bulbs, and they're also used in camera flashes and cinema projectors. Despite being almost totally unreactive, xenon does form a few compounds, and it's a remarkably good anesthetic, though its cost has kept it from wide medical use. Its name means 'stranger' in Greek.",
   "byline": "The bright noble",
   "tags": [
    "xenon",
@@ -1324,7 +1324,7 @@
   "name": "Radon",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The radioactive gas that can seep into basements unnoticed.",
+  "teaser": "Radon is a radioactive noble gas that seeps silently out of the ground — it forms when uranium in soil and rock decays, and it can accumulate in basements and crawl spaces. It's the second leading cause of lung cancer after smoking, responsible for tens of thousands of deaths a year, precisely because it's invisible, odorless, and easy to ignore. A simple home test kit can catch it.",
   "byline": "The silent seeping",
   "tags": [
    "radon",
@@ -1344,7 +1344,7 @@
   "name": "Neon",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The glowing gas behind the classic neon sign.",
+  "teaser": "Neon gives neon signs their signature red-orange glow — when an electric current passes through the gas, its atoms emit light at specific colors, and neon's is that warm red. Other gases add the rest of the palette: argon glows lavender, mercury vapor blue, helium pale gold. Though LEDs now do the job more efficiently, the word 'neon' still means any glowing sign.",
   "byline": "The sign glow",
   "tags": [
    "neon",
@@ -1364,7 +1364,7 @@
   "name": "Argon",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The abundant noble gas that shields welds and fills windows.",
+  "teaser": "Argon is the third most abundant gas in air (about 1%), and its total indifference to reacting makes it the ideal shield for welding — a jet of argon over a hot weld keeps oxygen and nitrogen out so the metal joins cleanly without oxidizing. It also fills double-pane windows and lightbulbs, and preserves museum artifacts and wine in inert atmospheres where oxygen would do damage.",
   "byline": "The shielding gas",
   "tags": [
    "argon",
@@ -1384,7 +1384,7 @@
   "name": "Why Helium Balloons Float",
   "categoryId": "CHEMISTRY",
   "subtype": "Elements",
-  "teaser": "The lightest noble gas and the physics of lifting things.",
+  "teaser": "Helium makes balloons float because it's far lighter than air — about seven times lighter, since each helium atom is a fraction of the mass of the nitrogen and oxygen molecules around it. It's also the second most abundant element in the universe, forged in stars. But party helium is a dwindling resource: most commercial helium comes from natural gas wells, and MRI machines need it to cool their magnets.",
   "byline": "The lifter",
   "tags": [
    "helium",
@@ -1404,7 +1404,7 @@
   "name": "What Molecules Are",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "When atoms join hands, they form the things you touch.",
+  "teaser": "When two or more atoms lock together, they form a molecule — and molecules are the true actors in chemistry. Two hydrogen atoms and one oxygen make water; a few dozen carbon, hydrogen, and oxygen atoms make sugar; millions of repeating units make plastic. The same handful of elements, endlessly rearranged, build everything from air to your DNA.",
   "byline": "Atomic partnerships",
   "tags": [
    "molecules",
@@ -1424,7 +1424,7 @@
   "name": "Covalent Bonds",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "The sharing arrangement that builds most molecules.",
+  "teaser": "A covalent bond is two atoms sharing electrons — the chemical equivalent of holding hands with the same pair of marbles. Oxygen shares two pairs with two hydrogens to make water, and carbon shares four bonds in endless variety. These shared-electron bonds are the strongest and most common in organic chemistry, and they're why molecules have such stable, specific shapes.",
   "byline": "The sharers",
   "tags": [
    "bonding",
@@ -1444,7 +1444,7 @@
   "name": "Ionic Bonds",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "The transfer deal that creates salts like table salt.",
+  "teaser": "An ionic bond forms when one atom fully hands an electron to another — sodium gives one to chlorine, and the resulting opposite charges snap together into a crystal. That's table salt, and it's why salts are brittle, melt at high temperatures, and dissolve in water: the ionic lattice is a grid of pure electrical attraction. Ionic compounds are what make seawater taste salty.",
   "byline": "The givers and takers",
   "tags": [
    "bonding",
@@ -1464,7 +1464,7 @@
   "name": "Metallic Bonds",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "The sea of shared electrons that makes metals shiny and bendy.",
+  "teaser": "In a metal, atoms don't share electrons in pairs — they donate them to a shared 'sea' that flows freely between all the atoms. That electron sea is why metals conduct electricity and heat so well, why they're malleable and ductile, and why they shine: free electrons absorb and re-emit light. Bend a paperclip and you're testing a metallic bond.",
   "byline": "The electron sea",
   "tags": [
    "bonding",
@@ -1484,7 +1484,7 @@
   "name": "Hydrogen Bonds",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "The weak bridges between molecules that shape water and DNA.",
+  "teaser": "A hydrogen bond is a weak attraction between a hydrogen atom in one molecule and an oxygen or nitrogen in another — far weaker than a real bond, yet it runs the living world. Hydrogen bonds make water liquid instead of a gas, hold DNA's two strands together, and fold proteins into the shapes they need. Life is a story of gentle attractions.",
   "byline": "The gentle links",
   "tags": [
    "bonding",
@@ -1504,7 +1504,7 @@
   "name": "Why Water Is Polar",
   "categoryId": "CHEMISTRY",
   "subtype": "Water chemistry",
-  "teaser": "The bent molecule whose lopsided charge explains nearly everything about water.",
+  "teaser": "Water's oxygen pulls shared electrons harder than its hydrogens, leaving one end of the molecule slightly negative and the other slightly positive — a lopsided charge that makes water polar. That polarity is why water dissolves so much, why it beads on wax, and why it clings to itself. Every property that makes water essential to life traces back to this one-sided tug-of-war.",
   "byline": "The lopsided molecule",
   "tags": [
    "water",
@@ -1524,7 +1524,7 @@
   "name": "Surface Tension",
   "categoryId": "CHEMISTRY",
   "subtype": "Water chemistry",
-  "teaser": "The skin-like layer that lets water striders walk on ponds.",
+  "teaser": "Surface tension is the invisible skin on water: molecules at the surface cling sideways and downward to each other so tightly that a water strider can stand on it and a carefully placed paperclip can float. The skin comes from hydrogen bonds pulling water molecules together. Soap destroys it, which is why bubbles and detergents work.",
   "byline": "The water skin",
   "tags": [
    "water",
@@ -1544,7 +1544,7 @@
   "name": "Capillary Action",
   "categoryId": "CHEMISTRY",
   "subtype": "Water chemistry",
-  "teaser": "How water climbs up tiny tubes against gravity.",
+  "teaser": "Capillary action lets water climb against gravity — in a thin tube, the water's attraction to the walls plus its own surface tension pulls it upward. Plants rely on it to lift water from roots to leaves that can be a hundred meters up. It's also why paper towels soak up spills and why a straw's water curves up at the edges.",
   "byline": "The water climber",
   "tags": [
    "water",
@@ -1564,7 +1564,7 @@
   "name": "The Universal Solvent",
   "categoryId": "CHEMISTRY",
   "subtype": "Water chemistry",
-  "teaser": "Why water dissolves more substances than almost anything else.",
+  "teaser": "Water is called the universal solvent because its polar molecules can pull apart and surround more substances than any other liquid — salts, sugars, acids, and most of the chemistry of life. Blood, sweat, coffee, and the sea are all water doing its dissolving job. The catch: water also dissolves pollutants and carries them everywhere, which is why clean water is hard to keep clean.",
   "byline": "The great dissolver",
   "tags": [
    "water",
@@ -1584,7 +1584,7 @@
   "name": "Why Ice Floats",
   "categoryId": "CHEMISTRY",
   "subtype": "Water chemistry",
-  "teaser": "The odd fact that solid water is less dense than liquid water.",
+  "teaser": "Almost everything shrinks when it freezes — but water expands, which is why ice floats. In liquid water, molecules pack tightly; when it freezes, they lock into a hexagonal lattice with more space between them, making solid water less dense. That quirk means lakes freeze top-down, fish survive under the ice, and ice cubes bob in your glass instead of sinking.",
   "byline": "The floating solid",
   "tags": [
    "water",
@@ -1604,7 +1604,7 @@
   "name": "Boiling and Evaporation",
   "categoryId": "CHEMISTRY",
   "subtype": "Water chemistry",
-  "teaser": "Why water boils at 100 degrees — and what boiling really is.",
+  "teaser": "Boiling happens when molecules gain enough energy to break free of the liquid and escape as vapor. Water boils at 100°C at sea level, but boil it in Denver and it's done at 95°C — lower air pressure means less energy needed to escape. Add salt and the boiling point rises slightly, which is why pasta water is salted but also why salt alone won't speed up dinner.",
   "byline": "The vapor escape",
   "tags": [
    "water",
@@ -1624,7 +1624,7 @@
   "name": "The Three States of Matter",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "How heating and cooling change solids, liquids, and gases.",
+  "teaser": "The same molecules can be solid, liquid, or gas depending on how much energy they have — ice, water, and steam are all H2O, just moving at different speeds. Solids hold shape, liquids flow but stay put, gases expand to fill any container. Add enough energy to strip electrons off atoms and you get a fourth state, plasma — the stuff of stars and lightning.",
   "byline": "The state changes",
   "tags": [
    "matter",
@@ -1644,7 +1644,7 @@
   "name": "Sublimation",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "The shortcut where solids skip the liquid state and go straight to gas.",
+  "teaser": "Sublimation is skipping the liquid step: a solid turning straight into vapor, or vapor straight into solid. Dry ice (frozen carbon dioxide) sublimes at -78.5°C, which is why it never leaves a puddle — just fog. Frost on a cold window is deposition, the reverse: water vapor freezing straight to ice crystals without ever being liquid in between.",
   "byline": "The ice shortcut",
   "tags": [
    "matter",
@@ -1664,7 +1664,7 @@
   "name": "Condensation",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "Why cold windows sweat and clouds form.",
+  "teaser": "Condensation is vapor turning back into liquid — the reverse of evaporation. When warm, moist air hits a cold surface, its molecules lose energy and glue back together into droplets: that's the fog on your cold drink, the dew on grass at dawn, and the steamed-up mirror after a hot shower. It's also the engine of rain, as rising water vapor cools and condenses into clouds.",
   "byline": "The vapor return",
   "tags": [
    "matter",
@@ -1684,7 +1684,7 @@
   "name": "The Fourth State: Plasma",
   "categoryId": "CHEMISTRY",
   "subtype": "Molecules and bonding",
-  "teaser": "The superheated gas that makes up stars, lightning, and neon.",
+  "teaser": "Plasma is matter so hot that electrons are ripped free of their atoms, leaving a glowing soup of charged particles — it's the most common state of matter in the universe, making up stars, lightning, and the auroras. On Earth we use it in neon signs, plasma TVs, and fluorescent bulbs. It behaves differently from gas because charged particles respond to electric and magnetic fields.",
   "byline": "The star matter",
   "tags": [
    "plasma",
@@ -1704,7 +1704,7 @@
   "name": "What a Chemical Reaction Is",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "When substances rearrange into something entirely new.",
+  "teaser": "A chemical reaction rearranges atoms — bonds break and re-form, and the molecules change into something new. Rust isn't dirt on iron; it's iron atoms bonding with oxygen. When you burn wood, cook an egg, or digest food, you're running chemical reactions. The atoms themselves are never created or destroyed — they just change partners.",
   "byline": "The great rearrangers",
   "tags": [
    "reactions",
@@ -1724,7 +1724,7 @@
   "name": "Reactants and Products",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The ingredients and results of every chemical recipe.",
+  "teaser": "Every reaction starts with reactants and ends with products: the starting molecules on the left of the arrow, the new molecules on the right. Wood plus oxygen (reactants) becomes ash, smoke, and heat (products). Reading a reaction equation is like reading a recipe — same atoms in, different combinations out, with nothing lost or gained along the way.",
   "byline": "The recipe book",
   "tags": [
    "reactions",
@@ -1744,7 +1744,7 @@
   "name": "Conservation of Mass",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The law that atoms are never created or destroyed.",
+  "teaser": "In any chemical reaction, mass is conserved: the total weight of the products exactly equals the total weight of the reactants. Burn a log and the ash plus smoke plus gases weigh precisely what the log plus oxygen did — nothing is destroyed, only rearranged. Lavoisier proved this with sealed-glass experiments in the 1770s, turning chemistry into a quantitative science.",
   "byline": "The unbreakable law",
   "tags": [
    "reactions",
@@ -1764,7 +1764,7 @@
   "name": "Lavoisier and the Oxygen Revolution",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The chemist who renamed elements and ended the phlogiston idea.",
+  "teaser": "Antoine Lavoisier gave chemistry its modern bones: he named oxygen and hydrogen, showed that burning and breathing are the same kind of reaction, and proved mass is conserved by weighing everything in sealed vessels. His balance-based methods replaced alchemy's guesswork. The French Revolution cut his career short — he was guillotined in 1794.",
   "byline": "The modern chemist",
   "tags": [
    "history",
@@ -1784,7 +1784,7 @@
   "name": "Exothermic Reactions",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "Reactions that release heat — like burning wood.",
+  "teaser": "Exothermic reactions release energy — usually as heat and light. Burning wood, rusting iron, and digesting food are all exothermic; even a hand warmer's iron powder rusts faster on purpose to give off heat. The energy comes from new bonds being stronger than the old ones. Fireworks, engines, and your own metabolism all run on exothermic chemistry.",
   "byline": "The heat givers",
   "tags": [
    "reactions",
@@ -1804,7 +1804,7 @@
   "name": "Endothermic Reactions",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "Reactions that soak up heat — like cold packs and cooking.",
+  "teaser": "Endothermic reactions absorb energy from their surroundings, which is why they feel cold. Dissolve ammonium nitrate in water and the beaker frosts over — the same chemistry inside instant cold packs. Cooking eggs and photosynthesis are endothermic too: they take energy in to build new bonds. The equation tells the story: energy on the left side of the arrow means the reaction needs it.",
   "byline": "The heat takers",
   "tags": [
    "reactions",
@@ -1824,7 +1824,7 @@
   "name": "Activation Energy",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The initial push every reaction needs to get started.",
+  "teaser": "Most reactions need a push before they'll start — the activation energy, like a boulder needing a shove before it can roll downhill. A match's heat supplies the push for burning paper; once started, the reaction releases more energy than the shove cost. That's why gasoline sits calmly in a can but explodes when sparked, and why food needs cooking to start its chemistry.",
   "byline": "The starting push",
   "tags": [
    "reactions",
@@ -1844,7 +1844,7 @@
   "name": "Catalysts",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "Substances that speed up reactions without being used up.",
+  "teaser": "A catalyst speeds up a reaction without being used up — it lowers the activation energy, letting molecules react faster, then emerges unchanged to do it again. Your body runs on catalysts called enzymes; cars use catalytic converters; industry uses catalysts to make everything from fertilizer to plastic. A single catalyst molecule can enable millions of reactions before retiring.",
   "byline": "The helpers",
   "tags": [
    "catalysts",
@@ -1864,7 +1864,7 @@
   "name": "The Catalytic Converter",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The metal catalyst quietly cleaning your car's exhaust.",
+  "teaser": "The catalytic converter under your car is a chemistry lab in a metal box: a honeycomb coated with platinum, palladium, and rhodium breaks down toxic exhaust gases into harmless ones. Carbon monoxide becomes carbon dioxide, and nitrogen oxides become nitrogen gas. It works because the hot exhaust energy plus the metal catalysts push the reactions to completion in milliseconds.",
   "byline": "The exhaust cleaner",
   "tags": [
    "catalysts",
@@ -1884,7 +1884,7 @@
   "name": "Oxidation and Reduction",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The electron handoffs behind rust, batteries, and breathing.",
+  "teaser": "Oxidation and reduction are a matched pair — when one atom loses electrons (oxidation), another gains them (reduction). Rust is iron being oxidized; the flame that burns fuel is rapid oxidation; batteries run on the electron flow between the two halves. The old name for oxidation was burning, but the same electron shuffle powers digestion, bleach, and every rechargeable device.",
   "byline": "The electron swaps",
   "tags": [
    "redox",
@@ -1904,7 +1904,7 @@
   "name": "Combustion",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The fast oxidation we call fire.",
+  "teaser": "Combustion is burning: a fuel reacts rapidly with oxygen, releasing heat and light. The classic fuel is a hydrocarbon — wood, gas, candle wax — and the products are carbon dioxide and water. It's the same reaction whether it's a campfire, a car engine, or a candle, just at different speeds. Your body 'burns' food with the same chemistry, minus the flame.",
   "byline": "The fire science",
   "tags": [
    "fire",
@@ -1924,7 +1924,7 @@
   "name": "The Fire Triangle",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The three ingredients every fire needs — remove one, it dies.",
+  "teaser": "Fire needs three things at once: fuel, oxygen, and heat — the fire triangle. Remove any one and the fire dies: water cools the heat, foam smothers the oxygen, and clearing brush removes fuel. Firefighters and extinguisher design are all about breaking the triangle. Even the smallest flame is a chain reaction that keeps the triangle intact.",
   "byline": "The fire recipe",
   "tags": [
    "fire",
@@ -1944,7 +1944,7 @@
   "name": "Why Metal Rusts",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The slow oxidation that eats iron from the inside.",
+  "teaser": "Rust is iron slowly burning — iron atoms reacting with oxygen and water to form iron oxide, a flaky brown compound that's weaker than the original metal. It's a slow, cold fire that eats through bridges, ships, and car bodies over years. Unlike combustion, rusting releases heat too slowly to ignite, but it's the same oxidation chemistry, just going at a crawl.",
   "byline": "The iron eater",
   "tags": [
    "rust",
@@ -1964,7 +1964,7 @@
   "name": "Tarnishing",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "Why silver darkens and copper turns green.",
+  "teaser": "Tarnishing is a metal's surface reacting with the air — silver darkens as it reacts with sulfur compounds, copper turns green as it forms patina, and even gold can dull slightly. It's oxidation at the surface only, a thin film of corrosion rather than deep decay. A polish removes the tarnish layer, which is why silverware brightens with a rub: you're wiping away the reacted skin.",
   "byline": "The surface change",
   "tags": [
    "metals",
@@ -1984,7 +1984,7 @@
   "name": "Acids and Bases",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The sour and slippery sides of chemistry.",
+  "teaser": "Acids and bases are chemical opposites: acids donate hydrogen ions and taste sour, while bases accept them and taste bitter. Lemon juice is acid; baking soda is a base. When you mix them they neutralize each other, fizzing as they cancel out. Your stomach is a vat of acid, while your blood stays slightly basic — the balance is everything.",
   "byline": "The opposites",
   "tags": [
    "acids",
@@ -2004,7 +2004,7 @@
   "name": "The pH Scale",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The 0-to-14 ruler that measures acidity.",
+  "teaser": "The pH scale measures how acidic or basic a solution is, running from 0 (stomach acid) to 14 (drain cleaner), with 7 as neutral. It's logarithmic — a solution at pH 3 is ten times more acidic than one at pH 4. The scale was invented in 1909 by a Danish chemist, and it governs everything from soil to blood to swimming pools.",
   "byline": "The acidity ruler",
   "tags": [
    "ph",
@@ -2024,7 +2024,7 @@
   "name": "Neutralization",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "When acids and bases cancel out to make water and salt.",
+  "teaser": "Neutralization is an acid and a base canceling each other out: the acid's hydrogen ions combine with the base's hydroxide ions to form water, and the leftover ions form a salt. That's why antacids settle your stomach — the base neutralizes the acid. The telltale sign is often fizzing, as carbon dioxide escapes during the reaction.",
   "byline": "The canceling act",
   "tags": [
    "acids",
@@ -2044,7 +2044,7 @@
   "name": "The Chemistry of Stomach Acid",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The hydrochloric acid vat that digests your dinner.",
+  "teaser": "Your stomach is filled with hydrochloric acid at a pH around 1.5 — strong enough to dissolve metal, yet your stomach lining survives because it's coated in protective mucus. The acid kills bacteria in food and begins breaking down proteins. When acid backs up into the esophagus, you get heartburn — and antacids work by neutralizing it.",
   "byline": "The internal acid",
   "tags": [
    "acids",
@@ -2064,7 +2064,7 @@
   "name": "Acid Rain",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "How pollution turns rain sour enough to eat stone.",
+  "teaser": "Acid rain forms when sulfur dioxide and nitrogen oxides from burning coal and gasoline react with water in the sky, producing sulfuric and nitric acids. Falling as rain, they lower the pH of lakes, strip nutrients from soil, and eat away at stone buildings and statues. Clean-air laws that cut those emissions have measurably reduced acid rain since the 1990s.",
   "byline": "The sour rain",
   "tags": [
    "acids",
@@ -2084,7 +2084,7 @@
   "name": "Limestone and Lime",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The rock that balances acid and builds with cement.",
+  "teaser": "Limestone is mostly calcium carbonate, and heating it drives off carbon dioxide to leave quicklime — one of humanity's oldest chemicals. Mix quicklime with water and you get slaked lime, a strong base that neutralizes acid soils and was the key ingredient in mortar and plaster for thousands of years. The Roman concrete that still stands today is lime chemistry at work.",
   "byline": "The rock that neutralizes",
   "tags": [
    "limestone",
@@ -2104,7 +2104,7 @@
   "name": "How Antacids Work",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The quick chemistry behind heartburn relief.",
+  "teaser": "Antacids are bases that neutralize the excess hydrochloric acid in your stomach — calcium carbonate (chalk), magnesium hydroxide, and aluminum hydroxide all do the job. They work fast because neutralization is instant, but the body responds by making more acid, which is why relief can be short-lived. Some antacids also foam, coating the stomach to block acid from reaching the esophagus.",
   "byline": "The tummy relief",
   "tags": [
    "acids",
@@ -2124,7 +2124,7 @@
   "name": "Chemical Indicators",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The color-changing dyes that reveal acidity.",
+  "teaser": "Indicators are molecules that change color with pH — litmus turns red in acid and blue in base, and cabbage juice runs a whole rainbow from red to green to blue. They work because their structure changes as hydrogen ions bind or leave. From lab tests to aquarium kits, indicators are the simplest way to read pH with your eyes.",
   "byline": "The litmus tests",
   "tags": [
    "indicators",
@@ -2144,7 +2144,7 @@
   "name": "The Red Cabbage Indicator",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The kitchen chemistry of homemade pH testing.",
+  "teaser": "Red cabbage contains anthocyanins — pigments that shift color with acidity, making the vegetable a free chemistry lab. Boil it and the purple water turns pink when you add lemon juice (acid) and green or blue when you add baking soda (base). The pigment is the same family of molecules that makes blueberries blue and autumn leaves red.",
   "byline": "The kitchen lab",
   "tags": [
    "indicators",
@@ -2164,7 +2164,7 @@
   "name": "Titration",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The careful drop-by-drop measurement of unknown acids.",
+  "teaser": "Titration is the chemist's precision measuring: you drip a base of known strength into an acid (or vice versa) until the indicator changes color, and the volume used tells you the exact concentration of the unknown. It's like counting how many drops of water fill a bucket — each drop a known amount, the total revealing the size. Labs, wineries, and water plants all rely on it.",
   "byline": "The precise measure",
   "tags": [
    "acids",
@@ -2184,7 +2184,7 @@
   "name": "Buffers",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "The chemical shock absorbers that hold pH steady.",
+  "teaser": "A buffer is a solution that resists pH change — it contains both a weak acid and its partner base, so added hydrogen ions get absorbed and removed ones get replaced. Your blood is buffered to hold pH at about 7.4; stray outside that narrow range and enzymes stop working, which can be fatal. Buffer systems also keep lakes, oceans, and laboratories stable.",
   "byline": "The pH keepers",
   "tags": [
    "buffers",
@@ -2204,7 +2204,7 @@
   "name": "The Blood Buffer System",
   "categoryId": "CHEMISTRY",
   "subtype": "Acids and bases",
-  "teaser": "How your body keeps blood pH in the narrow safe zone.",
+  "teaser": "Your blood holds its pH near 7.4 with a buffer system built on carbonic acid and bicarbonate — the same chemistry as soda water. When you exhale, you remove carbon dioxide, and the balance shifts; when you hold your breath, CO2 builds up and the pH drops. The body juggles breath and kidneys to keep the buffer in its narrow safe range.",
   "byline": "The internal balance",
   "tags": [
    "buffers",
@@ -2224,7 +2224,7 @@
   "name": "How Salts Form",
   "categoryId": "CHEMISTRY",
   "subtype": "Salts",
-  "teaser": "The crystals produced when acids meet bases.",
+  "teaser": "Salts are the solid products of acid-base neutralization and beyond: take away the hydrogen from an acid and the leftover negative ion pairs with a metal. Table salt is sodium plus chlorine; Epsom salt is magnesium plus sulfate; limestone is calcium carbonate. Salts form crystals, dissolve in water, and carry the ions that make seawater salty and nerves fire.",
   "byline": "The crystal makers",
   "tags": [
    "salts",
@@ -2244,7 +2244,7 @@
   "name": "Table Salt",
   "categoryId": "CHEMISTRY",
   "subtype": "Salts",
-  "teaser": "The essential crystal that shaped history and seasons your food.",
+  "teaser": "Table salt is a crystal of sodium and chlorine locked in a cubic lattice — and it's the only rock humans eat. It's essential: your nerves and muscles run on sodium ions, and the body can't make them. Salt has been taxed, fought over, and used as currency; the word 'salary' comes from the Latin for the salt ration given to Roman soldiers.",
   "byline": "The essential crystal",
   "tags": [
    "salt",
@@ -2264,7 +2264,7 @@
   "name": "Salt and Civilization",
   "categoryId": "CHEMISTRY",
   "subtype": "Salts",
-  "teaser": "The white gold that built roads, paid soldiers, and started wars.",
+  "teaser": "Salt once moved empires: it preserved meat and fish before refrigeration, making it literally worth its weight in gold in some regions. Salt roads crossed the Sahara, Venice built its wealth on salt, and Gandhi's 1930 Salt March protested a British monopoly. 'White gold' taxed, smuggled, and fought over — until modern chemistry made it cheap.",
   "byline": "The white gold",
   "tags": [
    "salt",
@@ -2284,7 +2284,7 @@
   "name": "Preserving With Salt",
   "categoryId": "CHEMISTRY",
   "subtype": "Salts",
-  "teaser": "The ancient chemistry that kept food safe before refrigeration.",
+  "teaser": "Salt preserves food by drawing water out of cells through osmosis — bacteria and fungi need moisture to grow, and a salty environment starves them. That's why ham, fish, and pickles last so long. The salt also changes flavor and texture: it firms proteins, which is why salted meat has that dense bite. Refrigeration may have replaced it, but salt is still the original preservative.",
   "byline": "The ancient keeper",
   "tags": [
    "salt",
@@ -2304,7 +2304,7 @@
   "name": "Electrolysis",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "Using electricity to tear compounds apart.",
+  "teaser": "Electrolysis uses electricity to force a reaction that wouldn't happen on its own — an electric current splits compounds apart. Run current through water and it separates into hydrogen and oxygen gas bubbles; run it through molten salt and you get pure sodium metal. It's how aluminum, chlorine, and many pure elements are made industrially.",
   "byline": "The electric splitter",
   "tags": [
    "electrolysis",
@@ -2324,7 +2324,7 @@
   "name": "Electroplating",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The electric coating that gilds jewelry and protects car parts.",
+  "teaser": "Electroplating uses electricity to coat one metal with another: dissolve a metal in solution, pass a current through it and an object, and metal ions deposit atom by atom onto the surface. That's how jewelry gets its gold layer, car parts get chrome, and coins get their shine. The coating can be microscopic yet completely change how a surface looks and behaves.",
   "byline": "The electric coating",
   "tags": [
    "electroplating",
@@ -2344,7 +2344,7 @@
   "name": "Electrochemical Cells",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The chemical reactions that make batteries work.",
+  "teaser": "An electrochemical cell is the reverse of electrolysis: instead of forcing a reaction with electricity, it lets a spontaneous reaction produce electricity. Two different metals in a solution, connected by a wire, push electrons from one to the other — that flow is current. Every battery is one or more electrochemical cells, converting chemical energy into the electricity that powers your devices.",
   "byline": "The power cells",
   "tags": [
    "batteries",
@@ -2364,7 +2364,7 @@
   "name": "The Lemon Battery",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The fruit-powered circuit that demonstrates electrochemical cells.",
+  "teaser": "A lemon battery works because two different metals — a zinc nail and a copper coin — push electrons through the lemon's acidic juice. The acid carries ions between them, the metals exchange electrons, and a wire connecting them carries current. One lemon makes only a tiny voltage, but string several together and you can light a small LED — pure electrochemistry from fruit.",
   "byline": "The kitchen battery",
   "tags": [
    "batteries",
@@ -2384,7 +2384,7 @@
   "name": "The Voltaic Pile",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The first real battery, built from stacked discs in 1800.",
+  "teaser": "The first real battery was Alessandro Volta's 1800 pile: alternating discs of zinc and copper separated by brine-soaked cardboard, stacked like a coin tower. Each pair generated a small voltage, and the whole stack added up to a usable current. It was the first device to produce steady electricity on demand — and Napoleon was so impressed he made Volta a count.",
   "byline": "The first battery",
   "tags": [
    "batteries",
@@ -2404,7 +2404,7 @@
   "name": "Galvani's Twitching Frogs",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The frog legs experiment that started the battery era.",
+  "teaser": "Electrochemistry began with a frog: in the 1780s, Luigi Galvani noticed that dissected frog legs twitched when touched with two different metals. He thought it was 'animal electricity,' but Volta realized the twitch came from the metals themselves — a battery, not a frog. Their debate over who was right built the foundation of electrochemistry, and both names live on in science.",
   "byline": "The twitching discovery",
   "tags": [
    "batteries",
@@ -2424,7 +2424,7 @@
   "name": "How Batteries Work",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The simple chemistry inside every alkaline and lithium cell.",
+  "teaser": "A battery stores chemical energy and releases it as electricity when the two electrode reactions connect. In a lithium-ion cell, lithium ions shuttle between electrodes as you charge and discharge; in an alkaline cell, zinc and manganese dioxide react. They all share the same core: an anode, a cathode, an electrolyte, and a wire that forces the electrons to do work on the way.",
   "byline": "The portable power",
   "tags": [
    "batteries",
@@ -2444,7 +2444,7 @@
   "name": "Fuel Cells",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The clean energy devices that combine hydrogen and oxygen.",
+  "teaser": "A fuel cell is a battery that never dies: feed it hydrogen and oxygen continuously and it produces electricity, with water as its only exhaust. The hydrogen gives up electrons at one electrode; the oxygen accepts them at the other; the electrons flow through the circuit doing work. Fuel cells power spacecraft, buses, and some cars — clean energy that runs as long as fuel flows.",
   "byline": "The clean power",
   "tags": [
    "fuel cells",
@@ -2464,7 +2464,7 @@
   "name": "Solutions and Solubility",
   "categoryId": "CHEMISTRY",
   "subtype": "Solutions",
-  "teaser": "Why sugar vanishes into water and sand does not.",
+  "teaser": "A solution is a uniform mixture where one substance (the solute) dissolves into another (the solvent) at the molecular level. Salt in water, sugar in tea, and the air itself are all solutions. The dissolved particles are too small to see, which is why saltwater looks clear — but the salt is truly there, evenly distributed, ready to crystallize back out when the water evaporates.",
   "byline": "The disappearing act",
   "tags": [
    "solutions",
@@ -2484,7 +2484,7 @@
   "name": "Concentration",
   "categoryId": "CHEMISTRY",
   "subtype": "Solutions",
-  "teaser": "The measure of how much stuff is dissolved in how much liquid.",
+  "teaser": "Concentration tells you how much solute is packed into a solution, and chemists measure it several ways: molarity counts moles per liter, percent tracks parts per hundred, and ppm tracks parts per million. One ppm is a single drop in fifty liters — the scale at which pollutants become dangerous and nutrients become essential. Choosing the right unit is how labs keep doses exact.",
   "byline": "The strength gauge",
   "tags": [
    "solutions",
@@ -2504,7 +2504,7 @@
   "name": "Supersaturation",
   "categoryId": "CHEMISTRY",
   "subtype": "Solutions",
-  "teaser": "The unstable solutions that crystallize at the touch.",
+  "teaser": "A supersaturated solution holds more dissolved solute than should be possible — heat the water, pack in extra sugar, then cool it carefully and the excess stays dissolved, waiting for a trigger. Tap it or drop in a seed crystal and the whole thing crystallizes instantly. That's how rock candy grows and how those instant-hot-or-cold packs snap into action.",
   "byline": "The ready crystals",
   "tags": [
    "solutions",
@@ -2524,7 +2524,7 @@
   "name": "Growing Crystals",
   "categoryId": "CHEMISTRY",
   "subtype": "Solutions",
-  "teaser": "The slow ordering of molecules into sparkling geometric forms.",
+  "teaser": "Crystals grow when dissolved molecules find a surface to latch onto and lock into a repeating pattern, layer by layer. Given time and the right concentration, even table salt and sugar form beautiful geometric solids. The slow growth is key: crystals grown too fast trap impurities and turn cloudy, which is why gems take months to grow in labs.",
   "byline": "The geometric builders",
   "tags": [
    "crystals",
@@ -2544,7 +2544,7 @@
   "name": "The Salt Crystal Lattice",
   "categoryId": "CHEMISTRY",
   "subtype": "Solutions",
-  "teaser": "The perfect cube arrangement hidden inside table salt.",
+  "teaser": "A salt crystal is a lattice of sodium and chlorine ions arranged in a perfect cube — each sodium surrounded by six chlorines and vice versa. That repeating grid is why salt crystals are cubic and why table salt feels gritty. The same ionic lattice pattern repeats through countless salts, each with its own signature shape.",
   "byline": "The cubic pattern",
   "tags": [
    "crystals",
@@ -2564,7 +2564,7 @@
   "name": "Why Diamond Is So Hard",
   "categoryId": "CHEMISTRY",
   "subtype": "Solutions",
-  "teaser": "The tetrahedral carbon lattice behind the hardest natural material.",
+  "teaser": "Diamond's hardness comes from its crystal structure: every carbon atom bonds to four others in a rigid three-dimensional lattice, the strongest arrangement in nature. Graphite, the same element, forms flat sheets that slide apart — pencil lead. The difference between the world's hardest mineral and soft pencil dust is purely how the carbon atoms arrange themselves.",
   "byline": "The hard lattice",
   "tags": [
    "diamonds",
@@ -2584,7 +2584,7 @@
   "name": "What Glass Is",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The rigid liquid that flows — extremely slowly.",
+  "teaser": "Glass is technically a liquid that's frozen in place — its atoms never lock into the repeating crystal pattern of solids, so it's called an amorphous solid. Melted sand (silica) cools into this disordered state, which is why old windowpanes are thicker at the bottom and why glass breaks with no crystal planes to guide it. It's a solid that behaves like a slow-motion liquid.",
   "byline": "The frozen liquid",
   "tags": [
    "glass",
@@ -2604,7 +2604,7 @@
   "name": "How Glass Is Made",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The sand, heat, and chemistry behind every window.",
+  "teaser": "Glassmaking is melting sand into a new material: silica (sand) melts at about 1,700°C, and adding soda ash lowers that to workable temperatures while lime stops it dissolving in water. The molten mixture can be blown, poured, or rolled into sheets. Ancient glassmakers discovered this recipe thousands of years ago, and the basic chemistry hasn't changed since.",
   "byline": "The sand transformation",
   "tags": [
    "glass",
@@ -2624,7 +2624,7 @@
   "name": "The Chemistry of Soap",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The molecules that bridge oil and water to wash them away.",
+  "teaser": "Soap molecules are chemical bridges: one end loves water (hydrophilic), the other loves grease (hydrophobic). When you wash, the grease-loving ends burrow into oil and dirt while the water-loving ends stay in the water — so rinsing pulls the whole bundle away. That dual personality, called amphiphilic, is the entire trick behind cleaning.",
   "byline": "The bridge makers",
   "tags": [
    "soap",
@@ -2644,7 +2644,7 @@
   "name": "Soap vs Detergent",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "Why soap fails in hard water and detergents do not.",
+  "teaser": "Soap and detergent both have the same bridge-shaped molecules, but soap is made from natural fats and detergents are synthesized — which is why they differ in hard water. Soap reacts with calcium and magnesium ions to form scummy curds; detergents don't, so they keep cleaning where soap fails. Modern laundry detergents are designed around that hard-water advantage.",
   "byline": "The washing rivals",
   "tags": [
    "soap",
@@ -2664,7 +2664,7 @@
   "name": "Emulsions",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The mixtures that hold oil and water together with help.",
+  "teaser": "An emulsion is a mixture of two liquids that normally refuse to mix — oil and water — held together by a third ingredient called an emulsifier. Mayonnaise, milk, and vinaigrette are all emulsions; without the emulsifier they'd split into separate layers. The emulsifier's molecules coat the droplets of one liquid and keep them suspended in the other.",
   "byline": "The unblendable blend",
   "tags": [
    "emulsions",
@@ -2684,7 +2684,7 @@
   "name": "The Mayonnaise Mystery",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "How egg yolks hold oil and water in a stable cream.",
+  "teaser": "Mayonnaise is the classic kitchen emulsion: oil droplets suspended in water (from egg and vinegar) with lecithin from egg yolk as the stabilizer. Whisk fast enough and the oil breaks into billions of tiny droplets that the lecithin coats, and the mixture thickens into a creamy spread. Add the oil too fast and the emulsion 'breaks' — the mayo splits back into oil and watery liquid.",
   "byline": "The stable blend",
   "tags": [
    "emulsions",
@@ -2704,7 +2704,7 @@
   "name": "What Plastics Are",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The long polymer chains that reshaped the modern world.",
+  "teaser": "Plastics are polymers — long chains of repeating molecules, usually built from petroleum. The chain's length and arrangement determine the plastic's personality: stiff PVC pipes, stretchy polyethylene bags, and clear acrylic all come from different monomers and chain structures. Their strength, flexibility, and durability are all properties of the carbon backbone and how the chains pack together.",
   "byline": "The polymer age",
   "tags": [
    "plastics",
@@ -2724,7 +2724,7 @@
   "name": "Polymerization",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The linking of small molecules into long chains.",
+  "teaser": "Polymerization is the reaction that builds plastics: small molecules called monomers link together into long chains, like boxcars coupling into a train. In addition polymerization, double bonds open up and hook monomers together with no byproducts; in condensation polymerization, each link releases a small molecule like water. Either way, thousands of monomers become one giant chain molecule.",
   "byline": "The chain builders",
   "tags": [
    "polymers",
@@ -2744,7 +2744,7 @@
   "name": "Natural Polymers",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The proteins, starches, and rubber made by life itself.",
+  "teaser": "Nature polymerizes too: proteins are chains of amino acids, cellulose and starch are chains of sugars, and rubber is chains of isoprene units. Wood, silk, wool, cotton, and DNA are all natural polymers. Humans copied nature's strategy to invent plastics — nylon was literally designed as a synthetic silk, and celluloid was an early plastic made from plant cellulose.",
   "byline": "Nature's chains",
   "tags": [
    "polymers",
@@ -2764,7 +2764,7 @@
   "name": "The Rubber Fix",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The sulfur treatment that made rubber strong enough for tires.",
+  "teaser": "Charles Goodyear accidentally discovered vulcanization in 1839 when he dropped rubber and sulfur on a hot stove: the sulfur formed cross-links between the rubber chains, turning sticky gum into durable, elastic rubber. That one discovery made tires, hoses, and waterproof boots possible. The cross-linked rubber bounces back because the sulfur bridges pull the tangled chains back into shape.",
   "byline": "The rubber saver",
   "tags": [
    "rubber",
@@ -2784,7 +2784,7 @@
   "name": "Nylon",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The first synthetic fiber, born in a DuPont lab.",
+  "teaser": "Nylon was the first synthetic fiber made entirely from chemistry — invented at DuPont in 1935 by Wallace Carothers, who built it from coal, water, and air. It debuted at the 1939 World's Fair and became famous overnight as 'synthetic silk,' most memorably in stockings. Women queued for hours to buy nylon stockings, and the fiber went on to make parachutes, ropes, and carpets.",
   "byline": "The synthetic silk",
   "tags": [
    "polymers",
@@ -2804,7 +2804,7 @@
   "name": "Teflon",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The nonstick polymer discovered entirely by accident.",
+  "teaser": "Teflon was discovered by accident in 1938: a chemist named Roy Plunkett opened a canister of tetrafluoroethylene gas and found a strange white solid inside — the gas had polymerized on its own. The carbon-fluorine bonds make Teflon so unreactive and slippery that almost nothing sticks to it. It went from a wartime secret to the coating on the world's frying pans.",
   "byline": "The accidental nonstick",
   "tags": [
    "polymers",
@@ -2824,7 +2824,7 @@
   "name": "Kevlar",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The strong polymer behind bulletproof vests.",
+  "teaser": "Kevlar is a polymer whose chains line up in parallel, rigid rods held together by strong hydrogen bonds — making it five times stronger than steel by weight. Invented at DuPont in 1965 by Stephanie Kwolek, it stops bullets because the fibers absorb and spread the impact energy across their length. It's the material of body armor, tires, and even the cables on suspension bridges.",
   "byline": "The body armor fiber",
   "tags": [
    "polymers",
@@ -2844,7 +2844,7 @@
   "name": "Carbon Fiber",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The ultra-strong light material woven from carbon threads.",
+  "teaser": "Carbon fiber is made by baking polymer threads until only carbon remains, then aligning the fibers into a strong, stiff, ultralight material. It's five times stronger than steel but a fraction of the weight, which is why race cars, aircraft, and bicycle frames use it. The fibers are strongest along their length, so engineers layer them in crisscross patterns to build parts in every direction.",
   "byline": "The modern weave",
   "tags": [
    "carbon",
@@ -2864,7 +2864,7 @@
   "name": "Aerogel",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The lightest solid on Earth, sometimes called frozen smoke.",
+  "teaser": "Aerogel is the lightest solid ever made — up to 99.8% air, so light it's nicknamed 'frozen smoke' and a brick-sized piece weighs less than a feather. It's made by drying a gel in a way that leaves its structure intact while removing all the liquid. Despite its weightlessness, it's an incredible insulator, used by NASA to catch space dust and keep spacecraft warm.",
   "byline": "The frozen smoke",
   "tags": [
    "materials",
@@ -2884,7 +2884,7 @@
   "name": "Alloys",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The blended metals that are stronger than their parts.",
+  "teaser": "An alloy is a metal mixed with other elements to change its personality — pure gold is too soft for jewelry, so it's alloyed with copper or silver; pure iron rusts, so it becomes steel with a little carbon. Bronze (copper plus tin) was so revolutionary it named an era. Alloys are chemistry's way of tuning metals: adjust the recipe, adjust the strength, shine, and corrosion resistance.",
   "byline": "The metal mixes",
   "tags": [
    "alloys",
@@ -2904,7 +2904,7 @@
   "name": "How Steel Is Made",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The iron-carbon recipe that built skyscrapers.",
+  "teaser": "Steel is iron with a controlled amount of carbon — usually less than 2% — and that tiny addition transforms soft iron into a hard, strong material. The carbon atoms squeeze into spaces between iron atoms, blocking the planes that let pure iron slide and bend. Modern steelmaking blasts oxygen through molten iron to burn off excess carbon and add precise amounts of alloying elements.",
   "byline": "The building metal",
   "tags": [
    "steel",
@@ -2924,7 +2924,7 @@
   "name": "Stainless Steel",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The chromium alloy that refuses to rust.",
+  "teaser": "Stainless steel is an alloy of iron, chromium (at least 10.5%), and often nickel — and the chromium is the magic. It forms an invisible chromium oxide film on the surface that seals the metal from oxygen and water, so it can't rust. Scratch the surface and the film instantly reforms, which is why stainless steel sinks and cutlery stay shiny for decades.",
   "byline": "The rustless alloy",
   "tags": [
    "steel",
@@ -2944,7 +2944,7 @@
   "name": "The Bronze Age",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The copper-tin alloy that named an era.",
+  "teaser": "Bronze — an alloy of copper and tin — was so superior to stone and pure copper that its adoption gave a whole era its name. It's harder than copper, casts well, and resists corrosion, and it was so valuable that trade routes stretched across continents to bring tin to copper-producing regions. The Bronze Age began around 3300 BCE and ended only when iron-making spread.",
   "byline": "The era maker",
   "tags": [
    "bronze",
@@ -2964,7 +2964,7 @@
   "name": "Brass",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The copper-zinc alloy behind instruments and fittings.",
+  "teaser": "Brass is an alloy of copper and zinc that looks like gold, costs like copper, and has been prized for millennia — it gives trumpets and horns their bright sound and their name. It's also easy to cast and resists corrosion, which made it the metal of choice for cannon fittings and doorknobs. Its golden color comes from the zinc tuning copper's red toward yellow.",
   "byline": "The golden alloy",
   "tags": [
    "brass",
@@ -2984,7 +2984,7 @@
   "name": "Shape Memory Alloys",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "Metals like nitinol that remember their shape and snap back.",
+  "teaser": "Shape-memory alloys remember their original shape: bend a Nitinol wire (nickel and titanium) out of place, heat it, and it snaps back perfectly. The atoms switch between two crystal structures — deformed at low temperature, restored at high. That's why braces straighten teeth, why eyeglass frames bounce back, and why heat-activated actuators can open spacecraft antennas that were folded for launch.",
   "byline": "The remembering metals",
   "tags": [
    "alloys",
@@ -3004,7 +3004,7 @@
   "name": "Liquid Crystals",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The strange state of matter that displays your screen.",
+  "teaser": "Liquid crystals are a state between liquid and solid — molecules that flow like a liquid but stay ordered like a crystal. They're the heart of every LCD screen: an electric field twists the molecules, changing how they polarize light, and that change draws the image. The same temperature-sensitive order is why mood rings change color and thermal camera patches shift with your skin temperature.",
   "byline": "The display state",
   "tags": [
    "crystals",
@@ -3024,7 +3024,7 @@
   "name": "Glow-in-the-Dark Chemistry",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The phosphorescence behind glowing toys and watch hands.",
+  "teaser": "Luminescence is light without heat — the opposite of a flame. It comes in flavors: fluorescence (glows only while the light source is on), phosphorescence (stores energy and glows after), chemiluminescence (light from a reaction, like glow sticks), and bioluminescence (light from living things, like fireflies). All of them work by electrons jumping and falling between energy levels, releasing photons as they land.",
   "byline": "The light keepers",
   "tags": [
    "glow",
@@ -3044,7 +3044,7 @@
   "name": "Fluorescence",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The instant glow of highlighter pens and UV posters.",
+  "teaser": "Fluorescence happens when a molecule absorbs invisible ultraviolet light and instantly re-emits it as visible color — the absorbed energy kicks an electron up, and it drops back down within nanoseconds, releasing light. That's how 'whiter than white' laundry glows under blacklights, how fluorescent bulbs turn UV into visible light, and how scorpions shine neon blue in the dark.",
   "byline": "The instant glow",
   "tags": [
    "fluorescence",
@@ -3064,7 +3064,7 @@
   "name": "Chemical Light",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The glow sticks that light up without heat.",
+  "teaser": "Chemiluminescence is light born directly from a chemical reaction, with no heat — the glow stick is the perfect example. Crack it, and the chemicals mix: a peroxide oxidizes a dye, the dye's electrons jump and fall, releasing photons. The same principle powers firefly flashes and the blue-green glow of certain deep-sea creatures. It's pure chemistry turned into cold light.",
   "byline": "The cold light",
   "tags": [
    "glow",
@@ -3084,7 +3084,7 @@
   "name": "The Chemistry of Living Light",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The luciferin reactions behind fireflies and glowing seas.",
+  "teaser": "Bioluminescence is living chemistry: organisms produce light by oxidizing a molecule called luciferin with an enzyme called luciferase. Fireflies flash to mate, anglerfish dangle glowing lures in the dark, and some squid squirt glowing ink to confuse predators. The light is cold — nearly all the energy becomes photons rather than heat, making it nature's most efficient lighting.",
   "byline": "The living light",
   "tags": [
    "bioluminescence",
@@ -3104,7 +3104,7 @@
   "name": "Firework Colors",
   "categoryId": "CHEMISTRY",
   "subtype": "Pyrotechnics",
-  "teaser": "The metal salts behind every burst of red, green, and blue.",
+  "teaser": "Firework colors come from metal salts heated in a flame: strontium burns red, barium green, sodium yellow, copper blue, and calcium orange. Each metal's atoms absorb the heat and re-emit it at a characteristic wavelength. The shell packs the right salts into star-shaped pellets, and as they burn, the sky fills with chemistry's palette — a color chart written in fire.",
   "byline": "The color explosives",
   "tags": [
    "fireworks",
@@ -3324,7 +3324,7 @@
   "name": "The Chemistry of Cooking",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "Why meat browns, bread rises, and onions caramelize.",
+  "teaser": "Cooking is applied chemistry: heat drives reactions that transform raw ingredients into food. Proteins denature and set, sugars caramelize and brown, starches absorb water and swell, and acids tenderize meat. Every recipe is a set of reaction conditions — temperature, time, and pH — that you're tuning by hand. The kitchen is the one lab everyone runs daily.",
   "byline": "The kitchen reactions",
   "tags": [
    "cooking",
@@ -3344,7 +3344,7 @@
   "name": "The Maillard Reaction",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The browning chemistry behind steak crust and toast.",
+  "teaser": "The Maillard reaction is the browning that gives toast, steak, and coffee their flavor — when heat drives amino acids and sugars to react, hundreds of new aromatic compounds form. It starts around 140°C, which is why a sear needs a hot pan and boiled meat never browns. The same reaction makes bread crust, roasted coffee, and the golden edges of baked goods taste like themselves.",
   "byline": "The flavor maker",
   "tags": [
    "cooking",
@@ -3364,7 +3364,7 @@
   "name": "Caramelization",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The pure sugar transformation behind golden caramel.",
+  "teaser": "Caramelization is pure sugar chemistry: heat sugar past its melting point and it breaks down into a deep brown, intensely flavored mix of hundreds of compounds. Unlike the Maillard reaction, no proteins are needed — just sugar and heat. Go too far and it turns bitter and burns, which is why caramel-making is a delicate race between golden sweetness and acrid char.",
   "byline": "The sugar gold",
   "tags": [
    "sugar",
@@ -3384,7 +3384,7 @@
   "name": "Why Bread Rises",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The yeast gas bubbles that lift the loaf.",
+  "teaser": "Bread rises because yeast eats sugar and exhales carbon dioxide — the gas gets trapped in the gluten network, inflating the dough into a light loaf. The yeast also produces alcohol and acids that flavor the bread. Baking then kills the yeast, sets the structure, and drives off the alcohol, leaving the golden crust and airy crumb you slice.",
   "byline": "The rising science",
   "tags": [
    "bread",
@@ -3404,7 +3404,7 @@
   "name": "The Chemistry of Cooking Eggs",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "Why eggs turn white and firm when heated.",
+  "teaser": "An egg is mostly protein and water, and cooking is protein denaturation: heat untangles the protein chains, which then bond to each other and trap water, turning clear liquid into white solid. At 60°C they start to set, at 70°C the yolk firms, and above that the egg turns rubbery as water squeezes out. The perfect soft-boiled egg is a temperature problem solved to the minute.",
   "byline": "The protein change",
   "tags": [
    "eggs",
@@ -3424,7 +3424,7 @@
   "name": "Baking Soda vs Baking Powder",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The two leaveners and when each one rises.",
+  "teaser": "Baking soda is pure sodium bicarbonate — a base that needs an acid to react and release the carbon dioxide that leavens baked goods. Baking powder is soda plus a built-in acid, so it works without extra ingredients. That's why recipes with buttermilk call for soda, while neutral batters use powder: the leavening is a controlled acid-base reaction timed to the oven's heat.",
   "byline": "The rising twins",
   "tags": [
    "baking",
@@ -3444,7 +3444,7 @@
   "name": "Why Soda Fizzes",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The dissolved carbon dioxide waiting to escape.",
+  "teaser": "Soda fizzes because carbon dioxide is dissolved into the liquid under pressure — the bubbles are CO2 escaping. Colder liquid holds more gas, which is why warm soda goes flat faster, and the fizz is released in bursts at nucleation sites, which is why a dirty glass or a Mentos candy causes an explosive eruption. When you open the can, the pressure drops and the dissolved gas rushes out.",
   "byline": "The fizz science",
   "tags": [
    "fizz",
@@ -3464,7 +3464,7 @@
   "name": "The Chemistry of Coffee",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The acids, oils, and caffeine behind the perfect cup.",
+  "teaser": "Coffee is a chemical extraction: hot water pulls over a thousand compounds out of roasted beans — caffeine for stimulation, acids for brightness, oils for body, and the Maillard-produced aromatics for flavor. Water temperature matters: too hot over-extracts bitter compounds, too cool under-extracts sour ones. The perfect cup is a solvent-extraction problem tuned to the bean and your taste.",
   "byline": "The morning science",
   "tags": [
    "coffee",
@@ -3484,7 +3484,7 @@
   "name": "The Chemistry of Chocolate",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The fermentation and roasting behind chocolate's flavor.",
+  "teaser": "Chocolate's chemistry begins with fermentation and roasting of cacao beans, which develops hundreds of flavor compounds. Its smoothness comes from cocoa butter, a fat that melts just below body temperature — which is why chocolate melts in your mouth. The snap of good chocolate requires proper tempering, where the cocoa butter crystals are coaxed into the right form so the chocolate sets shiny and crisp.",
   "byline": "The sweet science",
   "tags": [
    "chocolate",
@@ -3504,7 +3504,7 @@
   "name": "The Chemistry of Cheese",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "How milk turns into curds, whey, and flavor.",
+  "teaser": "Cheese is milk transformed by enzymes and bacteria: rennet causes the milk proteins to curdle into solid curds, leaving liquid whey behind, and then cultures ferment the curds, developing flavor as they age. The chemistry of aging breaks down fats and proteins into the sharp, nutty, and funky compounds that make each cheese distinct. One gallon of milk makes about a pound of cheese.",
   "byline": "The milk transformation",
   "tags": [
    "cheese",
@@ -3524,7 +3524,7 @@
   "name": "The Chemistry of Pickling",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "How acid preserves vegetables and changes their crunch.",
+  "teaser": "Pickling preserves food in acid: vinegar or fermentation drops the pH low enough that bacteria can't survive. The acid also denatures proteins and changes texture — that's why pickled vegetables stay crisp in brine with salt and turn soft in straight vinegar. The sour tang you taste is hydrogen ions, and the longer food sits in the brine, the deeper the acid chemistry penetrates.",
   "byline": "The sour keeper",
   "tags": [
    "pickles",
@@ -3544,7 +3544,7 @@
   "name": "The Chemistry of Beer",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The grain, yeast, and hops behind every brew.",
+  "teaser": "Beer brewing is controlled fermentation: malted barley's starches are broken into sugars by enzymes, yeast ferments those sugars into alcohol and carbon dioxide, and hops add bitter acids that balance the sweetness. The yeast also produces hundreds of flavor compounds — esters that smell fruity, phenols that taste spicy. Temperature, grain, and yeast strain set the whole character of the brew.",
   "byline": "The brew science",
   "tags": [
    "beer",
@@ -3564,7 +3564,7 @@
   "name": "The Chemistry of Wine",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The grape fermentation and aging behind every bottle.",
+  "teaser": "Wine is grape juice fermented by yeast: sugars turn into alcohol and CO2, and the grape's acids, tannins, and aromatics carry into the wine. The chemistry doesn't stop at bottling — aging lets oxygen slowly react with tannins, softening the wine and developing new flavors over years. The vintage, soil, and yeast all shape which compounds the final bottle holds.",
   "byline": "The grape science",
   "tags": [
    "wine",
@@ -3584,7 +3584,7 @@
   "name": "Vinegar",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The two-step fermentation that turns alcohol sour.",
+  "teaser": "Vinegar is acetic acid — produced when bacteria ferment alcohol a second time, turning wine or cider into a sour liquid. The acid is what preserves pickles, cuts through oil in dressings, and dissolves limescale. Its cleaning power comes from the same chemistry: acetic acid breaks down mineral deposits and kills some bacteria, which is why vinegar is a kitchen all-rounder.",
   "byline": "The sour acid",
   "tags": [
    "vinegar",
@@ -3604,7 +3604,7 @@
   "name": "The Chemistry of Perfume",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The top, heart, and base notes behind every fragrance.",
+  "teaser": "Perfume is chemistry built for the nose: small volatile molecules evaporate off your skin and bind to olfactory receptors, and each scent is a blend of top notes (which evaporate fast), middle notes, and base notes (large molecules that linger for hours). A single perfume may contain hundreds of compounds, balanced so the fragrance unfolds over time as the lightest molecules leave first.",
   "byline": "The scent architecture",
   "tags": [
    "perfume",
@@ -3624,7 +3624,7 @@
   "name": "Essential Oils",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The concentrated plant chemistry behind scents and remedies.",
+  "teaser": "Essential oils are concentrated mixtures of volatile aromatic molecules distilled from plants — the compounds that give lavender, mint, and orange peel their scents. They're mostly terpenes, small hydrocarbon molecules that evaporate easily and interact with your scent receptors. Distilling pounds of plant material yields only a few drops of oil, which is why genuine oils are expensive.",
   "byline": "The plant essences",
   "tags": [
    "oils",
@@ -3644,7 +3644,7 @@
   "name": "Deodorant and Antiperspirant",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The chemistry that fights odor and sweat.",
+  "teaser": "Deodorant fights odor by changing the chemistry of sweat: body odor is caused by bacteria on your skin breaking down sweat compounds, so deodorants use antimicrobials to kill the bacteria and fragrance to mask what's left. Antiperspirants go further — aluminum salts plug the sweat ducts so less sweat reaches the surface. One manages the microbes, the other blocks the moisture.",
   "byline": "The freshness science",
   "tags": [
    "body",
@@ -3664,7 +3664,7 @@
   "name": "The Chemistry of Toothpaste",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The abrasives, fluoride, and foaming agents that clean teeth.",
+  "teaser": "Toothpaste is a carefully engineered abrasive gel: mild abrasives like silica polish away plaque, fluoride strengthens enamel by swapping into its crystal structure, and detergents foam to lift debris. The fluoride is the real chemistry — it turns the tooth surface into a harder, acid-resistant mineral called fluorapatite. Brushing is a tiny mineral-engineering project twice a day.",
   "byline": "The paste science",
   "tags": [
    "teeth",
@@ -3684,7 +3684,7 @@
   "name": "The Chemistry of Shampoo",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The surfactants that lift oil from hair without stripping it.",
+  "teaser": "Shampoo is detergent chemistry tuned for hair: surfactants lift oil and dirt off the strands, while conditioning agents deposit onto the hair to smooth the cuticle and reduce static. The balance matters — too much stripping leaves hair dry and frizzy, so modern formulas pair cleaning surfactants with silicone-based conditioners. pH is kept slightly acidic to keep the hair's protein structure intact.",
   "byline": "The hair wash",
   "tags": [
    "hair",
@@ -3704,7 +3704,7 @@
   "name": "The Chemistry of Laundry Detergent",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The enzymes and surfactants that dissolve stains.",
+  "teaser": "Laundry detergent is a cocktail of cleaning chemistry: surfactants lift grease, enzymes (protease for protein stains, amylase for starches) chop stains into soluble pieces, and builders soften hard water so the surfactants work better. Optical brighteners coat fabrics in molecules that absorb UV and re-emit blue light, making whites look whiter than they are. Every stain has a chemistry designed for it.",
   "byline": "The stain fighters",
   "tags": [
    "cleaning",
@@ -3724,7 +3724,7 @@
   "name": "Bleach",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The oxidizing power behind whitening and disinfecting.",
+  "teaser": "Bleach whitens by oxidizing: its hypochlorite ions attack the colored molecules in stains and pigments, breaking the chemical bonds that give them color. That's why it works on almost anything organic and why it's also a powerful disinfectant — the same oxidation destroys the proteins and enzymes of bacteria and viruses. The catch: that oxidizing power can also damage fabrics and skin, so bleach must be used with care.",
   "byline": "The whitener",
   "tags": [
    "bleach",
@@ -3744,7 +3744,7 @@
   "name": "Hydrogen Peroxide",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The unstable compound that foams on wounds.",
+  "teaser": "Hydrogen peroxide is water with an extra oxygen atom, and that extra oxygen makes it a gentle oxidizer: it fizzes on a cut as an enzyme in your blood (catalase) breaks it into water and oxygen gas. The same reaction slowly decomposes it in the bottle, which is why peroxide loses strength over time. It's the fizz of oxygen freed from a molecule that wants to settle down.",
   "byline": "The fizzing antiseptic",
   "tags": [
    "peroxide",
@@ -3764,7 +3764,7 @@
   "name": "Why Salt Melts Ice",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The freezing point depression behind winter roads.",
+  "teaser": "Salt melts ice by lowering the freezing point of water: the salt dissolves into the thin film of liquid on the ice, and the resulting saltwater can't freeze until it's much colder, so the ice turns to liquid. That's why roads are salted in winter — and why ice cream makers add salt to their ice: it stays liquid below 0°C and chills the mix faster.",
   "byline": "The ice melter",
   "tags": [
    "salt",
@@ -3784,7 +3784,7 @@
   "name": "Freezing Point Depression",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The dissolved particles that keep liquids liquid in the cold.",
+  "teaser": "Freezing point depression is the rule that dissolved substances lower a liquid's freezing temperature — saltwater freezes below 0°C, and antifreeze keeps car coolant liquid far below winter temperatures. The effect depends on how many dissolved particles there are, not what they are. It's the same physics behind salting icy sidewalks, de-icing planes, and keeping ice cream machines running cold.",
   "byline": "The anti-freeze science",
   "tags": [
    "solutions",
@@ -4284,7 +4284,7 @@
   "name": "The Chemistry of Smell",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The volatile molecules that dock with your scent receptors.",
+  "teaser": "Smell is chemistry in real time: molecules evaporating off a substance drift into your nose and dock onto receptor proteins, which signal your brain. Small structural changes completely change a smell — one atom moved can turn a pleasant scent into a foul one. Your nose carries about 400 different receptors that combine to recognize thousands of odors.",
   "byline": "The odor molecules",
   "tags": [
    "smell",
@@ -4304,7 +4304,7 @@
   "name": "Why Onions Make You Cry",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The tear gas chemistry of chopping onions.",
+  "teaser": "Onions make you cry because cutting them releases a chemical called syn-propanethial-S-oxide — a volatile gas that drifts into your eyes and reacts with their moisture to form sulfuric acid, which stings. The onion produces it as a defense when its cells are damaged. Chilling the onion or cutting it underwater slows the gas, which is why the tears are optional.",
   "byline": "The eye irritant",
   "tags": [
    "onions",
@@ -4324,7 +4324,7 @@
   "name": "The Tearless Onion Quest",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The genetically edited onions that do not make you cry.",
+  "teaser": "The tearless onion quest is real chemistry: scientists genetically engineered onions that can't produce the enzyme needed to make the eye-stinging gas, so they're mild to cut yet still taste oniony. The gas-producing pathway and the flavor pathway are separate, which is the trick. They've been developed but not yet widely sold — a reminder that even an onion is a chemical factory.",
   "byline": "The gentler onion",
   "tags": [
    "onions",
@@ -4344,7 +4344,7 @@
   "name": "Why Garlic Smells",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The sulfur chemistry that lingers on your breath.",
+  "teaser": "Garlic's smell comes from sulfur compounds, especially allicin, which forms when you cut or crush the clove and its enzymes meet. Allicin is unstable and breaks into other sulfur molecules — some of which are absorbed into your bloodstream and later released through your breath, skin, and sweat. That's why garlic's aroma lingers long after the meal, and why your body itself smells of it.",
   "byline": "The pungent bulb",
   "tags": [
    "garlic",
@@ -4364,7 +4364,7 @@
   "name": "The Asparagus Smell Mystery",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The compound some people smell and others cannot.",
+  "teaser": "Asparagus makes urine smell because it contains asparagusic acid, which your body breaks down into volatile sulfur compounds — the same family of molecules behind skunk spray and rotten eggs. They're excreted in urine within hours. Curiously, only about 40% of people can smell it at all, and the ability is genetic — both the production and the perception run in families.",
   "byline": "The divisive smell",
   "tags": [
    "asparagus",
@@ -4384,7 +4384,7 @@
   "name": "Why Cilantro Tastes Like Soap",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The taste receptor gene behind the great cilantro divide.",
+  "teaser": "Cilantro tastes like soap to some people because of genetics: a cluster of smell-receptor genes determines whether you can detect aldehydes — molecules also found in soap — that give cilantro its distinctive note. People with certain variants of the OR6A2 gene find the herb overwhelmingly soapy, while others get only the fresh, citrusy side. It's a flavor divide written in your DNA.",
   "byline": "The divisive herb",
   "tags": [
    "cilantro",
@@ -4404,7 +4404,7 @@
   "name": "The Bitter Taste Gene",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "Why Brussels sprouts taste different to different people.",
+  "teaser": "The bitter taste gene TAS2R38 decides whether broccoli and Brussels sprouts taste bitter to you. People with one version of the gene are 'supertasters' who detect bitter compounds (like PTC) intensely, while others barely taste them. That's why some kids hate greens and others eat them happily — the bitterness is real chemistry, and your genes set the volume.",
   "byline": "The sprout divide",
   "tags": [
    "taste",
@@ -4424,7 +4424,7 @@
   "name": "Pheromones",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The chemical signals that animals use to communicate.",
+  "teaser": "Pheromones are chemical signals that pass between members of the same species, carrying messages like alarm, trail-following, or mating readiness. Ants lay pheromone trails, moths can detect a mate's pheromone from kilometers away, and honeybees release alarm pheromones when threatened. Human pheromones are hotly debated — our reliance on scent is real, but the precise molecules are far from settled science.",
   "byline": "The hidden signals",
   "tags": [
    "pheromones",
@@ -4444,7 +4444,7 @@
   "name": "The Chemistry of Skunk Spray",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The sulfur compounds behind the unforgettable smell.",
+  "teaser": "Skunk spray is a cocktail of sulfur compounds called thiols — molecules built around sulfur that smell unbelievably strong because your nose detects them at parts per billion. The spray is a pressurized oil that can travel several meters and cling for days. Its staying power comes from those sulfur bonds, which are hard to break — which is why the smell outlasts the encounter.",
   "byline": "The stink chemistry",
   "tags": [
    "skunks",
@@ -4464,7 +4464,7 @@
   "name": "Removing Skunk Smell",
   "categoryId": "CHEMISTRY",
   "subtype": "Chemistry and society",
-  "teaser": "The oxidizing chemistry that actually neutralizes thiols.",
+  "teaser": "The classic skunk-smell remedy is a chemical reaction: hydrogen peroxide, baking soda, and dish soap work together to oxidize the thiols into odorless sulfonates. The baking soda helps the peroxide break the sulfur bonds, and the soap lifts the oils. Tomato juice just masks the smell — the real chemistry neutralizes it by changing the molecules themselves.",
   "byline": "The smell fix",
   "tags": [
    "skunks",
@@ -4484,7 +4484,7 @@
   "name": "The Green Flame",
   "categoryId": "CHEMISTRY",
   "subtype": "Pyrotechnics",
-  "teaser": "The copper chemistry behind green fire and signals.",
+  "teaser": "Copper burns green because its atoms, when heated, absorb energy and emit it as light at a characteristic green wavelength — each element has its own 'spectral fingerprint.' That's why copper salts tint flames green in fireworks and why the classic flame test identifies elements by color. Sodium flames yellow, strontium red, barium green — a color chart encoded in atomic structure.",
   "byline": "The green fire",
   "tags": [
    "flames",
@@ -4504,7 +4504,7 @@
   "name": "The Flame Test",
   "categoryId": "CHEMISTRY",
   "subtype": "Reactions",
-  "teaser": "The rainbow colors that identify metals in a flame.",
+  "teaser": "The flame test is chemistry's oldest identification trick: dip a wire into a metal salt, hold it in a flame, and the color tells you the metal. Sodium burns brilliant yellow, copper green, lithium crimson, potassium lilac. Each color comes from electrons jumping between energy levels and emitting a specific wavelength. The test is simple enough for a classroom yet precise enough to have helped discover elements.",
   "byline": "The color test",
   "tags": [
    "flames",
@@ -4524,7 +4524,7 @@
   "name": "The Red of Lithium",
   "categoryId": "CHEMISTRY",
   "subtype": "Pyrotechnics",
-  "teaser": "The crimson contribution of lithium and strontium salts.",
+  "teaser": "Lithium salts burn a deep crimson red, and that's the chemistry behind red fireworks and red emergency flares. The metal's atoms, heated by the burning fuel, emit light at a red wavelength. Lithium's vivid flame is so distinctive it helped chemists identify the element in the 1800s — a mineral that burned crimson revealed a new metal hiding inside.",
   "byline": "The red makers",
   "tags": [
    "fireworks",
@@ -4544,7 +4544,7 @@
   "name": "The Green of Barium",
   "categoryId": "CHEMISTRY",
   "subtype": "Pyrotechnics",
-  "teaser": "The emerald bursts made with barium salts.",
+  "teaser": "Barium salts burn green, making them the color source for green fireworks and signal flares. When heated, barium atoms emit light at green wavelengths, and the effect is so specific that barium's flame test is a textbook signature. Mix barium with a chlorine source and the green intensifies — the chlorine helps the emission. Green fireworks owe their glow to this heavy metal.",
   "byline": "The green bursts",
   "tags": [
    "fireworks",
@@ -4564,7 +4564,7 @@
   "name": "The Blue of Copper",
   "categoryId": "CHEMISTRY",
   "subtype": "Pyrotechnics",
-  "teaser": "The hardest color for firework makers to achieve.",
+  "teaser": "Copper is the chemist's blue: its salts burn a bright azure, and that's what colors blue fireworks. Blue is the hardest firework color to make because copper's emission is dim and easily washed out by other elements, so pyrotechnicians guard their formulas. Get the balance right and the sky fills with copper's signature — a blue that's pure atomic emission.",
   "byline": "The tricky blue",
   "tags": [
    "fireworks",
@@ -4584,7 +4584,7 @@
   "name": "The Yellow of Sodium",
   "categoryId": "CHEMISTRY",
   "subtype": "Pyrotechnics",
-  "teaser": "The brilliant yellow from sodium's signature glow.",
+  "teaser": "Sodium burns the easiest yellow in pyrotechnics — so easy that street lamps glow with it. Sodium's flame is so intense and so yellow that it drowns out other colors, which is why firework makers avoid sodium when they want subtle shades. Its yellow is the most common flame color in chemistry, and the same sodium emission lights the orange-yellow glow of many streetlights.",
   "byline": "The easy yellow",
   "tags": [
    "fireworks",
@@ -4604,7 +4604,7 @@
   "name": "Why Streetlights Are Orange",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The sodium vapor chemistry behind the orange glow.",
+  "teaser": "Orange streetlights glow because they contain sodium vapor: an electric current excites sodium atoms, which emit their characteristic yellow-orange light. It's cheap and efficient, which is why cities chose it for decades. The light is nearly monochromatic — it renders colors poorly, turning everything into shades of yellow, which is why modern LEDs with whiter light are replacing the sodium glow.",
   "byline": "The sodium glow",
   "tags": [
    "lighting",
@@ -4624,7 +4624,7 @@
   "name": "The Neon Light Revolution",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The glowing tubes that lit up the night.",
+  "teaser": "Neon lighting began in 1910 when Georges Claude, a French engineer, passed electricity through sealed tubes of neon gas and saw the first glowing red-orange sign. Each gas glows its own color — neon red, argon lavender, mercury blue — and the tubes could be bent into letters. By the 1920s, neon signs were a global phenomenon, lighting up city streets and defining nightlife.",
   "byline": "The glowing signs",
   "tags": [
    "neon",
@@ -4644,7 +4644,7 @@
   "name": "Blacklight Chemistry",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The invisible light that makes posters glow.",
+  "teaser": "A blacklight is a lamp that emits mostly ultraviolet light, invisible to the eye — and the magic is what it reveals: fluorescent molecules absorb the UV and re-emit it as visible color. That's why white shirts glow blue-purple, tonic water glows blue, and some minerals, stamps, and even scorpions light up. Security marks, detergents, and stage effects all exploit this invisible-to-visible trick.",
   "byline": "The hidden glow",
   "tags": [
    "fluorescence",
@@ -4664,7 +4664,7 @@
   "name": "Lasers",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The stimulated light that cuts, reads, and projects.",
+  "teaser": "A laser is a beam of perfectly aligned light made by stimulating atoms to emit in sync: energy pumps electrons up, and a cascade of identical photons pours out, all the same wavelength and direction. Lasers are chemistry and physics working together — the laser medium can be a gas, a crystal, or even a dye. They read CDs, cut steel, correct vision, and measure the distance to the Moon.",
   "byline": "The focused light",
   "tags": [
    "lasers",
@@ -4684,7 +4684,7 @@
   "name": "The Ruby Laser",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The first laser, fired from a ruby crystal in 1960.",
+  "teaser": "The first laser, built in 1960 by Theodore Maiman, used a ruby crystal — aluminum oxide doped with chromium, the same impurity that makes rubies red. A flash lamp pumped energy into the chromium ions, which released it as a pulse of deep red coherent light. Maiman's ruby laser proved the principle, and within decades lasers went from a lab curiosity to the backbone of modern technology.",
   "byline": "The first beam",
   "tags": [
    "lasers",
@@ -4704,7 +4704,7 @@
   "name": "Glow-in-the-Dark Paint",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The strontium aluminate pigments that charge in the light.",
+  "teaser": "Glow-in-the-dark paint works by phosphorescence: its pigment absorbs light energy during the day, and the electrons get trapped in higher energy states, then slowly release the energy as a dim glow over hours. Strontium aluminate is the modern pigment, far brighter and longer-lasting than the old zinc sulfide. The glow is stored sunlight, leaking back out in the dark.",
   "byline": "The charging glow",
   "tags": [
    "glow",
@@ -4724,7 +4724,7 @@
   "name": "The Radium Watch Dial Story",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The glowing paint that poisoned the women who painted it.",
+  "teaser": "In the 1910s and 20s, watch dials glowed with radium paint — the radioactive element's emissions excited the phosphor. Factory workers, mostly young women, painted the dials by licking their brushes to sharpen the tips, swallowing radium with every stroke. The deadly consequences — bone cancer and jaw necrosis — led to a landmark lawsuit that established workplace safety law. The 'Radium Girls' became a cautionary tale in chemistry's history.",
   "byline": "The glowing tragedy",
   "tags": [
    "radium",
@@ -4744,7 +4744,7 @@
   "name": "Tritium Glow",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The radioactive gas that makes watch hands glow without charging.",
+  "teaser": "Tritium is a radioactive form of hydrogen, and it powers self-glowing devices: its beta radiation excites a phosphor coating that emits light for years without batteries or sunlight. Gun sights, exit signs, and watch hands glow with tritium, and the decay is so gentle that the radiation is safely contained inside glass tubes. It's perpetual cold light, powered by nuclear decay.",
   "byline": "The self-powered glow",
   "tags": [
    "tritium",
@@ -4764,7 +4764,7 @@
   "name": "The Lead Paint Story",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "Why lead made paint great — and why it had to go.",
+  "teaser": "Lead paint was prized for its durability and bright colors — and it was everywhere in homes until science revealed the danger. Lead is a neurotoxin that damages developing brains, and children eating flaking paint chips or breathing lead dust suffered lasting harm. The US banned lead house paint in 1978, but millions of old homes still contain it, making it a lingering public health battle.",
   "byline": "The dangerous paint",
   "tags": [
    "lead",
@@ -4784,7 +4784,7 @@
   "name": "The Asbestos Story",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The fireproof mineral that turned out to be deadly.",
+  "teaser": "Asbestos was the 'magic mineral' of the 20th century — fireproof, cheap, and strong, it insulated buildings, ships, and brake pads everywhere. But its microscopic fibers, when inhaled, lodge in the lungs and can cause mesothelioma decades later. The mineral's fireproof chemistry turned out to be its deadliest feature, and the cleanup has become a multibillion-dollar industry.",
   "byline": "The fireproof danger",
   "tags": [
    "asbestos",
@@ -4804,7 +4804,7 @@
   "name": "The Plastic Problem",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "Why plastics last centuries and what recycling really does.",
+  "teaser": "Plastics are chemistry's most durable product — and that durability is the problem. A plastic bottle can persist for centuries because the carbon chains resist the microbes and water that break down natural materials. Plastic waste now chokes oceans, and microplastics have been found in the deep sea, Arctic ice, and even human blood. The same polymer chemistry that made plastics useful made them permanent.",
   "byline": "The lasting waste",
   "tags": [
    "plastics",
@@ -4824,7 +4824,7 @@
   "name": "Microplastics",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The tiny plastic fragments now found everywhere from oceans to blood.",
+  "teaser": "Microplastics are plastic fragments under five millimeters — shed from bottles, synthetic clothing, tires, and the weathering of larger litter. They're everywhere: in sea salt, bottled water, fish, and rain. Because they're made of nearly unbreakable polymers, they persist and accumulate up the food chain. Scientists are still mapping their effects, but the chemistry guarantees one thing: they don't go away.",
   "byline": "The invisible plastic",
   "tags": [
    "plastics",
@@ -4844,7 +4844,7 @@
   "name": "Bioplastics",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "The plant-based plastics designed to break down.",
+  "teaser": "Bioplastics are polymers made from plants — corn, sugarcane, or potato starch — instead of petroleum. Some are biodegradable, breaking down into CO2 and water under the right conditions, though many need industrial composting facilities to degrade at all. They're a promising chemistry, but 'plant-based' doesn't automatically mean 'breaks down in nature,' so the recycling symbols matter more than the marketing.",
   "byline": "The greener plastic",
   "tags": [
    "plastics",
@@ -4864,7 +4864,7 @@
   "name": "The Chemistry of Recycling",
   "categoryId": "CHEMISTRY",
   "subtype": "Materials",
-  "teaser": "How materials are sorted and reborn through chemistry.",
+  "teaser": "Recycling is chemistry in reverse: most materials must be cleaned, sorted, and broken back down before they can be remade. Metals are melted and reused almost infinitely; glass is crushed and remelted; paper fibers get shorter each cycle; plastics are the hardest, since each type needs its own chemistry and mixing types ruins the batch. The sorting you do at the bin decides how much chemistry can work.",
   "byline": "The rebirth science",
   "tags": [
    "recycling",
@@ -14565,7 +14565,7 @@
   "name": "Redox Reactions",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The electron transfers behind batteries, rust, and breathing.",
+  "teaser": "Redox — reduction-oxidation — is the electron-shuffling chemistry behind batteries, rust, bleach, and breathing. One species loses electrons (oxidized), another gains them (reduced), and the two always happen together. Your cells extract energy from food via a long chain of redox steps, and every rechargeable battery cycles redox reactions thousands of times.",
   "imageUrl": "",
   "byline": "The electron handoffs",
   "tags": [
@@ -14585,7 +14585,7 @@
   "name": "Oxidation Numbers",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The bookkeeping system that tracks electrons in compounds.",
+  "teaser": "Oxidation numbers are a bookkeeping system for electrons: each atom in a molecule gets a number tracking how many electrons it's gained or lost compared to the free element. Oxygen is almost always -2, hydrogen +1, and pure elements are 0. By tallying these numbers, chemists can see exactly which atoms are oxidized and which are reduced in any reaction.",
   "imageUrl": "",
   "byline": "The electron ledger",
   "tags": [
@@ -14605,7 +14605,7 @@
   "name": "Galvanic Cells",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The spontaneous reactions that make electricity.",
+  "teaser": "A galvanic cell is a battery in its purest form: two half-cells, each with a metal electrode dipped in its own ion solution, connected by a wire and a salt bridge. One metal dissolves, pushing electrons out; the other accepts them. The voltage between them depends on how badly each metal wants to shed electrons — the reactivity series turned into electricity.",
   "imageUrl": "",
   "byline": "The power cells",
   "tags": [
@@ -14625,7 +14625,7 @@
   "name": "Electrode Potentials",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The voltage rankings that predict redox spontaneity.",
+  "teaser": "Every metal has a characteristic 'want' to give up electrons, measured as an electrode potential. Zinc wants to shed them (negative potential), copper is content to accept them (positive), and the voltage of a cell is simply the difference between the two. This ladder of potentials is why a zinc-copper battery gives about 1.1 volts and why lithium's strong potential makes it so energetic.",
   "imageUrl": "",
   "byline": "The voltage ladder",
   "tags": [
@@ -14645,7 +14645,7 @@
   "name": "The Nernst Equation",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The equation adjusting cell voltage to concentration.",
+  "teaser": "The Nernst equation corrects a battery's voltage for what's actually in solution — concentrations shift the potential, and the equation quantifies exactly how much. It was derived by Walther Nernst in 1889 and earned him the 1920 Nobel Prize. It's why a dying battery reads lower voltage: the reactants have been consumed, and the equation predicts the sag.",
   "imageUrl": "",
   "byline": "The concentration fix",
   "tags": [
@@ -14665,7 +14665,7 @@
   "name": "Corrosion",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The electrochemical eating of metals.",
+  "teaser": "Corrosion is electrochemistry gone rogue: a metal like iron acts as a tiny battery, with wet patches as electrodes and dissolved oxygen as the other half of the cell. Electrons flow through the metal itself while ions move through the water, slowly dissolving the iron into rust. It costs the world hundreds of billions of dollars a year in bridges, pipelines, and ships.",
   "imageUrl": "",
   "byline": "The metal eater",
   "tags": [
@@ -14685,7 +14685,7 @@
   "name": "Sacrificial Anodes",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The disposable metals that protect ships from rust.",
+  "teaser": "A sacrificial anode is a metal more eager to corrode than the one you're protecting — zinc or magnesium bolted to a steel hull or water heater. Because zinc gives up electrons more readily, the steel becomes the cathode and never rusts; the zinc dissolves instead. Ships, pipelines, and water tanks carry these quietly dying bodyguards, replaced only when they've fully sacrificed themselves.",
   "imageUrl": "",
   "byline": "The bodyguards",
   "tags": [
@@ -14705,7 +14705,7 @@
   "name": "Cathodic Protection",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The electric current that shields pipelines and hulls.",
+  "teaser": "Cathodic protection stops corrosion by making the metal the cathode of an electric circuit so it can't lose electrons. It's done two ways: with sacrificial anodes that corrode instead, or with an impressed current from a power supply that pumps electrons into the structure. Pipelines, storage tanks, and bridge rebar across the world are kept alive by this invisible electric shield.",
   "imageUrl": "",
   "byline": "The current shield",
   "tags": [
@@ -14725,7 +14725,7 @@
   "name": "Electroplating Chemistry",
   "categoryId": "CHEMISTRY",
   "subtype": "Electrochemistry",
-  "teaser": "The electric metal coating behind shiny objects.",
+  "teaser": "Electroplating chemistry is all about the ions in the bath: dissolve gold, silver, or chromium salts in solution, dip the object as the cathode, and metal ions swim to it, gaining electrons and depositing as a smooth layer. Current density and bath temperature control the finish — bright or matte, thick or thin. The same science that plates jewelry also protects steel from rust.",
   "imageUrl": "",
   "byline": "The coating cells",
   "tags": [
