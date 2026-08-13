@@ -48,8 +48,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -1132,16 +1130,23 @@ private fun BoxScope.DetailStickyBar(
                     modifier = Modifier.padding(8.dp)
                 )
             }
-            DropdownMenu(
+            // v30 — the shared accent-themed menu: an opaque surface tinted
+            // toward the entry's category accent, Share/Edit in the themed
+            // ink, Delete in error red. No more hardcoded light container.
+            CurioDropdownMenu(
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false },
-                containerColor = Color(0xFFF2F5F8).copy(alpha = 0.92f),
-                shape = RoundedCornerShape(18.dp),
-                tonalElevation = 0.dp,
-                shadowElevation = 10.dp
+                accent = category.themedAccent()
             ) {
-                DropdownMenuItem(
-                    text = { Text("Share", color = heroCardInk) },
+                CurioDropdownItem(
+                    text = { Text("Share") },
+                    leadingIcon = {
+                        CurioIcon(
+                            name = CurioIcons.Share,
+                            contentDescription = null,
+                            size = 20.dp
+                        )
+                    },
                     onClick = {
                         menuExpanded = false
                         shareComposableCard(
@@ -1150,84 +1155,73 @@ private fun BoxScope.DetailStickyBar(
                             authority = authority,
                             card = { CurioShareCard(entry = resolvedEntry, category = category) }
                         )
-                    },
-                    leadingIcon = {
-                        CurioIcon(
-                            name = CurioIcons.Share,
-                            contentDescription = null,
-                            tint = heroCardInk,
-                            size = 20.dp
-                        )
                     }
                 )
                 if (isMultiSectionEntry(resolvedEntry)) {
-                    DropdownMenuItem(
-                        text = { Text("Edit entry", color = heroCardInk) },
+                    CurioDropdownItem(
+                        text = { Text("Edit entry") },
+                        leadingIcon = {
+                            CurioIcon(
+                                name = CurioIcons.Edit,
+                                contentDescription = null,
+                                size = 20.dp
+                            )
+                        },
                         onClick = {
                             menuExpanded = false
                             navController.navigate(CurioRoutes.editEntry(resolvedEntry.id)) {
                                 launchSingleTop = true
                             }
-                        },
+                        }
+                    )
+                } else if (isMoodBoardEntry(resolvedEntry)) {
+                    CurioDropdownItem(
+                        text = { Text("Edit mood board") },
                         leadingIcon = {
                             CurioIcon(
                                 name = CurioIcons.Edit,
                                 contentDescription = null,
-                                tint = heroCardInk,
                                 size = 20.dp
                             )
-                        }
-                    )
-                } else if (isMoodBoardEntry(resolvedEntry)) {
-                    DropdownMenuItem(
-                        text = { Text("Edit mood board", color = heroCardInk) },
+                        },
                         onClick = {
                             menuExpanded = false
                             navController.navigate(CurioRoutes.editMoodBoard(resolvedEntry.id)) {
                                 launchSingleTop = true
                             }
-                        },
+                        }
+                    )
+                } else {
+                    CurioDropdownItem(
+                        text = { Text("Edit entry") },
                         leadingIcon = {
                             CurioIcon(
                                 name = CurioIcons.Edit,
                                 contentDescription = null,
-                                tint = heroCardInk,
                                 size = 20.dp
                             )
-                        }
-                    )
-                } else {
-                    DropdownMenuItem(
-                        text = { Text("Edit entry", color = heroCardInk) },
+                        },
                         onClick = {
                             menuExpanded = false
                             navController.navigate(CurioRoutes.editEntry(resolvedEntry.id)) {
                                 launchSingleTop = true
                             }
-                        },
-                        leadingIcon = {
-                            CurioIcon(
-                                name = CurioIcons.Edit,
-                                contentDescription = null,
-                                tint = heroCardInk,
-                                size = 20.dp
-                            )
                         }
                     )
                 }
-                DropdownMenuItem(
-                    text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                    onClick = {
-                        menuExpanded = false
-                        onDeleteRequest()
-                    },
+                CurioDropdownItem(
+                    text = { Text("Delete") },
+                    danger = true,
                     leadingIcon = {
                         CurioIcon(
                             name = CurioIcons.Delete,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
                             size = 20.dp
                         )
+                    },
+                    onClick = {
+                        menuExpanded = false
+                        onDeleteRequest()
                     }
                 )
             }

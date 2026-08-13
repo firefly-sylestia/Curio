@@ -552,6 +552,10 @@ fun CabinetScreen(navController: NavController) {
                         onToggleDirection = { sortAscending = !sortAscending },
                         ink = ink,
                         backdrop = backdrop,
+                        // v30 — the trailing slot receives the hero FILL
+                        // (active category accent / rose / tertiary), which
+                        // lights the dropdown's selected row.
+                        accent = backdrop,
                         emphasized = true
                     )
                     CabinetHeroActionPill(

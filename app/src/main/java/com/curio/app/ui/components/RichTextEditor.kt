@@ -22,8 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -1206,21 +1204,26 @@ private fun SizePickerButton(
             onClick = { expanded = true },
             paper = paper
         )
-        DropdownMenu(
+        // v30 — the shared accent-themed menu: the current size row lights
+        // up in the format accent with a trailing check.
+        CurioDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            accent = accent
         ) {
             // "Default" first — the field's base size, checked when nothing
             // is armed (or the base size is current).
-            DropdownMenuItem(
+            CurioDropdownItem(
                 text = {
                     Text(
                         "Default · ${BASE_FONT_SP.toInt()}sp",
                         fontWeight = FontWeight.Medium
                     )
                 },
-                leadingIcon = {
-                    if (currentSp == BASE_FONT_SP) {
+                selected = currentSp == BASE_FONT_SP,
+                accent = accent,
+                trailingIcon = if (currentSp == BASE_FONT_SP) {
+                    {
                         CurioIcon(
                             name = CurioIcons.Check,
                             contentDescription = null,
@@ -1228,7 +1231,7 @@ private fun SizePickerButton(
                             size = 16.dp
                         )
                     }
-                },
+                } else null,
                 onClick = {
                     expanded = false
                     onPick(BASE_FONT_SP)
@@ -1236,10 +1239,12 @@ private fun SizePickerButton(
             )
             HorizontalDivider(color = accent.copy(alpha = 0.2f))
             SIZE_OPTIONS.forEach { sp ->
-                DropdownMenuItem(
+                CurioDropdownItem(
                     text = { Text("${sp.toInt()} sp", fontSize = sp.sp) },
-                    leadingIcon = {
-                        if (sp == currentSp) {
+                    selected = sp == currentSp,
+                    accent = accent,
+                    trailingIcon = if (sp == currentSp) {
+                        {
                             CurioIcon(
                                 name = CurioIcons.Check,
                                 contentDescription = null,
@@ -1247,7 +1252,7 @@ private fun SizePickerButton(
                                 size = 16.dp
                             )
                         }
-                    },
+                    } else null,
                     onClick = {
                         expanded = false
                         onPick(sp)

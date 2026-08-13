@@ -664,6 +664,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     onToggleDirection = { tdSortAscending = !tdSortAscending },
                     ink = ink,
                     backdrop = settingsRoseAccent(),
+                    accent = settingsRoseAccent(),
                     emphasized = true
                 )
                 // Search pill — the pet landmark moved with the search box

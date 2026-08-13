@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,8 +50,14 @@ data class CurioSortOption(
  * that read too dark in light and pastel themes — full-ink glyphs on top
  * stay readable in every mode.
  *
+ * v30 — the menu itself now runs through [CurioDropdownMenu]: an opaque
+ * surface tinted toward the page's CATEGORY ACCENT, with the selected row
+ * lit in that accent (the old stock menu never carried the page color).
+ *
  * @param ink the tint for the pill glass + glyphs — hero callers pass their
  *   hero ink; plain screens pass the theme primary.
+ * @param accent the page's category accent — tints the dropdown surface and
+ *   lights the active row.
  */
 @Composable
 fun CurioSortDropdown(
@@ -67,7 +71,9 @@ fun CurioSortDropdown(
     emphasized: Boolean = false,
     // v27n — the banner fill behind the pill (the opaque-fill conversion
     // needs it to resolve the same perceived tint on the hero).
-    backdrop: Color
+    backdrop: Color,
+    // v30 — the page/category accent that lights the dropdown's selected row.
+    accent: Color = MaterialTheme.colorScheme.primary
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selected = options.firstOrNull { it.key == selectedKey }
@@ -142,28 +148,27 @@ fun CurioSortDropdown(
                 }
             }
         }
-        // v29 — redesigned dropdown: taller rounded menu, tonal depth, a
-        // header line, and a check on the active field.
-        DropdownMenu(
+        // v30 — shared accent-themed menu: tinted surface, accent header,
+        // accent-lit active row with check.
+        CurioDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = RoundedCornerShape(20.dp),
-            tonalElevation = 3.dp,
-            shadowElevation = 14.dp
+            accent = accent,
+            header = {
+                Text(
+                    text = "Sort by",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.4.sp
+                    ),
+                    color = accent,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                )
+            }
         ) {
-            Text(
-                text = "Sort by",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.4.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-            )
             options.forEach { option ->
                 val active = option.key == selectedKey
-                DropdownMenuItem(
+                CurioDropdownItem(
                     text = {
                         Text(
                             text = option.label,
@@ -171,12 +176,14 @@ fun CurioSortDropdown(
                             else FontWeight.Normal
                         )
                     },
+                    selected = active,
+                    accent = accent,
                     trailingIcon = if (active) {
                         {
                             CurioIcon(
                                 name = CurioIcons.Check,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = accent,
                                 size = 18.dp
                             )
                         }
