@@ -61,6 +61,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.features.settings.settingsRoseAccent
@@ -183,47 +184,117 @@ fun TopicDatabaseScreen(navController: NavController) {
             TopicJsonLoader.cached(cat.id)?.let { topics -> cat to laneTopics(cat, topics) }
         }
     }
+    // v29 — the PREBUILT index path: scripts/build_topic_index.py merges
+    // every topic into one topic_index.json with the search keys + year
+    // PRE-COMPUTED, prewarmed at app start. When present, the browser
+    // renders from it INSTANTLY (one file read — no per-category parses,
+    // no runtime lowercase/year work) and stays flat as the catalog grows
+    // past 20k. Falls back to the live per-category load when the asset is
+    // missing (or still warming on a cold start).
+    val indexEntries by produceState<List<TopicIndexEntry>?>(
+        initialValue = TopicJsonLoader.cachedIndex(),
+        AppPreferences.hiddenCategoriesState,
+        AppPreferences.categoryOrderState
+    ) {
+        value = withContext(Dispatchers.Default) {
+            runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
+        }
+    }
+    val useIndex = indexEntries != null
+    // The fallback per-category load only runs when the index is absent.
     val catalogState by produceState<CatalogState>(
         initialValue = CatalogState(
             entries = cachedCatalog,
             loading = cachedCatalog.size < visibleCategories.size
         ),
         AppPreferences.hiddenCategoriesState,
-        AppPreferences.categoryOrderState
+        AppPreferences.categoryOrderState,
+        useIndex
     ) {
-        value = withContext(Dispatchers.Default) {
-            // Load the canonical lanes; the wildcard lane reuses those caches
-            // (its pool merges every lane, then we keep only its own
-            // curiosities) so the extra lane adds no duplicate parses.
-            CatalogState(
-                entries = visibleCategories.map { cat ->
-                    cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
-                },
-                loading = false
-            )
+        if (useIndex) {
+            value = CatalogState(entries = emptyList(), loading = false)
+        } else {
+            value = withContext(Dispatchers.Default) {
+                // Load the canonical lanes; the wildcard lane reuses those
+                // caches (its pool merges every lane, then we keep only its
+                // own curiosities) so the extra lane adds no duplicate parses.
+                CatalogState(
+                    entries = visibleCategories.map { cat ->
+                        cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
+                    },
+                    loading = false
+                )
+            }
         }
     }
-    val catalog = catalogState.entries
-    val catalogLoading = catalogState.loading
+    val catalog: List<Pair<CurioCategory, List<CurioTopic>>> = if (useIndex) {
+        remember(indexEntries, visibleCategories) {
+            val byId = indexEntries.orEmpty().groupBy { it.topic.categoryId }
+            visibleCategories.mapNotNull { cat ->
+                val topics = byId[cat.id]
+                    ?.map { it.topic }
+                    ?.let { laneTopics(cat, it) }
+                    .orEmpty()
+                if (topics.isEmpty()) null else cat to topics
+            }
+        }
+    } else {
+        catalogState.entries
+    }
+    val catalogLoading = !useIndex && catalogState.loading
     val totalTopics = catalog.sumOf { it.second.size }
 
     // Build the expensive search/sort fields off the composition thread once
-    // per catalog load. Sorting used to lowercase strings and create year
-    // regexes for thousands of topics on the UI thread on every chip tap.
-    val indexedTopics by produceState<List<IndexedTopic>>(emptyList(), catalog) {
-        value = withContext(Dispatchers.Default) {
-            catalog.flatMap { (cat, topics) ->
-                topics.map { topic ->
-                    IndexedTopic(
-                        category = cat,
-                        topic = topic,
-                        nameKey = topic.name.lowercase(),
-                        subtypeKey = topic.subtype.lowercase(),
-                        bylineKey = topic.byline.lowercase(),
-                        teaserKey = topic.teaser.lowercase(),
-                        tagKeys = topic.tags.map(String::lowercase),
-                        year = topicYear(topic)
-                    )
+    // per catalog load (the index path uses the PRE-COMPUTED keys + year, so
+    // that work disappears entirely). Sorting used to lowercase strings and
+    // create year regexes for thousands of topics on the UI thread on every
+    // chip tap.
+    val indexedTopics by produceState<List<IndexedTopic>>(
+        // Warm-cache seed: when the index is already prewarmed, the rows are
+        // ready on the very first frame — no "Preparing topics…" flash.
+        initialValue = TopicJsonLoader.cachedIndex().orEmpty().map { entry ->
+            IndexedTopic(
+                category = CurioCategories.byId(entry.topic.categoryId),
+                topic = entry.topic,
+                nameKey = entry.nameKey,
+                subtypeKey = entry.subtypeKey,
+                bylineKey = entry.bylineKey,
+                teaserKey = entry.teaserKey,
+                tagKeys = entry.tagKeys,
+                year = entry.year
+            )
+        },
+        catalog,
+        useIndex
+    ) {
+        value = if (useIndex) {
+            indexEntries.orEmpty().map { entry ->
+                IndexedTopic(
+                    category = CurioCategories.byId(entry.topic.categoryId),
+                    topic = entry.topic,
+                    nameKey = entry.nameKey,
+                    subtypeKey = entry.subtypeKey,
+                    bylineKey = entry.bylineKey,
+                    teaserKey = entry.teaserKey,
+                    tagKeys = entry.tagKeys,
+                    year = entry.year
+                )
+            }
+        } else {
+            withContext(Dispatchers.Default) {
+                catalog.flatMap { (cat, topics) ->
+                    topics.map { topic ->
+                        IndexedTopic(
+                            category = cat,
+                            topic = topic,
+                            nameKey = topic.name.lowercase(),
+                            subtypeKey = topic.subtype.lowercase(),
+                            bylineKey = topic.byline.lowercase(),
+                            teaserKey = topic.teaser.lowercase(),
+                            tagKeys = topic.tags.map(String::lowercase),
+                            year = topicYear(topic)
+                        )
+                    }
                 }
             }
         }
@@ -769,8 +840,10 @@ private fun BoxScope.DatabaseStickyChipBar(
     }
 }
 
-/** Per-pill pop — each chip scales 0.90 → 1.0 as the bar lifts to pin
- *  (staggered left→right, eased on the same curve as the bar's lift). */
+/** Per-pill pop — each chip rests at full size and pops subtly (1.0 → 1.05)
+ *  as the bar lifts to pin (v29: the old 0.90 rest scale made the pills
+ *  look like they were GROWING on entry — they now start full-size and
+ *  only breathe a touch when the bar actually pins). */
 @Composable
 private fun DatabaseChipPop(
     index: Int,
@@ -780,7 +853,7 @@ private fun DatabaseChipPop(
     val stagger = (index * 0.07f).coerceAtMost(0.85f)
     val pillProgress = ((frostShift - stagger) / (1f - stagger)).coerceIn(0f, 1f)
     val eased = FastOutSlowInEasing.transform(pillProgress)
-    val pillScale = androidx.compose.ui.util.lerp(0.90f, 1f, eased)
+    val pillScale = androidx.compose.ui.util.lerp(1f, 1.05f, eased)
     Box(
         modifier = Modifier.graphicsLayer {
             scaleX = pillScale

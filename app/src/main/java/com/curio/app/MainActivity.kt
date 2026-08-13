@@ -74,6 +74,15 @@ class MainActivity : ComponentActivity() {
         // v29 — load per-topic reading/watching progress before any screen
         // (reveal / Cabinet / detail) reads it.
         TopicProgressStore.seed(this)
+        // v29 — prewarm the topic catalog in the background so the Topic
+        // Database opens with ZERO loading: the prebuilt index (search keys
+        // + years precomputed at build time) is parsed once here, and the
+        // per-category pools land in the loader cache while the user does
+        // anything else. Both are cached, so screens read them instantly.
+        lifecycleScope.launch {
+            runCatching { TopicJsonLoader.loadIndex() }
+            runCatching { TopicJsonLoader.preloadAll() }
+        }
         // v27 — watch for device screenshots while a session (or a handed-off
         // write package) is live, so the user's own shots auto-join the
         // session. Permission-gated internally; the bubble's own capture
@@ -106,6 +115,15 @@ class MainActivity : ComponentActivity() {
         if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
             TopicJsonLoader.clearCache()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // v29 — re-seed progress on every resume: a killed-in-background
+        // process could otherwise show stale progress until a full restart
+        // (the vanish-then-reappear-after-restart symptom). The read is a
+        // tiny prefs load and the in-memory state is always newer-or-equal.
+        TopicProgressStore.seed(this)
     }
 
     override fun onNewIntent(intent: Intent) {

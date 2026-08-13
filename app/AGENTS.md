@@ -291,6 +291,68 @@ app/src/main/java/com/curio/app/
   clipboard (with a short toast) so the user can paste the topic name
   into the app's own search box. New `CurioIcons.ContentCopy`
   (`content_copy`, verified present in the bundled font subset).
+- **v29 — per-topic progress UI redesigned (pill + editor + placements).**
+  `CurioProgressPill` is now a COMPACT OPAQUE pill (count + optional slim
+  category-accent bar) with a new signature `(topic, accent, ink,
+  background, showBar)` — the old long accent-shaped control with the
+  `fill`/`contentColor` params is gone. The editor is a brand-new
+  `CurioProgressEditorDialog` in `ui/components/CurioProgressPill.kt`: the
+  dialog CONTAINER is the category accent (opaque, content rides the
+  on-accent color), a circular progress ring with big % + count, −/+ round
+  steppers (±1 precise change), a stepped slider (`steps = target-1`, capped
+  at 600), and ONLY Finish (quick-set to target) + Save (persist + close)
+  — NO Reset, NO Cancel (dismiss = tap-outside/back). Placements: Topic
+  Reveal hero shows a small OPAQUE frosted count badge at the TOP-RIGHT
+  corner (`lerp(accent, White, 0.85)` fill + accent text — the old
+  bottom-straddling pill that clipped during the shared-element morph is
+  gone); Entry Detail shows a small pill at the hero's BOTTOM-RIGHT (tint
+  background `lerp(surfaceContainerHigh, accent, 0.16)` + accent bar); the
+  Cabinet card shows progress IN the hero (see below).
+- **v29 — Cabinet card hero FILLS with progress.** `CurioEntryCard`'s 96dp
+  hero header now renders a rising progress fill anchored to its bottom
+  edge (`fillMaxHeight(fraction)` of the on-accent ink, denser at the base
+  with a bright 2dp level line at the current mark) plus a small opaque
+  count pill at the hero's bottom-right corner (tap → editor) — 50%
+  progress = half the hero colored, 100% = fully filled. Works on AMOLED
+  too (onAccent resolves to white there, so the fill reads as a brightening
+  over the black-glass hero). The old bottom body strip was removed.
+- **v29 — Cabinet + Topic DB category pills stop GROWING on entry.** The
+  sticky chip bars' per-pill pop rested at 0.90 scale, so every pill looked
+  like it was growing the moment the screen opened. `CabinetChipPop` and
+  `DatabaseChipPop` now rest at FULL size (1.0) and only breathe subtly
+  (1.0 → 1.05) as the bar actually pins on scroll; the color-bloom + lift
+  language is unchanged.
+- **v29 — device-screenshot watcher hardened.** `DeviceScreenshotWatcher`
+  coalesces MediaStore change bursts (one scan pass drains all queued
+  requests instead of piling up work), schedules ONE delayed re-pass
+  (~1.5s) to catch screenshots MediaStore indexes a beat AFTER the change
+  event (the reason a fresh shot sometimes never attached), and widens
+  `looksLikeScreenshot` to also match any image filed under a
+  `/Screenshots/` folder (some OEMs name shots IMG_…). The heavy query +
+  file copy stay on the serialized scan thread.
+- **v29 — progress never vanishes.** `TopicProgressStore.writeAll` now uses
+  `commit()` (was `apply()` — an async write could be lost when the
+  process died right after saving, showing as progress silently reset), and
+  `MainActivity.onResume` re-seeds the in-memory progress map from prefs so
+  a killed-in-background process heals on return instead of waiting for a
+  restart.
+- **v29 — Topic Database opens with ZERO loading (prebuilt index).**
+  `scripts/build_topic_index.py` (LOCAL tool, gitignored per the
+  `/scripts/*.py` rule — run `python3 scripts/build_topic_index.py` after
+  ANY topic edit) merges every `assets/topics/*.json` into ONE
+  `app/src/main/assets/topic_index.json` (`{"version":1,"topics":[…]}`, ~0.8MB
+  APK delta after asset compression) with the lowercased search keys and
+  the sort YEAR precomputed at BUILD time (same precedence as the DB's
+  `topicYear`: name paren → targetName paren → teaser year → instruction
+  year → decade tag). `TopicJsonLoader.loadIndex()` parses it once
+  (reusing `parseTopic`, cached, `cachedIndex()` sync accessor) and
+  `MainActivity` prewarms it in the background at cold start. The Topic
+  Database renders from the index when present (grouped per lane, wildcard
+  lane = wildcard.json originals only) — no per-category parses, no runtime
+  lowercase/year work — and gracefully falls back to the live per-category
+  load when the asset is missing. Scaling note for 20k+: the same
+  precompute-at-build idea is the path — a SQLite/FTS5 or FlatBuffers index
+  would keep instant queries at any size (see Prompt.md).
 - **v28 — scrolling pets look UP/DOWN in a line, never a circle.** The v27v
   "roll" played a FULL 2π CIRCLE of the eyes on every scroll — it read as
   the pet's eyes spinning whenever you scrolled. Replaced with a vertical

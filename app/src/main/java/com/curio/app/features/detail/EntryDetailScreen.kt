@@ -716,20 +716,25 @@ fun EntryDetailScreen(
                         }
                     }
                 }
-                // v29 — floating progress button for books (pages) and
-                // anime (episodes): a long accent-shaped control hovering
-                // over the hero's bottom edge. Tapping opens the progress
-                // editor (slider + Finished/Reset) — the SAME
-                // TopicProgressStore as the reveal card and the Cabinet
-                // cards, so progress follows the topic everywhere.
+                // v29 — progress pill (books: pages / anime: episodes) at
+                // the hero's BOTTOM-RIGHT corner: a small compact pill with
+                // the amount done — background TINT for the pill, category
+                // accent for the progress bar — tapping opens the redesigned
+                // editor. Same TopicProgressStore everywhere.
                 if (resolvedEntry.topic.progressTarget != null) {
                     CurioProgressPill(
                         topic = resolvedEntry.topic,
                         accent = cat.themedAccent(),
-                        contentColor = cat.onAccent(),
+                        ink = cat.categoryInk(),
+                        background = lerp(
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                            cat.themedAccent(),
+                            0.16f
+                        ),
+                        showBar = true,
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .offset(y = 12.dp)
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 16.dp, bottom = 14.dp)
                     )
                 }
             }

@@ -75,6 +75,10 @@ object TopicProgressStore {
     private fun writeAll(context: Context, map: Map<String, Int>) {
         val obj = JSONObject()
         map.forEach { (id, v) -> obj.put(id, v) }
-        prefs(context).edit().putString(KEY_PROGRESS, obj.toString()).apply()
+        // v29 — commit() (not apply()): an async apply() write can be LOST if
+        // the process is killed right after saving, which showed up as
+        // progress silently vanishing. The payload is tiny, so the sync
+        // write is negligible; durability now matches the UI.
+        prefs(context).edit().putString(KEY_PROGRESS, obj.toString()).commit()
     }
 }

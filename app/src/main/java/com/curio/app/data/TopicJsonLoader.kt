@@ -202,6 +202,63 @@ object TopicJsonLoader {
         }.getOrDefault(0)
     }
 
+    // ── Prebuilt Topic Database index (v29) ───────────────────────────────
+    // scripts/build_topic_index.py merges every assets/topics/*.json into
+    // one topic_index.json with the search keys (lowercased) and the sort
+    // YEAR precomputed at BUILD time. The Topic Database reads this single
+    // file — parsed once and prewarmed at app start — so it renders with
+    // ZERO loading and the per-topic runtime work (lowercasing, year regexes)
+    // stays flat as the catalog grows past 20k. Falls back to the live
+    // per-category load when the asset is absent.
+    private const val INDEX_ASSET = "topic_index.json"
+
+    @Volatile private var indexCache: List<TopicIndexEntry>? = null
+
+    /**
+     * Loads (once) and caches the prebuilt database index. Null when the
+     * asset is missing or malformed — callers fall back to per-category
+     * loads. Suspends on [Dispatchers.IO].
+     */
+    suspend fun loadIndex(): List<TopicIndexEntry>? = withContext(Dispatchers.IO) {
+        indexCache?.let { return@withContext it }
+        val am = assets ?: return@withContext null
+        val entries = runCatching {
+            val root = JSONObject(
+                am.open(INDEX_ASSET).bufferedReader().use { it.readText() }
+            )
+            val arr = root.getJSONArray("topics")
+            List(arr.length()) { i ->
+                val obj = arr.getJSONObject(i)
+                val topic = parseTopic(obj)
+                val year = if (obj.has("year") && !obj.isNull("year"))
+                    obj.optInt("year", 0).takeIf { it > 0 } else null
+                val keys = obj.optJSONObject("keys")
+                fun key(name: String, fallback: String): String {
+                    val k = keys?.optString(name, "")?.takeIf { it.isNotEmpty() }
+                    return k ?: fallback.lowercase()
+                }
+                val tagsArr = keys?.optJSONArray("tags")
+                val tagKeys = if (tagsArr != null)
+                    List(tagsArr.length()) { j -> tagsArr.getString(j) }
+                else topic.tags.map(String::lowercase)
+                TopicIndexEntry(
+                    topic = topic,
+                    year = year,
+                    nameKey = key("name", topic.name),
+                    subtypeKey = key("subtype", topic.subtype),
+                    bylineKey = key("byline", topic.byline),
+                    teaserKey = key("teaser", topic.teaser),
+                    tagKeys = tagKeys
+                )
+            }
+        }.getOrNull()
+        indexCache = entries
+        entries
+    }
+
+    /** Synchronous accessor — null until [loadIndex] first succeeds. */
+    fun cachedIndex(): List<TopicIndexEntry>? = indexCache
+
     /** Clears the cache. Safe to call from Android memory callbacks. */
     fun clearCache() {
         // Advance the generation and clear under the same monitor used by
@@ -292,6 +349,23 @@ object TopicJsonLoader {
         )
     }
 }
+
+/**
+ * One entry of the prebuilt Topic Database index (v29): the full topic
+ * plus the fields the browser used to derive at runtime — the lowercased
+ * search keys and the sort year — now precomputed at build time by
+ * scripts/build_topic_index.py, so the database renders instantly at any
+ * catalog size.
+ */
+data class TopicIndexEntry(
+    val topic: CurioTopic,
+    val year: Int?,
+    val nameKey: String,
+    val subtypeKey: String,
+    val bylineKey: String,
+    val teaserKey: String,
+    val tagKeys: List<String>
+)
 
 /** Thrown when a topic JSON file is missing or malformed. */
 class TopicLoadException(

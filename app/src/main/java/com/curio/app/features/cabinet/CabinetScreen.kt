@@ -1020,8 +1020,11 @@ private fun CabinetChipPop(
     // track the scroll 1:1 while the bar eased, which read as a slightly
     // mechanical, janky pop. Easing it settles every pill in sync with the
     // bar's glide.
+    // v29 — pills REST at full size (1.0) and only pop subtly (1.05) while
+    // the bar actually pins: the old 0.90 rest scale made every pill look
+    // like it was GROWING when the Cabinet opened.
     val eased = FastOutSlowInEasing.transform(pillProgress)
-    val pillScale = androidx.compose.ui.util.lerp(0.90f, 1f, eased)
+    val pillScale = androidx.compose.ui.util.lerp(1f, 1.05f, eased)
     // v7.96 — COLOR MORPH: as each pill pops, its neutral surface blooms
     // toward its accent [popSurface] and it lifts with a soft shadow — every
     // chip ripples with its own color as the bar pins, instead of scaling

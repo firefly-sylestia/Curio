@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -41,6 +43,7 @@ import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
+import com.curio.app.data.TopicProgressStore
 import com.curio.app.data.formatSessionShort
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -184,6 +187,56 @@ fun CurioEntryCard(
                         )
                     }
                 }
+
+                // ── v29 — progress lives IN the hero: the card's hero
+                //    header FILLS with progress (50% → half filled, 100% →
+                //    fully colored) and a small opaque count pill in the
+                //    bottom-right corner opens the editor. Same
+                //    TopicProgressStore as the reveal + detail heroes.
+                val progressTarget = entry.topic.progressTarget
+                if (progressTarget != null && progressTarget > 0) {
+                    val current = TopicProgressStore.get(entry.topic.id)
+                    val fraction = (current.toFloat() / progressTarget).coerceIn(0f, 1f)
+                    val fillInk = cat.onAccent()
+                    if (current > 0) {
+                        // Rising fill — anchored to the hero's bottom edge:
+                        // half done = half filled. Denser at the base with a
+                        // bright level line at the current progress mark; the
+                        // card's own gradient shows through above the level.
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .fillMaxHeight(fraction)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            fillInk.copy(alpha = 0.34f),
+                                            fillInk.copy(alpha = 0.08f)
+                                        )
+                                    )
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .fillMaxWidth()
+                                    .height(2.dp)
+                                    .background(fillInk.copy(alpha = 0.55f))
+                            )
+                        }
+                    }
+                    CurioProgressPill(
+                        topic = entry.topic,
+                        accent = accent,
+                        ink = cat.accent,
+                        background = lerp(accent, Color.White, 0.85f),
+                        showBar = false,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                    )
+                }
             }
 
             // ── Minimal body — title, when-it-was-saved, format symbol.
@@ -243,20 +296,6 @@ fun CurioEntryCard(
                     }
                     EntryFormatBadges(entry)
                 }
-            }
-            // v29 — per-topic progress (books: pages, anime: episodes): a
-            // compact long accent strip at the bottom of the card that also
-            // works as a tap-to-edit control. Reads the SAME TopicProgressStore
-            // as the reveal card and the detail hero, so marking progress
-            // anywhere follows the topic everywhere.
-            if (entry.topic.progressTarget != null) {
-                Spacer(Modifier.height(8.dp))
-                CurioProgressPill(
-                    topic = entry.topic,
-                    accent = accent,
-                    contentColor = cat.onAccent(),
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }

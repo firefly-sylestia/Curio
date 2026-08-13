@@ -67,6 +67,7 @@ object CurioIcons {
     const val ChevronRight = "chevron_right"   // › — unified forward arrow
     const val Check       = "check"            // ✓
     const val Add         = "add"              // +
+    const val Remove      = "remove"           // −
     const val AutoAwesome = "auto_awesome"     // sparkles / logomark
     const val Tune         = "tune"            // sliders — Preferences settings entry
     const val Inventory2  = "inventory_2"      // cabinet empty state

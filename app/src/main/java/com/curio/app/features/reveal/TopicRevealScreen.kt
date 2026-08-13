@@ -1786,25 +1786,29 @@ private fun HeroCard(
                     }
                 }
             }
+
+            // ── v29 — progress badge (pages read / episodes watched) at
+            //    the hero's TOP-RIGHT corner: a small OPAQUE frosted pill
+            //    (count only) that opens the progress editor on tap. The
+            //    old long bottom-straddling control is gone — the corner
+            //    badge never clips during the shared-element morph and
+            //    its solid fill reads on any hero gradient, light or dark.
+            val heroTopic = resolved
+            if (heroTopic != null && heroTopic.progressTarget != null) {
+                CurioProgressPill(
+                    topic = heroTopic,
+                    accent = cat.accent,
+                    ink = cat.accent,
+                    background = lerp(cat.accent, Color.White, 0.85f),
+                    showBar = false,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 16.dp, end = 16.dp)
+                )
+            }
             } // inner background Box
         } // BoxWithConstraints
     } // HeroCard Surface
-
-    // ── Floating progress button — straddles the hero's bottom edge. ──
-    // v29 — the long accent-shaped control floats half-on the card so it
-    // reads as a button hovering over the hero; tapping opens the progress
-    // editor (slider + Finished/Reset) which writes to TopicProgressStore.
-    val heroTopic = resolved
-    if (heroTopic != null) {
-        CurioProgressPill(
-            topic = heroTopic,
-            accent = cat.themedAccent(),
-            contentColor = cat.onAccent(),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .offset(y = 22.dp)
-        )
-    }
     } // HeroCard floating Box
 }
 
