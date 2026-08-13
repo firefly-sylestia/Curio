@@ -1,6 +1,41 @@
 # Prompt.md — Request log
 
-## Current request — Pet eyes: stop looking after 2s, respond to touch scroll (v27v)
+## Current request — Custom pet design save + always-on + custom-pet look (v27v)
+
+### What was asked
+"When I tap save it says the design is saved, but the design doesn't
+change. Fix it while keeping all animations and sides and sleep matching
+the user's design. Let the user add the custom pet design — it wasn't
+working — and it should work regardless of the level or the pet; it should
+act as a new pet with the new animation system. Custom accessories and
+antenna should be OFF; only blush, eyes and effects enabled in the custom
+pet."
+
+### Root cause
+`CurioPetSprite`'s design resolution had:
+`stage == BABY -> PetDesign.evolutionDesign(BABY, null)` — ANY baby-stage
+pet (level < 15, i.e. most users) forced the baby default art and IGNORED
+the saved custom design. "Save" persisted, but the sprite never used it.
+
+### Fix
+- **Sprite** (`ui/pet/CurioPetSprite.kt`): a saved custom design now
+  ALWAYS wins, regardless of stage; stage-based evolution art only applies
+  when no custom design exists. Animations, view angles and the curled
+  sleep pose already flow from the winning design, so a custom pet is its
+  own new pet automatically.
+- **PetDesign** (`data/PetDesign.kt`): new `withCustomPetDefaults()` —
+  procedural map: tail/belly/accessories/antenna OFF, effects ON (blush +
+  eyes are FACE features, not procedural layers, so they stay on).
+- **PetDesignerScreen**: `saveAsNewPet()` and saving-into-a-custom-slot
+  both stamp the defaults; the plain Curie save keeps the working design
+  exactly as edited.
+
+### Validation
+Brace balance OK (3 files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v27v bullet.
+Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — Pet eyes: stop looking after 2s, respond to touch scroll (v27v)
 
 ### What was asked
 "The pet keeps looking while following the scroll and tap — it should stop

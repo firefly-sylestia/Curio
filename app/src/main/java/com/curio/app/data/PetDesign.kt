@@ -1114,6 +1114,27 @@ data class PetDesign(
     /** Missing flags intentionally mean enabled for old designs. */
     fun isProceduralEnabled(element: String): Boolean = procedural[element] ?: true
 
+    /**
+     * v27v — a CUSTOM pet is its own art: the procedural accessories
+     * (leaf sprout / element badge / halo), antenna (nightcap + thinking
+     * "?"), tail and belly flourishes stay OFF — the user's drawn design
+     * IS the look. Only the effects layer (sparkles, sleep Z's, whooshes)
+     * stays enabled. Blush and the eyes are FACE features, not procedural
+     * layers, so they remain enabled automatically. Applied when a design
+     * is saved as a new custom pet (and when updating one), so custom pets
+     * wear the clean art the user drew instead of stacking the built-in
+     * species flourishes on top.
+     */
+    fun withCustomPetDefaults(): PetDesign = copy(
+        procedural = mapOf(
+            "tail" to false,
+            "belly" to false,
+            "accessories" to false,
+            "effects" to true,
+            "antenna" to false
+        )
+    )
+
     // ── Custom actions (v8.53, Phase 7) ────────────────────────────────
 
     /** The custom action with [id], or null. */

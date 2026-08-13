@@ -306,18 +306,16 @@ fun CurioPetSprite(
     // saved in the playground). Parsing is cheap (16+16 rows) and cached
     // per text via remember.
     val savedText = AppPreferences.petDesignState
+    // v27v — a SAVED custom design ALWAYS wins, regardless of the pet's
+    // growth stage: the old code forced `evolutionDesign(BABY, null)` for
+    // any baby-stage pet (level < 15), so "Save" said success but the pet
+    // never changed for the majority of users. The stage-based evolution
+    // art now only applies when NO custom design exists. Animations, view
+    // angles and the sleep (curled) pose all flow from the winning design
+    // automatically, so a custom pet behaves like its own new pet.
     val activeDesign = remember(savedText, design, stage) {
         val base = design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
-        val resolved = base ?: PetDesign.DEFAULT
-        // Baby remains the original hand-tuned 16×16 form. A fresh evolved
-        // pet gets the new path-specific 64×64 guardian design; an existing
-        // saved/custom design keeps its legacy canvas size unchanged.
-        when {
-            stage == CurioPet.Stage.BABY -> PetDesign.evolutionDesign(CurioPet.Stage.BABY, null)
-            design == null && savedText == null ->
-                PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
-            else -> resolved
-        }
+        base ?: PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
     }
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
     // v8.10 — the scarf/aura accent is hardcoded to the Curio light-theme

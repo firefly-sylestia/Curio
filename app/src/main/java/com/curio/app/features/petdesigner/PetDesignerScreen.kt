@@ -478,14 +478,18 @@ fun PetDesignerScreen(navController: NavController) {
     // make it the ACTIVE design (v27t), so "Save as new pet" really puts it
     // on the pet everywhere. No pushUndo: the working design itself doesn't
     // change (the slot write is its own persisted copy, not an editable edit).
+    // v27v — the saved copy also wears the custom-pet defaults (procedural
+    // accessories/antenna/tail/belly off, effects on), so a custom pet is
+    // its own clean art instead of stacking the built-in flourishes.
     fun saveAsNewPet() {
         val slot = customPets.indexOfFirst { it == null }
         if (slot == -1) {
             toast = "Both custom pet slots are full — delete one to make room"
             return
         }
-        AppPreferences.setCustomPet(context, slot, design.toText())
-        AppPreferences.setPetDesign(context, design.toText())
+        val saved = design.withCustomPetDefaults()
+        AppPreferences.setCustomPet(context, slot, saved.toText())
+        AppPreferences.setPetDesign(context, saved.toText())
         activeCustomSlot = slot
         toast = "Saved as Custom ${slot + 1} — it's now your pet"
     }
@@ -546,13 +550,19 @@ fun PetDesignerScreen(navController: NavController) {
         },
                         onSave = {
                             if (design.isCustom) {
-                                AppPreferences.setPetDesign(context, design.toText())
+                                // v27v — saving into a custom slot reapplies
+                                // the custom-pet defaults (accessories /
+                                // antenna / tail / belly off, effects on);
+                                // the plain Curie save keeps the working
+                                // design exactly as edited.
+                                val slot = activeCustomSlot
+                                val saved = if (slot != null) design.withCustomPetDefaults() else design
+                                AppPreferences.setPetDesign(context, saved.toText())
                                 // v8.56 — saving while editing a custom pet
                                 // also refreshes its slot so the Pets page
                                 // card always shows the latest look.
-                                val slot = activeCustomSlot
                                 if (slot != null) {
-                                    AppPreferences.setCustomPet(context, slot, design.toText())
+                                    AppPreferences.setCustomPet(context, slot, saved.toText())
                                     toast = "Saved — Custom ${slot + 1} updated"
                                 } else {
                                     toast = "Saved — Curie wears it everywhere"
