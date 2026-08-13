@@ -264,6 +264,8 @@ object AppPreferences {
     var paperHeaderCutsState by mutableStateOf(false)
     var paperHeaderHolesState by mutableStateOf(false)
     var paperHoleRingsState by mutableStateOf(false)
+    /** v27v — which 3D ring style the pin holes wear ("coil" | "split" | "oblique"). */
+    var paperHoleRingStyleState by mutableStateOf("coil")
     var paperStatCardsState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
@@ -505,6 +507,7 @@ object AppPreferences {
         paperHeaderCutsState = isPaperHeaderCutsEnabled(context)
         paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
         paperHoleRingsState = isPaperHoleRingsEnabled(context)
+        paperHoleRingStyleState = getPaperHoleRingStyle(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
         homeTintState = isHomeTintEnabled(context)
@@ -750,6 +753,7 @@ object AppPreferences {
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
+    private const val KEY_PAPER_HOLE_RING_STYLE = "paper_hole_ring_style"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
     private const val KEY_HOME_TINT = "home_tint"
     private const val KEY_HOME_HERO_TINT = "home_hero_tint"
@@ -776,13 +780,23 @@ object AppPreferences {
         paperHeaderHolesState = enabled
     }
 
-    /** Whether the pin holes wear tilted metal book rings (experimental, default off). */
+    /** Whether the pin holes wear 3D metal rings (experimental, default off). */
     fun isPaperHoleRingsEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_PAPER_HOLE_RINGS, false)
 
     fun setPaperHoleRingsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_HOLE_RINGS, enabled).apply()
         paperHoleRingsState = enabled
+    }
+
+    /** Which 3D ring style the pin holes wear: "coil" | "split" | "oblique" (default "coil"). */
+    fun getPaperHoleRingStyle(context: Context): String =
+        prefs(context).getString(KEY_PAPER_HOLE_RING_STYLE, "coil")?.takeIf { it in setOf("coil", "split", "oblique") }
+            ?: "coil"
+
+    fun setPaperHoleRingStyle(context: Context, style: String) {
+        prefs(context).edit().putString(KEY_PAPER_HOLE_RING_STYLE, style).apply()
+        paperHoleRingStyleState = style
     }
 
     /** Whether Home's background + bottom nav wear the category tint (experimental, default off). */

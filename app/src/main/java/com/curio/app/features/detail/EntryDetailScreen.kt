@@ -149,6 +149,9 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.paperStatCardColor
+import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -566,52 +569,90 @@ fun EntryDetailScreen(
                         "Portfolio" else resolvedEntry.format.shortName
                     val heroTypeGlyph = if (resolvedEntry.captureData is CaptureData.Portfolio)
                         CurioIcons.Inventory2 else formatGlyph(resolvedEntry.format)
+                    // v27v — the paper & headers experiment extends to this
+                    // meta card: with "Paper stat card" on, the Date · Mood ·
+                    // Session · Type grid wears the shared opaque paper
+                    // surface (same fill, 3-hole column, rings, torn edges as
+                    // Home/Profile) instead of the frosted glass. Holes punch
+                    // through to the hero behind; the torn shape is seeded
+                    // per entry so the rip never re-rolls.
+                    val metaPaperOn = AppPreferences.paperStatCardsState
+                    val metaPaperBg = paperStatCardColor(heroSheetColor)
+                    val metaTearOn = metaPaperOn && AppPreferences.paperStatTearState
+                    val metaShape: Shape = remember(tearSeed, metaTearOn) {
+                        if (metaTearOn) TornStatPaperShape(tearSeed xor 0x6B4E3E) else RoundedCornerShape(18.dp)
+                    }
+                    val metaHolesOn = metaPaperOn && AppPreferences.paperHeaderHolesState
+                    val metaRingsOn = metaHolesOn && AppPreferences.paperHoleRingsState
+                    val metaRingStyle = AppPreferences.paperHoleRingStyleState
                     Surface(
-                        shape = RoundedCornerShape(18.dp),
+                        shape = metaShape,
                         // v27n — frosted glass pane over the hero: the
                         // translucent frost can't hold an elevation shadow
-                        // (it bleeds through), so the pane stays flat.
+                        // (it bleeds through), so the frosted pane stays
+                        // flat; the opaque paper card can lift like Home's.
                         color = Color.Transparent,
-                        shadowElevation = 0.dp
+                        shadowElevation = if (metaPaperOn) 3.dp else 0.dp
                     ) {
                         // The card's content Box: the Row below defines the
-                        // height, and the frosted pane + glass tint match its
-                        // size (BoxScope — the Surface content scope is NOT
-                        // BoxScope, so matchParentSize must live in an
-                        // explicit Box).
+                        // height, and the paper fill / frosted pane + glass
+                        // tint match its size (BoxScope — the Surface content
+                        // scope is NOT BoxScope, so matchParentSize must live
+                        // in an explicit Box).
                         Box(Modifier.fillMaxWidth()) {
-                            // ── Frosted pane — a blurred bloom of the hero's
-                            // color behind the glass, clipped to the card and
-                            // sitting BEHIND the crisp segments. Strong
-                            // enough that the card visibly glows with its
-                            // banner's color (RenderEffect on API 31+;
-                            // software blur below).
-                            Box(
-                                // The frosted pane is a STATIC vertical glow
-                                // instead of a per-frame 18dp RenderEffect
-                                // blur: over a flat color the blur was a
-                                // visual no-op but cost GPU time on every
-                                // scroll frame (the laggy detail scrolling).
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                heroStart.copy(alpha = 0.30f),
-                                                heroStart.copy(alpha = 0.16f)
+                            if (metaPaperOn) {
+                                // v27v — the shared opaque paper card (fill +
+                                // hole column + rings or rims), punched with
+                                // the SAME shape the Surface wears.
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .paperStatCardFill(
+                                            shape = metaShape,
+                                            fill = metaPaperBg,
+                                            holesOn = metaHolesOn,
+                                            ringsOn = metaRingsOn,
+                                            ringStyle = metaRingStyle,
+                                            ink = heroCardInk
+                                        )
+                                )
+                            } else {
+                                // ── Frosted pane — a blurred bloom of the
+                                // hero's color behind the glass, clipped to
+                                // the card and sitting BEHIND the crisp
+                                // segments. Strong enough that the card
+                                // visibly glows with its banner's color
+                                // (RenderEffect on API 31+; software blur
+                                // below).
+                                Box(
+                                    // The frosted pane is a STATIC vertical
+                                    // glow instead of a per-frame 18dp
+                                    // RenderEffect blur: over a flat color
+                                    // the blur was a visual no-op but cost
+                                    // GPU time on every scroll frame (the
+                                    // laggy detail scrolling).
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    heroStart.copy(alpha = 0.30f),
+                                                    heroStart.copy(alpha = 0.16f)
+                                                )
                                             )
                                         )
-                                    )
-                                    .clip(RoundedCornerShape(18.dp))
-                            )
-                            // Theme-aware frost: dark non-pastel gets a
-                            // restrained midnight surface; light and pastel
-                            // retain the bright paper-glass treatment.
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .background(heroFrostBrush)
-                            )
+                                        .clip(RoundedCornerShape(18.dp))
+                                )
+                                // Theme-aware frost: dark non-pastel gets a
+                                // restrained midnight surface; light and
+                                // pastel retain the bright paper-glass
+                                // treatment.
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(heroFrostBrush)
+                                )
+                            }
                             Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 9.dp),
                             verticalAlignment = Alignment.CenterVertically

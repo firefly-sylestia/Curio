@@ -236,9 +236,29 @@ app/src/main/java/com/curio/app/
   procedural accessories (leaf/badge/halo), antenna (nightcap + thinking
   ?), tail and belly stay OFF; only the effects layer (sparkles, Z's,
   whooshes) stays on. Blush + eyes are FACE features, not procedural
-  layers, so they stay enabled automatically. Applied by `saveAsNewPet()`
-  and when saving updates a custom slot (plain Curie saves keep the
-  working design exactly as edited).
+  layers, so they stay enabled automatically. Applied by  `saveAsNewPet()` and when saving updates a custom slot (plain Curie
+  saves keep the working design exactly as edited).
+- **v27v — 3D steel ring styles, Home tint pills, softer torn edges, paper
+  detail meta card.** (1) The "Hole rings" experiment now draws REAL 3D
+  steel rings through the 3 punch holes (`PaperStatCard.kt`) in three
+  selectable looks — "coil" (spring wire through the hole: bright front
+  arc over the paper, dark back arc receding into the hole), "split"
+  (closed metal torus with a split gap + top glint), "oblique" (a few
+  short coil segments springing diagonally out of the hole) — picked via a
+  new Experiments → Ring style row (`paperHoleRingStyleState`, default
+  "coil"; each style shares the steel gradient + contact shadow). (2) Home
+  tint: `heroTintOn`/`heroFill`/`questInk` are hoisted to the top of
+  `HomeScreen` so the sticky MENU + PROFILE pills wear the hero tint too
+  when "Hero tint too" is on (they previously always fell back to rose);
+  follow-my-Spin-lane still never tints the hero. (3) `TornStatPaperShape`
+  rework: the top edge is a NEW re-seeded tear (soft waves + gentle ragged
+  layer, no longer the inverted hero seam) and the three sides are SOFTER
+  (amplitude 3.5→2.2dp, high-frequency octave faded) so the card reads as
+  real torn paper, not spikes. (4) The paper & headers experiments now
+  extend to Entry Detail's Date · Mood · Session · Type meta card — when
+  "Paper stat card" is on it swaps the frosted glass for the shared opaque
+  paper surface (paperStatCardFill with the same holes/rings/torn
+  toggles; torn seed = per-entry tearSeed xor 0x6B4E3E).
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

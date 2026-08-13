@@ -1,6 +1,49 @@
 # Prompt.md — Request log
 
-## Current request — Custom pet design save + always-on + custom-pet look (v27v)
+## Current request — 3D steel rings (3 styles), Home tint pills, torn-edge rework, paper detail card (v27v)
+
+### What was asked
+"The hole rings aren't that — I meant spring-like rings through the holes
+in a spiral look, sticking out, steel type, 3D. Research properly and ask
+me again for confirmation. Also: Home tint — follow-my-Spin-lane must NOT
+tint the hero; when Hero tint is on, the profile + menu pills should get
+the color too. Torn paper edges: change the upper torn style/seed and the
+other sides look too sharp. Expand the paper & headers experiment to the
+detail page's mood/date stat card too."
+
+### User decisions (ask_user)
+- Rings: build ALL THREE styles as options with preview — pick the final
+  one later.
+- Home tint: all three items (follow-lane never tints hero; pills follow
+  hero tint; existing toggles otherwise unchanged).
+- Torn edges: new top tear style + soften sides.
+- Detail page: meta card + title lines.
+
+### Done
+- **PaperStatCard.kt** — three 3D steel ring looks behind a
+  `paperHoleRingStyleState` pref ("coil" | "split" | "oblique"): coil =
+  spring wire through the hole (bright front arc over paper, dark back arc
+  into the hole + specular); split = closed metal torus with a split gap;
+  oblique = short coil segments springing diagonally out of the hole.
+  Shared steel gradient + contact shadow. Experiments gained a "Ring
+  style" picker row (enabled with Hole rings). Home/Profile/Detail pass
+  the style through `paperStatCardFill`.
+- **HomeScreen** — `heroTintOn`/`heroFill`/`questInk` hoisted to the top
+  so the sticky MENU + PROFILE pills wear the hero tint when "Hero tint
+  too" is on; follow-my-Spin-lane still never tints the hero.
+- **PaperCard.kt** — `TornStatPaperShape` rework: new re-seeded top tear
+  (soft waves + gentle raggedness, not the inverted hero seam) and softer
+  sides (3.5→2.2dp amplitude, high-frequency octave faded).
+- **EntryDetailScreen** — the Date · Mood · Session · Type meta card swaps
+  frosted glass for the shared paper surface when "Paper stat card" is on
+  (same holes/rings/torn toggles, per-entry torn seed).
+
+### Validation
+Brace balance OK (7 files), `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v27v bullet.
+Commit made, NOT pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — Custom pet design save + always-on + custom-pet look (v27v)
 
 ### What was asked
 "When I tap save it says the design is saved, but the design doesn't

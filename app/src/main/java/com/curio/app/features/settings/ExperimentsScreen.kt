@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,7 +54,9 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 fun ExperimentsScreen(navController: NavController) {
     val context = LocalContext.current
     // v27u — the manual tint-category picker (single-select chips).
+    // v27v — the ring-style picker (Coil spring / Split ring / Oblique coil).
     var showTintCategoryPicker by remember { mutableStateOf(false) }
+    var showRingStylePicker by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -132,8 +135,29 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPaperHeaderHolesEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Hole rings", "Tilted metal rings through the pin holes, like a ring-bound notebook (needs Stamped pin holes on)", AppPreferences.paperHoleRingsState) {
+                    ExperimentSwitchRow("Hole rings", "3D steel rings through the pin holes (needs Stamped pin holes on)", AppPreferences.paperHoleRingsState) {
                         AppPreferences.setPaperHoleRingsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // v27v — pick between the three 3D ring looks; only
+                    // enabled while Hole rings is on.
+                    val ringStyleEnabled = AppPreferences.paperHoleRingsState
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(if (ringStyleEnabled) 1f else 0.45f)
+                    ) {
+                        CurioSettingsRow(
+                            CurioIcons.Tune,
+                            "Ring style",
+                            when (AppPreferences.paperHoleRingStyleState) {
+                                "split" -> "Split ring"
+                                "oblique" -> "Oblique coil"
+                                else -> "Coil spring"
+                            }
+                        ) {
+                            if (ringStyleEnabled) showRingStylePicker = true
+                        }
                     }
                     CurioSettingsDivider()
                     ExperimentSwitchRow("Paper stat card", "Soft rose paper card on the stat panes (Home + Profile)", AppPreferences.paperStatCardsState) {
@@ -235,6 +259,71 @@ fun ExperimentsScreen(navController: NavController) {
             confirmButton = {
                 TextButton(
                     onClick = { showTintCategoryPicker = false },
+                    colors = curioDialogActionButtonColors()
+                ) {
+                    Text("Done")
+                }
+            }
+        )
+    }
+
+    // ── Ring style picker — the three 3D ring looks, single-select ──
+    if (showRingStylePicker) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { showRingStylePicker = false },
+            title = { Text("Ring style") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(
+                        Triple("coil", "Coil spring", "Wire coil through the hole — spiral-notebook look"),
+                        Triple("split", "Split ring", "Closed metal torus — keyring / binder-ring look"),
+                        Triple("oblique", "Oblique coil", "Short coil segments springing out of the hole")
+                    ).forEach { (value, label, desc) ->
+                        Surface(
+                            onClick = { AppPreferences.setPaperHoleRingStyle(context, value) },
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                            color = if (AppPreferences.paperHoleRingStyleState == value)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.surface,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                            ) {
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = if (AppPreferences.paperHoleRingStyleState == value)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    desc,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (AppPreferences.paperHoleRingStyleState == value)
+                                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        "The stat cards on Home and Profile preview the change immediately.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showRingStylePicker = false },
                     colors = curioDialogActionButtonColors()
                 ) {
                     Text("Done")

@@ -750,6 +750,8 @@ private fun ProfileHero(
                     }
                     val statHolesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
                     val statRingsOn = statHolesOn && AppPreferences.paperHoleRingsState
+                    // v27v — which 3D ring look the holes wear.
+                    val statRingStyle = AppPreferences.paperHoleRingStyleState
                     Surface(
                         shape = statShape,
                         color = Color.Transparent,
@@ -762,6 +764,7 @@ private fun ProfileHero(
                                     fill = paperStatBg,
                                     holesOn = statHolesOn,
                                     ringsOn = statRingsOn,
+                                    ringStyle = statRingStyle,
                                     ink = ink
                                 )
                                 else -> Modifier.background(

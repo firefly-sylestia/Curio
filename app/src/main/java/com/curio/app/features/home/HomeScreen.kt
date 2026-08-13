@@ -226,6 +226,14 @@ fun HomeScreen(navController: NavController) {
     }
     val homeBg = if (homeTintOn) homeTintCat.categoryBackgroundWash()
         else MaterialTheme.colorScheme.background
+    // v27v — the quest hero tint resolution lives here at the TOP of the
+    // screen so the sticky top-bar pills (which render OUTSIDE the scroll
+    // column) can share it: when "Hero tint too" is on, the menu + profile
+    // pills wear the same tinted accent + on-accent ink as the hero instead
+    // of always falling back to the rose accent.
+    val heroTintOn = homeTintOn && !homeTintFollowLane && AppPreferences.homeHeroTintState
+    val heroFill = if (heroTintOn) homeTintCat.themedAccent() else homeRoseAccent()
+    val questInk = if (heroTintOn) homeTintCat.onAccent() else homeReadableInk(heroFill)
     // Publish the wash so the Scaffold-level bottom nav (which can't read
     // this screen's state) blends with the tinted Home page.
     LaunchedEffect(homeBg) {
@@ -378,14 +386,10 @@ fun HomeScreen(navController: NavController) {
             // chip row is gone). The banner wears the muted rose-wood hero
             // accent — in pastel mode (the shipped default) it resolves to
             // the airy rose-wood pastel twin, otherwise the calm base.
-            // v27u — "Hero tint too" swaps the rose for the tint category's
-            // accent (readable on-accent ink follows).
-            val heroTintOn = homeTintOn && !homeTintFollowLane && AppPreferences.homeHeroTintState
-            val heroFill = if (heroTintOn) homeTintCat.themedAccent() else homeRoseAccent()
-            // Use the actual pastel fill as the ink source too, so the
-            // cleaner pink-rose hue carries through the greeting, stat icons
-            // and hero watermark instead of falling back to a brown raw accent.
-            val questInk = if (heroTintOn) homeTintCat.onAccent() else homeReadableInk(heroFill)
+            // v27u/v27v — hero tint is resolved at the TOP of the screen
+            // (shared with the sticky pills); questInk = the readable ink on
+            // the active fill, carried through greeting, stat icons + watermark.
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -567,6 +571,8 @@ fun HomeScreen(navController: NavController) {
                             // banner shows through.
                             val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
                             val ringsOn = holesOn && AppPreferences.paperHoleRingsState
+                            // v27v — which 3D ring look the holes wear.
+                            val ringStyle = AppPreferences.paperHoleRingStyleState
                             Surface(
                                 shape = statShape,
                                 color = Color.Transparent,
@@ -587,6 +593,7 @@ fun HomeScreen(navController: NavController) {
                                             fill = paperStatBg,
                                             holesOn = holesOn,
                                             ringsOn = ringsOn,
+                                            ringStyle = ringStyle,
                                             ink = questInk
                                         )
                                         else -> Modifier.background(
@@ -1043,14 +1050,11 @@ fun HomeScreen(navController: NavController) {
             val frostShift = FastOutSlowInEasing.transform(stickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
             val stickyDark = isCurioDarkTheme()
-            // Re-resolve the hero ink here — the original questInk lives in
-            // the scroll Column's scope; the sticky bar is OUTSIDE it.
-            val heroPillBg = homeRoseAccent()
-            // In default light mode the old shared pastel helper returned
-            // white, which made the menu/profile glyphs disappear into the
-            // pale floating pill. Keep pastel and dark behavior intact, but
-            // use the theme's readable dark ink for the default light state.
-            val heroPillIcon = homeReadableInk(heroPillBg)
+            // v27v — the resting pills follow the HERO TINT (hoisted at the
+            // top of the screen): when "Hero tint too" is on, the menu +
+            // profile pills wear the tinted accent + on-accent ink.
+            val heroPillBg = heroFill
+            val heroPillIcon = questInk
             val heroPillRim = lerp(heroPillBg, heroPillIcon, 0.42f)
             // Both morph endpoints are fully opaque. The old hero endpoint
             // used a translucent ink wash, which let the banner show through

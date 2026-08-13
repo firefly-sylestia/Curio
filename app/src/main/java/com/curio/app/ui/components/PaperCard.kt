@@ -1089,13 +1089,15 @@ class SoftTornSheetShape(
  * The Home Streak · Cabinet · Topics stat card's torn paper outline
  * (experimental "Torn paper edges" look, off by default).
  *
- * The TOP edge carries an EXTENDED tear — the hero's BOLD soft seam pushed
- * ~15% deeper and inverted, so the slip reads as paper torn OUT of the
- * banner (mostly extending above its nominal top, with a few notches). The
- * other three edges tear with a SHARPER, jaggier ragged edge (real paper
- * bites at a higher frequency, not the rounded hero waves), so the slip
- * reads as genuinely ripped on every side while only the top gets the
- * extended look.
+ * The TOP edge carries an EXTENDED tear — a hand-torn slip ripped out of
+ * the banner: a NEW re-seeded personality (v27v) mixing the soft broad
+ * waves with a gentler medium raggedness (instead of the old single bold
+ * inverted seam), mostly extending above the nominal top with a few
+ * notches. The other three edges tear with a SOFTER ragged edge than
+ * before (v27v — the old 3.5dp high-frequency jitter read as spiky
+ * artificial bites; the amplitude is trimmed and the high octave faded), so
+ * the slip reads as genuinely ripped on every side while only the top gets
+ * the extended look.
  *
  * Deterministic per seed and cached per size — recomposition never
  * re-tears, and the same seed always reproduces the identical outline.
@@ -1128,14 +1130,16 @@ private fun buildTornStatPath(seed: Int, size: Size, density: Density): Path {
         return path
     }
     val step = with(density) { 4.dp.toPx() }
-    // Top edge — the EXTENDED tear: the hero's bold soft seam, inverted so
-    // it reads as paper torn out of the banner (mostly extended above the
-    // nominal top, with a few notches), pushed ~15% deeper for the extended
-    // look. The hero banner shows through the torn gaps.
-    val top = SoftTearParams(seed, density, bold = true)
-    // The three straight sides tear with a SHARPER, jaggier edge — a couple
-    // of high-frequency value-noise octaves, faded to crisp corners so the
-    // four sides meet cleanly.
+    // Top edge — the EXTENDED tear. v27v — a NEW re-seeded personality: the
+    // soft broad-wave seam (salted so it no longer mirrors the hero's bold
+    // seam) PLUS a gentle medium-frequency raggedness layered on, so the top
+    // reads as a fresh hand-rip out of the banner rather than a duplicate of
+    // the hero seam.
+    val top = SoftTearParams(seed xor 0x5A7E4D, density, bold = false)
+    // The three straight sides tear with a SOFTER ragged edge than the old
+    // sharp jitter (v27v): amplitude trimmed from 3.5dp to ~2.2dp and the
+    // high-frequency octave faded so the bites read as real paper tears, not
+    // spikes — still faded to crisp corners so the four sides meet cleanly.
     fun sharpDisp(edgeSeed: Int, pos: Float, span: Float): Float {
         val t = pos / span
         val fade = when {
@@ -1143,10 +1147,10 @@ private fun buildTornStatPath(seed: Int, size: Size, density: Density): Path {
             t > 0.96f -> (1f - t) / 0.04f
             else -> 1f
         }
-        val amp = with(density) { 3.5.dp.toPx() }
-        val n1 = (valueNoise(edgeSeed, pos * 0.21f, 5.3f) - 0.5f) * 2f
-        val n2 = (valueNoise(edgeSeed + 7, pos * 0.53f, 9.7f) - 0.5f) * 2f * 0.55f
-        val n3 = (valueNoise(edgeSeed + 13, pos * 1.31f, 3.9f) - 0.5f) * 2f * 0.30f
+        val amp = with(density) { 2.2.dp.toPx() }
+        val n1 = (valueNoise(edgeSeed, pos * 0.19f, 5.3f) - 0.5f) * 2f
+        val n2 = (valueNoise(edgeSeed + 7, pos * 0.47f, 9.7f) - 0.5f) * 2f * 0.45f
+        val n3 = (valueNoise(edgeSeed + 13, pos * 1.05f, 3.9f) - 0.5f) * 2f * 0.16f
         return (n1 + n2 + n3) * amp * fade
     }
     val right = seed + 0x1A1
@@ -1164,11 +1168,11 @@ private fun buildTornStatPath(seed: Int, size: Size, density: Density): Path {
     }
 
     // ── Top edge (left → right) — EXTENDED soft tear ─────────────────────
-    // The tear fades to zero over the last ~5% at each end (like the sharp
-    // sides' corner fade), so the extended edge meets the side tears in a
-    // crisp corner instead of stepping down through a visible notch — the
-    // hero's torn seam is masked by a white under-sheet, but this card has
-    // no under-sheet to hide a corner gap.
+    // v27v — the new top: broad soft waves (re-seeded) with a gentle
+    // medium-frequency raggedness riding over them, extended ABOVE the
+    // nominal top. Fades to zero over the last ~5% at each end so the
+    // extended edge meets the side tears in a crisp corner.
+    val topSeed = seed xor 0x1F3A5C7D
     var x = 0f
     while (x <= w) {
         val t = x / w
@@ -1177,7 +1181,12 @@ private fun buildTornStatPath(seed: Int, size: Size, density: Density): Path {
             t > 0.95f -> (1f - t) / 0.05f
             else -> 1f
         }
-        add(Offset(x, -top.disp(x, w) * 1.15f * fade))
+        // Soft wave rhythm (down-biased in SoftTearParams, inverted here so
+        // the card extends UP out of the banner) plus a gentle ragged layer.
+        val wave = -top.disp(x, w) * 1.2f
+        val ragged = (valueNoise(topSeed, x * 0.11f, 13.7f) - 0.5f) * 2f *
+            with(density) { 1.6.dp.toPx() }
+        add(Offset(x, (wave + ragged) * fade))
         x += step
     }
     // ── Right edge (top → bottom) — sharper ragged tear ─────────────────
