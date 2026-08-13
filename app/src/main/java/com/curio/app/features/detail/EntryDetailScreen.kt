@@ -102,6 +102,8 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioDropdownItem
+import com.curio.app.ui.components.CurioDropdownMenu
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
