@@ -26,8 +26,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,55 +42,128 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import kotlin.random.Random
 
-// ── Curio brand palette (light, warm paper) — mirrors CurioColors ────────────
+// ── Curio brand palette — mirrors CurioColors ───────────────────────────────
+// Brand tint accents (used as translucent tints on BOTH themes).
+private val Coral = Color(0xFFFF8FA3)           // CoralBlush — brand primary tint
+private val Butter = Color(0xFFFFD97D)          // ButterYellow — brand secondary tint
+
+// Light theme (warm paper).
 private val PaperCream = Color(0xFFF7F0E4)      // SoftCream — background
 private val SoftSand = Color(0xFFF6EFE4)        // surface container
 private val CardWhite = Color(0xFFFFFBF5)       // CreamWhite — cards
 private val Ink = Color(0xFF3A2B20)             // warm brown ink
 private val InkSoft = Color(0xFF8A7660)         // muted ink
-private val Coral = Color(0xFFFF8FA3)           // CoralBlush — brand primary
 private val CoralInk = Color(0xFFE2556B)        // deep rose — readable on light
 private val GoldInk = Color(0xFFB8860B)         // deep gold — readable on light
-private val Butter = Color(0xFFFFD97D)          // ButterYellow — secondary
+
+// Dark theme (warm near-black).
+private val DarkPaper = Color(0xFF1F1813)
+private val DarkSand = Color(0xFF2C241D)
+private val DarkCard = Color(0xFF2A211B)
+private val DarkInk = Color(0xFFF0E6D7)
+private val DarkInkSoft = Color(0xFFB3A18A)
+private val DarkCoral = Color(0xFFFF9DB0)       // light coral — readable on dark
+
+// v27t — persisted keys (DesktopPreferences JSON store).
+private const val PREF_LANE = "lane"
+private const val PREF_TOPIC = "topic"
+private const val PREF_DARK = "dark"
+private const val PREF_WIN_W = "windowW"
+private const val PREF_WIN_H = "windowH"
+private const val PREF_WIN_X = "windowX"
+private const val PREF_WIN_Y = "windowY"
 
 fun main() = application {
+    // Restore the last window size (defaults to a tablet-ish starting size).
+    val state = rememberWindowState(
+        width = DesktopPreferences.getInt(PREF_WIN_W, 1120).dp,
+        height = DesktopPreferences.getInt(PREF_WIN_H, 760).dp
+    )
+    // Restore the last window position — only when the saved coords are
+    // non-negative (an off-screen value would open the window out of reach).
+    val savedX = DesktopPreferences.getInt(PREF_WIN_X, -1)
+    val savedY = DesktopPreferences.getInt(PREF_WIN_Y, -1)
+    if (savedX >= 0 && savedY >= 0) {
+        state.position = WindowPosition(savedX, savedY)
+    }
     Window(
-        onCloseRequest = ::exitApplication,
+        onCloseRequest = {
+            saveWindowGeometry(state)
+            exitApplication()
+        },
         title = "Curio",
-        state = rememberWindowStateSafe()
+        state = state
     ) {
         CurioDesktopApp()
     }
 }
 
-// Standalone state helper so the window opens at a tablet-ish size with sane
-// minimums. (androidx.compose.ui.window.WindowState has no default constructor
-// on desktop; create it explicitly.)
-@Composable
-private fun rememberWindowStateSafe() =
-    androidx.compose.ui.window.rememberWindowState(
-        width = 1120.dp,
-        height = 760.dp
-    )
+/** Persists the window size + position on close so the next launch resumes. */
+private fun saveWindowGeometry(state: WindowState) {
+    val size = state.size
+    DesktopPreferences.setInt(PREF_WIN_W, size.width.value.toInt())
+    DesktopPreferences.setInt(PREF_WIN_H, size.height.value.toInt())
+    val pos = state.position
+    if (pos.isSpecified) {
+        DesktopPreferences.setInt(PREF_WIN_X, pos.x)
+        DesktopPreferences.setInt(PREF_WIN_Y, pos.y)
+    }
+}
 
 @Composable
 fun CurioDesktopApp() {
-    MaterialTheme(colorScheme = lightColorScheme(
-        primary = CoralInk,
-        onPrimary = Color.White,
-        secondary = Butter,
-        onSecondary = GoldInk,
-        background = PaperCream,
-        onBackground = Ink,
-        surface = CardWhite,
-        onSurface = Ink,
-        surfaceVariant = SoftSand,
-        onSurfaceVariant = InkSoft
-    )) {
-        Surface(color = PaperCream, modifier = Modifier.fillMaxSize()) {
+    // Persist shell settings as they change (lane, landed topic, theme).
+    LaunchedEffect(shell.selectedSlug) {
+        DesktopPreferences.set(PREF_LANE, shell.selectedSlug)
+    }
+    LaunchedEffect(shell.currentTopic?.id) {
+        DesktopPreferences.set(PREF_TOPIC, shell.currentTopic?.id ?: "")
+    }
+    LaunchedEffect(shell.darkMode) {
+        DesktopPreferences.setBoolean(PREF_DARK, shell.darkMode)
+    }
+    // Restore the last landed topic for the current lane on cold start.
+    LaunchedEffect(Unit) {
+        if (shell.currentTopic == null) {
+            val id = DesktopPreferences.get(PREF_TOPIC, "")
+            if (id.isNotBlank()) {
+                shell.currentTopic =
+                    DesktopCatalog.load(shell.selectedSlug).firstOrNull { it.id == id }
+            }
+        }
+    }
+    MaterialTheme(
+        colorScheme = if (shell.darkMode) darkColorScheme(
+            primary = DarkCoral,
+            onPrimary = Color(0xFF5C0E1E),
+            secondary = Butter,
+            onSecondary = Color(0xFF4A3500),
+            background = DarkPaper,
+            onBackground = DarkInk,
+            surface = DarkCard,
+            onSurface = DarkInk,
+            surfaceVariant = DarkSand,
+            onSurfaceVariant = DarkInkSoft
+        ) else lightColorScheme(
+            primary = CoralInk,
+            onPrimary = Color.White,
+            secondary = Butter,
+            onSecondary = GoldInk,
+            background = PaperCream,
+            onBackground = Ink,
+            surface = CardWhite,
+            onSurface = Ink,
+            surfaceVariant = SoftSand,
+            onSurfaceVariant = InkSoft
+        )
+    ) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxSize()) {
                 CategorySidebar()
                 MainPane()
@@ -99,9 +174,10 @@ fun CurioDesktopApp() {
 
 // ── Shared app state (kept at the top level of the shell) ───────────────────
 private class CurioShellState {
-    var selectedSlug by mutableStateOf("artists")
+    var selectedSlug by mutableStateOf(DesktopPreferences.get(PREF_LANE, "artists"))
     var currentTopic by mutableStateOf<DesktopTopic?>(null)
     var browseMode by mutableStateOf(false)
+    var darkMode by mutableStateOf(DesktopPreferences.getBoolean(PREF_DARK, false))
 }
 
 private val shell = CurioShellState()
@@ -120,7 +196,7 @@ private fun pickRandomTopic(pool: List<DesktopTopic>): DesktopTopic {
 @Composable
 private fun CategorySidebar() {
     Surface(
-        color = SoftSand,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
         modifier = Modifier
             .width(272.dp)
@@ -131,13 +207,13 @@ private fun CategorySidebar() {
                 "Curio",
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Black,
-                color = Ink,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
             Text(
                 "Your curiosity, one spin at a time.",
                 fontSize = 13.sp,
-                color = InkSoft,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
             Spacer(Modifier.height(20.dp))
@@ -146,7 +222,7 @@ private fun CategorySidebar() {
                 fontSize = 11.sp,
                 letterSpacing = 2.sp,
                 fontWeight = FontWeight.Bold,
-                color = InkSoft,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
             Spacer(Modifier.height(8.dp))
@@ -172,13 +248,15 @@ private fun CategorySidebar() {
                             cat.displayName,
                             fontSize = 15.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selected) CoralInk else Ink
+                            color = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(Modifier.weight(1f))
                         Text(
                             "${DesktopCatalog.load(cat.slug).size}",
                             fontSize = 12.sp,
-                            color = if (selected) CoralInk else InkSoft
+                            color = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -201,12 +279,17 @@ private fun MainPane() {
                 DesktopCatalog.displayName(shell.selectedSlug),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
-                color = Ink
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.weight(1f))
             ModePill("Spin", !shell.browseMode) { shell.browseMode = false }
             Spacer(Modifier.width(8.dp))
             ModePill("Browse", shell.browseMode) { shell.browseMode = true }
+            Spacer(Modifier.width(8.dp))
+            // v27t — theme toggle (persisted via the preferences store).
+            ModePill(if (shell.darkMode) "Light" else "Dark", shell.darkMode) {
+                shell.darkMode = !shell.darkMode
+            }
         }
         if (shell.browseMode) {
             BrowseList()
@@ -219,7 +302,7 @@ private fun MainPane() {
 @Composable
 private fun ModePill(label: String, active: Boolean, onClick: () -> Unit) {
     Surface(
-        color = if (active) CoralInk else Color.Transparent,
+        color = if (active) MaterialTheme.colorScheme.primary else Color.Transparent,
         shape = RoundedCornerShape(50),
         modifier = Modifier.clickable(onClick = onClick)
     ) {
@@ -227,7 +310,8 @@ private fun ModePill(label: String, active: Boolean, onClick: () -> Unit) {
             label,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
-            color = if (active) Color.White else InkSoft,
+            color = if (active) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 7.dp)
         )
     }
@@ -250,8 +334,8 @@ private fun SpinPane() {
         Button(
             onClick = { shell.currentTopic = pickRandomTopic(pool) },
             colors = ButtonDefaults.buttonColors(
-                containerColor = CoralInk,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = RoundedCornerShape(50),
             modifier = Modifier.height(52.dp)
@@ -304,7 +388,7 @@ private fun DeckStack(pool: List<DesktopTopic>) {
             )
         } else {
             Surface(
-                color = CardWhite,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .width(340.dp)
@@ -315,7 +399,7 @@ private fun DeckStack(pool: List<DesktopTopic>) {
                         "Pick a lane, then spin.",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        color = InkSoft
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -331,7 +415,7 @@ private fun DeckCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         shape = RoundedCornerShape(20.dp),
         modifier = modifier
@@ -351,14 +435,16 @@ private fun DeckCard(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.5.sp,
-                    color = if (dim <= 0f) CoralInk else InkSoft
+                    color = if (dim <= 0f) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(10.dp))
                 Text(
                     title,
                     fontSize = if (dim <= 0f) 21.sp else 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = if (dim <= 0f) Ink else Ink.copy(alpha = 0.55f),
+                    color = if (dim <= 0f) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -371,7 +457,7 @@ private fun DeckCard(
 private fun RevealCard() {
     val topic = shell.currentTopic ?: return
     Card(
-        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(22.dp),
         modifier = Modifier
@@ -384,7 +470,7 @@ private fun RevealCard() {
                     topic.name,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
-                    color = Ink
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.width(10.dp))
                 if (topic.safeByline.isNotBlank()) {
@@ -396,7 +482,7 @@ private fun RevealCard() {
                             topic.safeByline,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CoralInk,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
                     }
@@ -407,11 +493,11 @@ private fun RevealCard() {
                 topic.teaser,
                 fontSize = 15.sp,
                 lineHeight = 22.sp,
-                color = Ink
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(18.dp))
             Surface(
-                color = SoftSand,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
@@ -419,13 +505,13 @@ private fun RevealCard() {
                         "${topic.exploreAction.verb} ${topic.exploreAction.targetName}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CoralInk
+                        color = MaterialTheme.colorScheme.primary
                     )
                     if (topic.exploreAction.durationMinutes > 0) {
                         Text(
                             "~${topic.exploreAction.durationMinutes} min",
                             fontSize = 12.sp,
-                            color = InkSoft
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(Modifier.height(6.dp))
@@ -433,7 +519,7 @@ private fun RevealCard() {
                         topic.exploreAction.instruction,
                         fontSize = 13.sp,
                         lineHeight = 19.sp,
-                        color = Ink
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -453,7 +539,7 @@ private fun BrowseList() {
     ) {
         items(pool, key = { it.id }) { topic ->
             Surface(
-                color = CardWhite,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -468,7 +554,7 @@ private fun BrowseList() {
                             topic.name,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Ink,
+                            color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
@@ -477,7 +563,7 @@ private fun BrowseList() {
                             Text(
                                 topic.safeByline,
                                 fontSize = 12.sp,
-                                color = CoralInk,
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(start = 10.dp)
                             )
                         }
@@ -486,7 +572,7 @@ private fun BrowseList() {
                     Text(
                         topic.teaser,
                         fontSize = 13.sp,
-                        color = InkSoft,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )

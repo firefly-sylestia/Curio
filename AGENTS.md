@@ -230,21 +230,29 @@ Android app — the same Kotlin codebase running as a native Windows `.exe`
 (via jpackage, plus macOS/Linux). It is a separate Gradle module (`:desktop`)
 that compiles independently of the Android `:app` module.
 
-**Current state (milestone 1):** the desktop shell — brand sidebar with all
-36 lanes, the Spin deck (front ticket + 2 peek cards), the reveal card, and a
-Browse list. It reads the SAME topic JSON files as Android by pointing the
-module's resources at `app/src/main/assets/topics` (no duplicate assets —
-content edits flow into both builds automatically). Data classes are desktop
-mirrors of the Android schema; fields absent from legacy JSON (`byline`,
-`tier`) are nullable with `safe*` accessors because Gson bypasses Kotlin
-default-parameter constructors.
+**Current state (milestones 1–2):** the desktop shell — brand sidebar with all
+36 lanes, the Spin deck (front ticket + 2 peek cards), the reveal card, a
+Browse list, plus a **persisted preferences store** (`DesktopPreferences`:
+tiny JSON at `~/.curio/prefs.json` via Gson) and a **dark theme**. The
+selected lane, last landed topic, window size/position and the Light/Dark
+theme toggle survive restarts; the window resumes its geometry. It reads the
+SAME topic JSON files as Android by pointing the module's resources at
+`app/src/main/assets/topics` (no duplicate assets — content edits flow into
+both builds automatically). Data classes are desktop mirrors of the Android
+schema; fields absent from legacy JSON (`byline`, `tier`) are nullable with
+`safe*` accessors because Gson bypasses Kotlin default-parameter
+constructors.
 
 **Key facts:**
 - `desktop/build.gradle.kts` — CMP plugin (`org.jetbrains.compose`), JVM 17
   toolchain, `compose.material3` + Gson only (no Android APIs yet).
-- `desktop/src/main/kotlin/com/curio/desktop/Main.kt` — window + shell UI.
+- `desktop/src/main/kotlin/com/curio/desktop/Main.kt` — window + shell UI
+  (geometry persistence in `main()`/`saveWindowGeometry`, shell state wired
+  to the prefs store, light/dark `MaterialTheme` schemes).
 - `desktop/src/main/kotlin/com/curio/desktop/DesktopCatalog.kt` — topic
   loader (Gson) + the 36-lane category table.
+- `desktop/src/main/kotlin/com/curio/desktop/DesktopPreferences.kt` — the
+  JSON preferences store (`~/.curio/prefs.json`, Gson, best-effort load).
 - CI: the `desktop` job in `.github/workflows/android.yml` compiles and
   builds the module on every push (`:desktop:build`), so the port can't
   silently rot. Native packaging (.exe/.dmg/.deb) ships via a future
@@ -253,11 +261,11 @@ default-parameter constructors.
 **To run locally:** `./gradlew :desktop:run` (this environment forbids
 running Gradle — CI validates instead).
 
-**Not yet ported** (milestone 2+): Room data layer (desktop persistence),
-SharedPreferences→settings store, capture/sessions, notifications,
-floating overlay, and the remaining Android-only services — each needs a
-desktop stub. UI parity with Android (per the tablet-layout pass + web
-parity effort) is the ongoing goal; the shuffle deck must stay 2 peek cards.
+**Not yet ported** (milestone 3+): Room data layer (real saved entries,
+capture/sessions), notifications, floating overlay, and the remaining
+Android-only services — each needs a desktop stub. UI parity with Android
+(per the tablet-layout pass + web parity effort) is the ongoing goal; the
+shuffle deck must stay 2 peek cards.
 
 ## Web App (web/)
 

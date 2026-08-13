@@ -1,6 +1,21 @@
 # Prompt.md — Request log
 
-## Current request — pet studio save fix + paper experiment reworks (v27t)
+## Current request — desktop persistence + preferences store (v27t, milestone 2)
+
+### What was asked
+"Continue the desktop port: add persistence and a preferences store so the deck and settings survive restarts."
+
+### What was done
+- **`DesktopPreferences.kt` (new)** — tiny pretty-printed JSON store at `~/.curio/prefs.json` (Gson, same serializer as the topic loader); best-effort load (corrupt file → defaults); `get/set` + `getBoolean/setBoolean` + `getInt/setInt`.
+- **Main.kt — deck persistence:** `CurioShellState.selectedSlug` now seeds from prefs; `LaunchedEffect`s persist the lane, the landed topic id, and the theme as they change; on cold start the last landed topic is re-found in the lane's pool.
+- **Main.kt — settings persistence:** a Light/Dark theme toggle pill (persisted) + full dark color scheme (warm near-black paper, light coral primary); all components now read `MaterialTheme.colorScheme.*` instead of hardcoded light constants (brand `Coral` stays as a translucent tint on both themes).
+- **Main.kt — window geometry:** `rememberWindowState` restores saved size; saved position restored only when non-negative (off-screen guard); `saveWindowGeometry` persists size + position on close (guards `isSpecified`).
+- **CI fix (separate commit `258be7b`):** the v27t comment in `libs.versions.toml` used Kotlin `//` comments — TOML rejects them ("Unexpected '/'" at line 43), breaking catalog parsing for the whole build. Converted to `#`; verified with `tomllib`. Pushed first to unblock.
+
+### Validation
+Braces balanced (Main.kt + DesktopPreferences.kt), `git diff --check` clean, no leftover hardcoded light colors outside the palette/scheme blocks, no stale `rememberWindowStateSafe` reference. No Gradle locally (env rule) — the `desktop` CI job gates on push.
+
+## Prior — pet studio save fix + paper experiment reworks (v27t)
 
 ### What was asked
 1. "Curie custom design isn't saving" — it should apply regardless of the pet and save as a new pet.
