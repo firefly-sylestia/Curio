@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
@@ -46,6 +47,17 @@ object DeviceScreenshotWatcher {
     private var lastSeenId = -1L
     private val seenPaths: MutableSet<String> = Collections.synchronizedSet(HashSet())
 
+    // v27t — the scan does a MediaStore query plus a FULL FILE COPY of the
+    // screenshot (SessionShots.copyFrom). Running that on the main thread
+    // froze the app at the exact moment the system is still writing and
+    // indexing the file, so the heavy work runs on a single serialized
+    // background thread and only the session-state update hops back to main.
+    private val scanThread by lazy {
+        HandlerThread("curio-screenshot-scan").also { it.start() }
+    }
+    private val scanHandler by lazy { Handler(scanThread.looper) }
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     /** Registers the MediaStore observer (idempotent). */
     fun start(context: Context) {
         if (observer != null) return
@@ -54,7 +66,7 @@ object DeviceScreenshotWatcher {
         lastSeenId = newestRowId(context.contentResolver)
         observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
             override fun onChange(selfChange: Boolean) {
-                scan(context)
+                scanAsync(context)
             }
         }
         runCatching {
@@ -75,6 +87,16 @@ object DeviceScreenshotWatcher {
             observer = null
         }
         seenPaths.clear()
+    }
+
+    /**
+     * v27t — queues a scan on the serialized background thread (a burst of
+     * screenshots is processed one at a time, never in parallel). The
+     * observer still fires on the main thread, but [scan]'s query + file
+     * copy never touch it.
+     */
+    private fun scanAsync(context: Context) {
+        scanHandler.post { scan(context) }
     }
 
     private fun hasReadPermission(context: Context): Boolean {
@@ -143,7 +165,13 @@ object DeviceScreenshotWatcher {
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                     )
                     val saved = SessionShots.copyFrom(context, shotUri)
-                    if (saved != null) target(saved)
+                    if (saved != null) {
+                        val attach = target
+                        // State updates (session screenshot list, pending
+                        // write package) hop back to the main thread — the
+                        // file copy itself stays off it.
+                        mainHandler.post { attach(saved) }
+                    }
                 }
             }
         }
