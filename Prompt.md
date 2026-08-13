@@ -1,6 +1,6 @@
 # Prompt.md — Request log
 
-## Current request — CI fix: desktop build script errors (pushed b669f0c + 0f63f12)
+## Current request — CI fix: desktop build script + Kotlin source errors (b669f0c, 0f63f12, e27615d)
 
 ### Round 1 — plugin collision (b669f0c)
 
@@ -20,6 +20,15 @@ No Gradle locally (env rule) — the `desktop` CI job on push is the gate.
 After round 1 landed, CI got past plugin resolution but `desktop/build.gradle.kts` failed to compile as a Kotlin DSL script:
 - `TargetFormat` unresolved → added `import org.jetbrains.compose.desktop.application.dsl.TargetFormat`.
 - `compose.material3` (String accessor) deprecated → a script error in CMP 1.11+. Replaced with a direct catalog dependency: added `composeMaterial3 = "1.11.0-alpha07"` + `compose-material3` to `libs.versions.toml` (the material3 version bundled with CMP 1.11.1, decoupled from the CMP plugin version since 1.8) and `implementation(libs.compose.material3)` in the desktop module. TOML re-validated with `tomllib`.
+
+### Round 3 — desktop Kotlin source errors (e27615d)
+Once the desktop script compiled, `:desktop:compileKotlin` surfaced three independent issues (the desktop sources had never compiled — CI was blocked at plugin resolution until round 1):
+1. **DesktopCatalog.kt nested comment** — Kotlin supports NESTED block comments, so the `/*` in the doc comment's `topics/*.json` opened a nested comment, swallowing the rest of the file ("Unclosed comment" at EOF). This cascaded into every `Unresolved reference 'DesktopTopic'/'DesktopCatalog'` error. Reworded to `app's \`assets/topics\` JSON schema`.
+2. **DesktopPill** — `onClick` wasn't the last param, so trailing-lambda call sites (`DesktopPill("Light", active) { ... }`) bound the lambda to `enabled` (Boolean) → "No value passed for onClick". Moved `onClick` last (Compose convention).
+3. **Main.kt window API** — CMP 1.6+ sealed `WindowPosition`: `WindowPosition(x, y)` → `WindowPosition.Absolute(x.dp, y.dp)`; `state.position.x/.y` are `Dp` → `.value.toInt()` under an `is WindowPosition.Absolute` cast.
+
+### Round 4 — "other" APK build failure (kotlin.jvm not found — TRANSIENT)
+A separate CI run failed at the ROOT `build.gradle.kts` with `Plugin [id: 'org.jetbrains.kotlin.jvm', version: '2.3.21', apply: false] was not found` (could not resolve the plugin marker). Verified the marker `org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:2.3.21` EXISTS on Maven Central, and the sibling desktop job resolved it fine in the same push — so this is a transient resolver/network blip, not a code issue. Re-run if it recurs.
 
 ## Prior — desktop full parity (milestone 3) + workflow hardening (v27t)
 
