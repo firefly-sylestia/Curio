@@ -4018,8 +4018,15 @@ private fun CategoryPickerSheet(
                                     } else {
                                         val lanes = preset.lanes(categories)
                                         if (lanes.isNotEmpty()) {
+                                            val laneSlugs = lanes.map { it.id.routeSlug }.toSet()
                                             multiSelectMode = true
-                                            selectedSlugs = lanes.map { it.id.routeSlug }.toSet()
+                                            // v27t — presets toggle: tapping
+                                            // the active preset again UNDOES
+                                            // it (deselects its lanes); a
+                                            // different preset replaces the
+                                            // whole selection.
+                                            selectedSlugs =
+                                                if (active) selectedSlugs - laneSlugs else laneSlugs
                                         }
                                     }
                                 }

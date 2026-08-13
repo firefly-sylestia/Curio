@@ -256,8 +256,14 @@ fun CategoryPickerScreen(navController: NavController) {
                         } else {
                             val lanes = preset.lanes(categories)
                             if (lanes.isNotEmpty()) {
+                                val laneSlugs = lanes.map { it.id.routeSlug }
                                 multiSelectMode = true
-                                selectedSlugs = lanes.map { it.id.routeSlug }
+                                // v27t — presets toggle: tapping the active
+                                // preset again UNDOES it (deselects its
+                                // lanes); a different preset replaces the
+                                // whole selection (remove everything, add it).
+                                selectedSlugs =
+                                    if (active) selectedSlugs - laneSlugs else laneSlugs
                             }
                         }
                     }

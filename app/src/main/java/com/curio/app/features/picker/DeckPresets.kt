@@ -49,10 +49,11 @@ data class DeckPreset(
 /**
  * v27k — the quick-mix presets. Real mixes this time: Science, Entertainment,
  * Arts & Stories, and History & Ideas group the lanes people actually browse
- * together, plus Everything (all visible) and Clear (deselect all — the fast
- * way to start an empty mix). Presets only tick lanes that are visible at tap
- * time (hidden lanes and not-yet-shipped lanes drop out), so a preset never
- * silently overrides Manage Categories.
+ * together, plus Clear (deselect all — the fast way to start an empty mix).
+ * v27t — the Everything preset is gone: the Wildcard lane already covers
+ * every category, so "everything" was a redundant chip. Presets only tick
+ * lanes that are visible at tap time (hidden lanes and not-yet-shipped lanes
+ * drop out), so a preset never silently overrides Manage Categories.
  */
 val deckPresets = listOf(
     DeckPreset("Science", "science", listOf(
@@ -80,8 +81,6 @@ val deckPresets = listOf(
         CategoryId.DISCOVERIES, CategoryId.MYTHOLOGY,
         CategoryId.LANGUAGE, CategoryId.AUTHORS
     )),
-    // Everything = all visible categories (empty list is resolved at tap time).
-    DeckPreset("Everything", "casino", emptyList()),
     // Clear = deselect every lane (stays in multi-select so the mix can be
     // rebuilt from scratch without closing the picker).
     DeckPreset("Clear", "close", emptyList(), clearAll = true)
