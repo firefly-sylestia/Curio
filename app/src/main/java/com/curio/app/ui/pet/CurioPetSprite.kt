@@ -16,7 +16,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -26,6 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.awaitPointerEventScope
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -42,10 +50,48 @@ import com.curio.app.data.PetFace
 import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.ceil
+import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
+
+/**
+ * v27t — global pointer awareness for the pet's eyes: the NavHost root
+ * feeds the window pointer position here, and every [CurioPetSprite]
+ * reads it to aim its eyes at the cursor (Chromebook / desktop), to look
+ * at the point you click while holding, and to roll its eyes on wheel
+ * scrolls. One tracker serves all pets (floating, flower bed, quests).
+ */
+object PetPointer {
+    /** Last hover/press position in window coordinates (Unspecified = none). */
+    var position by mutableStateOf(Offset.Unspecified)
+    /** The current press point, or null when nothing is held. */
+    var press by mutableStateOf<Offset?>(null)
+    /** Increments on every wheel-scroll — the sprite plays a quick eye-roll. */
+    var rollTick by mutableStateOf(0)
+        private set
+
+    /**
+     * Attach to the app root: tracks hover, press and scroll so the pet's
+     * eyes can follow the pointer everywhere (not just over the pet).
+     */
+    @Composable
+    fun trackerModifier(): Modifier = Modifier.pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val change = awaitPointerEvent().changes.firstOrNull() ?: continue
+                position = change.position
+                when (change.type) {
+                    PointerEventType.Scroll -> rollTick++
+                    PointerEventType.Press -> press = change.position
+                    PointerEventType.Release -> press = null
+                    else -> Unit
+                }
+            }
+        }
+    }
+}
 
 /** Converts an RRGGBB design color into Compose's packed ARGB representation. */
 private fun petDesignColor(hex: String): Color =
@@ -203,7 +249,14 @@ fun CurioPetSprite(
      * animation frame previews exactly as drawn — no moving eyes or body.
      * Used by the timeline editor while editing a frame.
      */
-    staticPose: Boolean = false
+    staticPose: Boolean = false,
+    /**
+     * v27t — pointer-aware eyes: the pet aims its eyes at the cursor
+     * (Chromebook / desktop), looks at the point you press while holding,
+     * and rolls its eyes on wheel scrolls. Off for the designer's static
+     * previews (there the pointer isn't aimed at the sprite).
+     */
+    pointerAware: Boolean = true
 ) {
     val density = LocalDensity.current
     // v8.34 — resolve the active design: the explicit working copy wins;
@@ -484,10 +537,45 @@ fun CurioPetSprite(
         else -> moodFace.sparkles
     }
 
+    // v27t — pointer-aware eyes: track this sprite's on-screen center and
+    // compute where the cursor is relative to it, so the eyes aim at the
+    // pointer (or the held press point), capped so they never leave the
+    // head. A wheel scroll plays a quick full-circle eye roll.
+    var spriteCenter by remember { mutableStateOf<Offset?>(null) }
+    val pointerPos = PetPointer.position
+    val pressPos = PetPointer.press
+    val lookAt = pressPos ?: pointerPos
+    val rollAnim = remember { Animatable(0f) }
+    LaunchedEffect(PetPointer.rollTick) {
+        if (PetPointer.rollTick > 0 && pointerAware) {
+            rollAnim.snapTo(0f)
+            rollAnim.animateTo(2f * PI.toFloat(), tween(700, easing = FastOutSlowInEasing))
+        }
+    }
+    val lookCells: Offset =
+        if (pointerAware && spriteCenter != null && lookAt.isSpecified) {
+            val d = lookAt - spriteCenter!!
+            val dist = d.getDistance().coerceAtLeast(1f)
+            // Aim saturates within ~200dp — a farther cursor keeps pointing
+            // the same direction without the eyes over-tracking.
+            val prox = (dist / with(density) { 200.dp.toPx() }).coerceIn(0f, 1f)
+            if (rollAnim.value > 0f) {
+                Offset(cos(rollAnim.value), sin(rollAnim.value)) * 1.15f * prox
+            } else {
+                Offset(d.x / dist * 1.15f, d.y / dist * 0.75f) * prox
+            }
+        } else {
+            Offset.Zero
+        }
+
     val desc = contentDescription
     Box(
         modifier = modifier
             .size(spriteSize)
+            .onGloballyPositioned {
+                spriteCenter = it.positionInWindow() +
+                    Offset(it.size.width / 2f, it.size.height / 2f)
+            }
             .then(if (desc != null) Modifier.semantics { this.contentDescription = desc } else Modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -695,8 +783,10 @@ fun CurioPetSprite(
                         // (rows 6-8 instead of 7-9) so there is a clear gap
                         // between them and the mouth — never joined.
                         if (viewAngle != PetViewAngle.BACK && activeCustomGrid == null) translate(
-                            left = (glanceShift + angleFaceShift) * opx,
-                            top = when (viewAngle) {
+                            // v27t — the pointer-aim offsets join the glance
+                            // drift so the eyes track the cursor too.
+                            left = (glanceShift + angleFaceShift + lookCells.x) * opx,
+                            top = lookCells.y * opx + when (viewAngle) {
                                 PetViewAngle.LOOKING_UP -> -2f * opx
                                 PetViewAngle.LOOKING_DOWN -> opx
                                 else -> if (watchingNow) -opx else 0f
