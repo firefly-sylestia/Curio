@@ -206,6 +206,19 @@ fun StarRating(
 }
 
 /**
+ * v29 — OPAQUE version of a category's translucent tint (accent at ~20%
+ * alpha): the old `color = tint` attach-box fills were translucent and,
+ * after the border removal, looked like broken/ghost boxes (the v27n rule
+ * — translucent fills let the elevation shadow bleed through as a blurry
+ * background). Resolves the same perceived tint as an opaque lerp of the
+ * accent into the theme surface, so attach boxes read clean and solid in
+ * light, dark and pastel.
+ */
+@Composable
+fun categoryTintFill(accent: Color): Color =
+    lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, 0.16f)
+
+/**
  * Small image placeholder thumbnail — 80dp square with rounded corners.
  * Used by Reel Notes (poster/still attach) and Field Notes (single photo
  * attach). [onClick] opens the image in lightbox (Phase 4), [onRemove]
@@ -226,7 +239,9 @@ fun ImageThumb(
             modifier = Modifier
                 .size(80.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(tint)
+                // v29 — opaque fill (no transparency): the translucent tint
+                // looked broken after the border removal.
+                .background(categoryTintFill(accent))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
@@ -289,7 +304,9 @@ fun AddImageButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = tint,
+        // v29 — opaque fill (no transparency): the translucent tint looked
+        // broken after the border removal.
+        color = categoryTintFill(accent),
         shadowElevation = 2.dp,
         modifier = modifier.size(80.dp)
     ) {

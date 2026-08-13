@@ -240,6 +240,57 @@ app/src/main/java/com/curio/app/
   16→40dp when progress exists); on Cabinet cards it's a compact strip in
   the card body; on EntryDetail it floats over the hero's bottom edge.
   Always-on (no experiment toggle, per user decision).
+- **v29 — hero sort/search/select controls redesigned (Cabinet + Topic
+  Database).** `CurioSortDropdown` is now ONE pill with two tap zones —
+  the label + chevron opens the dropdown, a `VerticalDivider` separates
+  it from the arrow zone that toggles ascending/descending (was two
+  separate pills); the pill is bigger (44dp tall, labelLarge, 22dp arrow)
+  and the dropdown redesigned (20dp corners, tonal elevation, a "Sort by"
+  header, a check on the active field). The hero pills
+  (`SettingsHeroActionPill`, `CabinetHeroActionPill`) and the sort pill
+  dropped the v27r ink-lean fills (lerp toward ink at 0.30/0.35/0.55 —
+  read TOO DARK in light + pastel) for a LIGHT frosted glass: the banner
+  fill lifted toward white (`lerp(backdrop, White, 0.24f)` emphasized /
+  `0.38f` normal; destructive stays a black-lean `0.14f`), so full-ink
+  glyphs pop in light, dark, pastel and AMOLED. Both heroes' SEARCH
+  fields match: the ink-at-16% container became `lerp(fill, White, 0.30f)`
+  with full-ink borders (0.65/0.40). Pills also grew (14/10dp padding,
+  22dp glyph).
+- **v29 — Spin FilterSheet: ≤4 columns + visible inactive elevation.**
+  The chip grid swapped `GridCells.Adaptive(112dp)` (stretched two huge
+  slab-chips on phones, 5+ on tablets) for a `BoxWithConstraints` fixed
+  count: `(maxWidth / 92.dp).toInt().coerceIn(2, 4)` — compact pill
+  columns capped at four in a row. `CompactChip` now lifts the INACTIVE
+  fill a whisper of white (`lerp(chipSurface, White, 0.04 dark / 0.10
+  light)`) with a 2dp shadow in BOTH states + `curioDarkGlow`, so
+  unselected chips read as raised pills off the tinted sheet instead of
+  flat tiles.
+- **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
+  the translucent `category.tint` (accent @ 20% alpha) attach boxes
+  looking broken (v27n rule: translucent fills bleed the elevation
+  shadow). New shared `categoryTintFill(accent)` in
+  `CaptureFormatComponents.kt` resolves the same perceived tint as an
+  OPAQUE `lerp(surfaceContainerHigh, accent, 0.16f)`; `ImageThumb`,
+  `AddImageButton` (Reel Notes/Field Notes = review + field notes) and
+  `JournalVoiceNoteRow` (Marginalia journal voice-note capsule) all use
+  it now.
+- **v29 — save-capture topic strip matches the category + glow.** The
+  strip fill switched from `lerp(surfaceContainerHigh, accent, 0.20f)`
+  (muddy near-grey in dark) to `cat.categorySurface(surfaceContainerHigh)`
+  — the SAME opaque card-family tint as the rest of the app — with
+  `curioDarkGlow(3dp)` so the 3dp elevation shows in dark mode; ink stays
+  `cat.categoryInk()` (deep accent in light, light twin in dark, deep twin
+  in pastel) so the topic text is readable in every theme.
+- **v29 — Spotify/Apple Music explore links + auto-copy.** Apple Music's
+  URL gained the REQUIRED storefront segment
+  (`https://music.apple.com/us/search?term=…` — without `/us/` the server
+  redirects and the app never recognizes the link); Spotify keeps
+  `https://open.spotify.com/search/…` (verified correct). Because neither
+  app reliably hands off an in-app SEARCH from a web link, tapping
+  Explore / Watch in now AUTO-COPYs `buildExploreQuery(topic)` to the
+  clipboard (with a short toast) so the user can paste the topic name
+  into the app's own search box. New `CurioIcons.ContentCopy`
+  (`content_copy`, verified present in the bundled font subset).
 - **v28 — scrolling pets look UP/DOWN in a line, never a circle.** The v27v
   "roll" played a FULL 2π CIRCLE of the eyes on every scroll — it read as
   the pet's eyes spinning whenever you scrolled. Replaced with a vertical

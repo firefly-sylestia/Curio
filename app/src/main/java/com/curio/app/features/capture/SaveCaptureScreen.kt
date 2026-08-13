@@ -99,6 +99,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.EmberBurst
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -552,11 +553,16 @@ fun SaveCaptureScreen(
             else -> 0L
         }
         val tintWash = AppPreferences.tintWashEffective()
-        // v27u — opaque strip fill: cat.tint is the accent at 20% alpha, and
-        // a translucent fill bleeds the 3dp shadow through (v27n rule). The
-        // opaque lerp keeps the same tinted look with a clean shadow.
+        // v29 — the strip wears the SAME category-tinted card surface as the
+        // rest of the app ([categorySurface] is fully OPAQUE — the old lerp
+        // of the accent at 20% over surfaceContainerHigh was also opaque but
+        // its tint didn't match the cards in dark mode, where it read as a
+        // muddy near-grey instead of the category's mid-tone). The ink rides
+        // the category's readable ink ([categoryInk]: deep accent in light,
+        // light twin in dark, deep twin in pastel) so the topic text stays
+        // readable on the strip in every theme.
         val stripColor = if (tintWash) {
-            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.accent, 0.20f)
+            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         }
@@ -565,7 +571,9 @@ fun SaveCaptureScreen(
             color = stripColor,
             shape = RoundedCornerShape(20.dp),
             shadowElevation = 3.dp,
+            // v29 — dark mode elevation visibility (glow).
             modifier = Modifier
+                .curioDarkGlow(3.dp, RoundedCornerShape(20.dp))
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {

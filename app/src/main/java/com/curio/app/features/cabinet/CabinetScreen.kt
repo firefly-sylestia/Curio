@@ -812,10 +812,15 @@ private fun CabinetHeroHeader(
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                                 keyboardActions = KeyboardActions(onSearch = {}),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = ink.copy(alpha = 0.16f),
-                                    unfocusedContainerColor = ink.copy(alpha = 0.16f),
-                                    focusedBorderColor = ink.copy(alpha = 0.55f),
-                                    unfocusedBorderColor = ink.copy(alpha = 0.30f),
+                                    // v29 — frosted-glass container (banner
+                                    // lifted toward white) + full-ink borders:
+                                    // the old ink-at-16% container + dark
+                                    // border mix read too dark in light and
+                                    // pastel.
+                                    focusedContainerColor = lerp(fill, Color.White, 0.30f),
+                                    unfocusedContainerColor = lerp(fill, Color.White, 0.30f),
+                                    focusedBorderColor = ink.copy(alpha = 0.65f),
+                                    unfocusedBorderColor = ink.copy(alpha = 0.40f),
                                     cursorColor = ink,
                                     focusedTextColor = ink,
                                     unfocusedTextColor = ink,
@@ -1080,13 +1085,17 @@ private fun CabinetHeroActionPill(
     // glass alpha): a translucent fill let the elevation shadow bleed
     // through as a blurry broken background; the opaque lerp resolves to
     // the exact same perceived tint on the banner.
-    // v27r — the fills deepened (0.45/0.70 -> 0.35/0.55, destructive
-    // 0.35 -> 0.30) and the glyph grew (18 -> 20dp) so hero actions like
-    // search + sort read clearly on the banner instead of washing into it.
+    // v29 — the fills are now a LIGHT frosted glass (the banner lifted
+    // toward white): the v27r ink-lean fills (lerp toward the ink at
+    // 0.30/0.35/0.55) read too dark in light + pastel themes. Lifting
+    // toward white keeps the same visible-pill look with full-ink glyphs
+    // that pop in every mode — creamy in light/pastel, brighter glass on
+    // the deep dark banner. Destructive stays the darkest pill (a whisper
+    // of black) so delete reads as the danger action.
     val fill = when {
-        destructive -> lerp(ink, backdrop, 0.30f)
-        emphasized -> lerp(ink, backdrop, 0.35f)
-        else -> lerp(ink, backdrop, 0.55f)
+        destructive -> lerp(backdrop, Color.Black, 0.14f)
+        emphasized -> lerp(backdrop, Color.White, 0.24f)
+        else -> lerp(backdrop, Color.White, 0.38f)
     }
     Surface(
         onClick = onClick,
@@ -1098,16 +1107,18 @@ private fun CabinetHeroActionPill(
             .curioDarkGlow(3.dp, RoundedCornerShape(50))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+            // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero
+            // controls read as substantial buttons, not tiny chips.
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             if (glyph != null) {
                 CurioIcon(
                     name = glyph,
                     contentDescription = contentDescription,
                     tint = ink,
-                    size = 20.dp
+                    size = 22.dp
                 )
             }
             if (label != null) {

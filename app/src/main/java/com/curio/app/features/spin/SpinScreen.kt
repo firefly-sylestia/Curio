@@ -126,6 +126,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
@@ -1745,14 +1746,22 @@ private fun FilterSheet(
 
                 // ── Compact lazy chip grid — grouped Type · Genre · Era ·
                 //    Origin sections, each capped to a handful of chips so
-                //    the sheet stays tidy instead of 100+ raw tags. ─────
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 112.dp),
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                //    the sheet stays tidy instead of 100+ raw tags. v29 —
+                //    columns capped at 2–4 per row: the old Adaptive(112dp)
+                //    stretched two huge slab-chips on phones (overwhelming)
+                //    and more than four wide on tablets. Fixed compact pill
+                //    columns keep the sheet scannable in every width. ─────
+                BoxWithConstraints(
+                    modifier = Modifier.weight(1f)
                 ) {
+                    val gridCols = (maxWidth / 92.dp).toInt().coerceIn(2, 4)
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridCols),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                     if (filteredGroups.types.size > 1) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Type", Modifier.padding(bottom = 2.dp))
@@ -1843,6 +1852,7 @@ private fun FilterSheet(
                                 }
                             )
                         }
+                    }
                     }
                 }
             }
@@ -1936,14 +1946,21 @@ private fun CompactChip(
 ) {
     // Plain Surface + clickable (no M3 minimum touch-target inflation) keeps
     // the chips compact even with 100+ tags in the sheet.
+    // v29 — full pill shape in every state; the INACTIVE fill lifts a
+    // whisper of white so unselected chips read as raised pills off the
+    // category-tinted sheet (the old flat surface blended in and the 1dp
+    // shadow was invisible), and dark mode adds the light glow so the
+    // elevation shows on midnight too.
+    val inactiveFill = lerp(chipSurface, Color.White, if (isCurioDarkTheme()) 0.04f else 0.10f)
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (selected) accent else chipSurface,
-        // v28 — elevation 1: filter chips sit one step below cards (cards
-        // 2dp / chips 1dp) so they read as chips, not tiles.
-        shadowElevation = 1.dp,
+        color = if (selected) accent else inactiveFill,
+        // v29 — a visible 2dp lift in BOTH states (inactive included) so
+        // the unselected chips read as raised pills, not flat tiles.
+        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
+            .curioDarkGlow(2.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
     ) {

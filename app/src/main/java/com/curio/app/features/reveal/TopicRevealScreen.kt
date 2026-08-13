@@ -66,8 +66,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -97,6 +99,7 @@ import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildEngineSearchUrl
+import com.curio.app.data.buildExploreQuery
 import com.curio.app.data.buildExploreSearchUrl
 import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
@@ -200,6 +203,10 @@ fun TopicRevealScreen(
 
     val resolved = topic
     val context = LocalContext.current
+    // v29 — clipboard for the auto-copy on explore: the search query lands on
+    // the clipboard so the user can paste it into an app's own search box
+    // (Spotify / Apple Music don't always hand off an in-app search).
+    val clipboard = LocalClipboardManager.current
     // v6.7 — pin for later: the bookmark toggles on/off so the user can save
     // the topic and revisit it from Topic History → "Pinned for later".
     // Reads the REACTIVE pinnedTopicsState (not prefs) so the icon toggles
@@ -494,6 +501,19 @@ fun TopicRevealScreen(
     /** Starts a timed explore session, opens the search page (chosen engine — YouTube for music), back to Home. */
     fun startExploreSession(topic: CurioTopic, searchUrl: String = buildExploreSearchUrl(topic)) {
         engaged = true
+        // v29 — auto-copy the search query to the clipboard the moment the
+        // user taps Explore / Watch in: the browser opens a web search, but
+        // pasting the topic into Spotify / Apple Music's own search box is
+        // the reliable way to find it inside those apps (they don't always
+        // hand off an in-app search from a web link). No extra button — it
+        // just lands there, with a short toast so the user knows.
+        val query = buildExploreQuery(topic)
+        runCatching {
+            clipboard.setText(AnnotatedString(query))
+            android.widget.Toast.makeText(
+                context, "Copied \"$query\" to clipboard", android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
         // Engaging for real — record as recently-explored and clear any
         // recently-unexplored entry. recordExplored tags the row "Resumed"
         // when the user came back to a topic they'd left.

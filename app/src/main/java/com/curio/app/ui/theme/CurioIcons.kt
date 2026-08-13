@@ -105,6 +105,7 @@ object CurioIcons {
     const val YouTubeActivity = "youtube_activity" // rounded play tile — explore in YouTube
     const val MusicNote = "music_note"          // ♪ — Apple Music / music rows
     const val PlayCircle = "play_circle"        // ▶ in a ring — Spotify
+    const val ContentCopy = "content_copy"      // two overlapping squares — copy to clipboard
     const val Pause       = "pause"
     const val Stop        = "stop"
     const val Timer       = "timer"

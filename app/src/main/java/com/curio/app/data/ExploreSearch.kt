@@ -72,7 +72,13 @@ fun buildMusicServiceSearchUrl(
     val q = Uri.encode(buildExploreQuery(topic))
     return when (service) {
         MusicService.YOUTUBE_MUSIC -> "https://music.youtube.com/search?q=$q"
-        MusicService.APPLE_MUSIC -> "https://music.apple.com/search?term=$q"
+        // v29 — the storefront segment ("us") is REQUIRED: without it Apple's
+        // server redirects and the Apple Music app never recognizes the link,
+        // so "in-app" opens never hand off. music.apple.com/{cc}/search?term=
+        // is the canonical web-search URL the app understands.
+        MusicService.APPLE_MUSIC -> "https://music.apple.com/us/search?term=$q"
+        // Spotify's web search path (/search/{query}) is the correct deep
+        // link: it hands off into the installed app or opens the web player.
         MusicService.SPOTIFY -> "https://open.spotify.com/search/$q"
     }
 }
