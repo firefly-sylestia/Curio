@@ -1,5 +1,30 @@
 # Prompt.md — Request log
 
+## Current request — app-only quick-fact check: NOTHING under 30/50 words (v28)
+
+### What was asked
+"Ignore the web — just focus on the app. Re-analyse and tell me [what has
+under 30 words]."
+
+### What was done
+- Dropped the web topic work entirely: the internet handcraft batch was
+  reverted (uncommitted), the under-30 report file deleted. The food web
+  batch (f19a973) is still committed from when the user approved it —
+  offered to revert on request.
+- **App audit (app/src/main/assets/topics/, 14,226 topics, 29 populated
+  categories): ZERO teasers under 50 words — and none under 40/30/20.**
+  The minimum teaser across the whole app is 70 words (artists, artworks,
+  books, directors, discoveries, films, geology, plants all sit at exactly
+  70 min); medians run 83-190. The app's quick-fact content is fully
+  complete — nothing to fix.
+- **Real gap found:** 7 app category files are EMPTY arrays ("[]"):
+  medicine, psychology, mathematics, economics, language, engineering,
+  oceans — yet all 7 are declared categories in `Category.kt` (lines
+  63-69 + family lists). Those lanes ship zero topics in the app.
+
+### Validation
+Analysis-only (no code changes). Prompt.md committed per docs rule.
+
 ## Current request — handcrafted quick facts for web topics under 50 words (v28)
 
 ### What was asked
