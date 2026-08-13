@@ -59,18 +59,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -81,7 +72,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
@@ -107,6 +97,8 @@ import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.paperStatCardColor
+import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.ExploreSessionService
@@ -512,10 +504,9 @@ fun HomeScreen(navController: NavController) {
                             // light, a warm rose-brown in dark) when the
                             // "Paper stat card" experiment is on.
                             val paperStatsOn = AppPreferences.paperStatCardsState
-                            val paperStatBg = if (isCurioDarkTheme())
-                                lerp(heroFill, Color(0xFF2A211C), 0.50f)
-                            else
-                                lerp(heroFill, Color(0xFFFFF6EB), 0.62f)
+                            // v27u — shared paper color (same cream/rose-brown
+                            // blend Profile's stat pane uses).
+                            val paperStatBg = paperStatCardColor(heroFill)
                             // v27h — the Topics stat always shows the TRUE
                             // catalog total: the splash warm-cache seeds the
                             // first frame, then a lightweight IO count of the
@@ -540,90 +531,29 @@ fun HomeScreen(navController: NavController) {
                             // path so the holes stay transparent and the hero
                             // banner shows through.
                             val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
+                            val ringsOn = holesOn && AppPreferences.paperHoleRingsState
                             Surface(
                                 shape = statShape,
-                                color = if (holesOn) Color.Transparent else if (paperStatsOn) paperStatBg else Color.Transparent,
+                                color = Color.Transparent,
                                 shadowElevation = if (paperStatsOn) 3.dp else 0.dp
                             ) {
                                 // The fill must wear the card's own shape —
                                 // Surface does not clip its content, so a plain
                                 // background() would bleed square corners past
                                 // the torn/rounded border.
+                                // v27u — the paper surface (fill + 3-hole column
+                                // + pressed rims or tilted book rings) lives in
+                                // the shared paperStatCardFill component, so
+                                // Profile's stat pane wears the same card.
                                 Box(
                                     modifier = when {
-                                        holesOn -> Modifier.drawWithCache {
-                                            // v27t — diary-spiral binding holes:
-                                            // three punch holes down the left edge,
-                                            // each with a pressed two-tone rim
-                                            // (light catches top-left, shadow pools
-                                            // bottom-right) so they read as real
-                                            // ring-binder punches, not plain dots.
-                                            val holeR = 5.5.dp.toPx()
-                                            val holeX = 14.dp.toPx()
-                                            // Punch through the SAME outline the
-                                            // Surface wears (torn or rounded), so
-                                            // the card edge and the holes read as
-                                            // one piece of paper.
-                                            val outline = statShape.createOutline(size, LayoutDirection.Ltr, this)
-                                            val basePath = (outline as? Outline.Generic)?.path
-                                            val path = Path().apply {
-                                                if (basePath != null) {
-                                                    addPath(basePath)
-                                                } else {
-                                                    addRoundRect(
-                                                        RoundRect(Rect(Offset.Zero, size), CornerRadius(20.dp.toPx()))
-                                                    )
-                                                }
-                                                repeat(3) { i ->
-                                                    val cy = size.height * (i + 1) / 4f
-                                                    addOval(Rect(Offset(holeX, cy), holeR), Path.Direction.Clockwise)
-                                                }
-                                                fillType = PathFillType.EvenOdd
-                                            }
-                                            onDrawBehind {
-                                                drawPath(path, paperStatBg)
-                                                // Diary-spiral punch rims: a faint
-                                                // full lip ring plus a top-left
-                                                // highlight arc and a bottom-right
-                                                // shadow arc around each hole.
-                                                repeat(3) { i ->
-                                                    val cy = size.height * (i + 1) / 4f
-                                                    val center = Offset(holeX, cy)
-                                                    val ringR = holeR + 1.7.dp.toPx()
-                                                    val ringTopLeft = Offset(center.x - ringR, center.y - ringR)
-                                                    val ringSize = Size(ringR * 2f, ringR * 2f)
-                                                    val ringStroke = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
-                                                    // Faint full edge — the punched paper lip.
-                                                    drawCircle(
-                                                        color = questInk.copy(alpha = 0.10f),
-                                                        radius = ringR,
-                                                        center = center,
-                                                        style = Stroke(width = 1.dp.toPx())
-                                                    )
-                                                    // Highlight arc (top-left).
-                                                    drawArc(
-                                                        color = Color.White.copy(alpha = 0.40f),
-                                                        startAngle = 160f,
-                                                        sweepAngle = 130f,
-                                                        useCenter = false,
-                                                        topLeft = ringTopLeft,
-                                                        size = ringSize,
-                                                        style = ringStroke
-                                                    )
-                                                    // Shadow arc (bottom-right).
-                                                    drawArc(
-                                                        color = questInk.copy(alpha = 0.22f),
-                                                        startAngle = 340f,
-                                                        sweepAngle = 130f,
-                                                        useCenter = false,
-                                                        topLeft = ringTopLeft,
-                                                        size = ringSize,
-                                                        style = ringStroke
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        paperStatsOn -> Modifier.background(paperStatBg, statShape)
+                                        paperStatsOn -> Modifier.paperStatCardFill(
+                                            shape = statShape,
+                                            fill = paperStatBg,
+                                            holesOn = holesOn,
+                                            ringsOn = ringsOn,
+                                            ink = questInk
+                                        )
                                         else -> Modifier.background(
                                             Brush.verticalGradient(
                                                 listOf(

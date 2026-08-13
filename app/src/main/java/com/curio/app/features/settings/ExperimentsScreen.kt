@@ -119,7 +119,11 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPaperHeaderHolesEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Paper stat card", "Streak · Cabinet · Topics on a soft rose paper card", AppPreferences.paperStatCardsState) {
+                    ExperimentSwitchRow("Hole rings", "Tilted metal rings through the pin holes, like a ring-bound notebook (needs Stamped pin holes on)", AppPreferences.paperHoleRingsState) {
+                        AppPreferences.setPaperHoleRingsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Paper stat card", "Soft rose paper card on the stat panes (Home + Profile)", AppPreferences.paperStatCardsState) {
                         AppPreferences.setPaperStatCardsEnabled(context, it)
                     }
                     CurioSettingsDivider()

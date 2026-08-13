@@ -56,6 +56,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
@@ -94,6 +95,9 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.paperStatCardColor
+import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -734,29 +738,50 @@ private fun ProfileHero(
                     // ── Level · Saved · Lanes — the stats INSIDE the hero,
                     // pinned above the torn seam on a soft rose gradient pane.
                     // The streak remains in the action pill above.
+                    // v27u — the pane can wear the shared paper stat card when
+                    // the "Paper stat card" experiment is on — the exact same
+                    // card Home's Streak · Cabinet · Topics wears, following the
+                    // same toggles (holes + rings + torn edges).
+                    val paperStatsOn = AppPreferences.paperStatCardsState
+                    val paperStatBg = paperStatCardColor(fill)
+                    val statTearOn = paperStatsOn && AppPreferences.paperStatTearState
+                    val statShape: Shape = remember(statTearOn) {
+                        if (statTearOn) TornStatPaperShape(0x6B4E3E) else RoundedCornerShape(20.dp)
+                    }
+                    val statHolesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
+                    val statRingsOn = statHolesOn && AppPreferences.paperHoleRingsState
                     Surface(
-                        shape = RoundedCornerShape(20.dp),
+                        shape = statShape,
                         color = Color.Transparent,
                         shadowElevation = 3.dp
                     ) {
                         Box(
-                            modifier = Modifier.background(
-                                // v27n — OPAQUE pane gradient: the old
-                                // 12–55% alpha fill let the elevation shadow
-                                // bleed through (blurry broken pane). The
-                                // opaque blends resolve to the same perceived
-                                // tints over the banner while keeping the
-                                // shadow clean behind them.
-                                Brush.verticalGradient(
-                                    listOf(
-                                        lerp(fill, Color.White, 0.06f),
-                                        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                                            lerp(fill, CurioColors.HomeRosewood, 0.30f)
-                                        else lerp(fill, Color.White, 0.26f)
-                                    )
-                                ),
-                                RoundedCornerShape(20.dp)
-                            )
+                            modifier = when {
+                                paperStatsOn -> Modifier.paperStatCardFill(
+                                    shape = statShape,
+                                    fill = paperStatBg,
+                                    holesOn = statHolesOn,
+                                    ringsOn = statRingsOn,
+                                    ink = ink
+                                )
+                                else -> Modifier.background(
+                                    // v27n — OPAQUE pane gradient: the old
+                                    // 12–55% alpha fill let the elevation shadow
+                                    // bleed through (blurry broken pane). The
+                                    // opaque blends resolve to the same perceived
+                                    // tints over the banner while keeping the
+                                    // shadow clean behind them.
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            lerp(fill, Color.White, 0.06f),
+                                            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                                                lerp(fill, CurioColors.HomeRosewood, 0.30f)
+                                            else lerp(fill, Color.White, 0.26f)
+                                        )
+                                    ),
+                                    RoundedCornerShape(20.dp)
+                                )
+                            }
                         ) {
                             Row(
                                 modifier = Modifier

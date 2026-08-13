@@ -1,6 +1,58 @@
 # Prompt.md — Request log
 
-## Current request — explore-dialog pills: clean glyphs, visible pill fill, spacing (v27u)
+## Current request — cut-line rework + book rings in holes + paper card expansion (v27u)
+
+### What was asked
+1. "Title cut lines" experiment: the two lines need to be a little SHORTER,
+   more natural stroke, and the 2-line placement feels wrong — research how
+   they should be drawn and fix it.
+2. Place rings inside the pin holes like book rings — only 3, tilted look —
+   as a DIFFERENT look option with a NEW toggle in Experiments.
+3. Expand the paper stat card to all stat-card screens too (all experiments
+   stay behind their toggles).
+
+### Research
+Double-underline conventions: two strokes close together, NOT parallel —
+slight convergence like one continuous pen motion; the lower line usually a
+little longer; gentle waviness + rounded/felt ends read "hand-drawn". The
+old implementation's deep quadratic sag (control y 0.64 on a 0.40–0.47
+stroke) dipped INTO the second stroke — that crossing is the wrong
+placement.
+
+### Fix
+- **PaperTitleLines.kt** — lines now span ~88% of the title width (was
+  (len+3)·0.62em — stretched past the text), floor 1.8em / cap 11em +
+  220dp. Two cubic-bezier strokes in the lower half with a steady gap,
+  converging slightly toward the right (top 0.34→0.40, bottom 0.74→0.68),
+  bottom line longer + offset right, felt-pen double pass, -2° tilt.
+- **PaperStatCard.kt (new, shared)** — `paperStatCardFill(shape, fill,
+  holesOn, ringsOn, ink)` draws the opaque paper fill + 3-hole EvenOdd
+  punch (left edge, 5.5dp @ 14dp) + per-hole pressed rims OR tilted metal
+  book rings (foreshortened ellipse rx=holeR+0.8dp, ry=0.78·rx, per-ring
+  tilt -9°/-3°/3°, metal vertical gradient, white specular top arc,
+  contact shade bottom-right). `paperStatCardColor(base)` = the shared
+  cream/rose-brown paper blend (light lerp 0xFFF6EB 0.62 / dark 0x2A211C
+  0.50).
+- **AppPreferences** — new `paperHoleRingsState` (default false, KEY
+  paper_hole_rings) + is/set; loaded in init.
+- **ExperimentsScreen** — new "Hole rings" row under Stamped pin holes
+  ("needs Stamped pin holes on"); Paper stat card subtitle now "Home +
+  Profile".
+- **HomeScreen** — stat card refactored onto `paperStatCardFill` (rings
+  honored); paper color via `paperStatCardColor(heroFill)`; 10 dead drawing
+  imports removed.
+- **ProfileScreen** — Level · Saved · Lanes pane wears the same paper card
+  when the toggle is on (holes/rings/tear follow the same toggles; tear
+  seed 0x6B4E3E).
+- Cut lines confirmed: they were already on ALL hero-title screens (Home,
+  Profile, Cabinet, Entry Detail, Settings).
+
+### Validation
+Brace balance OK (6 files), `git diff --check` clean, no leftover
+Path/drawWithCache/StrokeCap/Outline refs in HomeScreen. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v27u bullet.
+
+## Prior — explore-dialog pills: clean glyphs, visible pill fill, spacing (v27u)
 
 ### What was asked
 "The Watch in YouTube icon looks bad, same for Explore in browser — give the
