@@ -15,6 +15,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicProgressStore
 import kotlinx.coroutines.launch
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioNavHost
