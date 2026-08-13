@@ -1,6 +1,24 @@
 # Prompt.md — Request log
 
-## Current request — desktop persistence + preferences store (v27t, milestone 2)
+## Current request — Windows .exe installers in CI (v27t, desktop release workflow)
+
+### What was asked
+"Build the Windows .exe installers in CI with a desktop release workflow."
+
+### What was done
+- **`desktop/build.gradle.kts`** — `packageVersion` now follows the tag: the workflow exports `RELEASE_VERSION` (tag minus `v`) and jpackage versions the installer from it, mirroring the Android `versionName` convention; local builds keep `1.0.0`.
+- **`.github/workflows/desktop-release.yml` (new)** — runs on `v*` tags + manual dispatch, `windows-latest`, `contents: write`:
+  - Installs WiX Toolset via chocolatey (jpackage needs it for `.msi`), exposed via `WIX` env + PATH.
+  - Runs `./gradlew.bat :desktop:packageDistributionForCurrentOS` → builds the app image (contains `Curio.exe`) + the `.msi` (Dmg/Deb are non-Windows formats, skipped).
+  - Hard guards: `.msi` must exist, app image must contain `Curio.exe`.
+  - Zips the app image into `Curio-Windows-{version}-portable.zip` and publishes BOTH the `.msi` and the portable zip to the GitHub release with a Windows install-guide body.
+  - Same `alpha/beta/rc` prerelease detection as Android; `update_release_body: false` so it never clobbers the Android release workflow's body when both run on the same tag (race-safe both directions).
+- Docs: `.github/AGENTS.md` ownership + new "Desktop release workflow" contract section; root AGENTS.md desktop CI + not-yet-ported lines.
+
+### Validation
+No YAML lint locally — the workflow is only exercised on tag push / manual dispatch. Structure mirrors the battle-tested `release.yml` (same action versions, prerelease logic, contents: write).
+
+## Prior — desktop persistence + preferences store (v27t, milestone 2)
 
 ### What was asked
 "Continue the desktop port: add persistence and a preferences store so the deck and settings survive restarts."

@@ -31,6 +31,15 @@ dependencies {
     implementation(libs.com.google.code.gson.gson)
 }
 
+// v27t — the desktop release workflow exports RELEASE_VERSION (the git tag
+// minus the leading "v", e.g. v1.2.3 -> 1.2.3) so jpackage versions the
+// Windows installer from the tag, mirroring the Android app's versionName.
+// Local builds (no env var) keep the default.
+val envDesktopVersion: String? = System.getenv("RELEASE_VERSION")
+    ?.trim()
+    ?.removePrefix("v")
+    ?.takeIf { it.isNotEmpty() }
+
 compose.desktop {
     application {
         mainClass = "com.curio.desktop.MainKt"
@@ -38,7 +47,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Dmg, TargetFormat.Deb)
             packageName = "Curio"
-            packageVersion = "1.0.0"
+            packageVersion = envDesktopVersion ?: "1.0.0"
             description = "Curio — discover the things you love, one curious spin at a time."
             vendor = "Curio"
         }

@@ -255,17 +255,22 @@ constructors.
   JSON preferences store (`~/.curio/prefs.json`, Gson, best-effort load).
 - CI: the `desktop` job in `.github/workflows/android.yml` compiles and
   builds the module on every push (`:desktop:build`), so the port can't
-  silently rot. Native packaging (.exe/.dmg/.deb) ships via a future
-  desktop release workflow.
+  silently rot. Native Windows installers (`.exe` app image + `.msi`)
+  build on tag pushes via `.github/workflows/desktop-release.yml` (a
+  windows-latest runner, WiX via chocolatey, jpackage
+  `packageDistributionForCurrentOS`; the portable zip + `.msi` attach to
+  the GitHub release).
 
 **To run locally:** `./gradlew :desktop:run` (this environment forbids
 running Gradle — CI validates instead).
 
 **Not yet ported** (milestone 3+): Room data layer (real saved entries,
 capture/sessions), notifications, floating overlay, and the remaining
-Android-only services — each needs a desktop stub. UI parity with Android
-(per the tablet-layout pass + web parity effort) is the ongoing goal; the
-shuffle deck must stay 2 peek cards.
+Android-only services — each needs a desktop stub. macOS `.dmg` and Linux
+`.deb` packaging is already declared in `targetFormats` but has no release
+job yet (add runners per OS when wanted). UI parity with Android (per the
+tablet-layout pass + web parity effort) is the ongoing goal; the shuffle
+deck must stay 2 peek cards.
 
 ## Web App (web/)
 

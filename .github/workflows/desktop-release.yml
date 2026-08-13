@@ -1,0 +1,143 @@
+# Curio Desktop Release — native Windows installers for the Compose
+# Multiplatform desktop port (desktop/ module).
+#
+# Runs on the same v* tags as the Android release workflow: this job builds
+# the Windows distribution (the Curio.exe app image via jpackage, plus the
+# .msi installer) and attaches both to the release. The Android workflow may
+# create the release body first; this workflow only writes its own body when
+# it creates the release (update_release_body is false), so the two never
+# clobber each other's text.
+name: Curio Desktop Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: curio-desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    name: Build Windows installer (.exe app image + .msi)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      # The tag (e.g. "v1.2.3") becomes the installer's package version —
+      # consumed by desktop/build.gradle.kts (mirrors the Android release
+      # workflow's RELEASE_VERSION convention).
+      RELEASE_VERSION: ${{ github.ref_name }}
+
+    steps:
+      - name: Check out Curio
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # jpackage needs the WiX Toolset to produce the .msi installer. The
+      # chocolatey package installs WiX 3.11 to the standard location; we
+      # expose it to jpackage via the WIX env var and PATH.
+      - name: Install WiX Toolset (for the .msi installer)
+        shell: pwsh
+        run: |
+          choco install wixtoolset --yes --no-progress
+          $wix = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          if (-not (Test-Path "$wix\candle.exe")) {
+            Write-Error "WiX Toolset not found at $wix after install"
+            exit 1
+          }
+          "WIX=$wix" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "$wix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "WiX Toolset ready: $wix"
+
+      # Builds the Windows-only distributions from nativeDistributions
+      # (Msi — Dmg/Deb are macOS/Linux formats and are skipped on Windows):
+      # the app image (contains Curio.exe) + the .msi installer.
+      - name: Build the Windows distribution (app image + MSI)
+        shell: pwsh
+        run: ./gradlew.bat :desktop:packageDistributionForCurrentOS --stacktrace
+
+      - name: Collect installers and build the portable zip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $root = "desktop/build/compose/binaries/main"
+          $msi = Get-ChildItem "$root/msi/*.msi" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $msi) {
+            Write-Error "No MSI installer was produced under $root/msi"
+            exit 1
+          }
+          $appDir = Get-ChildItem "$root/app" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $appDir) {
+            Write-Error "No app image was produced under $root/app"
+            exit 1
+          }
+          if (-not (Test-Path "$($appDir.FullName)\Curio.exe")) {
+            Write-Error "Curio.exe not found in the app image"
+            exit 1
+          }
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          if ([string]::IsNullOrWhiteSpace($version)) { $version = "1.0.0" }
+          $zipName = "Curio-Windows-$version-portable.zip"
+          Compress-Archive -Path "$($appDir.FullName)\*" -DestinationPath $zipName -Force
+          echo "Installer: $($msi.FullName)"
+          echo "Portable:  $($PWD.Path)\$zipName"
+          Get-Item "$($appDir.FullName)\Curio.exe" | Select-Object Name, Length
+
+      - name: Write Windows release body
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          # String array joined with newlines (a YAML block scalar can't
+          # hold an unindented PowerShell here-string; `` `` is an escaped
+          # backtick in double-quoted strings, so the markdown code spans
+          # survive).
+          $body = @(
+            "## Curio Desktop for Windows",
+            "",
+            "Curio is now a native Windows app (the Compose Multiplatform desktop port).",
+            "",
+            "| File | Best for |",
+            "|---|---|",
+            "| ``Curio-Windows-$version-portable.zip`` | Portable — unzip anywhere and run ``Curio.exe``, no install |",
+            "| ``Curio-$version.msi`` | Installer — adds a Start-menu shortcut and an uninstaller |",
+            "",
+            "**Windows 10/11, 64-bit.** The window remembers its size, position, theme and last deck between runs."
+          ) -join [Environment]::NewLine
+          Set-Content -Path release-body-windows.md -Value $body -Encoding utf8
+
+      - name: Determine prerelease status
+        id: prerelease
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_NAME -match "alpha|beta|rc") {
+            "value=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          } else {
+            "value=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          prerelease: ${{ steps.prerelease.outputs.value }}
+          # update_release_body is intentionally false: the Android release
+          # workflow may have already created the release body for this tag,
+          # and it must not be clobbered. The Windows body is only applied
+          # when this workflow creates the release first.
+          update_release_body: false
+          body_path: release-body-windows.md
+          files: |
+            desktop/build/compose/binaries/main/msi/*.msi
+            Curio-Windows-*-portable.zip
+          fail_on_unmatched_files: true
