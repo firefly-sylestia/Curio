@@ -652,9 +652,12 @@ private fun ProfileHero(
                             Box(
                                 modifier = m
                                     .size(72.dp)
+                                    // v27n — shadow FIRST so it renders behind
+                                    // the opaque fill (the old order smeared a
+                                    // dark blur on top of the avatar).
+                                    .shadow(2.dp, CircleShape)
                                     .clip(CircleShape)
-                                    .background(fill)
-                                    .shadow(2.dp, CircleShape),
+                                    .background(fill),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -734,12 +737,18 @@ private fun ProfileHero(
                     ) {
                         Box(
                             modifier = Modifier.background(
+                                // v27n — OPAQUE pane gradient: the old
+                                // 12–55% alpha fill let the elevation shadow
+                                // bleed through (blurry broken pane). The
+                                // opaque blends resolve to the same perceived
+                                // tints over the banner while keeping the
+                                // shadow clean behind them.
                                 Brush.verticalGradient(
                                     listOf(
-                                        fill.copy(alpha = 0.12f),
+                                        lerp(fill, Color.White, 0.06f),
                                         if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                                            CurioColors.HomeRosewood.copy(alpha = 0.30f)
-                                        else lerp(fill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                            lerp(fill, CurioColors.HomeRosewood, 0.30f)
+                                        else lerp(fill, Color.White, 0.26f)
                                     )
                                 ),
                                 RoundedCornerShape(20.dp)
@@ -1138,7 +1147,14 @@ private fun LanesCard(counts: Map<CategoryId, Int>, onCabinet: () -> Unit) {
                 val category = CurioCategories.byId(categoryId)
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = category.themedAccent().copy(alpha = 0.14f),
+                    // v27n — OPAQUE category-tinted tile (was 14% alpha, which
+                    // let the elevation shadow bleed through); the opaque lerp
+                    // keeps the same tint over the card surface.
+                    color = lerp(
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        category.themedAccent(),
+                        0.14f
+                    ),
                     shadowElevation = 2.dp
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {

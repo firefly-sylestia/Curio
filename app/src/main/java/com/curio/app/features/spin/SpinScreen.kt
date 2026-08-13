@@ -3149,11 +3149,13 @@ private fun PeekCard(
                 // so the Surface stays transparent and the brush (applied
                 // below) is what the eye sees.
                 color = Color.Transparent,
-                // v7.38 — the layered shadow now lives on the outer Box
-                // modifier (above, before the clip); the Surface stays flat
-                // so the two-depth glow is the ONLY shadow and never stacks
-                // with an elevation halo.
-                shadowElevation = 2.dp,
+                // v7.38 — the layered shadow lives on the outer Box modifier
+                // (above, before the clip); the Surface stays FLAT. v24
+                // rejected deck-card shadows (they look weird while the
+                // cards animate) and the elevation commit's 2dp halo was
+                // exactly that "boxy thing" during the reel — so no
+                // elevation shadow here, ever.
+                shadowElevation = 0.dp,
                 tonalElevation = 0.dp,
                 modifier = Modifier
                     .fillMaxSize()

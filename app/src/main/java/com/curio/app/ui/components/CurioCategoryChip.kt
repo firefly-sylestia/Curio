@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioCategory
 import com.curio.app.ui.theme.CurioIcon
@@ -38,6 +39,15 @@ fun CurioCategoryChip(
     modifier: Modifier = Modifier,
     label: String = category.displayName
 ) {
+    // v27n — the selected chip fill is OPAQUE: `category.tint` is the accent
+    // at 20% alpha, and a translucent container lets the chip's elevation
+    // shadow bleed through (blurry broken chip). The opaque 20% lerp over
+    // the surface resolves to the same tint.
+    val selectedChipFill = lerp(
+        MaterialTheme.colorScheme.surface,
+        category.accent,
+        0.20f
+    )
     FilterChip(
         selected = selected,
         onClick = onClick,
@@ -62,13 +72,13 @@ fun CurioCategoryChip(
         },
         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = if (selected) category.tint
+            containerColor = if (selected) selectedChipFill
                              else MaterialTheme.colorScheme.surface,
             labelColor = if (selected) category.categoryInk()
                          else MaterialTheme.colorScheme.onSurfaceVariant,
             iconColor = if (selected) category.categoryInk()
                        else MaterialTheme.colorScheme.onSurfaceVariant,
-            selectedContainerColor = category.tint,
+            selectedContainerColor = selectedChipFill,
             selectedLabelColor = category.categoryInk(),
             selectedLeadingIconColor = category.categoryInk()
         ),
