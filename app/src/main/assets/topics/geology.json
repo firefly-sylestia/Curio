@@ -9884,7 +9884,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Engineering Geology",
-  "teaser": "Geology for builders.",
+  "teaser": "Engineering geology applies rock and soil science to construction: how to build safely on, in, or against the ground. Engineers study foundation conditions, slope stability, groundwater, and earthquake hazards before anything is poured. A geologist's borehole logs and maps decide where bridges, tunnels, dams, and cities can stand. Getting the geology wrong can sink a building, crack a dam, or bury a road — so the ground is inspected before the blueprint.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -9903,7 +9903,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Geotechnical Engineering",
-  "teaser": "The ground science of building.",
+  "teaser": "Geotechnical engineering is the bridge between geology and construction — the discipline that tests soil and rock to predict how they will behave under load. Geotechnical engineers drill boreholes, run lab tests on samples, and calculate how much weight the ground can bear. Their reports set foundation depths, pile designs, and slope angles. Every skyscraper, highway, and dam rests on a geotechnical verdict about the unseen ground beneath.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -9922,7 +9922,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Foundations",
-  "teaser": "Anchoring buildings to the ground.",
+  "teaser": "A foundation transfers a building's weight to the ground, and its design depends on what lies below. Strong rock bears enormous loads directly; soft clay may need deep piles driven to firmer strata; sandy soils may require compaction or rafts that spread the load. Geologists map the subsurface with boreholes to find the bearing layer and spot hidden hazards like old mines or sinkholes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -9941,7 +9941,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Slope Stability",
-  "teaser": "Keeping hillsides in place.",
+  "teaser": "Slope stability is the science of keeping hillsides from moving: engineers analyse the balance between forces holding soil and rock in place — friction and cohesion — and forces pulling it down, gravity and water. A slope is stable when resisting forces win; rain, earthquakes, excavation, or loading can tip the balance. Analysis uses computer models of slip surfaces, and fixes range from drainage and retaining walls to regrading the whole slope.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -9960,7 +9960,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Landslides",
-  "teaser": "The moving mountains.",
+  "teaser": "Landslides are gravity's sudden victories: masses of rock, soil, or debris moving downhill, ranging from slow creeping slumps to catastrophic rock avalanches. They trigger on steep slopes when rain soaks the ground, earthquakes shake it, or humans undercut it. Some travel at highway speed for kilometres. Landslide mapping identifies susceptible slopes, and monitoring instruments — tiltmeters, GPS, radar — give warning before the ground lets go.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -9979,7 +9979,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Rockslides",
-  "teaser": "When cliffs collapse.",
+  "teaser": "Rockslides happen when a wedge or slab of rock detaches along a pre-existing weakness — a joint, bedding plane, or fault — and tumbles downslope. Unlike soil slides, they move fast and shatter on impact, sometimes generating air blasts that knock down trees ahead of them. They often follow rain, freeze-thaw, or earthquakes that open the cracks. Engineers stabilize them with rock bolts, mesh, barriers, and drainage; planners simply avoid the worst slopes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -9998,7 +9998,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Land Subsidence",
-  "teaser": "The sinking ground.",
+  "teaser": "Land subsidence is the slow sinking of the ground surface, usually because water, oil, or gas is pumped out from beneath. When fluids are removed, the sediment compacts and the land drops — sometimes metres over decades. Mexico City has sunk over 9 metres from groundwater pumping, and the San Joaquin Valley in California continues to settle. Subsidence damages foundations, canals, and coastlines; it can be slowed by recharging aquifers or limiting pumping.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10017,7 +10017,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Expansive Soils",
-  "teaser": "Ground that swells and shrinks.",
+  "teaser": "Expansive soils swell when wet and shrink when dry — clays containing minerals like montmorillonite that absorb water between their layers. The movement can lift foundations, crack walls, and buckle roads, causing billions in damage each year. Builders counter it by removing or replacing the clay, designing deep foundations that pass through it, or keeping moisture content constant around the structure. In some regions, expansive clay is the most costly natural hazard of all.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10036,7 +10036,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Tunneling Through Rock",
-  "teaser": "Boring under mountains.",
+  "teaser": "Tunneling through rock is a negotiation with geology: the ground must be held up while it is excavated. Hard rock tunnels are drilled and blasted or bored with giant machines; soft ground needs shields that pressurize the face to keep it from collapsing. Water is the tunneler's enemy — inflows flood works and weaken rock. Geologists map faults, water, and rock strength ahead of the face so the tunnel can be designed and reinforced accordingly.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10055,7 +10055,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Dams and Geology",
-  "teaser": "Building against water.",
+  "teaser": "A dam's safety rests on the ground: the foundation must bear its weight without settling, and the abutments must seal so water cannot leak around the structure. Geologists map the bedrock, grout fractures, and watch for weak layers that could let water undercut the dam. Some dams failed when foundations proved weaker than assumed, so the dam site itself is a geological judgement.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10074,7 +10074,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Dams and Earthquakes",
-  "teaser": "The reservoir trigger.",
+  "teaser": "Large reservoirs can trigger earthquakes. The weight of billions of tonnes of water loads the crust, and the pressure of water seeping into faults lubricates them, sometimes releasing pent-up stress. The 1967 Koyna earthquake in India, magnitude 6.3, occurred beneath a reservoir dam and killed hundreds. Dam engineers now assess seismic risk before construction, installing monitoring networks to track tremors and adjust reservoir levels if activity increases.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10093,7 +10093,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Road Cuts",
-  "teaser": "Carving roads through rock.",
+  "teaser": "Road cuts are geology on display — but also a liability. Cutting into a slope removes support, so the exposed face must be engineered to stay: benches step steep slopes, bolts pin loose blocks, mesh catches falling rock, and drainage keeps water from building up behind the cut. Geologists log each cut to find weak layers and slip planes. A well-designed road cut is a stable cliff; a poorly designed one becomes a rockfall chute.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10112,7 +10112,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Bridging the Ground",
-  "teaser": "Foundations for bridges.",
+  "teaser": "Bridges hang on their foundations, so geologists scrutinize the ground at every pier. Riverbeds hide the challenge: scouring currents can excavate around piers, and buried channels filled with soft sediment may be far weaker than they look. Geotechnical boring at each pier site finds the bearing stratum and reveals seismic risks like liquefaction. Some famous bridge failures, including historic collapses, trace directly to underestimating the riverbed geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10131,7 +10131,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Soil Testing",
-  "teaser": "Probing the ground.",
+  "teaser": "Soil testing turns invisible ground into numbers: samples from boreholes are weighed, sieved, and squeezed in labs to measure strength, compaction, permeability, and moisture. Field tests press cones into the ground or pump water to measure flow. The results feed foundation and slope designs, telling engineers how much load the ground can carry and how it will behave when wet or shaken. Testing is cheap compared to the failures it prevents.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10150,7 +10150,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Geologic Risk",
-  "teaser": "Living with Earth's hazards.",
+  "teaser": "Geologic risk is the chance that a hazard — earthquake, landslide, subsidence, sinkhole, volcanic eruption — will actually hurt people and property. Risk combines hazard likelihood with exposure and vulnerability: the same fault under a desert and under a city carries very different risks. Geologists map hazard zones, engineers build to resist them, and planners steer development away. The goal is never to eliminate hazard, but to keep people out of its way.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10169,7 +10169,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Coastal Engineering",
-  "teaser": "Building on shifting shores.",
+  "teaser": "Coastal engineering geology studies the shifting ground at the edge of the sea: eroding cliffs, migrating sand, rising water, and foundations that must resist salt and waves. Cliff retreat collapses homes, and soft coastal sediments amplify earthquake shaking and liquefaction. Seawalls, beach nourishment, and managed retreat are all geological decisions about how the coast will move. With sea levels rising, coastal geology now guides how entire cities adapt.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10188,7 +10188,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Mining Engineering",
-  "teaser": "Designing safe mines.",
+  "teaser": "Mine engineering designs the workings that extract ore safely: pit slopes that won't collapse, underground openings that won't crush, and waste dumps that won't slide. Rock mechanics predicts how stress redistributes around excavations, guiding pillar sizes and support. Mine engineers also manage groundwater — pumping it keeps workings dry but can drain the surrounding region. The science is balancing extraction against the ground's tolerance for disturbance.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10207,7 +10207,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "City Geology",
-  "teaser": "The ground beneath cities.",
+  "teaser": "Cities sit on geological foundations that shape everything: the bedrock under Manhattan's skyscrapers, the clay beneath Mexico City that amplified the 1985 earthquake, the buried rivers under London. Urban geologic mapping compiles boreholes, old mines, groundwater, and faults into hazard and foundation maps that planners use daily. As cities densify, knowing the ground beneath them becomes as important as the skyline above.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10226,7 +10226,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Green Infrastructure",
-  "teaser": "Working with the ground.",
+  "teaser": "Green infrastructure works with geology instead of against it: rain gardens and permeable pavements let stormwater soak into the ground, reducing floods and recharging aquifers; constructed wetlands filter runoff through soil and plants. Geologists map infiltration capacity and groundwater so these systems drain properly, and old industrial sites get cleaned through careful groundwater management. The ground becomes part of the city's water system rather than a barrier to it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10245,7 +10245,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Engineering Geology",
   "name": "Careers in Earth Engineering",
-  "teaser": "The jobs at the ground.",
+  "teaser": "Engineering geologists are the doctors of the built world: they diagnose ground conditions before construction, prescribe foundations and slopes, and monitor hazards for a lifetime. Careers span dam and tunnel projects, earthquake engineering, mine stability, coastal protection, and groundwater management. The work mixes fieldwork — drilling, mapping, testing — with analysis and design. With infrastructure aging and climate hazards rising, demand for these ground specialists keeps growing.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10264,7 +10264,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Impact Craters",
-  "teaser": "The scars of cosmic collisions.",
+  "teaser": "Impact craters are the scars of cosmic collisions — circular depressions blasted when asteroids or comets strike the surface. The energy of impact vaporizes rock, excavates a bowl, and throws debris for hundreds of kilometres. Earth has over 200 confirmed craters, but that is a small fraction of the original count: erosion, plate tectonics, and vegetation erase most. Craters like Meteor Crater in Arizona preserve a snapshot of a moment of violence.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10283,7 +10283,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Meteorites",
-  "teaser": "Rocks from space on Earth.",
+  "teaser": "Meteorites are rocks from space that survive the fiery plunge through the atmosphere and land on Earth. Most are fragments of asteroids, some come from the Moon and Mars, and a rare few may be from other planets' moons. Each one carries a record of the early solar system, older than any rock on Earth. Collectors and scientists prize them — a fresh fall can arrive with a boom and a trail of scorched sky.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10302,7 +10302,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Types of Meteorites",
-  "teaser": "The families of space rocks.",
+  "teaser": "Meteorites fall into three families: stony meteorites, the most common, made of silicate minerals; iron meteorites, dense metallic masses from shattered asteroid cores; and stony-irons, rare mixtures of both. Stony meteorites include chondrites, which hold tiny glassy spheres — chondrules — dating from the solar system's birth. Iron meteorites show Widmanstätten patterns, crystalline structures that form only over millions of years of slow cooling inside asteroids.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10321,7 +10321,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Meteorite Impacts",
-  "teaser": "When space rocks hit.",
+  "teaser": "A meteorite impact releases energy equal to mass times velocity squared — so a small rock hits like a bomb. The Chicxulub impact 66 million years ago released more energy than a billion atomic bombs and ended the dinosaurs. Even metre-sized rocks punch through the atmosphere and scatter debris over towns. A 10-kilometre object — rare but inevitable over geological time — can reshape global climate.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10340,7 +10340,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "How Craters Form",
-  "teaser": "The physics of impact.",
+  "teaser": "A crater forms in three acts: compression, when the impactor's energy vaporizes rock and drives a shock wave through the ground; excavation, when the shock blasts a bowl out at high speed; and modification, when the steep walls slump and the crater settles. Small craters stay simple bowls; large ones develop central peaks and ringed terraces as the shocked rock rebounds. The whole drama takes seconds — a geological event over in a blink.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10359,7 +10359,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "The Chicxulub Crater",
-  "teaser": "The buried dino-killer.",
+  "teaser": "The Chicxulub crater, buried under Mexico's Yucatán Peninsula, is the most famous impact scar on Earth: a 180-kilometre-wide structure from the asteroid that ended the dinosaurs 66 million years ago. The impact threw up a dust veil that darkened the sky for months, freezing the climate. Geologists found it through its ring of buried rock and worldwide layer of iridium, an element rare on Earth but common in asteroids.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10378,7 +10378,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Meteor Crater",
-  "teaser": "The best-preserved impact site.",
+  "teaser": "Meteor Crater in Arizona is the best-preserved impact crater on Earth — a 1.2-kilometre bowl blasted about 50,000 years ago by an iron meteorite. The desert climate kept its rim sharp, and visitors can see upturned rock layers pushed out from the blast. Long thought volcanic, it took mining engineer Daniel Barringer, who drilled for the buried meteorite, to prove the impact origin. The meteorite mostly vaporized on impact.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10397,7 +10397,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Tektites",
-  "teaser": "The glass of cosmic impact.",
+  "teaser": "Tektites are small, glassy blobs — often black, green, or brown — flung thousands of kilometres from large impacts. Molten rock splashed high into the atmosphere cools into droplets and aerodynamically sculpted shapes before falling back to Earth. They form strewn fields, like the Australasian tektites spread across a third of the planet from a single impact. Tektites are nature's impact souvenirs, and their composition matches the target rock, not the meteorite.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10416,7 +10416,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Impact Breccia",
-  "teaser": "The shattered rock of impacts.",
+  "teaser": "Impact breccia is the rubble of a crater: angular rock fragments, shocked and shattered by the blast, cemented together in a matrix of pulverized debris. It fills the crater floor, lines the walls, and forms thick deposits around the rim. Breccia layers are the signature of impact — geologists identify ancient craters by finding this distinctive jumble of broken rock. Some breccias contain glass formed by impact melting, recording the violence of the strike.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10435,7 +10435,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Shocked Quartz",
-  "teaser": "The fingerprints of impacts.",
+  "teaser": "Shocked quartz is quartz whose crystal structure has been deformed by the intense pressure of an impact — typically over 10 gigapascals. Under the microscope it shows parallel lines called planar deformation features, invisible to the naked eye but unmistakable to a geologist. Shock features like these are diagnostic proof of impact, since no ordinary volcanic or tectonic process can produce them. Shocked quartz found in a worldwide clay layer helped confirm the Chicxulub impact.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10454,7 +10454,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Impact Spherules",
-  "teaser": "The droplets of melted rock.",
+  "teaser": "Impact spherules are tiny, often glassy or crystalline beads formed when impact melt sprays into the air and solidifies into droplets. They fall back to Earth and form a thin, distinctive layer that can be traced across continents — like the tektite-strewn layer from Chicxulub found from Texas to Haiti. Spherule layers are time markers: find one, and you have dated the same catastrophe on two continents. They help geologists count Earth's largest impact events.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10473,7 +10473,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Impact Tsunamis",
-  "teaser": "Waves from the sky.",
+  "teaser": "An ocean impact can generate tsunami waves dwarfing any earthquake-driven one. When a large object slams into the sea, it displaces a wall of water that races outward at hundreds of kilometres per hour. The Chicxulub impact's tsunami may have been hundreds of metres high when it hit distant coastlines. Evidence survives as thick, chaotic sediment beds — 'impact tsunamites' — deposited far inland. Geologists map these layers to reconstruct ancient ocean impacts.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10492,7 +10492,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Impacts and Extinctions",
-  "teaser": "Cosmic collisions and dying life.",
+  "teaser": "Impacts can end eras. The Chicxulub impact 66 million years ago wiped out three-quarters of species, ending the dinosaurs and opening the door for mammals. Other impact layers correlate with smaller extinction events, though most mass extinctions have volcanic or climatic causes. The danger is probabilistic: large impacts are rare, but their effects are global and sudden. Studying past impact extinctions tells us what another major strike could do to our civilization.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10511,7 +10511,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Bolides",
-  "teaser": "The blazing fireballs.",
+  "teaser": "A bolide is a spectacular meteor — a fireball bright enough to light up the night sky, often with explosions and sonic booms. Strictly, the term refers to an impactor that explodes in the atmosphere, as the Chelyabinsk meteor did in 2013, shattering windows across Russian cities. Bolides come from asteroids and comets whose orbits cross Earth's. Tracking networks now record them nightly, mapping the small objects that constantly brush our planet.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10530,7 +10530,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Meteorite Hunting",
-  "teaser": "Finding space rocks on Earth.",
+  "teaser": "Meteorite hunting combines science and treasure hunting: freshly fallen meteorites are valuable to collectors and researchers alike. The best hunting grounds are deserts and ice sheets, where dark meteorites stand out against light surfaces and dry or cold conditions preserve them. Antarctic meteorites concentrate where ice flow pushes them against mountain ranges — thousands are collected each season. Finders often scan with metal detectors, since many meteorites are rich in iron.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10549,7 +10549,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Antarctic Meteorites",
-  "teaser": "The ice's space rock collection.",
+  "teaser": "Antarctica is the world's meteorite treasure chest: over 60,000 specimens collected so far, many from asteroids, the Moon, and Mars. The ice does two jobs — it preserves meteorites for tens of thousands of years, and its slow flow concentrates them along mountain barriers where they surface again. A dark rock on white ice is easy to spot, making search efficient. Martian meteorites from Antarctica helped prove that Mars once had water.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10568,7 +10568,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "The Chelyabinsk Meteor",
-  "teaser": "The wake-up call of 2013.",
+  "teaser": "The Chelyabinsk meteor exploded over Russia in February 2013 with the force of roughly 30 Hiroshima bombs. The 20-metre asteroid entered at hypersonic speed and burst about 30 kilometres up, its flash outshining the sun and its shockwave blowing out windows across the city, injuring over a thousand people. Thousands of fragments, some weighing hundreds of kilograms, fell into a frozen lake. It was the largest airburst since the 1908 Tunguska event.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10587,7 +10587,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "The Tunguska Event",
-  "teaser": "The 1908 mystery blast.",
+  "teaser": "The Tunguska event of 1908 flattened over 2,000 square kilometres of Siberian forest with no crater left behind — the asteroid or comet exploded several kilometres above the ground in an airburst. Eyewitnesses reported a blinding flash, a pillar of fire, and tremors felt hundreds of kilometres away. Trees lay felled in a radial pattern around ground zero, but almost no impactor material was ever found. It remains the largest cosmic impact in recorded history.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10606,7 +10606,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "Asteroid Defense",
-  "teaser": "Protecting Earth from impacts.",
+  "teaser": "Asteroid defense is the effort to find and deflect objects that could threaten Earth. Telescopes map near-Earth asteroids, cataloguing their orbits decades in advance; the goal is to spot a dangerous one with years of lead time. Deflection options include nudging the asteroid with a spacecraft impact, towing it with gravity, or — as a last resort — nuclear blasts. The 2022 DART mission proved the kinetic-impact method works by changing an asteroid's orbit.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10625,7 +10625,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Impacts & Meteorites",
   "name": "The DART Mission",
-  "teaser": "Testing asteroid deflection.",
+  "teaser": "NASA's DART mission was the first planetary defense test: in September 2022, a spacecraft deliberately slammed into the asteroid Dimorphos at about 6 kilometres per second. The impact shortened the asteroid's orbit around its companion by 32 minutes — far more than expected, as the collision ejected tonnes of debris that added thrust. The test proved that a well-aimed spacecraft can change an asteroid's path, turning a sci-fi idea into an engineering capability.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10644,7 +10644,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Planetary Geology",
-  "teaser": "Geology beyond Earth.",
+  "teaser": "Planetary geology applies Earth's rock science to other worlds — the Moon, Mars, Venus, and beyond. The same tools work everywhere: craters date surfaces, lava flows tell of volcanic pasts, and river channels reveal flowing water. Comparing planets teaches us about Earth, too — Venus shows what runaway greenhouse does, Mars shows a world that lost its water. Planetary geologists now walk alien landscapes through rovers, orbiters, and sample returns.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10663,7 +10663,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "The Geology of Mars",
-  "teaser": "The red planet's rocks.",
+  "teaser": "Mars is a geologist's paradise: no oceans, weak erosion, and a thin atmosphere leave billions of years of history exposed. Its surface shows giant volcanoes, canyon systems, dried riverbeds, polar ice caps, and dust storms that reshape the landscape. Rover missions have found rocks formed in ancient lakes and rivers, proving Mars was once warm and wet. Its crust preserves the record of a planet that lost most of its atmosphere and water.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10682,7 +10682,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Olympus Mons",
-  "teaser": "The tallest volcano known.",
+  "teaser": "Olympus Mons is the largest volcano in the solar system — about 22 kilometres high, nearly three times Everest, and wide enough to cover France. It is a shield volcano built by countless thin lava flows, its gentle slopes forming over billions of years of steady eruption. Mars lacks plate tectonics, so the volcano stayed over its magma source and kept building. Its summit caldera is 80 kilometres across.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10701,7 +10701,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Valles Marineris",
-  "teaser": "The grand canyon of Mars.",
+  "teaser": "Valles Marineris is the solar system's grandest canyon: a system of chasms stretching 4,000 kilometres across Mars, up to 200 kilometres wide and 7 kilometres deep. It likely formed when the crust swelled over the Tharsis volcanic bulge and cracked, with landslides and water later widening the gorges. Its walls expose kilometres of Martian strata, a natural cross-section of the planet's history. Earth's Grand Canyon would fit comfortably inside one of its side canyons.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10720,7 +10720,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Water on Mars",
-  "teaser": "The red planet's watery past.",
+  "teaser": "Mars was once a water world. Rovers and orbiters show ancient river deltas, lake beds, and minerals that form only in liquid water — Mars had lakes and rivers for its first billion years. Then its magnetic field faded and the atmosphere thinned, letting water escape to space or freeze into the ground. Today water survives as polar ice, subsurface ice, and briny streaks, driving Mars exploration.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10739,7 +10739,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "The Geology of the Moon",
-  "teaser": "The lunar rock record.",
+  "teaser": "The Moon is a fossil of the early solar system, its surface barely changed for billions of years. It formed about 4.5 billion years ago, likely from debris of a giant impact with Earth, then melted and differentiated into crust, mantle, and core. Its light highlands are ancient anorthosite; the dark maria are younger basalt lava plains. Without plate tectonics or weather, the Moon's craters record the bombardment history of the inner solar system.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10758,7 +10758,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Lunar Maria",
-  "teaser": "The dark seas of the Moon.",
+  "teaser": "The lunar maria are the dark, smooth plains that form the 'man in the moon' — giant basins flooded with lava about 3 to 4 billion years ago. Early astronomers called them seas, but they are basalt flows erupted when huge impacts cracked the Moon's crust and magma welled up. The basalt is rich in iron and titanium, giving it a darker colour than the highlands, with craters dotting the lava plains.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10777,7 +10777,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Lunar Regolith",
-  "teaser": "The dusty skin of the Moon.",
+  "teaser": "Lunar regolith is the Moon's soil: a layer of shattered rock and glass up to several metres thick, ground up by billions of years of meteorite impacts. Without wind or water, particles stay sharp and angular, and tiny glass beads formed by impact melting are mixed in. Astronauts found it so fine and clingy it got into everything. It also holds trapped solar-wind gases and, scientists hope, water ice at the poles.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10796,7 +10796,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "The Geology of Venus",
-  "teaser": "The volcanic twin.",
+  "teaser": "Venus is Earth's toxic twin: similar in size and composition, but wrapped in a crushing carbon-dioxide atmosphere and 460°C surface heat. Radar mapping revealed a world of vast volcanic plains, thousands of volcanoes, and strange deformed terrain called tesserae. Venus shows almost no impact craters on much of its surface — evidence that huge volcanic resurfacing events wiped them out. Its runaway greenhouse offers a warning about Earth's climate direction.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10815,7 +10815,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Io's Volcanoes",
-  "teaser": "The most volcanic world.",
+  "teaser": "Jupiter's moon Io is the most volcanically active world known — over 400 active volcanoes, powered not by internal heat but by tidal flexing as Jupiter's gravity kneads the moon. Sulphur and sulphur dioxide paint Io yellow, orange, and red, and eruptions can blast plumes hundreds of kilometres high. Its lava lakes and calderas resemble ancient Earth. Io's restless surface is geologically young, resurfaced so fast that almost no impact craters survive.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10834,7 +10834,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Europa's Icy Surface",
-  "teaser": "The cracked ice moon.",
+  "teaser": "Europa, one of Jupiter's large moons, hides an ocean beneath a cracked ice shell. Its surface is young and smooth, crisscrossed by brown ridges and bands where the ice shell has fractured and shifted — evidence of a mobile ice crust over liquid water. Tidal heating keeps the ocean liquid, making Europa a prime candidate for hosting life. Future missions will study its plumes for chemistry that might betray biology below.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10853,7 +10853,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Titan's Landscape",
-  "teaser": "The world of methane rivers.",
+  "teaser": "Titan, Saturn's largest moon, has geology eerily like Earth's — but made of exotic materials. Its thick orange atmosphere hides rivers, lakes, and seas of liquid methane and ethane, with rain, dunes, and river deltas carved by hydrocarbon weather. Its water-ice crust behaves like rock, and scientists suspect a liquid water ocean deep below. Titan is the only moon with a dense atmosphere, its geological cycle running on methane instead of water.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10872,7 +10872,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "The Geology of Mercury",
-  "teaser": "The scorched little world.",
+  "teaser": "Mercury is a scorched, cratered world with a surprisingly iron-rich core that takes up most of its volume. Its surface shows ancient lava plains, giant impact basins like the Caloris basin, and strange 'hollows' — pits that may be carved by vaporized minerals. Mercury's day lasts two of its years, and surface temperatures swing hundreds of degrees. Despite the extremes, water ice hides in permanently shadowed polar craters, shielded from the Sun's heat.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10891,7 +10891,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Planetary Crusts",
-  "teaser": "The shells of other worlds.",
+  "teaser": "Every rocky world wears a crust, but they differ wildly: Earth's thin, recycled crust moves on plates; Mars's thick, static crust preserves ancient terrain; the Moon's crust is battered anorthosite; Venus's is young volcanic plains; Mercury's is cratered and iron-rich. Crustal thickness and behaviour depend on a planet's size, heat, and water. Comparing crusts reveals how the same building blocks produce such different worlds — and why Earth's active crust is so unusual.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10910,7 +10910,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Geology of Exoplanets",
-  "teaser": "Rocks around other stars.",
+  "teaser": "Geology now extends beyond the solar system: telescopes measure the density, composition, and even weather of planets around other stars. Most exoplanets are thought to be rocky super-Earths or lava worlds, and some may have plate tectonics or oceans. Astronomers infer surfaces from spectra — molecules like water, carbon dioxide, and methane in their atmospheres. We cannot yet see exoplanet rocks directly, but the first geological observations of alien worlds are already underway.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10929,7 +10929,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Asteroid Geology",
-  "teaser": "The tiny worlds of rock.",
+  "teaser": "Asteroids are leftover building blocks of the solar system — small worlds with their own geology. Missions like Hayabusa2 and OSIRIS-REx have touched two of them, finding regolith, boulders, and organic molecules, and returning samples to Earth. Many asteroids are rubble piles: loose collections of rock held together by gravity, reshaped by impacts and even by sunlight. Their compositions range from primitive carbon-rich material to molten metal cores of shattered protoplanets.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10948,7 +10948,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Comet Geology",
-  "teaser": "The icy wanderers.",
+  "teaser": "Comets are icy bodies from the solar system's deep freeze, preserving pristine material from its birth. A comet's 'dirty snowball' holds water ice, carbon dioxide, dust, and complex organics; near the Sun, ices vaporize and blast jets that form the glowing coma and tail. The Rosetta mission orbited comet 67P and found cliffs, pits, and plains shaped by sublimation. Comets may have delivered water and organics to early Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10967,7 +10967,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Regolith Everywhere",
-  "teaser": "The soil of other worlds.",
+  "teaser": "Regolith — loose surface debris — covers nearly every solid world. On the Moon it is pulverized impact breccia; on Mars it is dust and volcanic sand sculpted into dunes; on asteroids it is a loose gravel pile; on Earth it is our own soil and sediment. Regolith records a world's history: each impact layer and wind streak is a page. It is also the material future explorers will mine and build with.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -10986,7 +10986,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Rovers as Geologists",
-  "teaser": "Robots reading alien rocks.",
+  "teaser": "Rovers are robotic field geologists. NASA's Mars rovers carry cameras, spectrometers, drills, and even a miniature lab; they have found riverbeds, discovered the chemistry for life, and drilled ancient lake sediments. The Mars 2020 Perseverance rover collects rock cores for return to Earth, while China's Zhurong explored the red plains. Driving a rover is slow — every metre is planned from orbit — but together they have rewritten the story of Mars.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11005,7 +11005,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Planetary Geology",
   "name": "Astrogeology",
-  "teaser": "The future of planetary science.",
+  "teaser": "Astrogeology is the study of geology beyond Earth — craters, volcanoes, ice, and oceans on other worlds. The US Geological Survey's astrogeology program, founded to support the Apollo missions, still maps the Moon, Mars, and beyond today. Astrogeologists compare planetary surfaces to Earth's geology to understand how worlds evolve, and they train astronauts in field geology. Every mission to another world carries a piece of Earth's geological method with it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11024,7 +11024,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Rocks in Human History",
-  "teaser": "Stone shaping civilization.",
+  "teaser": "Stone built civilization: the first tools, the first permanent homes, the first great monuments were all rock. Obsidian knives, flint axes, and stone grinding stones fed early humans; granite temples and limestone pyramids anchored the first empires. Stone's durability meant it recorded the past — quarries, tool workshops, and inscriptions survive where wood and cloth rotted away. Human history could be told entirely through the rocks we shaped.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11043,7 +11043,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Stone Tools",
-  "teaser": "The first technology.",
+  "teaser": "Stone tools are humanity's oldest technology, used for over three million years. Early hominins chose rocks that fracture predictably — flint, chert, obsidian, and quartzite — knapping them into sharp edges by striking with a hammerstone. A good toolstone was so valuable that people carried it hundreds of kilometres and traded it across continents. The ability to shape stone on demand is what set the human line apart, long before writing or farming.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11062,7 +11062,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Building with Stone",
-  "teaser": "The architecture of rock.",
+  "teaser": "Building stone is chosen for strength, workability, and beauty: granite for monuments, limestone and sandstone for blocks, marble for decoration, slate for roofs. Ancient builders tested stone by eye and touch; modern ones by lab tests. Great buildings became geological showcases — the pyramids of Giza used limestone quarried nearby, while Roman engineers shipped stone across the Mediterranean. Even today, concrete's aggregate is crushed rock, and every city is a geology museum.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11081,7 +11081,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "The Pyramids",
-  "teaser": "Stone giants of the desert.",
+  "teaser": "The pyramids of Giza are stone mountains on a human scale, built about 4,500 years ago from over two million limestone blocks. Most blocks came from nearby quarries; the fine white casing was limestone from across the Nile, and the granite chambers and casing came from Aswan, 800 kilometres upstream. Moving granite blocks weighing tens of tonnes required ramps, sledges, and enormous labour. The pyramids remain the largest stone structures ever built by hand.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11100,7 +11100,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Stonehenge",
-  "teaser": "The mystery stones of Salisbury.",
+  "teaser": "Stonehenge's mystery is partly geological: its largest stones are sarsen sandstone, likely dragged from about 25 kilometres away, but the smaller 'bluestones' came from the Preseli Hills of Wales, over 200 kilometres distant. Why Bronze Age builders moved these specific rocks remains debated — perhaps for their sound, their colour, or their sacred origin. The stones were dressed, shaped, and fitted with precise joints, a feat of prehistoric engineering still studied today.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11119,7 +11119,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Marble in Art",
-  "teaser": "The sculptor's favorite stone.",
+  "teaser": "Marble is metamorphosed limestone — recrystallized under heat and pressure until it takes a fine, translucent grain that sculptures love. The Greeks and Romans used Parian and Carrara marble for their greatest statues, and Michelangelo carved David and the Pietà from Carrara stone. Marble's appeal is geological: its uniform crystal structure lets light penetrate slightly, giving carved skin a lifelike glow. The same rock that built cathedrals also froze masterpieces in time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11138,7 +11138,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Gems Through History",
-  "teaser": "The stones of power and love.",
+  "teaser": "Gemstones have driven exploration, trade, and war for millennia. Ancient Egyptians mined turquoise and lapis lazuli, which travelled the Silk Road from Afghanistan; Roman emperors prized emeralds and sapphires; Indian rulers hoarded diamonds. A gem's value came from rarity, colour, and supposed powers — amulets, seals, and crowns all carried them. Gem deposits charted the map of the ancient world: rivers in India, mountains in Central Asia, and mines that made and broke empires.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11157,7 +11157,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Cave Paintings",
-  "teaser": "Art on ancient rock.",
+  "teaser": "Cave paintings are the oldest art, and their pigments were geology: red and yellow ochre from iron oxides, black from charcoal or manganese, white from calcite and kaolin. Prehistoric painters ground minerals, mixed them with binders, and applied them with brushes, fingers, and blown pigment. The colours have survived tens of thousands of years because mineral pigments resist fading. Lascaux, Altamira, and Sulawesi's caves preserve the chemistry of ancient palettes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11176,7 +11176,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Stone Sculpture",
-  "teaser": "Carving the eternal medium.",
+  "teaser": "Stone sculpture is a dialogue between artist and rock: the material's hardness, grain, and flaws decide what can be carved. Marble and limestone cut cleanly; granite demands patience; jade and hardstone require abrasion. Sculptors learned to read bedding planes and veins, avoiding weaknesses that could shatter a work mid-carving. From Easter Island's moai to Michelangelo's marbles, every finished statue is a compromise the stone agreed to.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11195,7 +11195,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Rock Climbing",
-  "teaser": "People and the vertical world.",
+  "teaser": "Rock climbing is applied geology: climbers read rock type and structure to find holds and routes. Granite offers solid friction and cracks; limestone gives pockets and overhangs; sandstone is gritty but fragile; basalt columns form perfect crack systems. Joints, bedding planes, and faults create the weaknesses climbers exploit — and the hazards they avoid. A climber's eye for rock texture and structure is a field geologist's eye, put to very different purpose.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11214,7 +11214,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Gemstone Myths",
-  "teaser": "The legends of stones.",
+  "teaser": "Gemstones gathered legends as rich as their colours: amethyst was said to prevent drunkenness, opals to bring bad luck, rubies to grant invincibility. Many myths rest on real geology — blood-red rubies and garnets recalled wounds and fire, while blue sapphires evoked sky and water. Some beliefs had practical roots: travellers carried turquoise for protection on journeys, and warriors wore jade amulets. Even today, birthstones and healing-crystal claims echo these ancient stories.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11233,7 +11233,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Stone in Modern Life",
-  "teaser": "Rocks all around us.",
+  "teaser": "Stone never left modern life — it hides in plain sight. Concrete aggregate, road base, glass, ceramics, cement, and most construction materials are crushed or melted rock. Silicon, the chip in every phone, comes from quartz sand; gypsum boards walls; limestone feeds steel and agriculture. Even the energy transition runs on stone-derived materials. We no longer knap flint, but every modern structure stands on quarried geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11252,7 +11252,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Geology in Art",
-  "teaser": "Landscapes painted in stone.",
+  "teaser": "Geologists have shaped art more than most realize: painters ground minerals into pigments, sculptors chose quarried stone, and landscape painters sketched real rock formations. Some artists, like the Japanese printmaker Hokusai, rendered geological detail with near-scientific accuracy — his Great Wave shows the cresting form of a breaking wave studied from life. Modern land art uses rock and earth as the medium itself. Art and geology share the same raw material: the Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11271,7 +11271,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "How Rocks Get Names",
-  "teaser": "The naming of stones.",
+  "teaser": "Rock names carry stories: basalt from the Ethiopian word for iron-bearing, granite from the Latin for grain, slate from the Old French for splinter. Some names describe texture (pumice, from foam), some origin (marble, from shining), some use (whetstone, grindstone). Geologists standardized this vocabulary in the 1800s, but the names still whisper their ancient roots. Learning to name a rock is learning to see the processes that made it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11290,7 +11290,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Rocks in Religion",
-  "teaser": "Sacred stones and stories.",
+  "teaser": "Rocks fill the world's sacred landscapes: mountains as homes of gods, stone circles as meeting places with the divine, meteorites as gifts from the sky. The Kaaba in Mecca holds a black stone; the Dome of the Rock crowns a limestone platform; pilgrims circle glacier-carved peaks. Geology explains the sacred too — holy springs flow along faults, and sacred mountains are often dramatic volcanic or folded peaks.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11309,7 +11309,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Geology in Literature",
-  "teaser": "Rocks in stories and poems.",
+  "teaser": "Geology permeates literature: Dante climbed real alpine folds, Tennyson wrote of 'the hills are shadows', and Jules Verne's Journey to the Centre of the Earth rode 19th-century geological theory into fiction. The discovery of deep time shook writers — Thomas Hardy mourned a world older than human memory, and poets used fossils and strata as metaphors for memory itself. Science fiction inherited the cosmic scale: planets, ice worlds, and alien strata are literary geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11328,7 +11328,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Stone Cities",
-  "teaser": "The rock-built metropolises.",
+  "teaser": "Cities are built of their local rock: Paris glows in cream limestone, Rome in travertine and tuff, Jerusalem in pale Jerusalem stone, Edinburgh in grey sandstone, and Prague in sandstone and slate. Builders used the rock at hand, so each city's geology shows in its architecture — the same stone that forms the local hills forms the local skyline. A city's character, colour, and even its decay rate are written in its building stone.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11347,7 +11347,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Gravestone Geology",
-  "teaser": "Memorials in stone.",
+  "teaser": "Gravestones are geological archives: marble and granite preserve inscriptions for centuries, while sandstone and slate weather and crumble. Epitaphs and dates on old stones let researchers trace changing rock preferences and even historical pollution — lichen growth and black crusts record air quality through time. Weathering rates on dated gravestones became a classic way to measure erosion. A cemetery is both a family history and a field laboratory.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11366,7 +11366,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Stone Masonry",
-  "teaser": "The craft of shaping rock.",
+  "teaser": "Stone masonry is the craft of building with rock: cutting, shaping, and setting blocks without mortar or with it, in patterns that spread loads and shed water. Masons read each stone's grain, bedding, and strength, laying it so water runs off and pressure flows through. Dry-stone walls, stone bridges, and cathedrals all depend on this skill. The best masonry outlives its builders by millennia — a tribute to choosing and setting stone well.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11385,7 +11385,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Rocks in Culture",
   "name": "Rock Collecting",
-  "teaser": "The hobby of the curious.",
+  "teaser": "Rock collecting is geology's most accessible door: a hobby that teaches identification, formation, and history through the hands. Collectors gather mineral specimens, fossils, crystals, and unusual rocks, learning to recognize quartz from calcite, igneous from sedimentary. Responsible collecting means following local laws, noting where each specimen came from, and leaving rare sites intact. Collections started as hobbies have grown into museum cabinets and even scientific discoveries.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11404,7 +11404,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "James Hutton",
-  "teaser": "The father of modern geology.",
+  "teaser": "James Hutton, an 18th-century Scottish farmer and doctor, is called the father of modern geology. Studying Scottish coasts and rock outcrops, he realized that the processes shaping Earth today — erosion, sedimentation, uplift — are the same ones that shaped it in the past, and that they act over vast stretches of time. His 1788 insight that the Earth is 'indefinitely old' overturned the young-Earth views of his era and founded uniformitarianism.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11423,7 +11423,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Charles Lyell",
-  "teaser": "The champion of uniformitarianism.",
+  "teaser": "Charles Lyell turned Hutton's idea into a discipline. His Principles of Geology, published in the 1830s, argued that slow, everyday processes — rivers, rain, volcanoes — operating over immense time explain all of Earth's features, a doctrine called uniformitarianism. Lyell's book influenced Darwin, who carried it on the Beagle and applied the same reasoning to life. Lyell also coined terms still in use and established geology as a respected Victorian science.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11442,7 +11442,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Alfred Wegener",
-  "teaser": "The man who moved continents.",
+  "teaser": "Alfred Wegener proposed continental drift in 1912, arguing that the continents once formed a single supercontinent he called Pangaea. His evidence was striking: matching coastlines, identical fossils and rock belts on separated continents, and glacial scratches pointing away from shared poles. Scientists rejected his mechanism — he lacked a force strong enough to move continents. Decades later, seafloor spreading proved him right, and plate tectonics vindicated his vision.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11461,7 +11461,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Mary Anning",
-  "teaser": "The fossil hunter of Lyme Regis.",
+  "teaser": "Mary Anning, a working-class fossil hunter from Lyme Regis, England, became one of history's greatest paleontologists. Starting as a child in the early 1800s, she uncovered complete ichthyosaurs, the first plesiosaurs, and the first pterosaur found outside Germany, all from Jurassic cliffs. Her careful excavations supplied specimens to London museums — though male scientists published the findings. Her discoveries helped prove that species could go extinct, a radical idea in her day.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11480,7 +11480,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "William Smith",
-  "teaser": "The father of English geology.",
+  "teaser": "William Smith, an English canal surveyor, created the first geological map of a whole country — his 1815 map of England and Wales, 'the map that changed the world'. Smith noticed that each rock layer carries distinctive fossils and that layers could be traced by them across the countryside. This principle of faunal succession let geologists correlate strata for the first time. Smith died poor, but his map founded the science of stratigraphy.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11499,7 +11499,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Georges Cuvier",
-  "teaser": "The father of paleontology.",
+  "teaser": "Georges Cuvier, the brilliant French anatomist, founded paleontology and comparative anatomy. Studying fossil elephants and mammoths, he showed that entire species had vanished — proof of extinction, a shocking idea in 1800. Cuvier championed catastrophism, arguing that sudden revolutions, like floods, wiped out life and were followed by new creations. Though his mechanism was wrong, his recognition of extinction and his fossil analysis were lasting breakthroughs.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11518,7 +11518,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Darwin the Geologist",
-  "teaser": "The geologist behind the naturalist.",
+  "teaser": "Darwin was a geologist before he was a biologist. As the Beagle's naturalist, he mapped the Andes, found marine fossils high in the mountains, and worked out how coral atolls form as volcanic islands sink — his first scientific book. His geological training taught him the power of slow processes over deep time, the very logic he later applied to evolution. He saw species the way he saw strata: changing gradually, leaving a record.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11537,7 +11537,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "James Dwight Dana",
-  "teaser": "The American geologist.",
+  "teaser": "James Dwight Dana, an American geologist and mineralogist, wrote the standard textbooks of 19th-century geology and mineralogy. His System of Mineralogy organized minerals by crystal chemistry and remains the ancestor of modern classification. Dana sailed on the US Exploring Expedition, describing Pacific geology and volcanoes, and proposed the concept of geosynclines — troughs where thick sediment accumulates before becoming mountain belts. His name still prefixes the standard mineral reference.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11556,7 +11556,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Marie Tharp",
-  "teaser": "The woman who mapped the seafloor.",
+  "teaser": "Marie Tharp mapped the ocean floor at a time when women were barred from research ships. Working from sonar data at Columbia University in the 1950s, she drew the first detailed maps of the seafloor and discovered the Mid-Atlantic Ridge's central rift valley — the smoking gun for seafloor spreading and plate tectonics. Her maps, dismissed at first by colleagues who called it 'girl talk', became iconic evidence that continents really do move.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11575,7 +11575,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Inge Lehmann",
-  "teaser": "The discoverer of the inner core.",
+  "teaser": "Inge Lehmann, a Danish seismologist, discovered Earth's inner core in 1936. Analysing earthquake waves from a 1929 New Zealand quake, she found signals that should not exist if the core were a single uniform ball — and correctly explained them by proposing a solid inner core inside the liquid outer core. Her meticulous work settled a decades-long debate. Lehmann worked well into her nineties, earning the nickname 'the great lady of seismology'.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11594,7 +11594,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Harry Hess",
-  "teaser": "The seafloor spreading pioneer.",
+  "teaser": "Harry Hess, a Princeton geologist and World War II Navy captain, proposed seafloor spreading in the early 1960s. Using sonar from his wartime ships, he mapped flat-topped seamounts and ocean ridges, then theorized that new seafloor forms at ridges and sinks back into the mantle at trenches. His 'Essay in Geopoetry' provided the mechanism Wegener lacked, converting continental drift into the theory of plate tectonics and revolutionizing Earth science.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11613,7 +11613,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "J. Tuzo Wilson",
-  "teaser": "The transform fault discoverer.",
+  "teaser": "J. Tuzo Wilson, a Canadian geophysicist, made plate tectonics workable. In the 1960s he proposed transform faults — plate boundaries that slide past each other — explaining how the ocean floor could move without tearing. He also originated the Wilson cycle: oceans open and close over hundreds of millions of years, with continents rifting apart, spreading, colliding, and re-forming supercontinents. His ideas unified geology's scattered observations into one framework.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11632,7 +11632,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Women in Geology",
-  "teaser": "The women who shaped the science.",
+  "teaser": "Women made vital, often uncredited contributions to geology for centuries. Mary Anning excavated fossils that men published; Etheldred Benett, a 19th-century gentlewoman, described hundreds of species and was nicknamed 'the first female geologist'; Florence Bascom broke into the profession formally. In the 20th century, Marie Tharp mapped the seafloor and Inge Lehmann found the inner core. Their persistence opened a field that had long barred women from the field.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11651,7 +11651,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Florence Bascom",
-  "teaser": "The first woman geologist.",
+  "teaser": "Florence Bascom was the first woman to earn a PhD in geology in the United States, and the first hired by the US Geological Survey. In the early 1900s she mapped the crystalline rocks of the Appalachians and Mid-Atlantic, training a generation of female geologists at Bryn Mawr College — her students became the first women on many university faculties. Bascom was also the first woman elected to the Geological Society of America's council.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11670,7 +11670,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Norman Bowen",
-  "teaser": "The father of igneous petrology.",
+  "teaser": "Norman Bowen transformed igneous petrology with experiments: in the early 1900s he melted rocks in the lab to watch minerals crystallize as magma cooled. The result, Bowen's reaction series, explains why basalt magma produces granite through fractional crystallization, and why certain minerals always appear together. His work turned the study of igneous rocks from description into chemistry. Every geologist's understanding of how magmas evolve descends from his furnace experiments.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11689,7 +11689,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Arthur Holmes",
-  "teaser": "The timekeeper of Earth.",
+  "teaser": "Arthur Holmes brought radioactive dating to geology and put deep time on solid ground. In 1913, at just 23, he published the first book on radiometric dating, using uranium-lead decay to estimate Earth's age — eventually refining it to about 4.5 billion years. Holmes also championed continental drift in the 1920s, proposing that convection currents in the mantle move continents. His textbook Principles of Physical Geology educated generations of geologists worldwide.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11708,7 +11708,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Walter Alvarez",
-  "teaser": "The iridium detective.",
+  "teaser": "Walter Alvarez, with his father Luis and colleagues, discovered the asteroid that killed the dinosaurs. In 1980 they reported a worldwide clay layer rich in iridium — an element rare on Earth but common in asteroids — exactly at the Cretaceous-Paleogene boundary. They proposed that a giant impact 66 million years ago caused the extinction. The 1991 discovery of the Chicxulub crater in Mexico confirmed the theory, ending a decade of fierce debate.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11727,7 +11727,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Louis Agassiz",
-  "teaser": "The ice age discoverer.",
+  "teaser": "Louis Agassiz, a Swiss-American naturalist, convinced the world that ice ages happened. In 1837 he proposed that glaciers once covered much of Europe, based on striated rocks, erratic boulders, and polished valleys that ice alone could explain. Initially ridiculed, his glacial theory triumphed within decades and revealed that Earth's climate fluctuates dramatically. Ironically, Agassiz also fought Darwin's evolution to the end — brilliant in one revolution, stubborn in another.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11746,7 +11746,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Modern Geology Leaders",
-  "teaser": "The scientists shaping the field today.",
+  "teaser": "Modern geology is a team sport: thousands of scientists monitor volcanoes, map seafloors, date rocks, and model climates together. Landmark modern achievements include the Deep Sea Drilling Project's confirmation of plate tectonics, the discovery of deep-sea hydrothermal ecosystems, precise GPS measurements of continental motion, and the Antarctic and Greenland ice cores that revealed rapid climate change. The field has never been more connected — or more urgently needed.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11765,7 +11765,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology Pioneers",
   "name": "Honoring Geologists",
-  "teaser": "The prizes of the field.",
+  "teaser": "Geology's highest honours reward transformative work: the Geological Society of America's Penrose Medal and the Geochemical Society's Goldschmidt Medal recognize lifetime achievement, while early-career researchers win the GSA's Donath Medal. The Wollaston Medal, geology's oldest, dates to 1831 and has gone to giants like Darwin and Lyell. Named in honour of William Smith, the field's foundational mapmaker, the awards trace a lineage from quarry surveyors to space-age planetary scientists.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11784,7 +11784,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Regional Geology",
-  "teaser": "The geology of places.",
+  "teaser": "Regional geology pieces together the history of a whole region as one continuous story. Geologists map formations, trace faults, and date events to reconstruct how the area evolved: seas advancing and retreating, mountains rising and eroding, ice sheets coming and going. Every region has a unique narrative written in its rocks, explaining the landscape, hazards, and resources that lie beneath.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11803,7 +11803,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Grand Canyon's Rocks",
-  "teaser": "The great stone staircase.",
+  "teaser": "The Grand Canyon is the world's most complete geological library, exposing nearly 2 billion years of history in its walls: ancient metamorphic basement, then sandstones, limestones, and shales recording seas, deserts, and swamps. The Coconino Sandstone preserves fossil sand dunes, the Redwall Limestone a shallow sea. Uplift of the Colorado Plateau, then the river's cutting, exposed it all.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11822,7 +11822,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Yellowstone's Geology",
-  "teaser": "The supervolcano park.",
+  "teaser": "Yellowstone sits atop a giant volcanic hotspot — a plume of hot rock rising from deep in the mantle. Its supervolcano has erupted catastrophically three times in the last two million years, blanketing North America in ash; the youngest eruption, 640,000 years ago, left the 70-kilometre caldera that shapes the park. The same heat powers geysers, hot springs, and mud pots. The ground still rises and falls as magma shifts beneath the park.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11841,7 +11841,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Hawaii's Geology",
-  "teaser": "The islands born of a hotspot.",
+  "teaser": "Hawaii is built by a hotspot: a plume of magma rising through the Pacific plate while the plate drifts northwest over it. Each island is a shield volcano born over the plume, then carried away as the hotspot births the next island to the southeast — that's why the chain is ordered by age, with active volcanoes only on the Big Island. Kīlauea and Mauna Loa still erupt today.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11860,7 +11860,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Iceland's Geology",
-  "teaser": "The island on a spreading ridge.",
+  "teaser": "Iceland is geology in the making: the only large island straddling the Mid-Atlantic Ridge, where the North American and Eurasian plates pull apart about 2 centimetres a year. The rift splits the country, with new crust forming in its centre as lava erupts from fissures. Iceland also sits on a volcanic hotspot, doubling the magma supply — a land of volcanoes, geysers, and rift valleys.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11879,7 +11879,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Alps' Geology",
-  "teaser": "Europe's folded mountains.",
+  "teaser": "The Alps rose from a collision: about 100 million years ago the African plate began driving into Europe, crumpling an ancient ocean floor into huge folds and thrust sheets. The mountains are still rising as the plates converge. Their rocks record the story — ocean-floor basalt from the vanished Tethys Sea now sits atop summits like the Matterhorn, miles above where it formed.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11898,7 +11898,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Appalachian Geology",
-  "teaser": "The ancient eastern range.",
+  "teaser": "The Appalachians are among the world's oldest mountains, born in three collisions between 480 and 250 million years ago as ancestral continents merged into Pangaea. Once as high as the Himalayas, they have eroded for 250 million years into gentle rounded ridges. Their folded rock belts still show the collision's structure, and the same chain continues into Scotland, Africa, and the Arctic.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11917,7 +11917,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Rocky Mountain Geology",
-  "teaser": "The west's uplifted backbone.",
+  "teaser": "The Rocky Mountains rose mainly during the Laramide orogeny, about 80 to 40 million years ago, when the Pacific plate's shallow subduction wrinkled the continental interior far from the coast. Unlike the Alps' folded ranges, the Rockies are basement-cored uplifts: giant blocks of ancient crust thrust upward along faults. Their granite cores, now exposed by erosion, anchor peaks like Longs Peak. Later glaciation carved the classic sharp ridges and U-shaped valleys of the modern range.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11936,7 +11936,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Death Valley",
-  "teaser": "The lowest geology of North America.",
+  "teaser": "Death Valley, the lowest point in North America at 86 metres below sea level, is a graben — a block dropped between parallel faults as the crust stretched. Its walls expose billion-year-old rock, and its floor holds salt pans from ancient Lake Manly, which filled during the ice ages. One of the hottest places on Earth, it records floods and alluvial fans as the same extension raises the mountains beside it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11955,7 +11955,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Salar de Uyuni",
-  "teaser": "The world's largest salt flat.",
+  "teaser": "The Salar de Uyuni in Bolivia is the world's largest salt flat — a 10,000-square-kilometre white expanse that was once a giant prehistoric lake. When the lake evaporated, it left salt crusts up to 10 metres thick over layered lakebed sediment. Beneath lies the world's richest lithium brine, concentrating as desert sun evaporates groundwater. In rains, a thin water film turns the flat into a mirror of the sky.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11974,7 +11974,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Great Barrier Reef",
-  "teaser": "The world's largest reef system.",
+  "teaser": "The Great Barrier Reef is built by living geology: coral animals extract calcium carbonate from seawater and cement it into limestone, layer upon layer for half a million years. The modern reef grew on older foundations as seas rose after the last ice age. Its 2,900 reefs sit on Australia's continental shelf. Warming seas now test the reef's ability to keep building.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -11993,7 +11993,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Nile Delta",
-  "teaser": "The river that built Egypt.",
+  "teaser": "The Nile Delta is one of Earth's great sediment machines: the river carries millions of tonnes of silt from the Ethiopian highlands and deposits it where the river meets the Mediterranean. Over millennia the delta built fertile farmland that supported Egyptian civilization for 5,000 years. The delta is sinking as it compacts, while the Aswan Dam traps the silt that once replenished it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12012,7 +12012,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Amazon Basin",
-  "teaser": "The river of the rainforest.",
+  "teaser": "The Amazon Basin's geology tells a dramatic reversal: until about 10 million years ago, the rising Andes blocked westward drainage, and much of the basin may have been wetland. When the mountains deflected the river, the Amazon turned east, becoming the world's largest river system draining over 7 million square kilometres. Its deep ancient soils feed the richest rainforest on Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12031,7 +12031,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Australia's Geology",
-  "teaser": "The ancient continent.",
+  "teaser": "Australia is the world's oldest, flattest continent: its craton has been stable for billions of years, with some rocks among the oldest on Earth — the Jack Hills zircons, dated at 4.4 billion years. Ancient shield regions, vast sedimentary basins, and the Great Artesian Basin — one of the world's largest groundwater systems — define its geology. Its long stability preserved astonishing features like Uluru and the outback's rust-red iron-rich soils.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12050,7 +12050,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Canadian Shield",
-  "teaser": "The ancient core of North America.",
+  "teaser": "The Canadian Shield is the exposed core of North America — some of the oldest rock on Earth, up to 4 billion years old. This broad dome of granite and gneiss was scraped clean by repeated glaciations, leaving thin soils, countless lakes, and bare polished rock. Its mineral wealth is legendary: gold, nickel, copper, and uranium mines dot the shield. It is the stable heart the continent grew around.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12069,7 +12069,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "The Andes' Geology",
-  "teaser": "The subduction mountain chain.",
+  "teaser": "The Andes are the world's longest mountain range, running 7,000 kilometres along South America, built where the Nazca plate dives beneath the continent. The result is explosive: a chain of active volcanoes, giant earthquakes, and the plateau of the Altiplano, second only to Tibet. The range rose mostly in the last 25 million years, and its uplift reshaped the continent's climate — creating the Amazon, the Atacama desert, and the world's largest copper deposits.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12088,7 +12088,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Himalayan Geology",
-  "teaser": "The collision of continents.",
+  "teaser": "The Himalayas are the youngest and highest mountains on Earth, born when India collided with Asia about 50 million years ago. The collision is still underway — India pushes north at about 5 centimetres a year, raising the range and driving earthquakes. Marine fossils sit on Everest's summit, proof the mountain was once seabed. The range is so massive it alters global climate and rivers.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12107,7 +12107,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Sahara Geology",
-  "teaser": "The geology beneath the sand.",
+  "teaser": "The Sahara was not always desert. During 'green Sahara' periods, most recently about 6,000 years ago, monsoon rains filled lakes across North Africa, and rock art shows giraffes where dunes now stand. The desert's rocks record older extremes too: marine sandstone and ancient river systems now buried. Beneath its vast sand seas lie the aquifers that could one day irrigate it again.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12126,7 +12126,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Antarctica's Geology",
-  "teaser": "The continent beneath the ice.",
+  "teaser": "Antarctica is a continent hidden under ice: kilometers of ice cover ancient cratons, mountain ranges, and a rift system — the West Antarctic Rift, with active volcanoes poking through. Its rocks hold fossils of forests and dinosaurs, proof the continent was once warm and connected to other landmasses. Ice cores drilled from its depths preserve 800,000 years of climate history. The bedrock beneath is slowly rebounding as the ice thins, a geological response still unfolding.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12145,7 +12145,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Regional Geology",
   "name": "Geoparks",
-  "teaser": "The parks of geological wonder.",
+  "teaser": "Geoparks are protected landscapes where geology is the star: UNESCO Global Geoparks showcase spectacular formations, educate visitors about Earth's history, and support local communities through sustainable tourism. From the Giant's Causeway's basalt columns to the fossils of Joggins Cliffs, each park tells its region's deep story. Geoparks connect geology to culture, archaeology, and nature — proving that the ground beneath our feet is heritage worth protecting and sharing.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12164,7 +12164,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Surface Processes",
-  "teaser": "The forces that shape the ground.",
+  "teaser": "Surface processes are the forces that wear the land down: weathering breaks rock apart, erosion carries it away, and deposition piles it up elsewhere. Rivers, wind, ice, waves, and gravity each leave distinctive signatures — canyons, dunes, moraines, beaches, and talus slopes. Together they constantly recycle the planet's surface, turning mountains into sediment that becomes new rock. Understanding these processes lets geologists predict how landscapes will change with climate and human activity.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12183,7 +12183,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Physical Weathering",
-  "teaser": "Rock breaking without chemistry.",
+  "teaser": "Physical weathering breaks rock into smaller pieces without changing its chemistry. The main agents are temperature swings, which stress minerals; frost wedging, where freezing water pries cracks apart; and pressure release, where overlying rock erodes and buried rock expands. Abrasion by wind and water grinds surfaces smooth. Physical weathering produces the gravel, sand, and clay that rivers carry — and the dramatic rock forms, like exfoliation domes, that shape mountain landscapes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12202,7 +12202,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Chemical Weathering",
-  "teaser": "Rock dissolving and reacting.",
+  "teaser": "Chemical weathering dissolves and transforms rock: rainwater, slightly acidic from dissolved carbon dioxide, attacks minerals and breaks them down. Feldspar becomes clay, iron minerals rust, and limestone slowly dissolves in carbonic acid — carving caves and karst landscapes. Warm, wet climates speed chemical weathering; deserts and cold regions slow it. Over deep time, chemical weathering has shaped entire continents, creating soils, ores, and the very chemistry of the oceans and atmosphere.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12221,7 +12221,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Frost Wedging",
-  "teaser": "Ice prying rocks apart.",
+  "teaser": "Frost wedging is water's quiet demolition work: when water seeps into cracks and freezes, it expands about 9 percent, acting like a slow wedge that pries the rock apart. Repeated freeze-thaw cycles gradually break boulders into angular blocks and shatter cliff faces into talus slopes. It dominates cold and high-altitude landscapes, producing sharp, blocky terrain. Freeze-thaw is also why roads and building foundations crack in cold climates — geology's lesson applied to engineering.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12240,7 +12240,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Root Wedging",
-  "teaser": "Plants breaking stone.",
+  "teaser": "Root wedging is biological weathering: plant roots grow into cracks and expand, splitting rock apart grain by grain. Even a small tree exerts enormous pressure as its roots thicken, and roots also secrete acids that chemically attack the rock. Roots pry loose blocks on cliffs, lift and topple boulders, and slowly convert outcrops into soil. The humble root is one of the most effective weathering agents on Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12259,7 +12259,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Thermal Weathering",
-  "teaser": "Rock stressed by temperature.",
+  "teaser": "Thermal weathering cracks rock through temperature change alone. In deserts and high mountains, intense sun heats rock surfaces while interiors stay cool, fracturing the outer shell — a process called spalling. Repeated day-night cycles fatigue the rock until sheets peel off like onion layers. Forest fires trigger sudden spalling, and dark rocks weather fastest because they absorb more heat.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12278,7 +12278,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Hydrolysis",
-  "teaser": "Water altering minerals.",
+  "teaser": "Hydrolysis is the chemical reaction between water and rock minerals, the most important weathering reaction on Earth. Water's hydrogen ions attack silicate minerals, breaking their crystal structure: feldspar converts to clay, releasing potassium and silica into solution. Hydrolysis is why granite weathers to clay-rich soil and why tropical soils are deep red — the iron left behind rusts. Over millions of years, hydrolysis has turned vast mountain ranges into the world's sediment and soil.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12297,7 +12297,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Carbonation",
-  "teaser": "Rain dissolving limestone.",
+  "teaser": "Carbonation is weathering by carbonic acid — rainwater enriched with dissolved carbon dioxide. The weak acid dissolves carbonate minerals, especially limestone, creating caves, sinkholes, and entire karst landscapes. The reaction is slow but relentless, widening joints and bedding planes until rivers vanish into cave systems. Carbonation also draws CO₂ out of the atmosphere into rocks, a natural brake on climate change.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12316,7 +12316,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Mass Wasting",
-  "teaser": "Gravity moving material downhill.",
+  "teaser": "Mass wasting is the downhill movement of rock and soil under gravity alone — no water or ice required as a carrier. It ranges from imperceptible soil creep to catastrophic rock avalanches, and includes slumps, mudflows, and rockfalls. Mass wasting shapes every steep landscape and is triggered by rain, earthquakes, undercutting, and oversteepening. It is one of the most common and underestimated geological hazards, moving more material than rivers in many mountain regions.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12335,7 +12335,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Soil Creep",
-  "teaser": "The slow downhill crawl.",
+  "teaser": "Soil creep is the slowest, sneakiest form of mass wasting: the entire soil layer inches downhill at millimetres per year. Freeze-thaw lifts particles at right angles to the slope, then gravity settles them slightly downhill; burrowing animals and wetting-drying cycles nudge them too. The evidence is subtle — tilted fence posts, curved tree trunks, and terraced ground. Though nearly invisible, creep moves enormous volumes over time and gradually deforms roads, walls, and foundations.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12354,7 +12354,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Slumping",
-  "teaser": "The rotational slides.",
+  "teaser": "Slumping happens when a mass of soil or weak rock slides downward along a curved, spoon-shaped surface, rotating as it goes. The slumped block often tilts backward, leaving a crescent scar and a jumbled toe at the base. Slumps are common in clay-rich slopes, especially after heavy rain or when the base is undercut. They can move metres in minutes after years of slow preparation.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12373,7 +12373,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Debris Flows",
-  "teaser": "The rushing slurries of rock.",
+  "teaser": "Debris flows are slurries of water, mud, rock, and trees that surge down slopes and canyons at up to 60 kilometres per hour. They are common in mountainous terrain after intense rain, on burned slopes, and at volcanoes, where they are called lahars. A debris flow moves like wet concrete, carrying boulders the size of cars. They can travel kilometres beyond their source.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12392,7 +12392,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Rock Falls",
-  "teaser": "Cliffs shedding their fragments.",
+  "teaser": "Rock falls are the fastest form of mass wasting: blocks of rock detach from cliffs and fall, bounce, and roll downhill. They are triggered by frost wedging, rain, earthquakes, or the slow loss of support. A rock fall can travel at 200 kilometres per hour, and even small falls have killed people and closed roads. Engineers catch them with nets, barriers, and draped mesh.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12411,7 +12411,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Avalanches",
-  "teaser": "The sudden snow slides.",
+  "teaser": "Snow avalanches are gravity-driven flows of snow and ice that can reach speeds over 300 kilometres per hour. They release on slopes steeper than about 30 degrees when snow layers fail, often triggered by new snow, wind, or a skier's weight. Avalanches shape mountain valleys and pose a constant hazard to alpine communities. Forecasters study snowpack layering and weather to predict when slopes will let go.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12430,7 +12430,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Boulder Fields",
-  "teaser": "The landscapes of scattered rock.",
+  "teaser": "Boulder fields — also called block fields — are vast jumbles of angular boulders covering slopes and summits, formed by frost wedging during ice ages. As water froze and thawed in cracks, bedrock shattered into blocks that gravity slowly moved downhill. Some boulder fields are ancient periglacial landscapes tens of thousands of years old. Their blocky chaos records the cold climates that built them.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12449,7 +12449,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Tors",
-  "teaser": "The rock towers of hilltops.",
+  "teaser": "Tors are isolated towers of bedrock rising abruptly from smooth slopes — the skeleton of a weathered mountain. They form where jointed granite or sandstone weathers more slowly along some cracks than others, leaving resistant pillars while surrounding rock crumbles and is carried away. Tors are classic periglacial features, often preserved where ice stripped away the weathered mantle. Dartmoor's granite tors in England and the tors of the American Southwest are famous examples.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12468,7 +12468,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Natural Arches",
-  "teaser": "The rock bridges of erosion.",
+  "teaser": "Natural arches form where erosion cuts completely through a rock fin or cliff. Most start as narrow fins of sandstone or limestone; weathering widens joints, wind and water carve alcoves, and finally a hole breaks through that grows until the span collapses. The arch's lifespan depends on rock strength and erosion rate — most last thousands to tens of thousands of years. Arches National Park in Utah preserves over 2,000 of these temporary sculptures.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12487,7 +12487,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Hoodoos",
-  "teaser": "The stone totems of badlands.",
+  "teaser": "Hoodoos are tall, thin spires of rock, often with a harder capstone protecting a softer pedestal. They form in layered sedimentary rock where joints channel water; rain and frost erode the weaker layers faster, leaving mushroom-shaped towers. The capstone shields its pedestal from rain until it finally falls, ending the hoodoo's life. Bryce Canyon in Utah is the world's greatest hoodoo field, with thousands of these precarious pillars in orange and pink stone.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12506,7 +12506,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Desert Varnish",
-  "teaser": "The dark patina of dry rock.",
+  "teaser": "Desert varnish is the dark, shiny coating on desert rocks — a paper-thin layer of clay and manganese and iron oxides, slowly deposited by wind-borne dust and microbes over thousands of years. It builds so slowly that archaeologists use it to date ancient rock art: petroglyphs carved through the varnish expose lighter rock beneath, and the darker the re-varnish, the older the art. Varnish is also a geological time capsule, recording environmental changes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12525,7 +12525,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Surface Processes",
   "name": "Erosion Rates",
-  "teaser": "How fast the land wears away.",
+  "teaser": "Erosion rates measure how fast landscapes wear down — typically a few millimetres to a few centimetres per thousand years for most surfaces. Rivers and glaciers erode fastest in steep mountains, while cratons erode almost nothing. Geologists measure rates with sediment gauges, river loads, and radioactive dating of exhumed rocks. The numbers matter: they reveal how fast mountains rise, how quickly soil is lost, and how long a landscape will persist.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12544,7 +12544,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Lakes",
-  "teaser": "The inland waters.",
+  "teaser": "Lakes are the world's geological ponds — basins that hold standing water before rivers, sediment, or climate drain or fill them. Most lakes are young on geological timescales, and all are gradually filling with sediment. Lakes record climate in their layered muds, preserve fossils, and moderate local weather. From glacial kettle ponds to rift lakes like Baikal, every lake is a basin with a story.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12563,7 +12563,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "How Lakes Form",
-  "teaser": "The many births of lakes.",
+  "teaser": "Lakes form wherever a basin traps water faster than it can drain or evaporate. Glaciers carve and dam basins — the most common lake-maker; rivers create oxbows; volcanic craters hold crater lakes; tectonic rifts sink long deep lakes; dissolving limestone opens sinkhole ponds. Even beavers and meteorites make lakes. The shape and chemistry of a lake reflect its birth: deep and cold from glaciers, warm and shallow from rivers.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12582,7 +12582,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Glacial Lakes",
-  "teaser": "Lakes carved by ice.",
+  "teaser": "Glacial lakes form in the gouges and dams left by ice. As glaciers advance, they scoop out bedrock basins and pile up moraine ridges; when the ice retreats, meltwater fills the hollows. The result is the classic northern landscape: thousands of lakes across Canada, Scandinavia, and the US Midwest. Some are enormous — the Great Lakes fill basins scoured by successive glaciations.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12601,7 +12601,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Volcanic Lakes",
-  "teaser": "Lakes in craters and calderas.",
+  "teaser": "Volcanic lakes fill the holes volcanoes leave behind: the craters and calderas of dormant volcanoes. Some are pristine blue — like Crater Lake in Oregon, formed when Mount Mazama collapsed 7,700 years ago — while others are acidic and steaming from volcanic gases. Crater Lake is nearly 600 metres deep. A few volcanic lakes hide dissolved carbon dioxide that can burst out catastrophically.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12620,7 +12620,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Oxbow Lakes",
-  "teaser": "Rivers leaving crescents.",
+  "teaser": "An oxbow lake is a river's abandoned bend: as a meandering river migrates across its floodplain, the neck of a loop narrows until a flood cuts through it, straightening the channel. The old loop becomes a crescent-shaped lake, slowly filling with sediment until it becomes a marsh and then dry ground. Oxbow lakes are living proof that rivers constantly shift and leave their old curves behind.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12639,7 +12639,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Lake Zonation",
-  "teaser": "The layers of a lake.",
+  "teaser": "Lakes divide into distinct zones: the shoreline littoral zone with rooted plants, the open-water limnetic zone where plankton drift, and the deep profundal zone below the light. Each zone has its own temperature, oxygen, and life. The profundal zone often runs low on oxygen because decomposing material sinks and consumes it. These zones shape everything from where fish breed to how lakes respond to pollution — and they shift as lakes age and fill.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12658,7 +12658,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Lake Stratification",
-  "teaser": "The layering of lake water.",
+  "teaser": "Many lakes stratify by temperature: in summer, warm surface water floats over cold deep water, and the boundary, called the thermocline, keeps the layers from mixing. The deep layer can run out of oxygen while the surface stays rich. In winter, the reverse — cold surface water sinks. The pattern depends on climate, depth, and latitude. Stratification controls nutrient cycling and oxygen, and it is why deep lakes can hold their character for centuries.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12677,7 +12677,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Eutrophication",
-  "teaser": "Lakes growing too rich.",
+  "teaser": "Eutrophication is the slow enrichment of lakes with nutrients, usually phosphorus and nitrogen, which explodes algae growth. When the algae die and decompose, oxygen is consumed, fish suffocate, and the lake turns green and murky. Natural eutrophication takes millennia as lakes age; human pollution — fertilizer runoff, sewage, detergents — speeds it to decades. Lakes like Lake Erie were nearly killed this way, and were revived only by strict nutrient controls.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12696,7 +12696,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Lake Turnover",
-  "teaser": "When lakes mix.",
+  "teaser": "Lake turnover is the seasonal mixing that renews deep water: in autumn, surface water cools until it matches the density of deeper water, and wind-driven currents let the whole lake overturn, carrying oxygen down and nutrients up. Many temperate lakes turn over twice a year, in spring and autumn. Turnover keeps lakes healthy — without it, deep layers would suffocate. The sudden mixing can also bring up old nutrients, occasionally triggering blooms.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12715,7 +12715,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Salt Lakes",
-  "teaser": "The salty inland seas.",
+  "teaser": "Saline lakes form in closed basins where water evaporates faster than it drains, concentrating dissolved salts. The Dead Sea is nearly ten times saltier than the ocean; the Great Salt Lake and the Caspian Sea, the world's largest lake, are other giants. Saline lakes support brine shrimp and flamingos, and leave vast salt deposits when they shrink. Under water diversions, many are now in crisis.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12734,7 +12734,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "The Great Lakes",
-  "teaser": "The ice-age giants of North America.",
+  "teaser": "The Great Lakes hold about a fifth of the world's fresh surface water, filling basins carved by repeated glaciations over the past two million years. Each lake has its own bedrock and history: Superior, the deepest and coldest, sits on ancient Precambrian rock rich in iron and copper; Erie, the shallowest and warmest, lies on younger sedimentary beds. The lakes' shorelines still rebound upward where the ice retreated, slowly tilting the basins.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12753,7 +12753,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Lake Baikal",
-  "teaser": "The deepest lake on Earth.",
+  "teaser": "Lake Baikal in Siberia is the world's oldest, deepest, and largest-volume freshwater lake: about 25 million years old, 1,600 metres deep, holding a fifth of the world's unfrozen freshwater. It fills a rift valley still actively widening as the crust pulls apart. Baikal's age and isolation produced extraordinary endemic life, including the freshwater seal, the only one on Earth. Its sediment core records 25 million years of climate history.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12772,7 +12772,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Wetlands",
-  "teaser": "The water-soaked lands.",
+  "teaser": "Wetlands are the transitional ground where land meets water: saturated soils supporting water-loving plants. They include marshes, swamps, bogs, and fens, and they perform outsized geological work — trapping sediment, filtering pollution, storing floodwater, and locking away carbon in peat. Wetlands once covered vast areas but have been drained for farms and cities; most of the world's original wetlands are gone. Their role as natural flood control and carbon storage is now recognized as critical.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12791,7 +12791,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Swamps",
-  "teaser": "The forested wetlands.",
+  "teaser": "Swamps are wetlands dominated by trees and shrubs standing in waterlogged ground. They form in low areas where drainage is blocked — river floodplains, coastal plains, and lake edges. Swamps trap sediment, slow floodwaters, and shelter rich wildlife, and their ancient, peat-building predecessors became today's coal seams. Some swamps, like the Everglades, are vast slow-moving rivers of grass and water. Draining them releases stored carbon and removes their flood protection.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12810,7 +12810,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Marshes",
-  "teaser": "The grassy wetlands.",
+  "teaser": "Marshes are wetlands of grasses, rushes, and sedges rather than trees. Freshwater marshes line rivers and lakes; salt marshes fringe coastlines where tides flood twice daily. Marshes are among the most productive ecosystems on Earth, feeding migratory birds and filtering runoff. Geologically, they trap sediment, build up organic soil, and protect coasts by absorbing storm waves. Rising seas now threaten coastal marshes, which must build upward to survive.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12829,7 +12829,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Bogs",
-  "teaser": "The acidic peat wetlands.",
+  "teaser": "Bogs are acidic, nutrient-poor wetlands that get their water from rain alone, not streams or groundwater. Sphagnum moss dominates, growing upward in thick carpets while the waterlogged, oxygen-free peat beneath barely decomposes. Bogs preserve what falls in — thousands-year-old bodies, pollen, and tools survive perfectly in their peat. They are also carbon vaults, storing far more carbon per area than forests. Acidic and hostile to most life, bogs are nonetheless ancient and precious archives.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12848,7 +12848,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Fens",
-  "teaser": "The mineral-rich wetlands.",
+  "teaser": "Fens are the bogs' wetter, richer cousins: groundwater-fed wetlands with neutral or alkaline water, full of nutrients, supporting sedges, grasses, and wildflowers. Because groundwater flows through them, fens are less acidic than bogs and build peat more slowly. They form in valleys, springs, and lake margins where groundwater seeps out. Fens are biodiversity hotspots and natural water filters, and many have been drained for farming.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12867,7 +12867,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Wetland Restoration",
-  "teaser": "Bringing wetlands back.",
+  "teaser": "Wetland restoration returns drained or damaged wetlands to working condition: removing dikes, reconnecting rivers to their floodplains, replanting native vegetation, and letting water back in. The payback is fast — restored wetlands absorb floods, filter pollution, and rebuild carbon-storing peat within decades. Major projects like the Florida Everglades restoration and Holland's 'Room for the River' show it works at scale. Geology guides the work: the right soils, hydrology, and elevations must be restored first.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12886,7 +12886,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Lake Sediments",
-  "teaser": "The archives at the bottom.",
+  "teaser": "Lake sediments are nature's tape recorders: each year's mud forms a varve — a couplet of coarse summer and fine winter layers — like tree rings in a lake bed. Pollen, ash, and chemistry trapped in the layers reveal past vegetation, eruptions, and climate. Drilling a sediment core reads thousands of years in a single tube. Lake sediments also preserve evidence of human activity.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12905,7 +12905,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
   "name": "Losing Wetlands",
-  "teaser": "The disappearing water lands.",
+  "teaser": "The world has lost over half its wetlands since 1900, drained for farms, filled for cities, and dammed away from their rivers. Coastal wetlands face an added threat from rising seas, which drown marshes that cannot build upward. Loss matters because wetlands do free work: flood storage, water purification, carbon storage, and nursery habitat for fisheries. Conservationists now aim to protect and restore these landscapes, treating them as critical infrastructure rather than wasteland.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
