@@ -353,7 +353,11 @@ fun SettingsHeroHeader(
                                 // v27 — experimental paper-title underline (two
                                 // short lines under the title text; OFF by default).
                                 if (AppPreferences.paperHeaderCutsState) {
-                                    PaperTitleLines(ink = ink)
+                                    PaperTitleLines(
+                                        ink = ink,
+                                        title = title,
+                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                                    )
                                 }
                                 Text(
                                     subtitle,

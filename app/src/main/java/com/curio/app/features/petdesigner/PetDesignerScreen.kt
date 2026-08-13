@@ -434,6 +434,8 @@ fun PetDesignerScreen(navController: NavController) {
     // untouched design is replaced by the pet's default art so the new look
     // shows immediately; custom designs keep their pixels but get re-tagged.
     // v8.56 — selecting the built-in pet also leaves any custom slot.
+    // v27t — a custom design is persisted as the ACTIVE design, so it applies
+    // regardless of which built-in pet is selected.
     fun selectPet(pet: PetDefinition) {
         if (design.definition.id == pet.id && activeCustomSlot == null) {
             toast = "\u201c${pet.displayName}\u201d is already your pet"
@@ -443,10 +445,21 @@ fun PetDesignerScreen(navController: NavController) {
         activeCustomSlot = null
         design = if (design.isCustom) design.copy(petSpeciesId = pet.id)
         else pet.defaultDesign.copy(petSpeciesId = pet.id)
+        // Persist the switch so it survives leaving the studio: a custom
+        // design follows the new species; the default look detaches from
+        // any saved custom design.
+        if (design.isCustom) {
+            AppPreferences.setPetDesign(context, design.toText())
+        } else {
+            AppPreferences.clearPetDesign(context)
+        }
         toast = "\u201c${pet.displayName}\u201d is now your pet"
     }
 
     // v8.56 — load a saved custom-pet slot into the working design.
+    // v27t — also makes it the ACTIVE design (persisted), so the pet wears
+    // it everywhere outside the studio too (the sprite reads the active
+    // design, not the slots).
     fun selectCustomPet(slot: Int) {
         val text = customPets.getOrNull(slot) ?: return
         if (activeCustomSlot == slot) {
@@ -457,12 +470,14 @@ fun PetDesignerScreen(navController: NavController) {
         pushUndo()
         design = parsed
         activeCustomSlot = slot
+        AppPreferences.setPetDesign(context, parsed.toText())
         toast = "\u201cCustom ${slot + 1}\u201d is now your pet"
     }
 
-    // v8.56 — copy the working design into the first empty custom slot.
-    // No pushUndo: the working design itself doesn't change (the slot write
-    // is its own persisted copy, not an editable edit).
+    // v8.56 — copy the working design into the first empty custom slot AND
+    // make it the ACTIVE design (v27t), so "Save as new pet" really puts it
+    // on the pet everywhere. No pushUndo: the working design itself doesn't
+    // change (the slot write is its own persisted copy, not an editable edit).
     fun saveAsNewPet() {
         val slot = customPets.indexOfFirst { it == null }
         if (slot == -1) {
@@ -470,14 +485,20 @@ fun PetDesignerScreen(navController: NavController) {
             return
         }
         AppPreferences.setCustomPet(context, slot, design.toText())
+        AppPreferences.setPetDesign(context, design.toText())
         activeCustomSlot = slot
         toast = "Saved as Custom ${slot + 1} — it's now your pet"
     }
 
     // v8.56 — delete one custom-pet slot (if it was active, back to Curie).
+    // v27t — deleting the ACTIVE slot also clears the persisted design so
+    // the pet really returns to its default look everywhere.
     fun deleteCustomPet(slot: Int) {
         AppPreferences.clearCustomPet(context, slot)
-        if (activeCustomSlot == slot) activeCustomSlot = null
+        if (activeCustomSlot == slot) {
+            activeCustomSlot = null
+            AppPreferences.clearPetDesign(context)
+        }
         toast = "Custom ${slot + 1} removed"
     }
 

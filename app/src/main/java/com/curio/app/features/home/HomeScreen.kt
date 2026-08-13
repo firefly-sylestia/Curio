@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -492,7 +493,11 @@ fun HomeScreen(navController: NavController) {
                             // v27 — experimental paper-title underline (two
                             // short lines under the name; OFF by default).
                             if (AppPreferences.paperHeaderCutsState) {
-                                PaperTitleLines(ink = questInk)
+                                PaperTitleLines(
+                                    ink = questInk,
+                                    title = displayName,
+                                    fontSize = 36.sp
+                                )
                             }
                             // Flex spacer — pins the stat card to the bottom
                             // of the banner, just above the tear.
@@ -546,8 +551,14 @@ fun HomeScreen(navController: NavController) {
                                 Box(
                                     modifier = when {
                                         holesOn -> Modifier.drawWithCache {
-                                            val holeR = 5.dp.toPx()
-                                            val holeX = 13.dp.toPx()
+                                            // v27t — diary-spiral binding holes:
+                                            // three punch holes down the left edge,
+                                            // each with a pressed two-tone rim
+                                            // (light catches top-left, shadow pools
+                                            // bottom-right) so they read as real
+                                            // ring-binder punches, not plain dots.
+                                            val holeR = 5.5.dp.toPx()
+                                            val holeX = 14.dp.toPx()
                                             // Punch through the SAME outline the
                                             // Surface wears (torn or rounded), so
                                             // the card edge and the holes read as
@@ -570,15 +581,43 @@ fun HomeScreen(navController: NavController) {
                                             }
                                             onDrawBehind {
                                                 drawPath(path, paperStatBg)
-                                                // A faint pressed rim around each
-                                                // hole — the paper edge catching light.
+                                                // Diary-spiral punch rims: a faint
+                                                // full lip ring plus a top-left
+                                                // highlight arc and a bottom-right
+                                                // shadow arc around each hole.
                                                 repeat(3) { i ->
                                                     val cy = size.height * (i + 1) / 4f
+                                                    val center = Offset(holeX, cy)
+                                                    val ringR = holeR + 1.7.dp.toPx()
+                                                    val ringTopLeft = Offset(center.x - ringR, center.y - ringR)
+                                                    val ringSize = Size(ringR * 2f, ringR * 2f)
+                                                    val ringStroke = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
+                                                    // Faint full edge — the punched paper lip.
                                                     drawCircle(
-                                                        color = questInk.copy(alpha = 0.15f),
-                                                        radius = holeR + 1.5.dp.toPx(),
-                                                        center = Offset(holeX, cy),
-                                                        style = Stroke(width = 1.5.dp.toPx())
+                                                        color = questInk.copy(alpha = 0.10f),
+                                                        radius = ringR,
+                                                        center = center,
+                                                        style = Stroke(width = 1.dp.toPx())
+                                                    )
+                                                    // Highlight arc (top-left).
+                                                    drawArc(
+                                                        color = Color.White.copy(alpha = 0.40f),
+                                                        startAngle = 160f,
+                                                        sweepAngle = 130f,
+                                                        useCenter = false,
+                                                        topLeft = ringTopLeft,
+                                                        size = ringSize,
+                                                        style = ringStroke
+                                                    )
+                                                    // Shadow arc (bottom-right).
+                                                    drawArc(
+                                                        color = questInk.copy(alpha = 0.22f),
+                                                        startAngle = 340f,
+                                                        sweepAngle = 130f,
+                                                        useCenter = false,
+                                                        topLeft = ringTopLeft,
+                                                        size = ringSize,
+                                                        style = ringStroke
                                                     )
                                                 }
                                             }

@@ -1,6 +1,24 @@
 # Prompt.md — Request log
 
-## Current request — start the Compose Multiplatform desktop port (v27t)
+## Current request — pet studio save fix + paper experiment reworks (v27t)
+
+### What was asked
+1. "Curie custom design isn't saving" — it should apply regardless of the pet and save as a new pet.
+2. "Stamped pin holes" experiment: make them DIARY-SPIRAL looking (like a ring-bound diary), only 3, proper look.
+3. "Title cut lines": move more to the end of the hero text, size to the hero text, a little longer, slight curve (not too much), pen-line like, slightly tilted.
+
+### Root cause (pet save)
+`saveAsNewPet()` / `selectCustomPet()` wrote the design only into the custom SLOTS (`setCustomPet`) — but the pet sprite + floating pet read ONLY the ACTIVE design (`AppPreferences.petDesignState`). So a "saved" custom pet never appeared outside the studio.
+
+### What was done
+- **PetDesignerScreen.kt:** `saveAsNewPet` + `selectCustomPet` now ALSO `setPetDesign` (persist as active). `selectPet` persists the re-tagged custom design (`setPetDesign` when custom — custom follows the species; `clearPetDesign` when the default look is picked). `deleteCustomPet` clears the active design when the deleted slot was active.
+- **PaperTitleLines.kt rework:** signature now `(ink, title, fontSize)` — length scales with text length + font size (≈0.62em/char + 3 chars past the end, cap 16em/300dp, floor 5em); two quadratic-bezier pen strokes (slight sag top, slight rise second), felt-pen edge (wide faint pass under narrow dark pass, round caps), -2° hand tilt. All 5 call sites updated (Home name 36sp, EntryDetail topic name headlineMedium, Settings/Profile/Cabinet headlineSmall).
+- **HomeScreen.kt diary-spiral holes:** 3 punch holes (5.5dp @ 14dp from left) with proper two-tone pressed rims — faint 1dp lip ring + white highlight arc top-left (160°→290°) + ink shadow arc bottom-right (340°→110°). `StrokeCap` import added.
+
+### Validation
+Braces balanced (7 files), `git diff --check` clean. No build locally (env rule) — CI on push.
+
+## Prior — start the Compose Multiplatform desktop port (v27t, pushed 40e3c21)
 
 ### What was asked
 "fix the app freeze when i take a screenshot during explore session. and fix cl and start the desktop port" (CL = the pet-eyes CI log the user pasted).

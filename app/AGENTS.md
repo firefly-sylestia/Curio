@@ -143,6 +143,25 @@ app/src/main/java/com/curio/app/
   fills; fixed colors like paperControlAccent 0xFFE3B84F / paperAccent
   0xFF9A7B2F never pastel-adapt). Category-accent fills keep the solid
   accent + onAccent/pastelFillInk contract.
+- **v27t — pet studio persistence + paper experiments rework.** (1) Custom
+  pet designs now APPLY: `saveAsNewPet`, `selectCustomPet`, and pet-species
+  switches persist the working design as the ACTIVE design
+  (`AppPreferences.setPetDesign`) — the sprite + floating pet read only the
+  active design (`petDesignState`), so before this the custom slots were
+  studio-only and "Save as new pet" never actually put the design on the
+  pet. Selecting a built-in pet with a custom design re-tags its species and
+  persists (custom follows the pet); picking the default look clears the
+  active design; deleting the ACTIVE slot clears it too.
+  (2) `PaperTitleLines` ("Title cut lines" experiment) sizes to the hero
+  title: length scales with the title text + font size (reaches ~3 chars
+  past the text end, capped 16em / 300dp, floored 5em), drawn as two
+  slightly curved pen strokes (quadratic beziers, wide-soft + narrow-dark
+  felt-pen passes, round caps) at a -2° hand-written tilt. Callers pass
+  `title` + `fontSize` (Home name 36sp, Entry Detail topic name
+  headlineMedium, others headlineSmall). (3) "Stamped pin holes" are now
+  DIARY-SPIRAL punches: 3 holes, 5.5dp radius at 14dp from the left edge,
+  each wearing a two-tone pressed rim — faint 1dp lip ring, top-left white
+  highlight arc (160°→290°), bottom-right ink shadow arc (340°→110°).
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

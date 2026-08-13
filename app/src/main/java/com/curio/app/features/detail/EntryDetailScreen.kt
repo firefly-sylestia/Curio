@@ -541,7 +541,11 @@ fun EntryDetailScreen(
                     // v27 — experimental paper-title underline (two short
                     // lines under the entry title; OFF by default).
                     if (AppPreferences.paperHeaderCutsState) {
-                        PaperTitleLines(ink = heroInk)
+                        PaperTitleLines(
+                            ink = heroInk,
+                            title = resolvedEntry.topic.name,
+                            fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                        )
                     }
                     // v27 — the session pill above adds height; tighten the
                     // gap so the fixed-height hero never overflows the seam.
