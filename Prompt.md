@@ -1,6 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — dark-mode hero header text white/creamish on all screens (v28)
+## Current request — pet eyes: scroll look up/down in a line, no circular spin (v28)
+
+### What was asked
+"What you did to the pet eyes — now they're not moving naturally, and they
+should look in a line, not like always spinning the eyes whenever I scroll.
+They are not looking up and down — they fully spin the eyes in a circle
+every time."
+
+### Root cause
+The v27v "eye-roll on scroll" animated the eyes through a FULL 2π CIRCLE
+(`rollAnim.animateTo(2π, tween(700))`) on every scroll event — wheel
+scroll AND each 24dp of accumulated touch-drag travel. That's the
+"spinning in a circle" the user saw on every scroll.
+
+### Fix (`ui/pet/CurioPetSprite.kt`)
+- `PetPointer` now exposes `scrollDir` (+1 down / -1 up) + `scrollTick`
+  (increments per scroll event) instead of `rollTick`: wheel scrolls take
+  the sign of `scrollDelta.y`; touch-drag scrolls use the finger's
+  INCREMENTAL vertical travel (2dp threshold + 60ms gate so micro-jitter
+  and direction flips track cleanly).
+- Each sprite runs a `scrollLook` Animatable keyed on `scrollTick`: eases
+  to the scroll direction (150ms), HOLDS while scroll events keep
+  arriving (each tick restarts the effect), then settles back to neutral
+  ~400ms after the last event. The eyes move STRAIGHT UP/DOWN along the
+  scroll line (pure Y offset — x stays 0).
+- The scroll look wins over the pointer aim while active, so a drag never
+  mixes finger-aim with a spin; `lookCells` picks the scroll look first,
+  then the aim, then neutral. Removed `rollAnim` + `cos` import.
+
+### Validation
+Brace balance OK, `git diff --check` clean. No Gradle locally (env rule) —
+CI on push is the gate. Docs: app/AGENTS.md v28 bullet. Commit made, NOT
+pushed (user: "don't push anything yet, I'll say when").
+
+## Prior — dark-mode hero header text white/creamish on all screens (v28)
 
 ### What was asked
 "In hero header text in all screen keep the text white or creamish in dark

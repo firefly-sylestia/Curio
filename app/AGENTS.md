@@ -224,6 +224,18 @@ app/src/main/java/com/curio/app/
   accumulates the vertical travel of a press-drag and fires the roll once
   it clearly scrolls, gated to one roll per ~350ms so a fast fling gives a
   few discrete rolls instead of restarting every frame.
+- **v28 — scrolling pets look UP/DOWN in a line, never a circle.** The v27v
+  "roll" played a FULL 2π CIRCLE of the eyes on every scroll — it read as
+  the pet's eyes spinning whenever you scrolled. Replaced with a vertical
+  scroll-look: `PetPointer` now exposes `scrollDir` (+1 down / -1 up) and
+  `scrollTick` (increments per scroll event) instead of `rollTick`; wheel
+  scrolls use `scrollDelta.y`'s sign and touch-drag scrolls use the
+  finger's INCREMENTAL vertical travel (2dp threshold + 60ms gate). Each
+  sprite runs a `scrollLook` Animatable keyed on `scrollTick`: ease to the
+  scroll direction (150ms), HOLD while scroll events keep arriving
+  (restarting the effect), then settle back to neutral ~400ms after the
+  last event. The scroll look wins over the pointer aim while active, so
+  dragging never mixes the aim with a spin.
 - **v27v — custom pet designs ALWAYS win + custom-pet procedural defaults.**
   (1) The sprite's design resolution (`CurioPetSprite`) forced
   `evolutionDesign(BABY, null)` for ANY baby-stage pet (level < 15) — so

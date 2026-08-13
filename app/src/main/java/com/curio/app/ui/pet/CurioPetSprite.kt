@@ -50,7 +50,6 @@ import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
-import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
 import kotlin.random.Random
@@ -60,16 +59,30 @@ import kotlinx.coroutines.delay
  * v27t — global pointer awareness for the pet's eyes: the NavHost root
  * feeds the window pointer position here, and every [CurioPetSprite]
  * reads it to aim its eyes at the cursor (Chromebook / desktop), to look
- * at the point you click while holding, and to roll its eyes on wheel
- * scrolls. One tracker serves all pets (floating, flower bed, quests).
+ * at the point you click while holding, and to glance up/down in a line
+ * while the user scrolls (wheel or touch-drag). One tracker serves all
+ * pets (floating, flower bed, quests).
  */
 object PetPointer {
     /** Last hover/press position in window coordinates (Unspecified = none). */
     var position by mutableStateOf(Offset.Unspecified)
     /** The current press point, or null when nothing is held. */
     var press by mutableStateOf<Offset?>(null)
-    /** Increments on every wheel-scroll — the sprite plays a quick eye-roll. */
-    var rollTick by mutableStateOf(0)
+    /**
+     * v28 — scroll direction for the pet's eye look: +1 = scrolling down
+     * (finger/wheel moving down the screen), -1 = scrolling up, 0 = none.
+     * Sprites glance VERTICALLY along this line while scrolling — they
+     * never spin in a circle (the old full 2π roll was unnatural).
+     */
+    var scrollDir by mutableStateOf(0f)
+        private set
+    /**
+     * v28 — increments on every scroll event (wheel `Scroll` or a vertical
+     * touch-drag `Move`). Sprites key their vertical scroll-look on it: it
+     * eases in the current direction, HOLDS while scroll events keep
+     * arriving, and settles back ~400ms after the last one.
+     */
+    var scrollTick by mutableStateOf(0)
         private set
     /**
      * v27v — increments on EVERY pointer event (hover, press, drag, scroll,
@@ -86,13 +99,13 @@ object PetPointer {
      */
     @Composable
     fun trackerModifier(): Modifier = Modifier.pointerInput(Unit) {
-        // v27v — touch-scroll detection. On touch devices vertical scrolling
-        // is a DRAG of Move events (wheel-only `Scroll` events never fire),
-        // so accumulate the vertical travel of a press-drag and roll the
-        // eyes once it clearly scrolls — with a short time gate so a fast
-        // fling fires a few discrete rolls instead of restarting every frame.
+        // v28 — scroll direction: wheel scrolls report `scrollDelta` on the
+        // event's first change; touch-drag scrolls are `Move` events, so the
+        // finger's INCREMENTAL vertical travel drives the same look (a small
+        // 2dp threshold + short time gate keep it from firing on micro-jitter,
+        // while every significant move re-aims the glance direction).
         var pressStart: Offset? = null
-        var verticalAccum = 0f
+        var lastMoveY: Float? = null
         var lastScrollNanos = 0L
         awaitPointerEventScope {
             while (true) {
@@ -104,29 +117,37 @@ object PetPointer {
                 position = change.position
                 activityTick++
                 when (event.type) {
-                    PointerEventType.Scroll -> rollTick++
+                    PointerEventType.Scroll -> {
+                        // Mouse-wheel scroll — glance along the scroll line.
+                        val dy = change.scrollDelta.y
+                        if (dy != 0f) {
+                            scrollDir = if (dy > 0f) 1f else -1f
+                            scrollTick++
+                        }
+                    }
                     PointerEventType.Press -> {
                         press = change.position
                         pressStart = change.position
-                        verticalAccum = 0f
+                        lastMoveY = change.position.y
                     }
                     PointerEventType.Move -> {
                         val start = pressStart
-                        if (start != null) {
-                            verticalAccum += abs(change.position.y - start.y)
-                            if (verticalAccum > with(density) { 24.dp.toPx() } &&
-                                System.nanoTime() - lastScrollNanos > 350_000_000L
+                        if (start != null && lastMoveY != null) {
+                            val dy = change.position.y - lastMoveY!!
+                            lastMoveY = change.position.y
+                            if (abs(dy) > with(density) { 2.dp.toPx() } &&
+                                System.nanoTime() - lastScrollNanos > 60_000_000L
                             ) {
-                                rollTick++
+                                scrollDir = if (dy > 0f) 1f else -1f
+                                scrollTick++
                                 lastScrollNanos = System.nanoTime()
-                                verticalAccum = 0f
                             }
                         }
                     }
                     PointerEventType.Release -> {
                         press = null
                         pressStart = null
-                        verticalAccum = 0f
+                        lastMoveY = null
                     }
                     else -> Unit
                 }
@@ -580,11 +601,13 @@ fun CurioPetSprite(
     // v27t — pointer-aware eyes: track this sprite's on-screen center and
     // compute where the cursor is relative to it, so the eyes aim at the
     // pointer (or the held press point), capped so they never leave the
-    // head. A wheel scroll plays a quick full-circle eye roll.
+    // head.
     // v27v — the look TIMES OUT: while pointer events keep arriving the eyes
     // aim at full strength, and ~2s after the last one (or once the press is
     // released) they ease back to the neutral glance — the pet stops staring
     // at the last scroll/tap point when you're not touching the screen.
+    // v28 — scrolling (wheel or touch-drag) drives a vertical glance along
+    // the scroll line instead of the old full-circle eye roll.
     var spriteCenter by remember { mutableStateOf<Offset?>(null) }
     val pointerPos = PetPointer.position
     val pressPos = PetPointer.press
@@ -600,29 +623,35 @@ fun CurioPetSprite(
             lookStrength.animateTo(0f, tween(450, easing = FastOutSlowInEasing))
         }
     }
-    val rollAnim = remember { Animatable(0f) }
-    LaunchedEffect(PetPointer.rollTick) {
-        if (PetPointer.rollTick > 0 && pointerAware) {
-            rollAnim.snapTo(0f)
-            rollAnim.animateTo(2f * PI.toFloat(), tween(700, easing = FastOutSlowInEasing))
+    // v28 — the SCROLL look: while the user scrolls (wheel or touch-drag)
+    // the eyes glance VERTICALLY along the scroll line — easing in the
+    // scroll direction, holding while scroll events keep arriving (each
+    // scrollTick restarts this effect), then settling back ~400ms after the
+    // last event. The old behavior spun the eyes in a FULL CIRCLE on every
+    // scroll — that's gone; scrolling now reads as a natural up/down look.
+    val scrollLook = remember { Animatable(0f) }
+    LaunchedEffect(PetPointer.scrollTick, pointerAware) {
+        if (PetPointer.scrollTick > 0 && pointerAware) {
+            scrollLook.animateTo(PetPointer.scrollDir, tween(150, easing = FastOutSlowInEasing))
+            delay(400)
+            scrollLook.animateTo(0f, tween(320, easing = FastOutSlowInEasing))
         }
     }
-    val lookCells: Offset =
-        if (pointerAware && spriteCenter != null && lookAt != Offset.Unspecified && lookStrength.value > 0f) {
+    val lookCells: Offset = when {
+        // An active scroll look wins — straight up/down, no circular spin.
+        scrollLook.value != 0f && lookStrength.value > 0f ->
+            Offset(0f, scrollLook.value * 0.9f) * lookStrength.value
+        pointerAware && spriteCenter != null && lookAt != Offset.Unspecified && lookStrength.value > 0f -> {
             val d = lookAt - spriteCenter!!
             val dist = d.getDistance().coerceAtLeast(1f)
             // Aim saturates within ~200dp — a farther cursor keeps pointing
             // the same direction without the eyes over-tracking. Scaled by
             // the v27v timeout so the aim eases back to neutral when idle.
             val prox = (dist / with(density) { 200.dp.toPx() }).coerceIn(0f, 1f) * lookStrength.value
-            if (rollAnim.value > 0f) {
-                Offset(cos(rollAnim.value), sin(rollAnim.value)) * 1.15f * prox
-            } else {
-                Offset(d.x / dist * 1.15f, d.y / dist * 0.75f) * prox
-            }
-        } else {
-            Offset.Zero
+            Offset(d.x / dist * 1.15f, d.y / dist * 0.75f) * prox
         }
+        else -> Offset.Zero
+    }
 
     val desc = contentDescription
     Box(
