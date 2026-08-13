@@ -12924,7 +12924,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Hydrogeology",
-  "teaser": "The science of underground water.",
+  "teaser": "Hydrogeology is the study of groundwater — where it comes from, how it moves, and how humans can use it without destroying it. Rain and snowmelt seep into the ground, filling the pore spaces of soil and rock like water in a sponge. Hydrogeologists map aquifers, measure flow, and model how pumping, pollution, and climate affect water supplies. Roughly half the world's drinking water and a third of its irrigation come from groundwater.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12943,7 +12943,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "The Water Cycle",
-  "teaser": "Water's endless journey.",
+  "teaser": "The water cycle is geology's conveyor belt: rain falls on the land, some flows to rivers, some evaporates, and some soaks into the ground to become groundwater. Groundwater moves slowly — metres to kilometres per year — through aquifers, eventually feeding springs, rivers, lakes, and the ocean. It can also stay trapped underground for thousands of years. The cycle links the sky to the rocks, and geology controls how fast each journey runs.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12962,7 +12962,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Groundwater Flow",
-  "teaser": "Water moving through rock.",
+  "teaser": "Groundwater flows by gravity and pressure, moving from high to low water tables through the pore spaces and fractures of rock, discharging into streams, springs, and wells. Flow rates vary wildly: gravel and fractured limestone carry water metres per day, while tight clay moves it centimetres per year. Mapping this underground flow is the core skill of hydrogeology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -12981,7 +12981,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Porosity",
-  "teaser": "The space in rocks.",
+  "teaser": "Porosity is the measure of empty space in rock or soil — the holes that can hold water. Sandstone and gravel are porous; solid granite and slate are nearly not. But porosity alone doesn't make an aquifer: the pores must also connect, a property called permeability. A sponge has both; a pumice stone has porosity but poor permeability. Hydrogeologists measure porosity in the lab to estimate how much water an aquifer can actually store.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13000,7 +13000,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Types of Aquifers",
-  "teaser": "The water-bearing layers.",
+  "teaser": "Aquifers come in two main types. Unconfined aquifers sit directly under the surface, recharged by rain soaking down through the soil — easily accessed but easily polluted. Confined aquifers are sandwiched between impermeable layers that trap water under pressure; their water can be ancient and is protected from surface contamination. There are also perched aquifers, small water bodies held above the main water table by a clay lens. Each type behaves differently under pumping.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13019,7 +13019,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Wells",
-  "teaser": "Tapping underground water.",
+  "teaser": "A well is a hole drilled into an aquifer to pump out groundwater. Modern wells are lined with casing, screened where water enters, and sealed at the surface to keep out contamination. The water level in a well shows the height of the water table, and pumping creates a cone of depression around the well. Overpumping can drain the aquifer or suck in saltwater.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13038,7 +13038,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Artesian Wells",
-  "teaser": "Water that flows on its own.",
+  "teaser": "An artesian well flows without a pump because the water is trapped under pressure between impermeable layers in a sloping aquifer. Wherever a well punctures the confining layer, the pressure pushes water up — sometimes all the way to the surface. The Great Artesian Basin in Australia, one of the world's largest, has flowed this way for over a century, watering vast grazing lands. Artesian pressure is a natural gift that overpumping can permanently waste.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13057,7 +13057,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Water Quality",
-  "teaser": "What makes water drinkable.",
+  "teaser": "Water quality is shaped by the rocks it travels through: groundwater dissolves minerals, picking up calcium, iron, and salts, and can absorb natural contaminants like arsenic from certain rock types. Hard water is rich in dissolved calcium and magnesium; soft water is poor in them. Human activity adds nitrates, pesticides, and industrial chemicals. Hydrogeologists sample wells and springs to track water chemistry — the invisible story of everything the water has touched.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13076,7 +13076,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Hard Water",
-  "teaser": "The mineral-rich water.",
+  "teaser": "Hard water is groundwater that dissolved lots of calcium and magnesium, usually from limestone, dolomite, or gypsum. It leaves scale in kettles and pipes, makes soap lather poorly, and spots dishes. Soft water, low in these minerals, comes from granite or quartz-rich areas. Hardness is harmless to drink, but it costs homeowners in plumbing and appliance wear.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13095,7 +13095,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Water Treatment",
-  "teaser": "Making water safe.",
+  "teaser": "Drinking water treatment removes what geology and human activity added: sediment is settled and filtered, bacteria are killed with chlorine or UV, and hardness, iron, or manganese may be removed. The raw water's chemistry decides the treatment: groundwater from limestone needs softening, surface water needs filtration, and deep wells may need iron removal. Many cities blend sources for taste and safety. The geology upstream quietly determines the treatment plant downstream.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13114,7 +13114,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Desalination",
-  "teaser": "Fresh water from the sea.",
+  "teaser": "Desalination turns seawater or brackish groundwater into fresh water by removing salt — through reverse osmosis, where pressure pushes water through membranes, or distillation, where evaporation separates it. Desalination is energy-hungry, which makes it expensive, but it sustains arid regions from the Persian Gulf to Australia. The brine left behind can harm coastal ecosystems if poorly managed. As freshwater supplies tighten, desalination's geological context — where to draw and discharge — matters more.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13133,7 +13133,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Water Scarcity",
-  "teaser": "The world's water squeeze.",
+  "teaser": "Water scarcity is a geological and human crisis: aquifers are being pumped faster than rain recharges them, while demand grows. The Ogallala Aquifer under the US Great Plains has dropped metres in places; the Arabian Peninsula's fossil aquifers hold water from the last ice age, with no recharge at all. Climate change shifts rainfall patterns, and growing cities compete with farms. Managing scarcity means understanding recharge rates — geology sets the sustainable limit.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13152,7 +13152,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Irrigation",
-  "teaser": "Watering the fields.",
+  "teaser": "Irrigation depends on geology for both water and drainage. Farms draw from rivers, reservoirs, and aquifers, and groundwater pumping has made deserts bloom — often at the cost of sinking land and drying wells. Poorly drained irrigated fields accumulate salts as water evaporates, eventually poisoning the soil, a process called salinization that ruined ancient Mesopotamian fields. Sustainable irrigation matches water use to what the aquifer and climate can actually supply.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13171,7 +13171,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Water Conservation",
-  "teaser": "Stretching every drop.",
+  "teaser": "Water conservation starts with knowing where the water is: hydrogeologists map aquifers, measure recharge, and monitor water levels to set sustainable pumping limits. Cities fix leaks, farms adopt drip irrigation, and households use less — but the geological side matters too. Recharging aquifers deliberately, by spreading water over permeable ground, banks water for dry years. Conserving groundwater is a partnership between human habits and the hidden capacity of rock.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13190,7 +13190,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Types of Springs",
-  "teaser": "The many water emergences.",
+  "teaser": "Springs are where groundwater emerges at the surface, and they come in types by origin: gravity springs flow where the water table meets a slope; artesian springs rise under pressure from confined aquifers; seepage springs trickle from porous layers; and thermal springs emerge warm from deep circulation. Spring water's chemistry and temperature reveal how deep and how long it travelled. For thousands of years, springs were the most reliable water source humans had.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13209,7 +13209,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Geysers",
-  "teaser": "The erupting hot springs.",
+  "teaser": "Geysers are hot springs that erupt: water seeps down to hot rock, superheats under pressure, then flashes to steam and blasts upward in a column of water and vapor. They need a rare combination — a heat source, a plumbing system of cracks, and a supply of water. Old Faithful in Yellowstone erupts about every 90 minutes. Geysers are fragile: earthquakes, erosion, and even tourist trash can permanently change or kill their timing.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13228,7 +13228,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Hot Springs",
-  "teaser": "Earth's heated pools.",
+  "teaser": "Hot springs are groundwater warmed by deep circulation and rising along fractures to the surface. The water's heat comes from geothermal gradients, recent volcanic activity, or hot rock near the surface. As it rises, it dissolves minerals, often depositing terraces of travertine — like the white cascades of Pamukkale in Turkey. The temperature and chemistry of hot springs attracted humans for millennia as baths and sacred sites, and today they still power spas and geysers.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13247,7 +13247,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Monitoring Groundwater",
-  "teaser": "Watching the hidden water.",
+  "teaser": "Monitoring the water table means measuring wells — hundreds or thousands of them — over time to track how groundwater levels rise and fall. Sensors record depth continuously, and the data reveal recharge from rain, declines from pumping, and recovery after conservation. Satellite gravity measurements can even track total groundwater storage from space. Declining trends trigger action: water restrictions, new supply, or artificial recharge. The water table is the aquifer's vital sign.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13266,7 +13266,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Groundwater Recharge",
-  "teaser": "Refilling the underground stores.",
+  "teaser": "Groundwater recharge is the slow refilling of aquifers as rain and snowmelt seep downward through the soil. Rates vary with climate, soil, and geology: sandy soils and fractured rock accept water readily; clay and pavement reject it. In many regions, recharge is a fraction of what pumping removes, so artificial recharge — spreading water over infiltration basins — is increasingly used.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13285,7 +13285,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Water Geology",
   "name": "Groundwater Contamination",
-  "teaser": "The poisons beneath us.",
+  "teaser": "Groundwater contamination is especially dangerous because it hides: pollutants seep into the ground and travel slowly through aquifers, out of sight, for decades. Common contaminants include nitrates from fertilizer, solvents and fuels from industry, salt from road de-icing, and naturally occurring arsenic and radon. Once polluted, aquifers are notoriously hard to clean — pumping and treating 'pump-and-treat' can take decades. Protection of recharge areas is far cheaper than any cleanup.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13304,7 +13304,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology in Daily Life",
-  "teaser": "The Earth science behind everything.",
+  "teaser": "Geology runs modern life invisibly: the concrete underfoot, the metals in phones, the fuel in cars, the water from taps, and the ground beneath every building all come from Earth science. Geologists also keep society safe, mapping earthquake faults, landslide slopes, and flood plains before we build on them. From the sand in glass to the lithium in batteries, civilization is a thin layer of technology on a geological foundation.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13323,7 +13323,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Water",
-  "teaser": "Rocks behind clean water.",
+  "teaser": "Geology decides where water is: aquifers store it, springs release it, and rivers drain it along paths set by rock structure. Cities grew where geology made water easy, and declined where it failed. Groundwater chemistry reflects the rocks it flowed through, from limestone's hard water to granite's soft water. Every drop we use has passed through a geological filter.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13342,7 +13342,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Food",
-  "teaser": "The soil behind our meals.",
+  "teaser": "Soil is the geological basis of all food: it forms from weathered rock, holds the water and nutrients plants need, and its type determines what grows where. The great breadbaskets of the world — Ukraine's black soils, China's loess, the Nile's alluvium — are all geological gifts. The bedrock decides soil chemistry, drainage, and fertility, and supplied the irrigation water too.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13380,7 +13380,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Medicine",
-  "teaser": "Rocks in health care.",
+  "teaser": "Geology influences health in direct and surprising ways: drinking water picks up arsenic, fluoride, and other elements from the rocks it flows through, with both benefits and dangers. Soils control trace-element intake through food; iodine-poor regions see goitre, and selenium-rich ones see toxicity. Radon, a radioactive gas from uranium-bearing rocks, is the second leading cause of lung cancer in some countries. Medical geology studies these links, mapping regions where geology and health interact.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13399,7 +13399,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Technology",
-  "teaser": "The minerals in your phone.",
+  "teaser": "Every technology runs on geology: silicon chips from quartz sand, rare earths in magnets and screens, lithium and cobalt in batteries, copper in wiring. The most advanced devices depend on mining, and technology supply chains follow geologists' maps. Even digital life has a geological footprint — data centres are built where water and electricity, both geological resources, are cheap.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13418,7 +13418,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Disasters",
-  "teaser": "Reading the risk of the land.",
+  "teaser": "Geology sets the stage for disasters: earthquakes strike along faults, volcanoes along plate boundaries, landslides on steep weak slopes, and floods in river valleys. The hazard is natural, but the disaster is not — it depends on where people build and how prepared they are. The same magnitude earthquake kills thousands where buildings are weak and few where codes are strong. Geology maps the danger; engineering and planning decide the toll.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13437,7 +13437,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Cities",
-  "teaser": "Building on the Earth.",
+  "teaser": "Cities are built on geological decisions, whether made or not: foundations rest on bedrock or fill, water comes from aquifers, hazards come from faults and soft ground. Earthquake codes are written from geological maps, flood plains shape zoning, and the best skyscraper sites sit on solid rock. Cities also change their geology — paving over recharge, sinking from groundwater pumping, and amplifying shaking on filled land. Urban geology is the hidden layer under every skyline.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13456,7 +13456,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Teaching Geology",
-  "teaser": "Learning the Earth's story.",
+  "teaser": "Geology education opens the ground beneath our feet: students learn to identify rocks, read maps, and understand the processes shaping the planet. Field trips are the heart of the discipline — outcrops are the textbook, and the landscape the classroom. Geology also builds crucial habits of mind: thinking in deep time, weighing evidence, and reasoning about complex systems. A geologically literate public understands climate, resources, and hazards far better.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13475,7 +13475,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Climate",
-  "teaser": "Rocks in the climate story.",
+  "teaser": "Geology both drives and records climate. Over millions of years, plate tectonics moves continents, opens and closes ocean gateways, and triggers volcanic outgassing — all shifting global climate. The rock record preserves these changes: glacial deposits, coral reefs, and carbon isotopes document ancient warm and cold periods. Geology also acts on climate: weathering of rock pulls CO₂ from the air, while volcanoes add it. Understanding deep-time climate helps predict what comes next.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13494,7 +13494,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and the Economy",
-  "teaser": "The value of the underground.",
+  "teaser": "The economy is built on geology: minerals, fuels, water, and construction materials are all geological products worth trillions of dollars. Mining and oil industries, agriculture, tourism to geological wonders, and even insurance against geological disasters all rest on Earth science. Commodity prices rise and fall with new discoveries, and nations' wealth tracks their mineral endowments. Economic geology — finding and valuing deposits — is one of the most direct ways geologists shape the global economy.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13513,7 +13513,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology and Policy",
-  "teaser": "Science guiding decisions.",
+  "teaser": "Geological knowledge shapes policy: earthquake building codes, flood-zone mapping, groundwater rights, mining regulations, and carbon-storage permits all derive from Earth science. Policy questions — where to build, what to extract, how to protect water — cannot be answered without geological data. Geologists increasingly work alongside lawmakers, translating rock records and hazard maps into rules. Good policy, like good construction, is only as sound as the ground it stands on.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13532,7 +13532,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geotourism",
-  "teaser": "Traveling for the Earth.",
+  "teaser": "Geotourism is travel that celebrates the Earth: visiting volcanoes, canyons, glaciers, and fossil beds to see geology in action. It ranges from national parks to geoparks, and it supports communities that protect their landscapes. Visitors learn to read cliffs, craters, and columns — turning a mountain view into a story of deep time. Done well, geotourism funds conservation and makes geology a local economic asset rather than an afterthought.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13551,7 +13551,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology Museums",
-  "teaser": "Where the Earth is displayed.",
+  "teaser": "Geology museums make deep time tangible: mineral halls dazzle with crystals, dinosaur skeletons dwarf visitors, and meteorites bring space to hand. Major collections — London's Natural History Museum, Washington's Smithsonian, Paris's Grande Galerie — grew from the great exploring expeditions and mining booms. Museums preserve type specimens that define species, host research, and teach generations. A museum's rock room is a time machine anyone can enter.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13570,7 +13570,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Citizen Science in Geology",
-  "teaser": "Everyone can study the Earth.",
+  "teaser": "Citizen science has geologists' eyes everywhere: volunteers track earthquakes with phones, photograph landslides for mapping, collect meteorites, and monitor stream water levels. Smartphone apps turn ordinary people into seismometers, and online platforms let amateurs classify rock images from Mars. Citizen observations extend official networks at a fraction of the cost and build public understanding of Earth science. The citizen geologist is the modern version of the Victorian amateur who built the field.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13589,7 +13589,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Rocks in Modern Design",
-  "teaser": "Stone in today's world.",
+  "teaser": "Modern design leans on geology in new ways: architects cut stone with computer-controlled saws, engineers make engineered stone from crushed quartz, and designers mine the natural patterns of agate, marble, and slate. Terrazzo floors, granite counters, and basalt facades bring geological materials into daily life. The stone in modern design is still a product of the ancient Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13608,7 +13608,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology Meets Space",
-  "teaser": "Earth science beyond Earth.",
+  "teaser": "Space exploration is geology's frontier: every planetary mission carries geologists' questions and tools, and astrogeology guides where rovers land and what they sample. Astronauts train in volcanic fields and impact craters to recognize geological features. Sample-return missions bring other worlds to Earth's labs. The first human boots on Mars will walk as field geologists, just as Apollo astronauts did on the Moon. Geology is the science most prepared for other planets.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13627,7 +13627,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Explaining Geology",
-  "teaser": "Sharing the Earth's story.",
+  "teaser": "Explaining geology is a craft: turning deep time, plate motions, and rock chemistry into stories people can grasp. Geoscience communicators use outcrops, museums, video, and social media to make Earth science vivid — and to counter misinformation about climate, earthquakes, and resources. The stakes are real: public understanding of geology shapes votes on energy, hazard preparedness, and conservation. A well-told geological story can change how a community builds for the next quake.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13646,7 +13646,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "Geology Ethics",
-  "teaser": "The moral side of Earth science.",
+  "teaser": "Geology raises real ethical questions: who benefits from mining, who bears the pollution, and how do we balance extraction with future generations? Geologists' work informs wars over resources, displaces communities, and can be used to obscure climate change. Professional codes now stress responsibility to the public and environment, not just employers. Ethical geology means honestly reporting risk, respecting communities, and remembering that the resources we extract belong to the future too.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13665,7 +13665,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Society",
   "name": "The Future of Geology",
-  "teaser": "Earth science ahead.",
+  "teaser": "The future of geology is urgent and expanding: mapping critical minerals for the energy transition, monitoring climate and sea-level change, warning of hazards, and managing groundwater under pressure. New tools — machine learning, satellite gravity, deep drilling, and robotics — are extending the reach of the discipline. Geologists will increasingly work at the interfaces of climate, energy, and society. The ground beneath us will matter more, not less, in the decades ahead.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13684,7 +13684,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Geologic Hazards",
-  "teaser": "Earth's dangerous side.",
+  "teaser": "Geologic hazards are the dangerous side of Earth's normal processes: earthquakes, volcanic eruptions, landslides, tsunamis, floods, and sinkholes. They cannot be stopped, but they can be understood and planned for. Geology maps where each hazard is likely, and engineering builds to resist it. Most deaths from hazards come not from the events themselves but from building in the wrong places — geology's maps are the first line of defense.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13703,7 +13703,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Hazard Mapping",
-  "teaser": "Charting the risks.",
+  "teaser": "Hazard mapping turns geology into safety: geologists map faults, landslide-prone slopes, flood plains, volcanic zones, and liquefaction-prone ground, producing the zoning maps cities and insurers rely on. Each map combines past events, geology, and computer models of future likelihood. A good hazard map doesn't predict when — it shows where, so communities can build accordingly. Japan, California, and Iceland all build from detailed hazard maps.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13722,7 +13722,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Hazard Zoning",
-  "teaser": "Planning around danger.",
+  "teaser": "Hazard zoning divides land by risk: red zones where building is restricted, yellow where special engineering is required, green where it is safe. Seismic zoning sets building code levels, flood zoning keeps homes off flood plains, and volcanic zoning restricts settlement near vents and lahars. The zoning is only as good as the geology behind it, and must be updated as knowledge grows.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13741,7 +13741,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Volcanic Hazards",
-  "teaser": "The many dangers of eruptions.",
+  "teaser": "Volcanoes kill in many ways: fast-moving pyroclastic flows of hot gas and rock, mudflows called lahars, ash falls that collapse roofs and choke engines, lava flows that burn and bury, and volcanic gases that poison. Each hazard has its own footprint — ash can travel hundreds of kilometres, lahars follow valleys, lava creeps slowly. Volcano observatories monitor all of these, mapping hazard zones and issuing warnings when the ground starts to move.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13760,7 +13760,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Lava Hazards",
-  "teaser": "The burning flows.",
+  "teaser": "Lava flows are volcanoes' slowest hazard — usually too slow to outrun a person, but unstoppable by any wall. Basaltic lava in Hawaii flows in rivers and sheets, burying roads and homes over weeks; viscous lava piles into domes that can collapse. Most deaths from lava are from people getting trapped or from secondary explosions. Lava's footprint is predictable, so communities plan around it — and sometimes nature surprises even careful planners.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13779,7 +13779,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Ash Fall Hazards",
-  "teaser": "The silent spread of ash.",
+  "teaser": "Volcanic ash looks like soft powder but is actually pulverized rock and glass, with sharp edges that damage everything. A few centimetres can collapse roofs, clog engines, short-circuit electronics, and pollute water. Ash also disrupts aviation — the 2010 Eyjafjallajökull eruption grounded European flights for a week. Ash clouds travel thousands of kilometres, so ash hazard extends far beyond the volcano itself. Communities clean up with masks, bulldozers, and patience.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13798,7 +13798,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Lahar Hazards",
-  "teaser": "The mudflow threats.",
+  "teaser": "Lahars are volcanic mudflows — torrents of water, ash, and rock that surge down volcano valleys at highway speed. They form when eruptions melt snow and ice, or when heavy rain mobilizes fresh ash. Mount Pinatubo's 1991 lahars buried towns and killed hundreds after the eruption itself ended. Because lahars follow established valleys, geologists map lahar zones and build warning systems — but a lahar can arrive with minutes of notice.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13817,7 +13817,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Tsunami Hazards",
-  "teaser": "The wave dangers.",
+  "teaser": "Tsunamis are waves set off by the sudden displacement of water — usually undersea earthquakes, but also landslides and volcanic collapses. In the open ocean they travel at jet speed with tiny height; at the coast they slow and pile into towering walls. The 2004 Indian Ocean tsunami killed over 200,000 people, mostly because no warning system existed. Today, seismic networks and sea-level gauges give precious warning time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13836,7 +13836,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Seismic Hazard Maps",
-  "teaser": "Measuring shaking risk.",
+  "teaser": "Seismic hazard maps show how strongly the ground is expected to shake in a region, based on fault maps, historical earthquakes, and geology. Soft sediments amplify shaking and can liquefy; bedrock shakes less. The maps drive building codes: regions at high hazard require stronger construction. After damaging quakes, the maps are revised with new data. California, Japan, and Turkey build from some of the most detailed seismic hazard maps in the world.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13855,7 +13855,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Geologic Floods",
-  "teaser": "When the ground floods.",
+  "teaser": "Geologic floods are shaped by the land as much as the rain: rivers flood their floodplains, storm surges invade coasts, and blocked drainage turns basins into lakes. Flood hazard maps mark the areas water historically reaches — the 100-year flood plain is the classic planning line. Development on floodplains and drained wetlands makes floods worse by removing the land's natural storage. Geology knows where the water will go; planning must respect it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13874,7 +13874,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Landslide Risk",
-  "teaser": "Living on unstable slopes.",
+  "teaser": "Landslide risk is highest on steep slopes with weak or waterlogged ground, and it spikes after heavy rain, earthquakes, and fires. Hazard mapping identifies the slopes most likely to fail, and monitoring instruments watch for movement. Engineering can stabilize many slides — drainage, retaining walls, and anchoring — but the cheapest protection is not building on the risky slope at all. Where people already live, warning systems and evacuation plans save lives.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13893,7 +13893,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Sinkhole Risk",
-  "teaser": "Living over hollow ground.",
+  "teaser": "Sinkholes open where groundwater dissolves soluble rock — limestone, dolomite, or salt — creating voids that suddenly collapse. Florida and the Yucatán are dotted with them, and they can swallow cars, homes, and even entire blocks. Risk is highest where groundwater pumping lowers the water table, removing the buoyancy that held the ground up. Geology maps karst regions; geophysical surveys can find hidden voids before a collapse — but some sinkholes still arrive without warning.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13912,7 +13912,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Subsidence Risk",
-  "teaser": "The sinking cities.",
+  "teaser": "Subsidence risk is where the ground is sinking, usually because water, oil, or gas is pumped from beneath. It threatens coastal cities (New Orleans, Jakarta, Venice), farmland, and infrastructure with gradual, metre-scale settlement. Subsidence amplifies flood risk — a sinking city needs ever-higher levees. The cause is often human, and the fix is often possible: stop pumping, recharge aquifers, and the land can slow or stop sinking. Monitoring with GPS and radar tracks the decline.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13931,7 +13931,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Hazard Preparedness",
-  "teaser": "Being ready for Earth's fury.",
+  "teaser": "Hazard preparedness means knowing the risks before the event: hazard maps, building codes, warning systems, and drills. Earthquake-prone cities strengthen schools and hospitals; tsunami coasts mark evacuation routes and rehearse them; volcano communities practice lahars and ash cleanups. Preparedness converts geological knowledge into behavior — and it works: well-prepared regions survive events that destroy unprepared ones. The science is the easy part; the drills are the hard part.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13950,7 +13950,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Disaster Response",
-  "teaser": "Reacting to Earth's events.",
+  "teaser": "After a disaster, geologists become first responders: assessing dammed rivers from landslides, mapping aftershock and afterslip hazards, inspecting damaged ground, and watching for secondary disasters like flood outbreaks. Their rapid assessments guide rescue and recovery — where it is safe to search, where roads may fail, what to evacuate next. The 2015 Nepal earthquake and 2018 Sulawesi tsunami showed how quickly geological teams mobilize to keep relief workers and survivors safe.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13969,7 +13969,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Risk Perception",
-  "teaser": "How we think about hazards.",
+  "teaser": "People underestimate familiar hazards and overestimate dramatic ones. Residents of earthquake zones forget the risk between events; tourists ignore warning signs near volcanoes and cliffs. Geologists study how risk is perceived because perception decides action — a community that doesn't fear the hazard won't prepare for it. The challenge is communicating real risk without panic: maps, drills, and honest discussion work better than fear. Risk communication is a science of its own.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -13988,7 +13988,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Hazard Insurance",
-  "teaser": "Money against disasters.",
+  "teaser": "Insurance is geology with a price tag: insurers use hazard maps to price earthquake, flood, and landslide coverage, and to decide what risks they cannot afford. After disasters, payouts fund rebuilding — but only if premiums reflected the real risk. Some hazards are uninsurable at market rates, leaving governments as insurers of last resort. As climate shifts flood and fire risk, insurers are re-mapping the world.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14007,7 +14007,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Early Warning Systems",
-  "teaser": "Heads-up before disaster.",
+  "teaser": "Early warning systems turn seconds into survival: seismic networks detect the first waves of an earthquake and broadcast alerts before the damaging shaking arrives — Japan's system gives seconds to tens of seconds of warning. Volcano observatories track seismicity, gas, and deformation to warn of eruptions; tsunami buoys confirm waves at sea. Every system buys time to drop, cover, evacuate, or stop trains. The sensors are geological; the life saved is human.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14026,7 +14026,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Disaster Recovery",
-  "teaser": "Rebuilding after Earth's events.",
+  "teaser": "Recovery after a geological disaster is a geological process too: landslides dammed by rubble must be mapped, contaminated groundwater assessed, and rebuilt infrastructure placed on stable ground. The recovery window is also a chance to rebuild better — stronger codes, wiser zoning, and restored wetlands and reefs. Japan rebuilt with higher seawalls after 2011; Christchurch re-planned its soft-soil centre after 2011's quake. Recovery is the test of whether a community learned its geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14045,7 +14045,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geologic Hazards",
   "name": "Communicating Hazards",
-  "teaser": "Warning the public.",
+  "teaser": "Communicating hazard is a delicate craft: tell people too much and they tune out; too little and they're unprepared. Geologists work with emergency managers, media, and communities to translate maps and models into clear warnings. The language matters — 'likely' and 'possible' mean different things to scientists and the public. Drills, sirens, and phone alerts turn maps into action. The best warning is the one people recognize, trust, and act on.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14064,7 +14064,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geology Careers",
-  "teaser": "The jobs of Earth science.",
+  "teaser": "Geology careers span the whole planet and beyond: exploration geologists hunt for minerals, hydrogeologists manage water, seismologists study earthquakes, volcanologists watch eruptions, and planetary geologists work on Mars missions. The field splits between industry — mining, energy, engineering — and research, government surveys, and teaching. Fieldwork, lab work, and computer modelling mix in most jobs. Geology is one of the few careers where 'office' can mean a mountainside or a drilling rig.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14083,7 +14083,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Field Geologists",
-  "teaser": "The outdoor Earth scientists.",
+  "teaser": "The field geologist is geology's classic: the person with a rock hammer, hand lens, and notebook, walking outcrops to map rocks and structures. Field geologists log strata, sample minerals, measure faults, and draw maps that become the foundation of every later decision. The work is rugged — long days in desert, jungle, or tundra — but builds the firsthand knowledge no lab can replace.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14102,7 +14102,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geophysicists",
-  "teaser": "Probing Earth with physics.",
+  "teaser": "Geophysicists probe the Earth with physics: seismology images the interior, gravity and magnetics map hidden structures, and electrical methods find water and ore. They work on earthquakes, oil exploration, climate science, and space missions, processing data into images of the invisible Earth. Much of their work is computation — modelling wave propagation and inverting measurements. When you see a picture of Earth's core or a map of seafloor spreading, a geophysicist made it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14121,7 +14121,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geochemists",
-  "teaser": "The chemists of the Earth.",
+  "teaser": "Geochemists read Earth's chemistry: they measure isotopes in rocks and waters to date events, trace magma sources, and reconstruct ancient climates and oceans. Their lab work — mass spectrometers, electron microscopes, and clean rooms — produces the numbers that date the planet and track pollution. Geochemists also study how elements cycle between rocks, oceans, and atmosphere. The discipline connects geology to biology, oceanography, and climate science at the molecular level.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14140,7 +14140,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Mineralogists",
-  "teaser": "The students of minerals.",
+  "teaser": "Mineralogists study minerals — their crystal structure, chemistry, and how they form. They identify new minerals, use X-rays and electron beams to determine crystal lattices, and map where minerals occur. Mineralogy underpins everything from gemology to ore geology, and mineralogists supply the data that classify Earth's materials. The field also reaches beyond Earth: mineralogists study meteorites and returned lunar and Martian samples. Every rock type is defined by the minerals it contains.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14159,7 +14159,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Petrologists",
-  "teaser": "The students of rocks.",
+  "teaser": "Petrologists study rocks as systems: how igneous rocks melt and crystallize, how sedimentary rocks form and alter, and how metamorphic rocks change under heat and pressure. They use thin sections, experimental furnaces, and geochemistry to reconstruct the pressure, temperature, and fluids that made each rock. Petrology explains volcanism, mountain building, and the evolution of Earth's crust. When a geologist reads a rock's history, a petrologist wrote the grammar.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14178,7 +14178,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Paleontologists",
-  "teaser": "The students of ancient life.",
+  "teaser": "Paleontologists study fossils — the remains of ancient life — to reconstruct evolution, extinction, and past environments. They dig, prepare, and identify specimens, and use them to date and correlate rock layers. Paleontology straddles geology and biology, from dinosaur skeletons to microscopic foraminifera that date oil wells. Every fossil is a snapshot of life on a changing planet.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14197,7 +14197,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Seismologists",
-  "teaser": "The quake scientists.",
+  "teaser": "Seismologists study earthquakes and the waves they generate: locating quakes, measuring magnitude, mapping faults, and probing Earth's interior with seismic waves. Their networks detect thousands of earthquakes a day, from imperceptible tremors to devastating ruptures. Seismology also images the deep Earth — the core, mantle, and plate boundaries — like a CT scan of the planet. Seismologists' work drives building codes, tsunami warnings, and our understanding of how the planet works.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14216,7 +14216,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Volcanologists",
-  "teaser": "The volcano scientists.",
+  "teaser": "Volcanologists study volcanoes: how magma forms, rises, and erupts, and how to warn people before disaster. They monitor volcanoes with seismometers, gas sensors, GPS, and satellites, and map past eruptions to predict future ones. Fieldwork means climbing steaming craters and sampling lava — a job with real risk and payoff. Their forecasts have saved hundreds of thousands of lives.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14235,7 +14235,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Hydrogeologists",
-  "teaser": "The water specialists.",
+  "teaser": "Hydrogeologists study groundwater: where aquifers are, how fast they refill, and how to keep them clean. They model groundwater flow, test wells, and design remediation for contaminated sites. Their work directly affects drinking water, irrigation, and ecosystems — roughly half the world's population drinks groundwater. They are also central to climate adaptation, mapping how drought and overpumping stress supplies.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14254,7 +14254,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Engineering Geologists",
-  "teaser": "The builders' Earth advisors.",
+  "teaser": "Engineering geologists apply geology to construction: mapping the ground for dams, tunnels, roads, and buildings, and predicting how it will behave. They drill and test, assess slope stability and earthquake risk, and recommend foundations and mitigation. Their reports decide where a dam goes, how deep piles must be, and whether a hillside is safe to build on. When a structure survives an earthquake or a landslide, an engineering geologist is part of the reason.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14273,7 +14273,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Environmental Geologists",
-  "teaser": "Protecting land and water.",
+  "teaser": "Environmental geologists study how human activity affects the ground and water: mapping contamination, cleaning up polluted sites, and assessing how land use changes geology. They work on landfills, mining remediation, groundwater protection, and climate adaptation, balancing development with environmental health. The work mixes field sampling, lab analysis, and regulation — and it is growing fast as society confronts legacy pollution and climate change. Their reports often decide whether a site is redeveloped or abandoned.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14292,7 +14292,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Planetary Geologists",
-  "teaser": "Studying other worlds.",
+  "teaser": "Planetary geologists apply geology beyond Earth: mapping Mars, the Moon, and asteroids, and interpreting what rovers and orbiters send back. They identify landing sites, analyze cratering histories, and study how other worlds evolved — even designing instruments that fly on spacecraft. Many train as classic geologists first, then aim their hammers at the sky. The field's work has reshaped our picture of the solar system, from Mars's ancient rivers to Europa's hidden ocean.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14311,7 +14311,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geology in Industry",
-  "teaser": "Earth science in business.",
+  "teaser": "Industry employs most working geologists: mining and exploration companies need geologists to find ore and plan mines; energy companies need them for oil, gas, and geothermal; construction firms need them for foundations. Engineering firms, water utilities, and environmental consultancies round out the field. Industry geologists combine fieldwork with economics — a deposit is only valuable if it can be extracted profitably. Their maps and models move billions of dollars and shape landscapes worldwide.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14330,7 +14330,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geology Research",
-  "teaser": "Advancing Earth science.",
+  "teaser": "Research geologists push the frontiers: dating Earth's oldest rocks, drilling ice cores, mapping the seafloor, and modelling future climate. They work in universities, institutes, and surveys, funded by grants and driven by curiosity. Research produces the deep-time records that anchor climate policy, the hazard maps that save lives, and the planetary data that shape space missions. Many discoveries came from research with no immediate application in mind.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14349,7 +14349,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Teaching Geology",
-  "teaser": "The educators of Earth science.",
+  "teaser": "University geology teaches the next generation while advancing the field. Professors lecture, lead field courses, and run research labs; graduate students map, drill, and publish. Academic geology is where theories are tested and new geologists are trained in fieldwork and modelling. Field camps — where students learn to map outcrops — are the rite of passage of the discipline.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14368,7 +14368,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geology Skills",
-  "teaser": "What geologists master.",
+  "teaser": "The skills of a geologist transfer surprisingly well: reading maps and data, thinking in deep time and systems, and making decisions with incomplete information. Fieldwork builds observation and problem-solving; lab work builds precision; modelling builds quantitative reasoning. Geologists also learn to communicate — writing reports, explaining risk, and defending conclusions. These skills feed careers in energy, environment, finance, technology, and policy, which is why geology graduates work in far more fields than just rocks.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14387,7 +14387,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geology Jobs Outlook",
-  "teaser": "The demand for Earth scientists.",
+  "teaser": "Geology pays best where the resources are: petroleum geologists and mining geologists in exploration and operations are among the highest earners, especially in boom regions. Engineering and hydrogeology consultants earn solid middle-class incomes, while academic and survey positions pay less but offer stability. Salaries track commodity prices and oil cycles, rising and falling with the industry. Entry-level geologists typically need field experience and often a master's degree for the best positions.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14406,7 +14406,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Geology Community",
-  "teaser": "The society of Earth scientists.",
+  "teaser": "Geologists are a tight-knit global community: professional societies like the Geological Society of America, the American Geophysical Union, and national geological surveys connect practitioners worldwide. Conferences share research, field trips build networks, and online communities trade advice on jobs and outcrops. The community also organizes disaster response — geologists volunteer to assess hazards after major quakes and eruptions. A geologist's network is often their best map to opportunity.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14425,7 +14425,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Careers",
   "name": "Becoming a Geologist",
-  "teaser": "The path into Earth science.",
+  "teaser": "Becoming a geologist starts with a bachelor's in geology or Earth science, with field camp and summer internships building experience. A master's degree opens most professional careers; a PhD leads to research and academia. Specialization — hydrogeology, seismology, mineral exploration — usually comes at the graduate level. The path rewards fieldwork, curiosity, and math. Geology remains one of the most in-demand and geographically adventurous degrees a student can choose.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14444,7 +14444,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Structural Geology",
-  "teaser": "The architecture of rock.",
+  "teaser": "Structural geology studies how rock deforms: the folds, faults, joints, and fabrics that record the forces acting on the crust. Structural geologists map these features to reconstruct mountain-building events, locate oil traps, and assess earthquake hazard. They work in the field, at the microscope, and in computer models. Every fold and fault is a fossilized movement of the crust.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14463,7 +14463,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Rock Deformation",
-  "teaser": "How rocks bend and break.",
+  "teaser": "Deformation is the bending, stretching, and breaking of rock under stress. Rock can deform elastically — bending and springing back, like a fault storing energy before an earthquake — or permanently, by folding or fracturing. Temperature, pressure, and strain rate decide which: deep hot rock folds, shallow cold rock fractures. Deformation is the language of plate tectonics.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14482,7 +14482,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Stress and Strain",
-  "teaser": "Forces and rock response.",
+  "teaser": "Stress is force per area applied to rock; strain is the resulting deformation. Three stress regimes shape the crust: compression squeezes and thickens it, tension stretches and thins it, and shear slides it sideways. The rock responds by shortening, lengthening, or rotating — folding, faulting, or rotating blocks. Geologists measure strain in deformed rocks to reconstruct ancient stress fields. The stress-strain relationship tells us how much force a fault can store before it breaks.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14501,7 +14501,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Folds",
-  "teaser": "The bends in rock layers.",
+  "teaser": "Folds are the wavy bends of rock layers under compression — the crumples of the crust. They range from gentle ripples to mountain-scale arches thousands of metres across, forming when layered rock is squeezed slowly enough to bend rather than break. Folds reveal the direction of ancient forces: fold axes point perpendicular to compression. They also trap oil, gas, and water in their arches.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14520,7 +14520,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Synclines and Anticlines",
-  "teaser": "The troughs and arches.",
+  "teaser": "Anticlines and synclines are the paired arch and trough of a fold. An anticline arches upward, with the oldest rocks in its core; a syncline bows downward, with the youngest in its centre. Because of that age pattern, geologists identify them even in eroded terrain. Anticlines are famous oil traps — oil migrates up into their crests beneath a sealing layer.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14539,7 +14539,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Monoclines",
-  "teaser": "The single step folds.",
+  "teaser": "A monocline is a single-step fold: flat rock layers that bend abruptly into a vertical 'step' and flatten out again — like a wrinkle in a carpet. Monoclines form where deep faults move and the overlying layers bend to accommodate the offset. They are common over basement faults in plateaus, and they can be subtle or dramatic. The Waterpocket Fold in Utah, a 160-kilometre monocline, exposes tilted strata that draw hikers from around the world.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14558,7 +14558,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Joints",
-  "teaser": "The cracks without slip.",
+  "teaser": "Joints are fractures where rock splits but the two sides barely move — no offset, just a crack. They form when rock cools, dries, or is unloaded by erosion, and they come in regular patterns that control how rock weathers. Joints guide groundwater flow, shape cliffs and columnar basalt, and create the weaknesses quarrymen and climbers exploit. Nearly every outcrop is sliced by joints.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14577,7 +14577,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Faults in Detail",
-  "teaser": "The slipping fractures.",
+  "teaser": "Faults are fractures where rock blocks slide past each other, and they come in three main types: normal faults from stretching, where one block drops; reverse faults from squeezing, where one block climbs over; and strike-slip faults, where blocks slide horizontally. The San Andreas is strike-slip; the Basin and Range's edges are normal; the Himalayas' fronts are reverse. Faults record the direction of ancient forces, and active ones mark where earthquakes will happen.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14596,7 +14596,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Thrust Faults",
-  "teaser": "Low-angle reverse faults.",
+  "teaser": "Thrust faults are low-angle reverse faults where one slab of rock is pushed up and over another — often for many kilometres. They dominate mountain belts like the Alps, Himalayas, and Appalachians, stacking slices of crust like cards. Some thrusts carry ancient seafloor onto land, explaining marine fossils on mountaintops. Thrust sheets can be tens of kilometres thick and are among the largest structures on Earth. They form where plates collide and the crust shortens.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14615,7 +14615,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Extensional Systems",
-  "teaser": "Land stretched apart.",
+  "teaser": "Normal fault systems form where the crust stretches: the land pulls apart, and blocks drop down along faults, creating alternating valleys and ranges. The Basin and Range province, East African Rift, and Rhine Graben are classic examples. Each fault's steep surface lets one block slide down, and the system widens over time, thinning the crust. Extended long enough, the crust can split entirely — the first step to a new ocean.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14634,7 +14634,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Shear Zones",
-  "teaser": "The bands of sliding rock.",
+  "teaser": "Shear zones are broad belts where rock deforms by sliding past itself — the ductile version of a fault. Within them, minerals stretch, rotate, and recrystallize into lineations and foliations that record the direction of motion. Shear zones can be metres or hundreds of kilometres wide, and often host mineral deposits because fluids concentrate in them. Plate boundaries show brittle faults that pass into shear zones at depth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14653,7 +14653,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Foliation in Detail",
-  "teaser": "The aligned minerals of stress.",
+  "teaser": "Foliation is the layered, planar fabric of metamorphic rock — the result of minerals aligning under directed pressure. As rock is squeezed, platy minerals like mica rotate perpendicular to the stress, creating bands or sheets. Foliation ranges from barely visible in slate's cleavage to dramatic in gneiss's light-and-dark stripes. Its orientation records the direction of ancient mountain-building forces. Geologists measure foliation in the field to reconstruct how and when rocks were deformed.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14672,7 +14672,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Cleavage in Rock",
-  "teaser": "The preferred break directions.",
+  "teaser": "Cleavage in rock is the tendency to split along parallel planes — a weak direction created when platy minerals align under stress. Slate's perfect cleavage made it the classic roofing and writing stone; geologists use cleavage orientation to read deformation history. Cleavage is distinct from bedding: it cuts across original layers, recording a later squeezing event.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14691,7 +14691,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Outcrops",
-  "teaser": "The exposed rock windows.",
+  "teaser": "An outcrop is exposed bedrock — the geologist's window into the ground. Outcrops occur along cliffs, riverbeds, road cuts, and mountain slopes, wherever erosion or excavation stripped the soil cover. Each outcrop shows a slice of the local geology: rock type, structure, and fossils. Geologists map by connecting outcrop observations, inferring what lies hidden between. For a geologist, an outcrop is a page in the landscape's book — and every hike is a reading.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14710,7 +14710,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Mapping Structure",
-  "teaser": "Charting the underground geometry.",
+  "teaser": "Structural mapping records how rock layers are arranged: their orientation, folding, faulting, and sequence, drawn onto a map. Geologists measure strike and dip at outcrops, trace contacts between formations, and connect structures across the landscape. The result — a structural map with fold axes and fault lines — reveals the region's deformation history. Such maps are essential for oil exploration, engineering, and hazard assessment. A good structural map reads like a geological story.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14729,7 +14729,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Geologic Cross-Sections",
-  "teaser": "Cutting through the Earth.",
+  "teaser": "A geologic cross-section is a vertical slice through the Earth drawn from surface mapping and drilling — showing what the ground looks like underground. Geologists project surface structures downward, filling the hidden space between outcrops. Cross-sections reveal folding, faulting, and layer thicknesses, and are used to find oil traps, plan tunnels, and assess earthquake hazard. They are the geologist's X-ray: the answer to what lies beneath, drawn with evidence and a little inference.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14748,7 +14748,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Structural Data",
-  "teaser": "Plotting orientations.",
+  "teaser": "Stereonets are the structural geologist's calculator: circular plots that show the orientation of planes and lines in three dimensions as points and great circles. Fold axes, fault planes, and mineral lineations all plot onto the net, letting geologists see patterns and reconstruct stress directions. The technique, developed in the early 1900s, is still used daily in structural analysis and rock engineering. A stereonet turns a pocketful of compass readings into a picture of the deformation.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14767,7 +14767,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Basement Rocks",
-  "teaser": "The ancient foundation.",
+  "teaser": "Basement is the old, hard rock that underlies everything else — the ancient crust on which sedimentary layers accumulated. It is usually Precambrian granite, gneiss, and schist billions of years old, forming the stable cores of continents like the Canadian Shield. Basement controls the shape of everything above: basins sag over weak zones, and oil traps form where basement faults move.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14786,7 +14786,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Basement Structures",
-  "teaser": "Deformation from below.",
+  "teaser": "Basement-involved structures form when the deep, old basement rock moves and the overlying layers respond. In the Rocky Mountains' Laramide province, basement blocks were thrust upward along steep faults, arching the sedimentary cover into broad folds — the basement-cored uplifts. Basement faults can be reactivated by later stress, and they often control where basins form and where oil accumulates. The deep rock that seems inert is actually the region's hidden skeleton.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14805,7 +14805,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Structural Geology",
   "name": "Reading Structural History",
-  "teaser": "The sequence of deformation.",
+  "teaser": "Every region's structures tell a chronological story: which faults moved first, how stress directions changed, and how the crust was reshaped. Geologists date deformation by cross-cutting relations — a fault that cuts a fold is younger — and by dating the rocks themselves. The result is a structural history: extension, then compression, then uplift, like layers of paint on a wall.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14824,7 +14824,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Geophysics",
-  "teaser": "Physics meets the Earth.",
+  "teaser": "Geophysics is physics applied to the Earth: using seismic waves, gravity, magnetics, electricity, and heat to see what is invisible. Geophysicists map the interior, find buried structures, and monitor hazards — without ever seeing the ground directly. Seismic imaging gives us plate tectonics and oil fields; gravity and magnetics map hidden basins and ore bodies. Every image of Earth's deep interior, from the core to the crust, is a geophysical construction.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14843,7 +14843,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Gravity Surveys",
-  "teaser": "Measuring the Earth's pull.",
+  "teaser": "Gravity surveys measure tiny variations in Earth's pull caused by buried density differences: dense ore bodies and basement rock pull harder, while low-density salt and sediment pull less. A gravimeter, sensitive to billionths of gravity, maps these anomalies across the landscape. Gravity surveys find ore deposits, map basin thickness, and even track groundwater and glacier melt from space. The subtle variations in the pull under your feet are a map of the hidden Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14862,7 +14862,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Magnetic Surveys",
-  "teaser": "Reading the rock magnetism.",
+  "teaser": "Magnetic surveys measure variations in Earth's magnetic field caused by magnetized rocks: iron-rich basalt and ore bodies create strong anomalies. Aircraft and ships tow magnetometers to map the seafloor's zebra-striped magnetic record — the evidence that proved seafloor spreading. On land, magnetics find iron ore, kimberlite pipes (diamond sources), and buried faults. The magnetic map of the oceans is one of geology's most beautiful and important images.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14881,7 +14881,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Electrical Surveys",
-  "teaser": "Probing with electricity.",
+  "teaser": "Electrical resistivity surveys measure how easily the ground conducts electricity — and since wet, clay-rich, or saline rock conducts easily while dry rock resists, the measurements map water and geology. Electrodes send current into the ground and measure the voltage response at depth. Resistivity imaging finds aquifers, contaminant plumes, permafrost, and buried channels, and is a staple of hydrogeology and engineering. It is the closest thing to seeing groundwater from the surface.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14900,7 +14900,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Electromagnetic Surveys",
-  "teaser": "Inducing fields in the ground.",
+  "teaser": "Electromagnetic surveys induce electrical currents in the ground and measure how they decay, revealing conductivity variations with depth. The method maps saltwater intrusion, ore bodies, groundwater, and even magma bodies under volcanoes. Airborne EM systems can scan hundreds of square kilometres a day, mapping hidden geology beneath forest and desert. Because conductivity depends on water and clay content, EM surveys are among the best tools for finding water in dry lands.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14919,7 +14919,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Seismic Reflection",
-  "teaser": "Echo-locating the subsurface.",
+  "teaser": "Seismic reflection imaging sends sound waves into the ground and records the echoes from rock layers — the same principle as ultrasound. It produces images of underground structure that transformed oil exploration: companies can now 'see' reservoirs before drilling. Reflection profiles show folding, faulting, and sediment layers in exquisite detail, and they revealed the subduction zones and ocean basins that proved plate tectonics. It is the most powerful imaging tool in geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14938,7 +14938,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Seismic Refraction",
-  "teaser": "Bending waves through layers.",
+  "teaser": "Seismic refraction measures how sound waves bend when they cross layers of different velocity — faster rock refracts the wave path back to the surface. By timing the first arrivals at an array of sensors, geologists calculate layer depths and velocities. The method maps the depth to bedrock, the water table, and weathering profiles, and first revealed Earth's layered interior.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14957,7 +14957,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Ground Penetrating Radar",
-  "teaser": "Radar into the shallow ground.",
+  "teaser": "Ground-penetrating radar (GPR) bounces radio waves off buried features, imaging the ground like radar images the sky. It reveals buried pipes, graves, foundations, ice layers, and sediment structures within about 10 to 30 metres of the surface. GPR has found archaeological cities, mapped glacier thickness, and located utility lines before digging. It works best in dry, sandy ground and is one of the few tools that images the shallow subsurface quickly and non-destructively.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14976,7 +14976,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Magnetotellurics",
-  "teaser": "Listening to natural fields.",
+  "teaser": "Magnetotellurics measures natural electrical currents in the Earth induced by the solar wind and lightning, mapping conductivity at depths from metres to hundreds of kilometres. The method images magma bodies beneath volcanoes, geothermal systems, and even the boundaries of tectonic plates. Because it uses natural signals, it needs no heavy equipment and can probe deep. MT surveys have mapped the hot, partially molten rock feeding volcanoes like Yellowstone and Mount St. Helens.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -14995,7 +14995,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Well Logging",
-  "teaser": "Probing inside boreholes.",
+  "teaser": "Well logging lowers sensors down a borehole to measure the rocks around it: electrical resistivity, natural radioactivity, and sound velocity. Each log reads a different property, and together they identify rock types, fluids, and porosity at depth. The oil industry runs logs in nearly every well — they are the lab results of drilling. Logs also monitor groundwater and geothermal wells.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15014,7 +15014,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Geodesy",
-  "teaser": "Measuring the Earth's shape.",
+  "teaser": "Geodesy is the science of measuring the Earth's shape, gravity field, and rotation — and how they change. It tracks the motion of tectonic plates at millimetre precision using GPS, laser ranging, and satellite radar. Geodesists measure post-glacial rebound, sea-level rise, and the slow deformation that builds toward earthquakes. Their data anchor maps, navigation, and climate monitoring. Every phone's GPS is a product of geodesy; every earthquake's deformation map is too.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15033,7 +15033,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "GPS in Geology",
-  "teaser": "Satellites tracking the Earth.",
+  "teaser": "GPS in geology is a revolution: receivers pinned to the ground record millimetre-level motion, revealing plate movement, fault creep, and the slow strain building before earthquakes. Networks of thousands of stations map how the crust deforms across whole regions in real time. GPS data show continents moving a few centimetres a year, volcanoes inflating before eruptions, and the ground rising after ice sheets melt. It turned geologists from static mappers into watchers of live motion.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15052,7 +15052,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "InSAR",
-  "teaser": "Radar satellites watching ground movement.",
+  "teaser": "InSAR — interferometric synthetic aperture radar — compares satellite radar images taken at different times to measure ground movement to millimetres across vast areas. It maps earthquake deformation, volcano inflation, landslides, subsidence, and glacier flow, all from orbit. InSAR revealed the silent sinking of cities like Jakarta and Mexico City, and it monitors slopes before they fail. It is one of the most powerful tools ever given to hazard geologists.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15071,7 +15071,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Lidar in Geology",
-  "teaser": "Laser maps of the land.",
+  "teaser": "Lidar fires laser pulses from aircraft or satellites and times their return to build a precise 3D map of the surface — even through forest, by measuring multiple returns. It reveals fault scarps, landslides, and ancient river channels hidden under trees, and it has found lost cities buried in jungle. Lidar data map earthquake ruptures, track coastal erosion, and measure glacier change. It is the geologist's way to see the ground clearly, without the trees.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15090,7 +15090,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Gravity Anomalies",
-  "teaser": "The bumps in Earth's gravity.",
+  "teaser": "A gravity anomaly is the difference between the gravity actually measured and what a smooth, uniform Earth would produce. Positive anomalies reveal dense rock like ore bodies; negative ones reveal low-density basins and rising mantle. Corrections let geologists isolate underground structure from elevation effects. Gravity maps of the oceans revealed the ridges and trenches that drove plate tectonics.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15109,7 +15109,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Heat Flow Surveys",
-  "teaser": "Mapping Earth's warmth.",
+  "teaser": "Heat flow surveys measure the heat escaping from Earth's interior — the energy budget of the planet. Heat flow is high at mid-ocean ridges and volcanoes, low on old continental shields. The measurements reveal where magma sits near the surface (good for geothermal energy), how deep basins have cooked their oil, and how thick the lithosphere is. Global heat-flow maps are the thermal fingerprint of plate tectonics, and they guide geothermal exploration worldwide.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15128,7 +15128,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Paleomagnetic Studies",
-  "teaser": "The ancient magnetic records.",
+  "teaser": "Paleomagnetism reads the record of Earth's magnetic field frozen in rocks: when minerals like magnetite cool or settle, they lock in the field's direction at that moment. The result is a history book of plate motion — continents carry their magnetic 'signatures' away from where they formed. Paleomagnetism proved continental drift, established the timescale of seafloor spreading, and dates rocks by magnetic reversals. It is the geologist's compass pointing backward in time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15147,7 +15147,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Seismic Velocities",
-  "teaser": "How fast waves travel.",
+  "teaser": "Seismic velocity is how fast sound waves travel through rock — a property that reveals composition, porosity, and fluid content. Dense, solid rock transmits fast; porous, fluid-filled or fractured rock transmits slow. Geologists map velocity to identify rock types, find oil and gas reservoirs, and image faults. The jumps in velocity at layer boundaries create the reflections and refractions that image the Earth's interior. Velocity is the fundamental currency of seismic geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15166,7 +15166,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "Geophysical Modeling",
-  "teaser": "Building the Earth in code.",
+  "teaser": "Geophysical modeling turns measurements into pictures: computer models calculate what gravity, magnetics, or seismic data should look like for a given underground structure, then adjust the structure until the model matches the data. Forward and inverse modelling let geologists test interpretations — is that anomaly an ore body or a basin? Is that layer a reservoir or shale? The best models fit all the data, not just one survey. Modelling is where geophysics becomes geology.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -15185,7 +15185,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geophysics",
   "name": "The History of Geophysics",
-  "teaser": "Probing deeper over time.",
+  "teaser": "Geophysics was born from war and curiosity: the 1800s pendulum experiments measured Earth's density, early 1900s seismographs found the core, and magnetic surveys during the World Wars mapped the seafloor's stripes. The post-war era's ocean surveys produced the evidence for plate tectonics — the revolution that unified geology. Today's geophysics — satellite gravity, GPS networks, and deep seismic imaging — carries that lineage. Every discovery about Earth's interior stands on geophysics' shoulders.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
