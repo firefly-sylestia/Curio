@@ -107,6 +107,14 @@ jobs:
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          if ([string]::IsNullOrWhiteSpace($version)) { $version = "1.0.0" }
+          # jpackage names the MSI from its numeric package version (the
+          # Gradle script strips prerelease/build suffixes, v1.0.2-beta ->
+          # 1.0.2), so derive the same numeric core for the body's MSI row.
+          # The portable zip keeps the FULL tag version to distinguish
+          # prerelease artifacts from later stable ones.
+          $msiVersion = $version.Split('-')[0].Split('+')[0]
+          if ([string]::IsNullOrWhiteSpace($msiVersion)) { $msiVersion = "1.0.0" }
           # String array joined with newlines (a YAML block scalar can't
           # hold an unindented PowerShell here-string; `` `` is an escaped
           # backtick in double-quoted strings, so the markdown code spans
@@ -119,7 +127,7 @@ jobs:
             "| File | Best for |",
             "|---|---|",
             "| ``Curio-Windows-$version-portable.zip`` | Portable — unzip anywhere and run ``Curio.exe``, no install |",
-            "| ``Curio-$version.msi`` | Installer — adds a Start-menu shortcut and an uninstaller |",
+            "| ``Curio-$msiVersion.msi`` | Installer — adds a Start-menu shortcut and an uninstaller |",
             "",
             "**Windows 10/11, 64-bit.** The window remembers its size, position, theme and last deck between runs."
           ) -join [Environment]::NewLine

@@ -1,6 +1,46 @@
 # Prompt.md — Request log
 
-## Current request — CI fix: desktop build + Android app compile errors (b669f0c…5d01a18) + desktop JAR artifact (d648350)
+## Current request — CI fix: jpackage "Illegal version" for the v1.0.2-beta tag
+
+### What was asked
+User pasted two identical CI failures (Windows desktop-release + Linux
+release/verify) — both fail configuring `:desktop`:
+
+```
+* Illegal version for 'Dmg': '1.0.2-beta' is not a valid version.
+  Correct format: 'MAJOR[.MINOR][.PATCH]'
+* Illegal version for 'Msi': '1.0.2-beta' is not a valid version.
+  Correct format: 'MAJOR.MINOR.BUILD'
+```
+
+### Root cause
+`settings.gradle.kts` includes `:desktop`, so EVERY Gradle invocation
+configures it (Android release, per-push desktop job, desktop-release).
+`desktop/build.gradle.kts` feeds the tag minus `v` straight into
+`nativeDistributions.packageVersion`; on the `v1.0.2-beta` tag that becomes
+`1.0.2-beta`, which jpackage rejects (numeric-only). The Android
+`versionName` is a plain string and tolerates the suffix — the desktop
+installer metadata does not.
+
+### Fix
+- **`desktop/build.gradle.kts`** — sanitize `envDesktopVersion`: strip
+  prerelease/build suffixes (`substringBefore('-')`, `substringBefore('+')`)
+  so `v1.0.2-beta` → packageVersion `1.0.2` (v27u comment).
+- **`.github/workflows/desktop-release.yml`** — the release body named the
+  MSI from the full tag (`Curio-1.0.2-beta.msi`) but jpackage names it from
+  the numeric package version (`Curio-1.0.2.msi`); the body now derives the
+  same numeric `msiVersion` while the portable zip keeps the full tag (so
+  prerelease artifacts stay distinguishable from later stable ones).
+- **`.github/AGENTS.md`** — desktop-release contract documents the
+  numeric-only packageVersion rule and the naming split (zip = full tag,
+  MSI = numeric core).
+
+### Validation
+No Gradle locally (env rule) — CI on push/tag is the gate. PowerShell and
+Kotlin logic hand-verified (`1.0.2-beta`.Split('-')[0] = 1.0.2; stable tags
+pass through unchanged).
+
+## Prior — CI fix: desktop build + Android app compile errors (b669f0c…5d01a18) + desktop JAR artifact (d648350)
 
 ### Round 1 — plugin collision (b669f0c)
 

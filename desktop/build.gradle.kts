@@ -39,9 +39,19 @@ dependencies {
 // minus the leading "v", e.g. v1.2.3 -> 1.2.3) so jpackage versions the
 // Windows installer from the tag, mirroring the Android app's versionName.
 // Local builds (no env var) keep the default.
+//
+// v27u — jpackage's packageVersion must be strictly numeric
+// (MAJOR[.MINOR][.PATCH] for DMG, MAJOR.MINOR.BUILD for MSI), so prerelease
+// tags like v1.0.2-beta fail configuration with "Illegal version". Strip
+// prerelease/build suffixes here — the installer metadata gets the numeric
+// core (1.0.2) while the release artifacts' names keep the full tag. The
+// Android versionName, by contrast, is a plain string and keeps the suffix.
 val envDesktopVersion: String? = System.getenv("RELEASE_VERSION")
     ?.trim()
     ?.removePrefix("v")
+    ?.takeIf { it.isNotEmpty() }
+    ?.substringBefore('-')
+    ?.substringBefore('+')
     ?.takeIf { it.isNotEmpty() }
 
 compose.desktop {

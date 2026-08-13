@@ -63,7 +63,13 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
   and uploads both it and the `.msi` to the release.
 - **Tag version is the package version:** exports `RELEASE_VERSION` (tag
   minus `v`) so `desktop/build.gradle.kts` versions the installer from the
-  tag, mirroring the Android convention.
+  tag, mirroring the Android convention. jpackage requires a strictly
+  numeric version (`MAJOR[.MINOR][.PATCH]`) for DMG/MSI metadata, so the
+  desktop module strips prerelease/build suffixes (`v1.0.2-beta` → `1.0.2`)
+  from `packageVersion` — the Android `versionName` is a plain string and
+  keeps the suffix. The portable zip name keeps the full tag (distinguishes
+  prerelease from later stable artifacts); the MSI is named from the numeric
+  package version, and the release body mirrors that (`msiVersion`).
 - Publishes through GitHub Releases with the same `alpha`/`beta`/`rc`
   prerelease detection as the Android workflow, and `update_release_body:
   false` so it never clobbers the Android workflow's release body when both
