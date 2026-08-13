@@ -19,7 +19,9 @@ pluginManagement {
             // compatibility cannot be checked". Pin every Kotlin plugin to the
             // catalog Kotlin version so the requests can be verified.
             if (requested.id.id.startsWith("org.jetbrains.kotlin.")) {
-                useVersion(libs.versions.kotlin.get())
+                // Keep in sync with the `kotlin` version in gradle/libs.versions.toml.
+                // (The catalog accessor isn't available inside pluginManagement.)
+                useVersion("2.3.21")
             }
         }
     }
