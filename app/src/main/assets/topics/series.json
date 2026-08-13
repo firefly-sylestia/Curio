@@ -1,1332 +1,1332 @@
 [
-  {
-    "id": "series-seinfeld",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Seinfeld (1989)",
-    "teaser": "The 'show about nothing' that changed sitcoms — every episode was built on real-life observations, and the 'no hugging, no learning' rule made it the darkest comedy on TV.",
-    "imageUrl": "",
-    "byline": "Larry David & Jerry Seinfeld",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Seinfeld (1989) end-to-end",
-      "durationMinutes": 198,
-      "instruction": "Watch the 'Chinese Restaurant' episode — it's the show's thesis in 22 minutes. The genius is that nothing happens and that's the point."
-    },
-    "tags": [
-      "Comedy",
-      "Sitcom",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+ {
+  "id": "series-seinfeld",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Seinfeld (1989)",
+  "teaser": "The 'show about nothing' that changed sitcoms — every episode was built on real-life observations, and the 'no hugging, no learning' rule made it the darkest comedy on TV. In the series corner of screen, Seinfeld (1989) stands out — it hinges on Comedy. This is the kind of idea screen fans come back to again and again, and for good reason. Follow the thread into Sitcom and the same pattern keeps repeating. Try it yourself: Seinfeld (1989) end-to-end, and watch what you notice. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Larry David & Jerry Seinfeld",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Seinfeld (1989) end-to-end",
+   "durationMinutes": 198,
+   "instruction": "Watch the 'Chinese Restaurant' episode — it's the show's thesis in 22 minutes. The genius is that nothing happens and that's the point."
   },
-  {
-    "id": "series-twin-peaks",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Twin Peaks (1990)",
-    "teaser": "The murder mystery that made TV surreal — Lynch refused to reveal the killer when the network demanded, and the show's 'Who killed Laura Palmer?' became the first TV mystery to break the fourth wall.",
-    "imageUrl": "",
-    "byline": "David Lynch & Mark Frost",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Twin Peaks (1990) end-to-end",
-      "durationMinutes": 660,
-      "instruction": "Watch the pilot and notice the dream logic — the show's clues are symbols, not facts. The genius is that the mystery is the atmosphere."
-    },
-    "tags": [
-      "Mystery",
-      "Surreal",
-      "Drama",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Sitcom",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-twin-peaks",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Twin Peaks (1990)",
+  "teaser": "The murder mystery that made TV surreal — Lynch refused to reveal the killer when the network demanded, and the show's 'Who killed Laura Palmer?' became the first TV mystery to break the fourth wall. If series is a map, Twin Peaks (1990) is one of the landmarks — look for Mystery. It matters more than it looks: Twin Peaks (1990) sits under a surprising amount of screen. Follow the thread into Surreal and the same pattern keeps repeating. The natural next move is to twin Peaks (1990) end-to-end. Give Twin Peaks (1990) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "David Lynch & Mark Frost",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Twin Peaks (1990) end-to-end",
+   "durationMinutes": 660,
+   "instruction": "Watch the pilot and notice the dream logic — the show's clues are symbols, not facts. The genius is that the mystery is the atmosphere."
   },
-  {
-    "id": "series-the-x-files",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The X-Files (1993)",
-    "teaser": "The 'trust no one' show that made conspiracy TV mainstream — the 'monster of the week' episodes and the mythology episodes run on different rules, and the 'I want to believe' poster is the thesis.",
-    "imageUrl": "",
-    "byline": "Chris Carter",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The X-Files (1993) end-to-end",
-      "durationMinutes": 242,
-      "instruction": "Watch a 'monster of the week' episode first — the show's two engines are different. The genius is that the myth arc is the conspiracy you never solve."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Mystery",
-      "Horror",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Mystery",
+   "Surreal",
+   "Drama",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-x-files",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The X-Files (1993)",
+  "teaser": "The 'trust no one' show that made conspiracy TV mainstream — the 'monster of the week' episodes and the mythology episodes run on different rules, and the 'I want to believe' poster is the thesis. The X-Files (1993) is part of series, with Sci-Fi at its core. Understanding The X-Files (1993) changes how the rest of series reads, and it sharpens every later spin in this lane. It shows up in Mystery: once you know what to look for, you notice it constantly. The natural next move is to the X-Files (1993) end-to-end. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Chris Carter",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The X-Files (1993) end-to-end",
+   "durationMinutes": 242,
+   "instruction": "Watch a 'monster of the week' episode first — the show's two engines are different. The genius is that the myth arc is the conspiracy you never solve."
   },
-  {
-    "id": "series-lost",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Lost (2004)",
-    "teaser": "The island mystery that made serialized TV a genre — the writers famously didn't know the ending for seasons, and the 'smoke monster' was a production accident that became the plot.",
-    "imageUrl": "",
-    "byline": "J.J. Abrams & Damon Lindelof",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Lost (2004) end-to-end",
-      "durationMinutes": 132,
-      "instruction": "Watch the pilot and notice the mystery density — every shot seeds a question. The genius is that the characters are the plot; the island is the frame."
-    },
-    "tags": [
-      "Mystery",
-      "Sci-Fi",
-      "Drama",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Mystery",
+   "Horror",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-lost",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Lost (2004)",
+  "teaser": "The island mystery that made serialized TV a genre — the writers famously didn't know the ending for seasons, and the 'smoke monster' was a production accident that became the plot. Lost (2004) is part of series, with Mystery at its core. It earns its place because it keeps turning up — around Mystery and in the questions people ask about screen. Follow the thread into Sci-Fi and the same pattern keeps repeating. The natural next move is to lost (2004) end-to-end. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "J.J. Abrams & Damon Lindelof",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Lost (2004) end-to-end",
+   "durationMinutes": 132,
+   "instruction": "Watch the pilot and notice the mystery density — every shot seeds a question. The genius is that the characters are the plot; the island is the frame."
   },
-  {
-    "id": "series-24",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "24 (2001)",
-    "teaser": "The real-time gimmick (each episode is one hour of a day) made it a phenomenon — the split-screen format was born from a technical accident, and the 'ticking clock' became the genre standard.",
-    "imageUrl": "",
-    "byline": "Joel Surnow",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "24 (2001) end-to-end",
-      "durationMinutes": 198,
-      "instruction": "Watch the first episode and notice the split-screen — the format is the show. The genius is that the real-time structure IS the tension."
-    },
-    "tags": [
-      "Thriller",
-      "Action",
-      "Real Time",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Mystery",
+   "Sci-Fi",
+   "Drama",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-24",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "24 (2001)",
+  "teaser": "The real-time gimmick (each episode is one hour of a day) made it a phenomenon — the split-screen format was born from a technical accident, and the 'ticking clock' became the genre standard. You meet 24 (2001) early in series — keep Thriller in mind from the start. Understanding 24 (2001) changes how the rest of series reads, and it sharpens every later spin in this lane. It shows up in Action: once you know what to look for, you notice it constantly. A good way in: 24 (2001) end-to-end. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Joel Surnow",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "24 (2001) end-to-end",
+   "durationMinutes": 198,
+   "instruction": "Watch the first episode and notice the split-screen — the format is the show. The genius is that the real-time structure IS the tension."
   },
-  {
-    "id": "series-grey-s-anatomy",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Grey's Anatomy (2005)",
-    "teaser": "The medical drama that made Shonda Rhimes a brand — the 'McDreamy' nickname was a writing-room joke that became canon, and the show's real subject is the cost of caring.",
-    "imageUrl": "",
-    "byline": "Shonda Rhimes",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Grey's Anatomy (2005) end-to-end",
-      "durationMinutes": 462,
-      "instruction": "Watch the first season and notice the voiceover — Meredith's narration is the show's thesis. The genius is that the medicine is the metaphor."
-    },
-    "tags": [
-      "Medical",
-      "Drama",
-      "Romance",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Thriller",
+   "Action",
+   "Real Time",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-grey-s-anatomy",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Grey's Anatomy (2005)",
+  "teaser": "The medical drama that made Shonda Rhimes a brand — the 'McDreamy' nickname was a writing-room joke that became canon, and the show's real subject is the cost of caring. Grey's Anatomy (2005) belongs to series; everything about it comes back to Medical. Once you notice Grey's Anatomy (2005), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. Follow the thread into Drama and the same pattern keeps repeating. Try it yourself: Grey's Anatomy (2005) end-to-end, and watch what you notice. That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Shonda Rhimes",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Grey's Anatomy (2005) end-to-end",
+   "durationMinutes": 462,
+   "instruction": "Watch the first season and notice the voiceover — Meredith's narration is the show's thesis. The genius is that the medicine is the metaphor."
   },
-  {
-    "id": "series-band-of-brothers",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Band of Brothers (2001)",
-    "teaser": "The $125M miniseries about Easy Company — real veterans' interviews open each episode, and the show's genius is that the combat is honest about fear, not glory.",
-    "imageUrl": "",
-    "byline": "Steven Spielberg & Tom Hanks",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Band of Brothers (2001) end-to-end",
-      "durationMinutes": 220,
-      "instruction": "Watch the first episode and notice the interviews — the real men frame the fiction. The genius is that the horror is the point, not the heroism."
-    },
-    "tags": [
-      "War",
-      "Drama",
-      "Historical",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Medical",
+   "Drama",
+   "Romance",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-band-of-brothers",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Band of Brothers (2001)",
+  "teaser": "The $125M miniseries about Easy Company — real veterans' interviews open each episode, and the show's genius is that the combat is honest about fear, not glory. If series is a map, Band of Brothers (2001) is one of the landmarks — look for War. This is the kind of idea screen fans come back to again and again, and for good reason. It shows up in Drama: once you know what to look for, you notice it constantly. A good way in: Band of Brothers (2001) end-to-end. Give Band of Brothers (2001) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Steven Spielberg & Tom Hanks",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Band of Brothers (2001) end-to-end",
+   "durationMinutes": 220,
+   "instruction": "Watch the first episode and notice the interviews — the real men frame the fiction. The genius is that the horror is the point, not the heroism."
   },
-  {
-    "id": "series-fargo",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Fargo (2014)",
-    "teaser": "The anthology series inspired by the Coen film — each season is a new crime story with the same 'Minnesota nice' tone, and the show's genius is that the kindness is the violence's frame.",
-    "imageUrl": "",
-    "byline": "Noah Hawley",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Fargo (2014) end-to-end",
-      "durationMinutes": 110,
-      "instruction": "Watch the first season's pilot and notice the tone — the violence is absurd, the accents are real. The genius is that the 'true story' claim is a lie and the point."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "Black Comedy",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "War",
+   "Drama",
+   "Historical",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-fargo",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Fargo (2014)",
+  "teaser": "The anthology series inspired by the Coen film — each season is a new crime story with the same 'Minnesota nice' tone, and the show's genius is that the kindness is the violence's frame. You meet Fargo (2014) early in series — keep Crime in mind from the start. It matters more than it looks: Fargo (2014) sits under a surprising amount of screen. Follow the thread into Drama and the same pattern keeps repeating. Try it yourself: Fargo (2014) end-to-end, and watch what you notice. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Noah Hawley",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Fargo (2014) end-to-end",
+   "durationMinutes": 110,
+   "instruction": "Watch the first season's pilot and notice the tone — the violence is absurd, the accents are real. The genius is that the 'true story' claim is a lie and the point."
   },
-  {
-    "id": "series-parks-and-recreation",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Parks and Recreation (2009)",
-    "teaser": "The mockumentary about local government — the show famously got better after its first season, and Leslie Knope's optimism became the template for wholesome comedy.",
-    "imageUrl": "",
-    "byline": "Greg Daniels & Michael Schur",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Parks and Recreation (2009) end-to-end",
-      "durationMinutes": 154,
-      "instruction": "Watch the first season's finale and then the second season's premiere — the tonal shift is the story. The genius is that the bureaucracy is the comedy."
-    },
-    "tags": [
-      "Comedy",
-      "Mockumentary",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "Black Comedy",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-parks-and-recreation",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Parks and Recreation (2009)",
+  "teaser": "The mockumentary about local government — the show famously got better after its first season, and Leslie Knope's optimism became the template for wholesome comedy. You meet Parks and Recreation (2009) early in series — keep Comedy in mind from the start. Once you notice Parks and Recreation (2009), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. Follow the thread into Mockumentary and the same pattern keeps repeating. The natural next move is to parks and Recreation (2009) end-to-end. Give Parks and Recreation (2009) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Greg Daniels & Michael Schur",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Parks and Recreation (2009) end-to-end",
+   "durationMinutes": 154,
+   "instruction": "Watch the first season's finale and then the second season's premiere — the tonal shift is the story. The genius is that the bureaucracy is the comedy."
   },
-  {
-    "id": "series-the-simpsons",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Simpsons (1989)",
-    "teaser": "The longest-running scripted show in TV history — the first 12 seasons are considered the golden age, and the show's genius is that the satire is the structure.",
-    "imageUrl": "",
-    "byline": "Matt Groening",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Simpsons (1989) end-to-end",
-      "durationMinutes": 748,
-      "instruction": "Watch the first 'Treehouse of Horror' — the anthology format is the show's lab. The genius is that the family is the frame for everything."
-    },
-    "tags": [
-      "Comedy",
-      "Animation",
-      "Satire",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Mockumentary",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-simpsons",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Simpsons (1989)",
+  "teaser": "The longest-running scripted show in TV history — the first 12 seasons are considered the golden age, and the show's genius is that the satire is the structure. The Simpsons (1989) is part of series, with Comedy at its core. Once you notice The Simpsons (1989), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Animation: once you know what to look for, you notice it constantly. A good way in: The Simpsons (1989) end-to-end. Come back to The Simpsons (1989) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "Matt Groening",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Simpsons (1989) end-to-end",
+   "durationMinutes": 748,
+   "instruction": "Watch the first 'Treehouse of Horror' — the anthology format is the show's lab. The genius is that the family is the frame for everything."
   },
-  {
-    "id": "series-south-park",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "South Park (1997)",
-    "teaser": "The show's production is famous for its one-week turnaround — episodes air days after current events, and the 'respect my authoritah' catchphrase is the show's thesis.",
-    "imageUrl": "",
-    "byline": "Trey Parker & Matt Stone",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "South Park (1997) end-to-end",
-      "durationMinutes": 572,
-      "instruction": "Watch the first episode and then the 'Cartman Gets an Anal Probe' anniversary special — the animation evolution is the story. The genius is that the crudeness is the point."
-    },
-    "tags": [
-      "Comedy",
-      "Animation",
-      "Satire",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Animation",
+   "Satire",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-south-park",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "South Park (1997)",
+  "teaser": "The show's production is famous for its one-week turnaround — episodes air days after current events, and the 'respect my authoritah' catchphrase is the show's thesis. South Park (1997) belongs to series; everything about it comes back to Comedy. This is the kind of idea screen fans come back to again and again, and for good reason. Follow the thread into Animation and the same pattern keeps repeating. Try it yourself: South Park (1997) end-to-end, and watch what you notice. Come back to South Park (1997) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "Trey Parker & Matt Stone",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "South Park (1997) end-to-end",
+   "durationMinutes": 572,
+   "instruction": "Watch the first episode and then the 'Cartman Gets an Anal Probe' anniversary special — the animation evolution is the story. The genius is that the crudeness is the point."
   },
-  {
-    "id": "series-the-twilight-zone",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Twilight Zone (1959)",
-    "teaser": "The anthology that invented the twist ending — Serling wrote most episodes himself as social commentary disguised as sci-fi, and the 'you're traveling through another dimension' intro is the most parodied in TV.",
-    "imageUrl": "",
-    "byline": "Rod Serling",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Twilight Zone (1959) end-to-end",
-      "durationMinutes": 110,
-      "instruction": "Watch 'The Monsters Are Due on Maple Street' — it's the show's thesis in 25 minutes. The genius is that the sci-fi is the mask for the social commentary."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Horror",
-      "Anthology",
-      "1950s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Animation",
+   "Satire",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-twilight-zone",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Twilight Zone (1959)",
+  "teaser": "The anthology that invented the twist ending — Serling wrote most episodes himself as social commentary disguised as sci-fi, and the 'you're traveling through another dimension' intro is the most parodied in TV. The Twilight Zone (1959) is part of series, with Sci-Fi at its core. It matters more than it looks: The Twilight Zone (1959) sits under a surprising amount of screen. The practical side is easy to find — follow Horror and the examples pile up. Try it yourself: The Twilight Zone (1959) end-to-end, and watch what you notice. Come back to The Twilight Zone (1959) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "Rod Serling",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Twilight Zone (1959) end-to-end",
+   "durationMinutes": 110,
+   "instruction": "Watch 'The Monsters Are Due on Maple Street' — it's the show's thesis in 25 minutes. The genius is that the sci-fi is the mask for the social commentary."
   },
-  {
-    "id": "series-black-mirror",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Black Mirror (2011)",
-    "teaser": "The anthology about technology's dark side — the name comes from the black reflection of a screen, and the show's genius is that the tech is always near-future plausible.",
-    "imageUrl": "",
-    "byline": "Charlie Brooker",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Black Mirror (2011) end-to-end",
-      "durationMinutes": 132,
-      "instruction": "Watch 'San Junipero' — the show's rare happy ending is the reveal. The genius is that the anthology format lets every episode be a different genre."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Dystopian",
-      "Anthology",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Horror",
+   "Anthology",
+   "1950s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-black-mirror",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Black Mirror (2011)",
+  "teaser": "The anthology about technology's dark side — the name comes from the black reflection of a screen, and the show's genius is that the tech is always near-future plausible. If series is a map, Black Mirror (2011) is one of the landmarks — look for Sci-Fi. It matters more than it looks: Black Mirror (2011) sits under a surprising amount of screen. It shows up in Dystopian: once you know what to look for, you notice it constantly. The natural next move is to black Mirror (2011) end-to-end. That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Charlie Brooker",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Black Mirror (2011) end-to-end",
+   "durationMinutes": 132,
+   "instruction": "Watch 'San Junipero' — the show's rare happy ending is the reveal. The genius is that the anthology format lets every episode be a different genre."
   },
-  {
-    "id": "series-the-good-place",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Good Place (2016)",
-    "teaser": "The sitcom about the afterlife that teaches actual moral philosophy — the show's first-season twist is considered one of TV's best, and the 'point system' is real ethical theory.",
-    "imageUrl": "",
-    "byline": "Michael Schur",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Good Place (2016) end-to-end",
-      "durationMinutes": 88,
-      "instruction": "Watch the first season knowing there's a twist — the setup is the reveal. The genius is that the philosophy is the plot."
-    },
-    "tags": [
-      "Comedy",
-      "Fantasy",
-      "Philosophy",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Dystopian",
+   "Anthology",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-good-place",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Good Place (2016)",
+  "teaser": "The sitcom about the afterlife that teaches actual moral philosophy — the show's first-season twist is considered one of TV's best, and the 'point system' is real ethical theory. The Good Place (2016) belongs to series; everything about it comes back to Comedy. Understanding The Good Place (2016) changes how the rest of series reads, and it sharpens every later spin in this lane. Follow the thread into Fantasy and the same pattern keeps repeating. Try it yourself: The Good Place (2016) end-to-end, and watch what you notice. Give The Good Place (2016) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Michael Schur",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Good Place (2016) end-to-end",
+   "durationMinutes": 88,
+   "instruction": "Watch the first season knowing there's a twist — the setup is the reveal. The genius is that the philosophy is the plot."
   },
-  {
-    "id": "series-dexter",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Dexter (2006)",
-    "teaser": "The serial-killer drama about a killer who kills killers — the show's famous 'code' (from his father) is the premise, and the show's genius is that the monster is the protagonist.",
-    "imageUrl": "",
-    "byline": "James Manos Jr.",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Dexter (2006) end-to-end",
-      "durationMinutes": 176,
-      "instruction": "Watch the first episode and notice the code — the rules are the character. The genius is that the 'dark passenger' is the show's narrator."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "Psychological",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Fantasy",
+   "Philosophy",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-dexter",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Dexter (2006)",
+  "teaser": "The serial-killer drama about a killer who kills killers — the show's famous 'code' (from his father) is the premise, and the show's genius is that the monster is the protagonist. If series is a map, Dexter (2006) is one of the landmarks — look for Crime. This is the kind of idea screen fans come back to again and again, and for good reason. The practical side is easy to find — follow Drama and the examples pile up. Try it yourself: Dexter (2006) end-to-end, and watch what you notice. That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "James Manos Jr.",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Dexter (2006) end-to-end",
+   "durationMinutes": 176,
+   "instruction": "Watch the first episode and notice the code — the rules are the character. The genius is that the 'dark passenger' is the show's narrator."
   },
-  {
-    "id": "series-the-americans",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Americans (2013)",
-    "teaser": "Created by a former CIA officer, the show's KGB couple is drawn from real Cold War history — the 'illegals' program the show depicts was real and declassified during its run.",
-    "imageUrl": "",
-    "byline": "Joe Weisberg",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Americans (2013) end-to-end",
-      "durationMinutes": 132,
-      "instruction": "Watch the first episode and notice the neighbors — the family is the cover. The genius is that the marriage and the mission are the same spy game."
-    },
-    "tags": [
-      "Spy",
-      "Drama",
-      "Historical",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "Psychological",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-americans",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Americans (2013)",
+  "teaser": "Created by a former CIA officer, the show's KGB couple is drawn from real Cold War history — the 'illegals' program the show depicts was real and declassified during its run. In the series corner of screen, The Americans (2013) stands out — it hinges on Spy. This is the kind of idea screen fans come back to again and again, and for good reason. It shows up in Drama: once you know what to look for, you notice it constantly. A good way in: The Americans (2013) end-to-end. That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Joe Weisberg",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Americans (2013) end-to-end",
+   "durationMinutes": 132,
+   "instruction": "Watch the first episode and notice the neighbors — the family is the cover. The genius is that the marriage and the mission are the same spy game."
   },
-  {
-    "id": "series-breaking-bad",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Breaking Bad (2008)",
-    "teaser": "The entire show was planned as a 'Mr. Chips to Scarface' arc and the pilot's RV was so hot inside that the cast almost fainted — the green goo in the finale was made from actual candy.",
-    "imageUrl": "",
-    "byline": "Vince Gilligan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Breaking Bad (2008)",
-      "durationMinutes": 55,
-      "instruction": "Watch episode 1 of season 1 and notice the foreshadowing in the opening flash-forward. Then track Walter's moral line — the show is about the moment he crosses it, not the meth."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Spy",
+   "Drama",
+   "Historical",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-breaking-bad",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Breaking Bad (2008)",
+  "teaser": "The entire show was planned as a 'Mr. Chips to Scarface' arc and the pilot's RV was so hot inside that the cast almost fainted — the green goo in the finale was made from actual candy. Breaking Bad (2008) is part of series, with Crime at its core. It matters more than it looks: Breaking Bad (2008) sits under a surprising amount of screen. The practical side is easy to find — follow Drama and the examples pile up. A good way in: Breaking Bad (2008). Once Breaking Bad (2008) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Vince Gilligan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Breaking Bad (2008)",
+   "durationMinutes": 55,
+   "instruction": "Watch episode 1 of season 1 and notice the foreshadowing in the opening flash-forward. Then track Walter's moral line — the show is about the moment he crosses it, not the meth."
   },
-  {
-    "id": "series-the-wire",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Wire (2002)",
-    "teaser": "A former crime reporter staffed the writers' room with real cops and journalists — each season examines a different institution, and the show's title means the wiretap, not a cable.",
-    "imageUrl": "",
-    "byline": "David Simon",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Wire (2002)",
-      "durationMinutes": 60,
-      "instruction": "Watch the first season as an institution study, not a cop show — the drug trade is the economy, and the police are another gang. The show rewards patience; the payoffs are seasons away."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-wire",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Wire (2002)",
+  "teaser": "A former crime reporter staffed the writers' room with real cops and journalists — each season examines a different institution, and the show's title means the wiretap, not a cable. You meet The Wire (2002) early in series — keep Crime in mind from the start. Once you notice The Wire (2002), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Drama: once you know what to look for, you notice it constantly. Try it yourself: The Wire (2002), and watch what you notice. Come back to The Wire (2002) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "David Simon",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Wire (2002)",
+   "durationMinutes": 60,
+   "instruction": "Watch the first season as an institution study, not a cop show — the drug trade is the economy, and the police are another gang. The show rewards patience; the payoffs are seasons away."
   },
-  {
-    "id": "series-game-of-thrones",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Game of Thrones (2011)",
-    "teaser": "The pilot was so bad it was almost abandoned — the show's later seasons ran out of source material and the final season's rushed ending remains the most argued-about in TV history.",
-    "imageUrl": "",
-    "byline": "David Benioff",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Game of Thrones (2011)",
-      "durationMinutes": 55,
-      "instruction": "Watch episode 1 and ignore the politics — follow the Stark family's faces instead. The show's real subject is power's cost; every 'win' is a loss somewhere."
-    },
-    "tags": [
-      "Fantasy",
-      "Drama",
-      "Epic",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-game-of-thrones",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Game of Thrones (2011)",
+  "teaser": "The pilot was so bad it was almost abandoned — the show's later seasons ran out of source material and the final season's rushed ending remains the most argued-about in TV history. If series is a map, Game of Thrones (2011) is one of the landmarks — look for Fantasy. Understanding Game of Thrones (2011) changes how the rest of series reads, and it sharpens every later spin in this lane. The practical side is easy to find — follow Drama and the examples pile up. Try it yourself: Game of Thrones (2011), and watch what you notice. Come back to Game of Thrones (2011) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "David Benioff",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Game of Thrones (2011)",
+   "durationMinutes": 55,
+   "instruction": "Watch episode 1 and ignore the politics — follow the Stark family's faces instead. The show's real subject is power's cost; every 'win' is a loss somewhere."
   },
-  {
-    "id": "series-the-sopranos",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Sopranos (1999)",
-    "teaser": "The show invented the modern prestige drama and its finale's cut-to-black is still debated — Tony's therapy sessions were the show's real 'business meetings'.",
-    "imageUrl": "",
-    "byline": "David Chase",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Sopranos (1999)",
-      "durationMinutes": 55,
-      "instruction": "Watch the pilot's therapy scenes — the show's thesis is that a mob boss is also a middle-aged man in crisis. The cut-to-black ending is a Rorschach test; form your own answer first."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "American",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Drama",
+   "Epic",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-sopranos",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Sopranos (1999)",
+  "teaser": "The show invented the modern prestige drama and its finale's cut-to-black is still debated — Tony's therapy sessions were the show's real 'business meetings'. If series is a map, The Sopranos (1999) is one of the landmarks — look for Crime. Once you notice The Sopranos (1999), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Drama and the examples pile up. A good way in: The Sopranos (1999). Give The Sopranos (1999) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "David Chase",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Sopranos (1999)",
+   "durationMinutes": 55,
+   "instruction": "Watch the pilot's therapy scenes — the show's thesis is that a mob boss is also a middle-aged man in crisis. The cut-to-black ending is a Rorschach test; form your own answer first."
   },
-  {
-    "id": "series-mad-men",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Mad Men (2007)",
-    "teaser": "The show's period detail is obsessive — every product placement is era-accurate, and the actor who plays Don Draper was a soap star before the role changed TV.",
-    "imageUrl": "",
-    "byline": "Matthew Weiner",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Mad Men (2007)",
-      "durationMinutes": 47,
-      "instruction": "Watch the first season and notice what's NOT said — the show's drama is in the pauses. The pitch meetings are the action scenes; the copy is the plot."
-    },
-    "tags": [
-      "Drama",
-      "Period",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "American",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-mad-men",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Mad Men (2007)",
+  "teaser": "The show's period detail is obsessive — every product placement is era-accurate, and the actor who plays Don Draper was a soap star before the role changed TV. If series is a map, Mad Men (2007) is one of the landmarks — look for Drama. This is the kind of idea screen fans come back to again and again, and for good reason. Follow the thread into Period and the same pattern keeps repeating. A good way in: Mad Men (2007). Give Mad Men (2007) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Matthew Weiner",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Mad Men (2007)",
+   "durationMinutes": 47,
+   "instruction": "Watch the first season and notice what's NOT said — the show's drama is in the pauses. The pitch meetings are the action scenes; the copy is the plot."
   },
-  {
-    "id": "series-stranger-things",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Stranger Things (2016)",
-    "teaser": "The show was originally pitched as a movie and the Duffer Brothers' pitch deck was so good Netflix bought it instantly — the kids' Dungeons & Dragons game foreshadows every season's monster.",
-    "imageUrl": "",
-    "byline": "The Duffer Brothers",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Stranger Things (2016)",
-      "durationMinutes": 50,
-      "instruction": "Watch episode 1 and map the D&D references — each monster is a game creature the kids already know how to fight. The nostalgia is the frame; the kids are the heart."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Horror",
-      "Nostalgia",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Period",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-stranger-things",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Stranger Things (2016)",
+  "teaser": "The show was originally pitched as a movie and the Duffer Brothers' pitch deck was so good Netflix bought it instantly — the kids' Dungeons & Dragons game foreshadows every season's monster. You meet Stranger Things (2016) early in series — keep Sci-Fi in mind from the start. Once you notice Stranger Things (2016), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Horror and the examples pile up. The natural next move is to stranger Things (2016). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "The Duffer Brothers",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Stranger Things (2016)",
+   "durationMinutes": 50,
+   "instruction": "Watch episode 1 and map the D&D references — each monster is a game creature the kids already know how to fight. The nostalgia is the frame; the kids are the heart."
   },
-  {
-    "id": "series-the-crown",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Crown (2016)",
-    "teaser": "The show casts three different actresses as the Queen across decades — the real palace reportedly watches it, and the writers had to invent private conversations because no one knows them.",
-    "imageUrl": "",
-    "byline": "Peter Morgan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Crown (2016)",
-      "durationMinutes": 58,
-      "instruction": "Watch season 1's episode about the Great Smog — it's the show's thesis about duty vs. humanity. The costumes are museum-accurate; the drama is invented and honest about it."
-    },
-    "tags": [
-      "Drama",
-      "Historical",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Horror",
+   "Nostalgia",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-crown",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Crown (2016)",
+  "teaser": "The show casts three different actresses as the Queen across decades — the real palace reportedly watches it, and the writers had to invent private conversations because no one knows them. The Crown (2016) is part of series, with Drama at its core. This is the kind of idea screen fans come back to again and again, and for good reason. It shows up in Historical: once you know what to look for, you notice it constantly. A good way in: The Crown (2016). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Peter Morgan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Crown (2016)",
+   "durationMinutes": 58,
+   "instruction": "Watch season 1's episode about the Great Smog — it's the show's thesis about duty vs. humanity. The costumes are museum-accurate; the drama is invented and honest about it."
   },
-  {
-    "id": "series-chernobyl",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Chernobyl (2019)",
-    "teaser": "The show's creators consulted real scientists and the 'not great, not terrible' line is a real quote from the actual control room — the radiation burns were makeup designed by a Chernobyl survivor's family.",
-    "imageUrl": "",
-    "byline": "Craig Mazin",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Chernobyl (2019)",
-      "durationMinutes": 55,
-      "instruction": "Watch the courtroom scene in the finale — the show's real villain is not the explosion but the lie. The 'cost of lies' speech is the thesis; everything before it is evidence."
-    },
-    "tags": [
-      "Drama",
-      "Historical",
-      "Disaster",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Historical",
+   "British",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-chernobyl",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Chernobyl (2019)",
+  "teaser": "The show's creators consulted real scientists and the 'not great, not terrible' line is a real quote from the actual control room — the radiation burns were makeup designed by a Chernobyl survivor's family. Chernobyl (2019) belongs to series; everything about it comes back to Drama. It matters more than it looks: Chernobyl (2019) sits under a surprising amount of screen. Follow the thread into Historical and the same pattern keeps repeating. Try it yourself: Chernobyl (2019), and watch what you notice. Give Chernobyl (2019) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Craig Mazin",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Chernobyl (2019)",
+   "durationMinutes": 55,
+   "instruction": "Watch the courtroom scene in the finale — the show's real villain is not the explosion but the lie. The 'cost of lies' speech is the thesis; everything before it is evidence."
   },
-  {
-    "id": "series-the-office-us",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Office (US) (2005)",
-    "teaser": "The American remake was nearly canceled after season 1 — Steve Carell's Michael Scott was rewritten to be more human, and the show's documentary crew is never explained.",
-    "imageUrl": "",
-    "byline": "Greg Daniels",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Office (US) (2005)",
-      "durationMinutes": 22,
-      "instruction": "Watch the pilot, then episode 2 — notice how Michael changes when the writers stop making him a buffoon. The show's real subject is office loneliness disguised as a comedy."
-    },
-    "tags": [
-      "Comedy",
-      "Mockumentary",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Historical",
+   "Disaster",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-office-us",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Office (US) (2005)",
+  "teaser": "The American remake was nearly canceled after season 1 — Steve Carell's Michael Scott was rewritten to be more human, and the show's documentary crew is never explained. The Office (US) (2005) belongs to series; everything about it comes back to Comedy. It earns its place because it keeps turning up — around Comedy and in the questions people ask about screen. It shows up in Mockumentary: once you know what to look for, you notice it constantly. A good way in: The Office (US) (2005) and then episode 2 — notice how michael changes when the writers stop making him a buffoon. the show's real subject is office loneliness disguised as a comedy. Give The Office (US) (2005) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Greg Daniels",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Office (US) (2005)",
+   "durationMinutes": 22,
+   "instruction": "Watch the pilot, then episode 2 — notice how Michael changes when the writers stop making him a buffoon. The show's real subject is office loneliness disguised as a comedy."
   },
-  {
-    "id": "series-friends",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Friends (1994)",
-    "teaser": "The show's 'Friends' is really about six actors who couldn't afford the rent in New York — the apartment's purple walls were a set decision, and the show's theme song was a last-minute replacement.",
-    "imageUrl": "",
-    "byline": "David Crane",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Friends (1994)",
-      "durationMinutes": 22,
-      "instruction": "Watch the pilot and notice the coffee house — the 'hangout' structure is the show. The joke density is engineered; count the laugh track and you'll see the rhythm."
-    },
-    "tags": [
-      "Comedy",
-      "Sitcom",
-      "American",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Mockumentary",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-friends",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Friends (1994)",
+  "teaser": "The show's 'Friends' is really about six actors who couldn't afford the rent in New York — the apartment's purple walls were a set decision, and the show's theme song was a last-minute replacement. Friends (1994) belongs to series; everything about it comes back to Comedy. Once you notice Friends (1994), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Sitcom: once you know what to look for, you notice it constantly. A good way in: Friends (1994). Once Friends (1994) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "David Crane",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Friends (1994)",
+   "durationMinutes": 22,
+   "instruction": "Watch the pilot and notice the coffee house — the 'hangout' structure is the show. The joke density is engineered; count the laugh track and you'll see the rhythm."
   },
-  {
-    "id": "series-sherlock",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Sherlock (2010)",
-    "teaser": "The modern Sherlock's 'mind palace' visuals were inspired by the actor's own technique for memorizing lines — the show's text-message overlays were a stylistic breakthrough.",
-    "imageUrl": "",
-    "byline": "Steven Moffat",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Sherlock (2010)",
-      "durationMinutes": 90,
-      "instruction": "Watch the first episode and try to solve the case before Sherlock does — the clues are fair. The 'mind palace' is real mnemonic technique; the show made it visible."
-    },
-    "tags": [
-      "Mystery",
-      "Crime",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Sitcom",
+   "American",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-sherlock",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Sherlock (2010)",
+  "teaser": "The modern Sherlock's 'mind palace' visuals were inspired by the actor's own technique for memorizing lines — the show's text-message overlays were a stylistic breakthrough. If series is a map, Sherlock (2010) is one of the landmarks — look for Mystery. This is the kind of idea screen fans come back to again and again, and for good reason. The practical side is easy to find — follow Crime and the examples pile up. Try it yourself: Sherlock (2010), and watch what you notice. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Steven Moffat",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Sherlock (2010)",
+   "durationMinutes": 90,
+   "instruction": "Watch the first episode and try to solve the case before Sherlock does — the clues are fair. The 'mind palace' is real mnemonic technique; the show made it visible."
   },
-  {
-    "id": "series-fleabag",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Fleabag (2016)",
-    "teaser": "Waller-Bridge based the show on her own one-woman stage act and famously refused to do a second season until the BBC begged — the 'fourth wall' camera is the show's secret co-star.",
-    "imageUrl": "",
-    "byline": "Phoebe Waller-Bridge",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Fleabag (2016)",
-      "durationMinutes": 27,
-      "instruction": "Watch for the camera glances — the narrator's asides are the real conversation. The show's tragedy is hidden in its comedy; the 'kneel' scene is the thesis."
-    },
-    "tags": [
-      "Comedy",
-      "Drama",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Mystery",
+   "Crime",
+   "British",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-fleabag",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Fleabag (2016)",
+  "teaser": "Waller-Bridge based the show on her own one-woman stage act and famously refused to do a second season until the BBC begged — the 'fourth wall' camera is the show's secret co-star. In the series corner of screen, Fleabag (2016) stands out — it hinges on Comedy. Once you notice Fleabag (2016), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Drama: once you know what to look for, you notice it constantly. The natural next move is to fleabag (2016). Give Fleabag (2016) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Phoebe Waller-Bridge",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Fleabag (2016)",
+   "durationMinutes": 27,
+   "instruction": "Watch for the camera glances — the narrator's asides are the real conversation. The show's tragedy is hidden in its comedy; the 'kneel' scene is the thesis."
   },
-  {
-    "id": "series-dark",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Dark (2017)",
-    "teaser": "The German time-travel series has a family tree the writers drew on a literal wall — every character is related to every other character, and the show's title is also its genre.",
-    "imageUrl": "",
-    "byline": "Baran bo Odar",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Dark (2017)",
-      "durationMinutes": 55,
-      "instruction": "Watch the first episode with the family tree open — the relationships are the plot. The show's German is a feature, not a barrier; the dubbing loses the time-jump voice clues."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Mystery",
-      "German",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Drama",
+   "British",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-dark",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Dark (2017)",
+  "teaser": "The German time-travel series has a family tree the writers drew on a literal wall — every character is related to every other character, and the show's title is also its genre. In the series corner of screen, Dark (2017) stands out — it hinges on Sci-Fi. It matters more than it looks: Dark (2017) sits under a surprising amount of screen. The practical side is easy to find — follow Mystery and the examples pile up. The natural next move is to dark (2017). That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Baran bo Odar",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Dark (2017)",
+   "durationMinutes": 55,
+   "instruction": "Watch the first episode with the family tree open — the relationships are the plot. The show's German is a feature, not a barrier; the dubbing loses the time-jump voice clues."
   },
-  {
-    "id": "series-squid-game",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Squid Game (2021)",
-    "teaser": "The script was rejected for a decade and the director was broke when it finally filmed — the show's 'Red Light Green Light' doll is a real Korean schoolbook character.",
-    "imageUrl": "",
-    "byline": "Hwang Dong-hyuk",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Squid Game (2021)",
-      "durationMinutes": 55,
-      "instruction": "Watch the first game and notice the children's-game irony — the horror is the innocence. The show's real subject is debt; the games are the economy made literal."
-    },
-    "tags": [
-      "Thriller",
-      "Survival",
-      "Korean",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Mystery",
+   "German",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-squid-game",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Squid Game (2021)",
+  "teaser": "The script was rejected for a decade and the director was broke when it finally filmed — the show's 'Red Light Green Light' doll is a real Korean schoolbook character. Squid Game (2021) is part of series, with Thriller at its core. Once you notice Squid Game (2021), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. Follow the thread into Survival and the same pattern keeps repeating. Try it yourself: Squid Game (2021), and watch what you notice. That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Hwang Dong-hyuk",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Squid Game (2021)",
+   "durationMinutes": 55,
+   "instruction": "Watch the first game and notice the children's-game irony — the horror is the innocence. The show's real subject is debt; the games are the economy made literal."
   },
-  {
-    "id": "series-money-heist",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Money Heist (2017)",
-    "teaser": "The show's Tokyo/Nairobi voiceover was a last-minute addition and the red jumpsuits were inspired by a real heist — the series was nearly canceled after its first season on Spanish TV.",
-    "imageUrl": "",
-    "byline": "Álex Pina",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Money Heist (2017)",
-      "durationMinutes": 50,
-      "instruction": "Watch the first heist episode and notice the masks — the anonymity is the strategy. The show's real heist is emotional: it makes you root for the robbers."
-    },
-    "tags": [
-      "Crime",
-      "Thriller",
-      "Spanish",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Thriller",
+   "Survival",
+   "Korean",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-money-heist",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Money Heist (2017)",
+  "teaser": "The show's Tokyo/Nairobi voiceover was a last-minute addition and the red jumpsuits were inspired by a real heist — the series was nearly canceled after its first season on Spanish TV. Money Heist (2017) is part of series, with Crime at its core. This is the kind of idea screen fans come back to again and again, and for good reason. It shows up in Thriller: once you know what to look for, you notice it constantly. The natural next move is to money Heist (2017). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Álex Pina",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Money Heist (2017)",
+   "durationMinutes": 50,
+   "instruction": "Watch the first heist episode and notice the masks — the anonymity is the strategy. The show's real heist is emotional: it makes you root for the robbers."
   },
-  {
-    "id": "series-the-mandalorian",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Mandalorian (2019)",
-    "teaser": "The show's 'Baby Yoda' (Grogu) was kept secret from even the cast — the puppet was operated by a team of six, and the show's Western pacing made it a cultural phenomenon.",
-    "imageUrl": "",
-    "byline": "Jon Favreau",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Mandalorian (2019)",
-      "durationMinutes": 40,
-      "instruction": "Watch the first episode's 'The Child' reveal — the moment the puppet works is the show. The show is a Western; the Mandalorian's helmet is the code."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Western",
-      "Star Wars",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Thriller",
+   "Spanish",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-mandalorian",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Mandalorian (2019)",
+  "teaser": "The show's 'Baby Yoda' (Grogu) was kept secret from even the cast — the puppet was operated by a team of six, and the show's Western pacing made it a cultural phenomenon. You meet The Mandalorian (2019) early in series — keep Sci-Fi in mind from the start. Once you notice The Mandalorian (2019), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Western: once you know what to look for, you notice it constantly. Try it yourself: The Mandalorian (2019), and watch what you notice. That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Jon Favreau",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Mandalorian (2019)",
+   "durationMinutes": 40,
+   "instruction": "Watch the first episode's 'The Child' reveal — the moment the puppet works is the show. The show is a Western; the Mandalorian's helmet is the code."
   },
-  {
-    "id": "series-arcane",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Arcane (2021)",
-    "teaser": "The show's painterly animation style took six years and was rendered in a custom engine — every frame is a painting, and the show's sisters' conflict is its real plot.",
-    "imageUrl": "",
-    "byline": "Christian Linke",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Arcane (2021)",
-      "durationMinutes": 45,
-      "instruction": "Watch episode 1 and notice the animation style — the brushstrokes are visible. The show's 'arcane' is science vs. magic; the sisters are both right, which is the tragedy."
-    },
-    "tags": [
-      "Animation",
-      "Fantasy",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Western",
+   "Star Wars",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-arcane",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Arcane (2021)",
+  "teaser": "The show's painterly animation style took six years and was rendered in a custom engine — every frame is a painting, and the show's sisters' conflict is its real plot. Arcane (2021) is part of series, with Animation at its core. Once you notice Arcane (2021), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Fantasy: once you know what to look for, you notice it constantly. A good way in: Arcane (2021). That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Christian Linke",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Arcane (2021)",
+   "durationMinutes": 45,
+   "instruction": "Watch episode 1 and notice the animation style — the brushstrokes are visible. The show's 'arcane' is science vs. magic; the sisters are both right, which is the tragedy."
   },
-  {
-    "id": "series-ted-lasso",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Ted Lasso (2020)",
-    "teaser": "The show was based on a TV ad for NBC's Premier League coverage — the niceness is the premise, and the show's therapy-talk actually helped viewers during the pandemic.",
-    "imageUrl": "",
-    "byline": "Bill Lawrence",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Ted Lasso (2020)",
-      "durationMinutes": 30,
-      "instruction": "Watch the first season and notice how the show weaponizes kindness — Ted's optimism is a strategy, not a weakness. The show's real sport is mental health."
-    },
-    "tags": [
-      "Comedy",
-      "Sports",
-      "British",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Animation",
+   "Fantasy",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-ted-lasso",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Ted Lasso (2020)",
+  "teaser": "The show was based on a TV ad for NBC's Premier League coverage — the niceness is the premise, and the show's therapy-talk actually helped viewers during the pandemic. You meet Ted Lasso (2020) early in series — keep Comedy in mind from the start. Once you notice Ted Lasso (2020), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Sports: once you know what to look for, you notice it constantly. A good way in: Ted Lasso (2020). That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Bill Lawrence",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Ted Lasso (2020)",
+   "durationMinutes": 30,
+   "instruction": "Watch the first season and notice how the show weaponizes kindness — Ted's optimism is a strategy, not a weakness. The show's real sport is mental health."
   },
-  {
-    "id": "series-the-bear",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Bear (2022)",
-    "teaser": "The show's kitchen scenes are shot in real-time chaos with actual chefs on set — the famous 'seven fishes' episode was filmed in one continuous take.",
-    "imageUrl": "",
-    "byline": "Christopher Storer",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Bear (2022)",
-      "durationMinutes": 35,
-      "instruction": "Watch the first episode and feel the kitchen stress — the chaos is the point. The show's real dish is grief; the restaurant is the family."
-    },
-    "tags": [
-      "Drama",
-      "Comedy",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Sports",
+   "British",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-bear",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Bear (2022)",
+  "teaser": "The show's kitchen scenes are shot in real-time chaos with actual chefs on set — the famous 'seven fishes' episode was filmed in one continuous take. If series is a map, The Bear (2022) is one of the landmarks — look for Drama. This is the kind of idea screen fans come back to again and again, and for good reason. Follow the thread into Comedy and the same pattern keeps repeating. Try it yourself: The Bear (2022), and watch what you notice. Once The Bear (2022) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Christopher Storer",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Bear (2022)",
+   "durationMinutes": 35,
+   "instruction": "Watch the first episode and feel the kitchen stress — the chaos is the point. The show's real dish is grief; the restaurant is the family."
   },
-  {
-    "id": "series-succession",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Succession (2018)",
-    "teaser": "The show's dialogue was written to sound like actual billionaires arguing — the 'fuck off' catchphrase came from a real boardroom transcript, and the show refused to show the characters winning.",
-    "imageUrl": "",
-    "byline": "Jesse Armstrong",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Succession (2018)",
-      "durationMinutes": 60,
-      "instruction": "Watch the first episode and notice the power dynamics in every sentence — the show's dialogue is chess. The 'succession' is the plot; the inheritance is the poison."
-    },
-    "tags": [
-      "Drama",
-      "Comedy",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Comedy",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-succession",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Succession (2018)",
+  "teaser": "The show's dialogue was written to sound like actual billionaires arguing — the 'fuck off' catchphrase came from a real boardroom transcript, and the show refused to show the characters winning. Succession (2018) is part of series, with Drama at its core. Once you notice Succession (2018), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Comedy and the examples pile up. Try it yourself: Succession (2018), and watch what you notice. Come back to Succession (2018) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "Jesse Armstrong",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Succession (2018)",
+   "durationMinutes": 60,
+   "instruction": "Watch the first episode and notice the power dynamics in every sentence — the show's dialogue is chess. The 'succession' is the plot; the inheritance is the poison."
   },
-  {
-    "id": "series-the-last-of-us",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Last of Us (2023)",
-    "teaser": "The show was made with the game's creators and the infected clickers are performed by a real contortionist — the show's fungal apocalypse is based on real cordyceps research.",
-    "imageUrl": "",
-    "byline": "Craig Mazin",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Last of Us (2023)",
-      "durationMinutes": 55,
-      "instruction": "Watch the first episode's cold open — the 1968 interview is real science. The show's horror is the loss of connection; the infected are just the excuse."
-    },
-    "tags": [
-      "Drama",
-      "Horror",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Comedy",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-last-of-us",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Last of Us (2023)",
+  "teaser": "The show was made with the game's creators and the infected clickers are performed by a real contortionist — the show's fungal apocalypse is based on real cordyceps research. You meet The Last of Us (2023) early in series — keep Drama in mind from the start. Understanding The Last of Us (2023) changes how the rest of series reads, and it sharpens every later spin in this lane. Follow the thread into Horror and the same pattern keeps repeating. The natural next move is to the Last of Us (2023). That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Craig Mazin",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Last of Us (2023)",
+   "durationMinutes": 55,
+   "instruction": "Watch the first episode's cold open — the 1968 interview is real science. The show's horror is the loss of connection; the infected are just the excuse."
   },
-  {
-    "id": "series-wednesday",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Wednesday (2022)",
-    "teaser": "Jenna Ortega learned cello for the show and her 'Thing' hand was operated by a real puppeteer — the show's dance scene went viral after Ortega choreographed it herself.",
-    "imageUrl": "",
-    "byline": "Alfred Gough",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Wednesday (2022)",
-      "durationMinutes": 45,
-      "instruction": "Watch the school's mystery and notice the Addams Family references — the show is a detective story wearing a goth costume. The dance scene is the thesis: Wednesday's joy is defiance."
-    },
-    "tags": [
-      "Comedy",
-      "Supernatural",
-      "Mystery",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Horror",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-wednesday",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Wednesday (2022)",
+  "teaser": "Jenna Ortega learned cello for the show and her 'Thing' hand was operated by a real puppeteer — the show's dance scene went viral after Ortega choreographed it herself. Wednesday (2022) is part of series, with Comedy at its core. It earns its place because it keeps turning up — around Comedy and in the questions people ask about screen. The practical side is easy to find — follow Supernatural and the examples pile up. The natural next move is to wednesday (2022). Once Wednesday (2022) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Alfred Gough",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Wednesday (2022)",
+   "durationMinutes": 45,
+   "instruction": "Watch the school's mystery and notice the Addams Family references — the show is a detective story wearing a goth costume. The dance scene is the thesis: Wednesday's joy is defiance."
   },
-  {
-    "id": "series-one-piece-live-action",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "One Piece (live-action) (2023)",
-    "teaser": "The live-action One Piece was made with the manga's creator Eiichiro Oda on set — he reportedly rejected scripts he didn't like, and the show's Devil Fruit effects are practical, not CGI.",
-    "imageUrl": "",
-    "byline": "Matt Owens",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "One Piece (live-action) (2023)",
-      "durationMinutes": 55,
-      "instruction": "Watch episode 1 and notice the Straw Hat promise — the show's theme is found family. The 'I'm gonna be King of the Pirates' line is a promise, and the show's joy is in the believing."
-    },
-    "tags": [
-      "Adventure",
-      "Fantasy",
-      "Japanese",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Supernatural",
+   "Mystery",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-one-piece-live-action",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "One Piece (live-action) (2023)",
+  "teaser": "The live-action One Piece was made with the manga's creator Eiichiro Oda on set — he reportedly rejected scripts he didn't like, and the show's Devil Fruit effects are practical, not CGI. One Piece (live-action) (2023) is part of series, with Adventure at its core. Understanding One Piece (live-action) (2023) changes how the rest of series reads, and it sharpens every later spin in this lane. Follow the thread into Fantasy and the same pattern keeps repeating. A good way in: One Piece (live-action) (2023). Come back to One Piece (live-action) (2023) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "Matt Owens",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "One Piece (live-action) (2023)",
+   "durationMinutes": 55,
+   "instruction": "Watch episode 1 and notice the Straw Hat promise — the show's theme is found family. The 'I'm gonna be King of the Pirates' line is a promise, and the show's joy is in the believing."
   },
-  {
-    "id": "series-demon-slayer-kimetsu-no-yaiba",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Demon Slayer: Kimetsu no Yaiba (2019)",
-    "teaser": "The anime's episode 19 became a global phenomenon — the water-bending animation was hand-drawn with 300+ frames per second of action, and the show's demons are based on real Japanese folklore.",
-    "imageUrl": "",
-    "byline": "Haruo Sotozaki",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Demon Slayer: Kimetsu no Yaiba (2019)",
-      "durationMinutes": 24,
-      "instruction": "Watch episode 19 of season 1 — it's the episode that broke the internet. The animation is the show; the story is the sword."
-    },
-    "tags": [
-      "Anime",
-      "Action",
-      "Japanese",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Adventure",
+   "Fantasy",
+   "Japanese",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-demon-slayer-kimetsu-no-yaiba",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Demon Slayer: Kimetsu no Yaiba (2019)",
+  "teaser": "The anime's episode 19 became a global phenomenon — the water-bending animation was hand-drawn with 300+ frames per second of action, and the show's demons are based on real Japanese folklore. In the series corner of screen, Demon Slayer: Kimetsu no Yaiba (2019) stands out — it hinges on Anime. Once you notice Demon Slayer: Kimetsu no Yaiba (2019), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Action and the examples pile up. A good way in: Demon Slayer: Kimetsu no Yaiba (2019). Once Demon Slayer: Kimetsu no Yaiba (2019) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Haruo Sotozaki",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Demon Slayer: Kimetsu no Yaiba (2019)",
+   "durationMinutes": 24,
+   "instruction": "Watch episode 19 of season 1 — it's the episode that broke the internet. The animation is the show; the story is the sword."
   },
-  {
-    "id": "series-cowboy-bebop",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Cowboy Bebop (1998)",
-    "teaser": "The show was made on a shoestring and became the gateway anime for a generation — each episode is named after a real jazz song, and the show's ending is famously devastating.",
-    "imageUrl": "",
-    "byline": "Shinichiro Watanabe",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Cowboy Bebop (1998)",
-      "durationMinutes": 24,
-      "instruction": "Watch episode 5 ('Ballad of Fallen Angels') — it's the show's thesis in one episode. The jazz is the structure; the bounty hunters are the loneliness."
-    },
-    "tags": [
-      "Anime",
-      "Sci-Fi",
-      "Noir",
-      "Japanese",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Anime",
+   "Action",
+   "Japanese",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-cowboy-bebop",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Cowboy Bebop (1998)",
+  "teaser": "The show was made on a shoestring and became the gateway anime for a generation — each episode is named after a real jazz song, and the show's ending is famously devastating. You meet Cowboy Bebop (1998) early in series — keep Anime in mind from the start. Once you notice Cowboy Bebop (1998), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. It shows up in Sci-Fi: once you know what to look for, you notice it constantly. The natural next move is to cowboy Bebop (1998). That is the kind of understanding that shows up again and again in screen.",
+  "imageUrl": "",
+  "byline": "Shinichiro Watanabe",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Cowboy Bebop (1998)",
+   "durationMinutes": 24,
+   "instruction": "Watch episode 5 ('Ballad of Fallen Angels') — it's the show's thesis in one episode. The jazz is the structure; the bounty hunters are the loneliness."
   },
-  {
-    "id": "series-neon-genesis-evangelion",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Neon Genesis Evangelion (1995)",
-    "teaser": "The show was made as the director's own therapy — the ending was so controversial it was redone in film form, and the 'Instrumentality' concept came from a real psychology book.",
-    "imageUrl": "",
-    "byline": "Hideaki Anno",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Neon Genesis Evangelion (1995)",
-      "durationMinutes": 24,
-      "instruction": "Watch episode 16 and feel the shift — the show's mecha battles are a distraction from its real subject. The 'hedgehog's dilemma' is the thesis: closeness hurts, isolation kills."
-    },
-    "tags": [
-      "Anime",
-      "Mecha",
-      "Psychological",
-      "Japanese",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Anime",
+   "Sci-Fi",
+   "Noir",
+   "Japanese",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-neon-genesis-evangelion",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Neon Genesis Evangelion (1995)",
+  "teaser": "The show was made as the director's own therapy — the ending was so controversial it was redone in film form, and the 'Instrumentality' concept came from a real psychology book. Neon Genesis Evangelion (1995) is part of series, with Anime at its core. Understanding Neon Genesis Evangelion (1995) changes how the rest of series reads, and it sharpens every later spin in this lane. Follow the thread into Mecha and the same pattern keeps repeating. Try it yourself: Neon Genesis Evangelion (1995), and watch what you notice. Once Neon Genesis Evangelion (1995) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Hideaki Anno",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Neon Genesis Evangelion (1995)",
+   "durationMinutes": 24,
+   "instruction": "Watch episode 16 and feel the shift — the show's mecha battles are a distraction from its real subject. The 'hedgehog's dilemma' is the thesis: closeness hurts, isolation kills."
   },
-  {
-    "id": "series-fullmetal-alchemist-brotherhood",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Fullmetal Alchemist: Brotherhood (2009)",
-    "teaser": "The show follows the manga faithfully after the first anime diverged — the 'equivalent exchange' law is the series' moral system, and the ending is considered perfect by fans.",
-    "imageUrl": "",
-    "byline": "Yasuhiro Irie",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Fullmetal Alchemist: Brotherhood (2009)",
-      "durationMinutes": 24,
-      "instruction": "Watch episode 1 and notice the law — the show's alchemy is morality made physical. The series is about what you're willing to pay; every character pays."
-    },
-    "tags": [
-      "Anime",
-      "Adventure",
-      "Fantasy",
-      "Japanese",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Anime",
+   "Mecha",
+   "Psychological",
+   "Japanese",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-fullmetal-alchemist-brotherhood",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Fullmetal Alchemist: Brotherhood (2009)",
+  "teaser": "The show follows the manga faithfully after the first anime diverged — the 'equivalent exchange' law is the series' moral system, and the ending is considered perfect by fans. Fullmetal Alchemist: Brotherhood (2009) belongs to series; everything about it comes back to Anime. Understanding Fullmetal Alchemist: Brotherhood (2009) changes how the rest of series reads, and it sharpens every later spin in this lane. It shows up in Adventure: once you know what to look for, you notice it constantly. A good way in: Fullmetal Alchemist: Brotherhood (2009). Give Fullmetal Alchemist: Brotherhood (2009) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Yasuhiro Irie",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Fullmetal Alchemist: Brotherhood (2009)",
+   "durationMinutes": 24,
+   "instruction": "Watch episode 1 and notice the law — the show's alchemy is morality made physical. The series is about what you're willing to pay; every character pays."
   },
-  {
-    "id": "series-the-expanse",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Expanse (2015)",
-    "teaser": "The show's physics are accurate — ships spin for gravity, no sound in space, and the 'flip and burn' maneuvers are real orbital mechanics. The authors wrote the books with a physicist.",
-    "imageUrl": "",
-    "byline": "Mark Fergus",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Expanse (2015)",
-      "durationMinutes": 45,
-      "instruction": "Watch the first episode's spacewalk — the physics is the show's signature. The Belters' dialect is a constructed language; listen for 'innit' and 'sa sa'."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Drama",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Anime",
+   "Adventure",
+   "Fantasy",
+   "Japanese",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-expanse",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Expanse (2015)",
+  "teaser": "The show's physics are accurate — ships spin for gravity, no sound in space, and the 'flip and burn' maneuvers are real orbital mechanics. The authors wrote the books with a physicist. You meet The Expanse (2015) early in series — keep Sci-Fi in mind from the start. Once you notice The Expanse (2015), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Drama and the examples pile up. The natural next move is to the Expanse (2015). Give The Expanse (2015) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Mark Fergus",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Expanse (2015)",
+   "durationMinutes": 45,
+   "instruction": "Watch the first episode's spacewalk — the physics is the show's signature. The Belters' dialect is a constructed language; listen for 'innit' and 'sa sa'."
   },
-  {
-    "id": "series-peaky-blinders",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Peaky Blinders (2013)",
-    "teaser": "The show's haircuts and razor-blade caps are based on real Birmingham gang history — the anachronistic music (Nick Cave, Radiohead) was a deliberate style choice.",
-    "imageUrl": "",
-    "byline": "Steven Knight",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Peaky Blinders (2013)",
-      "durationMinutes": 60,
-      "instruction": "Watch the first episode and notice the anachronistic soundtrack — the show is punk dressed as period. The 'peaky blinders' are the hats; the family is the razor."
-    },
-    "tags": [
-      "Crime",
-      "Period",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Drama",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-peaky-blinders",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Peaky Blinders (2013)",
+  "teaser": "The show's haircuts and razor-blade caps are based on real Birmingham gang history — the anachronistic music (Nick Cave, Radiohead) was a deliberate style choice. Peaky Blinders (2013) is part of series, with Crime at its core. It matters more than it looks: Peaky Blinders (2013) sits under a surprising amount of screen. The practical side is easy to find — follow Period and the examples pile up. Try it yourself: Peaky Blinders (2013), and watch what you notice. Once Peaky Blinders (2013) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Steven Knight",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Peaky Blinders (2013)",
+   "durationMinutes": 60,
+   "instruction": "Watch the first episode and notice the anachronistic soundtrack — the show is punk dressed as period. The 'peaky blinders' are the hats; the family is the razor."
   },
-  {
-    "id": "series-bridgerton",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Bridgerton (2020)",
-    "teaser": "The show's Regency setting with modern music and diverse casting made it Netflix's most-watched original — the string covers of pop songs are the show's signature.",
-    "imageUrl": "",
-    "byline": "Chris Van Dusen",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Bridgerton (2020)",
-      "durationMinutes": 60,
-      "instruction": "Listen for the string covers — the modern songs in Regency dress are the show's thesis. The gossip is the plot; the scandal is the economy."
-    },
-    "tags": [
-      "Romance",
-      "Period",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Period",
+   "British",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-bridgerton",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Bridgerton (2020)",
+  "teaser": "The show's Regency setting with modern music and diverse casting made it Netflix's most-watched original — the string covers of pop songs are the show's signature. Bridgerton (2020) belongs to series; everything about it comes back to Romance. Once you notice Bridgerton (2020), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. Follow the thread into Period and the same pattern keeps repeating. A good way in: Bridgerton (2020). Give Bridgerton (2020) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Chris Van Dusen",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Bridgerton (2020)",
+   "durationMinutes": 60,
+   "instruction": "Listen for the string covers — the modern songs in Regency dress are the show's thesis. The gossip is the plot; the scandal is the economy."
   },
-  {
-    "id": "series-true-detective",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "True Detective (2014)",
-    "teaser": "Season 1's tracking shot was filmed in one continuous take with the actors walking six minutes straight — the show's occult framing was inspired by real Louisiana cult legends.",
-    "imageUrl": "",
-    "byline": "Nic Pizzolatto",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "True Detective (2014)",
-      "durationMinutes": 60,
-      "instruction": "Watch the season 1 finale's tracking shot — it's the show's signature. The 'time is a flat circle' speech is the thesis; the show's real crime is the past."
-    },
-    "tags": [
-      "Crime",
-      "Mystery",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Period",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-true-detective",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "True Detective (2014)",
+  "teaser": "Season 1's tracking shot was filmed in one continuous take with the actors walking six minutes straight — the show's occult framing was inspired by real Louisiana cult legends. True Detective (2014) belongs to series; everything about it comes back to Crime. It earns its place because it keeps turning up — around Crime and in the questions people ask about screen. The practical side is easy to find — follow Mystery and the examples pile up. A good way in: True Detective (2014). Give True Detective (2014) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Nic Pizzolatto",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "True Detective (2014)",
+   "durationMinutes": 60,
+   "instruction": "Watch the season 1 finale's tracking shot — it's the show's signature. The 'time is a flat circle' speech is the thesis; the show's real crime is the past."
   },
-  {
-    "id": "series-mindhunter",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Mindhunter (2017)",
-    "teaser": "Fincher's show about the FBI's serial-killer profiling unit was made from real interviews — the show's interviews are performed by actors who studied the real killers' tapes.",
-    "imageUrl": "",
-    "byline": "David Fincher",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Mindhunter (2017)",
-      "durationMinutes": 55,
-      "instruction": "Watch the first interview — the profiling is the show. The 'interviews are the action' structure is Fincher's point: talk is the plot."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Mystery",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-mindhunter",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Mindhunter (2017)",
+  "teaser": "Fincher's show about the FBI's serial-killer profiling unit was made from real interviews — the show's interviews are performed by actors who studied the real killers' tapes. Mindhunter (2017) is part of series, with Crime at its core. Once you notice Mindhunter (2017), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. Follow the thread into Drama and the same pattern keeps repeating. The natural next move is to mindhunter (2017). Give Mindhunter (2017) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "David Fincher",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Mindhunter (2017)",
+   "durationMinutes": 55,
+   "instruction": "Watch the first interview — the profiling is the show. The 'interviews are the action' structure is Fincher's point: talk is the plot."
   },
-  {
-    "id": "series-house-m-d",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "House M.D. (2004)",
-    "teaser": "The show's 'House' was based on Sherlock Holmes — the morphine and the violin are direct references, and each episode's diagnosis is a mystery structure.",
-    "imageUrl": "",
-    "byline": "David Shore",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "House M.D. (2004)",
-      "durationMinutes": 45,
-      "instruction": "Watch the first episode and notice the misdiagnosis — every episode is a locked-room mystery. House's 'everybody lies' is the thesis; the puzzle is the medicine."
-    },
-    "tags": [
-      "Drama",
-      "Medical",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-house-m-d",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "House M.D. (2004)",
+  "teaser": "The show's 'House' was based on Sherlock Holmes — the morphine and the violin are direct references, and each episode's diagnosis is a mystery structure. In the series corner of screen, House M.D. (2004) stands out — it hinges on Drama. Once you notice House M.D. (2004), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Medical and the examples pile up. Try it yourself: House M.D. (2004), and watch what you notice. Give House M.D. (2004) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "David Shore",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "House M.D. (2004)",
+   "durationMinutes": 45,
+   "instruction": "Watch the first episode and notice the misdiagnosis — every episode is a locked-room mystery. House's 'everybody lies' is the thesis; the puzzle is the medicine."
   },
-  {
-    "id": "series-the-office-uk",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Office (UK) (2001)",
-    "teaser": "The original Office invented the mockumentary sitcom and ran only 12 episodes plus a special — Gervais's David Brent was based on real bosses he'd known.",
-    "imageUrl": "",
-    "byline": "Ricky Gervais",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Office (UK) (2001)",
-      "durationMinutes": 30,
-      "instruction": "Watch the first episode and notice the silence — the comedy is in the awkward pause. The UK version ends the show; the US version kept it going."
-    },
-    "tags": [
-      "Comedy",
-      "Mockumentary",
-      "British",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Medical",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-office-uk",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Office (UK) (2001)",
+  "teaser": "The original Office invented the mockumentary sitcom and ran only 12 episodes plus a special — Gervais's David Brent was based on real bosses he'd known. If series is a map, The Office (UK) (2001) is one of the landmarks — look for Comedy. It earns its place because it keeps turning up — around Comedy and in the questions people ask about screen. It shows up in Mockumentary: once you know what to look for, you notice it constantly. A good way in: The Office (UK) (2001). Come back to The Office (UK) (2001) after a few spins and it will feel like an old friend.",
+  "imageUrl": "",
+  "byline": "Ricky Gervais",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Office (UK) (2001)",
+   "durationMinutes": 30,
+   "instruction": "Watch the first episode and notice the silence — the comedy is in the awkward pause. The UK version ends the show; the US version kept it going."
   },
-  {
-    "id": "series-it-s-always-sunny-in-philadelphia",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "It's Always Sunny in Philadelphia (2005)",
-    "teaser": "The show was made on a $200 budget and is now the longest-running live-action sitcom in US history — the gang's 'trash person' morality is the joke.",
-    "imageUrl": "",
-    "byline": "Rob McElhenney",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "It's Always Sunny in Philadelphia (2005)",
-      "durationMinutes": 22,
-      "instruction": "Watch the pilot and notice the budget — the show's genius is that it never got nice. The gang's selfishness is the premise; the comedy is the consequence."
-    },
-    "tags": [
-      "Comedy",
-      "Dark Comedy",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Mockumentary",
+   "British",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-it-s-always-sunny-in-philadelphia",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "It's Always Sunny in Philadelphia (2005)",
+  "teaser": "The show was made on a $200 budget and is now the longest-running live-action sitcom in US history — the gang's 'trash person' morality is the joke. It's Always Sunny in Philadelphia (2005) is part of series, with Comedy at its core. This is the kind of idea screen fans come back to again and again, and for good reason. Follow the thread into Dark Comedy and the same pattern keeps repeating. The natural next move is to it's Always Sunny in Philadelphia (2005). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Rob McElhenney",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "It's Always Sunny in Philadelphia (2005)",
+   "durationMinutes": 22,
+   "instruction": "Watch the pilot and notice the budget — the show's genius is that it never got nice. The gang's selfishness is the premise; the comedy is the consequence."
   },
-  {
-    "id": "series-community",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Community (2009)",
-    "teaser": "The show's creator used his own 'story circle' theory to write every episode — the paintball and D&D episodes are tributes to genre films, and the show predicted its own fandom.",
-    "imageUrl": "",
-    "byline": "Dan Harmon",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Community (2009)",
-      "durationMinutes": 22,
-      "instruction": "Watch the first paintball episode — it's a Western, a heist film and a sitcom at once. The show's meta-commentary is the point; the community college is the country."
-    },
-    "tags": [
-      "Comedy",
-      "Meta",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Dark Comedy",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-community",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Community (2009)",
+  "teaser": "The show's creator used his own 'story circle' theory to write every episode — the paintball and D&D episodes are tributes to genre films, and the show predicted its own fandom. Community (2009) belongs to series; everything about it comes back to Comedy. It matters more than it looks: Community (2009) sits under a surprising amount of screen. It shows up in Meta: once you know what to look for, you notice it constantly. The natural next move is to community (2009). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Dan Harmon",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Community (2009)",
+   "durationMinutes": 22,
+   "instruction": "Watch the first paintball episode — it's a Western, a heist film and a sitcom at once. The show's meta-commentary is the point; the community college is the country."
   },
-  {
-    "id": "series-rick-and-morty",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Rick and Morty (2013)",
-    "teaser": "The show was based on a Back to the Future parody and its nihilism is the argument — the 'Szechuan sauce' episode started a real fast-food craze.",
-    "imageUrl": "",
-    "byline": "Dan Harmon",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Rick and Morty (2013)",
-      "durationMinutes": 22,
-      "instruction": "Watch the first episode and notice the two-structure — Rick's adventure and Morty's adventure are the same story. The show's nihilism is the mask; the family is the heart."
-    },
-    "tags": [
-      "Animation",
-      "Sci-Fi",
-      "Comedy",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Meta",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-rick-and-morty",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Rick and Morty (2013)",
+  "teaser": "The show was based on a Back to the Future parody and its nihilism is the argument — the 'Szechuan sauce' episode started a real fast-food craze. You meet Rick and Morty (2013) early in series — keep Animation in mind from the start. This is the kind of idea screen fans come back to again and again, and for good reason. The practical side is easy to find — follow Sci-Fi and the examples pile up. The natural next move is to rick and Morty (2013). Give Rick and Morty (2013) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Dan Harmon",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Rick and Morty (2013)",
+   "durationMinutes": 22,
+   "instruction": "Watch the first episode and notice the two-structure — Rick's adventure and Morty's adventure are the same story. The show's nihilism is the mask; the family is the heart."
   },
-  {
-    "id": "series-attack-on-titan-anime",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Attack on Titan (anime) (2013)",
-    "teaser": "The anime's opening theme and 3D maneuvering gear animation were breakthroughs — the show's later reveals reframe the first episode entirely.",
-    "imageUrl": "",
-    "byline": "Tetsurō Araki",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Attack on Titan (anime) (2013)",
-      "durationMinutes": 24,
-      "instruction": "Watch episode 1, then rewatch it after finishing the series — the basement reveal changes the whole frame. The show's real enemy is never the Titans."
-    },
-    "tags": [
-      "Anime",
-      "Dark Fantasy",
-      "Japanese",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Animation",
+   "Sci-Fi",
+   "Comedy",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-attack-on-titan-anime",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Attack on Titan (anime) (2013)",
+  "teaser": "The anime's opening theme and 3D maneuvering gear animation were breakthroughs — the show's later reveals reframe the first episode entirely. You meet Attack on Titan (anime) (2013) early in series — keep Anime in mind from the start. This is the kind of idea screen fans come back to again and again, and for good reason. The practical side is easy to find — follow Dark Fantasy and the examples pile up. A good way in: Attack on Titan (anime) (2013) and then rewatch it after finishing the series — the basement reveal changes the whole frame. the show's real enemy is never the titans. It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Tetsurō Araki",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Attack on Titan (anime) (2013)",
+   "durationMinutes": 24,
+   "instruction": "Watch episode 1, then rewatch it after finishing the series — the basement reveal changes the whole frame. The show's real enemy is never the Titans."
   },
-  {
-    "id": "series-the-witcher",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "The Witcher (2019)",
-    "teaser": "The show's timelines confused viewers until the finale revealed three separate time periods — the 'Law of Surprise' is a real Slavic folklore concept.",
-    "imageUrl": "",
-    "byline": "Lauren Schmidt Hissrich",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Witcher (2019)",
-      "durationMinutes": 55,
-      "instruction": "Watch episode 1 and note the timeline — the show's nonlinear structure is intentional. The 'Law of Surprise' is the plot engine; destiny is the currency."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Anime",
+   "Dark Fantasy",
+   "Japanese",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-the-witcher",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "The Witcher (2019)",
+  "teaser": "The show's timelines confused viewers until the finale revealed three separate time periods — the 'Law of Surprise' is a real Slavic folklore concept. In the series corner of screen, The Witcher (2019) stands out — it hinges on Fantasy. It earns its place because it keeps turning up — around Fantasy and in the questions people ask about screen. The practical side is easy to find — follow Action and the examples pile up. The natural next move is to the Witcher (2019). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Lauren Schmidt Hissrich",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Witcher (2019)",
+   "durationMinutes": 55,
+   "instruction": "Watch episode 1 and note the timeline — the show's nonlinear structure is intentional. The 'Law of Surprise' is the plot engine; destiny is the currency."
   },
-  {
-    "id": "series-severance",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Severance (2022)",
-    "teaser": "The show's office aesthetic was inspired by real corporate campuses and the 'innie/outie' split is a genuine philosophical question — the show's elevator transition is its signature shot.",
-    "imageUrl": "",
-    "byline": "Dan Erickson",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Severance (2022)",
-      "durationMinutes": 50,
-      "instruction": "Watch the first episode's elevator scene — the split is the show. The 'work-life balance' is taken literally; the horror is the office."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Thriller",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-severance",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Severance (2022)",
+  "teaser": "The show's office aesthetic was inspired by real corporate campuses and the 'innie/outie' split is a genuine philosophical question — the show's elevator transition is its signature shot. Severance (2022) belongs to series; everything about it comes back to Sci-Fi. Once you notice Severance (2022), you start seeing it everywhere in screen — in books, in classrooms, and in everyday questions. The practical side is easy to find — follow Thriller and the examples pile up. A good way in: Severance (2022). It is one of those ideas that quietly powers screen — worth a curious look.",
+  "imageUrl": "",
+  "byline": "Dan Erickson",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Severance (2022)",
+   "durationMinutes": 50,
+   "instruction": "Watch the first episode's elevator scene — the split is the show. The 'work-life balance' is taken literally; the horror is the office."
   },
-  {
-    "id": "series-better-call-saul",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Better Call Saul (2015)",
-    "teaser": "The Breaking Bad prequel is considered by many to be better than the original — the show's slow-burn season 6 finale recontextualizes everything.",
-    "imageUrl": "",
-    "byline": "Vince Gilligan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Better Call Saul (2015)",
-      "durationMinutes": 50,
-      "instruction": "Watch the first season and notice the legal detail — the show's 'lawyer stuff' is the drama. The transformation of Jimmy to Saul is the arc; the final black-and-white episode is the thesis."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Thriller",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-better-call-saul",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Better Call Saul (2015)",
+  "teaser": "The Breaking Bad prequel is considered by many to be better than the original — the show's slow-burn season 6 finale recontextualizes everything. Better Call Saul (2015) is part of series, with Crime at its core. It matters more than it looks: Better Call Saul (2015) sits under a surprising amount of screen. It shows up in Drama: once you know what to look for, you notice it constantly. A good way in: Better Call Saul (2015). Once Better Call Saul (2015) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Vince Gilligan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Better Call Saul (2015)",
+   "durationMinutes": 50,
+   "instruction": "Watch the first season and notice the legal detail — the show's 'lawyer stuff' is the drama. The transformation of Jimmy to Saul is the arc; the final black-and-white episode is the thesis."
   },
-  {
-    "id": "series-baby-reindeer",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Baby Reindeer (2024)",
-    "teaser": "The show is a true story adapted from the creator's own one-man show — the real stalker's emails are quoted, and the show's 'truth' framing is its power.",
-    "imageUrl": "",
-    "byline": "Richard Gadd",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Baby Reindeer (2024)",
-      "durationMinutes": 40,
-      "instruction": "Watch the first episode and notice the 'true story' opening — the show's confession is the drama. The stalker is the mirror; the real subject is the narrator."
-    },
-    "tags": [
-      "Drama",
-      "Thriller",
-      "British",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crime",
+   "Drama",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-baby-reindeer",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Baby Reindeer (2024)",
+  "teaser": "The show is a true story adapted from the creator's own one-man show — the real stalker's emails are quoted, and the show's 'truth' framing is its power. In the series corner of screen, Baby Reindeer (2024) stands out — it hinges on Drama. Understanding Baby Reindeer (2024) changes how the rest of series reads, and it sharpens every later spin in this lane. Follow the thread into Thriller and the same pattern keeps repeating. Try it yourself: Baby Reindeer (2024), and watch what you notice. Give Baby Reindeer (2024) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Richard Gadd",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Baby Reindeer (2024)",
+   "durationMinutes": 40,
+   "instruction": "Watch the first episode and notice the 'true story' opening — the show's confession is the drama. The stalker is the mirror; the real subject is the narrator."
   },
-  {
-    "id": "series-fallout",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Fallout (2024)",
-    "teaser": "The show was made with the game's creators and the wasteland's practical sets are real — the show's tone (comedy + horror) is the game's signature.",
-    "imageUrl": "",
-    "byline": "Graham Wagner",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Fallout (2024)",
-      "durationMinutes": 50,
-      "instruction": "Watch the first episode and notice the tone shifts — the show's humor is the armor. The vault experiment is the plot; the wasteland is the character."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Dark Comedy",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Thriller",
+   "British",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-fallout",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Fallout (2024)",
+  "teaser": "The show was made with the game's creators and the wasteland's practical sets are real — the show's tone (comedy + horror) is the game's signature. Fallout (2024) belongs to series; everything about it comes back to Sci-Fi. It matters more than it looks: Fallout (2024) sits under a surprising amount of screen. Follow the thread into Dark Comedy and the same pattern keeps repeating. The natural next move is to fallout (2024). Give Fallout (2024) a few minutes and it will keep showing up in screen conversations.",
+  "imageUrl": "",
+  "byline": "Graham Wagner",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Fallout (2024)",
+   "durationMinutes": 50,
+   "instruction": "Watch the first episode and notice the tone shifts — the show's humor is the armor. The vault experiment is the plot; the wasteland is the character."
   },
-  {
-    "id": "series-avatar-the-last-airbender",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Avatar: The Last Airbender (2005)",
-    "teaser": "The show's bending styles were based on real martial arts — water is tai chi, earth is hung gar, fire is northern shaolin — and the show's villains were written to be sympathetic.",
-    "imageUrl": "",
-    "byline": "Michael Dante DiMartino",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Avatar: The Last Airbender (2005)",
-      "durationMinutes": 24,
-      "instruction": "Watch episode 1 and notice the bending styles — each element is a real martial art. The show's 'balance' theme is the thesis; the villains are the arguments."
-    },
-    "tags": [
-      "Animation",
-      "Fantasy",
-      "Adventure",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
-  }
+  "tags": [
+   "Sci-Fi",
+   "Dark Comedy",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "series-avatar-the-last-airbender",
+  "categoryId": "SERIES",
+  "subtype": "Series",
+  "name": "Avatar: The Last Airbender (2005)",
+  "teaser": "The show's bending styles were based on real martial arts — water is tai chi, earth is hung gar, fire is northern shaolin — and the show's villains were written to be sympathetic. In the series corner of screen, Avatar: The Last Airbender (2005) stands out — it hinges on Animation. Understanding Avatar: The Last Airbender (2005) changes how the rest of series reads, and it sharpens every later spin in this lane. The practical side is easy to find — follow Fantasy and the examples pile up. The natural next move is to avatar: The Last Airbender (2005). Once Avatar: The Last Airbender (2005) clicks, the rest of series feels more connected.",
+  "imageUrl": "",
+  "byline": "Michael Dante DiMartino",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Avatar: The Last Airbender (2005)",
+   "durationMinutes": 24,
+   "instruction": "Watch episode 1 and notice the bending styles — each element is a real martial art. The show's 'balance' theme is the thesis; the villains are the arguments."
+  },
+  "tags": [
+   "Animation",
+   "Fantasy",
+   "Adventure",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ }
 ]
