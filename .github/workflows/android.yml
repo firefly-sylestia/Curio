@@ -122,9 +122,9 @@ jobs:
           retention-days: 1
 
   # v27t — Compose Multiplatform desktop port: keep the JVM/desktop module
-  # compiling on every push so the port can't silently rot. Only compiles +
-  # builds the jar — native .exe/.dmg/.deb packaging happens in a dedicated
-  # desktop release workflow once the port matures.
+  # compiling on every push so the port can't silently rot, and upload the
+  # compiled JAR as a downloadable artifact. Native .exe/.dmg/.deb packaging
+  # happens in a dedicated desktop release workflow (tag pushes).
   desktop:
     name: Compile Curio Desktop (JVM)
     runs-on: ubuntu-latest
@@ -148,3 +148,15 @@ jobs:
 
       - name: Compile and build the desktop module
         run: ./gradlew :desktop:build --stacktrace
+
+      # The JAR here is a plain compile artifact (classes + topic resources),
+      # NOT a standalone-runnable app — a runnable desktop build needs the
+      # Compose runtime + Skiko native libs, which the desktop release
+      # workflow bundles via jpackage on a tag push.
+      - name: Upload desktop JAR
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-desktop-jar-${{ github.run_number }}
+          path: desktop/build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 14
