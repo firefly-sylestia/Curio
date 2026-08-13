@@ -16344,7 +16344,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Geology Through the Seasons",
-  "teaser": "How seasons shape the land.",
+  "teaser": "Geology has its own seasons that outlast human ones: ice ages advance and retreat over tens of thousands of years, and mountain ranges grow and erode over millions. Yet seasonal cycles show up in the record too — annual sediment layers called varves and ice layers marking each year's snowfall. Geology runs on two clocks: the slow one of deep time and the annual one written in every layer.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16363,7 +16363,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Spring Geology",
-  "teaser": "The melt and flow season.",
+  "teaser": "Spring is geology's season of motion: melting snow swells rivers, carrying sediment and reshaping channels; freeze-thaw cycles finish their winter work, toppling blocks and widening cracks; and landslides wake on saturated slopes. Frost heave pushes stones up through soil, and rising groundwater carries minerals to the surface. Spring's floods deposit new layers on floodplains, beginning the year's record. For geologists, spring is when the landscape visibly moves.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16382,7 +16382,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Summer Geology",
-  "teaser": "The dry and hot season.",
+  "teaser": "Summer dries the land and exposes it: low rivers reveal bars and beds, drought cracks clay into polygons, and wildfires strip vegetation, making erosion obvious and triggering debris flows. Desert heat drives thermal weathering, spalling rock surfaces. Warm lakes stratify, layering their sediment records. For field geologists, summer is the season of outcrops — dry ground, low water, and long days to map, sample, and measure the exposed rock.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16401,7 +16401,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Autumn Geology",
-  "teaser": "The wet transition season.",
+  "teaser": "Autumn's geology is written in water and colour: leaf litter feeds soil organisms, storms stir lakes into turnover, and first frosts begin the year's freeze-thaw cycle. Falling water levels expose beaches and bars that summer floods hid, revealing new sections. Migrating sediment settles into the year's final layer. For geologists in temperate regions, autumn is a second field season — clearer water, cooler weather, and freshly exposed riverbanks.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16420,7 +16420,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Winter Geology",
-  "teaser": "The freeze season.",
+  "teaser": "Winter is when ice takes over the landscape: snow loads slopes, glaciers advance on their slow schedule, and frost wedging attacks every exposed crack. Frozen ground locks water in place, pausing groundwater movement. Ice jams on rivers build and release in violent floods, reshaping channels. For geologists, winter is lab season — samples are processed, thin sections made, and maps drawn while the field sleeps under snow.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16439,7 +16439,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Patterns in Time",
-  "teaser": "The rhythms of the rock record.",
+  "teaser": "Geology is full of repeating patterns: supercontinents assemble and split in the Wilson cycle, sea levels rise and fall in cycles of tens of thousands of years, and ice ages pulse with Earth's orbital wobbles. Sediment layers repeat as seasons and Milankovitch cycles pace them. These patterns let geologists predict — a pattern that took 100 million years reveals itself in the next layer. Earth's history is less a timeline than a set of rhythms.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16458,7 +16458,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Thinking in Deep Time",
-  "teaser": "The mindset of geology.",
+  "teaser": "Deep time is geology's hardest idea: 4.6 billion years of Earth history, so vast that human history is a blink. Geologists learn to think in millions of years — a canyon carved over six million, a mountain range rising over fifty. The metaphor that helps: compress Earth's history into a single year, and humans appear in the final seconds of December 31. It changes how you see every landscape.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16477,7 +16477,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Fast and Slow Geology",
-  "teaser": "The two tempos of Earth.",
+  "teaser": "Geology moves at two speeds at once: catastrophes that reshape landscapes in minutes — earthquakes, eruptions, landslides — and processes so slow they are invisible — continents drifting centimetres a year, mountains eroding millimetres. Both are geology, and both matter. The slow processes built the stage; the fast ones reset it. Understanding geology means holding both timescales in your head: the instant of a quake and the million years that loaded the fault.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16496,7 +16496,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Pivotal Geologic Moments",
-  "teaser": "The turning points of Earth.",
+  "teaser": "A few geological moments changed everything: the Chicxulub impact 66 million years ago ended the dinosaurs; the eruption of Toba 74,000 years ago may have bottlenecked humanity; the opening of the Drake Passage 30 million years ago froze Antarctica; and the Columbia River flood basalt eruptions shaped the Pacific Northwest. Each moment is a layer in the rock record, detectable worldwide. Geology's calendar is marked by such pivotal instants.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16515,7 +16515,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Changes in the Record",
-  "teaser": "Reading major transitions.",
+  "teaser": "The rock record marks turning points in Earth's story: the Great Oxidation Event 2.4 billion years ago, when oxygen from life changed the atmosphere and rusted the oceans; the Cambrian explosion of animal life; the Permian extinction that nearly emptied the seas; the rise of land plants that changed weathering and climate. Each turning point is recorded in distinctive rocks and chemistry. Earth's history is a series of revolutions written in stone.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16534,7 +16534,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Geology Today",
-  "teaser": "Earth science in this moment.",
+  "teaser": "Geology today is a crisis science and a resource science at once: geologists monitor climate change in ice cores and sea levels, map critical minerals for the energy transition, warn of earthquakes and volcanoes, and manage groundwater under stress. Every major challenge of the century — energy, climate, water — runs through the ground, and the field is changing fast with satellites and machine learning.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16553,7 +16553,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "The Next Million Years",
-  "teaser": "Forecasting the Earth.",
+  "teaser": "The next million years are visible in outline: continents will keep drifting, Africa's rift will widen, and the Atlantic will grow while the Pacific shrinks. Ice ages will likely return, sea levels will rise and fall, and new sediment will bury today's cities. Over tens of millions of years, a new supercontinent may assemble. Geology's future is as legible as its past — just slower than we are used to.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16572,7 +16572,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Human Time vs Earth Time",
-  "teaser": "Two scales of history.",
+  "teaser": "Human time and geological time barely overlap: civilizations last millennia, while geological events run in millions of years. A fault can sit quiet for 10,000 years — longer than all of recorded history — then rupture. Climate changes that took a millennium geologically can be compressed into a century by human activity. The mismatch is both our danger and our opportunity: we are the first species able to read deep time.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16591,7 +16591,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Long-Term Thinking",
-  "teaser": "Geology's gift to planning.",
+  "teaser": "The Long Now movement thinks in ten-thousand-year horizons, inspired by geology's deep time. Its clock, designed to tick for 10,000 years, is a monument to thinking beyond human lifetimes — the way geologists already do. Long-term thinking shapes everything from nuclear waste storage, which must be marked to warn beings thousands of years from now, to conservation. Geology is the original Long Now institution: it has kept records for billions of years.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16610,7 +16610,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Processes Acting Today",
-  "teaser": "The ongoing Earth work.",
+  "teaser": "The same processes that built the past are running today: rivers carve, volcanoes erupt, plates drift, and ice grinds. Geologists call this uniformitarianism — the present is the key to the past. Watching modern eruptions, floods, and landslides calibrates how to read ancient ones. A lava flow today looks like one from a billion years ago; a river meander behaves the same. The present is geology's laboratory, and it never closes.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16629,7 +16629,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Earth's Grand Cycles",
-  "teaser": "The systems that recycle.",
+  "teaser": "Earth runs grand cycles that recycle everything: the rock cycle turns igneous to sedimentary to metamorphic rock; the carbon cycle shuttles CO₂ between air, oceans, life, and rock; the water cycle moves water through sky, land, and sea; and plate tectonics recycles crust into the mantle and back. Each cycle runs on geological timescales but touches every human breath. Geology is the study of these loops — nothing on Earth is truly new, only recycled.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16648,7 +16648,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Geologic Heritage",
-  "teaser": "The stories we inherit.",
+  "teaser": "Geologic heritage protects the landscapes and sites that tell Earth's story: the Grand Canyon's strata, the Burgess Shale's fossils, the Giant's Causeway's columns, and thousands of national parks and geoparks. These places are irreplaceable records of deep time, and they are threatened by development, climate change, and overuse. Protecting geologic heritage means safeguarding the planet's archive. Every protected outcrop is a page saved from the scrap heap.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16667,7 +16667,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "How Earth Remembers",
-  "teaser": "The records we can read.",
+  "teaser": "Earth remembers: its rocks hold the record of every era — the chemistry of ancient atmospheres, the position of continents, the rhythm of ice ages. Ice cores preserve 800,000 years of climate in trapped bubbles; corals and tree rings extend the record; sediments store pollen and ash. This memory is readable, and geologists read it. The planet is a library that has never stopped writing.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16686,7 +16686,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "Stone as Timekeeper",
-  "teaser": "Rocks keeping the clock.",
+  "teaser": "Stone is the medium of time: every rock carries the age it formed, the environment it formed in, and the events that reshaped it since. A granite's crystals record slow cooling; a sandstone's grains record an ancient beach; a gneiss's bands record deep metamorphism. Geologists date these records with radioactive clocks that tick inside the minerals themselves. To hold a stone is to hold time — billions of years compressed into a hand-sized object.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16705,7 +16705,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Geology & Time",
   "name": "The Geologic Legacy",
-  "teaser": "What the Earth bequeaths.",
+  "teaser": "Geology's legacy is the framework of deep time and moving continents — ideas as transformative as evolution. The realization that Earth is 4.6 billion years old, that continents drift, that ice ages come and go, and that the same slow forces still shape the world changed how humanity sees itself. Geology gave us the timescale on which evolution, climate, and resources are understood. Every field of Earth science stands on that legacy.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16724,7 +16724,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Ocean Geology",
-  "teaser": "The Earth beneath the waves.",
+  "teaser": "Ocean geology studies the 71 percent of Earth covered by water: the mid-ocean ridges that build new crust, the trenches where plates sink, the abyssal plains draped in sediment, and the seamounts that rise from the deep. Most of the seafloor is younger than 200 million years — constantly recycled. The ocean floor records plate tectonics more clearly than any continent. Underwater geology is the missing half of Earth science, now being mapped in detail.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16743,7 +16743,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Continental Margins",
-  "teaser": "The edges of the continents at sea.",
+  "teaser": "Continental margins are the transition zones between land and ocean floor: passive margins, like the Atlantic coasts, where rifting split a continent and the margin slowly subsides under accumulating sediment; and active margins, like the Pacific, where plates collide or subduct, building mountains and trenches. Passive margins hold thick sediment wedges — rich in oil — while active margins are zones of earthquakes and volcanoes. The edge of every continent is a geological frontier.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16762,7 +16762,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Continental Shelves",
-  "teaser": "The flooded edges of continents.",
+  "teaser": "Continental shelves are the shallow, gently sloping underwater edges of continents, extending to about 200 metres depth before dropping to the deep sea. During ice ages, when sea level fell, shelves were dry land — the Bering Strait shelf connected Asia and America. Shelves teem with life and hold oil, gas, and fishing grounds. They are the most productive and most contested marine geology on Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16781,7 +16781,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Abyssal Plains",
-  "teaser": "The flat deep ocean floors.",
+  "teaser": "Abyssal plains are the vast, flat sediment-covered expanses of the deep ocean floor, lying between 4,000 and 6,000 metres down. They are among the flattest places on Earth — the sediment, delivered by currents and the slow rain of marine life, blankets the rugged basalt crust beneath. Despite their emptiness, they host manganese nodules, unique life, and kilometres of sediment that record ocean history. Abyssal plains cover more of Earth's surface than any other feature.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16800,7 +16800,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Seamounts",
-  "teaser": "The underwater mountains.",
+  "teaser": "Seamounts are underwater mountains, usually extinct volcanoes, rising from the seafloor without breaking the surface. They are scattered across every ocean — estimates run to tens of thousands — and many are arranged in chains marking the path of hotspots. Seamounts are biodiversity hotspots, their slopes teeming with corals and fish, and some hold cobalt-rich crusts. A few, like Hawaii's, grow tall enough to become islands. Each seamount is a geological island in the deep.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16819,7 +16819,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Hydrothermal Vents",
-  "teaser": "The seafloor hot springs.",
+  "teaser": "Hydrothermal vents are cracks in the seafloor where superheated, mineral-rich water erupts — black smokers jetting 350°C fluid laden with dissolved metals. The minerals precipitate into towering chimneys, and the vents power ecosystems that run on chemosynthesis instead of sunlight: tube worms, shrimp, and microbes living off the vent chemistry. The discovery in 1977 revolutionized biology and geology. Vents are Earth's chemical laboratories, and possibly a model for the origin of life.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16838,7 +16838,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Oceanic Crust",
-  "teaser": "The young crust of the seas.",
+  "teaser": "Oceanic crust is the thin, dense basalt skin of the seafloor, created at mid-ocean ridges and destroyed at trenches. It is only 6 to 10 kilometres thick, far thinner than continental crust, and almost all younger than 200 million years. Its layered structure — pillow basalt, sheeted dykes, gabbro — records its birth at the ridge, and its magnetic stripes proved seafloor spreading. It is the conveyor belt of plate tectonics.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16857,7 +16857,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Marine Sediments",
-  "teaser": "The seafloor deposits.",
+  "teaser": "Marine sediments are the deep ocean's slow rain: dust blown from continents, ash from eruptions, the shells of microscopic life, and fine clay that settles everywhere. They accumulate at centimetres per thousand years in the deep sea, building layers that record climate, ocean chemistry, and life through time. Ocean drilling cores from these sediments are the most complete archive of the last 100 million years.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16876,7 +16876,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Calcareous Ooze",
-  "teaser": "The shell-rich seafloor mud.",
+  "teaser": "Calcareous ooze is seafloor sediment made of the calcium carbonate shells of microscopic plankton — foraminifera and coccolithophores. It carpets large areas of the deep ocean where surface waters teem with shelled life, but only above the carbonate compensation depth, where seawater can still hold calcium carbonate in solution; below about 4,500 metres the shells dissolve. Lithified, it becomes chalk and limestone — the White Cliffs of Dover.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16895,7 +16895,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Siliceous Ooze",
-  "teaser": "The silica-rich seafloor mud.",
+  "teaser": "Siliceous ooze is seafloor sediment made of the opaline silica shells of diatoms and radiolarians, plankton that build glassy skeletons. It accumulates in cold, productive waters and beneath zones of upwelling, where these organisms thrive — forming vast deposits in the Southern Ocean and the equatorial Pacific. Siliceous ooze becomes chert and flint when lithified. Because silica dissolves slowly, the ooze records past productivity and ocean circulation in its glassy layers.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16914,7 +16914,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Manganese Nodules",
-  "teaser": "The potato-like seafloor treasures.",
+  "teaser": "Manganese nodules are potato-sized lumps of metal on the deep seafloor — concentric layers of manganese, iron, and traces of copper, nickel, and cobalt, growing a few millimetres per million years. They form where metals precipitate from seawater onto a nucleus, and they carpet vast abyssal plains, particularly in the Pacific's Clarion-Clipperton Zone. Rich in battery metals, they are the target of controversial deep-sea mining. Each nodule is a slow-motion geological growth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16933,7 +16933,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Deep-Sea Trenches",
-  "teaser": "The abyssal valleys.",
+  "teaser": "Deep-sea trenches are the deepest places on Earth, where oceanic plates bend and sink into the mantle at subduction zones. The Mariana Trench plunges nearly 11 kilometres — deeper than Everest is high. Trenches recycle crust, trigger earthquakes and tsunamis, and drag water into the deep Earth. Their floors host unique life adapted to crushing pressure. Trenches are the planet's deepest wounds and most active zones.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16952,7 +16952,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Paleoceanography",
-  "teaser": "Reading ancient oceans.",
+  "teaser": "Paleoceanography reconstructs the history of the oceans: their temperatures, currents, chemistry, and productivity through time. Geologists read this from marine sediment chemistry — oxygen isotopes in shells record temperature and ice volume; carbon isotopes track circulation; and sediment types map currents. The field revealed how ocean circulation drives ice ages and how the seas respond to warming. Paleoceanography is the deep memory of the largest habitat on Earth.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16971,7 +16971,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Ocean Basin Formation",
-  "teaser": "How ocean basins begin.",
+  "teaser": "Ocean basins form when continents rift apart: the East African Rift is splitting today; the Red Sea is a young flooded rift; the Atlantic is a mature basin still widening by centimetres a year. Each basin follows a life cycle — rift valley, narrow sea, widening ocean, then closure as subduction begins and ends in collision. The Wilson cycle describes this opening and closing over hundreds of millions of years.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -16990,7 +16990,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Continental Rises",
-  "teaser": "The sediment aprons at the deep.",
+  "teaser": "The continental rise is the apron of sediment at the base of the continental slope, where material washed off the continents finally comes to rest. Turbidity currents — underwater avalanches of mud and sand — build vast fan deposits that can extend hundreds of kilometres onto the abyssal plain. The rise is thickest off major rivers and hosts enormous sediment piles, some with oil potential. It is the geological dump site for the continents' erosion.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -17009,7 +17009,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Turbidity Currents",
-  "teaser": "The underwater avalanches.",
+  "teaser": "Turbidity currents are underwater avalanches: dense slurries of sediment and water that race down continental slopes at up to 70 kilometres per hour. Triggered by earthquakes, storms, or slope failure, they carry sand and mud far out onto the deep seafloor, depositing graded beds called turbidites. Some currents snap submarine cables, as happened off Newfoundland in 1929. Turbidite sequences are both a hazard to seafloor infrastructure and a record of past slope events.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -17028,7 +17028,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Guyots",
-  "teaser": "The flat-topped seamounts.",
+  "teaser": "Guyots are flat-topped underwater mountains — extinct volcanoes whose summits were planed flat by wave erosion when they stood at the surface, then subsided below sea level. They are named for Arnold Guyot, and they chart the fate of volcanic islands: active, then eroding, then sinking as the crust cools and subsides. Their flat tops, now hundreds of metres deep, record ancient sea levels. Guyots in chains trace the motion of plates over hotspots.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -17047,7 +17047,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Modern Seafloor Mapping",
-  "teaser": "Charting the deep today.",
+  "teaser": "Modern seafloor mapping is transforming our knowledge of the deep: multibeam sonar, satellite altimetry, and autonomous underwater vehicles now image the ocean floor in detail. International efforts like Seabed 2030 aim to map the entire seafloor by 2030 — currently only about 25 percent is mapped at high resolution. Each new map reveals seamounts, faults, and landslides that change our understanding of the planet. The last unmapped frontier on Earth is being charted now.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -17066,7 +17066,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "Ocean Drilling",
-  "teaser": "Sampling the deep seafloor.",
+  "teaser": "Ocean drilling has revolutionized geology: ships drill deep cores from the seafloor, recovering sediment and rock from every ocean. The cores date the seafloor, reveal past climates, find deep biosphere life, and test plate tectonics. Drilling discovered the Mediterranean's desiccation and the abrupt climate shifts of the last ice age. The seafloor is the Earth's best archive, and drilling is how we read it.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
@@ -17085,7 +17085,7 @@
   "categoryId": "GEOLOGY",
   "subtype": "Ocean Geology",
   "name": "The Future of Ocean Geology",
-  "teaser": "Exploring the deep ahead.",
+  "teaser": "The future of ocean geology is wide open: full seafloor mapping, deep drilling into the mantle, and real-time monitoring of submarine volcanoes and vents. Deep-sea mining of nodules is approaching, bringing geological assessment to the abyssal plains, and rising seas put coastal geology at the forefront. The ocean floor remains the least explored geology on Earth — its era of discovery is coming.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
