@@ -76,16 +76,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -2342,7 +2339,8 @@ private fun HeroTicketCard(
     // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
     // toggle was removed from Experiments and the read is hardcoded here.
     val heroGradientOn = true
-    val heroBorderOn = AppPreferences.heroBorderState
+    // v27u — the ticket's gradient rim border (and its AMOLED edge-shine
+    // rim light) were removed; the main card is border-free.
     val heroShadowOn = AppPreferences.heroShadowState
     // v24 — the dual-accent hero gradient experiment was rejected (ugly
     // golden blend); always OFF, so the blend branch below is dead.
@@ -2590,19 +2588,6 @@ private fun HeroTicketCard(
                     } else Modifier
                 )
                 .clip(RoundedCornerShape(30.dp))
-                .then(
-                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                        // v15 — the black-glass ticket carries the deck's
-                        // category color as a rim light: the edge shine
-                        // brightened from 0.55 → 0.75 so the accent reads
-                        // clearly on the OLED black, but stays below the
-                        // full-shine settings cards so the main card keeps
-                        // its sleek, clean look.
-                        Modifier.categoryEdgeShine(
-                            RoundedCornerShape(30.dp), accent, intensity = 0.75f
-                        )
-                    } else Modifier
-                )
         ) {
             Surface(
                 shape = RoundedCornerShape(30.dp),
@@ -2618,57 +2603,6 @@ private fun HeroTicketCard(
                         .background(
                             ticketBrush,
                             RoundedCornerShape(30.dp)
-                        )
-                        .then(
-                            if (heroBorderOn) {
-                                // v7.16 — refined gradient rim-light: a slim
-                                // 1.5dp stroke that catches light at the top
-                                // (barely brightened ink) and eases a whisper
-                                // of the accent at the bottom, plus a fainter
-                                // 1dp bevel hairline just inside — a soft
-                                // machined edge instead of the old harsh 2dp
-                                // white-to-accent ring.
-                                Modifier.drawBehind {
-                                    val borderW = 1.5.dp.toPx()
-                                    val radius = 30.dp.toPx() - borderW / 2f
-                                    drawRoundRect(
-                                        brush = Brush.verticalGradient(
-                                            listOf(
-                                                // v15 — dark mode: the old
-                                                // white-lerp rim drew a solid
-                                                // bright ring around the card;
-                                                // dark tones fade toward the
-                                                // fill at soft alpha so the
-                                                // machined edge stays subtle.
-                                                if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
-                                                else lerp(ink, Color.White, 0.30f),
-                                                if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
-                                                else lerp(ink, accent, 0.14f)
-                                            )
-                                        ),
-                                        topLeft = Offset(borderW / 2f, borderW / 2f),
-                                        size = Size(size.width - borderW, size.height - borderW),
-                                        cornerRadius = CornerRadius(radius, radius),
-                                        style = Stroke(width = borderW)
-                                    )
-                                    val innerW = 1.dp.toPx()
-                                    val inset = borderW + innerW
-                                    drawRoundRect(
-                                        // Bevel hairline: dark in light mode;
-                                        // in dark mode a black line would
-                                        // vanish on the dark fill, so it flips
-                                        // to a faint light stroke instead.
-                                        color = if (dark)
-                                            lerp(ink, Color.White, 0.60f).copy(alpha = 0.06f)
-                                        else
-                                            Color.Black.copy(alpha = 0.04f),
-                                        topLeft = Offset(inset, inset),
-                                        size = Size(size.width - 2f * inset, size.height - 2f * inset),
-                                        cornerRadius = CornerRadius(radius - innerW, radius - innerW),
-                                        style = Stroke(width = innerW)
-                                    )
-                                }
-                            } else Modifier
                         )
                 ) {
                     // One category watermark — keep the Shuffle hero focused

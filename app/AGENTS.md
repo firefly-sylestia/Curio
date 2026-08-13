@@ -162,6 +162,17 @@ app/src/main/java/com/curio/app/
   DIARY-SPIRAL punches: 3 holes, 5.5dp radius at 14dp from the left edge,
   each wearing a two-tone pressed rim — faint 1dp lip ring, top-left white
   highlight arc (160°→290°), bottom-right ink shadow arc (340°→110°).
+- **v27u — main card + reveal hero are border-free; save-page strip is
+  opaque.** (1) The Spin ticket's drawn gradient rim border (1.5dp stroke +
+  1dp bevel) and its AMOLED edge-shine rim light are GONE, and the Topic
+  Reveal hero's matching rim is gone too — the shared-element morph stays
+  clean because both cards changed together. The `heroBorderState` pref API
+  stays dormant (default true, nothing reads it). (2) The SaveCapture topic
+  strip no longer wears `cat.tint` (accent @ 20% alpha) under its 3dp
+  shadow — translucent fills bleed shadows (v27n rule) — it now uses an
+  opaque `lerp(surfaceContainerHigh, cat.accent, 0.20f)` fill, and the
+  strip's icon plate is opaque (`lerp(surfaceContainerHigh, themedAccent,
+  0.15f)`).
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

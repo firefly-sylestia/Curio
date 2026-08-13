@@ -61,13 +61,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -1471,7 +1468,8 @@ private fun HeroCard(
     // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
     // toggle was removed from Experiments and the read is hardcoded here.
     val heroGradientOn = true
-    val heroBorderOn = AppPreferences.heroBorderState
+    // v27u — the hero's gradient rim border was removed (it mirrored the
+    // Spin ticket's border, which is also gone — the morph stays clean).
     // v24 — the dual-accent hero gradient experiment was rejected (ugly
     // golden blend); always OFF, so the blend branch below is dead.
     val heroBlendOn = false
@@ -1527,35 +1525,6 @@ private fun HeroCard(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(30.dp))
-                .then(
-                    // Hero border — whisper hairline matching the ticket
-                    if (heroBorderOn) {
-                        Modifier.drawBehind {
-                            val borderW = 1.5.dp.toPx()
-                            val radius = 30.dp.toPx() - borderW / 2f
-                            drawRoundRect(
-                                brush = Brush.verticalGradient(
-                                    listOf(
-                                        // v15 — dark mode: the old white-lerp
-                                        // rim drew a solid bright ring around
-                                        // the card; dark tones fade toward the
-                                        // fill at soft alpha so the machined
-                                        // edge stays subtle (mirror of the
-                                        // Spin ticket).
-                                        if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
-                                        else lerp(ink, Color.White, 0.30f),
-                                        if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
-                                        else lerp(ink, accent, 0.14f)
-                                    )
-                                ),
-                                topLeft = Offset(borderW / 2f, borderW / 2f),
-                                size = Size(size.width - borderW, size.height - borderW),
-                                cornerRadius = CornerRadius(radius, radius),
-                                style = Stroke(width = borderW)
-                            )
-                        }
-                    } else Modifier
-                )
         ) {
             // ── Gradient brush — pixel-perfect match with the Spin ticket:
             //    same color stops AND the same diagonal linearGradient when

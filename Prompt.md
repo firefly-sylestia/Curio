@@ -1,6 +1,48 @@
 # Prompt.md — Request log
 
-## Current request — CI fix: jpackage "Illegal version" for the v1.0.2-beta tag
+## Current request — main-card border removal + save-page opaque fills (v27u)
+
+### What was asked
+"Leftover border cleanup: the main card still has the border. And on 'Save
+your take', the topic-name card at the top and the attach photo have a
+visual transparency issue — make it opaque, no transparency."
+
+### User decisions (ask_user)
+- Border scope: remove the drawn rim border from BOTH the Spin main card AND
+  the Topic Reveal hero, and ALSO remove the main card's AMOLED rim light.
+- Save page: topic strip fill + icon plate BOTH opaque.
+
+### Root causes
+- **Spin main card** (`SpinScreen.kt`) drew a 1.5dp gradient rim border +
+  1dp bevel (`heroBorderOn` ← `AppPreferences.heroBorderState`, default
+  true) plus an AMOLED `categoryEdgeShine` rim light — leftover borders from
+  the v27n border-removal pass.
+- **Topic Reveal hero** (`TopicRevealScreen.kt`) mirrored the same 1.5dp
+  gradient rim (must change with the ticket or the shared-element morph
+  would show the border popping in mid-morph).
+- **SaveCapture topic strip** used `cat.tint` = accent @ 20% alpha under a
+  3dp `shadowElevation` — translucent fill bleeds the shadow (v27n rule),
+  the exact transparency issue the user saw; its icon plate was
+  `themedAccent().copy(alpha = 0.15f)` (also translucent). The attach-photo
+  add tile was already opaque (v27n lerp) — nothing more to change there.
+
+### Fix
+- Removed the gradient rim + bevel `drawBehind` blocks and the AMOLED
+  `categoryEdgeShine` from the Spin main card; removed the matching rim from
+  the Reveal hero. Dropped now-unused imports (drawBehind, CornerRadius,
+  Stroke) in both files; the `categoryEdgeShine` import stays (4 other uses
+  in SpinScreen). `heroBorderState` pref API left dormant (nothing reads it
+  now — consistent with v25's dormant-pref convention).
+- SaveCapture strip fill → opaque `lerp(surfaceContainerHigh, cat.accent,
+  0.20f)` (preserves the tinted look, clean 3dp shadow); icon plate → opaque
+  `lerp(surfaceContainerHigh, themedAccent(), 0.15f)`.
+
+### Validation
+Brace balance OK (3 files), `git diff --check` clean, no leftover
+heroBorderOn/drawBehind/CornerRadius/Stroke refs in either file. No Gradle
+locally (env rule) — CI on push is the gate. Docs: app/AGENTS.md v27u note.
+
+## Prior — CI fix: jpackage "Illegal version" for the v1.0.2-beta tag
 
 ### What was asked
 User pasted two identical CI failures (Windows desktop-release + Linux

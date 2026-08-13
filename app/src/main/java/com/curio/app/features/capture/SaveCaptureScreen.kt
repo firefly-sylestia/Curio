@@ -552,7 +552,14 @@ fun SaveCaptureScreen(
             else -> 0L
         }
         val tintWash = AppPreferences.tintWashEffective()
-        val stripColor = if (tintWash) cat.tint else MaterialTheme.colorScheme.surfaceContainerHigh
+        // v27u — opaque strip fill: cat.tint is the accent at 20% alpha, and
+        // a translucent fill bleeds the 3dp shadow through (v27n rule). The
+        // opaque lerp keeps the same tinted look with a clean shadow.
+        val stripColor = if (tintWash) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.accent, 0.20f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
         val stripInk = if (tintWash) cat.categoryInk() else MaterialTheme.colorScheme.onSurface
         Surface(
             color = stripColor,
@@ -569,8 +576,13 @@ fun SaveCaptureScreen(
             ) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = if (tintWash) cat.themedAccent().copy(alpha = 0.15f)
-                            else MaterialTheme.colorScheme.surfaceVariant
+                    // v27u — opaque icon plate (was the accent at 15% alpha —
+                    // no transparency anywhere on the strip).
+                    color = if (tintWash) {
+                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.themedAccent(), 0.15f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
                 ) {
                     CurioIcon(
                         name = cat.iconGlyph,
