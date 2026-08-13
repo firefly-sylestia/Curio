@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.awaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -80,9 +79,13 @@ object PetPointer {
     fun trackerModifier(): Modifier = Modifier.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
-                val change = awaitPointerEvent().changes.firstOrNull() ?: continue
+                // NOTE: use the EVENT's type (PointerEventType) for
+                // scroll/press/release — PointerInputChange.type is a
+                // different enum (PointerType: touch/mouse/stylus).
+                val event = awaitPointerEvent()
+                val change = event.changes.firstOrNull() ?: continue
                 position = change.position
-                when (change.type) {
+                when (event.type) {
                     PointerEventType.Scroll -> rollTick++
                     PointerEventType.Press -> press = change.position
                     PointerEventType.Release -> press = null
@@ -553,7 +556,7 @@ fun CurioPetSprite(
         }
     }
     val lookCells: Offset =
-        if (pointerAware && spriteCenter != null && lookAt.isSpecified) {
+        if (pointerAware && spriteCenter != null && lookAt != Offset.Unspecified) {
             val d = lookAt - spriteCenter!!
             val dist = d.getDistance().coerceAtLeast(1f)
             // Aim saturates within ~200dp — a farther cursor keeps pointing
