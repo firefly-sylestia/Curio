@@ -269,7 +269,8 @@ constructors.
   JSON saved-entries store (`~/.curio/entries.json`, reactive via Compose
   state).
 - CI: the `desktop` job in `.github/workflows/android.yml` compiles and
-  builds the module on every push (`:desktop:build`), so the port can't
+  builds the module on every push (`:desktop:build`) and uploads the
+  compiled JAR as an artifact (`curio-desktop-jar-*`), so the port can't
   silently rot. Native Windows installers (`.exe` app image + `.msi`)
   build on tag pushes via `.github/workflows/desktop-release.yml` (a
   windows-latest runner, WiX via chocolatey, jpackage
