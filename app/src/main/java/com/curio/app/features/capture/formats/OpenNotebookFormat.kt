@@ -59,6 +59,7 @@ import com.curio.app.ui.theme.pastelFillInk
 @Composable
 fun OpenNotebookFormat(
     accent: Color,
+    tint: Color,
     onCanSaveChange: (Boolean) -> Unit,
     onDataChanged: (CaptureData?) -> Unit = {},
     initialData: CaptureData.OpenNotebook? = null,

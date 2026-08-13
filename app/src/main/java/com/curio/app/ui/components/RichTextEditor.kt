@@ -814,7 +814,8 @@ fun RichTextEditor(
                             onItalic = { applyFlag(RichFlag.ITALIC) },
                             onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
                             onSizePick = { applyExactSize(it) },
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            paper = paper
                         )
                     }
                 }
@@ -911,7 +912,8 @@ fun RichTextEditor(
                                 onBold = { applyFlag(RichFlag.BOLD) },
                                 onItalic = { applyFlag(RichFlag.ITALIC) },
                                 onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
-                                onSizePick = { applyExactSize(it) }
+                                onSizePick = { applyExactSize(it) },
+                                paper = paper
                             )
                         }
                     }
@@ -990,7 +992,8 @@ private fun SelectionFormatBar(
     onBold: () -> Unit,
     onItalic: () -> Unit,
     onHighlight: () -> Unit,
-    onSizePick: (Float) -> Unit
+    onSizePick: (Float) -> Unit,
+    paper: Boolean = false
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -1003,9 +1006,9 @@ private fun SelectionFormatBar(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold)
-            FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic)
-            FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight)
+            FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold, paper = paper)
+            FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic, paper = paper)
+            FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight, paper = paper)
             // One text-size button — the A+/A− pair both opened the same
             // size-picker dropdown, so they collapsed into a single button.
             SizePickerButton(
@@ -1015,7 +1018,8 @@ private fun SelectionFormatBar(
                 accent = accent,
                 enabled = enabled,
                 currentSp = currentSp,
-                onPick = onSizePick
+                onPick = onSizePick,
+                paper = paper
             )
         }
     }
@@ -1035,16 +1039,17 @@ private fun FormatToolbar(
     onItalic: () -> Unit,
     onHighlight: () -> Unit,
     onSizePick: (Float) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    paper: Boolean = false
 ) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold)
-        FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic)
-        FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight)
+        FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold, paper = paper)
+        FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic, paper = paper)
+        FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight, paper = paper)
         // Text size — tapping opens a dropdown of fixed sizes; picking one
         // applies it to the selection (if any) and arms it as the sticky
         // size so the next text typed carries it. The button stays lit
@@ -1135,16 +1140,23 @@ private fun FormatToolButton(
     accent: Color,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v27r — note-paper toolbars ride a FIXED paper control accent (amber
+    // in dark / brown in light), so their active fill is a MODERATED tint
+    // of the accent with the accent itself as glyph ink — a solid amber
+    // block was too saturated and white-on-amber unreadable. Category-accent
+    // toolbars (paper = false) keep the solid accent + on-fill ink.
+    paper: Boolean = false
 ) {
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(10.dp),
-        // v27q — the active tool fills with the SOLID accent (was an 18%
-        // lerp, which read muddy and let the shadow bleed); the glyph flips
-        // to the pastel-aware on-fill ink; elevation stays flat 2dp.
-        color = if (active) accent else MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = when {
+            active && paper -> lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
+            active -> accent
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+        },
         shadowElevation = 2.dp,
         modifier = modifier
     ) {
@@ -1153,8 +1165,10 @@ private fun FormatToolButton(
             contentDescription = label,
             // Theme-aware: inactive tools follow the theme's muted ink (which
             // reads on the dock surface AND the floating bar in every theme),
-            // active tools flip to the on-fill ink on the solid accent.
-            tint = if (active) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurfaceVariant,
+            // active tools flip to the on-fill ink (solid accent) or the
+            // accent itself on the tinted paper fill.
+            tint = if (active) (if (paper) accent else pastelFillInk(accent))
+                   else MaterialTheme.colorScheme.onSurfaceVariant,
             size = 16.dp,
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
         )
@@ -1178,7 +1192,8 @@ private fun SizePickerButton(
     accent: Color,
     enabled: Boolean,
     currentSp: Float,
-    onPick: (Float) -> Unit
+    onPick: (Float) -> Unit,
+    paper: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -1188,7 +1203,8 @@ private fun SizePickerButton(
             active = active,
             accent = accent,
             enabled = enabled,
-            onClick = { expanded = true }
+            onClick = { expanded = true },
+            paper = paper
         )
         DropdownMenu(
             expanded = expanded,

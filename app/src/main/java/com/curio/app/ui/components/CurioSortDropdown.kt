@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -63,8 +62,10 @@ fun CurioSortDropdown(
     // capsules now read clearly next to the other hero actions.
     // v27n — the fill is now OPAQUE (ink lerped into the banner at the old
     // glass alpha): a translucent fill let the elevation shadow bleed
-    // through as a blurry broken background.
-    val fill = if (emphasized) lerp(ink, backdrop, 0.45f) else lerp(ink, backdrop, 0.70f)
+    // through as a blurry broken background. v27r — the fills deepened
+    // (0.45/0.70 -> 0.35/0.55) so the arrow + label capsules read as
+    // clearly visible pills on the banner, and the glyphs stay FULL ink.
+    val fill = if (emphasized) lerp(ink, backdrop, 0.35f) else lerp(ink, backdrop, 0.55f)
 
     Box(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -88,8 +89,10 @@ fun CurioSortDropdown(
                     CurioIcon(
                         name = CurioIcons.KeyboardArrowDown,
                         contentDescription = "Choose sort field",
-                        tint = ink.copy(alpha = 0.7f),
-                        size = 14.dp
+                        // v27r — full-opacity ink (was 70%) so the chevron
+                        // reads clearly on the deeper pill.
+                        tint = ink,
+                        size = 16.dp
                     )
                 }
             }
@@ -108,10 +111,11 @@ fun CurioSortDropdown(
                         "Descending. Tap for ascending"
                     },
                     tint = ink,
-                    size = 18.dp,
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .size(20.dp)
+                    // v27r — the sort arrow is bigger (was 18dp in a 20dp
+                    // box) and the circle a touch larger so it reads as a
+                    // real toggle control.
+                    size = 22.dp,
+                    modifier = Modifier.padding(8.dp)
                 )
             }
         }

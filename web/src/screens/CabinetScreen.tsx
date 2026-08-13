@@ -155,7 +155,7 @@ export const CabinetScreen: React.FC = () => {
                 action={!searchQuery ? 'Start exploring' : undefined}
                 onAction={!searchQuery ? () => navigate('/spin') : undefined} />
             ) : (
-              <div className="space-y-6 pb-8">
+              <div className="space-y-4 pb-8">
                 {Object.entries(grouped).map(([catId, catEntries]) => {
                   const cat = getCategoryByIdSafe(catId);
                   return (

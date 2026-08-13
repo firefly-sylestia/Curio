@@ -1655,7 +1655,7 @@ private fun FormatBodyForCategory(
                         initialData = current.seed as? CaptureData.FieldNotes
                     )
                     CaptureFormat.OpenNotebook -> OpenNotebookFormat(
-                        category.themedAccent(),
+                        category.themedAccent(), category.tint,
                         { current.canSave = it },
                         { current.data = it?.withMood(current.mood) },
                         initialData = current.seed as? CaptureData.OpenNotebook,

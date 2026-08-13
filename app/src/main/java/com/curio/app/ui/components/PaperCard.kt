@@ -71,7 +71,6 @@ import com.curio.app.ui.theme.notePaperRule
 import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.paperAccent
 import com.curio.app.ui.theme.paperInk
-import com.curio.app.ui.theme.pastelFillInk
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
@@ -1899,15 +1898,18 @@ private fun CompactPaperChip(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        // v27q — the active chip fills with the SOLID accent; the label
-        // flips to the pastel-aware on-fill ink; elevation stays flat 2dp.
-        color = if (active) accent else MaterialTheme.colorScheme.surfaceContainerHighest,
+        // v27r — note-paper style chips are FIXED paper controls: the active
+        // fill is a MODERATED tint of the accent (a solid paperAccent block
+        // was too saturated and its ink unreadable in pastel mode) with the
+        // accent itself as label ink; elevation stays flat 2dp.
+        color = if (active) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
+                else MaterialTheme.colorScheme.surfaceContainerHighest,
         shadowElevation = 2.dp
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (active) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (active) accent else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
         )
     }
@@ -1934,15 +1936,16 @@ fun NotePaperColorToggle(
     var expanded by remember { mutableStateOf(false) }
     // Theme-aware on the dock/page: collapsed follows the theme's muted
     // tokens, expanded blooms in the accent (no hardcoded dark-mode bumps).
-    val ink = if (expanded) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (expanded) accent else MaterialTheme.colorScheme.onSurfaceVariant
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Surface(
             onClick = { expanded = !expanded },
             enabled = enabled,
             shape = RoundedCornerShape(10.dp),
-            // v27q — the expanded chip fills with the SOLID accent; the
-            // label flips to the pastel-aware on-fill ink; flat 2dp.
-            color = if (expanded) accent else MaterialTheme.colorScheme.surfaceContainerHighest,
+            // v27r — see CompactPaperChip: the expanded paper toggle wears a
+            // MODERATED accent tint, not a solid block; flat 2dp.
+            color = if (expanded) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
+                    else MaterialTheme.colorScheme.surfaceContainerHighest,
             shadowElevation = 2.dp
         ) {
             Row(

@@ -4,6 +4,25 @@
 
 **Status:** Implemented. Commits: `1adf0bd` (first pass) + `e34a79e` (app-wide opaque-fill extension + v27q selection flatten) + v27r explore-button/badge/passport pass (this working tree, commit pending — not pushed per user's standing no-push rule).
 
+## v27r — readability/saturation audit, hero sort+search, section headers, browser UX (fifth request)
+
+### What was asked
+1. The new solid category-accent fills can cause text-readability issues and look too saturated sometimes → full app audit + fixes. **User decision: category chips/cards keep solid; only the FIXED-COLOR paper toolbar controls (amber/brown) get a moderated tint fill + readable ink.**
+2. Cabinet sort arrow + search button: bigger + a good color; same in the Topic Browser.
+3. Section headers in lists of both cabinet and browser: place the category a little higher.
+4. Topic Browser: auto-scroll to top when switching category; the back-to-top arrow is too big — shrink it.
+5. **CI compile failures from e34a79e (user pasted the log):** `OpenNotebookFormat` unresolved `tint` (5 sub-format calls), `TopicDatabaseScreen` unresolved `themedAccent` (missing import). User asked to push the fix.
+
+### What was done
+- **CI fixes (pushed):** re-added `tint: Color` to `OpenNotebookFormat` + caller (the sub-format composables still need it); added `themedAccent` import to TopicDatabaseScreen.
+- **Readability/saturation audit:** verified every v27q solid-accent fill's on-accent ink (category chip, Cabinet pills, database chips, Spin chips + deck controls, format chips, sentiment buttons, notebook rows, mood chips, picker tabs/presets, pet designer, dialog rows, onboarding — all pastel-aware ✓). Found the real bugs in the FIXED-COLOR paper controls and fixed them: `FormatToolButton` (paper mode) + `CompactPaperChip` + `NotePaperColorToggle` now use a moderated tint `lerp(surfaceContainerHighest, accent, 0.45f)` with the accent as glyph/label ink (was solid accent + pastelFillInk → white-on-amber in dark paper mode, dark-on-dark in pastel light). Threaded a `paper` flag through FormatToolbar/SelectionFormatBar/SizePickerButton.
+- **Sort arrow + search (shared components, Cabinet + Topic Browser):** `CurioSortDropdown` arrow 18→22dp glyph (dropped the conflicting 20dp box), chevron full-opacity ink + 16dp, pill fills deepened (emphasized 0.45→0.35, plain 0.70→0.55); `SettingsHeroActionPill` + `CabinetHeroActionPill` glyph 18→20dp, fills 0.45/0.70→0.35/0.55 (destructive 0.35→0.30).
+- **Section headers higher:** Android `DatabaseSectionHeader` top padding 14→6dp; web TopicBrowser section header `pt-4`→`pt-2`; web Cabinet group gap `space-y-6`→`space-y-4` (the Android Cabinet has no section headers — flat grid).
+- **Topic Browser UX:** `LaunchedEffect(sortMode, effectiveCat)` now scrolls to top on category switch too (was sort-only); back-to-top arrow shrunk 20dp/11dp/6dp-shadow → 16dp/7dp/2dp-shadow.
+
+### Validation
+Braces balanced (10 files), `git diff --check` clean, unused `size` import removed from CurioSortDropdown, `pastelFillInk` import removed from PaperCard (no longer used), `lerp` import verified in RichTextEditor. Docs: `app/AGENTS.md` v27r fixed-color rule. Committed + PUSHED (user asked to push the CI fix).
+
 ## v27r — explore dialog buttons, badge borders, passport check (fourth request)
 
 ### What was asked

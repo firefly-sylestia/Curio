@@ -78,6 +78,7 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -347,8 +348,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     // v8.54 — switching the sort reorders the whole list, so land back at
     // the top instead of keeping a random index into the new ordering.
-    // (The category filter chips keep their pre-existing no-reset behavior.)
-    LaunchedEffect(sortMode) {
+    // v27r — switching the CATEGORY filter does the same: a different lane
+    // (or All) starts from the top, never from a stale position into the
+    // new lane.
+    LaunchedEffect(sortMode, effectiveCat) {
         if (hasRows && listState.firstVisibleItemIndex > 0) {
             savedScrollIndex = 0
             savedScrollOffset = 0
@@ -525,19 +528,21 @@ fun TopicDatabaseScreen(navController: NavController) {
                 },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary,
-                shadowElevation = 6.dp
+                // v27r — a compact arrow: 16dp glyph + slim padding (was
+                // 20dp + 11dp, which read as a big button), flat 2dp shadow.
+                shadowElevation = 2.dp
             ) {
                 // v26c — Surface's content box has no contentAlignment, so the
                 // glyph used to sit top-start inside the circle; center it.
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(11.dp)
+                    modifier = Modifier.padding(7.dp)
                 ) {
                     CurioIcon(
                         CurioIcons.ArrowUpward,
                         "Back to top",
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        size = 20.dp
+                        size = 16.dp
                     )
                 }
             }
@@ -832,7 +837,9 @@ private fun DatabaseSectionHeader(cat: CurioCategory, count: Int) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 14.dp, bottom = 2.dp)
+            // v27r — the section header sits higher (was 14dp top padding),
+            // tucking the category name against the previous row.
+            .padding(top = 6.dp, bottom = 2.dp)
     ) {
         Box(
             modifier = Modifier

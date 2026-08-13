@@ -392,8 +392,11 @@ fun SettingsHeroActionPill(
     // fill at the old glass alpha): a translucent fill let the elevation
     // shadow bleed through as a blurry broken background, and the opaque
     // lerp resolves to the exact same perceived tint on the banner.
+    // v27r — the fills deepened (0.45/0.70 -> 0.35/0.55) and the glyph
+    // grew (18 -> 20dp) so hero actions like search read clearly on the
+    // banner instead of washing into it.
     val backdrop = backdropOverride ?: settingsRoseAccent()
-    val fill = if (emphasized) lerp(ink, backdrop, 0.45f) else lerp(ink, backdrop, 0.70f)
+    val fill = if (emphasized) lerp(ink, backdrop, 0.35f) else lerp(ink, backdrop, 0.55f)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
@@ -411,7 +414,7 @@ fun SettingsHeroActionPill(
                     name = glyph,
                     contentDescription = contentDescription,
                     tint = ink,
-                    size = 18.dp
+                    size = 20.dp
                 )
             }
             if (label != null) {

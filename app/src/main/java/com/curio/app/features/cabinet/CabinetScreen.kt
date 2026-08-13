@@ -1071,10 +1071,13 @@ private fun CabinetHeroActionPill(
     // glass alpha): a translucent fill let the elevation shadow bleed
     // through as a blurry broken background; the opaque lerp resolves to
     // the exact same perceived tint on the banner.
+    // v27r — the fills deepened (0.45/0.70 -> 0.35/0.55, destructive
+    // 0.35 -> 0.30) and the glyph grew (18 -> 20dp) so hero actions like
+    // search + sort read clearly on the banner instead of washing into it.
     val fill = when {
-        destructive -> lerp(ink, backdrop, 0.35f)
-        emphasized -> lerp(ink, backdrop, 0.45f)
-        else -> lerp(ink, backdrop, 0.70f)
+        destructive -> lerp(ink, backdrop, 0.30f)
+        emphasized -> lerp(ink, backdrop, 0.35f)
+        else -> lerp(ink, backdrop, 0.55f)
     }
     Surface(
         onClick = onClick,
@@ -1092,7 +1095,7 @@ private fun CabinetHeroActionPill(
                     name = glyph,
                     contentDescription = contentDescription,
                     tint = ink,
-                    size = 18.dp
+                    size = 20.dp
                 )
             }
             if (label != null) {
