@@ -1,6 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — main-card border removal + save-page opaque fills (v27u)
+## Current request — explore-dialog pills: clean glyphs, visible pill fill, spacing (v27u)
+
+### What was asked
+"The Watch in YouTube icon looks bad, same for Explore in browser — give the
+two proper spacing and give the whole button a pill shape." (Also: drop the
+Codebuff commit footer from now on.)
+
+### Root cause
+The two explore actions were `TextButton`s with `RoundedCornerShape(50)` but
+`curioDialogActionButtonColors()` was TRANSPARENT (textButtonColors has no
+container color) — so the pill shape was invisible; what rendered was just
+the tiny 18dp v27s brand square (red YouTube tile / engine letter monogram)
+floating next to the label, which read as a bad icon + no button at all.
+
+### User decision (ask_user)
+Clean glyph icons: no brand tiles. Globe (travel_explore) on the browser
+button, the service's glyph (youtube_activity / play_circle / music_note)
+on the watch button, tinted with the pill ink, on visible soft-tinted pills,
+12dp apart.
+
+### Fix
+- `CurioTheme.kt` — `curioDialogActionButtonColors(containerColor: Color?
+  = null)` so dialog actions can wear a visible container fill.
+- `TopicRevealScreen.kt` — the two pills now use
+  `curioDialogActionButtonColors(containerColor = pillFill)` with
+  `pillFill = lerp(curioDialogContainerColor(), pillInk, 0.14f)` (opaque,
+  v27n-safe), pillInk = `curioDialogActionColor()`; clean CurioIcon glyphs
+  at 20dp tinted pillInk; spacing 8→12dp; contentPadding 14→16dp horizontal.
+  `watchGlyph` stays service-aware via `watchService.brandTile().second`;
+  removed the now-unused `SearchEngine` import + `BrandMonogram` import.
+  BrandMonogram/brandTile helpers stay in CurioIcons.kt (doc updated).
+
+### Validation
+Brace balance OK (3 files), `git diff --check` clean, no leftover
+BrandMonogram/engineTile/watchTile/SearchEngine refs. No Gradle locally
+(env rule) — CI on push is the gate. Docs: app/AGENTS.md v27u bullet.
+
+## Prior — main-card border removal + save-page opaque fills (v27u)
 
 ### What was asked
 "Leftover border cleanup: the main card still has the border. And on 'Save

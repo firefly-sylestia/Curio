@@ -94,7 +94,6 @@ import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TourController
 import com.curio.app.data.MusicService
-import com.curio.app.data.SearchEngine
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildEngineSearchUrl
@@ -116,7 +115,6 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
-import com.curio.app.ui.theme.BrandMonogram
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.brandTile
@@ -897,10 +895,22 @@ fun TopicRevealScreen(
         // to the user's chosen music service; everything else stays YouTube.
         val musicTopic = topic.isMusicTopic()
         val watchService = MusicService.fromId(AppPreferences.musicServiceState)
-        val (engineTile, engineLetter) = SearchEngine.fromId(AppPreferences.searchEngineState).brandTile()
-        val (watchTile, watchGlyph) =
-            if (musicTopic) watchService.brandTile()
-            else Color(0xFFFF0000) to CurioIcons.YouTubeActivity
+        // v27u — clean glyph pills: no brand tiles. The browser button wears
+        // the globe (travel_explore); the watch button wears the service's
+        // glyph (youtube_activity for YouTube / YouTube Music, play_circle
+        // for Spotify, music_note for Apple Music) so the pill still hints
+        // what it opens.
+        val watchGlyph = if (musicTopic) {
+            watchService.brandTile().second
+        } else {
+            CurioIcons.YouTubeActivity
+        }
+        // v27u — the two pills are VISIBLE soft-tinted pills (the old
+        // TextButton had no container color, so the pill shape was
+        // invisible): an opaque lerp of the dialog action ink over the
+        // dialog container.
+        val pillInk = curioDialogActionColor()
+        val pillFill = lerp(curioDialogContainerColor(), pillInk, 0.14f)
         // v11 — the dialog wears the shared Curio dialog theme: the card-
         // matching 24dp shape, the pastel-aware container, and the readable
         // action ink (deep rose on light/pastel so the buttons never wash
@@ -984,8 +994,10 @@ fun TopicRevealScreen(
                 // a leading icon + short label so nothing wraps or truncates
                 // in the width-constrained dialog: the globe (travel_explore)
                 // searches the user's chosen engine, the rounded play tile
-                // (youtube_activity) searches YouTube.
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // (youtube_activity) searches YouTube. v27u — the pills are
+                // now VISIBLE (soft tinted container fill, no brand tiles),
+                // 12dp apart.
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TextButton(
                         onClick = {
                             engaged = true
@@ -1002,16 +1014,16 @@ fun TopicRevealScreen(
                             }
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
-                        colors = curioDialogActionButtonColors(),
+                        colors = curioDialogActionButtonColors(containerColor = pillFill),
                         shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
-                        // v27s — the engine's own brand tile (color + letter)
-                        // so the pill shows WHICH engine the button opens.
-                        BrandMonogram(
-                            tileColor = engineTile,
-                            letter = engineLetter,
-                            size = 18.dp
+                        // v27u — clean globe glyph for the user's chosen engine.
+                        CurioIcon(
+                            name = CurioIcons.TravelExplore,
+                            contentDescription = null,
+                            tint = pillInk,
+                            size = 20.dp
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
@@ -1036,16 +1048,16 @@ fun TopicRevealScreen(
                                 else buildYouTubeSearchUrl(topic)
                             )
                         },
-                        colors = curioDialogActionButtonColors(),
+                        colors = curioDialogActionButtonColors(containerColor = pillFill),
                         shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
-                        // v27s — the service's brand tile (or the YouTube
-                        // tile for non-music topics) ahead of the label.
-                        BrandMonogram(
-                            tileColor = watchTile,
-                            glyph = watchGlyph,
-                            size = 18.dp
+                        // v27u — the service's clean glyph (no brand tile).
+                        CurioIcon(
+                            name = watchGlyph,
+                            contentDescription = null,
+                            tint = pillInk,
+                            size = 20.dp
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(

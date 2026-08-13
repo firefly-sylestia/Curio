@@ -346,9 +346,10 @@ fun MusicService.brandTile(): Pair<Color, String> = when (this) {
 }
 
 /**
- * v27s — the small brand tile shown at the front of the explore pills: a
- * rounded square in the brand color carrying either a Material glyph
- * ([glyph]) or a letter monogram ([letter]).
+ * v27s — a small brand tile: a rounded square in the brand color carrying
+ * either a Material glyph ([glyph]) or a letter monogram ([letter]).
+ * Retired from the explore dialog (v27u uses clean glyph pills instead)
+ * but kept as a general-purpose brand chip helper.
  */
 @Composable
 fun BrandMonogram(

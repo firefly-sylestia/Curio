@@ -421,7 +421,14 @@ fun curioDialogActionColor(): Color {
     return fromHsl(a.h, a.s.coerceIn(0.35f, 0.60f), 0.36f)
 }
 
-/** TextButton colors for dialog actions — dark readable ink in light mode. */
+/**
+ * TextButton colors for dialog actions — dark readable ink in light mode.
+ * v27u — optional [containerColor] turns the transparent TextButton into a
+ * visible soft-tinted pill (the explore dialog's two action pills).
+ */
 @Composable
-fun curioDialogActionButtonColors(): ButtonColors =
-    ButtonDefaults.textButtonColors(contentColor = curioDialogActionColor())
+fun curioDialogActionButtonColors(containerColor: Color? = null): ButtonColors =
+    ButtonDefaults.textButtonColors(
+        contentColor = curioDialogActionColor(),
+        containerColor = containerColor
+    )
