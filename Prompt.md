@@ -1,6 +1,20 @@
 # Prompt.md — Request log
 
-## Current request — Apple Music Explore, YouTube preference, and CI lint fix
+## Current request — restore Spin BoxWithConstraints import
+
+### What was asked
+Fix CI compilation failures caused by the previous Spin lint cleanup.
+
+### What was found
+The outer Spin layout still uses `BoxWithConstraints` for `maxHeight` and `maxWidth`; only its import had been removed. This caused the unresolved reference and all cascading scope/composable errors.
+
+### What was done
+Restored the `BoxWithConstraints` import. The compact filter grid remains a plain `Box`, so the original unused-scope lint fix is preserved.
+
+### Validation
+No Gradle commands were run locally per repository instructions. Verify with CI and `git diff --check`.
+
+## Prior — Apple Music Explore, YouTube preference, and CI lint fix
 
 ### What was asked
 Fix Apple Music Explore URL handling without forcing `/us`, add plain YouTube alongside YouTube Music for music preferences with YouTube as the default, and resolve the SpinScreen CI lint failure.
