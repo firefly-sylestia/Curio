@@ -131,6 +131,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk

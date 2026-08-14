@@ -29,6 +29,17 @@
 YAML re-validated (`npx yaml-lint`), `git diff --check` clean; CI on
 push/tag is the gate.
 
+### CI fix (same push)
+CI on the 2d6d182 push failed compiling `:app` (the 9f5b2c7 hero-follows-
+lane change had never been compiled):
+- `headerAccent()` / `categoryBackgroundWash()` are extension functions in
+  `ui/theme/CategoryInk.kt` — HomeScreen lacked the `headerAccent` import
+  and SettingsHubScreen lacked BOTH (Cabinet/EntryDetail already had
+  them). Added the imports.
+- `heroLaneCategory()` called `LocalContext.current` INSIDE a `runCatching`
+  lambda — a non-composable context can't contain @Composable invocations.
+  Hoisted `val context = LocalContext.current` above the `runCatching`s.
+
 ## Prior — Category pill chevron (v30 follow-up)
 
 ### What was asked

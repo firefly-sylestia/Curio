@@ -93,8 +93,10 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
@@ -526,7 +528,11 @@ private fun BoxScope.SettingsHeroSymbol(
 @Composable
 fun heroLaneCategory(): CurioCategory? {
     if (!AppPreferences.heroFollowLaneState) return null
-    val lane = runCatching { AppPreferences.getLastSpinCategories(LocalContext.current).singleOrNull() }
+    // Hoist LocalContext.current out of the runCatching lambdas — its
+    // @Composable accessor can't be invoked inside a non-composable
+    // lambda (rule: non-composable callbacks are NOT @Composable scopes).
+    val context = LocalContext.current
+    val lane = runCatching { AppPreferences.getLastSpinCategories(context).singleOrNull() }
         .getOrNull() ?: return null
     return runCatching { CurioCategories.byId(lane) }.getOrNull()
 }
