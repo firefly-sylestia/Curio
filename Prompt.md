@@ -1,6 +1,26 @@
 # Prompt.md — Request log
 
-## Current request — streaming backup RESTORE (OOM fix, mirrors the export) (v48)
+## Current request — sort pill matches the Category pill capsule + padding (v49)
+
+### What was asked
+"Why is the sort pill rectangular? Use the same dimension and size of the
+category pill in cabinet and topic browser."
+
+### What was done
+`CurioSortDropdown` (the shared sort pill used by the Cabinet + Topic
+Browser heroes) now matches `CabinetHeroActionPill` exactly:
+- **Shape:** v42 18dp corners → full 50dp capsule (same as the Category
+  pill — the 18dp corners were what read as rectangular).
+- **Padding:** label zone 12/8/7/7 → 14/10/10/10 (the Category pill's
+  14dp horizontal / 10dp vertical), same 42dp min height.
+Both heroes inherit the fix from the single shared component.
+
+### Validation
+Brace/paren balance + `git diff --check` clean (no Gradle locally — CI
+on push is the gate). Small single-file styling fix — no changelog/
+version bump; committed `9eb65eb`, NOT pushed (standing rule).
+
+## Prior — streaming backup RESTORE (OOM fix, mirrors the export) (v48)
 
 ### What was asked
 Apply the same streaming treatment to backup restore so restoring a

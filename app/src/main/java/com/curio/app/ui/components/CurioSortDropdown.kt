@@ -97,11 +97,11 @@ fun CurioSortDropdown(
     // — a whisper of the brand rose instead of plain cream) so the sort pill
     // matches the hero pills' new tinted look; AMOLED gets grey glass.
     val fill = lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
-    // v42 — less-rounded 18dp corners: the v33 50dp capsule read as a
-    // bulbous pill next to the other controls (the user's "radius is too
-    // much" report); 18dp reads as a proper raised button while still
-    // matching the pill family. The 42dp height + tight padding stay.
-    val pillShape = RoundedCornerShape(18.dp)
+    // v43 — match the hero Category pill exactly: the full 50dp capsule
+    // (the v42 18dp corners read rectangular next to it) with the same
+    // 42dp height and 14/10dp padding, so the sort pill reads as a true
+    // sibling of the Category pill in the Cabinet + Topic Browser heroes.
+    val pillShape = RoundedCornerShape(50)
 
     Box(modifier = modifier) {
         Surface(
@@ -125,7 +125,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(pillShape)
                         .clickable { expanded = true }
-                        .padding(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp)
+                        .padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp)
                 ) {
                     Text(
                         text = selected?.label.orEmpty(),
