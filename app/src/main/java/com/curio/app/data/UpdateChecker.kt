@@ -1,13 +1,17 @@
 package com.curio.app.data
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.curio.app.BuildConfig
 import com.curio.app.R
 import kotlinx.coroutines.CancellationException
@@ -306,11 +310,17 @@ object UpdateChecker {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
-        // POST_NOTIFICATIONS is runtime-gated on 13+; without the grant the
-        // notify() throws — the toast already announced the update.
-        runCatching {
-            NotificationManagerCompat.from(appContext).notify(UPDATE_NOTIFICATION_ID, notification)
+        // POST_NOTIFICATIONS is runtime-gated on 13+ (a no-op below API 33 —
+        // treated as granted); without the grant notify() throws a
+        // SecurityException. The toast above already announced the update, so
+        // just skip the notification when the permission is missing.
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return@withContext
         }
+        NotificationManagerCompat.from(appContext).notify(UPDATE_NOTIFICATION_ID, notification)
     }
 
     private fun ensureChannel(context: Context) {
