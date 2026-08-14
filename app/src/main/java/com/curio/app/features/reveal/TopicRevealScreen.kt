@@ -1915,12 +1915,16 @@ private fun HeroCard(
                     accent = cat.accent,
                     // v45 — the pill's text stays the deep accent (readable
                     // on the light frosted pill). v53 — the EDITOR dialog
-                    // now wears the standard background tint with theme
-                    // onSurface content, so no dialog color override is
-                    // needed anymore.
+                    // now wears the standard background tint. v66 — the
+                    // dialog content is the READABLE category ink (deep
+                    // accent in light, light twin in dark) so every element
+                    // — ring, steppers, slider, Save — reads on the dialog
+                    // in both modes instead of the raw accent going
+                    // dark-on-dark.
                     ink = cat.accent,
                     background = lerp(cat.accent, Color.White, 0.85f),
                     showBar = false,
+                    dialogContentColor = cat.categoryInk(),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(top = 16.dp, end = 16.dp)

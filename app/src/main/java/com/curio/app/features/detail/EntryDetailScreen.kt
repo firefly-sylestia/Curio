@@ -852,6 +852,11 @@ fun EntryDetailScreen(
                     0.16f
                 ),
                 showBar = true,
+                // v66 — dialog content rides the readable category ink
+                // (deep accent in light, light twin in dark) so the ring /
+                // steppers / slider / Save never go dark-on-dark with the
+                // raw accent.
+                dialogContentColor = cat.categoryInk(),
                 // The NavHost Scaffold already pads its content above the
                 // system nav bar (contentWindowInsets = navigationBars), so
                 // no navigationBarsPadding here — 16dp from the corner.

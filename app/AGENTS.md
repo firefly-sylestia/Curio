@@ -351,6 +351,19 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v67 — progress dialog colors fixed (reveal page).** The reveal
+  hero's pill passed the RAW category accent into the dialog, which then
+  used it for the −/+ stepper glyphs and the Save label ON the theme's
+  onSurface — with a deep accent (navy/indigo/…) that was dark-on-dark.
+  `CurioProgressEditorDialog` now drives EVERY element from
+  `contentColor`: the reveal + detail pills pass `cat.categoryInk()`
+  (readable deep accent in light mode / light twin in dark) so the ring,
+  steppers, slider and Save read on the standard dialog container in
+  both modes; `StepButton` tints a 14% wash of the content color (glyph
+  in the full color) instead of a solid circle; the Save button pairs
+  the content-colored container against `MaterialTheme.colorScheme.surface`
+  so its label always contrasts. The dialog's `accent` parameter is gone
+  (only caller was the pill).
 - **v66 — progress visibility + detail pill moved to the screen corner.**
   (1) **Cabinet progress line visible in light/pastel** (`CurioTopicCard`
   progress strip under the hero): `themedAccent()` resolves to a light

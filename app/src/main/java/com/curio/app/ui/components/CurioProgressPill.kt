@@ -53,13 +53,12 @@ import kotlin.math.roundToInt
  * shows how far the user is through a book (pages read) or anime (episodes
  * watched). `showBar` adds a slim category-accent progress bar under the
  * count; the badge variant (reveal hero top-right corner) is count-only.
- * Tap opens the redesigned [CurioProgressEditorDialog] — accent container,
- * −/+ steppers, stepped slider, Finish/Save only (no Reset, no Cancel).
- * Writes to [TopicProgressStore]; every surface shares the same topic
- * progress.
+ * Tap opens the redesigned [CurioProgressEditorDialog] — ring, −/+ steppers,
+ * stepped slider, Finish/Save only (no Reset, no Cancel). Writes to
+ * [TopicProgressStore]; every surface shares the same topic progress.
  *
  * @param accent the category accent — used for the progress bar / progress
- *   arc and the editor's strong elements.
+ *   arc.
  * @param ink text color on the pill background (category ink on a tinted
  *   pill, the accent itself on a light frosted pill).
  * @param background the pill's OPAQUE background (a category tint on the
@@ -77,9 +76,9 @@ fun CurioProgressPill(
     // for the pill's OWN background, but the dialog sits on the theme
     // dialog container — a pill ink that matches the accent (e.g. the
     // reveal hero's deep-accent text on a light frosted pill) would render
-    // invisible against it. v53 — defaults to the theme's onSurface (the
-    // dialog now wears the standard background tint), so every caller reads
-    // crisply without passing anything.
+    // invisible against it. v53 — defaults to the theme's onSurface. v66 —
+    // the reveal + detail callers pass [categoryInk] (deep accent in light,
+    // light twin in dark) so the dialog is category-colored AND readable.
     dialogContentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     val target = topic.progressTarget ?: return
@@ -92,7 +91,6 @@ fun CurioProgressPill(
     if (showEditor) {
         CurioProgressEditorDialog(
             topic = topic,
-            accent = accent,
             contentColor = dialogContentColor,
             onDismiss = { showEditor = false }
         )
@@ -147,17 +145,22 @@ fun CurioProgressPill(
 }
 
 /**
- * v29 — the redesigned progress editor: a rich dialog in the CATEGORY
- * ACCENT (the container is the accent fill, content rides [contentColor]),
- * a circular progress ring with the big % + count, −/+ steppers for precise
- * ±1 changes, a stepped slider for sweeping, and only Finish (quick-set to
- * the target) + Save (persist + close) — no Reset, no Cancel. Dismiss is
- * tap-outside / back.
+ * v29 — the redesigned progress editor: a circular progress ring with the
+ * big % + count, −/+ steppers for precise ±1 changes, a stepped slider for
+ * sweeping, and only Finish (quick-set to the target) + Save (persist +
+ * close) — no Reset, no Cancel. Dismiss is tap-outside / back.
+ *
+ * v66 — color fix: the dialog used to mix the caller's raw accent with the
+ * theme's onSurface, which went dark-on-dark when the accent was a deep
+ * category color (the reveal hero's pill). [contentColor] now drives EVERY
+ * element (callers pass [com.curio.app.ui.theme.categoryInk] — a readable
+ * deep accent in light mode / light twin in dark), the steppers tint a
+ * 14% wash of it instead of solid circles, and the Save button pairs it
+ * against the theme surface so the label always contrasts.
  */
 @Composable
 fun CurioProgressEditorDialog(
     topic: CurioTopic,
-    accent: Color,
     contentColor: Color,
     onDismiss: () -> Unit
 ) {
@@ -172,10 +175,9 @@ fun CurioProgressEditorDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         // v53 — the dialog wears the standard page-background tint like
-        // every other dialog (the accent container was too loud); the
-        // category accent still colors the ring, steppers and the Save
-        // button through [accent], and the content uses the theme's
-        // onSurface.
+        // every other dialog (the accent container was too loud). v66 —
+        // [contentColor] drives every element (readable category ink), so
+        // the ring, steppers, slider and Save all read in both modes.
         containerColor = curioDialogContainerColor(),
         shape = RoundedCornerShape(28.dp),
         title = {
@@ -245,8 +247,7 @@ fun CurioProgressEditorDialog(
                         glyph = CurioIcons.Remove,
                         contentDescription = "One less $unit",
                         enabled = value > 0,
-                        contentColor = contentColor,
-                        accent = accent
+                        contentColor = contentColor
                     ) { value = (value - 1).coerceAtLeast(0) }
                     Text(
                         text = "$value",
@@ -259,8 +260,7 @@ fun CurioProgressEditorDialog(
                         glyph = CurioIcons.Add,
                         contentDescription = "One more $unit",
                         enabled = value < target,
-                        contentColor = contentColor,
-                        accent = accent
+                        contentColor = contentColor
                     ) { value = (value + 1).coerceAtMost(target) }
                 }
 
@@ -306,7 +306,11 @@ fun CurioProgressEditorDialog(
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = contentColor,
-                        contentColor = accent
+                        // v66 — the theme surface is the dark-on-light /
+                        // light-on-dark partner for the content-colored
+                        // container in BOTH modes, so the label never sinks
+                        // into a deep accent button.
+                        contentColor = MaterialTheme.colorScheme.surface
                     ),
                     contentPadding = PaddingValues(
                         horizontal = 22.dp, vertical = 10.dp
@@ -323,28 +327,29 @@ fun CurioProgressEditorDialog(
     )
 }
 
-/** One circular − / + stepper button on the accent dialog. */
+/** One circular − / + stepper button in the progress dialog. */
 @Composable
 private fun StepButton(
     glyph: String,
     contentDescription: String,
     enabled: Boolean,
     contentColor: Color,
-    accent: Color,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = CircleShape,
-        color = if (enabled) contentColor else contentColor.copy(alpha = 0.35f),
+        // v66 — a soft tint of the content color (not a solid fill) so the
+        // glyph contrasts cleanly against it in every theme.
+        color = if (enabled) contentColor.copy(alpha = 0.14f) else contentColor.copy(alpha = 0.06f),
         modifier = Modifier.size(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             CurioIcon(
                 name = glyph,
                 contentDescription = contentDescription,
-                tint = if (enabled) accent else accent.copy(alpha = 0.5f),
+                tint = if (enabled) contentColor else contentColor.copy(alpha = 0.4f),
                 size = 22.dp
             )
         }

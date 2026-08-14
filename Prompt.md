@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — progress visibility (cabinet line + detail pill) (v66)
+## Current request — progress dialog colors off on the reveal page (v67)
+
+### What was asked
+"inside topic reveal page progress dialog the color are still very off,
+fix it"
+
+### What was done
+Root cause: the reveal pill passes the RAW category accent into
+`CurioProgressEditorDialog`, which used it for the −/+ stepper glyphs and
+Save label ON the theme's onSurface — deep accents (navy/indigo) went
+dark-on-dark. Reworked the dialog so [contentColor] drives everything:
+- Reveal + detail pills now pass `dialogContentColor = cat.categoryInk()`
+  (readable deep accent in light / light twin in dark).
+- Ring, steppers, slider, title, % all ride contentColor.
+- `StepButton`: soft 14% tint circle + full-color glyph (was solid
+  onSurface circle + raw accent glyph).
+- Save button: contentColor container paired with
+  `MaterialTheme.colorScheme.surface` label (contrasts in both modes).
+- Removed the dialog's now-unused `accent` parameter (only caller was
+  the pill).
+
+### Validation
+Brace balance OK (3 files); `git diff --check` clean. No Gradle locally
+(env rule) — CI on push.
+
+## Prior — progress visibility (cabinet line + detail pill) (v66)
 
 ### What was asked
 "the progress indicator in cabinet isnt really visible in light mode pastel
