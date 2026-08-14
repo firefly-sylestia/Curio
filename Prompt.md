@@ -1,56 +1,67 @@
 # Prompt.md — Request log
 
-## Current request — non-pastel peek/hero color fixes + pastel-dark readability (v32)
+## Current request — picker pills, filter accordion, pastel-dark lane hero (v33)
 
 ### What was asked
-1. Pastel OFF (non-pastel): the Spin deck peek cards behind the main card
-don't have the gradient like pastel and are too dark in light mode.
-2. Non-pastel: the shared hero banner colors (the category/lane-colored
-ones) are too bright/vibrant, blinding, and the texts are not visible.
-3. Same fixes in dark mode (non-pastel).
-4. Pastel dark: suggestions for the paper stat card color; the category
-and filter text on the Spin screen (not inside the chips); the small
-round things around the spin button look white during the spin animation.
-5. "Ask me for confirmation" before building.
+1. Category picker: the Original / New tabs and the preset chips are too
+thin — make proper pills, theme-aware, NOT matching the background.
+2. The filter chips in the Spin filter page still blend too much with the
+background in pastel light mode — give them a different shade.
+3. In the filter page, the Type / Genres / Era / Origin etc. headers
+should become filter pills: tap to expand that group's chips; tap the
+open one again to collapse it KEEPING the selections; tap another to
+swap (this one collapses, that one opens) — with a beautiful smooth
+animation.
+4. The filter page background is too bright — it takes the category main
+hero color instead of the background tint like other pages.
+5. Pastel dark: the shared hero cards are too bright for dark mode — make
+them a little darker.
+6. "Again for clarification ask me" before building.
 
 ### User decisions (ask_user)
-- Hero: yes — the category/lane-colored heroes (Adaptive Hero lane,
-Cabinet filter, detail hero); fix text ink (accent-aware, white/cream)
-+ soften the vivid fill, non-pastel light AND dark.
-- Paper stat card dark: **hue-matched deep paper** — theme-aware AND
-color-aware (the deep paper carries the hue of the hero/base it sits
-on, e.g. the detail page's own color).
-- Spin text: the **bottom bar button labels** (Categories / Filter), and
-also the **Topic Reveal "Start exploring" / "Express yourself"** text.
+- Pastel-dark shared hero: darken **only the lane-colored hero** (the
+Adaptive Hero banner); the plain rose hero keeps its deep dark twin.
+Also: **rename the "Sky azure hero" option to "Azure hero"** but don't
+change its behavior (stays greyed out / unselectable).
+- Filter chips: **raised neutral pills** (lift clearly toward cream/white
+so they stand off the pastel sheet).
+- Accordion: yes — one group open at a time, selections survive collapse,
+smooth animated expansion.
 
 ### What was done
-1. **Peek cards (non-pastel, light + dark):** `PeekCard` now steps like
-   pastel — HSL lightness drop (light 0.14/0.20, dark 0.11/0.16) + the
-   0.75x saturation pull — instead of the near-black black-lerp slabs
-   (0.40/0.52).
-2. **Category/lane heroes calmer + readable:** `headerAccent()` pulls
-   saturation ~15% (non-pastel) so vivid accents aren't blinding; the
-   shared-hero inks (`settingsReadableInk`/`homeReadableInk`/
-   `profileReadableInk`) resolve via `heroLaneCategory()?.heroHeaderInk()`
-   — white/cream on the deep accent instead of the fixed dark onSurface
-   that made lane-banner text invisible in non-pastel light.
-3. **Paper stat card dark = hue-matched deep paper:**
-   `paperStatCardColor` builds the deep paper from the base HUE
-   (per-screen color-aware), a whisper of warm brown keeps it paper.
-4. **Pastel-dark control text:** Categories/Filter bottom-bar labels
-   (new `deckControlInk`) + Topic Reveal's Start exploring / Express
-   yourself flip to the bright cream-white (`pastelFillInk`), and
-   `themedButtonFill()` deepens the pastel-dark fill (lightness x0.82)
-   so the buttons pop off the page wash.
-5. **Orbit dots (pastel dark):** the dots use a ~60% white-lerp instead
-   of the 85% white `pastelFillInk` resolution — light on midnight but
-   clearly carrying the pastel hue.
+1. **Picker proper pills:** `PickerPageTab` (Original / New) and
+   `PickerPresetChip` (DeckPresets.kt, shared with the Spin sheet) grow
+   4dp → 8dp vertical padding (~34dp pills), and the unselected fill now
+   lifts toward `curioPillLift()` (cream in light, lighter glass in
+   dark) so they stand off the category wash instead of the old
+   `surfaceVariant`/`surfaceContainerHigh` blend.
+2. **Filter chips raised neutral:** `CompactChip` light-mode inactive
+   fill now lerps toward `curioPillLift()` at 0.55 (was White at 0.32)
+   — unselected chips read as neutral raised pills off the pastel sheet;
+   gained a `fillMaxWidth` param (false in the accordion FlowRow so
+   chips wrap at natural pill width).
+3. **Filter accordion:** `FilterGroupKey` enum + `FilterGroups.chipsFor`;
+   Type · Genres · Era · Origin · Franchise are `FilterGroupPill`s
+   (open = accent fill, rotating chevron, per-group selected-count
+   badge). One group open at a time; tapping the open pill collapses it
+   (`openGroup = null` stays collapsed — selections survive); tapping
+   another swaps; a search-emptied group falls back to the first
+   available. Chips slide in via `expandVertically` + `fadeIn`
+   (FastOutSlowIn tweens) inside an `animateContentSize` column. The
+   old LazyVerticalGrid + GridItemSpan section grid is gone.
+4. **Filter sheet background:** container now wears
+   `categoryBackgroundWash()` (the soft page tint) instead of the
+   stronger card-level `categorySurface` that read as the raw hero
+   color; Material keeps its device surface.
+5. **Pastel-dark lane hero:** `headerAccent()` deepens pastel-dark
+   banners (lightness x0.80, floor 0.30), toggle-independent.
+6. **Hero picker rename:** "Sky azure hero" → "Azure hero" (option
+   label + disabled hint); behavior unchanged.
 
 ### Validation
-No Gradle locally (env rule). Brace balance + `git diff --check` clean
-(Pre-existing single paren imbalance in TopicRevealScreen confirmed
-present in HEAD, not introduced here); CI on push is the gate.
-Changelog + `app/AGENTS.md` v32 bullet updated.
+No Gradle locally (env rule). Brace balance (correct while-loop parser)
++ `git diff --check` clean; CI on push is the gate. Changelog +
+`app/AGENTS.md` v33 bullet updated.
 
 ## Prior — hero/category-chip/cream-tint fixes + faster Home (v31)
 

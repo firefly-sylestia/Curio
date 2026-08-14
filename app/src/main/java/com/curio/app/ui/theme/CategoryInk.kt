@@ -87,6 +87,15 @@ fun CurioCategory.headerAccent(): Color {
         val b = toHsl(base)
         fromHsl(b.h, (b.s * 0.85f).coerceAtMost(0.60f), b.l)
     }
+    // v33 — pastel DARK: the muted pastel lane accents still glow bright
+    // over the midnight page, so the lane-colored shared hero steps a clear
+    // shade darker to read as dark-mode. Applies whether or not the Deeper
+    // header toggle is on (like the v32 calming); the plain rose hero keeps
+    // its own deep dark twin untouched.
+    if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        val a = toHsl(calm)
+        return fromHsl(a.h, a.s, (a.l * 0.80f).coerceAtLeast(0.30f))
+    }
     if (!AppPreferences.headerDeepState) return calm
     // Hue-preserving deepen: pull lightness down rather than lerping toward
     // black (which would grey the hue). Light mode deepens a touch more so

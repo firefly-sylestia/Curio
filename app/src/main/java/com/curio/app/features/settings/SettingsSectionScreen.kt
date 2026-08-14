@@ -225,19 +225,19 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        // v31 — the hero picker is a two-option control (Rose hero / Sky
-        // azure hero). Sky azure stays VISIBLE but greyed out (can't be
-        // picked — the "Material · coming soon" pattern), and the whole
-        // control greys out while Adaptive Hero (below) is active, since
-        // the lane then owns the hero color.
+        // v31 — the hero picker is a two-option control (Rose hero / Azure
+        // hero; v33 — "Sky azure" shortened to "Azure"). Azure stays
+        // VISIBLE but greyed out (can't be picked — the "Material · coming
+        // soon" pattern), and the whole control greys out while Adaptive
+        // Hero (below) is active, since the lane then owns the hero color.
         SettingsRowPulse(highlightKey == "appearance-hero") {
             CompactSegmentedRow(
                 "Hero",
-                listOf("Rose hero", "Sky azure hero"),
+                listOf("Rose hero", "Azure hero"),
                 if (AppPreferences.heroBlueState) 1 else 0,
                 enabled = !AppPreferences.heroFollowLaneState,
                 disabledIndices = setOf(1),
-                disabledHint = "Sky azure hero · unavailable for now"
+                disabledHint = "Azure hero · unavailable for now"
             ) { index ->
                 AppPreferences.setHeroBlueEnabled(context, index == 1)
             }

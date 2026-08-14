@@ -351,6 +351,37 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v33 — picker pills, filter-sheet accordion, pastel-dark lane hero.**
+  (1) **Category picker proper pills:** the Original / New page tabs
+  (`PickerPageTab`) and the quick-mix preset chips (`PickerPresetChip`)
+  grow from 4dp to 8dp vertical padding (real ~34dp pills), and their
+  unselected fill now lifts toward `curioPillLift()` (cream in light,
+  lighter glass in dark — `lerp(surfaceContainerHigh, curioPillLift(),
+  0.18/0.60)`) so they stand off the category wash instead of the old
+  `surfaceVariant`/`surfaceContainerHigh` blend that melted into the
+  tinted picker. (2) **Spin FilterSheet accordion:** the Type · Genres ·
+  Era · Origin · Franchise headers became tappable `FilterGroupPill`s
+  (`FilterGroupKey` enum + `FilterGroups.chipsFor`) — one group open at
+  a time, tap the open pill to collapse (selections survive; `null`
+  stays collapsed), tap another to swap, search-narrowed groups fall
+  back to the first available; chips slide in via `expandVertically` +
+  `fadeIn` (tween/FastOutSlowIn) inside an `animateContentSize` column,
+  with a rotating chevron and a per-group selected-count badge. The
+  old LazyVerticalGrid + `GridItemSpan` section grid is gone. (3)
+  **Chips raised neutral:** `CompactChip` light-mode inactive fill
+  lifts to `curioPillLift()` at 0.55 (was White at 0.32) so unselected
+  chips read as neutral raised pills off the pastel sheet; gains a
+  `fillMaxWidth` param (false in the accordion FlowRow so chips wrap
+  at natural pill width). (4) **Filter sheet background:** the sheet
+  container now wears `categoryBackgroundWash()` — the same soft page
+  tint as the Spin page — instead of the stronger card-level
+  `categorySurface` that read as the raw hero color (Material keeps its
+  device surface). (5) **Pastel-dark lane hero darker:** `headerAccent()`
+  steps pastel-dark banners down (lightness x0.80, floor 0.30) whether
+  or not the Deeper header toggle is on; the plain rose hero keeps its
+  deep `HomeRosewoodDark` twin untouched. (6) **Hero picker rename:**
+  the greyed "Sky azure hero" option (and its hint) is renamed
+  "Azure hero" — behavior unchanged (still visible but unselectable).
 - **v32 — non-pastel peek/hero color fixes + pastel-dark readability.**
   (1) **Non-pastel deck peeks** (`SpinScreen.PeekCard`) step like pastel
   ones — an HSL lightness drop (light 0.14/0.20 near/far, dark
