@@ -69,6 +69,7 @@ import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioCategory
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -503,6 +504,32 @@ private fun BoxScope.SettingsHeroSymbol(
     )
 }
 
+/**
+ * The category driving the shared hero + page background when the
+ * "Hero follows Spin lane" Appearance option is on — the single lane last
+ * picked on Spin, or null (mix / no lane / toggle off) to keep the
+ * default rose/azure. The same resolver feeds every shared rose-wood hero
+ * (Home / Profile / Settings / Cabinet / Quests / the drawer) and the
+ * [heroPageBackground] wash, mirroring the Cabinet's active-filter hero.
+ */
+@Composable
+fun heroLaneCategory(): CurioCategory? {
+    if (!AppPreferences.heroFollowLaneState) return null
+    val lane = runCatching { AppPreferences.getLastSpinCategories(LocalContext.current).singleOrNull() }
+        .getOrNull() ?: return null
+    return runCatching { CurioCategories.byId(lane) }.getOrNull()
+}
+
+/**
+ * The shared-hero family's page background: the Spin lane's category wash
+ * when "Hero follows Spin lane" is on (the Cabinet's page language), else
+ * [default] — so screens that never wore a tint keep their exact current
+ * look until the toggle is flipped.
+ */
+@Composable
+fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): Color =
+    heroLaneCategory()?.categoryBackgroundWash() ?: default
+
 /** The settings hero's rose-wood fill — the SAME treatment as Home/Profile
  *  (the muted rose-wood base, its airy pastel twin in pastel mode) so
  *  Settings reads as part of the same torn-banner family. Shared (public)
@@ -521,6 +548,11 @@ fun settingsRoseAccent(): Color {
         // collage + back pill instead of a tinted fill.
         return Color.Black
     }
+    // v30 — "Hero follows Spin lane": the shared hero wears the Spin
+    // lane's category accent (the Cabinet's filtered-hero language) instead
+    // of the rose/azure, in the Curio style only (Material/AMOLED keep
+    // their scheme roles above).
+    heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
@@ -570,7 +602,9 @@ fun SettingsHubScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f))
+            // v30 — "Hero follows Spin lane": the page wears the Spin lane's
+            // wash (the Cabinet language); otherwise the soft rose tint.
+            .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (the Home/Profile language). Settings is category-neutral, so the
@@ -1061,14 +1095,13 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.DarkMode, "Theme", "Light, dark, or system", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
     SettingsDeepRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
-    SettingsDeepRow(CurioIcons.Schedule, "Entry date & mood", "Date, mood, and attachments on saved entries", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-entry"),
+    SettingsDeepRow(CurioIcons.AutoAwesome, "Hero follows Spin lane", "Shared hero + page take the category you last picked on Spin", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
     SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
     SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
     SettingsDeepRow(CurioIcons.Notifications, "Live explore notification", "Ongoing timer with pause and stop", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-live"),
-    SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-bubble"),
-    SettingsDeepRow(CurioIcons.Layers, "Display over other apps", "System permission for the floating bubble", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-overlay"),
+    SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps (asks for the overlay permission)", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-bubble"),
     SettingsDeepRow(CurioIcons.Pets, "Pet chatter", "Quiet, cozy, or talkative pet dialogue", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-chatter"),
     SettingsDeepRow(CurioIcons.Pets, "Pet games", "How often the pet starts games", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-games"),
     SettingsDeepRow(CurioIcons.Notifications, "Daily shuffle reminder", "A daily nudge to spin the deck", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-reminder"),

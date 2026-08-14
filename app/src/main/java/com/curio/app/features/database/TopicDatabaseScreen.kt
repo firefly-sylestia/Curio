@@ -68,6 +68,7 @@ import com.curio.app.features.settings.SettingsHeroExtraRowHeight
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.adaptive.isWide
@@ -472,7 +473,8 @@ fun TopicDatabaseScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            // v30 — "Hero follows Spin lane": the page wears the lane wash.
+            .background(heroPageBackground())
     ) {
         // ── Watermark backdrop — muted category glyphs (settings family).
         // Wide windows: the NavHost's full-bleed collage replaces the page's

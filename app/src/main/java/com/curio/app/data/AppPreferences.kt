@@ -68,6 +68,7 @@ object AppPreferences {
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
+    private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
     // v28 — dark-mode elevation visibility: black shadows vanish on
     // near-black surfaces, so dark mode can draw a soft LIGHT glow shadow
     // (default OFF). The v28 hairline outline option was REMOVED.
@@ -211,6 +212,13 @@ object AppPreferences {
     // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
     // azure instead of the rose-wood. Default OFF (rose stays).
     var heroBlueState by mutableStateOf(false)
+        private set
+
+    // v30 — "Hero follows Spin lane" (Appearance): when ON and the Spin
+    // deck is on a single lane, the shared hero AND its page background
+    // wear that category's accent + wash (the Cabinet's language) instead
+    // of the rose/azure. Off by default — rose stays.
+    var heroFollowLaneState by mutableStateOf(false)
         private set
 
     // v28 — dark-mode elevation: black shadows are invisible on the
@@ -507,6 +515,7 @@ object AppPreferences {
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
+        heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
         promoModeState = isPromoModeEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
@@ -609,6 +618,17 @@ object AppPreferences {
     fun setHeroBlueEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_BLUE, enabled).apply()
         heroBlueState = enabled
+    }
+
+    // ── Hero follows the Spin lane (v30) ──────────────────────────────
+    /** Whether the shared hero + page background follow the Spin lane's
+     *  category (Appearance toggle, default off). */
+    fun isHeroFollowLaneEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HERO_FOLLOW_LANE, false)
+
+    fun setHeroFollowLaneEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HERO_FOLLOW_LANE, enabled).apply()
+        heroFollowLaneState = enabled
     }
 
     // ── Dark-mode elevation (v28) ────────────────────────────────────

@@ -289,6 +289,30 @@ app/src/main/java/com/curio/app/
   derives its own content offsets from `DatabaseHeroTotalHeight`. The
   chip-bar content-top reservation only applies while the chips are
   visible, so the collapsed screens start right below the hero.
+- **v30 — shared hero follows the Spin lane (Appearance toggle) + settings
+  declutter.** (1) New Appearance toggle **"Hero follows Spin lane"**
+  (`heroFollowLaneState`): when ON and the Spin deck is on a single lane,
+  the shared torn hero (Home / Profile / Settings / Cabinet-All / Quests /
+  Recent / Support / drawer — every rose/azure hero) wears that category's
+  `headerAccent()` — the Cabinet's filtered-hero language — via the new
+  central `heroLaneCategory()` helper hooked into `settingsRoseAccent()` +
+  `homeRoseAccent()`, and the page background below it wears the category
+  wash via `heroPageBackground(default)` (Home inline, Profile/Settings hub
+  keep their rose-lerp default; the rest of the settings family keeps its
+  plain default; Cabinet-All falls back to the lane wash too). Mix/empty
+  lane or toggle off → rose/azure as before. (2) **Removed:** the Home tint
+  experiments (Home tint / Hero tint too / Follow my Spin lane / Tint
+  category — Experiments section + picker gone, prefs dormant), the
+  **"Glow shadows"** Appearance option (`curioDarkGlow` is now a no-op —
+  the light glow was retired as a poor look; `darkGlowState` pref stays
+  dormant), and the **"Entry date & mood"** option — date/mood/attachments
+  are ALWAYS on now (SaveCapture + Marginalia gates hardcoded).
+  (3) **Merged:** "Floating explore bubble" + "Display over other apps"
+  are ONE option — the bubble toggle shows the live overlay grant state in
+  its subtitle, enabling without the permission opens the system page to
+  ask for it, and when the bubble is OFF with the permission still granted
+  an inline "Remove overlay permission" row appears to revoke it (a
+  separate revoke-trip flag keeps the return from re-enabling the bubble).
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation

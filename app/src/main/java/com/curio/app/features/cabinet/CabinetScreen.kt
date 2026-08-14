@@ -81,6 +81,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.TopicCatalog
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
@@ -290,7 +291,11 @@ fun CabinetScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(filterCat?.categoryBackgroundWash() ?: MaterialTheme.colorScheme.background)
+            // v30 — an active filter washes the page; the "All" page falls
+            // back to the shared hero family's background (the Spin lane's
+            // wash when "Hero follows Spin lane" is on, else plain).
+            .background(filterCat?.categoryBackgroundWash()
+                ?: (heroLaneCategory()?.categoryBackgroundWash() ?: MaterialTheme.colorScheme.background))
     ) {
         // Muted category-glyph watermark behind the grid — the same
         // backdrop language as Home / Spin / the saved-entry page, so the

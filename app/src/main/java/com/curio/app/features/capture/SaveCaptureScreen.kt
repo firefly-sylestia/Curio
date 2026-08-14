@@ -1475,7 +1475,8 @@ private fun FormatBodyForCategory(
         // row now — GalleryWall gained a mood field so a picked mood persists.
         // OpenNotebook wraps a sub-format which always carries mood too.
         val moodCapable = true
-        if (AppPreferences.entryMetaEnabledState && active != null && moodCapable) {
+        // v30 — the "Entry date & mood" option was removed: mood is always on.
+        if (active != null && moodCapable) {
             MoodChipsRow(
                 mood = active.mood,
                 accent = category.themedAccent(),

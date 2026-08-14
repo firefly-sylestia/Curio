@@ -1,6 +1,52 @@
 # Prompt.md — Request log
 
-## Current request — Cabinet + Topic Browser: sort pill height, uniform pills, Category pill (v30)
+## Current request — shared hero follows the Spin lane + settings declutter (v30)
+
+### What was asked
+1. Remove the "Glow shadows" option from Appearance ("it's not good").
+2. Remove the Home tint experiments: Home tint, Hero tint too, Follow my
+   Spin lane (and the tint picker).
+3. Add an Appearance toggle that makes the shared hero + its below
+   background take the color/shade like the Cabinet — the category chosen
+   on Spin applies to the whole shared hero header and its background,
+   from Home to Profile, Settings, drawer, everywhere the rose/azure hero
+   is shared.
+4. Remove the "Entry date & mood" option — always on.
+5. Merge "Floating explore bubble" + "Display over other apps" (they are
+   the same): enabling without the permission asks for it; turning the
+   bubble OFF shows an inline option to remove the overlay permission.
+
+### What was done
+- **New pref + helpers:** `heroFollowLaneState` (Appearance toggle),
+  `heroLaneCategory()` (single Spin lane or null) and
+  `heroPageBackground(default)` in SettingsHubScreen.kt; `settingsRoseAccent()`
+  + `homeRoseAccent()` return `cat.headerAccent()` when the lane is active
+  (Curio style only; Material/AMOLED keep their scheme roles) — the whole
+  shared hero family follows automatically (Home/Profile/Settings/Cabinet-
+  All/Quests/Recent/Support/drawer/…). Page backgrounds use
+  `heroPageBackground()` (Home inline + Profile/Settings keep the rose-lerp
+  default; the settings-family screens keep plain; Cabinet-All falls back
+  to the lane wash) — zero default change until the toggle is flipped.
+- **Removed:** Home tint experiments (Experiments section + picker dialog
+  + state, prefs dormant), Glow shadows row (`curioDarkGlow` is now a no-op
+  pass-through; the glow is retired, `darkGlowState` dormant), Entry date &
+  mood row + hub deep rows (SaveCapture + Marginalia gates hardcoded to
+  always-on via `run {}` / condition drop).
+- **Bubble/overlay merge:** single "Floating explore bubble" toggle with
+  live grant state in the subtitle; enabling without permission opens the
+  system overlay page (existing ask); when OFF + permission granted, an
+  inline "Remove overlay permission" row opens the system page with a
+  revoke-trip flag so the return refreshes the grant without re-enabling
+  the bubble. The separate "Display over other apps" row + hub deep row are
+  gone; the "Explore bubble option in Explore dialog" row stays.
+
+### Validation
+No Gradle locally (env rule). Brace check clean on all edited files
+(pre-existing checker artifacts unchanged), stale anchors gone
+(appearance-glow / appearance-entry / pref-overlay), `git diff --check`
+clean; CI on push is the gate.
+
+## Prior — Cabinet + Topic Browser: sort pill height, uniform pills, Category pill (v30)
 
 ### What was asked
 "In cabinet and topic browser the sorting pill is too thick — fix it and

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +34,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioCategoryChip
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
@@ -53,14 +51,13 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 @Composable
 fun ExperimentsScreen(navController: NavController) {
     val context = LocalContext.current
-    // v27u — the manual tint-category picker (single-select chips).
     // v27v — the ring-style picker (Coil spring / Split ring / Oblique coil).
-    var showTintCategoryPicker by remember { mutableStateOf(false) }
     var showRingStylePicker by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            // v30 — "Hero follows Spin lane": the page wears the lane wash.
+            .background(heroPageBackground())
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (wildcard sparkle leads; experiments are category-neutral).
@@ -173,44 +170,6 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                 }
             }
-            item { CurioSectionLabel("Home tint") }
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Home tint", "Home background + bottom nav take a category tint", AppPreferences.homeTintState) {
-                        AppPreferences.setHomeTintEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    // Grayed out when following the Spin lane (the lane wins
-                    // over the manual toggles) or when Home tint is off.
-                    val heroTintEnabled = AppPreferences.homeTintState && !AppPreferences.homeTintFollowLaneState
-                    ExperimentSwitchRow("Hero tint too", "The quest hero also wears the tint", AppPreferences.homeHeroTintState, enabled = heroTintEnabled) {
-                        AppPreferences.setHomeHeroTintEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Follow my Spin lane", "Tint follows the category you last picked on Spin", AppPreferences.homeTintFollowLaneState) {
-                        AppPreferences.setHomeTintFollowLaneEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    // Manual source — grayed out while following the Spin lane.
-                    val pickerEnabled = !AppPreferences.homeTintFollowLaneState
-                    val tintCatName = runCatching {
-                        CurioCategories.byId(CategoryId.valueOf(AppPreferences.homeTintCategoryIdState)).displayName
-                    }.getOrDefault("Surprise")
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(if (pickerEnabled) 1f else 0.45f)
-                    ) {
-                        CurioSettingsRow(
-                            CurioIcons.Palette,
-                            "Tint category",
-                            tintCatName
-                        ) {
-                            if (pickerEnabled) showTintCategoryPicker = true
-                        }
-                    }
-                }
-            }
             item { CurioSectionLabel("Promo") }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -231,39 +190,6 @@ fun ExperimentsScreen(navController: NavController) {
             title = "Experiments",
             subtitle = "Try ideas before they ship",
             onBack = { navController.popBackStack() }
-        )
-    }
-
-    // ── Tint category picker — single-select chips over the visible lanes ──
-    if (showTintCategoryPicker) {
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { showTintCategoryPicker = false },
-            title = { Text("Tint category") },
-            text = {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CurioCategories.visible.forEach { cat ->
-                        CurioCategoryChip(
-                            category = cat,
-                            selected = cat.id.name == AppPreferences.homeTintCategoryIdState,
-                            onClick = { AppPreferences.setHomeTintCategory(context, cat.id) }
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { showTintCategoryPicker = false },
-                    colors = curioDialogActionButtonColors()
-                ) {
-                    Text("Done")
-                }
-            }
         )
     }
 
