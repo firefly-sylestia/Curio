@@ -264,7 +264,57 @@ app/src/main/java/com/curio/app/
   fill a whisper of white (`lerp(chipSurface, White, 0.04 dark / 0.10
   light)`) with a 2dp shadow in BOTH states + `curioDarkGlow`, so
   unselected chips read as raised pills off the tinted sheet instead of
-  flat tiles.
+  flat tiles. **Pastel-mode follow-up:** the whisper was invisible — in
+  light mode `categorySurface()` ignores its `base` surface step, so the
+  sheet (`surfaceContainerLow`) and the chips (`surfaceContainerHigh`)
+  resolved to the SAME airy pastel and the 2dp elevation read as nothing.
+  The light-mode lift is now a clear surface step (`0.32` toward white,
+  dark keeps `0.04` + glow), so unselected chips visibly stand off the
+  tinted sheet in pastel AND plain light mode.
+- **v30 — uniform hero-pill height + Category pill in Cabinet & Topic
+  Browser heroes.** (1) Every hero pill now reads the SAME 42dp height:
+  `CurioSortDropdown` trims from a 44dp minimum to 42dp, and
+  `CabinetHeroActionPill` / `SettingsHeroActionPill` label-only pills get
+  a `heightIn(min = 42.dp)` so they match the 22dp-glyph pills — the sort
+  pill no longer reads thick next to Select/Search. (2) A new **Category**
+  pill rides a SECOND row directly under the hero's top pill row (Tune
+  glyph + active-filter label + an up/down chevron that flips with the
+  chips — ▾ closed / ▴ open, via the pills' optional `trailingGlyph`,
+  `emphasized` while open): tapping it
+  reveals the sticky category chip bar — the same chips that appear while
+  searching — in BOTH the Cabinet and the Topic Database. The heroes grow
+  +52dp to fit it (`CabinetHeroBannerHeight` 180→232, compact 140→192;
+  `SettingsHeroExtraRowHeight = 52.dp` applied to the settings hero when
+  the new `extraRow` slot is used). The Topic Database's category chips
+  are now HIDDEN BY DEFAULT (matching the Cabinet): the chip bar shows
+  only while the Category pill is open or search is active, and the DB
+  derives its own content offsets from `DatabaseHeroTotalHeight`. The
+  chip-bar content-top reservation only applies while the chips are
+  visible, so the collapsed screens start right below the hero.
+- **v30 — shared hero follows the Spin lane (Appearance toggle) + settings
+  declutter.** (1) New Appearance toggle **"Hero follows Spin lane"**
+  (`heroFollowLaneState`): when ON and the Spin deck is on a single lane,
+  the shared torn hero (Home / Profile / Settings / Cabinet-All / Quests /
+  Recent / Support / drawer — every rose/azure hero) wears that category's
+  `headerAccent()` — the Cabinet's filtered-hero language — via the new
+  central `heroLaneCategory()` helper hooked into `settingsRoseAccent()` +
+  `homeRoseAccent()`, and the page background below it wears the category
+  wash via `heroPageBackground(default)` (Home inline, Profile/Settings hub
+  keep their rose-lerp default; the rest of the settings family keeps its
+  plain default; Cabinet-All falls back to the lane wash too). Mix/empty
+  lane or toggle off → rose/azure as before. (2) **Removed:** the Home tint
+  experiments (Home tint / Hero tint too / Follow my Spin lane / Tint
+  category — Experiments section + picker gone, prefs dormant), the
+  **"Glow shadows"** Appearance option (`curioDarkGlow` is now a no-op —
+  the light glow was retired as a poor look; `darkGlowState` pref stays
+  dormant), and the **"Entry date & mood"** option — date/mood/attachments
+  are ALWAYS on now (SaveCapture + Marginalia gates hardcoded).
+  (3) **Merged:** "Floating explore bubble" + "Display over other apps"
+  are ONE option — the bubble toggle shows the live overlay grant state in
+  its subtitle, enabling without the permission opens the system page to
+  ask for it, and when the bubble is OFF with the permission still granted
+  an inline "Remove overlay permission" row appears to revoke it (a
+  separate revoke-trip flag keeps the return from re-enabling the bubble).
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -68,6 +69,7 @@ import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioCategory
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -91,8 +93,10 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
@@ -112,6 +116,10 @@ private val SettingsHeroSheetExtent = 24.dp
  *  the hero (the hero overlays the content, letting rows disappear under
  *  the ragged tear as they scroll). */
 val SettingsHeroTotalHeight = SettingsHeroBannerHeight + SettingsHeroSheetExtent
+/** Extra banner height added when the hero carries a second action row
+ *  under the top pills (the Topic Database's Category pill). Public so the
+ *  database can compute its own content offsets. */
+val SettingsHeroExtraRowHeight = 52.dp
 
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
@@ -155,9 +163,18 @@ fun SettingsHeroHeader(
     onSearchQueryChange: (String) -> Unit = {},
     onCloseSearch: () -> Unit = {},
     searchFocus: FocusRequester? = null,
-    searchPlaceholder: String = "Search…"
+    searchPlaceholder: String = "Search…",
+    // v30 — optional second action row directly under the top pills (the
+    // Topic Database's Category pill). When present the banner grows by
+    // [SettingsHeroExtraRowHeight] so the row fits without crowding the
+    // title block; hidden while searching (search swaps the hero content
+    // and surfaces the chips itself).
+    extraRow: (@Composable (ink: Color) -> Unit)? = null
 ) {
-    val bannerHeight = if (compact) 140.dp else SettingsHeroBannerHeight
+    // v30 — a second action row rides under the top pills; the banner
+    // grows by [SettingsHeroExtraRowHeight] to make room.
+    val baseBanner = if (compact) 140.dp else SettingsHeroBannerHeight
+    val bannerHeight = if (extraRow != null) baseBanner + SettingsHeroExtraRowHeight else baseBanner
     val totalHeight = bannerHeight + SettingsHeroSheetExtent
     val heroTornShape = remember(SETTINGS_HERO_TEAR_SEED) { SoftTornBottomShape(SETTINGS_HERO_TEAR_SEED, bold = true) }
     val sheetShape = remember(SETTINGS_HERO_TEAR_SEED) {
@@ -266,6 +283,13 @@ fun SettingsHeroHeader(
                                 trailing(ink)
                             }
                         }
+                    }
+                    // v30 — optional second action row under the top pills
+                    // (the Category pill); hidden while searching — search
+                    // swaps the hero content and surfaces the chips itself.
+                    if (extraRow != null && !searchActive) {
+                        Spacer(Modifier.height(8.dp))
+                        extraRow(ink)
                     }
                     // Flex spacer — pins the title/search block just above the tear.
                     Spacer(Modifier.weight(1f))
@@ -398,6 +422,9 @@ fun SettingsHeroActionPill(
     label: String? = null,
     glyph: String? = null,
     contentDescription: String? = null,
+    // v30 — optional trailing glyph (the Category pill's up/down chevron).
+    trailingGlyph: String? = null,
+    trailingContentDescription: String? = null,
     emphasized: Boolean = false,
     modifier: Modifier = Modifier,
     // v27n — the banner fill behind the pill (the opaque-fill conversion
@@ -432,7 +459,11 @@ fun SettingsHeroActionPill(
         Row(
             // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero
             // controls read as substantial buttons, not tiny chips.
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            // v30 — uniform 42dp height so label-only pills match glyph
+            // pills and the sort dropdown (which reads the same 42dp).
+            modifier = Modifier
+                .heightIn(min = 42.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -449,6 +480,14 @@ fun SettingsHeroActionPill(
                     label,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = ink
+                )
+            }
+            if (trailingGlyph != null) {
+                CurioIcon(
+                    name = trailingGlyph,
+                    contentDescription = trailingContentDescription,
+                    tint = ink.copy(alpha = 0.85f),
+                    size = 18.dp
                 )
             }
         }
@@ -478,6 +517,36 @@ private fun BoxScope.SettingsHeroSymbol(
     )
 }
 
+/**
+ * The category driving the shared hero + page background when the
+ * "Hero follows Spin lane" Appearance option is on — the single lane last
+ * picked on Spin, or null (mix / no lane / toggle off) to keep the
+ * default rose/azure. The same resolver feeds every shared rose-wood hero
+ * (Home / Profile / Settings / Cabinet / Quests / the drawer) and the
+ * [heroPageBackground] wash, mirroring the Cabinet's active-filter hero.
+ */
+@Composable
+fun heroLaneCategory(): CurioCategory? {
+    if (!AppPreferences.heroFollowLaneState) return null
+    // Hoist LocalContext.current out of the runCatching lambdas — its
+    // @Composable accessor can't be invoked inside a non-composable
+    // lambda (rule: non-composable callbacks are NOT @Composable scopes).
+    val context = LocalContext.current
+    val lane = runCatching { AppPreferences.getLastSpinCategories(context).singleOrNull() }
+        .getOrNull() ?: return null
+    return runCatching { CurioCategories.byId(lane) }.getOrNull()
+}
+
+/**
+ * The shared-hero family's page background: the Spin lane's category wash
+ * when "Hero follows Spin lane" is on (the Cabinet's page language), else
+ * [default] — so screens that never wore a tint keep their exact current
+ * look until the toggle is flipped.
+ */
+@Composable
+fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): Color =
+    heroLaneCategory()?.categoryBackgroundWash() ?: default
+
 /** The settings hero's rose-wood fill — the SAME treatment as Home/Profile
  *  (the muted rose-wood base, its airy pastel twin in pastel mode) so
  *  Settings reads as part of the same torn-banner family. Shared (public)
@@ -496,6 +565,11 @@ fun settingsRoseAccent(): Color {
         // collage + back pill instead of a tinted fill.
         return Color.Black
     }
+    // v30 — "Hero follows Spin lane": the shared hero wears the Spin
+    // lane's category accent (the Cabinet's filtered-hero language) instead
+    // of the rose/azure, in the Curio style only (Material/AMOLED keep
+    // their scheme roles above).
+    heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
@@ -545,7 +619,9 @@ fun SettingsHubScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f))
+            // v30 — "Hero follows Spin lane": the page wears the Spin lane's
+            // wash (the Cabinet language); otherwise the soft rose tint.
+            .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (the Home/Profile language). Settings is category-neutral, so the
@@ -1036,14 +1112,13 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.DarkMode, "Theme", "Light, dark, or system", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
     SettingsDeepRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
-    SettingsDeepRow(CurioIcons.Schedule, "Entry date & mood", "Date, mood, and attachments on saved entries", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-entry"),
+    SettingsDeepRow(CurioIcons.AutoAwesome, "Hero follows Spin lane", "Shared hero + page take the category you last picked on Spin", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
     SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
     SettingsDeepRow(CurioIcons.Timer, "Explore sessions", "Timer, reminder, and done prompt", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
     SettingsDeepRow(CurioIcons.Notifications, "Live explore notification", "Ongoing timer with pause and stop", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-live"),
-    SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-bubble"),
-    SettingsDeepRow(CurioIcons.Layers, "Display over other apps", "System permission for the floating bubble", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-overlay"),
+    SettingsDeepRow(CurioIcons.BubbleChart, "Floating explore bubble", "Timer bubble over other apps (asks for the overlay permission)", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-bubble"),
     SettingsDeepRow(CurioIcons.Pets, "Pet chatter", "Quiet, cozy, or talkative pet dialogue", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-chatter"),
     SettingsDeepRow(CurioIcons.Pets, "Pet games", "How often the pet starts games", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-games"),
     SettingsDeepRow(CurioIcons.Notifications, "Daily shuffle reminder", "A daily nudge to spin the deck", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-reminder"),

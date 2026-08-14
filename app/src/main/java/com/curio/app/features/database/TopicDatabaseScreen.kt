@@ -64,9 +64,11 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
+import com.curio.app.features.settings.SettingsHeroExtraRowHeight
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.adaptive.isWide
@@ -126,6 +128,16 @@ fun TopicDatabaseScreen(navController: NavController) {
     // in the header instead of scrolling inside the list.
     var searchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    // v30 — the Category pill (second row under the hero pills) toggles the
+    // sticky category chips; they also show while searching. Hidden by
+    // default (matches the Cabinet), so the Category pill is the way in.
+    var categoryFilterOpen by rememberSaveable { mutableStateOf(false) }
+    // v30 — the chip-bar reservation only applies while the chips are
+    // visible (the pill or search); collapsed, content starts right below
+    // the (taller) hero.
+    val chipsVisible = categoryFilterOpen || searchActive
+    val contentTop = DatabaseHeroTotalHeight +
+        (if (chipsVisible) DatabaseChipBarHeight else 0.dp) + 12.dp
     val searchFocus = remember { FocusRequester() }
     LaunchedEffect(searchActive) {
         if (searchActive) {
@@ -461,7 +473,8 @@ fun TopicDatabaseScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            // v30 — "Hero follows Spin lane": the page wears the lane wash.
+            .background(heroPageBackground())
     ) {
         // ── Watermark backdrop — muted category glyphs (settings family).
         // Wide windows: the NavHost's full-bleed collage replaces the page's
@@ -480,7 +493,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = DatabaseContentTop,
+                    top = contentTop,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -569,7 +582,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = DatabaseContentTop, bottom = 16.dp)
+                .padding(top = contentTop, bottom = 16.dp)
         )
 
         // ── Floating back-to-top arrow (v26) — once the list is scrolled
@@ -589,7 +602,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // Floating just below the pinned chip bar, centered over the
                 // list — clear of the scroll-indicator strip on the right.
                 .align(Alignment.TopCenter)
-                .padding(top = SettingsHeroTotalHeight + 74.dp)
+                .padding(top = DatabaseHeroTotalHeight + 74.dp)
         ) {
             Surface(
                 onClick = {
@@ -622,15 +635,19 @@ fun TopicDatabaseScreen(navController: NavController) {
         // ── Floating category filter bar (v26) — the Cabinet's sticky chip
         // bar language: rests just below the hero, then lifts, pops (0.97 →
         // 1.0) and frosts in as the list scrolls, pinning just below the
-        // ragged tear while the topic rows pass underneath it.
-        DatabaseStickyChipBar(
-            listState = listState,
-            catalog = catalog,
-            totalTopics = totalTopics,
-            selectedCat = effectiveCat,
-            onSelectAll = { selectedCat = null },
-            onSelectCategory = { selectedCat = it }
-        )
+        // ragged tear while the topic rows pass underneath it. v30 — hidden
+        // by default; the Category pill (in the hero) or search reveal it,
+        // matching the Cabinet.
+        if (chipsVisible) {
+            DatabaseStickyChipBar(
+                listState = listState,
+                catalog = catalog,
+                totalTopics = totalTopics,
+                selectedCat = effectiveCat,
+                onSelectAll = { selectedCat = null },
+                onSelectCategory = { selectedCat = it }
+            )
+        }
 
         // ── Torn rose hero on top — rows disappear under the tear. The
         // sort dropdown and search pill ride the hero's top row as ink-glass
@@ -646,6 +663,24 @@ fun TopicDatabaseScreen(navController: NavController) {
             onCloseSearch = { searchActive = false; searchQuery = "" },
             searchFocus = searchFocus,
             searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
+            // v30 — the Category pill rides a second row under the top pills
+            // (the hero grows taller); tapping toggles the sticky category
+            // chips, which are hidden by default.
+            extraRow = { ink ->
+                SettingsHeroActionPill(
+                    onClick = { categoryFilterOpen = !categoryFilterOpen },
+                    glyph = CurioIcons.Tune,
+                    label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
+                    ink = ink,
+                    // v30 — chevron flips with the chips: ▾ when closed, ▴
+                    // when open.
+                    trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
+                        else CurioIcons.KeyboardArrowDown,
+                    trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
+                        else "Show category chips",
+                    emphasized = categoryFilterOpen
+                )
+            },
             // Passed as a NAMED argument (not trailing-lambda syntax): the
             // @Composable slot isn't the last parameter, and the trailing
             // form fails to bind under K2.
@@ -754,16 +789,18 @@ private fun DatabaseFilterChip(
 // The Cabinet's sticky chip bar, adapted for the database's LazyListState:
 // rests just below the hero, then lifts, pops and pins just below the
 // ragged tear as the list scrolls, while the topic rows pass underneath.
+// v30 — the Topic Database's hero carries the Category pill in a second
+// row under the top pills, so it grows taller than the shared settings
+// hero by [SettingsHeroExtraRowHeight]; every DB offset uses this total.
+private val DatabaseHeroTotalHeight = SettingsHeroTotalHeight + SettingsHeroExtraRowHeight
 /** Where the chip bar rests below the hero (its unpinned spot). */
-private val DatabaseChipBarRestTop = SettingsHeroTotalHeight + 4.dp
+private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + 4.dp
 /** Where the chip bar pins when scrolled — just below the ragged tear. */
-private val DatabaseChipBarPinnedTop = SettingsHeroTotalHeight + 2.dp
+private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + 2.dp
 /** Scroll distance (dp) before the chip bar fully pins (Cabinet pill style). */
 private val DatabaseChipStickyThreshold = 56.dp
 /** The chip bar's layout height — scroll content starts below it. */
 private val DatabaseChipBarHeight = 52.dp
-/** Top content padding — hero + floating chip bar + breathing room. */
-private val DatabaseContentTop = SettingsHeroTotalHeight + DatabaseChipBarHeight + 12.dp
 /** Rows scrolled before the floating back-to-top arrow appears (≈ one
  *  full screen — each row is roughly 70dp tall). */
 private const val BackToTopRowThreshold = 10

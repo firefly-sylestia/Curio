@@ -1946,12 +1946,18 @@ private fun CompactChip(
 ) {
     // Plain Surface + clickable (no M3 minimum touch-target inflation) keeps
     // the chips compact even with 100+ tags in the sheet.
-    // v29 — full pill shape in every state; the INACTIVE fill lifts a
-    // whisper of white so unselected chips read as raised pills off the
-    // category-tinted sheet (the old flat surface blended in and the 1dp
-    // shadow was invisible), and dark mode adds the light glow so the
-    // elevation shows on midnight too.
-    val inactiveFill = lerp(chipSurface, Color.White, if (isCurioDarkTheme()) 0.04f else 0.10f)
+    // v29 — full pill shape in every state; the INACTIVE fill lifts toward
+    // white so unselected chips read as raised pills off the category-tinted
+    // sheet (the old flat surface blended in and the 1dp shadow was
+    // invisible), and dark mode adds the light glow so the elevation shows
+    // on midnight too. Pastel-mode fix: the sheet and the chips resolve the
+    // SAME airy pastel (categorySurface ignores the base surface step in
+    // light mode), so the original 0.10 white whisper vanished and the 2dp
+    // elevation read as nothing — the light-mode lift is now a clear surface
+    // step (0.32) that visibly stands off the tinted sheet. Dark mode keeps
+    // its small lift: the chip is already a stronger tint blend than the
+    // sheet there and wears curioDarkGlow.
+    val inactiveFill = lerp(chipSurface, Color.White, if (isCurioDarkTheme()) 0.04f else 0.32f)
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else inactiveFill,

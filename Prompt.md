@@ -1,5 +1,207 @@
 # Prompt.md — Request log
 
+## Current request — Windows download docs + PR/push = APK only (v31)
+
+### What was asked
+1. "Add instruction of how to download the windows version of the app."
+2. "Return the PR push to build just the APK, and make the tag push to
+   release both desktop and APK."
+
+### What was done
+- **README.md:** new **"Install on Windows (Desktop App)"** section under
+  Quick Start — Releases-page download steps, portable zip vs `.msi`
+  choice, SmartScreen "Run anyway" note (not code-signed), data location
+  (`%USERPROFILE%\.curio`), and a not-yet-ported disclaimer. System
+  Requirements table gained a Windows row (Windows 10/11 64-bit).
+- **desktop-release.yml → tag-only:** removed the `push`/`pull_request`
+  triggers (my earlier v28 addition) — PR/push CI now builds just the
+  Android APK via android.yml. The workflow runs only on `v*` tags (+ manual
+  dispatch): builds `Curio.exe` + `.msi` and attaches the portable zip +
+  installer to the release next to the APKs from release.yml. The artifact
+  upload step is now manual-dispatch-only (`if: !startsWith(ref,
+  'refs/tags/')`) since tag runs attach the files to the release.
+- **android.yml:** `push`/`pull_request` branches now `[main, Alpha]` so
+  the PR/push APK build runs on the active branch. The desktop JVM compile
+  job stays (compile gate only, no .exe).
+- Docs: `.github/AGENTS.md` desktop-release + android sections updated.
+
+### Validation
+YAML re-validated (`npx yaml-lint`), `git diff --check` clean; CI on
+push/tag is the gate.
+
+### CI fix (same push)
+CI on the 2d6d182 push failed compiling `:app` (the 9f5b2c7 hero-follows-
+lane change had never been compiled):
+- `headerAccent()` / `categoryBackgroundWash()` are extension functions in
+  `ui/theme/CategoryInk.kt` — HomeScreen lacked the `headerAccent` import
+  and SettingsHubScreen lacked BOTH (Cabinet/EntryDetail already had
+  them). Added the imports.
+- `heroLaneCategory()` called `LocalContext.current` INSIDE a `runCatching`
+  lambda — a non-composable context can't contain @Composable invocations.
+  Hoisted `val context = LocalContext.current` above the `runCatching`s.
+
+## Prior — Category pill chevron (v30 follow-up)
+
+### What was asked
+"Give the Category pill a chevron that flips up/down when the chips are
+open."
+
+### What was done
+`CabinetHeroActionPill` + `SettingsHeroActionPill` gained optional
+`trailingGlyph` / `trailingContentDescription` (a small 18dp trailing icon
+after the label, ink at 0.85). The Category pill in both the Cabinet and
+Topic Browser heroes passes `KeyboardArrowDown` when closed and
+`KeyboardArrowUp` when open, with matching show/hide content
+-descriptions — the chips-open state reads as an accordion.
+
+### Validation
+Brace check OK (3 files), `git diff --check` clean; CI on push is the gate.
+
+## Prior — shared hero follows the Spin lane + settings declutter (v30)
+
+### What was asked
+1. Remove the "Glow shadows" option from Appearance ("it's not good").
+2. Remove the Home tint experiments: Home tint, Hero tint too, Follow my
+   Spin lane (and the tint picker).
+3. Add an Appearance toggle that makes the shared hero + its below
+   background take the color/shade like the Cabinet — the category chosen
+   on Spin applies to the whole shared hero header and its background,
+   from Home to Profile, Settings, drawer, everywhere the rose/azure hero
+   is shared.
+4. Remove the "Entry date & mood" option — always on.
+5. Merge "Floating explore bubble" + "Display over other apps" (they are
+   the same): enabling without the permission asks for it; turning the
+   bubble OFF shows an inline option to remove the overlay permission.
+
+### What was done
+- **New pref + helpers:** `heroFollowLaneState` (Appearance toggle),
+  `heroLaneCategory()` (single Spin lane or null) and
+  `heroPageBackground(default)` in SettingsHubScreen.kt; `settingsRoseAccent()`
+  + `homeRoseAccent()` return `cat.headerAccent()` when the lane is active
+  (Curio style only; Material/AMOLED keep their scheme roles) — the whole
+  shared hero family follows automatically (Home/Profile/Settings/Cabinet-
+  All/Quests/Recent/Support/drawer/…). Page backgrounds use
+  `heroPageBackground()` (Home inline + Profile/Settings keep the rose-lerp
+  default; the settings-family screens keep plain; Cabinet-All falls back
+  to the lane wash) — zero default change until the toggle is flipped.
+- **Removed:** Home tint experiments (Experiments section + picker dialog
+  + state, prefs dormant), Glow shadows row (`curioDarkGlow` is now a no-op
+  pass-through; the glow is retired, `darkGlowState` dormant), Entry date &
+  mood row + hub deep rows (SaveCapture + Marginalia gates hardcoded to
+  always-on via `run {}` / condition drop).
+- **Bubble/overlay merge:** single "Floating explore bubble" toggle with
+  live grant state in the subtitle; enabling without permission opens the
+  system overlay page (existing ask); when OFF + permission granted, an
+  inline "Remove overlay permission" row opens the system page with a
+  revoke-trip flag so the return refreshes the grant without re-enabling
+  the bubble. The separate "Display over other apps" row + hub deep row are
+  gone; the "Explore bubble option in Explore dialog" row stays.
+
+### Validation
+No Gradle locally (env rule). Brace check clean on all edited files
+(pre-existing checker artifacts unchanged), stale anchors gone
+(appearance-glow / appearance-entry / pref-overlay), `git diff --check`
+clean; CI on push is the gate.
+
+## Prior — Cabinet + Topic Browser: sort pill height, uniform pills, Category pill (v30)
+
+### What was asked
+"In cabinet and topic browser the sorting pill is too thick — fix it and
+keep all pills with same height. And below those 3 pills place the category
+choose pill which shows the category chips same as when it shows when i tap
+the search."
+
+### User decisions (ask_user)
+- Topic Browser category chips: HIDE by default, reveal via the new pill
+  (or search) — matching the Cabinet.
+- Category pill placement: INSIDE the hero, directly under the top pill
+  row — the hero banner grows taller to make room.
+
+### What was done
+- **Uniform 42dp hero pills:** `CurioSortDropdown` min 44→42dp;
+  `CabinetHeroActionPill` + `SettingsHeroActionPill` label-only pills gain
+  `heightIn(min = 42.dp)` (they were 40dp vs the 22dp-glyph pills' 42dp) —
+  Select / Sort / Search now read the same height in both heroes.
+- **Category pill:** a second row directly under the top pill row (Tune
+  glyph + active-filter label, `emphasized` when open) toggles the sticky
+  category chip bar — the same chips search shows — in the Cabinet and
+  the Topic Database. Heroes grow +52dp: `CabinetHeroBannerHeight` 180→232
+  (compact 140→192); settings hero adds `SettingsHeroExtraRowHeight = 52.dp`
+  when its new `extraRow` slot is used (only the DB passes it).
+- **DB chips hidden by default:** `DatabaseStickyChipBar` renders only when
+  `categoryFilterOpen || searchActive`; the DB derives all offsets from a
+  new `DatabaseHeroTotalHeight`. Both screens' content top-padding shrinks
+  when the chips are hidden (the 52dp chip-bar reservation only applies
+  while visible).
+- Docs: `app/AGENTS.md` v30 bullet.
+
+### Validation
+No Gradle locally (env rule). Source-audited imports (heightIn added to
+Cabinet/Settings), braces balanced, `git diff --check` clean; CI on push is
+the gate.
+
+## Prior — pastel-mode FilterSheet chips: invisible elevation (v29 follow-up)
+
+### What was asked
+"In pastel mode the filter chips elevation isn't visible as they have the
+same shade — fix it."
+
+### Root cause
+In the Spin FilterSheet (`CompactChip` in `SpinScreen.kt`), the sheet
+container resolves `cat.categorySurface(surfaceContainerLow)` and the chips
+resolve `cat.categorySurface(surfaceContainerHigh)` — but in LIGHT mode
+`categorySurface()` IGNORES its `base` parameter and always returns
+`lightSurfaceTint(accent)` (pastel: `lightAccentTint(accent, 0.28, 0.86)`).
+So sheet and chips were the SAME airy pastel; the v29 "whisper" lift
+(`lerp(chipSurface, White, 0.10)`) was invisible on the near-white pastel,
+and the 2dp elevation read as nothing. (Dark mode was already fine: the chip
+is a stronger tint blend than the sheet there + wears `curioDarkGlow`.)
+
+### What was done
+`CompactChip`'s light-mode inactive fill lift raised 0.10 → 0.32 toward
+white — a real surface step so unselected chips visibly stand off the
+tinted sheet in pastel AND plain light mode; dark keeps 0.04 + glow.
+Docs: `app/AGENTS.md` v29 FilterSheet bullet extended.
+
+### Validation
+No Gradle locally (env rule). Braces/imports unchanged (single constant
+edit); CI on push is the gate.
+
+## Prior — desktop-release: missing Curio.exe app image + PR builds (v28)
+
+### What was asked
+Fix the desktop tag-release CI failure (`Write-Error: No Curio.exe app image
+was produced under desktop/build/compose/binaries/main`) and make PR pushes
+build the proper `.exe` too.
+
+### Root cause
+The workflow ran only `:desktop:packageDistributionForCurrentOS`, which is a
+lifecycle task aggregating the package tasks. `packageMsi` builds its own
+jpackage image INTERNALLY and consumes it — the app image folder (with
+`Curio.exe`) is never left on disk, so the portable-zip step's recursive
+`Curio.exe` search found nothing. Only `:desktop:createDistributable`
+("Creates a final application image without creating an installer")
+leaves the image under `build/compose/binaries/main`.
+
+### What was done
+- `desktop-release.yml` now runs BOTH
+  `:desktop:createDistributable` and `:desktop:packageDistributionForCurrentOS`
+  so the `Curio.exe` app image exists for the portable zip; the collect step
+  derives the zip version from `RELEASE_VERSION` (fallback `1.0.0` for
+  non-tag runs) so PR ref names can't leak into artifact names.
+- Added `push` + `pull_request` triggers on `main`/`Alpha`: PR/push runs
+  build the `.exe` + `.msi` and upload them as run artifacts
+  (`curio-desktop-windows-*`, 7-day retention). `RELEASE_VERSION` is only
+  set for tag runs (jpackage rejects non-numeric versions); release-only
+  steps (body, prerelease, gh-release) are gated on
+  `startsWith(github.ref, 'refs/tags/')`; concurrency switched to
+  cancel-in-progress like android.yml.
+- Docs: `.github/AGENTS.md` + root `AGENTS.md` desktop sections updated.
+
+### Validation
+No Gradle locally (env rule). YAML re-validated with `npx yaml-lint` +
+`git diff --check`; CI on PR/push/tag is the gate.
+
 ## Current request — restore Spin BoxWithConstraints import
 
 ### What was asked

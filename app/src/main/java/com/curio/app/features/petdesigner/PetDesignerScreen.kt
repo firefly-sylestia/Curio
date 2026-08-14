@@ -115,6 +115,7 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -509,7 +510,8 @@ fun PetDesignerScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            // v30 — "Hero follows Spin lane": the page wears the lane wash.
+            .background(heroPageBackground())
     ) {
         if (!windowWidthSizeClass().isWide) {
             CurioWatermarkBackdrop(

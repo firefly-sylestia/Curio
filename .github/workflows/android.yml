@@ -2,9 +2,9 @@ name: Curio Android CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, Alpha]
   pull_request:
-    branches: [main]
+    branches: [main, Alpha]
   workflow_dispatch:
 
 permissions:

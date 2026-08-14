@@ -125,7 +125,8 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            // v30 — "Hero follows Spin lane": the page wears the lane wash.
+            .background(heroPageBackground())
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (wildcard sparkle leads; settings is category-neutral).
@@ -222,19 +223,12 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        // v28 — dark-mode elevation visibility: black shadows vanish on the
-        // midnight surfaces, so dark mode draws a soft light glow (default
-        // ON). The v28 hairline outline option was REMOVED — dark cards rely
-        // on the glow + shine instead. Light mode is untouched.
-        SettingsRowPulse(highlightKey == "appearance-glow") {
-            CompactSwitchRow("Glow shadows", "Dark mode: soft light glow so elevation stays visible", AppPreferences.darkGlowState) {
-                AppPreferences.setDarkGlowEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-entry") {
-            CompactSwitchRow("Entry date & mood", "Date, mood, and attachments on saved entries", AppPreferences.entryMetaEnabledState) {
-                AppPreferences.setEntryMetaEnabled(context, it)
+        // v30 — the shared hero AND its page background follow the category
+        // last picked on Spin (the Cabinet's language) instead of the
+        // rose/azure. Off by default — rose stays.
+        SettingsRowPulse(highlightKey == "appearance-hero-lane") {
+            CompactSwitchRow("Hero follows Spin lane", "Shared hero and page take the category you last picked on Spin", AppPreferences.heroFollowLaneState) {
+                AppPreferences.setHeroFollowLaneEnabled(context, it)
             }
         }
         CurioSettingsDivider()
@@ -271,6 +265,10 @@ private fun PreferencesSection(highlightKey: String? = null) {
     // grant — or a decline — just happened).
     var overlayUsable by remember { mutableStateOf(AppPreferences.overlayActuallyUsable(context)) }
     var overlaySettingsOpened by remember { mutableStateOf(false) }
+    // v30 — the bubble and the overlay permission are ONE option now; this
+    // flags the "Remove overlay permission" trip so the return only refreshes
+    // the grant state instead of re-enabling the bubble.
+    var overlayRevokeOpened by remember { mutableStateOf(false) }
     var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
     // v27 — the daily shuffle reminder + its hour chips moved in from the
@@ -301,8 +299,15 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 // prompts stop (Settings toggles still work anytime).
                 if (overlaySettingsOpened) {
                     overlaySettingsOpened = false
+                    val revoking = overlayRevokeOpened
+                    overlayRevokeOpened = false
                     overlayUsable = AppPreferences.overlayActuallyUsable(context)
-                    if (overlayUsable) {
+                    if (revoking) {
+                        // v30 — the "Remove overlay permission" row opened the
+                        // system page: the bubble stays OFF; only the live
+                        // grant state refreshes in the subtitle.
+                    } else if (overlayUsable) {
+                        // Grant: re-enable the bubble + clear the declined flag.
                         AppPreferences.setOverlayAskDeclined(context, false)
                         AppPreferences.setOverlayBubbleEnabled(context, true)
                         overlayEnabled = true
@@ -365,11 +370,22 @@ private fun PreferencesSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v30 — the floating bubble and the overlay permission are ONE
+        // option (the bubble IS the overlay). Enabling without the permission
+        // opens the system page to ask for it; the subtitle shows the live
+        // grant state. When the bubble is OFF and the permission is still
+        // granted, an inline row below offers to remove it.
         SettingsRowPulse(highlightKey == "pref-bubble") {
-            CompactSwitchRow("Floating explore bubble", "Timer bubble over other apps", overlayEnabled) { enabled ->
+            CompactSwitchRow(
+                "Floating explore bubble",
+                if (overlayUsable) "Timer bubble over other apps · overlay permission granted"
+                else "Timer bubble over other apps — needs the overlay permission",
+                overlayEnabled
+            ) { enabled ->
                 if (enabled && !AppPreferences.overlayActuallyUsable(context)) {
-                    // Explicit intent — stop suppressing the prompt and
-                    // remember the settings trip so the return decides.
+                    // Enabling without the permission: ask for it — stop
+                    // suppressing the prompt, open the system page, and let
+                    // the ON_RESUME observer decide grant vs decline.
                     AppPreferences.setOverlayAskDeclined(context, false)
                     val launched = runCatching {
                         overlaySettingsOpened = true
@@ -387,31 +403,31 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
-        // v8.1 — the permission toggle itself: shows the live grant state
-        // and opens the system special-access page (on or off — the grant
-        // can't be flipped from the app). The switch re-reads reality on
-        // return, so granting here re-enables the bubble and future prompts.
-        SettingsRowPulse(highlightKey == "pref-overlay") {
-            CompactSwitchRow(
-                "Display over other apps",
-                if (overlayUsable) "Granted. The bubble can float over other apps"
-                else "System permission for the floating bubble",
-                overlayUsable
-            ) { enabled ->
-                // An explicit toggle is a fresh intent: it always opens the
-                // system page (grant OR revoke) and clears the declined flag.
-                AppPreferences.setOverlayAskDeclined(context, false)
-                val launched = runCatching {
+        if (!overlayEnabled && overlayUsable) {
+            SettingsRowPulse(highlightKey == "pref-bubble-revoke") {
+                CurioSettingsRow(
+                    CurioIcons.Layers,
+                    "Remove overlay permission",
+                    "Open system settings to revoke the floating bubble's permission"
+                ) {
+                    // A fresh trip with no intent to enable: only refresh the
+                    // grant state on return — never re-enable the bubble.
+                    AppPreferences.setOverlayAskDeclined(context, false)
+                    overlayRevokeOpened = true
                     overlaySettingsOpened = true
-                    overlaySettingsLauncher.launch(
-                        Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:${context.packageName}")
+                    val launched = runCatching {
+                        overlaySettingsLauncher.launch(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:${context.packageName}")
+                            )
                         )
-                    )
+                    }
+                    if (launched.isFailure) {
+                        overlaySettingsOpened = false
+                        overlayRevokeOpened = false
+                    }
                 }
-                if (launched.isFailure) overlaySettingsOpened = false
             }
         }
         CurioSettingsDivider()

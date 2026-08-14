@@ -50,6 +50,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -97,7 +98,8 @@ fun PromoModeScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            // v30 — "Hero follows Spin lane": the page wears the lane wash.
+            .background(heroPageBackground())
     ) {
         // ── Watermark backdrop — muted category glyphs (settings family).
         // Wide windows: the NavHost's full-bleed collage replaces the page's

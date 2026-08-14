@@ -246,8 +246,9 @@ fun MarginaliaFormat(
             newCardColor = { journalColor }
         )
 
-        // ── Attachments — behind the "Entry date & mood" setting ─────────
-        if (AppPreferences.entryMetaEnabledState) {
+        // ── Attachments — always on (v30: the "Entry date & mood" option
+        // was removed — date, mood and attachments are permanent).
+        run {
             // Attach gallery images (up to [MaxAttachedImages]) — same row
             // as Reel Notes.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

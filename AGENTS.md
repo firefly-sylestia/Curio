@@ -272,10 +272,12 @@ constructors.
   builds the module on every push (`:desktop:build`) and uploads the
   compiled JAR as an artifact (`curio-desktop-jar-*`), so the port can't
   silently rot. Native Windows installers (`.exe` app image + `.msi`)
-  build on tag pushes via `.github/workflows/desktop-release.yml` (a
-  windows-latest runner, WiX via chocolatey, jpackage
-  `packageDistributionForCurrentOS`; the portable zip + `.msi` attach to
-  the GitHub release).
+  build on PRs/pushes to `main`/`Alpha` AND tag pushes via
+  `.github/workflows/desktop-release.yml` (a windows-latest runner, WiX
+  via chocolatey, jpackage `createDistributable` for the `.exe` app image
+  + `packageDistributionForCurrentOS` for the `.msi`; the portable zip +
+  `.msi` attach to the GitHub release on tags and upload as run artifacts
+  on PR/push builds).
 
 **To run locally:** `./gradlew :desktop:run` (this environment forbids
 running Gradle — CI validates instead).

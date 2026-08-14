@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -80,6 +81,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.TopicCatalog
 
 import com.curio.app.features.settings.settingsReadableInk
+import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
@@ -146,9 +148,8 @@ private val CategoryIdSaver = Saver<CategoryId?, String>(
 fun CabinetScreen(navController: NavController) {
     // Wide windows (tablet / landscape) spread the grid into more columns.
     val wide = windowWidthSizeClass().isWide
-    // Compact hero on tablets/landscape — 140dp instead of 180dp.
-    val compactBannerHeight = if (wide) 140.dp else CabinetHeroBannerHeight
-    val contentTop = compactBannerHeight + CabinetHeroSheetExtent + CabinetChipBarHeight + 12.dp
+    // Compact hero on tablets/landscape — 192dp instead of 232dp.
+    val compactBannerHeight = if (wide) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
     var selectedFilter by rememberSaveable(CabinetSessionToken, stateSaver = CategoryIdSaver) {
         mutableStateOf<CategoryId?>(null)
     }
@@ -161,6 +162,15 @@ fun CabinetScreen(navController: NavController) {
     // sort button toggles newest-first / oldest-first by capture time.
     var searchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    // v30 — the category pill (second row under the hero pills) toggles the
+    // sticky category chips; they also show while searching (same chips).
+    var categoryFilterOpen by rememberSaveable { mutableStateOf(false) }
+    // v30 — the chip-bar reservation only applies while the chips are
+    // visible (search or the category pill); collapsed, content starts
+    // right below the hero.
+    val chipsVisible = searchActive || categoryFilterOpen
+    val contentTop = compactBannerHeight + CabinetHeroSheetExtent +
+        (if (chipsVisible) CabinetChipBarHeight else 0.dp) + 12.dp
     // v26 — sort is a dropdown (field) + a universal ascending/descending
     // arrow. Default: Date, newest first (descending).
     var cabinetSortField by rememberSaveable { mutableStateOf(CabinetSortField.DATE.name) }
@@ -281,7 +291,11 @@ fun CabinetScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(filterCat?.categoryBackgroundWash() ?: MaterialTheme.colorScheme.background)
+            // v30 — an active filter washes the page; the "All" page falls
+            // back to the shared hero family's background (the Spin lane's
+            // wash when "Hero follows Spin lane" is on, else plain).
+            .background(filterCat?.categoryBackgroundWash()
+                ?: (heroLaneCategory()?.categoryBackgroundWash() ?: MaterialTheme.colorScheme.background))
     ) {
         // Muted category-glyph watermark behind the grid — the same
         // backdrop language as Home / Spin / the saved-entry page, so the
@@ -453,8 +467,9 @@ fun CabinetScreen(navController: NavController) {
         // ── Sticky filter chip bar — drawn ON TOP of the scroll content.
         // As the grid scrolls the bar lifts, pops (0.97 → 1.0) and frosts in
         // (Profile's pill mechanism), pinning just below the ragged tear
-        // while the entry cards pass underneath it.
-        if (searchActive) {
+        // while the entry cards pass underneath it. v30 — shown while
+        // searching OR when the Category pill (under the hero pills) is open.
+        if (chipsVisible) {
             CabinetStickyChipBar(
                 gridState = gridState,
                 entries = entries,
@@ -494,6 +509,14 @@ fun CabinetScreen(navController: NavController) {
             onCloseSearch = { searchActive = false; searchQuery = "" },
             searchFocus = searchFocus,
             compact = wide,
+            // v30 — the Category pill under the hero pills toggles the
+            // sticky category chips (the same chips search shows).
+            categoryFilterOpen = categoryFilterOpen,
+            onToggleCategoryFilter = { categoryFilterOpen = !categoryFilterOpen },
+            categoryLabel = when {
+                showLegacyOnly -> "Category · Legacy"
+                else -> "Category · ${selectedFilter?.let { CurioCategories.byId(it).displayName } ?: "All"}"
+            },
             // Passed as a NAMED argument (not trailing-lambda syntax): the
             // @Composable slot isn't the last parameter, and the trailing
             // form fails to bind it under K2 ("no value passed for
@@ -580,8 +603,12 @@ fun CabinetScreen(navController: NavController) {
 // is active) and the search/sort/select action pills as ink-glass pills.
 // ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-/** The hero banner's solid body height — compact, like the settings hero. */
-private val CabinetHeroBannerHeight = 180.dp
+/** The hero banner's solid body height — compact, like the settings hero.
+ *  v30 — +52dp for the Category pill row riding under the top pills. */
+private val CabinetHeroBannerHeight = 232.dp
+/** Banner height on wide windows (tablet/landscape) — keeps the same +52dp
+ *  as the phone banner for the Category pill row. */
+private val CabinetHeroBannerHeightCompact = 192.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val CabinetHeroSheetExtent = 24.dp
 /** Total header footprint — the torn banner plus its under-sheet extent. */
@@ -646,9 +673,15 @@ private fun CabinetHeroHeader(
     trailing: @Composable (ink: Color, backdrop: Color) -> Unit,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
-    compact: Boolean = false
+    compact: Boolean = false,
+    // v30 — the category filter pill rides a second row directly under the
+    // top pills; tapping it toggles the sticky category chips below the
+    // hero (the same chips search shows).
+    categoryFilterOpen: Boolean,
+    onToggleCategoryFilter: () -> Unit,
+    categoryLabel: String
 ) {
-    val bannerHeight = if (compact) 140.dp else CabinetHeroBannerHeight
+    val bannerHeight = if (compact) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
     val totalHeight = bannerHeight + CabinetHeroSheetExtent
     val heroTornShape = remember(CABINET_TEAR_SEED) { SoftTornBottomShape(CABINET_TEAR_SEED, bold = true) }
     val sheetShape = remember(CABINET_TEAR_SEED) {
@@ -766,6 +799,29 @@ private fun CabinetHeroHeader(
                             ) {
                                 trailing(ink, fill)
                             }
+                        }
+                    }
+                    // v30 — category filter pill, directly under the top pill
+                    // row (hidden while searching — search already surfaces
+                    // the chips). Tapping toggles the sticky chip bar below
+                    // the hero, exactly like the search chips.
+                    if (!searchActive) {
+                        Spacer(Modifier.height(8.dp))
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            CabinetHeroActionPill(
+                                onClick = onToggleCategoryFilter,
+                                glyph = CurioIcons.Tune,
+                                label = categoryLabel,
+                                ink = ink,
+                                backdrop = fill,
+                                // v30 — chevron flips with the chips: ▾ when
+                                // closed, ▴ when open.
+                                trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
+                                    else CurioIcons.KeyboardArrowDown,
+                                trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
+                                    else "Show category chips",
+                                emphasized = categoryFilterOpen
+                            )
                         }
                     }
                     // Flex spacer — pins the title block just above the tear.
@@ -1084,6 +1140,9 @@ private fun CabinetHeroActionPill(
     label: String? = null,
     glyph: String? = null,
     contentDescription: String? = null,
+    // v30 — optional trailing glyph (the Category pill's up/down chevron).
+    trailingGlyph: String? = null,
+    trailingContentDescription: String? = null,
     emphasized: Boolean = false,
     destructive: Boolean = false
 ) {
@@ -1118,7 +1177,11 @@ private fun CabinetHeroActionPill(
         Row(
             // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero
             // controls read as substantial buttons, not tiny chips.
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            // v30 — uniform 42dp height so label-only pills match glyph
+            // pills and the sort dropdown (which reads the same 42dp).
+            modifier = Modifier
+                .heightIn(min = 42.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -1135,6 +1198,14 @@ private fun CabinetHeroActionPill(
                     label,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = ink
+                )
+            }
+            if (trailingGlyph != null) {
+                CurioIcon(
+                    name = trailingGlyph,
+                    contentDescription = trailingContentDescription,
+                    tint = ink.copy(alpha = 0.85f),
+                    size = 18.dp
                 )
             }
         }

@@ -1,12 +1,14 @@
 # Curio Desktop Release — native Windows installers for the Compose
 # Multiplatform desktop port (desktop/ module).
 #
-# Runs on the same v* tags as the Android release workflow: this job builds
-# the Windows distribution (the Curio.exe app image via jpackage, plus the
-# .msi installer) and attaches both to the release. The Android workflow may
-# create the release body first; this workflow only writes its own body when
-# it creates the release (update_release_body is false), so the two never
-# clobber each other's text.
+# Tag-only: PR/push CI builds just the Android APK (see android.yml). On a
+# v* tag this workflow runs on a windows-latest runner, builds the proper
+# Curio.exe app image + .msi, and attaches the portable zip + installer to
+# the GitHub release alongside the Android APKs published by release.yml.
+# The Android workflow may create the release body first; this workflow only
+# writes its own body when it creates the release (update_release_body is
+# false), so the two never clobber each other's text. Manual dispatch runs
+# the same build and uploads the files as run artifacts for testing.
 name: Curio Desktop Release
 
 on:
@@ -18,8 +20,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: curio-desktop-release-${{ github.ref }}
-  cancel-in-progress: false
+  group: curio-desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   windows:
@@ -29,8 +31,10 @@ jobs:
     env:
       # The tag (e.g. "v1.2.3") becomes the installer's package version —
       # consumed by desktop/build.gradle.kts (mirrors the Android release
-      # workflow's RELEASE_VERSION convention).
-      RELEASE_VERSION: ${{ github.ref_name }}
+      # workflow's RELEASE_VERSION convention). Manual dispatch runs leave
+      # it empty so the module keeps its default 1.0.0 (jpackage needs a
+      # strictly numeric version).
+      RELEASE_VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
 
     steps:
       - name: Check out Curio
@@ -82,11 +86,16 @@ jobs:
           echo "WiX Toolset ready: $($wixRoot.FullName) (bin: $wixBin)"
 
       # Builds the Windows-only distributions from nativeDistributions
-      # (Msi — Dmg/Deb are macOS/Linux formats and are skipped on Windows):
-      # the app image (contains Curio.exe) + the .msi installer.
+      # (Msi — Dmg/Deb are macOS/Linux formats and are skipped on Windows).
+      # BOTH tasks must run: createDistributable leaves the Curio.exe app
+      # image on disk under build/compose/binaries/main, while
+      # packageDistributionForCurrentOS builds the .msi — its packageMsi
+      # task consumes its own jpackage image internally and does NOT leave
+      # the app image behind, so without createDistributable there is no
+      # Curio.exe to zip into the portable archive.
       - name: Build the Windows distribution (app image + MSI)
         shell: pwsh
-        run: ./gradlew.bat :desktop:packageDistributionForCurrentOS --stacktrace
+        run: ./gradlew.bat :desktop:createDistributable :desktop:packageDistributionForCurrentOS --stacktrace
 
       - name: Collect installers and build the portable zip
         shell: pwsh
@@ -113,15 +122,33 @@ jobs:
             Write-Error "Curio.exe has no parent app-image directory"
             exit 1
           }
-          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          # Tag runs name the zip from the tag (v1.2.3 -> 1.2.3); manual
+          # dispatch runs have no tag, so keep the module's default version.
+          $version = $env:RELEASE_VERSION
           if ([string]::IsNullOrWhiteSpace($version)) { $version = "1.0.0" }
+          $version = $version.TrimStart("v")
           $zipName = "Curio-Windows-$version-portable.zip"
           Compress-Archive -Path "$($appDir.FullName)\*" -DestinationPath $zipName -Force
           echo "Installer: $($msi.FullName)"
           echo "Portable:  $($PWD.Path)\$zipName"
           Get-Item "$($appDir.FullName)\Curio.exe" | Select-Object Name, Length
 
+      # Tag runs attach these files permanently to the GitHub release below.
+      # Manual-dispatch runs (no tag) can't publish, so the same files are
+      # uploaded as downloadable run artifacts for testing instead.
+      - name: Upload Windows artifacts (manual dispatch only)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-desktop-windows-${{ github.run_number }}
+          path: |
+            Curio-Windows-*-portable.zip
+            desktop/build/compose/binaries/main/msi/*.msi
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Write Windows release body
+        if: startsWith(github.ref, 'refs/tags/')
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME.TrimStart("v")
@@ -153,6 +180,7 @@ jobs:
 
       - name: Determine prerelease status
         id: prerelease
+        if: startsWith(github.ref, 'refs/tags/')
         shell: pwsh
         run: |
           if ($env:GITHUB_REF_NAME -match "alpha|beta|rc") {
@@ -162,6 +190,7 @@ jobs:
           }
 
       - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3
         with:
           prerelease: ${{ steps.prerelease.outputs.value }}

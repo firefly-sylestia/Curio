@@ -102,6 +102,7 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
+import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
@@ -130,6 +131,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
@@ -210,39 +212,26 @@ private data class HomeHeroPair(
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
-    // v27u — Home tint experiments (Settings → Experiments → Home tint):
-    // the Home background + bottom nav can wear a category's tint. When
-    // "Follow my Spin lane" is on it wins over the manual picker (the
-    // manual toggles gray out in Experiments); otherwise the picker's
-    // category is used. Everything is OFF by default — Home stays plain.
-    val homeTintFollowLane = AppPreferences.homeTintFollowLaneState
-    val homeTintOn = homeTintFollowLane || AppPreferences.homeTintState
-    val homeTintCat: CurioCategory = if (homeTintFollowLane) {
-        val lane = runCatching { AppPreferences.getLastSpinCategories(context).singleOrNull() }
-            .getOrNull() ?: CategoryId.WILDCARD
-        CurioCategories.byId(lane)
-    } else {
-        val id = runCatching { CategoryId.valueOf(AppPreferences.homeTintCategoryIdState) }
-            .getOrDefault(CategoryId.WILDCARD)
-        CurioCategories.byId(id)
-    }
-    val homeBg = if (homeTintOn) homeTintCat.categoryBackgroundWash()
+    // v30 — Appearance "Hero follows Spin lane": the quest hero AND the Home
+    // background take the category last picked on Spin (the Cabinet's
+    // language) when the toggle is on; otherwise Home stays on the soft
+    // rose-tinted background with the rose/azure hero. (The v27u Home tint
+    // experiments were removed — this is their always-clean successor.)
+    val laneCat = heroLaneCategory()
+    val homeBg = if (laneCat != null) laneCat.categoryBackgroundWash()
         else androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)
-    // v27v — the quest hero tint resolution lives here at the TOP of the
-    // screen so the sticky top-bar pills (which render OUTSIDE the scroll
-    // column) can share it: when "Hero tint too" is on, the menu + profile
-    // pills wear the same tinted accent + on-accent ink as the hero instead
-    // of always falling back to the rose accent.
-    val heroTintOn = homeTintOn && !homeTintFollowLane && AppPreferences.homeHeroTintState
-    val heroFill = if (heroTintOn) homeTintCat.themedAccent() else homeRoseAccent()
-    // v28 — dark mode: the tinted hero's title + sticky pills stay
-    // white/creamish (never the category's tinted light twin); light mode
-    // keeps the pastel-aware on-accent ink as before.
-    val questInk = if (heroTintOn) homeTintCat.heroHeaderInk() else homeReadableInk(heroFill)
+    // The hero + sticky top-bar pills share the SAME resolved fill (the
+    // lane-aware homeRoseAccent below) so the menu/profile pills match the
+    // quest hero in every mode.
+    val heroFill = homeRoseAccent()
+    // v28 — dark mode: the hero's title + sticky pills stay white/creamish
+    // (never a tinted light twin over the deep banner); light mode keeps the
+    // pastel-aware on-accent ink.
+    val questInk = homeReadableInk(heroFill)
     // Publish the wash so the Scaffold-level bottom nav (which can't read
-    // this screen's state) blends with the tinted Home page.
+    // this screen's state) blends with the lane-tinted Home page.
     LaunchedEffect(homeBg) {
-        CurioNavTint.publishHomeWash(if (homeTintOn) homeBg else null)
+        CurioNavTint.publishHomeWash(if (laneCat != null) homeBg else null)
     }
     val displayName = remember { AppPreferences.getDisplayName(context) }
     // Saved-shelf unsave confirmation — set when the user taps the remove
@@ -544,13 +533,9 @@ fun HomeScreen(navController: NavController) {
                             // "Paper stat card" experiment is on.
                             val paperStatsOn = AppPreferences.paperStatCardsState
                             // v27u — shared paper color (same cream/rose-brown
-                            // blend Profile's stat pane uses). With the Home
-                            // tint on, the stat card takes a 5% whisper of the
-                            // category shade — creamy, not colored.
-                            val statGlass = if (homeTintOn) lerp(heroFill, homeTintCat.accent, 0.05f) else heroFill
-                            val paperStatBg = paperStatCardColor(heroFill).let { base ->
-                                if (homeTintOn) lerp(base, homeTintCat.accent, 0.05f) else base
-                            }
+                            // blend Profile's stat pane uses).
+                            val statGlass = heroFill
+                            val paperStatBg = paperStatCardColor(heroFill)
                             // v27h — the Topics stat always shows the TRUE
                             // catalog total: the splash warm-cache seeds the
                             // first frame, then a lightweight IO count of the
@@ -1594,6 +1579,9 @@ private fun homeRoseAccent(): Color {
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
         return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
     }
+    // v30 — "Hero follows Spin lane": Home's shared hero wears the Spin
+    // lane's accent too (the drawer + hero share this resolver).
+    heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {

@@ -16,7 +16,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 - `.github/workflows/android.yml` — Branch and pull-request verification
 - `.github/workflows/release.yml` — Tag-triggered signed release publishing (Android APKs)
-- `.github/workflows/desktop-release.yml` — Tag-triggered Windows desktop installers (.exe app image + .msi)
+- `.github/workflows/desktop-release.yml` — Windows desktop installers (.exe app image + .msi) on tag releases (manual dispatch for testing)
 - `.github/ISSUE_TEMPLATE/bug-report.yml` — Curio Android bug report form
 - `.github/ISSUE_TEMPLATE/feature-request.yml` — Curio product and UX request form
 - `.github/PULL_REQUEST_TEMPLATE.md` — Curio pull-request review template
@@ -25,7 +25,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 ### Android CI workflow
 
-`android.yml` runs on pushes and pull requests targeting `main`, plus manual dispatch. It:
+`android.yml` runs on pushes and pull requests targeting `main`/`Alpha`, plus manual dispatch. It:
 
 - Validates all topic catalogs with the self-contained Gradle `validateTopics` task (wired into `preBuild`); no external scripts are shipped in the repo.
 - Runs the Gradle `lintDebug`, `validateTopics`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain — **release build only**, no debug APK is produced (debug remains available for local development via the app's debug build type).
@@ -47,8 +47,10 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 ### Desktop release workflow
 
-`desktop-release.yml` runs on the same `v*` tags (plus manual dispatch) on a
-**windows-latest** runner. It:
+`desktop-release.yml` is **tag-only**: it runs on a **windows-latest**
+runner on the same `v*` tags as the Android release workflow (plus manual
+dispatch for testing — PR/push CI builds just the Android APK, see
+`android.yml`). It:
 
 - Requires NO secrets — the desktop port has no signing story yet (jpackage
   code signing is optional and unconfigured).
@@ -61,11 +63,24 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
   `%WIX%` convention), `PATH` = the `bin` dir.
 - Compiles the module FIRST (`:desktop:build`) so code errors fail fast
   with a clear log before the slow WiX/jpackage steps, then runs
-  `:desktop:packageDistributionForCurrentOS` — on Windows this builds the
-  app image (contains `Curio.exe`) plus the `.msi` installer; `Dmg`/`Deb`
-  are macOS/Linux formats and are skipped.
+  `:desktop:createDistributable` AND `:desktop:packageDistributionForCurrentOS`
+  — on Windows this builds the app image (contains `Curio.exe`, left on
+  disk by `createDistributable`) plus the `.msi` installer (built by
+  `packageDistributionForCurrentOS`; its `packageMsi` task consumes its own
+  jpackage image internally and does NOT leave the app image behind, so
+  both tasks must run for the portable zip to exist); `Dmg`/`Deb` are
+  macOS/Linux formats and are skipped.
 - Zips the app image into a **portable** `Curio-Windows-{version}-portable.zip`
-  and uploads both it and the `.msi` to the release.
+  and attaches both it and the `.msi` to the GitHub release on tags, next
+  to the Android APKs published by `release.yml`. Manual-dispatch runs
+  (no tag) upload the same two files as run artifacts
+  (`curio-desktop-windows-*`, 7-day retention) so the proper `.exe` can be
+  downloaded for testing — the release-only steps (release body, prerelease
+  detection, `action-gh-release` publish) are gated on
+  `startsWith(github.ref, 'refs/tags/')`. `RELEASE_VERSION` is only set for
+  tag runs; manual-dispatch runs keep the module's default `1.0.0` package
+  version (and the zip's default name) because jpackage rejects
+  non-numeric versions.
 - **Tag version is the package version:** exports `RELEASE_VERSION` (tag
   minus `v`) so `desktop/build.gradle.kts` versions the installer from the
   tag, mirroring the Android convention. jpackage requires a strictly
