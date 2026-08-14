@@ -1,6 +1,24 @@
 # Prompt.md — Request log
 
-## Current request — Spin filter sheet: chips + typography bigger (v61)
+## Current request — sort pill slimmer in Cabinet + Topic Browser (v62)
+
+### What was asked
+"and stil the sort pill in cabinet and topic browser is too wide please
+reduce it please or mak eth search icon be the same size too"
+
+### What was done
+`CurioSortDropdown` (shared by both heroes; user preferred the reduce
+option over growing the Search pill): label-zone padding 10/8 → 8/6,
+chevron 18 → 16dp, zone gap 6 → 5dp, arrow-zone horizontal padding 6 →
+4dp, direction arrow 22 → 20dp, widthIn floor 96 → 88dp. Uniform 42dp
+height untouched; the pill now hugs its label ("Category" / "Default" /
+"Year") next to the icon-only Search pill.
+
+### Validation
+Brace/paren balance 57/57 unchanged, `git diff --check` clean. No Gradle
+locally (env rule) — CI on push is the gate.
+
+## Prior — Spin filter sheet: chips + typography bigger (v61)
 
 ### What was asked
 "make the filters in spin page the filters chips even bigger whole filter

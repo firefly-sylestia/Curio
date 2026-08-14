@@ -122,18 +122,23 @@ fun CurioSortDropdown(
                 // widthIn floor keeps it from collapsing too small, and NO
                 // maxWidth caps how far a long label ("Category · All") can
                 // stretch it.
+                // v62 — slimmer still: label padding 10/8 → 8/6, chevron
+                // 18 → 16dp, arrow-zone padding 6 → 4 and the direction
+                // arrow 22 → 20dp, min-width floor 96 → 88dp — the pill
+                // hugs its label so it stops reading too wide next to the
+                // icon-only Search pill.
                 modifier = Modifier
                     .heightIn(min = 42.dp)
-                    .widthIn(min = 96.dp)
+                    .widthIn(min = 88.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
                     modifier = Modifier
                         .clip(pillShape)
                         .clickable { expanded = true }
-                        .padding(start = 10.dp, end = 8.dp, top = 10.dp, bottom = 10.dp)
+                        .padding(start = 8.dp, end = 6.dp, top = 10.dp, bottom = 10.dp)
                 ) {
                     Text(
                         text = selected?.label.orEmpty(),
@@ -144,7 +149,7 @@ fun CurioSortDropdown(
                         name = CurioIcons.KeyboardArrowDown,
                         contentDescription = "Choose sort field",
                         tint = ink,
-                        size = 18.dp
+                        size = 16.dp
                     )
                 }
                 // ── Divider between the two zones ──
@@ -160,7 +165,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable(onClick = onToggleDirection)
-                        .padding(horizontal = 6.dp)
+                        .padding(horizontal = 4.dp)
                         .heightIn(min = 40.dp)
                 ) {
                     CurioIcon(
@@ -171,7 +176,7 @@ fun CurioSortDropdown(
                             "Descending. Tap for ascending"
                         },
                         tint = ink,
-                        size = 22.dp
+                        size = 20.dp
                     )
                 }
             }

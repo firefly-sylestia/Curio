@@ -363,6 +363,13 @@ app/src/main/java/com/curio/app/
   entry content) swaps live when the toggle changes.
   (2) **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips and
   pills read calmer, less stretched.
+- **v62 — sort pill slimmer again (Cabinet + Topic Browser).** The shared
+  `CurioSortDropdown` still read too wide next to the icon-only Search
+  pill (user: "too wide, please reduce it"): label-zone padding 10/8 →
+  8/6, chevron 18 → 16dp, zone gap 6 → 5dp, arrow-zone horizontal
+  padding 6 → 4dp, direction arrow 22 → 20dp, and the widthIn floor
+  96 → 88dp. Both heroes keep the uniform 42dp height — the pill now hugs
+  its label ("Category"/"Default"/"Year") instead of stretching.
 - **v61 — Spin filter sheet: bigger chips + louder typography/hierarchy.**
   (1) **Filter chips bigger still** (`CompactChip`): 16 → 18sp label,
   padding 16/11 → 20/13, glyph 17 → 19dp, gap 7 → 8dp, inactive weight
