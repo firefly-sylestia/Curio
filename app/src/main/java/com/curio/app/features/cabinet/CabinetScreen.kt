@@ -83,6 +83,7 @@ import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -161,6 +162,20 @@ fun CabinetScreen(navController: NavController) {
     // sort button toggles newest-first / oldest-first by capture time.
     var searchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    // v39 — opening the Cabinet from a lane tile (Profile → "Your lanes")
+    // lands pre-filtered to that lane: the pending handoff is consumed once
+    // on first composition (keyed on the monotonic bump so re-opens fire).
+    // Placed AFTER searchActive/searchQuery so the effect can clear them.
+    LaunchedEffect(PendingCabinetFilter.trigger) {
+        PendingCabinetFilter.take()?.let { name ->
+            runCatching { CategoryId.valueOf(name) }.getOrNull()?.let { catId ->
+                selectedFilter = catId
+                showLegacyOnly = false
+                searchActive = false
+                searchQuery = ""
+            }
+        }
+    }
     // v30 — the category pill (second row under the hero pills) toggles the
     // sticky category chips; they also show while searching (same chips).
     var categoryFilterOpen by rememberSaveable { mutableStateOf(false) }
@@ -173,10 +188,10 @@ fun CabinetScreen(navController: NavController) {
     // so the header text never moves down. Content reserves that row (and
     // the chip bar only when the chips are open).
     val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
-    // v33 — content reserves BOTH fixed rows below the hero (the
-    // Sort/Search controls row AND the Category pill row under it), plus
-    // the chip bar only when the chips are open.
-    val contentTop = heroTotal + CabinetControlsRowHeight + CabinetCategoryPillRowHeight +
+    // v36 — content reserves the single Category pill row below the hero
+    // (the action pills live back inside the banner), plus the chip bar
+    // only when the chips are open.
+    val contentTop = heroTotal + CabinetCategoryPillRowHeight +
         (if (chipsVisible) CabinetChipBarHeight else 0.dp) + 12.dp
     // v26 — sort is a dropdown (field) + a universal ascending/descending
     // arrow. Default: Date, newest first (descending).
@@ -471,86 +486,12 @@ fun CabinetScreen(navController: NavController) {
                 .padding(top = contentTop + 8.dp, bottom = 16.dp)
         )
 
-        // ── v33 — controls row below the hero: the action pills moved OUT
-        // of the hero into this row (the banner is a clean title header at
-        // top now). Normally the Sort dropdown + Search pill; while
-        // SELECTING, ONLY the Clear/Select-all + Delete pills show — the
-        // Select button is gone (long-press enters selection) and nothing
-        // else appears, as requested. Hidden while searching (the hero
-        // morphs into the search field and the Cancel pill takes over),
-        // matching the old hero-pill behavior. Page-level styling:
-        // on-surface ink over a surface-high glass instead of hero ink.
-        if (!searchActive) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .offset(y = heroTotal + 4.dp)
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (selectionMode) {
-                    CabinetHeroActionPill(
-                        onClick = {
-                            selectedEntryIds = if (allVisibleSelected) {
-                                selectedEntryIds - categorySelectionIds
-                            } else {
-                                selectedEntryIds + categorySelectionIds
-                            }
-                        },
-                        label = if (allVisibleSelected) "Clear" else "Select all",
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        backdrop = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        emphasized = true
-                    )
-                    CabinetHeroActionPill(
-                        onClick = {
-                            if (selectedEntryIds.isNotEmpty()) showBulkDeleteConfirm = true
-                        },
-                        label = "Delete (${selectedEntryIds.size})",
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        backdrop = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        emphasized = true,
-                        destructive = true
-                    )
-                } else {
-                    CurioSortDropdown(
-                        options = listOf(
-                            CurioSortOption(CabinetSortField.DATE.name, "Date"),
-                            CurioSortOption(CabinetSortField.TITLE.name, "Title"),
-                            CurioSortOption(CabinetSortField.CATEGORY.name, "Category")
-                        ),
-                        selectedKey = cabinetSortField,
-                        ascending = sortAscending,
-                        onSelect = { cabinetSortField = it },
-                        onToggleDirection = { sortAscending = !sortAscending },
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        backdrop = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        // v30 — the dropdown's accent lights the menu; the
-                        // active category's color when a filter is on, else
-                        // the theme primary.
-                        accent = filterCat?.themedAccent() ?: MaterialTheme.colorScheme.primary,
-                        emphasized = true
-                    )
-                    CabinetHeroActionPill(
-                        onClick = { searchActive = true },
-                        glyph = CurioIcons.Search,
-                        contentDescription = "Search captures",
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        backdrop = MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                }
-            }
-        }
-
-        // ── Category filter pill — v31: rides its own fixed row just below
-        // the hero; v33 — sits BELOW the Sort/Search controls row, exactly
-        // as requested (category under the search and sort pills). Hidden
-        // while selecting — only the Clear/Delete pills show then. Tapping
-        // it toggles the sticky category chips below (the same chips search
-        // shows). Page-level control — on-surface ink over a surface-high
-        // glass instead of hero ink.
+        // ── Category filter pill — v36: the action pills (sort/search,
+        // selection) are back inside the hero, so this pill rides its own
+        // fixed row just below the banner (the v31 position), hidden while
+        // selecting. Tapping it toggles the sticky category chips below
+        // (the same chips search shows). Page-level control — on-surface
+        // ink over a surface-high glass instead of hero ink.
         val categoryLabel = when {
             showLegacyOnly -> "Category · Legacy"
             else -> "Category · ${selectedFilter?.let { CurioCategories.byId(it).displayName } ?: "All"}"
@@ -560,7 +501,7 @@ fun CabinetScreen(navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .fillMaxWidth()
-                    .offset(y = heroTotal + CabinetControlsRowHeight + 4.dp)
+                    .offset(y = heroTotal + 4.dp)
                     .padding(horizontal = 16.dp)
             ) {
                 CabinetHeroActionPill(
@@ -588,7 +529,7 @@ fun CabinetScreen(navController: NavController) {
         if (chipsVisible) {
             CabinetStickyChipBar(
                 gridState = gridState,
-                barTop = heroTotal + CabinetControlsRowHeight + CabinetCategoryPillRowHeight,
+                barTop = heroTotal + CabinetCategoryPillRowHeight,
                 entries = entries,
                 selectedFilter = selectedFilter,
                 showLegacyOnly = showLegacyOnly,
@@ -600,10 +541,11 @@ fun CabinetScreen(navController: NavController) {
 
         // ── Torn rose hero banner — drawn ON TOP of the scroll content; the
         // search field expands INSIDE the banner when search is active.
-        // v33 — the banner is a clean title header: the back pill and the
-        // Select/Sort/Search pills moved OUT into the controls row below
-        // (above), the title sits at the TOP of the banner, and the
-        // Cancel pill rides here while searching.
+        // v36 — the action pills live back INSIDE the hero's top row (they
+        // briefly rode a below-hero row in v33; the user wanted them back on
+        // the banner): Sort + Search normally, Select-all/Clear + Delete +
+        // Cancel while selecting. The back pill stays gone and the title
+        // sits at the TOP of the banner.
         val cabinetTitle = when {
             selectionMode -> "${selectedEntryIds.size} selected"
             showLegacyOnly -> "Legacy Cabinet"
@@ -624,7 +566,72 @@ fun CabinetScreen(navController: NavController) {
             onSearchQueryChange = { searchQuery = it },
             onCloseSearch = { searchActive = false; searchQuery = "" },
             searchFocus = searchFocus,
-            compact = wide
+            compact = wide,
+            // Passed as a NAMED argument (not trailing-lambda syntax): the
+            // @Composable slot isn't the last parameter, and the trailing
+            // form fails to bind it under K2.
+            trailing = { ink, backdrop ->
+                if (selectionMode) {
+                    CabinetHeroActionPill(
+                        onClick = {
+                            selectedEntryIds = if (allVisibleSelected) {
+                                selectedEntryIds - categorySelectionIds
+                            } else {
+                                selectedEntryIds + categorySelectionIds
+                            }
+                        },
+                        label = if (allVisibleSelected) "Clear" else "Select all",
+                        ink = ink,
+                        backdrop = backdrop,
+                        emphasized = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = {
+                            if (selectedEntryIds.isNotEmpty()) showBulkDeleteConfirm = true
+                        },
+                        label = "Delete (${selectedEntryIds.size})",
+                        ink = ink,
+                        backdrop = backdrop,
+                        emphasized = true,
+                        destructive = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = { selectionMode = false; selectedEntryIds = emptySet() },
+                        glyph = CurioIcons.Close,
+                        contentDescription = "Cancel selection",
+                        ink = ink,
+                        backdrop = backdrop
+                    )
+                } else {
+                    // v26 — sort dropdown: the label opens the field list,
+                    // the arrow toggles ascending/descending universally.
+                    CurioSortDropdown(
+                        options = listOf(
+                            CurioSortOption(CabinetSortField.DATE.name, "Date"),
+                            CurioSortOption(CabinetSortField.TITLE.name, "Title"),
+                            CurioSortOption(CabinetSortField.CATEGORY.name, "Category")
+                        ),
+                        selectedKey = cabinetSortField,
+                        ascending = sortAscending,
+                        onSelect = { cabinetSortField = it },
+                        onToggleDirection = { sortAscending = !sortAscending },
+                        ink = ink,
+                        backdrop = backdrop,
+                        // v36 — the dropdown's accent lights the menu: the
+                        // active category's color when a filter is on, else
+                        // the theme primary.
+                        accent = filterCat?.themedAccent() ?: MaterialTheme.colorScheme.primary,
+                        emphasized = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = { searchActive = true },
+                        glyph = CurioIcons.Search,
+                        contentDescription = "Search captures",
+                        ink = ink,
+                        backdrop = backdrop
+                    )
+                }
+            }
         )
     }
 }
@@ -645,14 +652,10 @@ private val CabinetHeroBannerHeight = 180.dp
 private val CabinetHeroBannerHeightCompact = 140.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val CabinetHeroSheetExtent = 24.dp
-/** The controls row height below the hero — Sort + Search pills (v33:
- *  moved OUT of the hero into their own row so the banner is a clean
- *  title header at top). */
-private val CabinetControlsRowHeight = 52.dp
-/** The Category pill row height below the controls row — a 42dp pill +
- *  breathing room. v31 — the row lives OUTSIDE the hero so the banner
- *  height (and the header text) never change. v33 — sits BELOW the
- *  Sort/Search row, as requested. */
+/** The Category pill row height below the hero — a 42dp pill + breathing
+ *  room. v31 — the row lives OUTSIDE the hero so the banner height (and
+ *  the header text) never change. v36 — the action pills moved back INTO
+ *  the hero, so this is the only row below the banner again. */
 private val CabinetCategoryPillRowHeight = 52.dp
 /** Fixed tear seed — the Cabinet tears in its own bold pattern, never re-rolls. */
 private const val CABINET_TEAR_SEED = 0xCAB1E
@@ -701,6 +704,11 @@ private fun CabinetHeroHeader(
     onSearchQueryChange: (String) -> Unit,
     onCloseSearch: () -> Unit,
     searchFocus: FocusRequester,
+    // v27n — the slot also receives the banner fill so hero pills can
+    // resolve an OPAQUE glass fill (lerp of the ink into the banner).
+    // v36 — the action pills (sort/search or selection pills) ride the
+    // banner's top row again.
+    trailing: @Composable (ink: Color, backdrop: Color) -> Unit,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
     compact: Boolean = false
@@ -788,16 +796,18 @@ private fun CabinetHeroHeader(
                         .statusBarsPadding()
                         .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 16.dp)
                 ) {
-                    // ── v33 — clean title header: the back pill and the
-                    //    Select/Sort/Search action pills moved OUT of the
-                    //    banner into the controls row below the hero. Only
-                    //    the Cancel pill rides here while search is open.
-                    if (searchActive) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                    // ── v36 — action pills row: Sort + Search normally,
+                    //    Select-all/Clear + Delete + Cancel while selecting,
+                    //    and a single Cancel pill while searching. The back
+                    //    pill stays gone; the pills ride the banner's top
+                    //    right as theme-aware ink-glass (matching the
+                    //    restored hero-pill style).
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (searchActive) {
                             CabinetHeroActionPill(
                                 onClick = onCloseSearch,
                                 label = "Cancel",
@@ -806,10 +816,17 @@ private fun CabinetHeroHeader(
                                 ink = ink,
                                 backdrop = fill
                             )
+                        } else {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                trailing(ink, fill)
+                            }
                         }
                     }
-                    // v33 — title block at the TOP of the banner (no flex
-                    // spacer down to the tear).
+                    // v36 — title block at the TOP of the banner, right
+                    // under the pills (no flex spacer down to the tear).
                     // ── Search field or title, animated expand/collapse ──
                     //    The search bar scales in from the pill's position
                     //    when opened, and the title fades back in when closed.

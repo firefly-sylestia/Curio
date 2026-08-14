@@ -452,13 +452,12 @@ fun CurioNavHost(
                                 delayMillis = 0
                             )
                         )
-                    // Tab switches: subtle scale-fade (no directional slide) —
-                    // the incoming tab grows gently while it fades in.
+                    // Tab switches: clean crossfade (no directional slide and
+                    // no scale) — the old scale-fade read as a slight zoom/old
+                    // animation when opening the Cabinet from Profile; a pure
+                    // fade is the smoothest peer-tab handoff.
                     isTabSwitch(initialState, targetState) ->
-                        scaleIn(
-                            initialScale = 0.97f,
-                            animationSpec = tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing)
-                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other forward navigations: slide left + fade
                     else -> slideInHorizontally(
                         initialOffsetX = { fullWidth -> fullWidth / 4 },
@@ -513,13 +512,10 @@ fun CurioNavHost(
                     // detail; v8.4x pop screens).
                     isDetailRoute(initialState) || isPopScreenRoute(initialState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
-                    // Tab switch back: subtle scale-fade too (no directional
-                    // slide).
+                    // Tab switch back: clean crossfade to match the forward
+                    // tab switch (no scale, no directional slide).
                     isTabSwitch(initialState, targetState) ->
-                        scaleIn(
-                            initialScale = 0.97f,
-                            animationSpec = tween(CurioMotion.Durations.Standard, easing = FastOutSlowInEasing)
-                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
                         // Back navigation: slide right + fade
                         slideInHorizontally(

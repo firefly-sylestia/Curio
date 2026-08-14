@@ -103,21 +103,24 @@ fun PickerPresetChip(
         onClick = onClick,
         shape = shape,
         // v27q — selection reads as a SOLID primary fill with onPrimary
-        // content; elevation stays a flat 2dp in both states.
+        // content.
         // v33 — the UNselected pill is a proper raised pill that stands off
         // the category wash: it lifts clearly toward the page background
         // (cream in light, a lighter glass in dark) instead of the old
         // surfaceVariant blend that melted into the tinted picker.
+        // v38 — the light lift rises to 0.82 (neutral cream) so the pills
+        // separate from the pale pastel wash, and BOTH states carry a 3dp
+        // elevation.
         color = if (selected) MaterialTheme.colorScheme.primary
                 else lerp(
                     MaterialTheme.colorScheme.surfaceContainerHigh,
                     curioPillLift(),
-                    if (isCurioDarkTheme()) 0.18f else 0.60f
+                    if (isCurioDarkTheme()) 0.18f else 0.82f
                 ),
-        shadowElevation = 2.dp,
+        shadowElevation = 3.dp,
         modifier = Modifier
             // v28 — dark mode: soft glow + top-lit shine, no border rings.
-            .curioDarkGlow(2.dp, shape)
+            .curioDarkGlow(3.dp, shape)
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
         Row(

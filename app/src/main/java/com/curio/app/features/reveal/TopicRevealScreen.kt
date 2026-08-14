@@ -126,6 +126,7 @@ import com.curio.app.ui.theme.brandTile
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -588,9 +589,12 @@ fun TopicRevealScreen(
             // name pinned to the top-left, so the category reads at a
             // glance next to the pin/close buttons (weight leaves the
             // end-aligned group in place).
+            // v36 — theme-aware treatment: the chip wears the category's
+            // tinted card surface (resolves light/dark/pastel/AMOLED),
+            // matching the page cards instead of the flat surfaceVariant.
             Surface(
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
                 modifier = Modifier.weight(1f, fill = false)
             ) {
                 Row(
@@ -619,6 +623,7 @@ fun TopicRevealScreen(
 
             // Pin for later — filled bookmark when pinned (category accent),
             // outline when not. Only meaningful once the topic has resolved.
+            // v36 — theme-aware surface (category tint, every theme).
             Surface(
                 onClick = {
                     val topic = resolved ?: return@Surface
@@ -629,7 +634,8 @@ fun TopicRevealScreen(
                     }
                 },
                 shape = CircleShape,
-                color = if (isPinned) cat.themedAccent() else MaterialTheme.colorScheme.surfaceVariant
+                color = if (isPinned) cat.themedAccent()
+                        else cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 CurioIcon(
                     name = if (isPinned) CurioIcons.Bookmark else CurioIcons.BookmarkBorder,
@@ -643,6 +649,7 @@ fun TopicRevealScreen(
             // Close — return to the Spin deck (not Home): the landed card
             // keeps its "Tap to open" state so it can be reopened until the
             // user spins again or explores it (v5.6).
+            // v36 — theme-aware surface (category tint, every theme).
             Surface(
                 onClick = {
                     // Browse mode is read-only: nothing is ever recorded.
@@ -652,7 +659,7 @@ fun TopicRevealScreen(
                     navController.popBackStack()
                 },
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 CurioIcon(
                     name = CurioIcons.Close,
@@ -793,14 +800,17 @@ fun TopicRevealScreen(
         // bar (see CurioNavHost.showBottomBar): a flat rectangle with no
         // torn seam or ragged edge — the tags row sits on it.
         // v9.x — the band is fully opaque and follows the active appearance.
-        // Curio uses the category surface (anchored to the surface container
-        // so the band reads as a slightly darker, more defined strip; the old
-        // `surface` base washed white/creamy on the tinted page). Material
-        // uses the device surface, and AMOLED stays pure black.
+        // v39 — the band now wears the SAME page wash as the reveal body
+        // (the old categorySurface strip resolved to a lighter tint that
+        // read as a separate white/creamy slab at the bottom — most visible
+        // during the open fade, right behind the tags). With the band
+        // matching the page, the reveal reads as one continuous surface and
+        // only the tags chips stand out. Material keeps its device surface,
+        // and AMOLED stays pure black.
         val bandPaper = when (AppPreferences.themeStyleState) {
             AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
             AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
-            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainer)
+            else -> cat.categoryBackgroundWash()
         }
         val bandInk = MaterialTheme.colorScheme.onSurface
         // v9.x — NavHost reserves the missing navbar footprint for Reveal
@@ -950,7 +960,8 @@ fun TopicRevealScreen(
 
     if (showExploreDialog && resolved != null) {
         val topic = resolved
-        val action = topic.exploreAction
+        // v41 — the `action` val (verb/duration copy) was removed with the
+        // dialog's helper paragraphs; the pills only need the service glyphs.
         // v27s — music topics (Album / Artist / Song) route the second pill
         // to the user's chosen music service; everything else stays YouTube.
         val musicTopic = topic.isMusicTopic()
@@ -998,28 +1009,15 @@ fun TopicRevealScreen(
                 )
             },
             text = {
+                // v41 — the dialog is a single line now: the two helper
+                // paragraphs (the engine/verb intro and the timed-explore
+                // note) are gone, leaving the title, the pledge, and the two
+                // pill actions. The pledge is the approved user rephrase —
+                // no em dash, natural voice.
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        // v23 — the browser button searches the user's chosen
-                        // engine (pickable in onboarding + Settings), so the
-                        // copy stays engine-neutral. v27s — music topics name
-                        // the chosen music service instead of YouTube.
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open ${if (musicTopic) watchService.displayName else "YouTube"}.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        "Your explore gets timed (not a countdown), and when you come back we'll ask if you're done so you can write it down.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    // v22 — the no-AI pledge, bold so it leads the dialog's
-                    // intent: research stays the user's own words. v27s — the
-                    // avoid-AI note is spelled out: read real sources, skip
-                    // the AI summaries.
-                    Text(
-                        "Keep your research your own — skip the AI summaries and read the real sources. Stay curious: this is your curiosity, in your own words.",
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                        "Keep your research yours. Read the real sources instead of AI summaries, and the discovery is all yours.",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     // ── v22/v23 — opt-in for the floating explore bubble ──
@@ -1504,9 +1502,11 @@ private fun RevealAlreadyButton(
             Spacer(Modifier.width(metrics.gap))
             Text(
                 text = "Express yourself",
+                // v37 — ExtraBold to match the filled Start exploring CTA's
+                // weight so the pair reads as a unified action row.
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontSize = metrics.textSp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 ),
                 color = ink,
                 maxLines = 1,
@@ -1565,6 +1565,19 @@ private fun HeroCard(
     // Match the Spin ticket's ink formula exactly so the morph reads as
     // the same card expanding: pastel → pastelFillInk, else → onAccent.
     val ink = if (AppPreferences.pastelColorsState) pastelFillInk(accent) else cat.onAccent()
+
+    // v37 — the hero pill glass (action badge, byline, subtype). The old
+    // `ink.copy(alpha = 0.18f)` read washed on the pale pastel heroes (the
+    // pill dissolved into the gradient) and drab on the deep non-pastel
+    // ones. Now a proper frosted glass off the hero accent: a strong white
+    // lift on the airy pastel-light heroes (deep-ink labels pop), a
+    // brighter glass on the deep non-pastel banners, and the page-ink lift
+    // on dark so the pill stays a visible brighter glass on the deep card.
+    val pillGlass = lerp(
+        accent,
+        if (!dark && AppPreferences.pastelColorsState) Color.White else curioPillLift(),
+        if (!dark && AppPreferences.pastelColorsState) 0.92f else 0.42f
+    )
 
     // ── Gradient brush — match the Spin ticket's formula so the card
     //    reads as the same surface during the morph. When heroGradientOn
@@ -1714,10 +1727,13 @@ private fun HeroCard(
                 // ── Top — action badge (verb + duration) ────────────────
                 // v35 — the plain dot is now the action's own verb icon
                 // (headphones / play / book / restaurant…) for instant charm.
+                // v36 — the frosted pill fill is the same opaque glass as
+                // the hero action pills (lifted toward the page background)
+                // so the badge reads crisp instead of washed.
                 if (action != null) {
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = ink.copy(alpha = 0.18f),
+                        color = pillGlass,
                         shadowElevation = 0.dp
                     ) {
                         Row(
@@ -1747,24 +1763,9 @@ private fun HeroCard(
                 // measured line count feeds the hero's height so long names
                 // wrap in full instead of being cut at 3 lines (v8.36).
                 Spacer(Modifier.weight(1f))
-                // v35 — category eyebrow: a small frosted caps pill above
-                // the title, so the hierarchy reads eyebrow → title → pills.
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = ink.copy(alpha = 0.16f),
-                    shadowElevation = 0.dp
-                ) {
-                    Text(
-                        text = cat.displayName.uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.5.sp
-                        ),
-                        color = ink.copy(alpha = 0.92f),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
+                // v36 — the category eyebrow pill was removed: the top bar
+                // already shows the category chip, so the hero title stands
+                // alone (no duplicate category inside the card).
                 Text(
                     text = resolved?.name ?: cat.displayName,
                     style = MaterialTheme.typography.displaySmall.copy(
@@ -1808,7 +1809,7 @@ private fun HeroCard(
                     if (byline != null && bylineLabel != null) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = ink.copy(alpha = 0.18f),
+                            color = pillGlass,
                             shadowElevation = 0.dp,
                             modifier = Modifier.weight(1f, fill = false)
                         ) {
@@ -1840,7 +1841,7 @@ private fun HeroCard(
                     if (subtype != null) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = ink.copy(alpha = 0.18f),
+                            color = pillGlass,
                             shadowElevation = 0.dp
                         ) {
                             Text(
@@ -1934,12 +1935,13 @@ private fun TeaserCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            // v35 — the fact reads in the Lora editorial serif (17/27sp),
-            // clearly larger than its kicker.
+            Spacer(Modifier.height(10.dp))
+            // v37 — the quick fact is back on the plain Material bodyLarge
+            // (the Lora serif experiment read too "editorial" for the fact;
+            // the kicker above keeps the hierarchy).
             Text(
                 text = teaser ?: "Loading topic…",
-                style = CurioEditorialBody,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis
@@ -2000,14 +2002,9 @@ private fun ActionPromptCard(
                         )
                     }
                 }
-                // v35 — subtle trailing affordance so the card reads as
-                // actionable.
-                CurioIcon(
-                    name = CurioIcons.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
-                    size = 18.dp
-                )
+                // v37 — the trailing arrow affordance is gone: the card's
+                // icon tile + bold title already read as actionable, and the
+                // arrow just crowded the subtype line.
             }
             Spacer(Modifier.height(10.dp))
             Text(

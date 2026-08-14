@@ -351,6 +351,105 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v41 — Explore dialog declutter + canonical pet-dialog doc.**
+  (1) **Explore dialog:** the two helper paragraphs (the engine/verb
+  intro and the timed-explore note) are gone; the dialog is now the
+  title ("Explore {topic}?"), the rephrased no-AI pledge — "Keep your
+  research yours. Read the real sources instead of AI summaries, and
+  the discovery is all yours." (user-approved, no em dash) — and the two
+  pill actions. The now-unused `action` val was removed from the dialog
+  block (the pill glyphs only need the music-service resolution).
+  (2) **docs/pet-dialogs.md** — the canonical, source-of-truth doc for
+  every Curie/pet spoken line (BABY / FIRST_EVO / FINAL_EVO voices),
+  organized by group: event reactions, streak milestones, evolution
+  ceremony, mood bubbles, greetings/welcome-backs, touch tiers, games,
+  memory/fact lines, the learning brain's composed + coined lines, the
+  tour script, and the mature routine lines. Each section lists the
+  current FIRST_EVO pools with BABY/FINAL_EVO twins inline, plus an
+  integration checklist (keep pool names, bullet order, and placeholders
+  like `__LANE__` / `$lane` / `$streak` identical when porting rephrased
+  lines).
+- **v40 — reveal bottom-band wash + smooth tab crossfade + lane tiles open Cabinet.**
+  (1) **Reveal bottom band:** `TopicRevealScreen`'s band now wears
+  `cat.categoryBackgroundWash()` (the page's own wash) instead of
+  `categorySurface(surfaceContainer)` — the old strip resolved to a
+  lighter tint that read as a separate white/creamy slab at the bottom,
+  most visible behind the tags during the open fade. The reveal now reads
+  as one continuous surface (Material/AMOLED unchanged). (2) **Tab
+  switch animation:** `CurioNavHost` tab switches (enter + pop-enter) are
+  now a clean `fadeIn` instead of `scaleIn(0.97f) + fadeIn` — the
+  scale-fade read as the "old" animation opening the Cabinet from
+  Profile. (3) **Profile lane tiles open the Cabinet filtered:** new
+  `PendingCabinetFilter` out-of-band handoff in CurioRoutes (mirrors
+  PendingEntryOpen: `request(CategoryId)` + monotonic `trigger` +
+  `take()`); Profile's `LanesCard` gained `onOpenLane(CategoryId)` and
+  its tiles became clickable `Surface(onClick)`; `CabinetScreen` consumes
+  the pending filter once per request in a `LaunchedEffect(trigger)` and
+  applies it to `selectedFilter` (clearing legacy/search). (4) **Lane
+  glyph readability:** the tile icon wears `category.categoryInk()`
+  instead of `themedAccent()` — in pastel light `themedAccent` resolved
+  to a near-white pastel that washed out on the pale tile (the "whitish
+  icons" report); ink resolves a deep same-hue twin in light.
+- **v39 — filter-chip contrast + 3dp elevation + Cabinet decode cache.**
+  (1) **Filter sheet contrast fixed:** `CompactChip` + `FilterGroupPill`
+  light-mode inactive fills lift 0.55 → 0.82 toward `curioPillLift()` —
+  the old lift still read same-y against the pale pastel wash (both the
+  sheet and the chips are pastel tints); chips now go neutral cream and
+  clearly separate. Dark keeps its subtle 0.04 lift + glow. (2) **Both
+  states get 3dp elevation:** `shadowElevation` + `curioDarkGlow` 2 → 3dp
+  on the filter chips and group pills; same contrast/elevation applied to
+  the picker tabs (`PickerPageTab`) and preset chips (`PickerPresetChip`,
+  0.60 → 0.82 lift, 3dp). (3) **Cabinet freeze on mass saves:**
+  `CaptureRepository.observeAll()` now caches decoded `CurioEntry`s by a
+  signature (id + format + capturedAtMillis + formatDataJson/tags/
+  screenshots hash + sessionNote + deletedAt); Room re-emits the full list
+  on every insert, so a large archive re-ran Gson decoding for EVERY row
+  per save — the GC pauses froze the app. Now only new/changed rows
+  decode; the map is only touched from the flow's single collection
+  dispatcher.
+- **v38 — onboarding proportions + page-pill indicator + reveal quick-fact revert.**
+  (1) **Hero/tear deeper:** the onboarding torn-rose hero deepens 0.70 →
+  0.76 of screen height so the tear sits just above the page pills and the
+  dead band between the dots and the Skip/Next controls disappears.
+  (2) **Wordmark ↔ slide spacing:** the 6dp spacer under the pledge became
+  10dp and the pager gained `top = 8.dp` / `bottom = 26.dp` so the slide
+  content centers evenly in the banner. (3) **Page indicator → pills:**
+  `PageDot` is a proper indicator now — the active page is a 22×8dp
+  capsule, the rest 8dp circles (no more 12dp box × 1.2 scale blob); the
+  row drops to `vertical = 12.dp` with even 3dp gaps; the unused
+  `ui.draw.scale` import was removed and `foundation.layout.width` added.
+  (4) **Reveal quick fact:** `TeaserCard`'s fact body reverts from
+  `CurioEditorialBody` (Lora) to `MaterialTheme.typography.bodyLarge`
+  (spacer 12 → 10dp) — the Lora voice stays on the ActionPromptCard
+  instruction and onboarding subtext, only the quick fact goes back.
+- **v37 — hero controls return + reveal pill polish + compact wildcard filters.**
+  (1) **Cabinet/Topic Browser controls back INSIDE the hero:** the v34
+  below-hero controls row is gone — the Sort dropdown + Search pill (and
+  the selection pills Clear/Select-all, Delete, Cancel) ride the hero's
+  top row again via the existing `trailing` slot (`CabinetHeroHeader`
+  keeps its `(ink, backdrop)` slot; `SettingsHeroHeader`'s `trailing`
+  passes hero `ink`). `contentTop` reverts to reserving only the single
+  Category pill row below the banner; `CabinetControlsRowHeight` /
+  `DatabaseControlsRowHeight` constants are removed. The sort dropdown
+  keeps its capsule 50dp pill + `CurioDropdownMenu` accent-themed menu
+  (accent = active filter's `themedAccent` in Cabinet, rose in the
+  database). (2) **Reveal:** the duplicate category eyebrow pill inside
+  the HeroCard is removed (the top-bar chip already shows the lane); the
+  top-bar category chip + pin + close now wear `cat.categorySurface()`
+  (theme-aware tint in every mode instead of flat surfaceVariant);
+  Express yourself stepped Bold → ExtraBold to match the Start exploring
+  CTA; the ActionPromptCard's trailing arrow is gone; the hero's action
+  badge / byline / subtype pills use a new `pillGlass` — strong white
+  glass on pastel-light heroes, page-background lift on dark — instead
+  of the washed `ink.copy(alpha = 0.18f)`. (3) **Wildcard filter
+  compaction (FilterSheet only):** `buildFilterGroups` caps Type at the
+  top-8 most frequent subtypes when a pool exceeds 8 (the wildcard
+  surprise deck merges every category — its raw list was a 60+ chip
+  wall; individual categories keep their full list), and the TYPE group
+  renders in a compact 2-column `LazyVerticalGrid` (`heightIn max 160dp`,
+  no scroll) instead of a full-width flow stack. (4) **Sparse groups
+  filled out:** genres/eras/origins caps rise 4/4/3 → 8/6/6 so
+  categories with fewer than 4 options expose more filters.
 - **v35 — typography pass: Lora serif + reveal hierarchy + icons.**
   (1) **New font:** `app/src/main/res/font/lora.ttf` (Lora variable,
   OFL) bundled; `LoraFontFamily` (multi-entry variable pattern like
