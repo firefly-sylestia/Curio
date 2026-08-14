@@ -68,7 +68,6 @@ object AppPreferences {
     private const val KEY_SAVES_WEEK_START = "saves_week_start_epoch_day"
     private const val KEY_SAVES_WEEK_COUNTS = "saves_week_counts"
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
-    private const val KEY_LORA_BODY = "lora_body_enabled"   // serif body text (v59.3)
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
@@ -229,14 +228,6 @@ object AppPreferences {
     // Default ON (v7.x — the soft look is the app's shipped default now).
     // Seeded from prefs in [initThemeMode].
     var pastelColorsState by mutableStateOf(true)
-        private set
-
-    // Serif body text (v59.3) — the everyday body voice (bodyLarge/Medium/
-    // Small: settings copy, cards, form fields, entry content) switches
-    // from the platform default sans to the bundled Lora serif. Default ON
-    // (the requested editorial look); turning it off returns to the neutral
-    // sans. Seeded from prefs in [initThemeMode].
-    var loraBodyState by mutableStateOf(true)
         private set
 
     // Sky-azure hero variant (v27l) — when ON, the shared torn hero
@@ -545,7 +536,6 @@ object AppPreferences {
         themeModeState = getThemeMode(context)
         themeStyleState = getThemeStyle(context)
         pastelColorsState = isPastelColorsEnabled(context)
-        loraBodyState = isLoraBodyEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
@@ -631,16 +621,6 @@ object AppPreferences {
     fun setPastelColorsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PASTEL_COLORS_ENABLED, enabled).apply()
         pastelColorsState = enabled
-    }
-
-    // ── Serif body text (v59.3) ────────────────────────────────────────
-    /** Whether the everyday body text uses the Lora serif (default on). */
-    fun isLoraBodyEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LORA_BODY, true)
-
-    fun setLoraBodyEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_LORA_BODY, enabled).apply()
-        loraBodyState = enabled
     }
 
     // ── Pastel crown depth (v7.12 experimental) ───────────────────────

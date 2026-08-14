@@ -353,10 +353,7 @@ fun CurioTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        // v59.3 — the body voice is toggleable (Serif body text); the
-        // composable accessor reads the preference so the whole app swaps
-        // live when it changes.
-        typography  = curioAppTypography(),
+        typography  = CurioTypography,
         shapes      = CurioShapes,
         content     = content
     )

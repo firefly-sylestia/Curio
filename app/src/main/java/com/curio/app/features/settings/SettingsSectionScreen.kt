@@ -220,15 +220,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        // v59.3 — the everyday body text (reading, cards, settings copy)
-        // wears the Lora serif instead of the platform sans. Live toggle:
-        // the theme reads the preference, so the whole app swaps instantly.
-        SettingsRowPulse(highlightKey == "appearance-serif") {
-            CompactSwitchRow("Serif body text", "Editorial Lora for reading, cards and settings copy", AppPreferences.loraBodyState) {
-                AppPreferences.setLoraBodyEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
         // v42 — the hero picker is a two-option control (Rose hero / Azure
         // hero), both fully selectable — azure is back and now the DEFAULT.
         // The whole control greys out while Adaptive Hero (below) is active,

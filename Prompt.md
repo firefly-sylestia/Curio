@@ -1,6 +1,41 @@
 # Prompt.md — Request log
 
-## Current request — release-note format + per-commit update rules (v64)
+## Current request — revert f991db1 (serif body text toggle) + new pet designer tools (v64)
+
+### What was asked
+"...also revert this commit font changes" (f991db1 — toggleable serif body
+text) + "add an advance animation system that automatically adjusts the
+pixel and things based on the image the user imports. and remove that zoom
+slider and add brush size incrase size with brush indicator. and in pen
+fill etc show which color is selected alongside them. and add 3 preset to
+set the size of the eyes and a eye placement adjuster showing the previe
+animation and user can adjust the placement with arrows."
+
+### What was done (font revert — code part)
+1. **Reverted f991db1 exactly** (all 5 code files byte-match `f991db1^`):
+   - `CurioTypography.kt` — removed `CurioLoraBodyTypography` +
+     `curioAppTypography()` + unused imports; labelMedium/labelSmall
+     tracking back 0.3 → 0.5sp.
+   - `CurioTheme.kt` — typography back to `CurioTypography`.
+   - `AppPreferences.kt` — removed KEY_LORA_BODY, `loraBodyState`, the
+     initThemeMode seed, `isLoraBodyEnabled`/`setLoraBodyEnabled`.
+   - `SettingsSectionScreen.kt` — removed the "Serif body text" row.
+   - `ExploreSessionService.kt` — bubble typography back to
+     `CurioTypography`.
+2. **Docs:** app/AGENTS.md v59.3 bullet rewritten as REVERTED (v64),
+   noting the v35 Lora reading serif stays; changelog Settings line drops
+   "serif body toggle".
+
+### Validation
+All 5 code files byte-match the pre-revert state; `git diff --check`
+clean; brace balance OK. No Gradle locally (env rule) — CI on push.
+
+### Pending — the pet designer / capture tools request
+Not started yet (this session): the advanced animation system, zoom-slider
+removal + brush-size/indicator, selected-color chips next to pen/fill, 3
+eye-size presets + arrow eye-placement adjuster with preview animation.
+
+## Prior — release-note format + per-commit update rules (v64)
 
 ### What was asked
 "Similar to Prompt.md make the release note update by yours add

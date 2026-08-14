@@ -13,7 +13,7 @@ ADD
 - Curie pet: evolving companion with moods, games, three voices, 150+ reactions and a full Pet Designer.
 - Quests: daily and journey quests, path chains, medals and a badge shelf.
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
-- Settings: themes (Curio / AMOLED / Material), pastel colors, Adaptive Hero, serif body toggle, notifications, recording and lane management.
+- Settings: themes (Curio / AMOLED / Material), pastel colors, Adaptive Hero, notifications, recording and lane management.
 - Update checker: in-app update card with release notes, tappable in-app toast, once-per-version notification, direct APK download and install.
 - Onboarding tour with a search-engine picker (Google, DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
 - In-app toast system for background announcements.

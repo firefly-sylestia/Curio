@@ -351,18 +351,16 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
-- **v59.3 — toggleable serif body text + tighter label tracking.**
-  (1) **"Serif body text" Appearance toggle** (default ON): new
-  `AppPreferences.loraBodyState` (KEY_LORA_BODY, seeded in
-  `initThemeMode`); `CurioTypography` gains `CurioLoraBodyTypography`
-  (bodyLarge/Medium/Small → `LoraFontFamily` at 0 tracking; the base
-  [CurioTypography] stays as the neutral-sans variant so toggling off is
-  a pure family swap) + `@Composable curioAppTypography()` that reads the
-  pref. `CurioTheme` and the ExploreSessionService bubble theme now use
-  it, so the whole app's body voice (settings copy, cards, form fields,
-  entry content) swaps live when the toggle changes.
-  (2) **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips and
-  pills read calmer, less stretched.
+- **v59.3 → REVERTED (v64) — toggleable serif body text + tighter label
+  tracking.** v59.3 added a "Serif body text" Appearance toggle
+  (`AppPreferences.loraBodyState` / KEY_LORA_BODY), `CurioLoraBodyTypography`
+  + `@Composable curioAppTypography()` (body → Lora at 0 tracking, read by
+  `CurioTheme` + ExploreSessionService bubble) and labelMedium/labelSmall
+  tracking 0.5 → 0.3sp. The user reverted f991db1 (v64): the toggle row,
+  the pref key/state/seeding, both typography variants and the tracking
+  tweak are all gone — body text is back to the platform sans and label
+  tracking back to 0.5sp. The v35 Lora editorial serif for reading/hero
+  text (fonts + CurioEditorialBody) is UNTOUCHED.
 - **v63 — update notice is now an IN-APP toast (no android Toast).**
   New global bus `CurioToast` (ui/components/CurioInAppToast.kt):
   `object CurioToast` with snapshot state (`show(text, glyph,
