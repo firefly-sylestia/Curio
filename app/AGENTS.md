@@ -315,6 +315,42 @@ app/src/main/java/com/curio/app/
   ask for it, and when the bubble is OFF with the permission still granted
   an inline "Remove overlay permission" row appears to revoke it (a
   separate revoke-trip flag keeps the return from re-enabling the bubble).
+- **v31 — Adaptive Hero + hero picker, Category pill below the hero,
+  slimmer sort pill, background-tinted surfaces, faster Home.**
+  (1) **"Hero follows Spin lane" renamed "Adaptive Hero"** (Appearance
+  toggle + Settings hub row) and the Profile hero finally follows the
+  lane: `profileRoseAccent()` now runs the same `heroLaneCategory()`
+  check Home/Settings have (it was the only shared hero missing it).
+  (2) **Hero picker is a 2-option segmented control** (Rose hero / Sky
+  azure hero) replacing the "Sky azure hero" switch — Sky azure is
+  GREYED OUT (visible but unselectable, the Material-coming-soon
+  pattern; a one-time migration flips a previously-enabled azure back to
+  rose), and the whole control greys while Adaptive Hero is on.
+  (3) **Category pill moved OUT of the hero** in Cabinet + Topic
+  Browser: it rides its own fixed row just below the hero (page-level
+  pill: on-surface ink over surface-high glass), so the heroes returned
+  to their original heights (`CabinetHeroBannerHeight` 232→180,
+  compact 192→140; the settings `extraRow` slot + `SettingsHeroExtraRow-
+  Height` are gone) and the header text never moves down. The sticky
+  chip bar sits below the pill row (chip-bar offsets derive from
+  `barTop`/heroTotal + `CabinetCategoryPillRowHeight`).
+  (4) **Sort pill slims down:** `CurioSortDropdown` swaps its fully-
+  rounded 50dp capsule for 16dp corners with tighter padding (keeps the
+  uniform 42dp height). (5) **Cream → small tint of the page
+  background, in every theme:** `CurioSettingsCard` (Profile + Settings
+  hub + sub-pages) lerps `surfaceContainerLow` 30% toward `background`;
+  the ink-glass hero pills + sort pill lift toward the page background
+  in light mode via a new `curioPillLift()` helper (dark/AMOLED keep the
+  white lift for visibility); dialogs pull a step toward the background
+  in every theme (`curioDialogContainerColor`); and the settings-family
+  sub-pages (Appearance/Preferences/Support/Backup/Experiments/Promo)
+  now wear the same rose-lean page tint as the hub/Profile instead of
+  the plain cream background (`heroPageBackground(lerp(background,
+  settingsRoseAccent(), 0.10f))` — the spin-lane wash still wins when
+  Adaptive Hero is on). (6) **Home opens faster:** the canonical topic
+  count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
+  parsed the whole ~14k-topic catalog on EVERY return to Home; one
+  parse per process now).
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation

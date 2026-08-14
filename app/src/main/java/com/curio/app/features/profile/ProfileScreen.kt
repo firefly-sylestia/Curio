@@ -72,6 +72,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
@@ -104,6 +105,7 @@ import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -959,6 +961,12 @@ private fun profileRoseAccent(): Color {
         // collage + the sticky pills instead of a tinted fill.
         return Color.Black
     }
+    // v31 — "Adaptive Hero" (v30's "Hero follows Spin lane"): Profile's
+    // hero must follow the spin lane like Home/Settings do — it was the
+    // only shared hero missing this check. In the Curio style the hero
+    // wears the last-picked lane's accent; Material/AMOLED keep their
+    // scheme roles above.
+    heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {

@@ -57,7 +57,10 @@ fun ExperimentsScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             // v30 — "Hero follows Spin lane": the page wears the lane wash.
-            .background(heroPageBackground())
+            // v31 — settings-family pages wear the soft page tint (a small
+            // rose-lean of the background shade; the spin-lane wash when
+            // Adaptive Hero is on) instead of the plain cream background.
+            .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (wildcard sparkle leads; experiments are category-neutral).

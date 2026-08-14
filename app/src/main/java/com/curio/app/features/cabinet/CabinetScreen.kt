@@ -111,6 +111,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.onAccent
@@ -169,7 +170,12 @@ fun CabinetScreen(navController: NavController) {
     // visible (search or the category pill); collapsed, content starts
     // right below the hero.
     val chipsVisible = searchActive || categoryFilterOpen
-    val contentTop = compactBannerHeight + CabinetHeroSheetExtent +
+    // v31 — the hero keeps its original height; the Category pill now rides
+    // its own fixed row just below the hero (below the search/sort pills),
+    // so the header text never moves down. Content reserves that row (and
+    // the chip bar only when the chips are open).
+    val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
+    val contentTop = heroTotal + CabinetCategoryPillRowHeight +
         (if (chipsVisible) CabinetChipBarHeight else 0.dp) + 12.dp
     // v26 — sort is a dropdown (field) + a universal ascending/descending
     // arrow. Default: Date, newest first (descending).
@@ -464,14 +470,48 @@ fun CabinetScreen(navController: NavController) {
                 .padding(top = contentTop + 8.dp, bottom = 16.dp)
         )
 
+        // ── Category filter pill — v31: rides its own fixed row just below
+        // the hero (below the search/sort pills), so the hero keeps its
+        // original height and the header text never moves down. Tapping it
+        // toggles the sticky category chips below (the same chips search
+        // shows). The pill is a page-level control now, so it wears the
+        // on-surface ink over a surface-high glass instead of hero ink.
+        val categoryLabel = when {
+            showLegacyOnly -> "Category · Legacy"
+            else -> "Category · ${selectedFilter?.let { CurioCategories.byId(it).displayName } ?: "All"}"
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .fillMaxWidth()
+                .offset(y = heroTotal + 4.dp)
+                .padding(horizontal = 16.dp)
+        ) {
+            CabinetHeroActionPill(
+                onClick = { categoryFilterOpen = !categoryFilterOpen },
+                glyph = CurioIcons.Tune,
+                label = categoryLabel,
+                ink = MaterialTheme.colorScheme.onSurface,
+                backdrop = MaterialTheme.colorScheme.surfaceContainerHigh,
+                // v30 — chevron flips with the chips: ▾ when closed, ▴ when open.
+                trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
+                    else CurioIcons.KeyboardArrowDown,
+                trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
+                    else "Show category chips",
+                emphasized = categoryFilterOpen
+            )
+        }
+
         // ── Sticky filter chip bar — drawn ON TOP of the scroll content.
         // As the grid scrolls the bar lifts, pops (0.97 → 1.0) and frosts in
         // (Profile's pill mechanism), pinning just below the ragged tear
         // while the entry cards pass underneath it. v30 — shown while
-        // searching OR when the Category pill (under the hero pills) is open.
+        // searching OR when the Category pill is open; v31 — sits below the
+        // Category pill row instead of directly under the hero.
         if (chipsVisible) {
             CabinetStickyChipBar(
                 gridState = gridState,
+                barTop = heroTotal + CabinetCategoryPillRowHeight,
                 entries = entries,
                 selectedFilter = selectedFilter,
                 showLegacyOnly = showLegacyOnly,
@@ -509,14 +549,6 @@ fun CabinetScreen(navController: NavController) {
             onCloseSearch = { searchActive = false; searchQuery = "" },
             searchFocus = searchFocus,
             compact = wide,
-            // v30 — the Category pill under the hero pills toggles the
-            // sticky category chips (the same chips search shows).
-            categoryFilterOpen = categoryFilterOpen,
-            onToggleCategoryFilter = { categoryFilterOpen = !categoryFilterOpen },
-            categoryLabel = when {
-                showLegacyOnly -> "Category · Legacy"
-                else -> "Category · ${selectedFilter?.let { CurioCategories.byId(it).displayName } ?: "All"}"
-            },
             // Passed as a NAMED argument (not trailing-lambda syntax): the
             // @Composable slot isn't the last parameter, and the trailing
             // form fails to bind it under K2 ("no value passed for
@@ -604,15 +636,18 @@ fun CabinetScreen(navController: NavController) {
 // ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 /** The hero banner's solid body height — compact, like the settings hero.
- *  v30 — +52dp for the Category pill row riding under the top pills. */
-private val CabinetHeroBannerHeight = 232.dp
-/** Banner height on wide windows (tablet/landscape) — keeps the same +52dp
- *  as the phone banner for the Category pill row. */
-private val CabinetHeroBannerHeightCompact = 192.dp
+ *  v31 — back to the original 180dp: the Category pill no longer lives
+ *  inside the hero (it rides its own row below), so the banner no longer
+ *  needs the v30 +52dp growth and the header text stays put. */
+private val CabinetHeroBannerHeight = 180.dp
+/** Banner height on wide windows (tablet/landscape). */
+private val CabinetHeroBannerHeightCompact = 140.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val CabinetHeroSheetExtent = 24.dp
-/** Total header footprint — the torn banner plus its under-sheet extent. */
-private val CabinetHeroTotalHeight = CabinetHeroBannerHeight + CabinetHeroSheetExtent
+/** The Category pill row height below the hero — a 42dp pill + breathing
+ *  room. v31 — the row lives OUTSIDE the hero so the banner height (and
+ *  the header text) never change. */
+private val CabinetCategoryPillRowHeight = 52.dp
 /** Fixed tear seed — the Cabinet tears in its own bold pattern, never re-rolls. */
 private const val CABINET_TEAR_SEED = 0xCAB1E
 
@@ -621,16 +656,10 @@ private const val CABINET_TEAR_SEED = 0xCAB1E
 // it rests below the hero, then lifts, pops (0.97 → 1.0) and frosts in as
 // the grid scrolls, pinning just below the ragged tear while the entry
 // cards pass underneath it.
-/** Where the chip bar rests below the hero (its unpinned spot). */
-private val CabinetChipBarRestTop = CabinetHeroTotalHeight + 4.dp
-/** Where the chip bar pins when scrolled — just below the ragged tear. */
-private val CabinetChipBarPinnedTop = CabinetHeroTotalHeight + 2.dp
 /** Scroll distance (dp) before the chip bar fully pins (Profile pill style). */
 private val CabinetChipStickyThreshold = 56.dp
 /** The chip bar's layout height — scroll content starts below it. */
 private val CabinetChipBarHeight = 52.dp
-/** Top content padding — hero + chip bar + breathing room. */
-private val CabinetContentTop = CabinetHeroTotalHeight + CabinetChipBarHeight + 12.dp
 
 /** One mirrored hero watermark pair (the settings/profile collage). */
 private data class CabinetHeroPair(
@@ -673,13 +702,7 @@ private fun CabinetHeroHeader(
     trailing: @Composable (ink: Color, backdrop: Color) -> Unit,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
-    compact: Boolean = false,
-    // v30 — the category filter pill rides a second row directly under the
-    // top pills; tapping it toggles the sticky category chips below the
-    // hero (the same chips search shows).
-    categoryFilterOpen: Boolean,
-    onToggleCategoryFilter: () -> Unit,
-    categoryLabel: String
+    compact: Boolean = false
 ) {
     val bannerHeight = if (compact) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
     val totalHeight = bannerHeight + CabinetHeroSheetExtent
@@ -801,29 +824,6 @@ private fun CabinetHeroHeader(
                             }
                         }
                     }
-                    // v30 — category filter pill, directly under the top pill
-                    // row (hidden while searching — search already surfaces
-                    // the chips). Tapping toggles the sticky chip bar below
-                    // the hero, exactly like the search chips.
-                    if (!searchActive) {
-                        Spacer(Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            CabinetHeroActionPill(
-                                onClick = onToggleCategoryFilter,
-                                glyph = CurioIcons.Tune,
-                                label = categoryLabel,
-                                ink = ink,
-                                backdrop = fill,
-                                // v30 — chevron flips with the chips: ▾ when
-                                // closed, ▴ when open.
-                                trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
-                                    else CurioIcons.KeyboardArrowDown,
-                                trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
-                                    else "Show category chips",
-                                emphasized = categoryFilterOpen
-                            )
-                        }
-                    }
                     // Flex spacer — pins the title block just above the tear.
                     Spacer(Modifier.weight(1f))
                     // ── Search field or title, animated expand/collapse ──
@@ -942,6 +942,9 @@ private fun CabinetHeroHeader(
 @Composable
 private fun BoxScope.CabinetStickyChipBar(
     gridState: LazyGridState,
+    // v31 — the top of the hero + Category pill row (the chip bar now sits
+    // BELOW the pill row, so its rest/pin offsets derive from this).
+    barTop: Dp,
     entries: List<CurioEntry>,
     selectedFilter: CategoryId?,
     showLegacyOnly: Boolean,
@@ -956,7 +959,7 @@ private fun BoxScope.CabinetStickyChipBar(
     // first visible card row's top edge inside the viewport: it starts at
     // the content top (~274dp) and falls as the user scrolls.
     val thresholdPx = with(LocalDensity.current) { CabinetChipStickyThreshold.toPx() }
-    val barBottomPx = with(LocalDensity.current) { (CabinetChipBarRestTop + CabinetChipBarHeight).toPx() }
+    val barBottomPx = with(LocalDensity.current) { (barTop + 4.dp + CabinetChipBarHeight).toPx() }
     val progress by remember {
         derivedStateOf {
             val first = gridState.layoutInfo.visibleItemsInfo.firstOrNull()
@@ -965,7 +968,8 @@ private fun BoxScope.CabinetStickyChipBar(
         }
     }
     val frostShift = FastOutSlowInEasing.transform(progress)
-    val liftPx = with(LocalDensity.current) { (CabinetChipBarRestTop - CabinetChipBarPinnedTop).toPx() }
+    // The bar pins 2dp above its rest spot (the rest/pin gap).
+    val liftPx = with(LocalDensity.current) { 2.dp.toPx() }
 
     // No frosted card behind the chips — each pill pops on its own (v7.89:
     // per-pill pop-up animation as the bar lifts to pin just below the tear).
@@ -979,7 +983,7 @@ private fun BoxScope.CabinetStickyChipBar(
             .align(Alignment.TopStart)
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .offset(y = CabinetChipBarRestTop)
+            .offset(y = barTop + 4.dp)
             .graphicsLayer {
                 translationY = -liftPx * frostShift
             }
@@ -1160,10 +1164,14 @@ private fun CabinetHeroActionPill(
     // that pop in every mode — creamy in light/pastel, brighter glass on
     // the deep dark banner. Destructive stays the darkest pill (a whisper
     // of black) so delete reads as the danger action.
+    // v31 — the glass lifts toward the PAGE BACKGROUND in light mode
+    // ([curioPillLift]) instead of stark white: the pill carries a small
+    // tint of the background shade, not a cream block. Dark keeps the
+    // white lift so the pill stays a brighter glass on the deep banner.
     val fill = when {
         destructive -> lerp(backdrop, Color.Black, 0.14f)
-        emphasized -> lerp(backdrop, Color.White, 0.24f)
-        else -> lerp(backdrop, Color.White, 0.38f)
+        emphasized -> lerp(backdrop, curioPillLift(), 0.24f)
+        else -> lerp(backdrop, curioPillLift(), 0.38f)
     }
     Surface(
         onClick = onClick,

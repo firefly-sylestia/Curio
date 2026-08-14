@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -49,7 +50,16 @@ fun CurioSettingsCard(
         // v27n — every theme wears the faint container step as its elevation
         // (the black-glass shine edge keeps AMOLED cards defined on pure
         // black; the old hairline outline is gone).
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        // v31 — a small tint of the PAGE BACKGROUND shade (in every theme):
+        // the card no longer reads as a stark cream block; it carries a
+        // whisper of the background so Profile/Settings cards melt into the
+        // page. The step stays large enough that text (onSurface roles)
+        // keeps its contrast in light, dark, pastel and AMOLED.
+        color = lerp(
+            MaterialTheme.colorScheme.surfaceContainerLow,
+            MaterialTheme.colorScheme.background,
+            0.30f
+        ),
         // AMOLED: tonalElevation overlays the scheme's primary (the coral
         // brand color) onto the container, which washed the pitch-black cards
         // with a faint rose tint. The black-glass shine edge keeps them

@@ -172,10 +172,18 @@ object TopicJsonLoader {
      * Counts canonical topics without constructing or caching CurioTopic
      * objects. This is used by promotional UI that needs a truthful count
      * but does not need every catalog resident in the heap.
+     *
+     * v31 — the count is CACHED in memory: Home's Topics stat re-runs this
+     * every time Home re-enters composition (each tab switch back parses
+     * the whole ~14k-topic catalog again), which made Home feel like it
+     * "opened late". One parse per process, instant afterwards.
      */
+    @Volatile private var canonicalTopicCount: Int = -1
+
     suspend fun countCanonicalTopics(): Int = withContext(Dispatchers.IO) {
+        canonicalTopicCount.takeIf { it >= 0 }?.let { return@withContext it }
         val am = assets ?: return@withContext 0
-        CategoryId.values()
+        val count = CategoryId.values()
             .filter { it != CategoryId.WILDCARD }
             .sumOf { id ->
                 runCatching {
@@ -184,6 +192,8 @@ object TopicJsonLoader {
                     }
                 }.getOrDefault(0)
             }
+        canonicalTopicCount = count
+        count
     }
 
     /**

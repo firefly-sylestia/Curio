@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioPillLift
 
 /** One selectable sort field for [CurioSortDropdown]. */
 data class CurioSortOption(
@@ -50,6 +51,13 @@ data class CurioSortOption(
  * glass (banner lifted toward white) instead of the old ink-leaned fill
  * that read too dark in light and pastel themes — full-ink glyphs on top
  * stay readable in every mode.
+ *
+ * v31 — the pill slims down: 16dp corner radius instead of the fully-
+ * rounded 50dp capsule (the wide Date/Default pill read as a fat rounded
+ * blob next to the compact action pills), tighter horizontal padding, and
+ * the frosted fill now lifts toward the PAGE BACKGROUND in light mode
+ * (via [curioPillLift]) so the pill carries a small tint of the
+ * background shade instead of stark cream.
  *
  * v30 — the menu itself now runs through [CurioDropdownMenu]: an opaque
  * surface tinted toward the page's CATEGORY ACCENT, with the selected row
@@ -83,8 +91,10 @@ fun CurioSortDropdown(
     // pastel it reads creamy — either way the full-ink glyphs pop instead
     // of sinking into a dark mauve pill (the v27r 0.35/0.55 ink-lean fills
     // were too dark in light + pastel).
-    val fill = lerp(backdrop, Color.White, if (emphasized) 0.24f else 0.38f)
-    val pillShape = RoundedCornerShape(50)
+    val fill = lerp(backdrop, curioPillLift(), if (emphasized) 0.24f else 0.38f)
+    // v31 — 16dp corners (was the fully-rounded 50dp capsule): the wide
+    // sort pill reads as a slim control, not a fat rounded blob.
+    val pillShape = RoundedCornerShape(16.dp)
 
     Box(modifier = modifier) {
         Surface(
@@ -108,7 +118,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(pillShape)
                         .clickable { expanded = true }
-                        .padding(start = 14.dp, end = 10.dp, top = 7.dp, bottom = 7.dp)
+                        .padding(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp)
                 ) {
                     Text(
                         text = selected?.label.orEmpty(),
@@ -135,7 +145,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable(onClick = onToggleDirection)
-                        .padding(horizontal = 10.dp)
+                        .padding(horizontal = 8.dp)
                         .heightIn(min = 40.dp)
                 ) {
                     CurioIcon(

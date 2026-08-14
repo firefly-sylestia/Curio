@@ -130,6 +130,11 @@ Use this git workflow:
 
 Follow conventional commit format: `feat:`, `fix:`, `refactor:`, `docs:`, `style:`, `chore:`, etc.
 
+**NEVER append tool/generated-by footers to commit messages** — no
+"Generated with Codebuff", no `Co-Authored-By: Codebuff` (or any other
+AI/tool attribution) lines. Commit messages are plain conventional-format
+text only.
+
 ### 📝 SMALL TEXT-ONLY CHANGES — DO NOT PUSH
 
 Small text-only changes that do **not** affect app functionality — comment

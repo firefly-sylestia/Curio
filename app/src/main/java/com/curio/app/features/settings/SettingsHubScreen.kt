@@ -95,6 +95,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -116,11 +117,6 @@ private val SettingsHeroSheetExtent = 24.dp
  *  the hero (the hero overlays the content, letting rows disappear under
  *  the ragged tear as they scroll). */
 val SettingsHeroTotalHeight = SettingsHeroBannerHeight + SettingsHeroSheetExtent
-/** Extra banner height added when the hero carries a second action row
- *  under the top pills (the Topic Database's Category pill). Public so the
- *  database can compute its own content offsets. */
-val SettingsHeroExtraRowHeight = 52.dp
-
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
 private data class SettingsHeroPair(
@@ -163,18 +159,12 @@ fun SettingsHeroHeader(
     onSearchQueryChange: (String) -> Unit = {},
     onCloseSearch: () -> Unit = {},
     searchFocus: FocusRequester? = null,
-    searchPlaceholder: String = "Search…",
-    // v30 — optional second action row directly under the top pills (the
-    // Topic Database's Category pill). When present the banner grows by
-    // [SettingsHeroExtraRowHeight] so the row fits without crowding the
-    // title block; hidden while searching (search swaps the hero content
-    // and surfaces the chips itself).
-    extraRow: (@Composable (ink: Color) -> Unit)? = null
+    searchPlaceholder: String = "Search…"
 ) {
-    // v30 — a second action row rides under the top pills; the banner
-    // grows by [SettingsHeroExtraRowHeight] to make room.
-    val baseBanner = if (compact) 140.dp else SettingsHeroBannerHeight
-    val bannerHeight = if (extraRow != null) baseBanner + SettingsHeroExtraRowHeight else baseBanner
+    // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
+    // that pill now rides its own row BELOW the hero so the banner keeps
+    // its original height and the header text never moves down.
+    val bannerHeight = if (compact) 140.dp else SettingsHeroBannerHeight
     val totalHeight = bannerHeight + SettingsHeroSheetExtent
     val heroTornShape = remember(SETTINGS_HERO_TEAR_SEED) { SoftTornBottomShape(SETTINGS_HERO_TEAR_SEED, bold = true) }
     val sheetShape = remember(SETTINGS_HERO_TEAR_SEED) {
@@ -283,13 +273,6 @@ fun SettingsHeroHeader(
                                 trailing(ink)
                             }
                         }
-                    }
-                    // v30 — optional second action row under the top pills
-                    // (the Category pill); hidden while searching — search
-                    // swaps the hero content and surfaces the chips itself.
-                    if (extraRow != null && !searchActive) {
-                        Spacer(Modifier.height(8.dp))
-                        extraRow(ink)
                     }
                     // Flex spacer — pins the title/search block just above the tear.
                     Spacer(Modifier.weight(1f))
@@ -446,7 +429,11 @@ fun SettingsHeroActionPill(
     // in every mode — creamy in light/pastel, brighter glass on the deep
     // dark banner. The glyph stays 20dp.
     val backdrop = backdropOverride ?: settingsRoseAccent()
-    val fill = lerp(backdrop, Color.White, if (emphasized) 0.24f else 0.38f)
+    // v31 — the glass lifts toward the PAGE BACKGROUND in light mode
+    // ([curioPillLift]) instead of stark white: the pill carries a small
+    // tint of the background shade, not a cream block. Dark keeps the
+    // white lift so the pill stays a brighter glass on the deep banner.
+    val fill = lerp(backdrop, curioPillLift(), if (emphasized) 0.24f else 0.38f)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
@@ -1112,7 +1099,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.DarkMode, "Theme", "Light, dark, or system", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
     SettingsDeepRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
-    SettingsDeepRow(CurioIcons.AutoAwesome, "Hero follows Spin lane", "Shared hero + page take the category you last picked on Spin", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane"),
+    SettingsDeepRow(CurioIcons.AutoAwesome, "Adaptive Hero", "Shared hero + page take the category you last picked on Spin", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane"),
     // ── Preferences (v26) — search engine, explore behavior, pet personality ──
     // v19 — which search engine the "Explore in browser" button opens.
     SettingsDeepRow(CurioIcons.Search, "Search engine", "Which engine Explore opens in the browser", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),

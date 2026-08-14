@@ -384,20 +384,48 @@ fun curioDialogContainerColor(): Color {
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
         return Color.Black
     }
+    // v31 — every theme pulls the dialog container a small step toward the
+    // page background shade so dialogs melt into the page instead of
+    // floating a separate elevated cream/grey panel ("no matter the
+    // theme"). The blend stays modest so the dialog still reads as a
+    // raised surface.
     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-        return MaterialTheme.colorScheme.surfaceContainerHigh
+        return lerp(
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            MaterialTheme.colorScheme.background,
+            0.20f
+        )
     }
     if (isCurioDarkTheme()) {
-        return MaterialTheme.colorScheme.surfaceContainerHigh
+        return lerp(
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            MaterialTheme.colorScheme.background,
+            0.25f
+        )
     }
     // v11 — light: a soft near-background sheet that matches the page wash
     // family (the cream background) instead of the deeper #E4D7BF container.
+    // v31 — pulled a touch further toward the background (0.60 → 0.72) so
+    // the light dialog stops reading as a separate cream panel.
     return lerp(
         MaterialTheme.colorScheme.surfaceContainerHigh,
         MaterialTheme.colorScheme.background,
-        0.60f
+        0.72f
     )
 }
+
+/**
+ * The hero glass-pill lift — the color the ink-glass hero pills
+ * ([SettingsHeroActionPill], [CabinetHeroActionPill], the sort dropdown)
+ * are lerped toward for their frosted fill. LIGHT mode lifts toward the
+ * page background (the soft cream) so pills read as a small tint of the
+ * background shade instead of stark white-cream; dark/AMOLED keep the
+ * white lift so the pill stays a visibly brighter glass on the deep
+ * banner. v31.
+ */
+@Composable
+fun curioPillLift(): Color =
+    if (isCurioDarkTheme()) Color.White else MaterialTheme.colorScheme.background
 
 /**
  * Readable dialog ACTION ink. In light mode the scheme primary is the pale
