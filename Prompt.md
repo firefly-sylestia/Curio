@@ -1,5 +1,40 @@
 # Prompt.md — Request log
 
+## Current request — desktop-release: missing Curio.exe app image + PR builds (v28)
+
+### What was asked
+Fix the desktop tag-release CI failure (`Write-Error: No Curio.exe app image
+was produced under desktop/build/compose/binaries/main`) and make PR pushes
+build the proper `.exe` too.
+
+### Root cause
+The workflow ran only `:desktop:packageDistributionForCurrentOS`, which is a
+lifecycle task aggregating the package tasks. `packageMsi` builds its own
+jpackage image INTERNALLY and consumes it — the app image folder (with
+`Curio.exe`) is never left on disk, so the portable-zip step's recursive
+`Curio.exe` search found nothing. Only `:desktop:createDistributable`
+("Creates a final application image without creating an installer")
+leaves the image under `build/compose/binaries/main`.
+
+### What was done
+- `desktop-release.yml` now runs BOTH
+  `:desktop:createDistributable` and `:desktop:packageDistributionForCurrentOS`
+  so the `Curio.exe` app image exists for the portable zip; the collect step
+  derives the zip version from `RELEASE_VERSION` (fallback `1.0.0` for
+  non-tag runs) so PR ref names can't leak into artifact names.
+- Added `push` + `pull_request` triggers on `main`/`Alpha`: PR/push runs
+  build the `.exe` + `.msi` and upload them as run artifacts
+  (`curio-desktop-windows-*`, 7-day retention). `RELEASE_VERSION` is only
+  set for tag runs (jpackage rejects non-numeric versions); release-only
+  steps (body, prerelease, gh-release) are gated on
+  `startsWith(github.ref, 'refs/tags/')`; concurrency switched to
+  cancel-in-progress like android.yml.
+- Docs: `.github/AGENTS.md` + root `AGENTS.md` desktop sections updated.
+
+### Validation
+No Gradle locally (env rule). YAML re-validated with `npx yaml-lint` +
+`git diff --check`; CI on PR/push/tag is the gate.
+
 ## Current request — restore Spin BoxWithConstraints import
 
 ### What was asked
