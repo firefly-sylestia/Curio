@@ -1713,7 +1713,7 @@ private fun FilterSheet(
                         size = 72.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = 10.dp, bottom = -6.dp)
+                            .padding(end = 10.dp, bottom = 6.dp)
                     )
                     CurioIcon(
                         cat.iconGlyph,
