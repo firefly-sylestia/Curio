@@ -154,9 +154,18 @@ fun CabinetScreen(navController: NavController) {
         mutableStateOf<CategoryId?>(null)
     }
     var showLegacyOnly by rememberSaveable(CabinetSessionToken) { mutableStateOf(false) }
+    // Saveable-backed scroll state — the grid keeps its position on rotation.
+    val gridState = rememberLazyGridState()
+
+    // Search + sort — the search button expands into a real filter bar
+    // (matches by topic name or custom title, case-insensitive), and the
+    // sort button toggles newest-first / oldest-first by capture time.
+    var searchActive by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     // v39 — opening the Cabinet from a lane tile (Profile → "Your lanes")
     // lands pre-filtered to that lane: the pending handoff is consumed once
     // on first composition (keyed on the monotonic bump so re-opens fire).
+    // Placed AFTER searchActive/searchQuery so the effect can clear them.
     LaunchedEffect(PendingCabinetFilter.trigger) {
         PendingCabinetFilter.take()?.let { name ->
             runCatching { CategoryId.valueOf(name) }.getOrNull()?.let { catId ->
@@ -167,14 +176,6 @@ fun CabinetScreen(navController: NavController) {
             }
         }
     }
-    // Saveable-backed scroll state — the grid keeps its position on rotation.
-    val gridState = rememberLazyGridState()
-
-    // Search + sort — the search button expands into a real filter bar
-    // (matches by topic name or custom title, case-insensitive), and the
-    // sort button toggles newest-first / oldest-first by capture time.
-    var searchActive by rememberSaveable { mutableStateOf(false) }
-    var searchQuery by rememberSaveable { mutableStateOf("") }
     // v30 — the category pill (second row under the hero pills) toggles the
     // sticky category chips; they also show while searching (same chips).
     var categoryFilterOpen by rememberSaveable { mutableStateOf(false) }
