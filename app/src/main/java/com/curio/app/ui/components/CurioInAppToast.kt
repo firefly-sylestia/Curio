@@ -6,13 +6,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,7 +35,11 @@ import kotlinx.coroutines.delay
 private data class CurioToastMessage(
     val id: Long,
     val text: String,
-    val glyph: String? = null
+    val glyph: String? = null,
+    /** Short tap-affordance label ("Open") shown at the pill's end. */
+    val actionLabel: String? = null,
+    /** Opaque action key passed to the host's [onAction] when tapped. */
+    val actionId: String? = null
 )
 
 /**
@@ -52,9 +60,19 @@ object CurioToast {
         private set
     private var nextId = 0L
 
-    /** Shows [text] as an in-app toast (main thread). Re-shows replace. */
-    fun show(text: String, glyph: String? = null) {
-        current = CurioToastMessage(nextId++, text, glyph)
+    /**
+     * Shows [text] as an in-app toast (main thread). Re-shows replace.
+     * When [actionLabel] + [actionId] are given, the pill becomes tappable
+     * and the host's `onAction` fires with [actionId] (the NavHost maps it
+     * to navigation, e.g. "support" → Support & diagnostics).
+     */
+    fun show(
+        text: String,
+        glyph: String? = null,
+        actionLabel: String? = null,
+        actionId: String? = null
+    ) {
+        current = CurioToastMessage(nextId++, text, glyph, actionLabel, actionId)
     }
 
     /** Dismisses the toast — only when [id] is still the one showing. */
@@ -67,10 +85,16 @@ object CurioToast {
  * The in-app toast overlay — place at the ROOT of the NavHost so it floats
  * above every screen (bottom-nav tabs and pushed pages alike). Observes
  * [CurioToast.current], auto-dismisses after ~3.5s, and animates in/out
- * with a soft slide + fade.
+ * with a soft slide + fade. Toasts that carry an action are tappable:
+ * tapping dismisses them and forwards the action key to [onAction].
  */
 @Composable
-fun CurioInAppToastHost(modifier: Modifier = Modifier) {
+fun CurioInAppToastHost(
+    modifier: Modifier = Modifier,
+    // v63b — tap-to-action: the NavHost wires navigation here ("support" →
+    // Support & diagnostics) so the update toast opens the update page.
+    onAction: ((actionId: String) -> Unit)? = null
+) {
     val message = CurioToast.current
     // Auto-dismiss: a fresh message id restarts the timer from zero.
     LaunchedEffect(message?.id) {
@@ -87,11 +111,19 @@ fun CurioInAppToastHost(modifier: Modifier = Modifier) {
         exit = fadeOut(animationSpec = tween(180))
     ) {
         message?.let { m ->
+            val action = m.actionId
             Surface(
                 shape = RoundedCornerShape(50),
                 color = curioDialogContainerColor(),
                 shadowElevation = 6.dp,
-                modifier = Modifier.padding(horizontal = 24.dp)
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .then(
+                        if (action != null) Modifier.clickable {
+                            CurioToast.dismiss(m.id)
+                            onAction?.invoke(action)
+                        } else Modifier
+                    )
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
@@ -114,6 +146,21 @@ fun CurioInAppToastHost(modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center
                     )
+                    if (m.actionLabel != null) {
+                        VerticalDivider(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                            modifier = Modifier
+                                .fillMaxHeight(0.55f)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = m.actionLabel,
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

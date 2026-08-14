@@ -365,16 +365,23 @@ app/src/main/java/com/curio/app/
   pills read calmer, less stretched.
 - **v63 — update notice is now an IN-APP toast (no android Toast).**
   New global bus `CurioToast` (ui/components/CurioInAppToast.kt):
-  `object CurioToast` with snapshot state (`show(text, glyph)` /
-  `dismiss(id)`) + `CurioInAppToastHost` — a themed pill (dialog-tinted
-  container, primary glyph, 6dp lift) that slides up, holds ~3.5s and
-  fades. Hosted at the ROOT of `CurioNavHost`'s Box (above every screen,
-  cleared past the bottom nav via navigationBarsPadding + 96dp), so a
-  message fired before the UI composes is picked up on first frame.
-  `UpdateChecker.notifyIfUpdateAvailable` now calls `CurioToast.show(...)
-  (glyph = CurioIcons.Download)` instead of `android.widget.Toast`
-  (import removed); the once-per-version NOTIFICATION is untouched.
-  Generic bus — future background notices reuse it.
+  `object CurioToast` with snapshot state (`show(text, glyph,
+  actionLabel, actionId)` / `dismiss(id)`) + `CurioInAppToastHost` — a
+  themed pill (dialog-tinted container, primary glyph, 6dp lift) that
+  slides up, holds ~3.5s and fades. Hosted at the ROOT of `CurioNavHost`'s
+  Box (above every screen, cleared past the bottom nav via
+  navigationBarsPadding + 96dp), so a message fired before the UI composes
+  is picked up on first frame. v63b — toasts with an `actionId` are
+  TAPPABLE: `CurioInAppToastHost` takes an `onAction` callback (the
+  NavHost maps "support" → `CurioRoutes.SUPPORT`) and shows the
+  `actionLabel` ("Open") after a divider; tapping dismisses + navigates.
+  `UpdateChecker.notifyIfUpdateAvailable` now calls `CurioToast.show(...
+  glyph = CurioIcons.Download, actionLabel = "Open", actionId =
+  "support")` instead of `android.widget.Toast` (import removed), and
+  v63b moved the once-per-version gate ([AppPreferences]
+  lastNotifiedUpdateVersion) BEFORE both announcements — a pending update
+  is announced ONCE (toast + notification together), never on every
+  launch. Generic bus — future background notices reuse it.
 - **v62 — sort pill slimmer again (Cabinet + Topic Browser).** The shared
   `CurioSortDropdown` still read too wide next to the icon-only Search
   pill (user: "too wide, please reduce it"): label-zone padding 10/8 →

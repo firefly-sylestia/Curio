@@ -1,6 +1,33 @@
 # Prompt.md — Request log
 
-## Current request — update notice → in-app toast (v63)
+## Current request — update toast: tappable → Support + once per version (v63b)
+
+### What was asked
+"Make the update toast tappable to open Support & diagnostics" + "and
+show it only once not everytime the app opens."
+
+### What was done
+1. **Tappable toast** — `CurioToast.show(text, glyph, actionLabel,
+   actionId)`; `CurioToastMessage` carries `actionLabel`/`actionId`;
+   `CurioInAppToastHost` takes `onAction: (actionId) -> Unit` and makes
+   the pill `Modifier.clickable` when an action exists, rendering
+   "Open" (primary, ExtraBold) after a divider; tapping dismisses +
+   forwards. NavHost maps `"support"` → `navController.navigate(
+   CurioRoutes.SUPPORT)`.
+2. **Once per version** — the `lastNotifiedUpdateVersion` gate moved
+   BEFORE both announcements in `notifyIfUpdateAvailable`: on the first
+   launch that finds a newer release it records the tag then shows the
+   toast + posts the notification; later launches return early. (Old
+   behavior: the toast fired on EVERY launch; only the notification was
+   deduped.)
+
+### Validation
+Brace/paren balance: CurioInAppToast 48/48, CurioNavHost 450/450,
+UpdateChecker 173/175 (keeps its pre-existing +2 close comment-parenthesis
+imbalance, delta balanced). `git diff --check` clean. No Gradle locally
+(env rule) — CI on push is the gate.
+
+## Prior — update notice → in-app toast (v63)
 
 ### What was asked
 "remove the toast for update replace it with in app toast not the android

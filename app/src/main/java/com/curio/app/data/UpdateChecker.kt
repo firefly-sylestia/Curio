@@ -266,11 +266,14 @@ object UpdateChecker {
     /**
      * v53 — background update notifier, run on app start. When the latest
      * release is newer than the installed build:
-     *  - an IN-APP toast ([CurioToast]) announces it on every check that
-     *    finds an update (v63 — replaces the old android.widget.Toast), and
-     *  - a NOTIFICATION fires ONCE per version ([AppPreferences] remembers
-     *    the last announced tag), so a pending update never re-notifies on
-     *    every launch.
+     *  - an IN-APP toast ([CurioToast]) announces it (v63 — replaces the old
+     *    android.widget.Toast), tappable to open Support & diagnostics
+     *    (v63b), and
+     *  - a NOTIFICATION fires alongside it.
+     * Both are ONCE PER VERSION — [AppPreferences] remembers the last
+     * announced tag, so a pending update is announced on the first launch
+     * that finds it and never again (v63b: the old toast repeated on every
+     * launch; the once-gate now sits BEFORE both announcements).
      * Any failure (offline, API error) is silently ignored — the manual
      * check in Support & diagnostics remains the authoritative path.
      */
@@ -278,19 +281,24 @@ object UpdateChecker {
         val appContext = context.applicationContext
         val release = fetchLatestRelease() ?: return@withContext
         if (!isNewer(release.tagName, BuildConfig.VERSION_NAME)) return@withContext
-        withContext(Dispatchers.Main) {
-            // In-app toast — rendered by CurioInAppToastHost in the NavHost;
-            // global state survives the check racing the UI's first frame.
-            CurioToast.show(
-                "Curio ${release.tagName} is available — update in Support & diagnostics",
-                glyph = CurioIcons.Download
-            )
-        }
-        // Notification — only once per version ("once the update comes,
-        // not always"). The in-app toast above still fires on every check.
+        // v63b — ONCE per version for BOTH the toast and the notification:
+        // the announced tag is recorded (and the gate consumed) BEFORE any
+        // announcement, so a pending update never nags on every launch.
         val lastNotified = AppPreferences.getLastNotifiedUpdateVersion(appContext)
         if (lastNotified == release.tagName) return@withContext
         AppPreferences.setLastNotifiedUpdateVersion(appContext, release.tagName)
+        withContext(Dispatchers.Main) {
+            // In-app toast — rendered by CurioInAppToastHost in the NavHost;
+            // global state survives the check racing the UI's first frame.
+            // Tapping it opens Support & diagnostics (actionId "support").
+            CurioToast.show(
+                "Curio ${release.tagName} is available — update in Support & diagnostics",
+                glyph = CurioIcons.Download,
+                actionLabel = "Open",
+                actionId = "support"
+            )
+        }
+        // Notification — same once-per-version gate as the toast above.
         runCatching { ensureChannel(appContext) }
         val openApp = appContext.packageManager
             .getLaunchIntentForPackage(appContext.packageName)

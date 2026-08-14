@@ -999,11 +999,20 @@ fun CurioNavHost(
         // v63 — the app's IN-APP toast (the update notice, etc.) floats above
         // every screen; the bottom clearance clears the bottom nav bar so the
         // pill reads over content, never over the bar.
+        // v63b — toasts with an action are tappable: the update toast's
+        // "support" action opens Support & diagnostics.
         CurioInAppToastHost(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 96.dp)
+                .padding(bottom = 96.dp),
+            onAction = { actionId ->
+                if (actionId == "support") {
+                    navController.navigate(CurioRoutes.SUPPORT) {
+                        launchSingleTop = true
+                    }
+                }
+            }
         )
     }
 }
