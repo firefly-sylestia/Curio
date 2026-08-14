@@ -2,8 +2,13 @@ package com.curio.app.ui.theme
 
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.JournalMood
+import com.curio.app.data.MusicService
+import com.curio.app.data.SearchEngine
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -62,6 +67,7 @@ object CurioIcons {
     const val ChevronRight = "chevron_right"   // › — unified forward arrow
     const val Check       = "check"            // ✓
     const val Add         = "add"              // +
+    const val Remove      = "remove"           // −
     const val AutoAwesome = "auto_awesome"     // sparkles / logomark
     const val Tune         = "tune"            // sliders — Preferences settings entry
     const val Inventory2  = "inventory_2"      // cabinet empty state
@@ -96,6 +102,11 @@ object CurioIcons {
     const val AspectRatio = "aspect_ratio" // ▭ — Smart Spin layout (small-screen fit)
     const val PhotoSizeSelectLarge = "photo_size_select_large" // ⤢ size — Smart density layout (deck scale)
     const val PlayArrow   = "play_arrow"
+    const val TravelExplore = "travel_explore"   // globe + magnifier — explore in the user's chosen engine
+    const val YouTubeActivity = "youtube_activity" // rounded play tile — explore in YouTube
+    const val MusicNote = "music_note"          // ♪ — Apple Music / music rows
+    const val PlayCircle = "play_circle"        // ▶ in a ring — Spotify
+    const val ContentCopy = "content_copy"      // two overlapping squares — copy to clipboard
     const val Pause       = "pause"
     const val Stop        = "stop"
     const val Timer       = "timer"
@@ -307,5 +318,70 @@ fun CurioIcon(
                 )
             )
         )
+    }
+}
+
+/**
+ * v27s — the search-engine pill tile: brand color + letter monogram. The
+ * icon font has no logo glyphs, so each engine is a colored rounded tile
+ * carrying its initial — readable at 18dp and brand-recognizable.
+ */
+fun SearchEngine.brandTile(): Pair<Color, String> = when (this) {
+    SearchEngine.GOOGLE -> Color(0xFF4285F4) to "G"
+    SearchEngine.DUCKDUCKGO -> Color(0xFFDE5833) to "D"
+    SearchEngine.BING -> Color(0xFF008373) to "B"
+    SearchEngine.BRAVE -> Color(0xFFFB542B) to "B"
+    SearchEngine.ECOSIA -> Color(0xFF008A52) to "E"
+    SearchEngine.STARTPAGE -> Color(0xFF5469EC) to "S"
+    SearchEngine.YAHOO -> Color(0xFF6001D2) to "Y"
+}
+
+/**
+ * v27s — the music-service pill tile: brand color + a Material glyph (the
+ * font has no Apple/Spotify logos, so the services use their recognizable
+ * glyph + color instead).
+ */
+fun MusicService.brandTile(): Pair<Color, String> = when (this) {
+    MusicService.YOUTUBE_MUSIC -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
+    MusicService.APPLE_MUSIC -> Color(0xFFFA2D48) to CurioIcons.MusicNote
+    MusicService.SPOTIFY -> Color(0xFF1DB954) to CurioIcons.PlayCircle
+}
+
+/**
+ * v27s — a small brand tile: a rounded square in the brand color carrying
+ * either a Material glyph ([glyph]) or a letter monogram ([letter]).
+ * Retired from the explore dialog (v27u uses clean glyph pills instead)
+ * but kept as a general-purpose brand chip helper.
+ */
+@Composable
+fun BrandMonogram(
+    tileColor: Color,
+    glyph: String? = null,
+    letter: String? = null,
+    size: Dp = 18.dp,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(size / 3.2f))
+            .background(tileColor),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            glyph != null -> CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = Color.White,
+                size = size * 0.62f
+            )
+            letter != null -> Text(
+                letter,
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = (size.value * 0.52f).sp,
+                maxLines = 1
+            )
+        }
     }
 }

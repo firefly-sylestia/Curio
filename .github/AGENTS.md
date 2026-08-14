@@ -15,7 +15,8 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 ## Ownership
 
 - `.github/workflows/android.yml` — Branch and pull-request verification
-- `.github/workflows/release.yml` — Tag-triggered signed release publishing
+- `.github/workflows/release.yml` — Tag-triggered signed release publishing (Android APKs)
+- `.github/workflows/desktop-release.yml` — Tag-triggered Windows desktop installers (.exe app image + .msi)
 - `.github/ISSUE_TEMPLATE/bug-report.yml` — Curio Android bug report form
 - `.github/ISSUE_TEMPLATE/feature-request.yml` — Curio product and UX request form
 - `.github/PULL_REQUEST_TEMPLATE.md` — Curio pull-request review template
@@ -32,7 +33,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 - Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies **every** release APK's signature is not the debug key. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes.
 - Cancels an older in-progress run for the same ref when a newer run starts.
 
-### Release workflow
+### Release workflow (Android)
 
 `release.yml` runs only for `v*` tags. It:
 
@@ -44,14 +45,42 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 - Publishes the release APKs through a GitHub Release, marking `alpha`, `beta`, and `rc` tags as prereleases.
 - Never falls back to debug signing for a published release.
 
-### Release workflow
+### Desktop release workflow
 
-`release.yml` runs only for `v*` tags. It:
+`desktop-release.yml` runs on the same `v*` tags (plus manual dispatch) on a
+**windows-latest** runner. It:
 
-- Requires `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`.
-- Decodes the repository keystore, runs `validateTopics assembleRelease`, and verifies the APK signature is not the Android debug key using the available Android build-tools.
-- Publishes the release APK through a GitHub Release, marking `alpha`, `beta`, and `rc` tags as prereleases.
-- Never falls back to debug signing for a published release.
+- Requires NO secrets — the desktop port has no signing story yet (jpackage
+  code signing is optional and unconfigured).
+- Installs the **WiX Toolset** via chocolatey (jpackage needs it to build
+  the `.msi`) and exposes it via `WIX`/`PATH`. The install folder is
+  VERSIONED (v3.11, v3.14, ...) and changes between runner images — the
+  step DISCOVERS it (`WiX Toolset*` glob) instead of hardcoding a version.
+  jpackage itself locates the toolset by scanning Program Files, so
+  `WIX`/`PATH` are belt-and-braces: `WIX` = installation root (the standard
+  `%WIX%` convention), `PATH` = the `bin` dir.
+- Compiles the module FIRST (`:desktop:build`) so code errors fail fast
+  with a clear log before the slow WiX/jpackage steps, then runs
+  `:desktop:packageDistributionForCurrentOS` — on Windows this builds the
+  app image (contains `Curio.exe`) plus the `.msi` installer; `Dmg`/`Deb`
+  are macOS/Linux formats and are skipped.
+- Zips the app image into a **portable** `Curio-Windows-{version}-portable.zip`
+  and uploads both it and the `.msi` to the release.
+- **Tag version is the package version:** exports `RELEASE_VERSION` (tag
+  minus `v`) so `desktop/build.gradle.kts` versions the installer from the
+  tag, mirroring the Android convention. jpackage requires a strictly
+  numeric version (`MAJOR[.MINOR][.PATCH]`) for DMG/MSI metadata, so the
+  desktop module strips prerelease/build suffixes (`v1.0.2-beta` → `1.0.2`)
+  from `packageVersion` — the Android `versionName` is a plain string and
+  keeps the suffix. The portable zip name keeps the full tag (distinguishes
+  prerelease from later stable artifacts); the MSI is named from the numeric
+  package version, and the release body mirrors that (`msiVersion`).
+- Publishes through GitHub Releases with the same `alpha`/`beta`/`rc`
+  prerelease detection as the Android workflow, and `update_release_body:
+  false` so it never clobbers the Android workflow's release body when both
+  run on the same tag.
+- Validates the build output with hard guards: the `.msi` must exist, the
+  app image must contain `Curio.exe`; unmatched upload files fail the run.
 
 ### Contributor templates
 

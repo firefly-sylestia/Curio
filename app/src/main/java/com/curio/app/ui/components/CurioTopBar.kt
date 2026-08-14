@@ -70,11 +70,14 @@ fun CurioBackButton(
             shape = RoundedCornerShape(50),
             color = containerColor,
             shadowElevation = shadowElevation,
-            modifier = modifier.clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
+            modifier = modifier
+                // v28 — dark mode elevation visibility (glow + hairline).
+                .curioDarkGlow(shadowElevation, RoundedCornerShape(50))
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                )
         ) { icon() }
     } else {
         Surface(
@@ -83,6 +86,8 @@ fun CurioBackButton(
             color = containerColor,
             shadowElevation = shadowElevation,
             modifier = modifier
+                // v28 — dark mode elevation visibility (glow + hairline).
+                .curioDarkGlow(shadowElevation, RoundedCornerShape(50))
         ) { icon() }
     }
 }

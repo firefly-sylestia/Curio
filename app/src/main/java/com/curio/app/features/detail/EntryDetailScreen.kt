@@ -48,8 +48,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -104,6 +102,9 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioDropdownItem
+import com.curio.app.ui.components.CurioDropdownMenu
+import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.NotePaperCard
@@ -149,6 +150,9 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.paperStatCardColor
+import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -160,6 +164,7 @@ import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -258,7 +263,9 @@ fun EntryDetailScreen(
     // (glyph, title, frosted bar, watermark scatter) flips from white to the
     // theme-aware onAccent ink — deep accent in light, light twin in dark.
     // White when pastel mode is off, preserving the exact pre-pastel look.
-    val heroInk = cat.onAccent()
+    // v28 — dark mode hero title text is always white/creamish (never the
+    // tinted light twin) so the banner headline stays crisp light-on-deep.
+    val heroInk = cat.heroHeaderInk()
     val darkNonPastel = isCurioDarkTheme() && !AppPreferences.pastelColorsState
     // Dark non-pastel hero cards use a quiet midnight frost instead of the
     // former bright-white glass. Light and pastel modes retain the established
@@ -511,8 +518,11 @@ fun EntryDetailScreen(
                         Spacer(Modifier.height(10.dp))
                         Surface(
                             shape = RoundedCornerShape(50),
+                            // v27n — this pill sits ON the frosted hero card:
+                            // a translucent glass fill can't hold an elevation
+                            // shadow (it bleeds through), so it stays flat.
                             color = heroCardInk.copy(alpha = 0.12f),
-                            shadowElevation = 2.dp
+                            shadowElevation = 0.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
@@ -538,7 +548,11 @@ fun EntryDetailScreen(
                     // v27 — experimental paper-title underline (two short
                     // lines under the entry title; OFF by default).
                     if (AppPreferences.paperHeaderCutsState) {
-                        PaperTitleLines(ink = heroInk)
+                        PaperTitleLines(
+                            ink = heroInk,
+                            title = resolvedEntry.topic.name,
+                            fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                        )
                     }
                     // v27 — the session pill above adds height; tighten the
                     // gap so the fixed-height hero never overflows the seam.
@@ -559,49 +573,90 @@ fun EntryDetailScreen(
                         "Portfolio" else resolvedEntry.format.shortName
                     val heroTypeGlyph = if (resolvedEntry.captureData is CaptureData.Portfolio)
                         CurioIcons.Inventory2 else formatGlyph(resolvedEntry.format)
+                    // v27v — the paper & headers experiment extends to this
+                    // meta card: with "Paper stat card" on, the Date · Mood ·
+                    // Session · Type grid wears the shared opaque paper
+                    // surface (same fill, 3-hole column, rings, torn edges as
+                    // Home/Profile) instead of the frosted glass. Holes punch
+                    // through to the hero behind; the torn shape is seeded
+                    // per entry so the rip never re-rolls.
+                    val metaPaperOn = AppPreferences.paperStatCardsState
+                    val metaPaperBg = paperStatCardColor(heroSheetColor)
+                    val metaTearOn = metaPaperOn && AppPreferences.paperStatTearState
+                    val metaShape: Shape = remember(tearSeed, metaTearOn) {
+                        if (metaTearOn) TornStatPaperShape(tearSeed xor 0x6B4E3E) else RoundedCornerShape(18.dp)
+                    }
+                    val metaHolesOn = metaPaperOn && AppPreferences.paperHeaderHolesState
+                    val metaRingsOn = metaHolesOn && AppPreferences.paperHoleRingsState
+                    val metaRingStyle = AppPreferences.paperHoleRingStyleState
                     Surface(
-                        shape = RoundedCornerShape(18.dp),
+                        shape = metaShape,
+                        // v27n — frosted glass pane over the hero: the
+                        // translucent frost can't hold an elevation shadow
+                        // (it bleeds through), so the frosted pane stays
+                        // flat; the opaque paper card can lift like Home's.
                         color = Color.Transparent,
-                        shadowElevation = 2.dp
+                        shadowElevation = if (metaPaperOn) 3.dp else 0.dp
                     ) {
                         // The card's content Box: the Row below defines the
-                        // height, and the frosted pane + glass tint match its
-                        // size (BoxScope — the Surface content scope is NOT
-                        // BoxScope, so matchParentSize must live in an
-                        // explicit Box).
+                        // height, and the paper fill / frosted pane + glass
+                        // tint match its size (BoxScope — the Surface content
+                        // scope is NOT BoxScope, so matchParentSize must live
+                        // in an explicit Box).
                         Box(Modifier.fillMaxWidth()) {
-                            // ── Frosted pane — a blurred bloom of the hero's
-                            // color behind the glass, clipped to the card and
-                            // sitting BEHIND the crisp segments. Strong
-                            // enough that the card visibly glows with its
-                            // banner's color (RenderEffect on API 31+;
-                            // software blur below).
-                            Box(
-                                // The frosted pane is a STATIC vertical glow
-                                // instead of a per-frame 18dp RenderEffect
-                                // blur: over a flat color the blur was a
-                                // visual no-op but cost GPU time on every
-                                // scroll frame (the laggy detail scrolling).
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                heroStart.copy(alpha = 0.30f),
-                                                heroStart.copy(alpha = 0.16f)
+                            if (metaPaperOn) {
+                                // v27v — the shared opaque paper card (fill +
+                                // hole column + rings or rims), punched with
+                                // the SAME shape the Surface wears.
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .paperStatCardFill(
+                                            shape = metaShape,
+                                            fill = metaPaperBg,
+                                            holesOn = metaHolesOn,
+                                            ringsOn = metaRingsOn,
+                                            ringStyle = metaRingStyle,
+                                            ink = heroCardInk
+                                        )
+                                )
+                            } else {
+                                // ── Frosted pane — a blurred bloom of the
+                                // hero's color behind the glass, clipped to
+                                // the card and sitting BEHIND the crisp
+                                // segments. Strong enough that the card
+                                // visibly glows with its banner's color
+                                // (RenderEffect on API 31+; software blur
+                                // below).
+                                Box(
+                                    // The frosted pane is a STATIC vertical
+                                    // glow instead of a per-frame 18dp
+                                    // RenderEffect blur: over a flat color
+                                    // the blur was a visual no-op but cost
+                                    // GPU time on every scroll frame (the
+                                    // laggy detail scrolling).
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    heroStart.copy(alpha = 0.30f),
+                                                    heroStart.copy(alpha = 0.16f)
+                                                )
                                             )
                                         )
-                                    )
-                                    .clip(RoundedCornerShape(18.dp))
-                            )
-                            // Theme-aware frost: dark non-pastel gets a
-                            // restrained midnight surface; light and pastel
-                            // retain the bright paper-glass treatment.
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .background(heroFrostBrush)
-                            )
+                                        .clip(RoundedCornerShape(18.dp))
+                                )
+                                // Theme-aware frost: dark non-pastel gets a
+                                // restrained midnight surface; light and
+                                // pastel retain the bright paper-glass
+                                // treatment.
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(heroFrostBrush)
+                                )
+                            }
                             Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 9.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -661,6 +716,27 @@ fun EntryDetailScreen(
                         }
                     }
                 }
+                // v29 — progress pill (books: pages / anime: episodes) at
+                // the hero's BOTTOM-RIGHT corner: a small compact pill with
+                // the amount done — background TINT for the pill, category
+                // accent for the progress bar — tapping opens the redesigned
+                // editor. Same TopicProgressStore everywhere.
+                if (resolvedEntry.topic.progressTarget != null) {
+                    CurioProgressPill(
+                        topic = resolvedEntry.topic,
+                        accent = cat.themedAccent(),
+                        ink = cat.categoryInk(),
+                        background = lerp(
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                            cat.themedAccent(),
+                            0.16f
+                        ),
+                        showBar = true,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 16.dp, bottom = 14.dp)
+                    )
+                }
             }
 
         }
@@ -714,8 +790,14 @@ fun EntryDetailScreen(
                             resolvedEntry.tags.forEach { tag ->
                                 Surface(
                                     shape = RoundedCornerShape(50),
-                                    color = if (AppPreferences.tintWashEffective()) cat.tint.copy(alpha = 0.14f)
-                                            else MaterialTheme.colorScheme.surfaceVariant,
+                                    // v27n — opaque tinted tag chip (was the
+                                    // 20%-accent tint at 14% alpha, which let
+                                    // the elevation shadow bleed through).
+                                    color = if (AppPreferences.tintWashEffective()) {
+                                        lerp(MaterialTheme.colorScheme.surface, cat.accent, 0.14f)
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    },
                                     shadowElevation = 2.dp
                                 ) {
                                     Text(
@@ -1050,16 +1132,23 @@ private fun BoxScope.DetailStickyBar(
                     modifier = Modifier.padding(8.dp)
                 )
             }
-            DropdownMenu(
+            // v30 — the shared accent-themed menu: an opaque surface tinted
+            // toward the entry's category accent, Share/Edit in the themed
+            // ink, Delete in error red. No more hardcoded light container.
+            CurioDropdownMenu(
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false },
-                containerColor = Color(0xFFF2F5F8).copy(alpha = 0.92f),
-                shape = RoundedCornerShape(18.dp),
-                tonalElevation = 0.dp,
-                shadowElevation = 10.dp
+                accent = category.themedAccent()
             ) {
-                DropdownMenuItem(
-                    text = { Text("Share", color = heroCardInk) },
+                CurioDropdownItem(
+                    text = { Text("Share") },
+                    leadingIcon = {
+                        CurioIcon(
+                            name = CurioIcons.Share,
+                            contentDescription = null,
+                            size = 20.dp
+                        )
+                    },
                     onClick = {
                         menuExpanded = false
                         shareComposableCard(
@@ -1068,84 +1157,73 @@ private fun BoxScope.DetailStickyBar(
                             authority = authority,
                             card = { CurioShareCard(entry = resolvedEntry, category = category) }
                         )
-                    },
-                    leadingIcon = {
-                        CurioIcon(
-                            name = CurioIcons.Share,
-                            contentDescription = null,
-                            tint = heroCardInk,
-                            size = 20.dp
-                        )
                     }
                 )
                 if (isMultiSectionEntry(resolvedEntry)) {
-                    DropdownMenuItem(
-                        text = { Text("Edit entry", color = heroCardInk) },
+                    CurioDropdownItem(
+                        text = { Text("Edit entry") },
+                        leadingIcon = {
+                            CurioIcon(
+                                name = CurioIcons.Edit,
+                                contentDescription = null,
+                                size = 20.dp
+                            )
+                        },
                         onClick = {
                             menuExpanded = false
                             navController.navigate(CurioRoutes.editEntry(resolvedEntry.id)) {
                                 launchSingleTop = true
                             }
-                        },
+                        }
+                    )
+                } else if (isMoodBoardEntry(resolvedEntry)) {
+                    CurioDropdownItem(
+                        text = { Text("Edit mood board") },
                         leadingIcon = {
                             CurioIcon(
                                 name = CurioIcons.Edit,
                                 contentDescription = null,
-                                tint = heroCardInk,
                                 size = 20.dp
                             )
-                        }
-                    )
-                } else if (isMoodBoardEntry(resolvedEntry)) {
-                    DropdownMenuItem(
-                        text = { Text("Edit mood board", color = heroCardInk) },
+                        },
                         onClick = {
                             menuExpanded = false
                             navController.navigate(CurioRoutes.editMoodBoard(resolvedEntry.id)) {
                                 launchSingleTop = true
                             }
-                        },
+                        }
+                    )
+                } else {
+                    CurioDropdownItem(
+                        text = { Text("Edit entry") },
                         leadingIcon = {
                             CurioIcon(
                                 name = CurioIcons.Edit,
                                 contentDescription = null,
-                                tint = heroCardInk,
                                 size = 20.dp
                             )
-                        }
-                    )
-                } else {
-                    DropdownMenuItem(
-                        text = { Text("Edit entry", color = heroCardInk) },
+                        },
                         onClick = {
                             menuExpanded = false
                             navController.navigate(CurioRoutes.editEntry(resolvedEntry.id)) {
                                 launchSingleTop = true
                             }
-                        },
-                        leadingIcon = {
-                            CurioIcon(
-                                name = CurioIcons.Edit,
-                                contentDescription = null,
-                                tint = heroCardInk,
-                                size = 20.dp
-                            )
                         }
                     )
                 }
-                DropdownMenuItem(
-                    text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                    onClick = {
-                        menuExpanded = false
-                        onDeleteRequest()
-                    },
+                CurioDropdownItem(
+                    text = { Text("Delete") },
+                    danger = true,
                     leadingIcon = {
                         CurioIcon(
                             name = CurioIcons.Delete,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
                             size = 20.dp
                         )
+                    },
+                    onClick = {
+                        menuExpanded = false
+                        onDeleteRequest()
                     }
                 )
             }
@@ -1492,7 +1570,9 @@ private fun PortfolioRender(entry: CurioEntry, category: CurioCategory, navContr
                     shape = RoundedCornerShape(50),
                     color = if (selected) category.themedAccent()
                             else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    shadowElevation = if (selected) 3.dp else 1.dp,
+                    // v27q — flat 2dp: selection reads through the solid
+                    // accent fill.
+                    shadowElevation = 2.dp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Row(
@@ -1769,7 +1849,9 @@ private fun SoundBiteRender(
                     if (noteTranscribing || noteError != null) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = category.themedAccent().copy(alpha = 0.10f),
+                            // v27n — opaque accent-tinted fill (was 10% alpha,
+                            // which let the elevation shadow bleed through).
+                            color = lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.10f),
                             shadowElevation = 2.dp,
                             modifier = Modifier.weight(1f)
                         ) {
@@ -1822,7 +1904,8 @@ private fun SoundBiteRender(
                                 else if (voiceToTextEnabled) notePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                             },
                             shape = RoundedCornerShape(8.dp),
-                            color = category.themedAccent().copy(alpha = 0.10f),
+                            // v27n — opaque accent-tinted fill (was 10% alpha).
+                            color = lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.10f),
                             shadowElevation = 2.dp
                         ) {
                             Row(
@@ -2833,8 +2916,10 @@ private fun FrostedExportButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
+        // v27n — frosted glass button: the translucent wash + white frost
+        // can't hold an elevation shadow (it bleeds through), stays flat.
         color = Color.Transparent,
-        shadowElevation = 2.dp,
+        shadowElevation = 0.dp,
         modifier = modifier
     ) {
         Box(Modifier.fillMaxWidth()) {
@@ -3720,7 +3805,9 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
                 structuredRows.forEach { (label, value) ->
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                        // v27n — opaque row (was 72% alpha, which let the
+                        // elevation shadow bleed through).
+                        color = MaterialTheme.colorScheme.surface,
                         shadowElevation = 2.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {

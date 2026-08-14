@@ -76,16 +76,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -129,8 +126,10 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
+import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -1068,8 +1067,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // BoxWithConstraints scope rather than inside the Row/Column below:
         // the nested layout lambdas can't resolve this scope's maxWidth as
         // an implicit receiver, which broke the CI build.
+        // v27t — the deck now scales UP on tablets/landscape (cap raised
+        // from 1.0 to 1.6): the front ticket and the two peek cards grow
+        // with the stage instead of staying phone-sized in empty gutters.
+        // The proportional fan keeps exactly 2 peek cards at any scale.
         val wideFit = ((maxWidth - 130.dp) / 360.dp).coerceIn(
-            if (compactHeight) 0.62f else 0.78f, 1f
+            if (compactHeight) 0.62f else 0.78f, 1.6f
         )
         // ── Watermark backdrop — every category glyph scattered around ──
         //    the screen in a muted shade, behind all content, so the quiet
@@ -1580,10 +1583,24 @@ private fun FilterSheet(
     onDismiss: () -> Unit,
     onApply: (tags: Set<String>, subtypes: Set<String>) -> Unit
 ) {
-    val subtypes = groups.types
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var draftFilters by remember(initialFilters) { mutableStateOf(initialFilters) }
     var draftSubtypes by remember(initialSubtypes) { mutableStateOf(initialSubtypes) }
+    // v28 — filter search: type into the sheet and every chip group (Type /
+    // Genre / Era / Origin / Franchise) narrows live, so a 100+ tag
+    // category is scannable instead of a wall of chips.
+    var filterQuery by remember { mutableStateOf("") }
+    val needle = filterQuery.trim()
+    val filteredGroups = remember(groups, needle) {
+        if (needle.isEmpty()) groups
+        else FilterGroups(
+            types = groups.types.filter { it.contains(needle, ignoreCase = true) },
+            genres = groups.genres.filter { it.contains(needle, ignoreCase = true) },
+            eras = groups.eras.filter { it.contains(needle, ignoreCase = true) },
+            origins = groups.origins.filter { it.contains(needle, ignoreCase = true) },
+            franchises = groups.franchises.filter { it.contains(needle, ignoreCase = true) }
+        )
+    }
     val activeCount = draftFilters.size + draftSubtypes.size
     // v8.21 — tell the pet a drawer is up so it comes over to peek.
     LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
@@ -1651,6 +1668,14 @@ private fun FilterSheet(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
             )
 
+            // ── v28 — filter search: narrow the chips live ──────────
+            CurioSearchField(
+                query = filterQuery,
+                onQueryChange = { filterQuery = it },
+                placeholder = "Search filters",
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+            )
+
             // ── Active filter summary chips — this is what was missing ─
             if (activeCount > 0) {
                 Column(
@@ -1693,14 +1718,15 @@ private fun FilterSheet(
                 Spacer(Modifier.height(14.dp))
             }
 
-            val hasAny = subtypes.size > 1 ||
-                groups.genres.isNotEmpty() ||
-                groups.eras.isNotEmpty() ||
-                groups.origins.isNotEmpty() ||
-                groups.franchises.isNotEmpty()
+            val hasAny = filteredGroups.types.size > 1 ||
+                filteredGroups.genres.isNotEmpty() ||
+                filteredGroups.eras.isNotEmpty() ||
+                filteredGroups.origins.isNotEmpty() ||
+                filteredGroups.franchises.isNotEmpty()
             if (!hasAny) {
                 Text(
-                    text = "No filters for this category yet.",
+                    text = if (needle.isNotEmpty()) "No filters match \"$needle\""
+                           else "No filters for this category yet.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -1720,19 +1746,27 @@ private fun FilterSheet(
 
                 // ── Compact lazy chip grid — grouped Type · Genre · Era ·
                 //    Origin sections, each capped to a handful of chips so
-                //    the sheet stays tidy instead of 100+ raw tags. ─────
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 112.dp),
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                //    the sheet stays tidy instead of 100+ raw tags. v29 —
+                //    columns capped at 2–4 per row: the old Adaptive(112dp)
+                //    stretched two huge slab-chips on phones (overwhelming)
+                //    and more than four wide on tablets. Fixed compact pill
+                //    columns keep the sheet scannable in every width. ─────
+                BoxWithConstraints(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    if (subtypes.size > 1) {
+                    val gridCols = 3
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridCols),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                    if (filteredGroups.types.size > 1) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Type", Modifier.padding(bottom = 2.dp))
                         }
-                        items(subtypes) { st ->
+                        items(filteredGroups.types) { st ->
                             CompactChip(
                                 label = st,
                                 selected = st in draftSubtypes,
@@ -1745,14 +1779,14 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.genres.isNotEmpty()) {
+                    if (filteredGroups.genres.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel(
                                 "Genres",
-                                Modifier.padding(top = if (subtypes.size > 1) 6.dp else 0.dp, bottom = 2.dp)
+                                Modifier.padding(top = if (filteredGroups.types.size > 1) 6.dp else 0.dp, bottom = 2.dp)
                             )
                         }
-                        items(groups.genres) { tag ->
+                        items(filteredGroups.genres) { tag ->
                             CompactChip(
                                 label = tag,
                                 selected = tag in draftFilters,
@@ -1765,11 +1799,11 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.eras.isNotEmpty()) {
+                    if (filteredGroups.eras.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Era", Modifier.padding(top = 6.dp, bottom = 2.dp))
                         }
-                        items(groups.eras) { era ->
+                        items(filteredGroups.eras) { era ->
                             CompactChip(
                                 label = era,
                                 selected = era in draftFilters,
@@ -1782,11 +1816,11 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.origins.isNotEmpty()) {
+                    if (filteredGroups.origins.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel("Origin", Modifier.padding(top = 6.dp, bottom = 2.dp))
                         }
-                        items(groups.origins) { origin ->
+                        items(filteredGroups.origins) { origin ->
                             CompactChip(
                                 label = origin,
                                 selected = origin in draftFilters,
@@ -1799,14 +1833,14 @@ private fun FilterSheet(
                             )
                         }
                     }
-                    if (groups.franchises.isNotEmpty()) {
+                    if (filteredGroups.franchises.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel(
                                 "Franchise",
-                                Modifier.padding(top = if (subtypes.size > 1) 6.dp else 6.dp, bottom = 2.dp)
+                                Modifier.padding(top = if (filteredGroups.types.size > 1) 6.dp else 6.dp, bottom = 2.dp)
                             )
                         }
-                        items(groups.franchises) { franchise ->
+                        items(filteredGroups.franchises) { franchise ->
                             CompactChip(
                                 label = franchise,
                                 selected = franchise in draftFilters,
@@ -1818,6 +1852,7 @@ private fun FilterSheet(
                                 }
                             )
                         }
+                    }
                     }
                 }
             }
@@ -1859,7 +1894,7 @@ private fun ActiveFilterChip(
     Surface(
         shape = RoundedCornerShape(50),
         color = accent,
-        shadowElevation = 0.dp
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
@@ -1911,18 +1946,27 @@ private fun CompactChip(
 ) {
     // Plain Surface + clickable (no M3 minimum touch-target inflation) keeps
     // the chips compact even with 100+ tags in the sheet.
+    // v29 — full pill shape in every state; the INACTIVE fill lifts a
+    // whisper of white so unselected chips read as raised pills off the
+    // category-tinted sheet (the old flat surface blended in and the 1dp
+    // shadow was invisible), and dark mode adds the light glow so the
+    // elevation shows on midnight too.
+    val inactiveFill = lerp(chipSurface, Color.White, if (isCurioDarkTheme()) 0.04f else 0.10f)
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (selected) accent else chipSurface,
-        shadowElevation = if (selected) 3.dp else 1.dp,
+        color = if (selected) accent else inactiveFill,
+        // v29 — a visible 2dp lift in BOTH states (inactive included) so
+        // the unselected chips read as raised pills, not flat tiles.
+        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
+            .curioDarkGlow(2.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
     ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                 ),
                 color = if (selected) ink else MaterialTheme.colorScheme.onSurface,
@@ -2337,7 +2381,8 @@ private fun HeroTicketCard(
     // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
     // toggle was removed from Experiments and the read is hardcoded here.
     val heroGradientOn = true
-    val heroBorderOn = AppPreferences.heroBorderState
+    // v27u — the ticket's gradient rim border (and its AMOLED edge-shine
+    // rim light) were removed; the main card is border-free.
     val heroShadowOn = AppPreferences.heroShadowState
     // v24 — the dual-accent hero gradient experiment was rejected (ugly
     // golden blend); always OFF, so the blend branch below is dead.
@@ -2585,19 +2630,6 @@ private fun HeroTicketCard(
                     } else Modifier
                 )
                 .clip(RoundedCornerShape(30.dp))
-                .then(
-                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                        // v15 — the black-glass ticket carries the deck's
-                        // category color as a rim light: the edge shine
-                        // brightened from 0.55 → 0.75 so the accent reads
-                        // clearly on the OLED black, but stays below the
-                        // full-shine settings cards so the main card keeps
-                        // its sleek, clean look.
-                        Modifier.categoryEdgeShine(
-                            RoundedCornerShape(30.dp), accent, intensity = 0.75f
-                        )
-                    } else Modifier
-                )
         ) {
             Surface(
                 shape = RoundedCornerShape(30.dp),
@@ -2613,57 +2645,6 @@ private fun HeroTicketCard(
                         .background(
                             ticketBrush,
                             RoundedCornerShape(30.dp)
-                        )
-                        .then(
-                            if (heroBorderOn) {
-                                // v7.16 — refined gradient rim-light: a slim
-                                // 1.5dp stroke that catches light at the top
-                                // (barely brightened ink) and eases a whisper
-                                // of the accent at the bottom, plus a fainter
-                                // 1dp bevel hairline just inside — a soft
-                                // machined edge instead of the old harsh 2dp
-                                // white-to-accent ring.
-                                Modifier.drawBehind {
-                                    val borderW = 1.5.dp.toPx()
-                                    val radius = 30.dp.toPx() - borderW / 2f
-                                    drawRoundRect(
-                                        brush = Brush.verticalGradient(
-                                            listOf(
-                                                // v15 — dark mode: the old
-                                                // white-lerp rim drew a solid
-                                                // bright ring around the card;
-                                                // dark tones fade toward the
-                                                // fill at soft alpha so the
-                                                // machined edge stays subtle.
-                                                if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
-                                                else lerp(ink, Color.White, 0.30f),
-                                                if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
-                                                else lerp(ink, accent, 0.14f)
-                                            )
-                                        ),
-                                        topLeft = Offset(borderW / 2f, borderW / 2f),
-                                        size = Size(size.width - borderW, size.height - borderW),
-                                        cornerRadius = CornerRadius(radius, radius),
-                                        style = Stroke(width = borderW)
-                                    )
-                                    val innerW = 1.dp.toPx()
-                                    val inset = borderW + innerW
-                                    drawRoundRect(
-                                        // Bevel hairline: dark in light mode;
-                                        // in dark mode a black line would
-                                        // vanish on the dark fill, so it flips
-                                        // to a faint light stroke instead.
-                                        color = if (dark)
-                                            lerp(ink, Color.White, 0.60f).copy(alpha = 0.06f)
-                                        else
-                                            Color.Black.copy(alpha = 0.04f),
-                                        topLeft = Offset(inset, inset),
-                                        size = Size(size.width - 2f * inset, size.height - 2f * inset),
-                                        cornerRadius = CornerRadius(radius - innerW, radius - innerW),
-                                        style = Stroke(width = innerW)
-                                    )
-                                }
-                            } else Modifier
                         )
                 ) {
                     // One category watermark — keep the Shuffle hero focused
@@ -3161,8 +3142,14 @@ private fun PeekCard(
                     .fillMaxSize()
                     .background(brush = fillBrush, shape = RoundedCornerShape(corner))
                     // v9.x — Material peeks keep the deck's category identity
-                    // as the accent rim on the device-colored fill.
-                    .categoryEdgeShine(RoundedCornerShape(corner), accent = accent)
+                    // as the accent rim on the device-colored fill. v28 — the
+                    // main card opts back into the AMOLED hairline so the
+                    // hero card keeps a readable edge on pure black.
+                    .categoryEdgeShine(
+                        RoundedCornerShape(corner),
+                        accent = accent,
+                        amoledHairline = true
+                    )
             ) {
                 Column(
                     modifier = Modifier
@@ -3704,7 +3691,8 @@ private fun VerticalDeckButton(
             if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
             else cat.themedButtonFill()
         } else deckControlSurface(cat),
-        shadowElevation = if (selected) 6.dp else 3.dp,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         modifier = modifier
             .size(width = 54.dp, height = 112.dp)
             // v9.x — Material buttons keep their category identity as the
@@ -3759,7 +3747,8 @@ private fun DeckControlButton(
             if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
             else cat.themedButtonFill()
         } else deckControlSurface(cat),
-        shadowElevation = if (selected) 6.dp else 3.dp,
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp,
         modifier = modifier
             .height(62.dp)
             // v9.x — Material buttons keep their category identity as the
@@ -4011,8 +4000,15 @@ private fun CategoryPickerSheet(
                                     } else {
                                         val lanes = preset.lanes(categories)
                                         if (lanes.isNotEmpty()) {
+                                            val laneSlugs = lanes.map { it.id.routeSlug }.toSet()
                                             multiSelectMode = true
-                                            selectedSlugs = lanes.map { it.id.routeSlug }.toSet()
+                                            // v27t — presets toggle: tapping
+                                            // the active preset again UNDOES
+                                            // it (deselects its lanes); a
+                                            // different preset replaces the
+                                            // whole selection.
+                                            selectedSlugs =
+                                                if (active) selectedSlugs - laneSlugs else laneSlugs
                                         }
                                     }
                                 }

@@ -22,7 +22,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -51,6 +54,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -77,6 +81,7 @@ import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -86,6 +91,7 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
@@ -169,10 +175,14 @@ fun SettingsHeroHeader(
             .fillMaxWidth()            .height(totalHeight)
         ) {
             // ── Under-sheet — the shared white paper layer, so the tear stays
-            // bright beneath the rose hero in every theme. AMOLED: the sheet
-            // turns a soft rose so the torn edge keeps reading through the
-            // up-bites of the pure-black banner (black-on-black would hide
-            // the seam), carrying the accent of the color.
+            // bright beneath the rose hero in EVERY theme (light + dark). This
+            // matches the app-wide hero pattern (Home uses the same warm
+            // cream [0xFFFDFCF9]) — the Settings hero was the only one using
+            // the theme surface, so in dark mode its tear read midnight-dark
+            // while every other screen's tear stayed white paper. AMOLED:
+            // the sheet turns a soft rose so the torn edge keeps reading
+            // through the up-bites of the pure-black banner (black-on-black
+            // would hide the seam), carrying the accent of the color.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,17 +191,19 @@ fun SettingsHeroHeader(
                 .clip(sheetShape)                    .background(
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
                         CurioColors.HomeRosewood.copy(alpha = 0.45f)
-                    else MaterialTheme.colorScheme.surface
+                    else Color(0xFFFDFCF9)
                 )
 
         )
-        // ── Torn-edge shadow — hairline dark rim under the seam.
+        // ── Torn-edge shadow — hairline dark rim under the seam (same
+        // black rim as Home's hero, in every theme — NOT the theme
+        // onSurface, which resolves white-ish in dark mode).
         Box(
             modifier = Modifier
                 .fillMaxWidth()                .height(bannerHeight)
                 .offset(y = 1.dp)
                 .clip(heroTornShape)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f))
+                .background(Color.Black.copy(alpha = 0.20f))
             )
             // ── Solid rose banner, torn bottom edge ────────────────────────
             Surface(
@@ -316,10 +328,15 @@ fun SettingsHeroHeader(
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                                 keyboardActions = KeyboardActions(onSearch = {}),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = ink.copy(alpha = 0.16f),
-                                    unfocusedContainerColor = ink.copy(alpha = 0.16f),
-                                    focusedBorderColor = ink.copy(alpha = 0.55f),
-                                    unfocusedBorderColor = ink.copy(alpha = 0.30f),
+                                    // v29 — frosted-glass container (banner
+                                    // lifted toward white) + full-ink borders:
+                                    // the old ink-at-16% container + dark
+                                    // border mix read too dark in light and
+                                    // pastel.
+                                    focusedContainerColor = lerp(fill, Color.White, 0.30f),
+                                    unfocusedContainerColor = lerp(fill, Color.White, 0.30f),
+                                    focusedBorderColor = ink.copy(alpha = 0.65f),
+                                    unfocusedBorderColor = ink.copy(alpha = 0.40f),
                                     cursorColor = ink,
                                     focusedTextColor = ink,
                                     unfocusedTextColor = ink,
@@ -348,7 +365,11 @@ fun SettingsHeroHeader(
                                 // v27 — experimental paper-title underline (two
                                 // short lines under the title text; OFF by default).
                                 if (AppPreferences.paperHeaderCutsState) {
-                                    PaperTitleLines(ink = ink)
+                                    PaperTitleLines(
+                                        ink = ink,
+                                        title = title,
+                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                                    )
                                 }
                                 Text(
                                     subtitle,
@@ -378,30 +399,49 @@ fun SettingsHeroActionPill(
     glyph: String? = null,
     contentDescription: String? = null,
     emphasized: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v27n — the banner fill behind the pill (the opaque-fill conversion
+    // needs it to resolve the same perceived tint); defaults to the shared
+    // settings hero rose since every call site rides that banner.
+    backdropOverride: Color? = null
 ) {
     // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
     // banner (especially in light mode), so hero actions like search / sort
     // read as invisible. The glass stays frosted but clearly visible.
-    val fill = if (emphasized) ink.copy(alpha = 0.55f) else ink.copy(alpha = 0.30f)
+    // v27n — the pill fill is now OPAQUE (ink lerped into the hero banner
+    // fill at the old glass alpha): a translucent fill let the elevation
+    // shadow bleed through as a blurry broken background, and the opaque
+    // lerp resolves to the exact same perceived tint on the banner.
+    // v29 — the fills are now a LIGHT frosted glass (the banner lifted
+    // toward white): the v27r ink-lean fills (lerp toward the ink at
+    // 0.35/0.55) read too dark in light + pastel themes. Lifting toward
+    // white keeps the same visible-pill look with full-ink glyphs that pop
+    // in every mode — creamy in light/pastel, brighter glass on the deep
+    // dark banner. The glyph stays 20dp.
+    val backdrop = backdropOverride ?: settingsRoseAccent()
+    val fill = lerp(backdrop, Color.White, if (emphasized) 0.24f else 0.38f)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
         shadowElevation = 3.dp,
         modifier = modifier
+            // v28 — dark mode elevation visibility (glow).
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+            // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero
+            // controls read as substantial buttons, not tiny chips.
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             if (glyph != null) {
                 CurioIcon(
                     name = glyph,
                     contentDescription = contentDescription,
                     tint = ink,
-                    size = 18.dp
+                    size = 22.dp
                 )
             }
             if (label != null) {
@@ -505,7 +545,7 @@ fun SettingsHubScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(settingsRoseAccent().copy(alpha = 0.10f).compositeOver(MaterialTheme.colorScheme.background))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (the Home/Profile language). Settings is category-neutral, so the
@@ -536,6 +576,11 @@ fun SettingsHubScreen(navController: NavController) {
         // the torn banner doesn't dominate the short vertical space.
         val heroTotal = if (wide) 140.dp + SettingsHeroSheetExtent else SettingsHeroTotalHeight
         val gridState = rememberLazyGridState()
+        // v27t — wide windows (tablet / landscape) render the two-pane
+        // master-detail layout ([SettingsTwoPaneHub]): the full settings nav
+        // list stays on the left while the selected page's options show on
+        // the right. Compact phones keep the familiar single-column grid.
+        if (!wide) {
         ScreenEntrance {
             LazyVerticalGrid(
                 state = gridState,
@@ -636,6 +681,238 @@ fun SettingsHubScreen(navController: NavController) {
             onBack = { navController.popBackStack() },
             compact = wide
         )
+        } else {
+            SettingsTwoPaneHub(
+                query = query,
+                onQueryChange = { query = it },
+                navController = navController,
+                sections = sections,
+                searching = searching,
+                searchResults = searchResults,
+                needle = needle
+            )
+        }
+    }
+}
+
+/**
+ * v27t — the tablet/landscape two-pane Settings: a fixed-width nav list on
+ * the left (every settings entry, search-filtered) with the selected page's
+ * options on the right — no more pushing a full-screen section over the hub
+ * on big windows.
+ */
+@Composable
+private fun SettingsTwoPaneHub(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    navController: NavController,
+    sections: List<SettingsSectionEntry>,
+    searching: Boolean,
+    searchResults: List<SettingsSearchResult>,
+    needle: String
+) {
+    var selectedPageName by rememberSaveable { mutableStateOf(SettingsPage.APPEARANCE.name) }
+    val selectedPage =
+        runCatching { SettingsPage.valueOf(selectedPageName) }.getOrDefault(SettingsPage.APPEARANCE)
+    // Deep-search highlight: when a search result points inside a section,
+    // the target is set before the page switches, so the right pane pulses
+    // the exact row (mirrors [SettingsSectionScreen]'s handoff).
+    val paneHighlight = remember(selectedPage) {
+        SettingsHighlightTarget.takeIf { it.page == selectedPage }?.rowKey
+    }
+    LaunchedEffect(selectedPage) {
+        SettingsHighlightTarget.page = null
+        SettingsHighlightTarget.rowKey = null
+    }
+
+    fun handleRow(row: SettingsRowEntry, deep: SettingsDeepRow? = null) {
+        val page = sectionPageFor(row.route)
+        if (page != null) {
+            // A section row (or a deep row pointing into one) selects the
+            // page in the right pane instead of navigating.
+            if (deep?.page != null && deep.rowKey != null) {
+                SettingsHighlightTarget.page = deep.page
+                SettingsHighlightTarget.rowKey = deep.rowKey
+            }
+            selectedPageName = page.name
+        } else {
+            navController.navigate(row.route) { launchSingleTop = true }
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Compact hero at the top — the panes sit below it, so the menu
+        // never scrolls under the tear in the two-pane layout.
+        SettingsHeroHeader(
+            title = "Settings",
+            subtitle = "Tune Curio your way",
+            onBack = { navController.popBackStack() },
+            compact = true
+        )
+        Row(modifier = Modifier.fillMaxSize()) {
+            // ── Left pane — the full settings nav list (search-filtered) ──
+            Column(
+                modifier = Modifier
+                    .width(300.dp)
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.35f))
+            ) {
+                CurioSearchField(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    placeholder = "Search settings",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    if (searching) {
+                        if (searchResults.isEmpty()) {
+                            item { SettingsNoResults(needle) }
+                        } else {
+                            val grouped = searchResults.groupBy { it.sectionLabel }
+                            grouped.forEach { (sectionLabel, results) ->
+                                item { CurioSectionLabel(sectionLabel) }
+                                results.forEach { result ->
+                                    item {
+                                        SettingsNavRow(
+                                            icon = result.row.icon,
+                                            title = result.row.title,
+                                            subtitle = result.row.subtitle,
+                                            selected = sectionPageFor(result.row.route)?.name == selectedPageName
+                                        ) { handleRow(result.row, result.deep) }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        sections.forEach { section ->
+                            item { CurioSectionLabel(section.label) }
+                            section.cards.forEach { card ->
+                                card.rows.forEach { row ->
+                                    item {
+                                        if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
+                                            // v8.xx — the Appearance row is a pet
+                                            // landmark: the pet pokes it, and the
+                                            // tour's Settings stop points at it.
+                                            PetLandmark(
+                                                id = "appearance",
+                                                kind = PetLandmarks.Kind.FUN,
+                                                screen = "settings"
+                                            ) { lm ->
+                                                Box(modifier = lm) {
+                                                    SettingsNavRow(
+                                                        icon = row.icon,
+                                                        title = row.title,
+                                                        subtitle = row.subtitle,
+                                                        selected = sectionPageFor(row.route)?.name == selectedPageName
+                                                    ) { handleRow(row) }
+                                                }
+                                            }
+                                        } else {
+                                            SettingsNavRow(
+                                                icon = row.icon,
+                                                title = row.title,
+                                                subtitle = row.subtitle,
+                                                selected = sectionPageFor(row.route)?.name == selectedPageName
+                                            ) { handleRow(row) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // Hairline between the panes.
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+            )
+            // ── Right pane — the selected page's options ────────────────
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 14.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item { CurioSectionLabel(selectedPage.title) }
+                item {
+                    SettingsPageContent(selectedPage, navController, paneHighlight)
+                }
+            }
+        }
+    }
+}
+
+/** The settings page a hub row opens — the four in-app sections, or null
+ *  when the row navigates to its own screen (Pet designer, History, …). */
+private fun sectionPageFor(route: String): SettingsPage? = when (route) {
+    CurioRoutes.SETTINGS_APPEARANCE -> SettingsPage.APPEARANCE
+    CurioRoutes.SETTINGS_PREFERENCES -> SettingsPage.PREFERENCES
+    CurioRoutes.SETTINGS_RECORDING -> SettingsPage.RECORDING
+    CurioRoutes.SETTINGS_DATA -> SettingsPage.DATA
+    else -> null
+}
+
+/** A nav-list row for the two-pane hub: icon + label, with the selected
+ *  page's row wearing a soft action tint so the active section reads at a
+ *  glance. */
+@Composable
+private fun SettingsNavRow(
+    icon: String,
+    title: String,
+    subtitle: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        color = if (selected) curioDialogActionColor().copy(alpha = 0.14f) else Color.Transparent,
+        shape = RoundedCornerShape(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CurioIcon(
+                icon,
+                null,
+                tint = if (selected) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 21.dp
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(curioDialogActionColor())
+                )
+            }
+        }
     }
 }
 

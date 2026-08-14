@@ -50,6 +50,19 @@ export const TopicRevealScreen: React.FC = () => {
   const handleStartExploring = () => {
     if (topic) {
       const query = encodeURIComponent(`${topic.name} ${topic.subtype}`);
+      // v27s — music topics (albums, artists, songs) open the chosen
+      // streaming service; everything else searches the chosen engine.
+      const isMusic = ['Album', 'Artist', 'Song'].includes(topic.subtype);
+      if (isMusic) {
+        const service = localStorage.getItem('curio-music-service') || 'youtube_music';
+        const musicUrls: Record<string, string> = {
+          youtube_music: `https://music.youtube.com/search?q=${query}`,
+          apple_music: `https://music.apple.com/search?term=${query}`,
+          spotify: `https://open.spotify.com/search/${query}`,
+        };
+        window.open(musicUrls[service] || musicUrls.youtube_music, '_blank');
+        return;
+      }
       const engine = localStorage.getItem('curio-search-engine') || 'google';
       const urls: Record<string, string> = {
         google: `https://www.google.com/search?q=${query}`,

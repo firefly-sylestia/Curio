@@ -322,8 +322,15 @@ fun RecycleBinScreen(navController: NavController) {
                                 scope.launch { RecycleBinExpiry.purgeExpired(context) }
                             },
                             shape = RoundedCornerShape(16.dp),
-                            color = if (selected) curioDialogActionColor().copy(alpha = 0.12f) else Color.Transparent,
-                            shadowElevation = if (selected) 3.dp else 1.dp,
+                            // v27q — selection reads as a SOLID action fill;
+                            // unselected rows wear an opaque surface so the
+                            // flat 2dp shadow renders cleanly behind every
+                            // row.
+                            color = if (selected) curioDialogActionColor()
+                                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = if (selected) recycleRowSelectedInk()
+                                           else MaterialTheme.colorScheme.onSurface,
+                            shadowElevation = 2.dp,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -334,7 +341,10 @@ fun RecycleBinScreen(navController: NavController) {
                                 RadioButton(
                                     selected = selected,
                                     onClick = null,
-                                    colors = RadioButtonDefaults.colors(selectedColor = curioDialogActionColor())
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = if (selected) recycleRowSelectedInk()
+                                                       else curioDialogActionColor()
+                                    )
                                 )
                                 Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
                             }
@@ -352,6 +362,16 @@ fun RecycleBinScreen(navController: NavController) {
 }
 
 /** "Keep forever" / "7 days" label for the recycle-bin expiry window. */
+/**
+ * v27q — content ink that reads on the SOLID [curioDialogActionColor]
+ * selected-row fill: white on the rose/primary rows everywhere except
+ * AMOLED, where the action color IS the white onSurface, so the content
+ * flips to black.
+ */
+@Composable
+private fun recycleRowSelectedInk(): Color =
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black else Color.White
+
 private fun expiryLabel(days: Int): String =
     if (days <= 0) "Keep forever" else "$days days"
 

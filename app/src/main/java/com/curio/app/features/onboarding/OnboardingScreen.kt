@@ -59,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -1070,8 +1071,11 @@ private fun ThemeModeChip(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (selected) ink else ink.copy(alpha = 0.14f),
-        shadowElevation = if (selected) 4.dp else 2.dp
+        // v27n — the unselected pill fill is OPAQUE (was ink at 14% alpha,
+        // which let the elevation shadow bleed through).
+        color = if (selected) ink else lerp(MaterialTheme.colorScheme.surface, ink, 0.14f),
+        // v27q — flat 2dp: selection reads through the solid ink fill.
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -1182,8 +1186,10 @@ private fun SearchEngineChip(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (selected) ink else ink.copy(alpha = 0.14f),
-        shadowElevation = if (selected) 4.dp else 2.dp
+        // v27n — the unselected pill fill is OPAQUE (was ink at 14% alpha).
+        color = if (selected) ink else lerp(MaterialTheme.colorScheme.surface, ink, 0.14f),
+        // v27q — flat 2dp: selection reads through the solid ink fill.
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),

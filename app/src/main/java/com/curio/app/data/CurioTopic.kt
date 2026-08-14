@@ -51,8 +51,37 @@ data class CurioTopic(
      * painter. Blank = no byline pill. Optional — defaults to "" so
      * legacy JSON and hand-built topics need no migration.
      */
-    val byline: String = ""
+    val byline: String = "",
+    /**
+     * Books: total page count (e.g. 704). Null for non-book topics and
+     * legacy JSON without the field. Powers the per-topic reading progress
+     * (pages read / total pages) on the reveal card, Cabinet and detail.
+     */
+    val pageCount: Int? = null,
+    /**
+     * Anime (and series): total episode count (e.g. 26). Null for films and
+     * topics without the field. Powers the per-topic watching progress
+     * (episodes watched / total episodes).
+     */
+    val episodeCount: Int? = null
 ) {
+    /**
+     * Progress target for this topic: pages for books, episodes for anime/
+     * series, null otherwise (no progress tracking).
+     */
+    val progressTarget: Int? get() = when (categoryId) {
+        CategoryId.BOOKS -> pageCount
+        CategoryId.ANIME -> episodeCount
+        else -> null
+    }
+
+    /** Human label for the progress unit: "pages" / "episodes". */
+    val progressUnitLabel: String get() = when (categoryId) {
+        CategoryId.BOOKS -> "pages"
+        CategoryId.ANIME -> "episodes"
+        else -> ""
+    }
+
     init {
         require(id.isNotBlank()) { "CurioTopic id must not be blank." }
         require(name.isNotBlank()) { "CurioTopic name must not be blank." }

@@ -60,6 +60,7 @@ import com.curio.app.ui.components.MorphEntrance
 
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -235,7 +236,9 @@ fun CategoryPickerScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(vertical = 6.dp),
+                // v28 — the preset row hugs the Original/New tabs (the old
+                // 6dp vertical padding made the two rows read far apart).
+                .padding(top = 4.dp, bottom = 1.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             deckPresets.forEach { preset ->
@@ -256,8 +259,14 @@ fun CategoryPickerScreen(navController: NavController) {
                         } else {
                             val lanes = preset.lanes(categories)
                             if (lanes.isNotEmpty()) {
+                                val laneSlugs = lanes.map { it.id.routeSlug }
                                 multiSelectMode = true
-                                selectedSlugs = lanes.map { it.id.routeSlug }
+                                // v27t — presets toggle: tapping the active
+                                // preset again UNDOES it (deselects its
+                                // lanes); a different preset replaces the
+                                // whole selection (remove everything, add it).
+                                selectedSlugs =
+                                    if (active) selectedSlugs - laneSlugs else laneSlugs
                             }
                         }
                     }
@@ -267,7 +276,7 @@ fun CategoryPickerScreen(navController: NavController) {
 
         // ── v27i — page tabs: Original vs the new lanes ─────────────
         Row(
-            modifier = Modifier.padding(bottom = 4.dp),
+            modifier = Modifier.padding(top = 1.dp, bottom = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -425,6 +434,9 @@ fun CategoryPickerScreen(navController: NavController) {
                     ),
                     modifier = Modifier
                         .weight(1f)
+                        // v28 — dark mode: soft glow + top-lit shine, no
+                        // border rings on the black AMOLED plate.
+                        .curioDarkGlow(2.dp, mixShape)
                         .categoryEdgeShine(mixShape)
                 ) {
                     CurioIcon(CurioIcons.Check, null, size = 18.dp)
@@ -471,30 +483,31 @@ fun PickerPageTab(
     Surface(
         onClick = onClick,
         shape = shape,
-        color = if (selected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-        } else {
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
-        },
-        shadowElevation = if (selected) 3.dp else 1.dp,
+        // v27q — selection reads as a SOLID primary fill with onPrimary
+        // content; elevation stays a flat 2dp in both states.
+        color = if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 2.dp,
         modifier = Modifier
+            // v28 — dark mode: soft glow + top-lit shine, no border rings.
+            .curioDarkGlow(2.dp, shape)
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) MaterialTheme.colorScheme.primary
+                color = if (selected) MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "$count",
                 style = MaterialTheme.typography.labelMedium,
-                color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                color = if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }

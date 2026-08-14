@@ -68,6 +68,10 @@ object AppPreferences {
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
+    // v28 — dark-mode elevation visibility: black shadows vanish on
+    // near-black surfaces, so dark mode can draw a soft LIGHT glow shadow
+    // (default OFF). The v28 hairline outline option was REMOVED.
+    private const val KEY_DARK_GLOW = "dark_glow"
     private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
     // v7.7 — experimental peek-card redesign, four independent toggles so
     // each upgrade can be A/B'd on its own: top-lit gradient fill, tinted
@@ -110,6 +114,10 @@ object AppPreferences {
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
+    // v27s — the music service the "Watch in" explore action opens for
+    // Album / Artist / Song topics (YouTube Music by default; Apple Music,
+    // Spotify).
+    private const val KEY_MUSIC_SERVICE = "music_service"
     // v27 — recycle-bin retention: how many days soft-deleted captures stay
     // before being auto-deleted forever (0 = keep forever). Default 30 days.
     private const val KEY_RECYCLE_BIN_EXPIRY_DAYS = "recycle_bin_expiry_days"
@@ -205,6 +213,13 @@ object AppPreferences {
     var heroBlueState by mutableStateOf(false)
         private set
 
+    // v28 — dark-mode elevation: black shadows are invisible on the
+    // midnight surfaces, so dark mode draws a soft LIGHT glow shadow
+    // (default OFF; users can opt into the glow from Appearance). Light mode
+    // is untouched either way.
+    var darkGlowState by mutableStateOf(false)
+        private set
+
     // Pastel crown depth (v7.12, EXPERIMENTAL) — when pastel mode is ON
     // and this toggle is ON, the top of pastel card gradients gets a
     // subtle 5% black deepen so every card reads with a gentle darker
@@ -259,9 +274,17 @@ object AppPreferences {
     /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
     var paperHeaderCutsState by mutableStateOf(false)
     var paperHeaderHolesState by mutableStateOf(false)
+    var paperHoleRingsState by mutableStateOf(false)
+    /** v27v — which 3D ring style the pin holes wear ("coil" | "split" | "oblique"). */
+    var paperHoleRingStyleState by mutableStateOf("coil")
     var paperStatCardsState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
+    /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
+    var homeTintState by mutableStateOf(false)
+    var homeHeroTintState by mutableStateOf(false)
+    var homeTintFollowLaneState by mutableStateOf(false)
+    var homeTintCategoryIdState by mutableStateOf(CategoryId.WILDCARD.name)
     // v27j — header fill depth. ON by default: the torn-hero headers wear a
     // slightly DARKER version of the category's painter accent. Turning it
     // off restores the exact pre-toggle accent. Watermark glyphs, ink and
@@ -327,6 +350,9 @@ object AppPreferences {
     // Explore browser button. Reactive so the Topic Reveal dialog copy and
     // the Settings row update the moment it changes.
     var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
+    // v27s — the chosen music service id ("youtube_music", "apple_music",
+    // "spotify") for the "Watch in" action on Album / Artist / Song topics.
+    var musicServiceState by mutableStateOf(MusicService.YOUTUBE_MUSIC.id)
     var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
@@ -480,6 +506,7 @@ object AppPreferences {
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
+        darkGlowState = isDarkGlowEnabled(context)
         promoModeState = isPromoModeEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
@@ -491,8 +518,14 @@ object AppPreferences {
         heroShadowState = isHeroShadowEnabled(context)
         paperHeaderCutsState = isPaperHeaderCutsEnabled(context)
         paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
+        paperHoleRingsState = isPaperHoleRingsEnabled(context)
+        paperHoleRingStyleState = getPaperHoleRingStyle(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
+        homeTintState = isHomeTintEnabled(context)
+        homeHeroTintState = isHomeHeroTintEnabled(context)
+        homeTintFollowLaneState = isHomeTintFollowLaneEnabled(context)
+        homeTintCategoryIdState = getHomeTintCategory(context)
         headerDeepState = isHeaderDeepEnabled(context)
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
@@ -503,6 +536,7 @@ object AppPreferences {
         smartDensityModeState = getSmartDensityMode(context)
         exploreSessionsEnabledState = isExploreSessionsEnabled(context)
         searchEngineState = getSearchEngine(context)
+        musicServiceState = getMusicService(context)
         recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
         liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
@@ -574,6 +608,16 @@ object AppPreferences {
     fun setHeroBlueEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_BLUE, enabled).apply()
         heroBlueState = enabled
+    }
+
+    // ── Dark-mode elevation (v28) ────────────────────────────────────
+    /** Whether dark mode draws the soft light glow shadow (default off). */
+    fun isDarkGlowEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DARK_GLOW, false)
+
+    fun setDarkGlowEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DARK_GLOW, enabled).apply()
+        darkGlowState = enabled
     }
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────
@@ -730,7 +774,13 @@ object AppPreferences {
     // ── Paper & header experiments (v27) ─────────────────────────────
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
+    private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
+    private const val KEY_PAPER_HOLE_RING_STYLE = "paper_hole_ring_style"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
+    private const val KEY_HOME_TINT = "home_tint"
+    private const val KEY_HOME_HERO_TINT = "home_hero_tint"
+    private const val KEY_HOME_TINT_FOLLOW_LANE = "home_tint_follow_lane"
+    private const val KEY_HOME_TINT_CATEGORY = "home_tint_category"
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
     private const val KEY_HEADER_DEEP = "header_deep"
 
@@ -750,6 +800,62 @@ object AppPreferences {
     fun setPaperHeaderHolesEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_HEADER_HOLES, enabled).apply()
         paperHeaderHolesState = enabled
+    }
+
+    /** Whether the pin holes wear 3D metal rings (experimental, default off). */
+    fun isPaperHoleRingsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_HOLE_RINGS, false)
+
+    fun setPaperHoleRingsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_HOLE_RINGS, enabled).apply()
+        paperHoleRingsState = enabled
+    }
+
+    /** Which 3D ring style the pin holes wear: "coil" | "split" | "oblique" (default "coil"). */
+    fun getPaperHoleRingStyle(context: Context): String =
+        prefs(context).getString(KEY_PAPER_HOLE_RING_STYLE, "coil")?.takeIf { it in setOf("coil", "split", "oblique") }
+            ?: "coil"
+
+    fun setPaperHoleRingStyle(context: Context, style: String) {
+        prefs(context).edit().putString(KEY_PAPER_HOLE_RING_STYLE, style).apply()
+        paperHoleRingStyleState = style
+    }
+
+    /** Whether Home's background + bottom nav wear the category tint (experimental, default off). */
+    fun isHomeTintEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_TINT, false)
+
+    fun setHomeTintEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_TINT, enabled).apply()
+        homeTintState = enabled
+    }
+
+    /** Whether the Home quest hero ALSO wears the tint (experimental, default off). */
+    fun isHomeHeroTintEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_HERO_TINT, false)
+
+    fun setHomeHeroTintEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_HERO_TINT, enabled).apply()
+        homeHeroTintState = enabled
+    }
+
+    /** Whether the Home tint follows the category picked on Spin (experimental, default off). */
+    fun isHomeTintFollowLaneEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_TINT_FOLLOW_LANE, false)
+
+    fun setHomeTintFollowLaneEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_TINT_FOLLOW_LANE, enabled).apply()
+        homeTintFollowLaneState = enabled
+    }
+
+    /** The manually picked category for the Home tint (default wildcard). */
+    fun getHomeTintCategory(context: Context): String =
+        prefs(context).getString(KEY_HOME_TINT_CATEGORY, CategoryId.WILDCARD.name)
+            ?: CategoryId.WILDCARD.name
+
+    fun setHomeTintCategory(context: Context, id: CategoryId) {
+        prefs(context).edit().putString(KEY_HOME_TINT_CATEGORY, id.name).apply()
+        homeTintCategoryIdState = id.name
     }
 
     /** Whether the Home Streak · Cabinet · Topics bar wears a solid paper card (experimental, default off). */
@@ -877,6 +983,19 @@ object AppPreferences {
     fun setSearchEngine(context: Context, engine: SearchEngine) {
         prefs(context).edit().putString(KEY_SEARCH_ENGINE, engine.id).apply()
         searchEngineState = engine.id
+    }
+
+    /**
+     * v27s — the user's chosen music service id for the "Watch in" explore
+     * action, defaulting to YouTube Music so existing behavior is unchanged
+     * until they switch.
+     */
+    fun getMusicService(context: Context): String =
+        prefs(context).getString(KEY_MUSIC_SERVICE, null) ?: MusicService.YOUTUBE_MUSIC.id
+
+    fun setMusicService(context: Context, service: MusicService) {
+        prefs(context).edit().putString(KEY_MUSIC_SERVICE, service.id).apply()
+        musicServiceState = service.id
     }
 
     /** v27 — recycle-bin retention window in days (0 = keep forever). */

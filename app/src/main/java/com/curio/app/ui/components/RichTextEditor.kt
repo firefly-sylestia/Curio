@@ -22,8 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -71,6 +70,7 @@ import com.curio.app.ui.theme.notePaperHighlight
 import com.curio.app.ui.theme.notePaperInk
 import com.curio.app.ui.theme.notePaperSurface
 import com.curio.app.ui.theme.paperControlAccent
+import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.paperHighlight
 import com.curio.app.ui.theme.PatrickHandFontFamily
 
@@ -812,7 +812,8 @@ fun RichTextEditor(
                             onItalic = { applyFlag(RichFlag.ITALIC) },
                             onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
                             onSizePick = { applyExactSize(it) },
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            paper = paper
                         )
                     }
                 }
@@ -909,7 +910,8 @@ fun RichTextEditor(
                                 onBold = { applyFlag(RichFlag.BOLD) },
                                 onItalic = { applyFlag(RichFlag.ITALIC) },
                                 onHighlight = { applyFlag(RichFlag.HIGHLIGHT) },
-                                onSizePick = { applyExactSize(it) }
+                                onSizePick = { applyExactSize(it) },
+                                paper = paper
                             )
                         }
                     }
@@ -988,7 +990,8 @@ private fun SelectionFormatBar(
     onBold: () -> Unit,
     onItalic: () -> Unit,
     onHighlight: () -> Unit,
-    onSizePick: (Float) -> Unit
+    onSizePick: (Float) -> Unit,
+    paper: Boolean = false
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -1001,9 +1004,9 @@ private fun SelectionFormatBar(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold)
-            FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic)
-            FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight)
+            FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold, paper = paper)
+            FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic, paper = paper)
+            FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight, paper = paper)
             // One text-size button — the A+/A− pair both opened the same
             // size-picker dropdown, so they collapsed into a single button.
             SizePickerButton(
@@ -1013,7 +1016,8 @@ private fun SelectionFormatBar(
                 accent = accent,
                 enabled = enabled,
                 currentSp = currentSp,
-                onPick = onSizePick
+                onPick = onSizePick,
+                paper = paper
             )
         }
     }
@@ -1033,16 +1037,17 @@ private fun FormatToolbar(
     onItalic: () -> Unit,
     onHighlight: () -> Unit,
     onSizePick: (Float) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    paper: Boolean = false
 ) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold)
-        FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic)
-        FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight)
+        FormatToolButton(CurioIcons.FormatBold, "Bold", boldActive, accent, enabled, onBold, paper = paper)
+        FormatToolButton(CurioIcons.FormatItalic, "Italic", italicActive, accent, enabled, onItalic, paper = paper)
+        FormatToolButton(CurioIcons.FormatHighlight, "Highlight", highlightActive, accent, enabled, onHighlight, paper = paper)
         // Text size — tapping opens a dropdown of fixed sizes; picking one
         // applies it to the selection (if any) and arms it as the sticky
         // size so the next text typed carries it. The button stays lit
@@ -1078,8 +1083,13 @@ private fun ToolToggleButton(
     // the theme's muted tokens, expanded blooms in the accent container —
     // no hardcoded dark-mode alphas.
     val ink = if (expanded) accent else MaterialTheme.colorScheme.onSurfaceVariant
-    val fill = if (expanded) accent.copy(alpha = 0.18f)
-               else MaterialTheme.colorScheme.surfaceContainerHighest
+    // v27n — the expanded fill is OPAQUE (was 18% alpha, which let the
+    // elevation shadow bleed through).
+    val fill = if (expanded) {
+        lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.18f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    }
     val rim = if (expanded) accent.copy(alpha = 0.65f)
               else MaterialTheme.colorScheme.outlineVariant
     Surface(
@@ -1098,9 +1108,11 @@ private fun ToolToggleButton(
             if (dot != null) {
                 Box(
                     modifier = Modifier
+                        // v27n — shadow BEFORE the fill (was painted on top
+                        // of the color dot).
+                        .shadow(1.dp, CircleShape)
                         .size(12.dp)
                         .background(dot, CircleShape)
-                        .shadow(1.dp, CircleShape)
                 )
             }
             CurioIcon(
@@ -1126,15 +1138,24 @@ private fun FormatToolButton(
     accent: Color,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v27r — note-paper toolbars ride a FIXED paper control accent (amber
+    // in dark / brown in light), so their active fill is a MODERATED tint
+    // of the accent with the accent itself as glyph ink — a solid amber
+    // block was too saturated and white-on-amber unreadable. Category-accent
+    // toolbars (paper = false) keep the solid accent + on-fill ink.
+    paper: Boolean = false
 ) {
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(10.dp),
-        color = if (active) accent.copy(alpha = 0.18f)
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = if (active) 3.dp else 1.dp,
+        color = when {
+            active && paper -> lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
+            active -> accent
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+        },
+        shadowElevation = 2.dp,
         modifier = modifier
     ) {
         CurioIcon(
@@ -1142,8 +1163,10 @@ private fun FormatToolButton(
             contentDescription = label,
             // Theme-aware: inactive tools follow the theme's muted ink (which
             // reads on the dock surface AND the floating bar in every theme),
-            // active tools bloom in the accent.
-            tint = if (active) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+            // active tools flip to the on-fill ink (solid accent) or the
+            // accent itself on the tinted paper fill.
+            tint = if (active) (if (paper) accent else pastelFillInk(accent))
+                   else MaterialTheme.colorScheme.onSurfaceVariant,
             size = 16.dp,
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
         )
@@ -1167,7 +1190,8 @@ private fun SizePickerButton(
     accent: Color,
     enabled: Boolean,
     currentSp: Float,
-    onPick: (Float) -> Unit
+    onPick: (Float) -> Unit,
+    paper: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -1177,23 +1201,29 @@ private fun SizePickerButton(
             active = active,
             accent = accent,
             enabled = enabled,
-            onClick = { expanded = true }
+            onClick = { expanded = true },
+            paper = paper
         )
-        DropdownMenu(
+        // v30 — the shared accent-themed menu: the current size row lights
+        // up in the format accent with a trailing check.
+        CurioDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            accent = accent
         ) {
             // "Default" first — the field's base size, checked when nothing
             // is armed (or the base size is current).
-            DropdownMenuItem(
+            CurioDropdownItem(
                 text = {
                     Text(
                         "Default · ${BASE_FONT_SP.toInt()}sp",
                         fontWeight = FontWeight.Medium
                     )
                 },
-                leadingIcon = {
-                    if (currentSp == BASE_FONT_SP) {
+                selected = currentSp == BASE_FONT_SP,
+                accent = accent,
+                trailingIcon = if (currentSp == BASE_FONT_SP) {
+                    {
                         CurioIcon(
                             name = CurioIcons.Check,
                             contentDescription = null,
@@ -1201,7 +1231,7 @@ private fun SizePickerButton(
                             size = 16.dp
                         )
                     }
-                },
+                } else null,
                 onClick = {
                     expanded = false
                     onPick(BASE_FONT_SP)
@@ -1209,10 +1239,12 @@ private fun SizePickerButton(
             )
             HorizontalDivider(color = accent.copy(alpha = 0.2f))
             SIZE_OPTIONS.forEach { sp ->
-                DropdownMenuItem(
+                CurioDropdownItem(
                     text = { Text("${sp.toInt()} sp", fontSize = sp.sp) },
-                    leadingIcon = {
-                        if (sp == currentSp) {
+                    selected = sp == currentSp,
+                    accent = accent,
+                    trailingIcon = if (sp == currentSp) {
+                        {
                             CurioIcon(
                                 name = CurioIcons.Check,
                                 contentDescription = null,
@@ -1220,7 +1252,7 @@ private fun SizePickerButton(
                                 size = 16.dp
                             )
                         }
-                    },
+                    } else null,
                     onClick = {
                         expanded = false
                         onPick(sp)

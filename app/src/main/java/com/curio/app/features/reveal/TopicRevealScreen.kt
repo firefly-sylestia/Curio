@@ -61,16 +61,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -96,11 +95,15 @@ import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TourController
+import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.buildEngineSearchUrl
+import com.curio.app.data.buildExploreQuery
 import com.curio.app.data.buildExploreSearchUrl
+import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
+import com.curio.app.data.isMusicTopic
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -109,21 +112,24 @@ import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.brandTile
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
-import com.curio.app.ui.theme.headerAccent
+import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -197,6 +203,10 @@ fun TopicRevealScreen(
 
     val resolved = topic
     val context = LocalContext.current
+    // v29 — clipboard for the auto-copy on explore: the search query lands on
+    // the clipboard so the user can paste it into an app's own search box
+    // (Spotify / Apple Music don't always hand off an in-app search).
+    val clipboard = LocalClipboardManager.current
     // v6.7 — pin for later: the bookmark toggles on/off so the user can save
     // the topic and revisit it from Topic History → "Pinned for later".
     // Reads the REACTIVE pinnedTopicsState (not prefs) so the icon toggles
@@ -491,6 +501,19 @@ fun TopicRevealScreen(
     /** Starts a timed explore session, opens the search page (chosen engine — YouTube for music), back to Home. */
     fun startExploreSession(topic: CurioTopic, searchUrl: String = buildExploreSearchUrl(topic)) {
         engaged = true
+        // v29 — auto-copy the search query to the clipboard the moment the
+        // user taps Explore / Watch in: the browser opens a web search, but
+        // pasting the topic into Spotify / Apple Music's own search box is
+        // the reliable way to find it inside those apps (they don't always
+        // hand off an in-app search from a web link). No extra button — it
+        // just lands there, with a short toast so the user knows.
+        val query = buildExploreQuery(topic)
+        runCatching {
+            clipboard.setText(AnnotatedString(query))
+            android.widget.Toast.makeText(
+                context, "Copied \"$query\" to clipboard", android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
         // Engaging for real — record as recently-explored and clear any
         // recently-unexplored entry. recordExplored tags the row "Resumed"
         // when the user came back to a topic they'd left.
@@ -634,6 +657,11 @@ fun TopicRevealScreen(
                             // ── 2.5 Action row — Express yourself / Explore ─────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
+                // v29 — when the topic carries reading/watching progress
+                // (books: pages, anime: episodes) the floating progress
+                // button straddles the hero's bottom edge, so the action
+                // row drops a little lower to stay clear of it.
+                val progressFloatGap = if (resolved?.progressTarget != null) 40.dp else 16.dp
                 RevealContentEntrance(delayMillis = 40) {
                     RevealActionRow(
                         cat = cat,
@@ -641,7 +669,7 @@ fun TopicRevealScreen(
                         resolved = latestResolved,
                         onExplore = latestOnExplore,
                         onAlready = latestOnAlready,
-                        modifier = Modifier.padding(top = 16.dp)
+                        modifier = Modifier.padding(top = progressFloatGap)
                     )
                 }
 
@@ -779,7 +807,9 @@ fun TopicRevealScreen(
                     Surface(
                         modifier = Modifier.weight(1f, fill = false),
                         shape = RoundedCornerShape(50),
-                        color = cat.themedAccent().copy(alpha = 0.22f),
+                        // v27n — opaque tinted fill (was 22% alpha, which let
+                        // the elevation shadow bleed through).
+                        color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.22f),
                         shadowElevation = 2.dp
                     ) {
                         Text(
@@ -888,6 +918,26 @@ fun TopicRevealScreen(
     if (showExploreDialog && resolved != null) {
         val topic = resolved
         val action = topic.exploreAction
+        // v27s — music topics (Album / Artist / Song) route the second pill
+        // to the user's chosen music service; everything else stays YouTube.
+        val musicTopic = topic.isMusicTopic()
+        val watchService = MusicService.fromId(AppPreferences.musicServiceState)
+        // v27u — clean glyph pills: no brand tiles. The browser button wears
+        // the globe (travel_explore); the watch button wears the service's
+        // glyph (youtube_activity for YouTube / YouTube Music, play_circle
+        // for Spotify, music_note for Apple Music) so the pill still hints
+        // what it opens.
+        val watchGlyph = if (musicTopic) {
+            watchService.brandTile().second
+        } else {
+            CurioIcons.YouTubeActivity
+        }
+        // v27u — the two pills are VISIBLE soft-tinted pills (the old
+        // TextButton had no container color, so the pill shape was
+        // invisible): an opaque lerp of the dialog action ink over the
+        // dialog container.
+        val pillInk = curioDialogActionColor()
+        val pillFill = lerp(curioDialogContainerColor(), pillInk, 0.14f)
         // v11 — the dialog wears the shared Curio dialog theme: the card-
         // matching 24dp shape, the pastel-aware container, and the readable
         // action ink (deep rose on light/pastel so the buttons never wash
@@ -919,8 +969,9 @@ fun TopicRevealScreen(
                     Text(
                         // v23 — the browser button searches the user's chosen
                         // engine (pickable in onboarding + Settings), so the
-                        // copy stays engine-neutral.
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open YouTube.",
+                        // copy stays engine-neutral. v27s — music topics name
+                        // the chosen music service instead of YouTube.
+                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open ${if (musicTopic) watchService.displayName else "YouTube"}.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -930,9 +981,11 @@ fun TopicRevealScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     // v22 — the no-AI pledge, bold so it leads the dialog's
-                    // intent: research stays the user's own words.
+                    // intent: research stays the user's own words. v27s — the
+                    // avoid-AI note is spelled out: read real sources, skip
+                    // the AI summaries.
                     Text(
-                        "Keep your research your own, and stay curious. This is your curiosity — in your own words.",
+                        "Keep your research your own — skip the AI summaries and read the real sources. Stay curious: this is your curiosity, in your own words.",
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -964,7 +1017,14 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // v27r — the two explore actions are PILL-shaped buttons, each
+                // a leading icon + short label so nothing wraps or truncates
+                // in the width-constrained dialog: the globe (travel_explore)
+                // searches the user's chosen engine, the rounded play tile
+                // (youtube_activity) searches YouTube. v27u — the pills are
+                // now VISIBLE (soft tinted container fill, no brand tiles),
+                // 12dp apart.
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TextButton(
                         onClick = {
                             engaged = true
@@ -981,15 +1041,20 @@ fun TopicRevealScreen(
                             }
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
-                        colors = curioDialogActionButtonColors(),
-                        // v27n — the two action labels sit side by side in a
-                        // width-constrained dialog, so each stays on ONE line
-                        // (tight padding + ellipsis fallback instead of
-                        // wrapping into a broken two-line button).
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                        colors = curioDialogActionButtonColors(containerColor = pillFill),
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
+                        // v27u — clean globe glyph for the user's chosen engine.
+                        CurioIcon(
+                            name = CurioIcons.TravelExplore,
+                            contentDescription = null,
+                            tint = pillInk,
+                            size = 20.dp
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Text(
-                            "Explore in browser",
+                            "Explore",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1002,13 +1067,28 @@ fun TopicRevealScreen(
                                 AppPreferences.setOverlayBubbleEnabled(context, bubbleOptIn)
                                 if (bubbleOptIn) AppPreferences.setOverlayAskDeclined(context, false)
                             }
-                            startExploreSession(topic, buildYouTubeSearchUrl(topic))
+                            // v27s — music topics open the chosen music
+                            // service; everything else searches YouTube.
+                            startExploreSession(
+                                topic,
+                                if (musicTopic) buildMusicServiceSearchUrl(topic, watchService)
+                                else buildYouTubeSearchUrl(topic)
+                            )
                         },
-                        colors = curioDialogActionButtonColors(),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                        colors = curioDialogActionButtonColors(containerColor = pillFill),
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
+                        // v27u — the service's clean glyph (no brand tile).
+                        CurioIcon(
+                            name = watchGlyph,
+                            contentDescription = null,
+                            tint = pillInk,
+                            size = 20.dp
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Text(
-                            "Explore in YouTube",
+                            "Watch in",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1346,9 +1426,15 @@ private fun RevealAlreadyButton(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        color = if (enabled) surface else surface.copy(alpha = 0.45f),
+        // v27n — the disabled fill is OPAQUE too (the 45% alpha let the
+        // elevation shadow bleed through): an opaque blend toward the page
+        // background keeps the muted disabled look.
+        color = if (enabled) surface
+                else lerp(MaterialTheme.colorScheme.background, surface, 0.45f),
         shadowElevation = 3.dp,
         modifier = modifier
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
             .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
             // Give the writing action a real, forgiving tap target across its
             // entire weighted half of the row. The old inner padding made the
@@ -1404,10 +1490,27 @@ private fun HeroCard(
     val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
 
     val action = resolved?.exploreAction
-    // v27j — header fill depth: a slightly darker painter accent by default
-    // (toggle in Experiments → Paper & headers).
-    val accent = cat.headerAccent()
-    val heroGradient = CurioGradients.cardGradient(accent)
+    val dark = isCurioDarkTheme()
+    // v28 — the reveal hero uses the SAME accent source as the Spin ticket
+    // (themedAccent, NOT the headerAccent() deepen): the hero morphs out of
+    // the ticket, so its gradient must read pixel-identical. The old
+    // headerAccent() deepen made the reveal hero a shade darker than the
+    // ticket in LIGHT mode (dark's 0.94 factor hid it).
+    val accent = cat.themedAccent()
+    // v28 — mirror the Spin ticket's gradient recipe EXACTLY in every
+    // theme: pastel light uses the ticket's pastel crown + on-hue tint
+    // stops; everything else uses the shared card gradient. The old
+    // cardGradient-only recipe diverged from the ticket in pastel light
+    // (the ticket's second stop IS the tint, cardGradient's is only 30%
+    // toward it) — the morph visibly shifted color on light pastel pages.
+    val heroGradient = if (AppPreferences.pastelColorsState && !dark) {
+        listOf(
+            lerp(accent, Color.Black, 0.05f),
+            lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
+        )
+    } else {
+        CurioGradients.cardGradient(accent)
+    }
     // v7.5 — pastel mode lightens the hero gradient, so the pill content
     // flips from white to the deep accent (light) / light twin (dark).
     // Match the Spin ticket's ink formula exactly so the morph reads as
@@ -1418,12 +1521,12 @@ private fun HeroCard(
     //    reads as the same surface during the morph. When heroGradientOn
     //    is enabled, the hero gets the same top-lit diagonal sweep as the
     //    deck's front ticket; otherwise a plain vertical gradient.
-    val dark = isCurioDarkTheme()
     val pastelLightHero = AppPreferences.pastelColorsState && !dark
     // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
     // toggle was removed from Experiments and the read is hardcoded here.
     val heroGradientOn = true
-    val heroBorderOn = AppPreferences.heroBorderState
+    // v27u — the hero's gradient rim border was removed (it mirrored the
+    // Spin ticket's border, which is also gone — the morph stays clean).
     // v24 — the dual-accent hero gradient experiment was rejected (ugly
     // golden blend); always OFF, so the blend branch below is dead.
     val heroBlendOn = false
@@ -1456,8 +1559,13 @@ private fun HeroCard(
         label = "revealHeroHeight"
     )
 
+    // v29 — the hero sits in a Box so the floating progress button can
+    // straddle the card's bottom edge (half on the hero, half floating in
+    // the gap above the action row). Only rendered for topics that carry a
+    // progress target (books: pages, anime: episodes).
+    Box(modifier = modifier.fillMaxWidth()) {
     Surface(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(heroHeight)
             .then(
@@ -1479,35 +1587,6 @@ private fun HeroCard(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(30.dp))
-                .then(
-                    // Hero border — whisper hairline matching the ticket
-                    if (heroBorderOn) {
-                        Modifier.drawBehind {
-                            val borderW = 1.5.dp.toPx()
-                            val radius = 30.dp.toPx() - borderW / 2f
-                            drawRoundRect(
-                                brush = Brush.verticalGradient(
-                                    listOf(
-                                        // v15 — dark mode: the old white-lerp
-                                        // rim drew a solid bright ring around
-                                        // the card; dark tones fade toward the
-                                        // fill at soft alpha so the machined
-                                        // edge stays subtle (mirror of the
-                                        // Spin ticket).
-                                        if (dark) lerp(ink, Color.Black, 0.22f).copy(alpha = 0.30f)
-                                        else lerp(ink, Color.White, 0.30f),
-                                        if (dark) lerp(ink, Color.Black, 0.45f).copy(alpha = 0.16f)
-                                        else lerp(ink, accent, 0.14f)
-                                    )
-                                ),
-                                topLeft = Offset(borderW / 2f, borderW / 2f),
-                                size = Size(size.width - borderW, size.height - borderW),
-                                cornerRadius = CornerRadius(radius, radius),
-                                style = Stroke(width = borderW)
-                            )
-                        }
-                    } else Modifier
-                )
         ) {
             // ── Gradient brush — pixel-perfect match with the Spin ticket:
             //    same color stops AND the same diagonal linearGradient when
@@ -1707,9 +1786,30 @@ private fun HeroCard(
                     }
                 }
             }
+
+            // ── v29 — progress badge (pages read / episodes watched) at
+            //    the hero's TOP-RIGHT corner: a small OPAQUE frosted pill
+            //    (count only) that opens the progress editor on tap. The
+            //    old long bottom-straddling control is gone — the corner
+            //    badge never clips during the shared-element morph and
+            //    its solid fill reads on any hero gradient, light or dark.
+            val heroTopic = resolved
+            if (heroTopic != null && heroTopic.progressTarget != null) {
+                CurioProgressPill(
+                    topic = heroTopic,
+                    accent = cat.accent,
+                    ink = cat.accent,
+                    background = lerp(cat.accent, Color.White, 0.85f),
+                    showBar = false,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 16.dp, end = 16.dp)
+                )
+            }
             } // inner background Box
         } // BoxWithConstraints
     } // HeroCard Surface
+    } // HeroCard floating Box
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1726,7 +1826,10 @@ private fun TeaserCard(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
         shadowElevation = 3.dp,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(3.dp, RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -1872,7 +1975,8 @@ private fun SentimentButton(
         onClick = onClick,
         shape = CircleShape,
         color = if (active) accent else MaterialTheme.colorScheme.surfaceVariant,
-        shadowElevation = if (active) 4.dp else 2.dp
+        // v27q — flat 2dp: selection reads through the solid accent fill.
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),

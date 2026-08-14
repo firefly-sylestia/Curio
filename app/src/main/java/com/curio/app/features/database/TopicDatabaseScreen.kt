@@ -61,8 +61,10 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.ui.pet.PetLandmark
@@ -77,9 +79,11 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.pastelFillInk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -180,47 +184,117 @@ fun TopicDatabaseScreen(navController: NavController) {
             TopicJsonLoader.cached(cat.id)?.let { topics -> cat to laneTopics(cat, topics) }
         }
     }
+    // v29 — the PREBUILT index path: scripts/build_topic_index.py merges
+    // every topic into one topic_index.json with the search keys + year
+    // PRE-COMPUTED, prewarmed at app start. When present, the browser
+    // renders from it INSTANTLY (one file read — no per-category parses,
+    // no runtime lowercase/year work) and stays flat as the catalog grows
+    // past 20k. Falls back to the live per-category load when the asset is
+    // missing (or still warming on a cold start).
+    val indexEntries by produceState<List<TopicIndexEntry>?>(
+        initialValue = TopicJsonLoader.cachedIndex(),
+        AppPreferences.hiddenCategoriesState,
+        AppPreferences.categoryOrderState
+    ) {
+        value = withContext(Dispatchers.Default) {
+            runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
+        }
+    }
+    val useIndex = indexEntries != null
+    // The fallback per-category load only runs when the index is absent.
     val catalogState by produceState<CatalogState>(
         initialValue = CatalogState(
             entries = cachedCatalog,
             loading = cachedCatalog.size < visibleCategories.size
         ),
         AppPreferences.hiddenCategoriesState,
-        AppPreferences.categoryOrderState
+        AppPreferences.categoryOrderState,
+        useIndex
     ) {
-        value = withContext(Dispatchers.Default) {
-            // Load the canonical lanes; the wildcard lane reuses those caches
-            // (its pool merges every lane, then we keep only its own
-            // curiosities) so the extra lane adds no duplicate parses.
-            CatalogState(
-                entries = visibleCategories.map { cat ->
-                    cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
-                },
-                loading = false
-            )
+        if (useIndex) {
+            value = CatalogState(entries = emptyList(), loading = false)
+        } else {
+            value = withContext(Dispatchers.Default) {
+                // Load the canonical lanes; the wildcard lane reuses those
+                // caches (its pool merges every lane, then we keep only its
+                // own curiosities) so the extra lane adds no duplicate parses.
+                CatalogState(
+                    entries = visibleCategories.map { cat ->
+                        cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
+                    },
+                    loading = false
+                )
+            }
         }
     }
-    val catalog = catalogState.entries
-    val catalogLoading = catalogState.loading
+    val catalog: List<Pair<CurioCategory, List<CurioTopic>>> = if (useIndex) {
+        remember(indexEntries, visibleCategories) {
+            val byId = indexEntries.orEmpty().groupBy { it.topic.categoryId }
+            visibleCategories.mapNotNull { cat ->
+                val topics = byId[cat.id]
+                    ?.map { it.topic }
+                    ?.let { laneTopics(cat, it) }
+                    .orEmpty()
+                if (topics.isEmpty()) null else cat to topics
+            }
+        }
+    } else {
+        catalogState.entries
+    }
+    val catalogLoading = !useIndex && catalogState.loading
     val totalTopics = catalog.sumOf { it.second.size }
 
     // Build the expensive search/sort fields off the composition thread once
-    // per catalog load. Sorting used to lowercase strings and create year
-    // regexes for thousands of topics on the UI thread on every chip tap.
-    val indexedTopics by produceState<List<IndexedTopic>>(emptyList(), catalog) {
-        value = withContext(Dispatchers.Default) {
-            catalog.flatMap { (cat, topics) ->
-                topics.map { topic ->
-                    IndexedTopic(
-                        category = cat,
-                        topic = topic,
-                        nameKey = topic.name.lowercase(),
-                        subtypeKey = topic.subtype.lowercase(),
-                        bylineKey = topic.byline.lowercase(),
-                        teaserKey = topic.teaser.lowercase(),
-                        tagKeys = topic.tags.map(String::lowercase),
-                        year = topicYear(topic)
-                    )
+    // per catalog load (the index path uses the PRE-COMPUTED keys + year, so
+    // that work disappears entirely). Sorting used to lowercase strings and
+    // create year regexes for thousands of topics on the UI thread on every
+    // chip tap.
+    val indexedTopics by produceState<List<IndexedTopic>>(
+        // Warm-cache seed: when the index is already prewarmed, the rows are
+        // ready on the very first frame — no "Preparing topics…" flash.
+        initialValue = TopicJsonLoader.cachedIndex().orEmpty().map { entry ->
+            IndexedTopic(
+                category = CurioCategories.byId(entry.topic.categoryId),
+                topic = entry.topic,
+                nameKey = entry.nameKey,
+                subtypeKey = entry.subtypeKey,
+                bylineKey = entry.bylineKey,
+                teaserKey = entry.teaserKey,
+                tagKeys = entry.tagKeys,
+                year = entry.year
+            )
+        },
+        catalog,
+        useIndex
+    ) {
+        value = if (useIndex) {
+            indexEntries.orEmpty().map { entry ->
+                IndexedTopic(
+                    category = CurioCategories.byId(entry.topic.categoryId),
+                    topic = entry.topic,
+                    nameKey = entry.nameKey,
+                    subtypeKey = entry.subtypeKey,
+                    bylineKey = entry.bylineKey,
+                    teaserKey = entry.teaserKey,
+                    tagKeys = entry.tagKeys,
+                    year = entry.year
+                )
+            }
+        } else {
+            withContext(Dispatchers.Default) {
+                catalog.flatMap { (cat, topics) ->
+                    topics.map { topic ->
+                        IndexedTopic(
+                            category = cat,
+                            topic = topic,
+                            nameKey = topic.name.lowercase(),
+                            subtypeKey = topic.subtype.lowercase(),
+                            bylineKey = topic.byline.lowercase(),
+                            teaserKey = topic.teaser.lowercase(),
+                            tagKeys = topic.tags.map(String::lowercase),
+                            year = topicYear(topic)
+                        )
+                    }
                 }
             }
         }
@@ -345,8 +419,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     // v8.54 — switching the sort reorders the whole list, so land back at
     // the top instead of keeping a random index into the new ordering.
-    // (The category filter chips keep their pre-existing no-reset behavior.)
-    LaunchedEffect(sortMode) {
+    // v27r — switching the CATEGORY filter does the same: a different lane
+    // (or All) starts from the top, never from a stale position into the
+    // new lane.
+    LaunchedEffect(sortMode, effectiveCat) {
         if (hasRows && listState.firstVisibleItemIndex > 0) {
             savedScrollIndex = 0
             savedScrollOffset = 0
@@ -523,19 +599,21 @@ fun TopicDatabaseScreen(navController: NavController) {
                 },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary,
-                shadowElevation = 6.dp
+                // v27r — a compact arrow: 16dp glyph + slim padding (was
+                // 20dp + 11dp, which read as a big button), flat 2dp shadow.
+                shadowElevation = 2.dp
             ) {
                 // v26c — Surface's content box has no contentAlignment, so the
                 // glyph used to sit top-start inside the circle; center it.
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(11.dp)
+                    modifier = Modifier.padding(7.dp)
                 ) {
                     CurioIcon(
                         CurioIcons.ArrowUpward,
                         "Back to top",
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        size = 20.dp
+                        size = 16.dp
                     )
                 }
             }
@@ -585,6 +663,8 @@ fun TopicDatabaseScreen(navController: NavController) {
                     onSelect = { tdSortField = it },
                     onToggleDirection = { tdSortAscending = !tdSortAscending },
                     ink = ink,
+                    backdrop = settingsRoseAccent(),
+                    accent = settingsRoseAccent(),
                     emphasized = true
                 )
                 // Search pill — the pet landmark moved with the search box
@@ -639,16 +719,14 @@ private data class DatabaseRow(
 private fun DatabaseFilterChip(
     label: String,
     count: Int,
-    selectedInk: Color,
     accent: Color = MaterialTheme.colorScheme.primary,
-    tint: Color = MaterialTheme.colorScheme.primaryContainer,
     selected: Boolean,
     onClick: () -> Unit,
     // v26 — the floating chip bar pops each pill on scroll: the label
     // blooms toward its accent as the pill pops (Cabinet's per-pill pop).
     popProgress: Float = 0f
 ) {
-    val labelColor = if (selected) selectedInk
+    val labelColor = if (selected) pastelFillInk(accent)
     else lerp(
         MaterialTheme.colorScheme.onSurfaceVariant,
         accent,
@@ -657,8 +735,11 @@ private fun DatabaseFilterChip(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (selected) tint else MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = if (selected) 4.dp else 2.dp
+        // v27q — selection reads as a SOLID accent fill with pastel-aware
+        // ink (the old primaryContainer/category-tint fills were translucent
+        // and let the shadow bleed); elevation stays a flat 2dp.
+        color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 2.dp
     ) {
         Text(
             text = if (count > 0) "$label $count" else label,
@@ -735,9 +816,7 @@ private fun BoxScope.DatabaseStickyChipBar(
                 DatabaseFilterChip(
                     label = "All",
                     count = totalTopics,
-                    selectedInk = MaterialTheme.colorScheme.onPrimaryContainer,
                     accent = MaterialTheme.colorScheme.primary,
-                    tint = MaterialTheme.colorScheme.primaryContainer,
                     selected = selectedCat == null,
                     onClick = onSelectAll,
                     popProgress = popProgress
@@ -752,9 +831,7 @@ private fun BoxScope.DatabaseStickyChipBar(
                 DatabaseFilterChip(
                     label = cat.displayName,
                     count = list.size,
-                    selectedInk = cat.accent,
-                    accent = cat.accent,
-                    tint = cat.tint,
+                    accent = cat.themedAccent(),
                     selected = selectedCat == cat.id,
                     onClick = { onSelectCategory(cat.id) },
                     popProgress = popProgress
@@ -764,8 +841,10 @@ private fun BoxScope.DatabaseStickyChipBar(
     }
 }
 
-/** Per-pill pop — each chip scales 0.90 → 1.0 as the bar lifts to pin
- *  (staggered left→right, eased on the same curve as the bar's lift). */
+/** Per-pill pop — each chip rests at full size and pops subtly (1.0 → 1.05)
+ *  as the bar lifts to pin (v29: the old 0.90 rest scale made the pills
+ *  look like they were GROWING on entry — they now start full-size and
+ *  only breathe a touch when the bar actually pins). */
 @Composable
 private fun DatabaseChipPop(
     index: Int,
@@ -775,7 +854,7 @@ private fun DatabaseChipPop(
     val stagger = (index * 0.07f).coerceAtMost(0.85f)
     val pillProgress = ((frostShift - stagger) / (1f - stagger)).coerceIn(0f, 1f)
     val eased = FastOutSlowInEasing.transform(pillProgress)
-    val pillScale = androidx.compose.ui.util.lerp(0.90f, 1f, eased)
+    val pillScale = androidx.compose.ui.util.lerp(1f, 1.05f, eased)
     Box(
         modifier = Modifier.graphicsLayer {
             scaleX = pillScale
@@ -832,7 +911,9 @@ private fun DatabaseSectionHeader(cat: CurioCategory, count: Int) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 14.dp, bottom = 2.dp)
+            // v27r — the section header sits higher (was 14dp top padding),
+            // tucking the category name against the previous row.
+            .padding(top = 6.dp, bottom = 2.dp)
     ) {
         Box(
             modifier = Modifier

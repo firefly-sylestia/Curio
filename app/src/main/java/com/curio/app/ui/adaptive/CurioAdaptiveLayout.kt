@@ -24,16 +24,21 @@ import androidx.compose.ui.unit.dp
  * landscape without any Settings toggle, and phones are unaffected.
  */
 
-/** The max width of centered page content on wide windows. */
-val CurioContentMaxWidth: Dp = 720.dp
+/** The max width of centered page content on wide windows. v27t — raised
+ *  from 720dp so tablets/landscape actually use the screen: the old cap left
+ *  big dead gutters on 10"+ windows, so content now breathes to 880dp and
+ *  the watermark collage fills the remaining edge. */
+val CurioContentMaxWidth: Dp = 880.dp
 
 /**
  * The comfortable INNER content column on wide windows (tablet / landscape /
- * desktop) — narrower than the 720dp shell cap so phone-designed rows and
- * cards never stretch into disconnected, gap-filled plates. The extra margin
- * shows the full-bleed watermark collage around the content.
+ * desktop) — slightly narrower than the 880dp shell cap so phone-designed
+ * rows and cards never stretch into disconnected, gap-filled plates. The
+ * extra margin shows the full-bleed watermark collage around the content.
+ * v27t — raised from 640dp so shelves, grids and settings rows spread into
+ * the tablet's width instead of floating in a narrow centered strip.
  */
-val WideContentMaxWidth: Dp = 640.dp
+val WideContentMaxWidth: Dp = 800.dp
 
 /**
  * Horizontal edge padding that keeps the standard 16dp on phones but centers

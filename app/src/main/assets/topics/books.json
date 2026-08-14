@@ -18,7 +18,8 @@
       "Greek",
       "Ancient"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 704
   },
   {
     "id": "book-odyssey",
@@ -39,7 +40,8 @@
       "Greek",
       "Ancient"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 560
   },
   {
     "id": "book-aeneid",
@@ -60,7 +62,8 @@
       "Latin",
       "Ancient"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 496
   },
   {
     "id": "book-divine-comedy",
@@ -81,7 +84,8 @@
       "Italian",
       "Poetry"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 798
   },
   {
     "id": "book-don-quixote",
@@ -102,7 +106,8 @@
       "Spanish",
       "Novel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 992
   },
   {
     "id": "book-pride-and-prejudice",
@@ -123,7 +128,8 @@
       "British",
       "Novel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 279
   },
   {
     "id": "book-jane-eyre",
@@ -144,7 +150,8 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 532
   },
   {
     "id": "book-wuthering-heights",
@@ -165,7 +172,8 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-frankenstein",
@@ -186,7 +194,8 @@
       "British",
       "Gothic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-great-expectations",
@@ -207,7 +216,8 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-oliver-twist",
@@ -228,14 +238,15 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 512
   },
   {
     "id": "book-war-and-peace",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "War and Peace",
-    "teaser": "Tolstoy's 1225-page epic of Russian families during the Napoleonic Wars (1869). Tolstoy refused the copyright revenue to his wife's fury. He said he wrote the book 'to teach Russians to love history.'",
+    "teaser": "Tolstoy's 1225-page epic of Russian families during the Napoleonic Wars (1869). Tolstoy refused the copyright revenue to his wife's fury. He said he wrote the book 'to teach Russians to love history.'.",
     "imageUrl": "",
     "byline": "Leo Tolstoy",
     "exploreAction": {
@@ -249,7 +260,8 @@
       "Novel",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 1392
   },
   {
     "id": "book-crime-and-punishment",
@@ -270,7 +282,8 @@
       "Novel",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 672
   },
   {
     "id": "book-madame-bovary",
@@ -291,7 +304,8 @@
       "Realism",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 432
   },
   {
     "id": "book-the-brothers-karamazov",
@@ -312,7 +326,8 @@
       "Novel",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 824
   },
   {
     "id": "book-moby-dick",
@@ -333,7 +348,8 @@
       "Novel",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 635
   },
   {
     "id": "book-leaves-of-grass",
@@ -354,7 +370,8 @@
       "Poetry",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 576
   },
   {
     "id": "book-emma",
@@ -375,7 +392,8 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-the-picture-of-dorian-gray",
@@ -396,14 +414,15 @@
       "Irish-British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 254
   },
   {
     "id": "book-the-trial",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "The Trial",
-    "teaser": "Kafka's 1925 novel (published posthumously by Max Brod, who ignored Kafka's request to burn his papers). The novel's most-quoted line: 'Someone must have been telling lies about Josef K., for one morning he was arrested without having done anything wrong.'",
+    "teaser": "Kafka's 1925 novel (published posthumously by Max Brod, who ignored Kafka's request to burn his papers). The novel's most-quoted line: 'Someone must have been telling lies about Josef K., for one morning he was arrested without having done anything wrong.'.",
     "imageUrl": "",
     "byline": "Franz Kafka",
     "exploreAction": {
@@ -417,7 +436,8 @@
       "Czech-Austrian",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-ulysses",
@@ -438,7 +458,8 @@
       "Irish",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 732
   },
   {
     "id": "book-mrs-dalloway",
@@ -459,7 +480,8 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 194
   },
   {
     "id": "book-in-search-of-lost-time",
@@ -480,7 +502,8 @@
       "French",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 4215
   },
   {
     "id": "book-the-waste-land",
@@ -501,7 +524,8 @@
       "American-British",
       "Poetry"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 96
   },
   {
     "id": "book-brave-new-world",
@@ -522,7 +546,8 @@
       "British",
       "Novel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-1984",
@@ -543,7 +568,8 @@
       "British",
       "Novel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 328
   },
   {
     "id": "book-the-catcher-in-the-rye",
@@ -564,7 +590,8 @@
       "Novel",
       "Mid-20th"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 277
   },
   {
     "id": "book-beloved",
@@ -585,7 +612,8 @@
       "Novel",
       "Modern"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 324
   },
   {
     "id": "book-one-hundred-years-of-solitude",
@@ -606,7 +634,8 @@
       "Colombian",
       "Novel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 417
   },
   {
     "id": "book-if-on-a-winters-night-a-traveler",
@@ -627,7 +656,8 @@
       "Italian",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 276
   },
   {
     "id": "book-house-of-leaves",
@@ -648,7 +678,8 @@
       "American",
       "Horror"
     ],
-    "tier": 3
+    "tier": 3,
+    "pageCount": 709
   },
   {
     "id": "book-the-collected-poems-of-pablo-neruda",
@@ -669,7 +700,8 @@
       "Poetry",
       "Latin-American"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 96
   },
   {
     "id": "book-the-second-sex",
@@ -690,7 +722,8 @@
       "Essays",
       "Feminist"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 832
   },
   {
     "id": "book-the-myth-of-sisyphus",
@@ -711,7 +744,8 @@
       "Essays",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 212
   },
   {
     "id": "book-the-god-of-small-things",
@@ -732,7 +766,8 @@
       "Novel",
       "Late 20th"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 340
   },
   {
     "id": "book-the-left-hand-of-darkness",
@@ -753,7 +788,8 @@
       "American",
       "Feminist"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-the-three-body-problem",
@@ -774,7 +810,8 @@
       "Chinese",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-foundation",
@@ -795,7 +832,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 296
   },
   {
     "id": "book-dune",
@@ -816,14 +854,15 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 688
   },
   {
     "id": "book-the-master-and-margarita",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "The Master and Margarita",
-    "teaser": "Bulgakov's 1967 novel (published posthumously after 26 years in Soviet censorship). The novel's most famous line: 'Manuscripts don't burn.'",
+    "teaser": "Bulgakov's 1967 novel (published posthumously after 26 years in Soviet censorship). The novel's most famous line: 'Manuscripts don't burn.'.",
     "imageUrl": "",
     "byline": "Mikhail Bulgakov",
     "exploreAction": {
@@ -837,7 +876,8 @@
       "Russian",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-persuasion",
@@ -858,7 +898,8 @@
       "British",
       "Novel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-the-godfather-1969-145",
@@ -879,7 +920,8 @@
       "Crime",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-fear-and-loathing-in-146",
@@ -900,14 +942,15 @@
       "Gonzo",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 208
   },
   {
     "id": "book-sula-1973-133",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Sula (1973)",
-    "teaser": "Toni Morrison's second novel splits its story between two Black girls in the 'Bottom' neighborhood — Sula Peace, who leaves and returns as the town's scapegoat, and Nel Wright, who stays. Morrison called it a book about good and evil, then admitted she meant 'to ask how evil comes to be.'",
+    "teaser": "Toni Morrison's second novel splits its story between two Black girls in the 'Bottom' neighborhood — Sula Peace, who leaves and returns as the town's scapegoat, and Nel Wright, who stays. Morrison called it a book about good and evil, then admitted she meant 'to ask how evil comes to be.'.",
     "imageUrl": "",
     "byline": "Toni Morrison",
     "exploreAction": {
@@ -921,7 +964,8 @@
       "Literary",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 192
   },
   {
     "id": "book-song-of-solomon-1977-134",
@@ -942,7 +986,8 @@
       "Literary",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-midnights-children-1981-135",
@@ -963,7 +1008,8 @@
       "Magic Realism",
       "Postcolonial"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-neuromancer-1984-136",
@@ -984,7 +1030,8 @@
       "Cyberpunk",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-beloved-1987-137",
@@ -1005,7 +1052,8 @@
       "Literary",
       "Slavery"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 324
   },
   {
     "id": "book-the-satanic-verses-1988-138",
@@ -1026,7 +1074,8 @@
       "Magic Realism",
       "Controversy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 561
   },
   {
     "id": "book-the-things-they-carried-139",
@@ -1047,7 +1096,8 @@
       "Vietnam",
       "Short Stories"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-the-english-patient-1992-140",
@@ -1068,7 +1118,8 @@
       "Literary",
       "WWII"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-snow-crash-1992-141",
@@ -1089,7 +1140,8 @@
       "Cyberpunk",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-infinite-jest-1996-142",
@@ -1110,7 +1162,8 @@
       "Postmodern",
       "Addiction"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 1079
   },
   {
     "id": "book-memoirs-of-a-geisha-143",
@@ -1131,7 +1184,8 @@
       "Historical",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-the-god-of-small-144",
@@ -1152,7 +1206,8 @@
       "Literary",
       "Family"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 340
   },
   {
     "id": "book-white-teeth-2000-145",
@@ -1173,7 +1228,8 @@
       "Comedy",
       "Multicultural"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-atonement-2001-146",
@@ -1194,14 +1250,15 @@
       "Literary",
       "WWII"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 368
   },
   {
     "id": "book-middlesex-2002-147",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Middlesex (2002)",
-    "teaser": "Eugenides's Pulitzer winner is a Greek-American family saga narrated by Cal, a woman raised as Calliope who discovers she has 5-alpha-reductase deficiency — a condition that made her body develop as male at puberty. The novel opens with a line that announces the whole project: 'I was born twice.'",
+    "teaser": "Eugenides's Pulitzer winner is a Greek-American family saga narrated by Cal, a woman raised as Calliope who discovers she has 5-alpha-reductase deficiency — a condition that made her body develop as male at puberty. The novel opens with a line that announces the whole project: 'I was born twice.'.",
     "imageUrl": "",
     "byline": "Jeffrey Eugenides",
     "exploreAction": {
@@ -1215,14 +1272,15 @@
       "Literary",
       "Family"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-cloud-atlas-2004-148",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Cloud Atlas (2004)",
-    "teaser": "David Mitchell's novel stacks six stories from the 1850s to a post-apocalyptic future, each nested inside the next — a journal found in a letter, a letter read in a manuscript, a manuscript seen in a film — then unwinds them in reverse. The Booker-shortlisted structure is the point: 'Souls cross ages like clouds cross skies.'",
+    "teaser": "David Mitchell's novel stacks six stories from the 1850s to a post-apocalyptic future, each nested inside the next — a journal found in a letter, a letter read in a manuscript, a manuscript seen in a film — then unwinds them in reverse. The Booker-shortlisted structure is the point: 'Souls cross ages like clouds cross skies.'.",
     "imageUrl": "",
     "byline": "David Mitchell",
     "exploreAction": {
@@ -1236,7 +1294,8 @@
       "Literary",
       "Structure"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-the-road-2006-149",
@@ -1257,7 +1316,8 @@
       "Post-Apocalyptic",
       "Literary"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-wolf-hall-2009-150",
@@ -1278,14 +1338,15 @@
       "Historical",
       "Tudor"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 672
   },
   {
     "id": "book-a-visit-from-the-151",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "A Visit from the Goon Squad (2010)",
-    "teaser": "Jennifer Egan's Pulitzer winner is 13 linked stories about music-industry people orbiting one record producer — told in different genres across decades, culminating in a chapter written entirely as a PowerPoint presentation by a 12-year-old. The title's 'goon squad' is time: 'the goon squad... at your back as you age.'",
+    "teaser": "Jennifer Egan's Pulitzer winner is 13 linked stories about music-industry people orbiting one record producer — told in different genres across decades, culminating in a chapter written entirely as a PowerPoint presentation by a 12-year-old. The title's 'goon squad' is time: 'the goon squad... at your back as you age.'.",
     "imageUrl": "",
     "byline": "Jennifer Egan",
     "exploreAction": {
@@ -1299,7 +1360,8 @@
       "Experimental",
       "Music"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-gone-girl-2012-152",
@@ -1320,7 +1382,8 @@
       "Thriller",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 432
   },
   {
     "id": "book-americanah-2013-153",
@@ -1341,7 +1404,8 @@
       "Literary",
       "Immigration"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 496
   },
   {
     "id": "book-between-the-world-and-154",
@@ -1362,7 +1426,8 @@
       "Memoir",
       "Race"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 176
   },
   {
     "id": "book-lincoln-in-the-bardo-155",
@@ -1383,7 +1448,8 @@
       "Experimental",
       "Historical"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 368
   },
   {
     "id": "book-normal-people-2018-156",
@@ -1404,7 +1470,8 @@
       "Literary",
       "Romance"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-the-testaments-2019-157",
@@ -1425,7 +1492,8 @@
       "Dystopian",
       "Sequel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-klara-and-the-sun-158",
@@ -1446,7 +1514,8 @@
       "Literary",
       "Science Fiction"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-demon-copperhead-2022-159",
@@ -1467,7 +1536,8 @@
       "Literary",
       "Appalachia"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-chain-gang-all-stars-2023-160",
@@ -1488,7 +1558,8 @@
       "Dystopian",
       "Satire"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 384
   },
   {
     "id": "book-yellowface-2023-161",
@@ -1509,7 +1580,8 @@
       "Satire",
       "Publishing"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-north-woods-2023-162",
@@ -1530,7 +1602,8 @@
       "Literary",
       "Experimental"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 384
   },
   {
     "id": "book-wellness-2023-163",
@@ -1551,7 +1624,8 @@
       "Literary",
       "Marriage"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 608
   },
   {
     "id": "book-birnam-wood-2023-164",
@@ -1572,7 +1646,8 @@
       "Thriller",
       "Environmental"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 432
   },
   {
     "id": "book-the-wager-2023-165",
@@ -1593,7 +1668,8 @@
       "Maritime",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-king-a-life-2023-166",
@@ -1614,7 +1690,8 @@
       "Biography",
       "Civil Rights"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 880
   },
   {
     "id": "book-the-vaster-wilds-2023-167",
@@ -1635,7 +1712,8 @@
       "Historical",
       "Literary"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-western-lane-2023-168",
@@ -1656,7 +1734,8 @@
       "Literary",
       "Debut"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 176
   },
   {
     "id": "book-old-gods-time-2023-169",
@@ -1677,14 +1756,15 @@
       "Literary",
       "Crime"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-the-guest-2023-170",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "The Guest (2023)",
-    "teaser": "Emma Cline's follow-up to The Girls follows Alex, a 22-year-old adrift on Long Island's wealthy summer circuit, who has been told to leave and instead keeps orbiting the people she's crashed with — borrowing, conning, and performing her way through a season. The novel is a study of a woman who is only ever 'the guest.'",
+    "teaser": "Emma Cline's follow-up to The Girls follows Alex, a 22-year-old adrift on Long Island's wealthy summer circuit, who has been told to leave and instead keeps orbiting the people she's crashed with — borrowing, conning, and performing her way through a season. The novel is a study of a woman who is only ever 'the guest.'.",
     "imageUrl": "",
     "byline": "Emma Cline",
     "exploreAction": {
@@ -1698,7 +1778,8 @@
       "Literary",
       "Summer"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 272
   },
   {
     "id": "book-tremor-2023-171",
@@ -1719,14 +1800,15 @@
       "Literary",
       "Essayistic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-everythings-fine-2023-172",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Everything's Fine (2023)",
-    "teaser": "Cecilia Rabess's debut follows Jess, a young Black woman who takes a job at Goldman Sachs and falls for a white co-worker who votes against everything she believes — a 'love across the aisle' romance that was itself controversial before publication, with a publisher's sensitivity read generating headlines. The novel's debate is the point: can intimacy survive politics?",
+    "teaser": "Cecilia Rabess's debut follows Jess, a young Black woman who takes a job at Goldman Sachs and falls for a white co-worker who votes against everything she believes — a 'love across the aisle' romance that was itself controversial before publication, with a publisher's sensitivity read generating headlines. The novel's debate is the point: can intimacy survive politics?.",
     "imageUrl": "",
     "byline": "Cecilia Rabess",
     "exploreAction": {
@@ -1740,7 +1822,8 @@
       "Romance",
       "Debate"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-the-new-naturals-2023-173",
@@ -1760,7 +1843,8 @@
       "Utopia",
       "Satire"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-pride-and-prejudice-1813-174",
@@ -1781,7 +1865,8 @@
       "Classic",
       "Romance"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 279
   },
   {
     "id": "book-crime-and-punishment-1866-175",
@@ -1802,7 +1887,8 @@
       "Classic",
       "Psychology"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 672
   },
   {
     "id": "book-heart-of-darkness-1899-176",
@@ -1823,7 +1909,8 @@
       "Classic",
       "Colonialism"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 112
   },
   {
     "id": "book-to-the-lighthouse-1927-177",
@@ -1844,7 +1931,8 @@
       "Modernist",
       "Literary"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 209
   },
   {
     "id": "book-the-grapes-of-wrath-178",
@@ -1865,7 +1953,8 @@
       "Classic",
       "Depression"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-1984-1949-179",
@@ -1886,7 +1975,8 @@
       "Dystopian",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 328
   },
   {
     "id": "book-invisible-man-1952-180",
@@ -1907,7 +1997,8 @@
       "Classic",
       "Race"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 608
   },
   {
     "id": "book-lord-of-the-flies-181",
@@ -1928,7 +2019,8 @@
       "Classic",
       "Allegory"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-things-fall-apart-1958-182",
@@ -1949,7 +2041,8 @@
       "Classic",
       "Postcolonial"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-catch-22-1961-183",
@@ -1970,7 +2063,8 @@
       "Satire",
       "WWII"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-the-bell-jar-1963-184",
@@ -1991,14 +2085,15 @@
       "Classic",
       "Mental Health"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-slaughterhouse-five-1969-185",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Slaughterhouse-Five (1969)",
-    "teaser": "Vonnegut's anti-war novel is built from his own experience as a POW in Dresden during the firebombing — he survived in a slaughterhouse, which is the book's title and its setting. Billy Pilgrim has 'come unstuck in time,' and the novel's response to mass death is the refrain 'So it goes.'",
+    "teaser": "Vonnegut's anti-war novel is built from his own experience as a POW in Dresden during the firebombing — he survived in a slaughterhouse, which is the book's title and its setting. Billy Pilgrim has 'come unstuck in time,' and the novel's response to mass death is the refrain 'So it goes.'.",
     "imageUrl": "",
     "byline": "Kurt Vonnegut",
     "exploreAction": {
@@ -2012,7 +2107,8 @@
       "WWII",
       "Anti-War"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-the-bluest-eye-1970-186",
@@ -2033,7 +2129,8 @@
       "Classic",
       "Race"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-the-gulag-archipelago-1973-187",
@@ -2054,7 +2151,8 @@
       "History",
       "Testimony"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-the-hitchhikers-guide-to-188",
@@ -2075,7 +2173,8 @@
       "Science Fiction",
       "Comedy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-the-color-purple-1982-189",
@@ -2096,7 +2195,8 @@
       "Epistolary",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-the-handmaids-tale-1985-190",
@@ -2117,7 +2217,8 @@
       "Dystopian",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-norwegian-wood-1987-191",
@@ -2138,7 +2239,8 @@
       "Literary",
       "Romance"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 296
   },
   {
     "id": "book-the-remains-of-the-192",
@@ -2159,7 +2261,8 @@
       "Literary",
       "Memory"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 258
   },
   {
     "id": "book-american-psycho-1991-193",
@@ -2180,7 +2283,8 @@
       "Satire",
       "Dark"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-the-virgin-suicides-1993-194",
@@ -2201,7 +2305,8 @@
       "Literary",
       "Suburbia"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 272
   },
   {
     "id": "book-trainspotting-1993-195",
@@ -2222,7 +2327,8 @@
       "Literary",
       "Addiction"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-fight-club-1996-196",
@@ -2243,7 +2349,8 @@
       "Satire",
       "Cult"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 208
   },
   {
     "id": "book-harry-potter-1997-197",
@@ -2264,7 +2371,8 @@
       "Fantasy",
       "Middle Grade"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 223
   },
   {
     "id": "book-disgrace-1999-198",
@@ -2285,7 +2393,8 @@
       "Literary",
       "Booker"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 220
   },
   {
     "id": "book-the-corrections-2001-199",
@@ -2306,7 +2415,8 @@
       "Literary",
       "Family"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 576
   },
   {
     "id": "book-life-of-pi-2001-200",
@@ -2327,7 +2437,8 @@
       "Literary",
       "Survival"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-the-kite-runner-2003-201",
@@ -2348,7 +2459,8 @@
       "Literary",
       "Redemption"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 400
   },
   {
     "id": "book-never-let-me-go-202",
@@ -2369,7 +2481,8 @@
       "Literary",
       "Science Fiction"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-the-brief-wondrous-life-203",
@@ -2390,14 +2503,15 @@
       "Literary",
       "Pulitzer"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-the-help-2009-204",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "The Help (2009)",
-    "teaser": "Stockett's debut — set in Jackson, Mississippi, in 1962 — is narrated by three voices: Skeeter, a young white woman who wants to be a writer, and two Black maids, Aibileen and Minny, who agree to tell their stories for her book. It sold 10 million copies and became a film, and its central controversy — a white author writing Black maids' voices — is part of its history.",
+    "teaser": "Stockett's debut — set in Jackson, Mississippi, in 1962 — is narrated by three voices: Skeeter, a young white woman who wants to be a writer, and two Black maids, Aibileen and Minny, who agree to tell their stories for her book. It sold 10 million copies and became a film, and its central controversy — a white author writing Black maids' voices.",
     "imageUrl": "",
     "byline": "Kathryn Stockett",
     "exploreAction": {
@@ -2411,7 +2525,8 @@
       "Historical",
       "Civil Rights"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-swamplandia-2011-205",
@@ -2432,7 +2547,8 @@
       "Literary",
       "Magic Realism"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-the-goldfinch-2013-206",
@@ -2453,7 +2569,8 @@
       "Literary",
       "Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 784
   },
   {
     "id": "book-all-the-light-we-207",
@@ -2474,7 +2591,8 @@
       "WWII",
       "Pulitzer"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-the-underground-railroad-2016-208",
@@ -2495,7 +2613,8 @@
       "Historical",
       "Slavery"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-sing-unburied-sing-2017-209",
@@ -2516,7 +2635,8 @@
       "Literary",
       "Ghosts"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-circe-2018-210",
@@ -2537,7 +2657,8 @@
       "Mythology",
       "Retelling"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 400
   },
   {
     "id": "book-piranesi-2020-211",
@@ -2558,7 +2679,8 @@
       "Fantasy",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 272
   },
   {
     "id": "book-sea-of-tranquility-2022-212",
@@ -2579,7 +2701,8 @@
       "Science Fiction",
       "Literary"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-tomorrow-and-tomorrow-2022-213",
@@ -2600,7 +2723,8 @@
       "Literary",
       "Games"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-the-fraud-2023-214",
@@ -2621,7 +2745,8 @@
       "Historical",
       "Literary"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-the-bee-sting-2023-215",
@@ -2642,7 +2767,8 @@
       "Literary",
       "Family"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 592
   },
   {
     "id": "book-tom-lake-2023-216",
@@ -2663,7 +2789,8 @@
       "Literary",
       "Pandemic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-the-heaven-earth-grocery-217",
@@ -2684,7 +2811,8 @@
       "Historical",
       "Community"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 400
   },
   {
     "id": "book-lone-women-2023-218",
@@ -2705,7 +2833,8 @@
       "Horror",
       "Western"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-how-to-say-babylon-219",
@@ -2726,7 +2855,8 @@
       "Memoir",
       "Poetry"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 368
   },
   {
     "id": "book-blackouts-2023-220",
@@ -2747,7 +2877,8 @@
       "Queer",
       "Experimental"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-prophet-song-2023-221",
@@ -2768,7 +2899,8 @@
       "Dystopian",
       "Booker"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-this-other-eden-2023-222",
@@ -2789,7 +2921,8 @@
       "Historical",
       "Pulitzer"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-in-memoriam-2023-223",
@@ -2810,7 +2943,8 @@
       "Historical",
       "WWI"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 400
   },
   {
     "id": "book-let-us-descend-2023-224",
@@ -2831,7 +2965,8 @@
       "Historical",
       "Slavery"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-roman-stories-2023-225",
@@ -2852,7 +2987,8 @@
       "Short Stories",
       "Translation"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-land-of-milk-and-226",
@@ -2873,7 +3009,8 @@
       "Dystopian",
       "Satire"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-family-meal-2023-227",
@@ -2894,7 +3031,8 @@
       "Queer",
       "Grief"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-moby-dick-1851-228",
@@ -2915,7 +3053,8 @@
       "Classic",
       "Epic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 635
   },
   {
     "id": "book-anna-karenina-1877-229",
@@ -2936,7 +3075,8 @@
       "Classic",
       "Literary"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 864
   },
   {
     "id": "book-the-great-gatsby-1925-230",
@@ -2957,7 +3097,8 @@
       "Classic",
       "Jazz Age"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 180
   },
   {
     "id": "book-brave-new-world-1932-231",
@@ -2978,7 +3119,8 @@
       "Dystopian",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-native-son-1940-232",
@@ -2999,7 +3141,8 @@
       "Classic",
       "Race"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-the-catcher-in-the-233",
@@ -3020,7 +3163,8 @@
       "Classic",
       "Coming of Age"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 277
   },
   {
     "id": "book-fahrenheit-451-1953-234",
@@ -3041,14 +3185,15 @@
       "Dystopian",
       "Science Fiction"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-lolita-1955-235",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Lolita (1955)",
-    "teaser": "Nabokov's novel is narrated by Humbert Humbert, a middle-aged European professor who obsesses over his stepdaughter, Dolores 'Lolita' Haze — and the book's scandal obscured its design: it is a confession written for a jury, in which the monster is so eloquent that the reader must work to see past him. Nabokov called the novel his 'love affair with the English language.'",
+    "teaser": "Nabokov's novel is narrated by Humbert Humbert, a middle-aged European professor who obsesses over his stepdaughter, Dolores 'Lolita' Haze — and the book's scandal obscured its design: it is a confession written for a jury, in which the monster is so eloquent that the reader must work to see past him. Nabokov called the novel his 'love affair with the English language.'.",
     "imageUrl": "",
     "byline": "Vladimir Nabokov",
     "exploreAction": {
@@ -3062,7 +3207,8 @@
       "Classic",
       "Unreliable Narrator"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-to-kill-a-mockingbird-236",
@@ -3083,7 +3229,8 @@
       "Classic",
       "Race"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-one-flew-over-the-237",
@@ -3104,7 +3251,8 @@
       "Classic",
       "Counterculture"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-one-hundred-years-of-238",
@@ -3125,7 +3273,8 @@
       "Magic Realism",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 417
   },
   {
     "id": "book-the-handmaids-tale",
@@ -3148,7 +3297,8 @@
       "20th Century",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-if-on-a-winters-night",
@@ -3170,7 +3320,8 @@
       "Metafiction",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 276
   },
   {
     "id": "book-the-remains-of-the-day",
@@ -3192,7 +3343,8 @@
       "Historical",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 258
   },
   {
     "id": "book-pachinko",
@@ -3214,7 +3366,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 496
   },
   {
     "id": "book-the-name-of-the-rose",
@@ -3236,14 +3389,15 @@
       "Mystery",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-never-let-me-go",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Never Let Me Go (2005)",
-    "teaser": "Kazuo Ishiguro's dystopia that hides its dystopia — the narrator, Kathy H., is a carer at a boarding school, and the horror of what the school is for only dawns on you slowly. Ishiguro said he wanted to write about mortality, and cloning was just the vehicle. The novel never uses the word 'clone.'",
+    "teaser": "Kazuo Ishiguro's dystopia that hides its dystopia — the narrator, Kathy H., is a carer at a boarding school, and the horror of what the school is for only dawns on you slowly. Ishiguro said he wanted to write about mortality, and cloning was just the vehicle. The novel never uses the word 'clone.'.",
     "imageUrl": "",
     "byline": "Kazuo Ishiguro",
     "exploreAction": {
@@ -3258,7 +3412,8 @@
       "Dystopian",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-things-fall-apart",
@@ -3280,7 +3435,8 @@
       "Postcolonial",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-midnights-children",
@@ -3302,7 +3458,8 @@
       "Historical",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-disgrace",
@@ -3324,7 +3481,8 @@
       "Nobel",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 220
   },
   {
     "id": "book-white-teeth",
@@ -3346,7 +3504,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-atonement",
@@ -3368,7 +3527,8 @@
       "Historical",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 368
   },
   {
     "id": "book-the-house-of-the-spirits",
@@ -3390,7 +3550,8 @@
       "Historical",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 496
   },
   {
     "id": "book-to-kill-a-mockingbird",
@@ -3412,7 +3573,8 @@
       "Classic",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-nineteen-eighty-four",
@@ -3434,7 +3596,8 @@
       "Political",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 328
   },
   {
     "id": "book-anna-karenina",
@@ -3456,7 +3619,8 @@
       "Classic",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 864
   },
   {
     "id": "book-the-brief-wondrous-life-of-oscar-wao",
@@ -3478,7 +3642,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-the-wind-up-bird-chronicle",
@@ -3500,7 +3665,8 @@
       "Magical Realism",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 640
   },
   {
     "id": "book-the-color-purple",
@@ -3522,7 +3688,8 @@
       "Epistolary",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-sapiens",
@@ -3544,7 +3711,8 @@
       "History",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-a-brief-history-of-time",
@@ -3566,7 +3734,8 @@
       "Science",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-demon-copperhead",
@@ -3588,7 +3757,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-the-secret-history",
@@ -3610,7 +3780,8 @@
       "Mystery",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 640
   },
   {
     "id": "book-parable-of-the-sower",
@@ -3632,7 +3803,8 @@
       "Dystopian",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-the-sympathizer",
@@ -3654,7 +3826,8 @@
       "Historical",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-klara-and-the-sun",
@@ -3676,7 +3849,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-the-goldfinch",
@@ -3698,7 +3872,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 784
   },
   {
     "id": "book-slaughterhouse-five",
@@ -3720,7 +3895,8 @@
       "Anti-War",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-americanah",
@@ -3742,7 +3918,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 496
   },
   {
     "id": "book-the-road",
@@ -3764,7 +3941,8 @@
       "Post-Apocalyptic",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-the-underground-railroad",
@@ -3786,14 +3964,15 @@
       "Speculative",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-erasure",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "Erasure (2001)",
-    "teaser": "Percival Everett's novel about a Black novelist who, enraged by the success of stereotypical 'ghetto fiction,' writes a parody of it under a pseudonym — which becomes a smash hit that the literary establishment takes seriously. The novel was adapted into the Oscar-winning film 'American Fiction' (2023).",
+    "teaser": "Percival Everett's novel about a Black novelist who, enraged by the success of stereotypical 'ghetto fiction,' writes a parody of it under a pseudonym — which becomes a smash hit that the literary establishment takes seriously.",
     "imageUrl": "",
     "byline": "Percival Everett",
     "exploreAction": {
@@ -3808,7 +3987,8 @@
       "Satire",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-piranesi",
@@ -3830,7 +4010,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 272
   },
   {
     "id": "book-my-brilliant-friend",
@@ -3852,7 +4033,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-station-eleven",
@@ -3874,7 +4056,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-the-odyssey",
@@ -3896,7 +4079,8 @@
       "Classical",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-i-know-why-the-caged-bird-sings",
@@ -3918,7 +4102,8 @@
       "Autobiography",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-the-hitchhikers-guide-to-the-galaxy",
@@ -3940,7 +4125,8 @@
       "Comedy",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-half-of-a-yellow-sun",
@@ -3962,7 +4148,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-the-virgin-suicides",
@@ -3984,7 +4171,8 @@
       "Literary",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 272
   },
   {
     "id": "book-crying-in-h-mart",
@@ -4006,7 +4194,8 @@
       "Nonfiction",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-the-power",
@@ -4028,7 +4217,8 @@
       "Feminist",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 400
   },
   {
     "id": "book-homegoing",
@@ -4050,7 +4240,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-the-vanishing-half",
@@ -4072,7 +4263,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-giovannis-room",
@@ -4094,7 +4286,8 @@
       "Literary",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 192
   },
   {
     "id": "book-normal-people",
@@ -4116,7 +4309,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-the-fire-next-time",
@@ -4138,7 +4332,8 @@
       "Nonfiction",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 144
   },
   {
     "id": "book-dubliners",
@@ -4160,14 +4355,15 @@
       "Short Stories",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-the-passion-according-to-gh",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "The Passion According to G.H. (1964)",
-    "teaser": "Clarice Lispector's novel about a wealthy woman in Rio de Janeiro who enters her maid's room and crushes a cockroach — and from that act, has a mystical crisis that dissolves her entire sense of self. The novel is less a story than an extended meditation. Lispector described it as 'the best book I wrote, and I don't understand it.'",
+    "teaser": "Clarice Lispector's novel about a wealthy woman in Rio de Janeiro who enters her maid's room and crushes a cockroach — and from that act, has a mystical crisis that dissolves her entire sense of self. The novel is less a story than an extended meditation. Lispector described it as 'the best book I wrote, and I don't understand it.'.",
     "imageUrl": "",
     "byline": "Clarice Lispector",
     "exploreAction": {
@@ -4182,7 +4378,8 @@
       "Philosophical",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 192
   },
   {
     "id": "book-season-of-migration-to-the-north",
@@ -4204,7 +4401,8 @@
       "Postcolonial",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 176
   },
   {
     "id": "book-a-visit-from-the-goon-squad",
@@ -4226,7 +4424,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-pachinko-novel",
@@ -4248,14 +4447,15 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 496
   },
   {
     "id": "book-the-canterbury-tales",
     "categoryId": "BOOKS",
     "subtype": "Book",
     "name": "The Canterbury Tales (c. 1400)",
-    "teaser": "Geoffrey Chaucer's collection of 24 stories told by pilgrims traveling to Canterbury Cathedral. Each pilgrim tells a tale — knight, miller, wife of Bath, pardoner — in their own voice. Chaucer wrote in Middle English when that was revolutionary: French and Latin were the languages of literature. He died before finishing it; the tales we have are a fragment.",
+    "teaser": "Geoffrey Chaucer's collection of 24 stories told by pilgrims traveling to Canterbury Cathedral. Each pilgrim tells a tale — knight, miller, wife of Bath, pardoner — in their own voice. Chaucer wrote in Middle English when that was revolutionary: French and Latin were the languages of literature. He died before finishing it; the tales we have are a fragment. The Canterbury Tales (c. 1400).",
     "imageUrl": "",
     "byline": "Geoffrey Chaucer",
     "exploreAction": {
@@ -4270,7 +4470,8 @@
       "Classic",
       "Medieval"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 608
   },
   {
     "id": "book-austerlitz",
@@ -4292,7 +4493,8 @@
       "Historical",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-a-wizard-of-earthsea",
@@ -4314,7 +4516,8 @@
       "Young Adult",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 183
   },
   {
     "id": "book-the-bluest-eye",
@@ -4336,7 +4539,8 @@
       "Literary",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-braiding-sweetgrass",
@@ -4358,7 +4562,8 @@
       "Nature",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-on-earth-were-briefly-gorgeous",
@@ -4380,7 +4585,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-if-beale-street-could-talk",
@@ -4402,7 +4608,8 @@
       "Romance",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 208
   },
   {
     "id": "book-the-vaster-wilds",
@@ -4424,7 +4631,8 @@
       "Literary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-the-alchemist",
@@ -4446,7 +4654,8 @@
       "Allegorical",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 208
   },
   {
     "id": "book-the-bee-sting",
@@ -4468,7 +4677,8 @@
       "Contemporary",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 592
   },
   {
     "id": "book-the-midnight-library",
@@ -4490,7 +4700,8 @@
       "Speculative",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-kindred",
@@ -4512,7 +4723,8 @@
       "Historical",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-yellowface",
@@ -4534,7 +4746,8 @@
       "Satire",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-the-sellout",
@@ -4556,7 +4769,8 @@
       "Satire",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-their-eyes-were-watching-god",
@@ -4578,7 +4792,8 @@
       "Harlem Renaissance",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-les-miserables",
@@ -4599,7 +4814,8 @@
       "French",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 1463
   },
   {
     "id": "book-count-of-monte-cristo",
@@ -4620,7 +4836,8 @@
       "French",
       "Revenge"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 1276
   },
   {
     "id": "book-candide",
@@ -4641,7 +4858,8 @@
       "French",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-scarlet-letter",
@@ -4662,7 +4880,8 @@
       "Classic",
       "Symbolism"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-huckleberry-finn",
@@ -4683,7 +4902,8 @@
       "Classic",
       "Mississippi"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-little-women",
@@ -4704,7 +4924,8 @@
       "Coming of Age",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 608
   },
   {
     "id": "book-middlesex",
@@ -4725,7 +4946,8 @@
       "Classic",
       "Provincial"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 880
   },
   {
     "id": "book-bleak-house",
@@ -4746,7 +4968,8 @@
       "Legal",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 880
   },
   {
     "id": "book-vanity-fair",
@@ -4767,7 +4990,8 @@
       "Satire",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 880
   },
   {
     "id": "book-dracula",
@@ -4788,7 +5012,8 @@
       "Horror",
       "Epistolary"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 418
   },
   {
     "id": "book-jekyll-and-hyde",
@@ -4809,7 +5034,8 @@
       "British",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-alice-in-wonderland",
@@ -4830,7 +5056,8 @@
       "British",
       "Nonsense"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 192
   },
   {
     "id": "book-wizard-of-oz",
@@ -4851,7 +5078,8 @@
       "American",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-anne-of-green-gables",
@@ -4872,7 +5100,8 @@
       "Coming of Age",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-secret-garden",
@@ -4893,7 +5122,8 @@
       "Children",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-peter-pan",
@@ -4914,7 +5144,8 @@
       "British",
       "Children"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 208
   },
   {
     "id": "book-treasure-island",
@@ -4935,7 +5166,8 @@
       "British",
       "Pirates"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-twenty-thousand-leagues",
@@ -4956,7 +5188,8 @@
       "French",
       "Adventure"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 480
   },
   {
     "id": "book-notes-from-underground",
@@ -4977,7 +5210,8 @@
       "Philosophy",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-idiot",
@@ -4998,7 +5232,8 @@
       "Classic",
       "Goodness"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 688
   },
   {
     "id": "book-faust",
@@ -5019,7 +5254,8 @@
       "Drama",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 464
   },
   {
     "id": "book-stranger",
@@ -5040,7 +5276,8 @@
       "Existentialism",
       "Nobel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-doctor-zhivago",
@@ -5061,7 +5298,8 @@
       "Nobel",
       "Revolution"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 624
   },
   {
     "id": "book-and-quiet-flows-the-don",
@@ -5082,7 +5320,8 @@
       "Epic",
       "Cossacks"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 1344
   },
   {
     "id": "book-one-day-in-the-life",
@@ -5103,7 +5342,8 @@
       "Nobel",
       "Gulag"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 176
   },
   {
     "id": "book-cancer-ward",
@@ -5124,7 +5364,8 @@
       "Nobel",
       "Hospital"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-we",
@@ -5145,7 +5386,8 @@
       "Dystopia",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-heart-of-the-matter",
@@ -5166,7 +5408,8 @@
       "Faith",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 320
   },
   {
     "id": "book-power-and-the-glory",
@@ -5187,7 +5430,8 @@
       "Faith",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-brideshead-revisited",
@@ -5208,7 +5452,8 @@
       "Faith",
       "Memory"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 432
   },
   {
     "id": "book-decline-and-fall",
@@ -5229,7 +5474,8 @@
       "Comedy",
       "Satire"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-a-handful-of-dust",
@@ -5250,7 +5496,8 @@
       "Satire",
       "Comedy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-lucky-jim",
@@ -5271,7 +5518,8 @@
       "Comedy",
       "Academic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-woman-in-white",
@@ -5292,7 +5540,8 @@
       "Mystery",
       "Victorian"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 640
   },
   {
     "id": "book-moonstone",
@@ -5313,7 +5562,8 @@
       "Mystery",
       "Detective"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 528
   },
   {
     "id": "book-sherlock-holmes-studies",
@@ -5334,7 +5584,8 @@
       "Mystery",
       "Detective"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-hound-of-the-baskervilles",
@@ -5355,7 +5606,8 @@
       "Mystery",
       "Gothic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 192
   },
   {
     "id": "book-and-then-there-were-none",
@@ -5376,7 +5628,8 @@
       "Mystery",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-murder-on-the-orient-express",
@@ -5397,7 +5650,8 @@
       "Mystery",
       "Poirot"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-rebecca",
@@ -5418,14 +5672,15 @@
       "Gothic",
       "Romance"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 416
   },
   {
     "id": "book-jamaica-inn",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "Jamaica Inn",
-    "teaser": "du Maurier's 1936 novel of Mary Yellan, sent to her aunt's Cornish inn on the moors — where the landlord runs a wrecking crew and the storms hide worse. A Gothic thriller of wind, dread, and survival.",
+    "teaser": "Du Maurier's 1936 novel of Mary Yellan, sent to her aunt's Cornish inn on the moors — where the landlord runs a wrecking crew and the storms hide worse. A Gothic thriller of wind, dread, and survival.",
     "imageUrl": "",
     "byline": "Daphne du Maurier",
     "exploreAction": {
@@ -5439,7 +5694,8 @@
       "Gothic",
       "Cornwall"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-to-the-lighthouse",
@@ -5460,7 +5716,8 @@
       "Modernism",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 209
   },
   {
     "id": "book-orlando",
@@ -5481,7 +5738,8 @@
       "Modernism",
       "Gender"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 240
   },
   {
     "id": "book-room-of-ones-own",
@@ -5502,7 +5760,8 @@
       "Essay",
       "Feminist"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-passage-to-india",
@@ -5523,7 +5782,8 @@
       "Empire",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 362
   },
   {
     "id": "book-howards-end",
@@ -5544,7 +5804,8 @@
       "Class",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-sons-and-lovers",
@@ -5565,7 +5826,8 @@
       "Classic",
       "Family"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 432
   },
   {
     "id": "book-women-in-love",
@@ -5586,7 +5848,8 @@
       "Modernism",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-lady-chatterleys-lover",
@@ -5607,7 +5870,8 @@
       "Banned Book",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-good-soldier",
@@ -5628,7 +5892,8 @@
       "Modernism",
       "Unreliable"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-of-human-bondage",
@@ -5649,7 +5914,8 @@
       "Bildungsroman",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 704
   },
   {
     "id": "book-razors-edge",
@@ -5670,7 +5936,8 @@
       "Spiritual",
       "Quest"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-brighton-rock",
@@ -5691,7 +5958,8 @@
       "Thriller",
       "Faith"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 272
   },
   {
     "id": "book-quiet-american",
@@ -5712,7 +5980,8 @@
       "Politics",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 192
   },
   {
     "id": "book-1984-sequel-call",
@@ -5733,7 +6002,8 @@
       "Empire",
       "Colonial"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-down-and-out-in-paris-and-london",
@@ -5754,7 +6024,8 @@
       "Memoir",
       "Poverty"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 240
   },
   {
     "id": "book-homage-to-catalonia",
@@ -5775,7 +6046,8 @@
       "War",
       "Memoir"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-brave-little-tailor",
@@ -5796,7 +6068,8 @@
       "Folk",
       "Children"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 128
   },
   {
     "id": "book-little-prince",
@@ -5817,7 +6090,8 @@
       "Fable",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 96
   },
   {
     "id": "book-night",
@@ -5838,7 +6112,8 @@
       "Memoir",
       "Holocaust"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-a-tale-of-two-cities",
@@ -5859,7 +6134,8 @@
       "Historical",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 512
   },
   {
     "id": "book-david-copperfield",
@@ -5880,7 +6156,8 @@
       "Autobiographical",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 880
   },
   {
     "id": "book-hard-times",
@@ -5901,7 +6178,8 @@
       "Industrial",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-pickwick-papers",
@@ -5922,7 +6200,8 @@
       "Comedy",
       "Serial"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 800
   },
   {
     "id": "book-nicholas-nickleby",
@@ -5943,7 +6222,8 @@
       "Social",
       "Serial"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 960
   },
   {
     "id": "book-tess-of-the-durbervilles",
@@ -5964,7 +6244,8 @@
       "Tragedy",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 512
   },
   {
     "id": "book-far-from-the-madding-crowd",
@@ -5985,7 +6266,8 @@
       "Wessex",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-judge-the-obscure",
@@ -6006,7 +6288,8 @@
       "Class",
       "Tragedy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-mayor-of-casterbridge",
@@ -6027,7 +6310,8 @@
       "Tragedy",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 400
   },
   {
     "id": "book-silas-marner",
@@ -6048,7 +6332,8 @@
       "Fable",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-mill-on-the-floss",
@@ -6069,7 +6354,8 @@
       "Family",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-adam-bede",
@@ -6090,7 +6376,8 @@
       "Realism",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 560
   },
   {
     "id": "book-romola",
@@ -6111,7 +6398,8 @@
       "Historical",
       "Renaissance"
     ],
-    "tier": 3
+    "tier": 3,
+    "pageCount": 640
   },
   {
     "id": "book-shirley",
@@ -6132,7 +6420,8 @@
       "Industrial",
       "Victorian"
     ],
-    "tier": 3
+    "tier": 3,
+    "pageCount": 640
   },
   {
     "id": "book-villette",
@@ -6153,7 +6442,8 @@
       "Modernism",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 624
   },
   {
     "id": "book-agnes-grey",
@@ -6174,7 +6464,8 @@
       "Governess",
       "Victorian"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-tenant-of-wildfell-hall",
@@ -6195,7 +6486,8 @@
       "Feminist",
       "Victorian"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 544
   },
   {
     "id": "book-woman-who-could-not-die",
@@ -6216,7 +6508,8 @@
       "Victorian",
       "Brussels"
     ],
-    "tier": 3
+    "tier": 3,
+    "pageCount": 304
   },
   {
     "id": "book-north-and-south",
@@ -6237,7 +6530,8 @@
       "Industrial",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 496
   },
   {
     "id": "book-bell-jar",
@@ -6258,7 +6552,8 @@
       "Confessional",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-ariel",
@@ -6279,7 +6574,8 @@
       "Poetry",
       "Confessional"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 208
   },
   {
     "id": "book-collected-poems-of-robert-frost",
@@ -6300,7 +6596,8 @@
       "Poetry",
       "New England"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 640
   },
   {
     "id": "book-four-quartets",
@@ -6321,7 +6618,8 @@
       "Poetry",
       "Nobel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 64
   },
   {
     "id": "book-cantos",
@@ -6342,7 +6640,8 @@
       "Poetry",
       "Modernism"
     ],
-    "tier": 3
+    "tier": 3,
+    "pageCount": 848
   },
   {
     "id": "book-walden",
@@ -6363,7 +6662,8 @@
       "Nature",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-civil-disobedience",
@@ -6384,7 +6684,8 @@
       "Essay",
       "Political"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 96
   },
   {
     "id": "book-self-reliance",
@@ -6405,7 +6706,8 @@
       "Essay",
       "Transcendentalism"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 128
   },
   {
     "id": "book-nature",
@@ -6426,7 +6728,8 @@
       "Essay",
       "Transcendentalism"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 96
   },
   {
     "id": "book-essays-of-montaigne",
@@ -6447,7 +6750,8 @@
       "Essay",
       "Renaissance"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 1344
   },
   {
     "id": "book-meditations",
@@ -6468,7 +6772,8 @@
       "Stoicism",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-republic",
@@ -6489,7 +6794,8 @@
       "Philosophy",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 416
   },
   {
     "id": "book-nicomachean-ethics",
@@ -6510,7 +6816,8 @@
       "Philosophy",
       "Ethics"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 368
   },
   {
     "id": "book-confessions-of-st-augustine",
@@ -6531,7 +6838,8 @@
       "Memoir",
       "Theology"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-summa-theologica",
@@ -6552,7 +6860,8 @@
       "Theology",
       "Medieval"
     ],
-    "tier": 3
+    "tier": 3,
+    "pageCount": 1200
   },
   {
     "id": "book-leviathan",
@@ -6573,7 +6882,8 @@
       "Philosophy",
       "Politics"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 688
   },
   {
     "id": "book-second-treatise",
@@ -6594,7 +6904,8 @@
       "Philosophy",
       "Liberalism"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-social-contract",
@@ -6615,7 +6926,8 @@
       "Philosophy",
       "Revolution"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 192
   },
   {
     "id": "book-common-sense",
@@ -6636,7 +6948,8 @@
       "Revolution",
       "Pamphlet"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 128
   },
   {
     "id": "book-rights-of-man",
@@ -6657,7 +6970,8 @@
       "Revolution",
       "Pamphlet"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-fahrenheit-451-burn",
@@ -6678,7 +6992,8 @@
       "Dystopia",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-dandelion-wine",
@@ -6699,7 +7014,8 @@
       "Childhood",
       "Summer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-something-wicked",
@@ -6720,7 +7036,8 @@
       "Horror",
       "Carnival"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-body",
@@ -6741,7 +7058,8 @@
       "Coming of Age",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 96
   },
   {
     "id": "book-shining",
@@ -6762,7 +7080,8 @@
       "Horror",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 480
   },
   {
     "id": "book-it",
@@ -6783,7 +7102,8 @@
       "Horror",
       "Epic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 1168
   },
   {
     "id": "book-misery",
@@ -6804,7 +7124,8 @@
       "Horror",
       "Thriller"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-dead-zone",
@@ -6825,7 +7146,8 @@
       "Horror",
       "Psychic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-murder-on-orient-express-copy",
@@ -6846,14 +7168,15 @@
       "Mystery",
       "Poirot"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-abc-murders",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "The A.B.C. Murders",
-    "teaser": "Christie's 1936 novel where the killer writes to Poirot to announce the next victim — a serial killer's alphabetical game that ends with one of the most audacious twists in detective fiction.",
+    "teaser": "Christie's 1936 novel where the killer writes to Poirot to announce the next victim — a serial killer's alphabetical game that ends with one of the most audacious twists in detective fiction. The A.B.C. Murders.",
     "imageUrl": "",
     "byline": "Agatha Christie",
     "exploreAction": {
@@ -6867,7 +7190,8 @@
       "Mystery",
       "Serial"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-murder-of-roger-ackroyd",
@@ -6888,7 +7212,8 @@
       "Mystery",
       "Twist"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-spy-who-came-in-from-the-cold",
@@ -6909,7 +7234,8 @@
       "Spy",
       "Cold War"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-tinker-tailor",
@@ -6930,7 +7256,8 @@
       "Spy",
       "Smiley"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-call-for-the-dead",
@@ -6951,7 +7278,8 @@
       "Spy",
       "Debut"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 160
   },
   {
     "id": "book-honourable-schoolboy",
@@ -6972,7 +7300,8 @@
       "Spy",
       "Smiley"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 544
   },
   {
     "id": "book-smileys-people",
@@ -6993,7 +7322,8 @@
       "Spy",
       "Karla"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 384
   },
   {
     "id": "book-night-manager",
@@ -7014,7 +7344,8 @@
       "Spy",
       "Thriller"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 432
   },
   {
     "id": "book-constant-gardener",
@@ -7035,7 +7366,8 @@
       "Thriller",
       "Africa"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-perfect-spy",
@@ -7056,7 +7388,8 @@
       "Spy",
       "Autobiographical"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 480
   },
   {
     "id": "book-little-drummer-girl",
@@ -7077,7 +7410,8 @@
       "Spy",
       "Middle East"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 512
   },
   {
     "id": "book-animal-farm-orwell",
@@ -7098,7 +7432,8 @@
       "Allegory",
       "Satire"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-lord-flies-golding",
@@ -7119,7 +7454,8 @@
       "Nobel",
       "Allegory"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-catch22-heller",
@@ -7140,7 +7476,8 @@
       "Satire",
       "War"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 464
   },
   {
     "id": "book-1984-alternate",
@@ -7161,7 +7498,8 @@
       "Alternate History",
       "Hugo"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-ubik",
@@ -7182,7 +7520,8 @@
       "Science Fiction",
       "Reality"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-flowers-for-algernon",
@@ -7203,7 +7542,8 @@
       "Science Fiction",
       "Hugo Nebula"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-stranger-strange-land-heinlein",
@@ -7224,7 +7564,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-moon-harsh-mistress",
@@ -7245,7 +7586,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 384
   },
   {
     "id": "book-starship-troopers",
@@ -7266,7 +7608,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-i-robot",
@@ -7287,7 +7630,8 @@
       "Science Fiction",
       "Robots"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-childhood-end-clarke",
@@ -7308,7 +7652,8 @@
       "Science Fiction",
       "Transcendence"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-timescape",
@@ -7329,7 +7674,8 @@
       "Science Fiction",
       "Nebula"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-dune-messiah-herbert",
@@ -7350,7 +7696,8 @@
       "Science Fiction",
       "Messiah"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-hyperion-simmons",
@@ -7371,7 +7718,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 512
   },
   {
     "id": "book-hitchhiker-adams",
@@ -7392,7 +7740,8 @@
       "Comedy",
       "Science Fiction"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-dirk-gently",
@@ -7413,7 +7762,8 @@
       "Comedy",
       "Time Travel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-long-dark-tea-time",
@@ -7434,7 +7784,8 @@
       "Comedy",
       "Norse"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-good-omens-pratchett-gaiman",
@@ -7455,7 +7806,8 @@
       "Comedy",
       "Apocalypse"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 416
   },
   {
     "id": "book-neverwhere",
@@ -7476,7 +7828,8 @@
       "Fantasy",
       "Urban"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 400
   },
   {
     "id": "book-metamorphoses-ovid",
@@ -7497,7 +7850,8 @@
       "Mythology",
       "Poetry"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 768
   },
   {
     "id": "book-inferno-dante",
@@ -7518,7 +7872,8 @@
       "Poetry",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 432
   },
   {
     "id": "book-canterbury-tales",
@@ -7539,7 +7894,8 @@
       "Poetry",
       "Medieval"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 608
   },
   {
     "id": "book-paradise-lost-milton",
@@ -7560,7 +7916,8 @@
       "Epic",
       "Religion"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 464
   },
   {
     "id": "book-midsummer-nights-dream",
@@ -7581,7 +7938,8 @@
       "Drama",
       "Comedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 176
   },
   {
     "id": "book-tempest-shakespeare",
@@ -7602,7 +7960,8 @@
       "Drama",
       "Romance"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 176
   },
   {
     "id": "book-othello-shakespeare",
@@ -7623,7 +7982,8 @@
       "Drama",
       "Tragedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-sense-and-sensibility",
@@ -7644,7 +8004,8 @@
       "Classic",
       "Romance"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-northanger-abbey",
@@ -7665,7 +8026,8 @@
       "Classic",
       "Satire"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-mansfield-park",
@@ -7686,7 +8048,8 @@
       "Classic",
       "Morality"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-lady-susan",
@@ -7707,7 +8070,8 @@
       "Epistolary",
       "Comedy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 128
   },
   {
     "id": "book-juvenilia-novel",
@@ -7728,7 +8092,8 @@
       "Comedy",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 880
   },
   {
     "id": "book-hero-with-a-thousand-faces",
@@ -7749,7 +8114,8 @@
       "Mythology",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 448
   },
   {
     "id": "book-the-power-of-myth",
@@ -7770,7 +8136,8 @@
       "Mythology",
       "Conversation"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-golden-bough",
@@ -7791,7 +8158,8 @@
       "Mythology",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 880
   },
   {
     "id": "book-annotated-sherlock",
@@ -7812,7 +8180,8 @@
       "Mystery",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-tales-of-othello",
@@ -7833,7 +8202,8 @@
       "Shakespeare",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-plague",
@@ -7854,7 +8224,8 @@
       "Allegory",
       "Nobel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-metamorphosis",
@@ -7875,7 +8246,8 @@
       "Absurd",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 96
   },
   {
     "id": "book-siddhartha",
@@ -7896,7 +8268,8 @@
       "Spiritual",
       "Nobel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 176
   },
   {
     "id": "book-steppenwolf",
@@ -7917,7 +8290,8 @@
       "Modernism",
       "Nobel"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 240
   },
   {
     "id": "book-magic-mountain",
@@ -7938,7 +8312,8 @@
       "Nobel",
       "Time"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 720
   },
   {
     "id": "book-tin-drum",
@@ -7959,7 +8334,8 @@
       "Nobel",
       "Grotesque"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 592
   },
   {
     "id": "book-perfume",
@@ -7980,7 +8356,8 @@
       "Historical",
       "Obsession"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-reader",
@@ -8001,7 +8378,8 @@
       "Guilt",
       "Holocaust"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-unbearable-lightness",
@@ -8022,7 +8400,8 @@
       "Philosophy",
       "Politics"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-godot",
@@ -8043,7 +8422,8 @@
       "Absurd",
       "Drama"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 128
   },
   {
     "id": "book-sun-also-rises",
@@ -8064,7 +8444,8 @@
       "Lost Generation",
       "Nobel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-sound-and-fury",
@@ -8085,7 +8466,8 @@
       "Nobel",
       "Modernism"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-east-of-eden",
@@ -8106,7 +8488,8 @@
       "Epic",
       "Nobel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 608
   },
   {
     "id": "book-native-son",
@@ -8127,7 +8510,8 @@
       "Protest",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 544
   },
   {
     "id": "book-invisible-man",
@@ -8148,7 +8532,8 @@
       "National Book Award",
       "Identity"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 608
   },
   {
     "id": "book-go-tell-it-on-the-mountain",
@@ -8169,7 +8554,8 @@
       "Faith",
       "Harlem"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-autobiography-malcolm-x",
@@ -8190,7 +8576,8 @@
       "Memoir",
       "Civil Rights"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 480
   },
   {
     "id": "book-wretched-of-the-earth",
@@ -8211,7 +8598,8 @@
       "Decolonization",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-silent-spring",
@@ -8232,7 +8620,8 @@
       "Environment",
       "Science"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 400
   },
   {
     "id": "book-sand-county-almanac",
@@ -8253,7 +8642,8 @@
       "Nature",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 240
   },
   {
     "id": "book-guns-germs-steel",
@@ -8274,7 +8664,8 @@
       "History",
       "Pulitzer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 496
   },
   {
     "id": "book-nausea",
@@ -8295,7 +8686,8 @@
       "Existentialism",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 192
   },
   {
     "id": "book-heart-is-a-lonely-hunter",
@@ -8316,7 +8708,8 @@
       "Southern",
       "Loneliness"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 368
   },
   {
     "id": "book-members-of-the-wedding",
@@ -8337,7 +8730,8 @@
       "Coming of Age",
       "Southern"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 192
   },
   {
     "id": "book-herzog",
@@ -8358,7 +8752,8 @@
       "Nobel",
       "Comedy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-confederacy-of-dunces",
@@ -8379,7 +8774,8 @@
       "Comedy",
       "Pulitzer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 416
   },
   {
     "id": "book-night-circus",
@@ -8400,7 +8796,8 @@
       "Fantasy",
       "Romance"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 528
   },
   {
     "id": "book-seven-husbands-of-evelyn-hugo",
@@ -8421,7 +8818,8 @@
       "Contemporary",
       "Romance"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 400
   },
   {
     "id": "book-snow-crash",
@@ -8442,7 +8840,8 @@
       "Cyberpunk",
       "Satire"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 480
   },
   {
     "id": "book-neuromancer",
@@ -8463,7 +8862,8 @@
       "Cyberpunk",
       "Hugo Nebula"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-american-gods",
@@ -8484,7 +8884,8 @@
       "Fantasy",
       "Hugo Nebula"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 592
   },
   {
     "id": "book-anansi-boys",
@@ -8505,14 +8906,15 @@
       "Fantasy",
       "Comedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-guards-guards",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "Guards! Guards!",
-    "teaser": "Terry Pratchett's 1989 Discworld novel that introduced Sam Vimes and the City Watch — a secret society summons a dragon to take over Ankh-Morpork, and the Night Watch has to do something about it.",
+    "teaser": "Terry Pratchett's 1989 Discworld novel that introduced Sam Vimes and the City Watch — a secret society summons a dragon to take over Ankh-Morpork, and the Night Watch has to do something about it. Guards! Guards!",
     "imageUrl": "",
     "byline": "Terry Pratchett",
     "exploreAction": {
@@ -8526,7 +8928,8 @@
       "Fantasy",
       "Comedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-name-of-the-wind",
@@ -8547,7 +8950,8 @@
       "Fantasy",
       "Epic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 672
   },
   {
     "id": "book-way-of-kings",
@@ -8568,7 +8972,8 @@
       "Fantasy",
       "Epic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 1008
   },
   {
     "id": "book-mistborn",
@@ -8589,7 +8994,8 @@
       "Fantasy",
       "Heist"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 544
   },
   {
     "id": "book-project-hail-mary",
@@ -8610,7 +9016,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 496
   },
   {
     "id": "book-android-dream-electric-sheep",
@@ -8631,7 +9038,8 @@
       "Science Fiction",
       "Androids"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-being-mortal",
@@ -8652,7 +9060,8 @@
       "Medicine",
       "Aging"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-when-breath-becomes-air",
@@ -8673,7 +9082,8 @@
       "Memoir",
       "Medicine"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 240
   },
   {
     "id": "book-immortal-life-henrietta-lacks",
@@ -8694,7 +9104,8 @@
       "Science",
       "Ethics"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-sixth-extinction",
@@ -8715,7 +9126,8 @@
       "Environment",
       "Pulitzer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-man-search-for-meaning",
@@ -8736,7 +9148,8 @@
       "Memoir",
       "Psychology"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 200
   },
   {
     "id": "book-thinking-fast-and-slow",
@@ -8757,7 +9170,8 @@
       "Psychology",
       "Nobel"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 512
   },
   {
     "id": "book-homo-deus",
@@ -8778,7 +9192,8 @@
       "Future",
       "Big Ideas"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-outliers",
@@ -8799,7 +9214,8 @@
       "Psychology",
       "Success"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-power-of-habit",
@@ -8820,7 +9236,8 @@
       "Psychology",
       "Self-help"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 400
   },
   {
     "id": "book-deep-work",
@@ -8841,7 +9258,8 @@
       "Productivity",
       "Attention"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-atomic-habits",
@@ -8862,7 +9280,8 @@
       "Habits",
       "Self-improvement"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-short-history-nearly-everything",
@@ -8883,7 +9302,8 @@
       "Science",
       "Popular"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 544
   },
   {
     "id": "book-demon-haunted-world",
@@ -8904,7 +9324,8 @@
       "Science",
       "Skepticism"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 480
   },
   {
     "id": "book-cosmos",
@@ -8925,7 +9346,8 @@
       "Cosmology",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-emperor-of-all-maladies",
@@ -8946,7 +9368,8 @@
       "Medicine",
       "Pulitzer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 592
   },
   {
     "id": "book-gene",
@@ -8967,7 +9390,8 @@
       "Genetics",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 608
   },
   {
     "id": "book-double-helix",
@@ -8988,7 +9412,8 @@
       "Science",
       "Memoir"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 256
   },
   {
     "id": "book-selfish-gene",
@@ -9009,7 +9434,8 @@
       "Evolution",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-freakonomics",
@@ -9030,7 +9456,8 @@
       "Economics",
       "Pop Science"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-fathers-and-sons",
@@ -9051,7 +9478,8 @@
       "Generations",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-resurrection",
@@ -9072,7 +9500,8 @@
       "Justice",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 528
   },
   {
     "id": "book-dead-souls",
@@ -9093,7 +9522,8 @@
       "Satire",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 464
   },
   {
     "id": "book-oblomov",
@@ -9114,7 +9544,8 @@
       "Comedy",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 512
   },
   {
     "id": "book-heart-of-darkness",
@@ -9135,7 +9566,8 @@
       "Colonial",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 112
   },
   {
     "id": "book-lord-jim",
@@ -9156,7 +9588,8 @@
       "Honor",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-turn-of-the-screw",
@@ -9177,7 +9610,8 @@
       "Gothic",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-portrait-of-a-lady",
@@ -9198,7 +9632,8 @@
       "Classic",
       "Freedom"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 640
   },
   {
     "id": "book-remains-of-the-day",
@@ -9219,7 +9654,8 @@
       "Booker",
       "Memory"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 258
   },
   {
     "id": "book-pygmalion",
@@ -9240,7 +9676,8 @@
       "Drama",
       "Class"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 128
   },
   {
     "id": "book-importance-of-being-earnest",
@@ -9261,7 +9698,8 @@
       "Comedy",
       "Drama"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 128
   },
   {
     "id": "book-on-the-road",
@@ -9282,7 +9720,8 @@
       "Beat",
       "Road"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-naked-lunch",
@@ -9303,7 +9742,8 @@
       "Beat",
       "Experimental"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 288
   },
   {
     "id": "book-one-flew-over",
@@ -9324,7 +9764,8 @@
       "Institution",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-canticle-for-leibowitz",
@@ -9345,7 +9786,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 336
   },
   {
     "id": "book-last-unicorn",
@@ -9366,7 +9808,8 @@
       "Fantasy",
       "Lyric"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-earths-sea-cycle",
@@ -9387,7 +9830,8 @@
       "Fantasy",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 183
   },
   {
     "id": "book-lion-witch-wardrobe",
@@ -9408,7 +9852,8 @@
       "Fantasy",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 208
   },
   {
     "id": "book-hobbit",
@@ -9429,7 +9874,8 @@
       "Fantasy",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-princess-bride",
@@ -9450,7 +9896,8 @@
       "Fantasy",
       "Comedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 432
   },
   {
     "id": "book-watership-down",
@@ -9471,7 +9918,8 @@
       "Adventure",
       "Allegory"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 496
   },
   {
     "id": "book-wizard-of-earthsea-tombs",
@@ -9492,7 +9940,8 @@
       "Fantasy",
       "Newbery"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 224
   },
   {
     "id": "book-farthing-wood",
@@ -9513,7 +9962,8 @@
       "Children",
       "Fantasy"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 176
   },
   {
     "id": "book-hamlet",
@@ -9534,7 +9984,8 @@
       "Drama",
       "Tragedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-macbeth",
@@ -9555,7 +10006,8 @@
       "Drama",
       "Ambition"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-king-lear",
@@ -9576,7 +10028,8 @@
       "Drama",
       "Tragedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-romeo-juliet",
@@ -9597,7 +10050,8 @@
       "Drama",
       "Love"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 320
   },
   {
     "id": "book-beowulf",
@@ -9618,7 +10072,8 @@
       "Epic",
       "Heroic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 160
   },
   {
     "id": "book-ramayana",
@@ -9639,7 +10094,8 @@
       "Epic",
       "Mythology"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-mahabharata",
@@ -9660,7 +10116,8 @@
       "Epic",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 880
   },
   {
     "id": "book-thousand-and-one-nights",
@@ -9681,7 +10138,8 @@
       "Folk",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 560
   },
   {
     "id": "book-journey-to-west",
@@ -9702,7 +10160,8 @@
       "Classic",
       "Adventure"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 480
   },
   {
     "id": "book-genji",
@@ -9723,7 +10182,8 @@
       "Classic",
       "Court"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 1216
   },
   {
     "id": "book-love-in-the-time-of-cholera",
@@ -9744,7 +10204,8 @@
       "Nobel",
       "Love"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 448
   },
   {
     "id": "book-pedro-paramo",
@@ -9765,7 +10226,8 @@
       "Magical Realism",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 160
   },
   {
     "id": "book-hopscotch",
@@ -9786,7 +10248,8 @@
       "Experimental",
       "Modernism"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 448
   },
   {
     "id": "book-morel",
@@ -9807,14 +10270,15 @@
       "Science Fiction",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 128
   },
   {
     "id": "book-grapes-of-wrath",
     "categoryId": "BOOKS",
     "subtype": "Novel",
     "name": "The Grapes of Wrath",
-    "teaser": "Steinbeck's 1939 Pulitzer-winning novel of the Joad family driven off the Oklahoma dust bowl toward California — the great American novel of the Depression, of the road, and of 'we.'",
+    "teaser": "Steinbeck's 1939 Pulitzer-winning novel of the Joad family driven off the Oklahoma dust bowl toward California — the great American novel of the Depression, of the road, and of 'we.'.",
     "imageUrl": "",
     "byline": "John Steinbeck",
     "exploreAction": {
@@ -9828,7 +10292,8 @@
       "Pulitzer",
       "Depression"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 464
   },
   {
     "id": "book-of-mice-and-men",
@@ -9849,7 +10314,8 @@
       "Novella",
       "Tragedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 112
   },
   {
     "id": "book-cannery-row",
@@ -9870,7 +10336,8 @@
       "Comedy",
       "Community"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 208
   },
   {
     "id": "book-my-antonia",
@@ -9891,7 +10358,8 @@
       "Prairie",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 272
   },
   {
     "id": "book-death-comes-for-the-archbishop",
@@ -9912,7 +10380,8 @@
       "Southwest",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 304
   },
   {
     "id": "book-bridge-of-sanjay-luis-rey",
@@ -9933,7 +10402,8 @@
       "Pulitzer",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-our-town",
@@ -9954,7 +10424,8 @@
       "Drama",
       "Pulitzer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 192
   },
   {
     "id": "book-ethan-frome",
@@ -9975,7 +10446,8 @@
       "Novella",
       "Tragedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 160
   },
   {
     "id": "book-age-of-innocence",
@@ -9996,7 +10468,8 @@
       "Pulitzer",
       "Manners"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-awakening",
@@ -10017,7 +10490,8 @@
       "Feminist",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 160
   },
   {
     "id": "book-maggie-girl-of-the-streets",
@@ -10038,7 +10512,8 @@
       "Naturalism",
       "Novella"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 112
   },
   {
     "id": "book-sister-carrie",
@@ -10059,7 +10534,8 @@
       "Naturalism",
       "City"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 512
   },
   {
     "id": "book-jungle",
@@ -10080,7 +10556,8 @@
       "Muckraking",
       "Labor"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 416
   },
   {
     "id": "book-progress-and-poverty",
@@ -10101,7 +10578,8 @@
       "Economics",
       "Classic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 608
   },
   {
     "id": "book-up-from-slavery",
@@ -10122,7 +10600,8 @@
       "Memoir",
       "Education"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 352
   },
   {
     "id": "book-souls-of-black-folk",
@@ -10143,7 +10622,8 @@
       "Essays",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-narrative-frederick-douglass",
@@ -10164,7 +10644,8 @@
       "Memoir",
       "Abolition"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 144
   },
   {
     "id": "book-uncle-toms-cabin",
@@ -10185,7 +10666,8 @@
       "Abolition",
       "Classic"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 512
   },
   {
     "id": "book-little-house-on-the-prairie",
@@ -10206,7 +10688,8 @@
       "Children",
       "Pioneer"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-tarzan",
@@ -10227,7 +10710,8 @@
       "Adventure",
       "Pulp"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 352
   },
   {
     "id": "book-dark-forest",
@@ -10248,7 +10732,8 @@
       "Science Fiction",
       "Hugo"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 512
   },
   {
     "id": "book-ball-lightning",
@@ -10269,7 +10754,8 @@
       "Science Fiction",
       "Hard SF"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 384
   },
   {
     "id": "book-solaris",
@@ -10290,7 +10776,8 @@
       "Science Fiction",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 224
   },
   {
     "id": "book-dispossessed",
@@ -10311,7 +10798,8 @@
       "Science Fiction",
       "Utopia"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 384
   },
   {
     "id": "book-martian-chronicles",
@@ -10332,7 +10820,8 @@
       "Science Fiction",
       "Story Cycle"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 288
   },
   {
     "id": "book-rendezvous-with-rama",
@@ -10353,7 +10842,8 @@
       "Science Fiction",
       "Hugo Nebula"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 368
   },
   {
     "id": "book-brave-new-world-revisited",
@@ -10374,7 +10864,8 @@
       "Nonfiction",
       "Politics"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 192
   },
   {
     "id": "book-going-postal",
@@ -10395,7 +10886,8 @@
       "Fantasy",
       "Comedy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 400
   },
   {
     "id": "book-small-gods",
@@ -10416,7 +10908,8 @@
       "Fantasy",
       "Religion"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 336
   },
   {
     "id": "book-norse-mythology",
@@ -10437,7 +10930,8 @@
       "Mythology",
       "Retelling"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 304
   },
   {
     "id": "book-ocean-at-the-end-of-the-lane",
@@ -10458,7 +10952,8 @@
       "Fantasy",
       "Novella"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 256
   },
   {
     "id": "book-graveyard-book",
@@ -10479,7 +10974,8 @@
       "Fantasy",
       "Newbery"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 368
   },
   {
     "id": "book-pratchett-hogfather",
@@ -10500,7 +10996,8 @@
       "Fantasy",
       "Belief"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 416
   },
   {
     "id": "book-far-seer",
@@ -10521,7 +11018,8 @@
       "Fantasy",
       "Epic"
     ],
-    "tier": 2
+    "tier": 2,
+    "pageCount": 464
   },
   {
     "id": "book-gideon-the-ninth",
@@ -10542,7 +11040,8 @@
       "Science Fiction",
       "Fantasy"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 464
   },
   {
     "id": "book-murderbot",
@@ -10563,6 +11062,7 @@
       "Science Fiction",
       "Hugo Nebula"
     ],
-    "tier": 1
+    "tier": 1,
+    "pageCount": 176
   }
 ]

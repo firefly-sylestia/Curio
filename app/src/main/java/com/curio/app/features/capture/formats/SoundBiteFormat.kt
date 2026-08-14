@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -865,7 +866,9 @@ private fun TranscribePanel(
     ) {
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = accent.copy(alpha = 0.1f),
+            // v27n — opaque accent-tinted fill (was 10% alpha, which let the
+            // elevation shadow bleed through).
+            color = lerp(MaterialTheme.colorScheme.surface, accent, 0.10f),
             shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -946,7 +949,8 @@ private fun DictateFieldButton(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(8.dp),
-        color = if (enabled) accent.copy(alpha = 0.10f)
+        // v27n — opaque accent-tinted fill (was 10% alpha).
+        color = if (enabled) lerp(MaterialTheme.colorScheme.surface, accent, 0.10f)
                 else MaterialTheme.colorScheme.surfaceVariant,
         shadowElevation = 2.dp
     ) {

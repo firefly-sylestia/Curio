@@ -86,6 +86,22 @@ data class CurioTopic(
 )
 ```
 
+> **v29 (active schema drift):** the shipped `CurioTopic` in `app/data/CurioTopic.kt`
+> has evolved past this spec — it now carries `tags: List<String>` (dynamic Spin
+> filter chips), `tier: Int` (1 = marquee / human-curated, 2+ = long tail),
+> `byline: String`, plus two **progress-metadata fields** added in v29:
+>
+> ```kotlin
+> val pageCount: Int? = null     // BOOKS — total pages (e.g. 704); powers reading progress
+> val episodeCount: Int? = null  // ANIME — total episodes (e.g. 26); powers watching progress
+> ```
+>
+> These are optional and absent from legacy JSON (null = no progress tracking).
+> Progress is stored per-topic in `TopicProgressStore` (SharedPreferences), shared
+> by the reveal hero card, the Cabinet cards and the entry detail hero — a single
+> floating accent button (slider editor) that reads/writes the same map.
+> Anime films deliberately carry no `episodeCount` (a film has no episodes to track).
+
 ### §2.1 ExploreAction — the new "what to do" requirement
 
 This is the user's "proper explanation of what to do" requirement. Every topic gets ONE structured `ExploreAction`. The Renderer (§2.2) turns it into a card UI; the writer fills the fields.

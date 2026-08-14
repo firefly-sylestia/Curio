@@ -16,7 +16,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -26,6 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -46,6 +53,86 @@ import kotlin.math.floor
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
+
+/**
+ * v27t — global pointer awareness for the pet's eyes: the NavHost root
+ * feeds the window pointer position here, and every [CurioPetSprite]
+ * reads it to aim its eyes at the cursor (Chromebook / desktop) and at
+ * the point you tap/click. Scrolling deliberately does NOT move the eyes.
+ * One tracker serves all pets (floating, flower bed, quests).
+ */
+object PetPointer {
+    /** Last hover/press position in window coordinates (Unspecified = none). */
+    var position by mutableStateOf(Offset.Unspecified)
+    /** The current press point, or null when nothing is held. */
+    var press by mutableStateOf<Offset?>(null)
+    /**
+     * v27v — increments on EVERY pointer event (hover, press, drag, scroll,
+     * release). Sprites key their 2-second look-timeout on it: while events
+     * keep arriving the eyes stay aimed, and ~2s after the last one they
+     * ease back to the neutral glance.
+     */
+    var activityTick by mutableStateOf(0)
+        private set
+
+    /**
+     * Attach to the app root: tracks hover and press so the pet's eyes can
+     * follow the pointer everywhere (not just over the pet). Scrolling does
+     * NOT move the eyes — the pet only looks at where you tap/click:
+     * desktop hover aims the eyes at the cursor, a real tap aims at the tap
+     * point, but once the finger STARTS DRAGGING (a touch-scroll) the aim is
+     * cancelled so the eyes go neutral instead of following the scroll.
+     */
+    @Composable
+    fun trackerModifier(): Modifier = Modifier.pointerInput(Unit) {
+        var pressStart: Offset? = null
+        var dragging = false
+        awaitPointerEventScope {
+            while (true) {
+                // NOTE: use the EVENT's type (PointerEventType) for
+                // scroll/press/release — PointerInputChange.type is a
+                // different enum (PointerType: touch/mouse/stylus).
+                val event = awaitPointerEvent()
+                val change = event.changes.firstOrNull() ?: continue
+                activityTick++
+                when (event.type) {
+                    PointerEventType.Press -> {
+                        press = change.position
+                        pressStart = change.position
+                        dragging = false
+                        position = change.position
+                    }
+                    PointerEventType.Move -> {
+                        val start = pressStart
+                        if (start != null) {
+                            // The finger moved far enough to be a drag (a
+                            // touch-scroll) — cancel the tap-aim so the eyes
+                            // go NEUTRAL instead of following the scroll.
+                            val dist = (change.position - start).getDistance()
+                            if (dist > with(density) { 8.dp.toPx() }) {
+                                dragging = true
+                                press = null
+                                pressStart = null
+                                position = Offset.Unspecified
+                            }
+                        } else if (!dragging) {
+                            // No press active (mouse hover) — follow the
+                            // cursor; while a drag is underway, ignore moves
+                            // so the eyes stay neutral through a scroll.
+                            position = change.position
+                        }
+                    }
+                    PointerEventType.Release -> {
+                        press = null
+                        pressStart = null
+                        dragging = false
+                    }
+                    else -> Unit
+                }
+            }
+        }
+    }
+}
 
 /** Converts an RRGGBB design color into Compose's packed ARGB representation. */
 private fun petDesignColor(hex: String): Color =
@@ -203,7 +290,14 @@ fun CurioPetSprite(
      * animation frame previews exactly as drawn — no moving eyes or body.
      * Used by the timeline editor while editing a frame.
      */
-    staticPose: Boolean = false
+    staticPose: Boolean = false,
+    /**
+     * v27t — pointer-aware eyes: the pet aims its eyes at the cursor
+     * (Chromebook / desktop), looks at the point you press while holding,
+     * and rolls its eyes on wheel scrolls. Off for the designer's static
+     * previews (there the pointer isn't aimed at the sprite).
+     */
+    pointerAware: Boolean = true
 ) {
     val density = LocalDensity.current
     // v8.34 — resolve the active design: the explicit working copy wins;
@@ -211,18 +305,16 @@ fun CurioPetSprite(
     // saved in the playground). Parsing is cheap (16+16 rows) and cached
     // per text via remember.
     val savedText = AppPreferences.petDesignState
+    // v27v — a SAVED custom design ALWAYS wins, regardless of the pet's
+    // growth stage: the old code forced `evolutionDesign(BABY, null)` for
+    // any baby-stage pet (level < 15), so "Save" said success but the pet
+    // never changed for the majority of users. The stage-based evolution
+    // art now only applies when NO custom design exists. Animations, view
+    // angles and the sleep (curled) pose all flow from the winning design
+    // automatically, so a custom pet behaves like its own new pet.
     val activeDesign = remember(savedText, design, stage) {
         val base = design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
-        val resolved = base ?: PetDesign.DEFAULT
-        // Baby remains the original hand-tuned 16×16 form. A fresh evolved
-        // pet gets the new path-specific 64×64 guardian design; an existing
-        // saved/custom design keeps its legacy canvas size unchanged.
-        when {
-            stage == CurioPet.Stage.BABY -> PetDesign.evolutionDesign(CurioPet.Stage.BABY, null)
-            design == null && savedText == null ->
-                PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
-            else -> resolved
-        }
+        base ?: PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
     }
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
     // v8.10 — the scarf/aura accent is hardcoded to the Curio light-theme
@@ -484,10 +576,52 @@ fun CurioPetSprite(
         else -> moodFace.sparkles
     }
 
+    // v27t — pointer-aware eyes: track this sprite's on-screen center and
+    // compute where the cursor is relative to it, so the eyes aim at the
+    // pointer (or the held press point), capped so they never leave the
+    // head.
+    // v27v — the look TIMES OUT: while pointer events keep arriving the eyes
+    // aim at full strength, and ~2s after the last one (or once the press is
+    // released) they ease back to the neutral glance — the pet stops staring
+    // at the last scroll/tap point when you're not touching the screen.
+    // v28 — scrolling (wheel or touch-drag) drives a vertical glance along
+    // the scroll line instead of the old full-circle eye roll.
+    var spriteCenter by remember { mutableStateOf<Offset?>(null) }
+    val pointerPos = PetPointer.position
+    val pressPos = PetPointer.press
+    val lookAt = pressPos ?: pointerPos
+    val lookStrength = remember { Animatable(1f) }
+    LaunchedEffect(PetPointer.activityTick, PetPointer.press, pointerAware) {
+        if (!pointerAware) return@LaunchedEffect
+        lookStrength.snapTo(1f)
+        // While the finger is held down (long-press / button hold) the look
+        // stays; only schedule the fade-out once it's been released.
+        if (PetPointer.press == null) {
+            delay(2_000)
+            lookStrength.animateTo(0f, tween(450, easing = FastOutSlowInEasing))
+        }
+    }
+    val lookCells: Offset = when {
+        pointerAware && spriteCenter != null && lookAt != Offset.Unspecified && lookStrength.value > 0f -> {
+            val d = lookAt - spriteCenter!!
+            val dist = d.getDistance().coerceAtLeast(1f)
+            // Aim saturates within ~200dp — a farther cursor keeps pointing
+            // the same direction without the eyes over-tracking. Scaled by
+            // the v27v timeout so the aim eases back to neutral when idle.
+            val prox = (dist / with(density) { 200.dp.toPx() }).coerceIn(0f, 1f) * lookStrength.value
+            Offset(d.x / dist * 1.15f, d.y / dist * 0.75f) * prox
+        }
+        else -> Offset.Zero
+    }
+
     val desc = contentDescription
     Box(
         modifier = modifier
             .size(spriteSize)
+            .onGloballyPositioned {
+                spriteCenter = it.positionInWindow() +
+                    Offset(it.size.width / 2f, it.size.height / 2f)
+            }
             .then(if (desc != null) Modifier.semantics { this.contentDescription = desc } else Modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -695,8 +829,10 @@ fun CurioPetSprite(
                         // (rows 6-8 instead of 7-9) so there is a clear gap
                         // between them and the mouth — never joined.
                         if (viewAngle != PetViewAngle.BACK && activeCustomGrid == null) translate(
-                            left = (glanceShift + angleFaceShift) * opx,
-                            top = when (viewAngle) {
+                            // v27t — the pointer-aim offsets join the glance
+                            // drift so the eyes track the cursor too.
+                            left = (glanceShift + angleFaceShift + lookCells.x) * opx,
+                            top = lookCells.y * opx + when (viewAngle) {
                                 PetViewAngle.LOOKING_UP -> -2f * opx
                                 PetViewAngle.LOOKING_DOWN -> opx
                                 else -> if (watchingNow) -opx else 0f

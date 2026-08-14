@@ -2288,7 +2288,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Galaxies",
     "name": "The Milky Way's Center",
-    "teaser": "The heart of the Milky Way is a crowded, brilliant region in the constellation Sagittarius — a bulge of billions of old stars, glowing gas clouds and dust lanes, anchored by the supermassive black hole Sagittarius A*. From dark skies, it's visible as a bright swelling of the Milky Way band, though dust hides much of it from optical view; infrared telescopes reveal a dense swarm of stars at its core. Stars here orbit the centre in months, and stellar collisions are common in the crush.",
+    "teaser": "The heart of the Milky Way is a crowded, brilliant region in the constellation Sagittarius — a bulge of billions of old stars, glowing gas clouds and dust lanes, anchored by the supermassive black hole Sagittarius A*. From dark skies, it's visible as a bright swelling of the Milky Way band, though dust hides much of it from optical view; infrared telescopes reveal a dense swarm of stars.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -2924,7 +2924,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Observatories",
     "name": "Light Pollution",
-    "teaser": "Light pollution is the glow of human lights reflecting off the atmosphere, washing out the stars above cities. In truly dark skies, thousands of stars and the Milky Way blaze overhead; in a city, you might see a dozen. The problem is growing — skyglow increased worldwide even with LED lights — but it's reversible: shielding lights to point downward cuts it dramatically. Organizations like the International Dark-Sky Association certify 'dark sky places' where the night still belongs to the stars. The Milky Way has become invisible to a third of humanity.",
+    "teaser": "Light pollution is the glow of human lights reflecting off the atmosphere, washing out the stars above cities. In truly dark skies, thousands of stars and the Milky Way blaze overhead; in a city, you might see a dozen. The problem is growing — skyglow increased worldwide even with LED lights — but it's reversible: shielding lights to point downward cuts it dramatically. Organizations like the International Dark-Sky Association certify 'dark sky places' where the night still.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -3949,7 +3949,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Space Missions",
     "name": "Women in Spaceflight",
-    "teaser": "The women who flew to space in the early era — Valentina Tereshkova, Svetlana Savitskaya, Sally Ride and others — broke the final frontier's glass ceiling one flight at a time. Savitskaya was the first woman to walk in space in 1984, and Helen Sharman became the first British astronaut in 1991. Today women are regular crew members, commanders and spacewalkers on the ISS, and NASA's Artemis program is planning the first woman on the Moon. Their progress mirrors a broader truth: space was built by humanity, and it belongs to everyone.",
+    "teaser": "The women who flew to space in the early era — Valentina Tereshkova, Svetlana Savitskaya, Sally Ride and others — broke the final frontier's glass ceiling one flight at a time. Savitskaya was the first woman to walk in space in 1984, and Helen Sharman became the first British astronaut in 1991. Today women are regular crew members, commanders and spacewalkers on the ISS, and NASA's Artemis program is planning the first woman on the Moon. Their progress mirrors a broader truth: space was built by humanity, and it.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -4309,7 +4309,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Stars",
     "name": "Parsecs and Parallax",
-    "teaser": "The parsec is astronomy's workhorse unit of distance, defined by geometry: one parsec is the distance at which a star appears to shift by one arcsecond as Earth moves from one side of its orbit to the other. It works out to about 3.26 light-years, or 31 trillion kilometres. The nearest star is 1.3 parsecs away; the Milky Way is about 30,000 parsecs across. Astronomers use kiloparsecs and megaparsecs for galaxies and the cosmic web, and the distance-measuring technique itself — parallax — is the first rung of the cosmic distance ladder. (The name comes from 'parallax of one arcsecond' — and yes, Han Solo's Kessel Run was measured in them.)",
+    "teaser": "The parsec is astronomy's workhorse unit of distance, defined by geometry: one parsec is the distance at which a star appears to shift by one arcsecond as Earth moves from one side of its orbit to the other. It works out to about 3.26 light-years, or 31 trillion kilometres. The nearest star is 1.3 parsecs away; the Milky Way is about 30,000 parsecs across. Astronomers use kiloparsecs and megaparsecs for galaxies and the cosmic web, and the distance-measuring technique itself — parallax — is the first rung of the cosmic distance ladder. (The name comes from 'parallax of one arcsecond' — and yes, Han Solo's Kessel Run was measured in them.).",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -5240,7 +5240,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Mysteries",
     "name": "The Rare Earth Hypothesis",
-    "teaser": "The Rare Earth hypothesis argues that complex life like ours may be extraordinarily rare — not because planets are scarce, but because the conditions for animals require an improbable chain of events. The case for it lists the lucky breaks: a stable, single star; a planet with plate tectonics and a magnetic field; a large Moon for stable tides; Jupiter-sized giants to shield against impacts; the right place in the galaxy. The opposing view — the Copernican principle — says we're probably nothing special. The debate shapes how we design the search for life: look for microbes everywhere, or listen for something rarer.",
+    "teaser": "The Rare Earth hypothesis argues that complex life like ours may be extraordinarily rare — not because planets are scarce, but because the conditions for animals require an improbable chain of events. The case for it lists the lucky breaks: a stable, single star; a planet with plate tectonics and a magnetic field; a large Moon for stable tides; Jupiter-sized giants to shield against impacts; the right place in the galaxy. The opposing view — the Copernican principle — says we're probably nothing special. The debate shapes how we design the search for life.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -6817,7 +6817,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Stars",
     "name": "Where the Elements Come From",
-    "teaser": "Every atom in your body was forged in the stars. Hydrogen and helium came from the Big Bang; carbon, nitrogen and oxygen were fused inside stars; and iron, calcium and phosphorus were made in the final stages of massive stars' lives. The elements heavier than iron — gold, silver, uranium — were forged in supernovae and neutron star collisions. When those stars exploded, they scattered their atoms into space, where they mixed into new clouds, new stars and new planets. You are made of star-stuff, recycled across cosmic time. Carl Sagan said it best: 'We are a way for the cosmos to know itself.'",
+    "teaser": "Every atom in your body was forged in the stars. Hydrogen and helium came from the Big Bang; carbon, nitrogen and oxygen were fused inside stars; and iron, calcium and phosphorus were made in the final stages of massive stars' lives. The elements heavier than iron — gold, silver, uranium — were forged in supernovae and neutron star collisions. When those stars exploded, they scattered their atoms into space, where they mixed into new clouds, new stars and new planets. You are made of star-stuff, recycled across cosmic time. Carl Sagan said it best: 'We are a way for the cosmos to know itself.'.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -7234,7 +7234,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Observatories",
     "name": "Seeing and Transparency",
-    "teaser": "'Seeing' is the astronomer's term for how steady the atmosphere is — and it makes or breaks a night of observing. Bad seeing makes stars boil and shimmer like sparks; good seeing holds them steady as pinpoints. It's caused by layers of warm and cool air mixing above your head. Seeing is rated on scales from 1 to 5 or 10, and it varies by site: mountains, oceans and deserts offer steadier air. At the best sites, like Mauna Kea and the Chilean Andes, seeing can be nearly perfect. The atmosphere is the astronomer's nemesis — and learning to read it is part of the craft.",
+    "teaser": "'Seeing' is the astronomer's term for how steady the atmosphere is — and it makes or breaks a night of observing. Bad seeing makes stars boil and shimmer like sparks; good seeing holds them steady as pinpoints. It's caused by layers of warm and cool air mixing above your head. Seeing is rated on scales from 1 to 5 or 10, and it varies by site: mountains, oceans and deserts offer steadier air. At the best sites, like Mauna Kea and the Chilean Andes, seeing can be nearly perfect. The atmosphere is the astronomer's nemesis — and learning to read it.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -10348,7 +10348,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Life in Space",
     "name": "The Martian Subsurface",
-    "teaser": "Mars today is a cold, dry desert, but the surface is not the whole story. Beneath the rusty soil, evidence has been building for a hidden world of water: radar reflections hinting at buried lakes under the south pole, salts that only form in liquid water, and underground ice that extends far from the poles. Underground, the rock would shield any microbes from the harsh radiation that sterilizes the surface, and residual warmth from the planet's core could keep water liquid at depth. That is why the Martian subsurface is now considered one of the most promising places in the solar system to look for life.",
+    "teaser": "Mars today is a cold, dry desert, but the surface is not the whole story. Beneath the rusty soil, evidence has been building for a hidden world of water: radar reflections hinting at buried lakes under the south pole, salts that only form in liquid water, and underground ice that extends far from the poles. Underground, the rock would shield any microbes from the harsh radiation that sterilizes the surface, and residual warmth from the planet's core could keep water liquid at depth. That is why the Martian subsurface is now considered one of the most promising places in the solar system to.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -10538,7 +10538,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Life in Space",
     "name": "Mega-Engineering in Space",
-    "teaser": "In 2015 astronomers noticed something odd around a distant star called Tabby's Star: its light dipped dramatically and irregularly, far more than a passing planet could explain. One bold idea was a Dyson sphere - a giant structure a civilization might build to capture its star's energy, blocking starlight as it passes. Follow-up studies blamed the dimming on dust and comets, and no megastructure has been found, but the episode showed the modern search for intelligence has room for imagination. Even the failed hypothesis taught astronomers how to look for genuinely alien artifacts in starlight.",
+    "teaser": "In 2015 astronomers noticed something odd around a distant star called Tabby's Star: its light dipped dramatically and irregularly, far more than a passing planet could explain. One bold idea was a Dyson sphere - a giant structure a civilization might build to capture its star's energy, blocking starlight as it passes. Follow-up studies blamed the dimming on dust and comets, and no megastructure has been found, but the episode showed the modern search for intelligence has room for imagination. Even the failed hypothesis taught astronomers how to.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -11197,7 +11197,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Space Missions",
     "name": "Landing on the Moon",
-    "teaser": "Landing on the Moon required the most delicate maneuver in all of spaceflight: slowing a fragile spacecraft from 5,900 kilometers per hour to zero, guided only by a computer and a pilot staring out a tiny triangular window. The Apollo lunar module descended on a pillar of rocket fire, its engine throttling up and down as it dodged boulders and craters in search of a flat spot. On July 20, 1969, Neil Armstrong flew past the planned landing site, taking manual control with only seconds of fuel to spare, before the probe touched the dusty surface and he radioed the words the world had waited for: 'The Eagle has landed.'",
+    "teaser": "Landing on the Moon required the most delicate maneuver in all of spaceflight: slowing a fragile spacecraft from 5,900 kilometers per hour to zero, guided only by a computer and a pilot staring out a tiny triangular window. The Apollo lunar module descended on a pillar of rocket fire, its engine throttling up and down as it dodged boulders and craters in search of a flat spot. On July 20, 1969, Neil Armstrong flew past the planned landing site, taking manual control with only seconds of fuel to spare, before the probe touched the dusty surface and he radioed the words the world had waited for: 'The Eagle has landed.'.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -12204,7 +12204,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Observatories",
     "name": "Collimation",
-    "teaser": "Collimation is the art of aligning a telescope's mirrors, and it is the difference between a crisp image and a blurry mess. Over time, bumps and jostles knock a reflector's mirrors out of alignment, and the telescope starts showing stars as blobs instead of points. Collimation is the fix: adjusting screws to bring the mirrors into precise alignment, usually guided by a laser or a simple sight tube. It sounds technical, but it takes minutes once learned, and it is part of owning a reflector. A well-collimated telescope is a joy; a neglected one frustrates everyone who looks through it.",
+    "teaser": "Collimation is the art of aligning a telescope's mirrors, and it is the difference between a crisp image and a blurry mess. Over time, bumps and jostles knock a reflector's mirrors out of alignment, and the telescope starts showing stars as blobs instead of points. Collimation is the fix: adjusting screws to bring the mirrors into precise alignment, usually guided by a laser or a simple sight tube. It sounds technical, but it takes minutes once learned, and it.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -12565,7 +12565,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Galaxies",
     "name": "Seeing Andromeda",
-    "teaser": "The Andromeda Galaxy is the most distant thing the human eye can see without a telescope: a faint smudge of light 2.5 million light-years away, containing a trillion stars. On a dark night, find the constellation Andromeda and look for a soft, elongated glow - the light that left those stars before our ancestors walked the Earth. Andromeda is our Milky Way's giant neighbor, larger than our galaxy, and it is heading toward us; in about 4.5 billion years, the two galaxies will collide and merge into one. Seeing it with your own eyes is a quiet moment of cosmic perspective no photograph can match.",
+    "teaser": "The Andromeda Galaxy is the most distant thing the human eye can see without a telescope: a faint smudge of light 2.5 million light-years away, containing a trillion stars. On a dark night, find the constellation Andromeda and.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -13603,7 +13603,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Astronauts",
     "name": "Record Spaceflights",
-    "teaser": "Spaceflight records read like a hall of fame of endurance and daring. Valery Polyakov holds the record for the longest single stay in space at 437 days. Peggy Whitson has spent the most cumulative time of any American, with 665 days across three missions. The Apollo 10 crew holds the record for the fastest humans ever, reaching 39,897 kilometers per hour on their way to the Moon. The oldest person in space is John Glenn, who flew at 77. And the record for most time in space belongs to Russian cosmonaut Gennady Padalka, with 878 cumulative days. Each record pushes the boundaries of what humans can endure beyond Earth.",
+    "teaser": "Spaceflight records read like a hall of fame of endurance and daring. Valery Polyakov holds the record for the longest single stay in space at 437 days. Peggy Whitson has spent the most cumulative time of any American, with 665 days across three missions. The Apollo 10 crew holds the record for the fastest humans ever, reaching 39,897 kilometers per hour on their way to the Moon. The oldest person in space is John Glenn, who flew at 77. And the record for most time in space.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -14800,7 +14800,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Exoplanets",
     "name": "The Transit Method",
-    "teaser": "The transit method is the exoplanet-hunting technique that has found the most worlds: watch a star and look for the tiny, periodic dimming that happens when a planet passes in front of it. The dip is minuscule - a Jupiter-sized planet dims its star by about one percent, an Earth-sized one by a hundredth of that - and transits last hours. Repeated dips at regular intervals reveal a planet's size and its orbital period. NASA's Kepler and TESS missions have used transits to find thousands of planets. The method also lets astronomers study atmospheres: as starlight filters through a planet's air during transit, its spectrum reveals what gases are there. It is the workhorse of planet hunting.",
+    "teaser": "The transit method is the exoplanet-hunting technique that has found the most worlds: watch a star and.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -16510,7 +16510,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Missions & Programs",
     "name": "Apollo 13",
-    "teaser": "Apollo 13 was meant to be the third Moon landing; it became the most famous rescue in space history. On April 13, 1970, two days into the flight, an oxygen tank exploded in the service module, crippling the spacecraft. The crew — Lovell, Swigert and Haise — survived by climbing into the lunar module, which became an improvised lifeboat with its own oxygen, power and water. They looped around the Moon, rigged a carbon-dioxide scrubber from spare parts, and re-entered with systems running on the edge. The capsule splashed down safely on April 17. The mission's motto, written on a controller's clipboard: 'Failure is not an option.'",
+    "teaser": "Apollo 13 was meant to be the third Moon landing; it became the most famous rescue in space history. On April 13, 1970, two days into the flight, an oxygen tank exploded in the service module, crippling the spacecraft. The crew — Lovell, Swigert and Haise — survived by climbing into the lunar module, which became an improvised lifeboat with its own oxygen, power and water. They looped around the Moon, rigged a carbon-dioxide scrubber from spare parts, and re-entered with systems running on the edge. The capsule splashed down safely on April 17. The mission's motto, written on a controller's clipboard: 'Failure is not an option.'.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -16681,7 +16681,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Astrobiology",
     "name": "Astrobiology",
-    "teaser": "Astrobiology is the science of life in the universe — where it comes from, where it might exist, and how to find it. It's a field stitched together from biology, chemistry, astronomy and planetary science, asking questions like: How does life begin? Could it survive on Mars or Europa? What would alien life look like? Astrobiologists study Earth's extremes — deep-sea vents, Antarctic ice, hot springs — to understand life's limits, and they design missions to seek life elsewhere. No alien life has been found yet, but the field's logic is simple: the universe is vast and full of planets, and we're just beginning to look for company.",
+    "teaser": "Astrobiology is the science of life in the universe — where it comes from, where it might exist, and how to find it. It's a field stitched together from biology, chemistry, astronomy and planetary science, asking questions like: How does life begin? Could it survive on Mars or Europa? What would alien life look like? Astrobiologists study Earth's extremes — deep-sea vents, Antarctic ice, hot springs — to understand life's limits, and they design missions to seek life elsewhere. No alien life has been found yet, but the field's logic is simple: the universe is vast and full of planets, and we're just beginning to.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -17023,7 +17023,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Astrobiology",
     "name": "Why Life Uses Carbon",
-    "teaser": "All life on Earth is carbon-based — and for good reason. Carbon is uniquely versatile: it can form four stable bonds, chain into long molecules, make rings and complex structures, and hold the information of DNA. It's the fourth most abundant element in the universe, forged in stars and scattered by supernovae, and it's everywhere: in comets, interstellar clouds and meteorites. Astrobiologists consider carbon the most likely basis for alien life too, since the chemistry is so rich and the element so common. That's why biosignature hunting focuses on carbon chemistry — methane, organic molecules, the building blocks of life. Life elsewhere may be radically different — but if it's anywhere, it's probably made of the same stuff that made us.",
+    "teaser": "All life on Earth is carbon-based.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -17631,7 +17631,7 @@
     "categoryId": "ASTRONOMY",
     "subtype": "Planetary Exploration",
     "name": "InSight",
-    "teaser": "InSight was the geophysicist of Mars missions: a stationary lander designed to listen to the planet's heartbeat. Landing in 2018, it deployed the first seismometer ever placed on Mars and detected more than 1,300 marsquakes, revealing the planet's interior structure for the first time - the thickness of its crust, the nature of its mantle, and the state of its core. It also tried to hammer a heat probe into the surface, which stubbornly refused to dig, a famous partial failure. InSight's quake data showed that Mars is seismically active, and that its core is larger and less dense than expected. It fell silent in 2022 after its solar panels choked with dust, having given Mars its first 'ear to the ground.'",
+    "teaser": "InSight was the geophysicist of Mars missions: a stationary lander designed to listen to the planet's heartbeat. Landing in 2018, it deployed the first seismometer ever placed on Mars and detected more than 1,300 marsquakes, revealing the planet's interior structure for the first time - the thickness of its crust, the nature of its mantle, and the state of its core. It also tried to hammer a heat probe into the surface, which stubbornly refused to dig, a famous partial failure. InSight's quake data showed that Mars is seismically active, and th.",
     "imageUrl": "",
     "tier": 1,
     "tags": [

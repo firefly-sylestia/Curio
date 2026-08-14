@@ -362,7 +362,9 @@ private fun JournalVoiceNoteRow(
         AudioRecorder.State.IDLE -> Surface(
             onClick = onRecord,
             shape = RoundedCornerShape(12.dp),
-            color = tint,
+            // v29 — opaque fill (no transparency): the translucent tint
+            // looked broken after the border removal.
+            color = categoryTintFill(accent),
             shadowElevation = 2.dp
         ) {
             Row(
@@ -387,7 +389,8 @@ private fun JournalVoiceNoteRow(
         AudioRecorder.State.RECORDING,
         AudioRecorder.State.PAUSED -> Surface(
             shape = RoundedCornerShape(12.dp),
-            color = tint,
+            // v29 — opaque fill (no transparency).
+            color = categoryTintFill(accent),
             shadowElevation = 2.dp
         ) {
             Row(
@@ -429,7 +432,8 @@ private fun JournalVoiceNoteRow(
 
         AudioRecorder.State.STOPPED -> Surface(
             shape = RoundedCornerShape(12.dp),
-            color = tint,
+            // v29 — opaque fill (no transparency).
+            color = categoryTintFill(accent),
             shadowElevation = 2.dp
         ) {
             Row(

@@ -19,7 +19,8 @@
       "Drama",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 26
   },
   {
     "id": "anime-cowboy-bebop",
@@ -41,7 +42,8 @@
       "Jazz",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 26
   },
   {
     "id": "anime-steins-gate",
@@ -63,7 +65,8 @@
       "Drama",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 24
   },
   {
     "id": "anime-fullmetal-alchemist-brotherhood",
@@ -85,7 +88,8 @@
       "Drama",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 64
   },
   {
     "id": "anime-mob-psycho-100",
@@ -107,7 +111,8 @@
       "Supernatural",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 37
   },
   {
     "id": "anime-one-punch-man",
@@ -129,7 +134,8 @@
       "Superhero",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 24
   },
   {
     "id": "anime-spy-x-family",
@@ -151,14 +157,15 @@
       "Family",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 37
   },
   {
     "id": "anime-bocchi-the-rock",
     "categoryId": "ANIME",
     "subtype": "Anime",
     "name": "Bocchi the Rock! (2022)",
-    "teaser": "The anime's animation budget went into a girl playing guitar alone in a closet — the show's visuals (including the famous 'paper cutout' panic moments) made it the most-discussed anime of its season.",
+    "teaser": "The anime's animation budget went into a girl playing guitar alone in a closet — the show's visuals (including the famous 'paper cutout' panic moments) made it the most-discussed anime of its season. Bocchi the Rock!",
     "imageUrl": "",
     "byline": "CloverWorks",
     "exploreAction": {
@@ -173,7 +180,8 @@
       "Slice of Life",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 12
   },
   {
     "id": "anime-k-on",
@@ -195,7 +203,8 @@
       "Slice of Life",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 13
   },
   {
     "id": "anime-anohana-the-flower-we-saw-that-day",
@@ -217,7 +226,8 @@
       "Slice of Life",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 11
   },
   {
     "id": "anime-your-lie-in-april",
@@ -239,7 +249,8 @@
       "Romance",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 22
   },
   {
     "id": "anime-march-comes-in-like-a-lion",
@@ -261,7 +272,8 @@
       "Psychological",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 44
   },
   {
     "id": "anime-ping-pong-the-animation",
@@ -283,7 +295,8 @@
       "Drama",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 11
   },
   {
     "id": "anime-monster",
@@ -305,7 +318,8 @@
       "Mystery",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 74
   },
   {
     "id": "anime-paranoia-agent",
@@ -327,7 +341,8 @@
       "Surreal",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 13
   },
   {
     "id": "anime-serial-experiments-lain",
@@ -349,7 +364,8 @@
       "Philosophical",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 13
   },
   {
     "id": "anime-psycho-pass",
@@ -371,7 +387,8 @@
       "Dystopian",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 22
   },
   {
     "id": "anime-puella-magi-madoka-magica",
@@ -393,7 +410,8 @@
       "Drama",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 12
   },
   {
     "id": "anime-fate-zero",
@@ -415,7 +433,8 @@
       "Drama",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 25
   },
   {
     "id": "anime-dr-stone",
@@ -437,7 +456,8 @@
       "Comedy",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 24
   },
   {
     "id": "anime-that-time-i-got-reincarnated-as-a-slime",
@@ -459,7 +479,8 @@
       "Comedy",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 48
   },
   {
     "id": "anime-re-zero",
@@ -481,14 +502,15 @@
       "Thriller",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 50
   },
   {
     "id": "anime-konosuba-god-s-blessing-on-this-wonderful-world",
     "categoryId": "ANIME",
     "subtype": "Anime",
     "name": "Konosuba: God's Blessing on This Wonderful World! (2016)",
-    "teaser": "The isekai parody that made the genre laugh at itself — the protagonist's party is a useless goddess, a masochistic crusader and a loli mage who only casts one spell, and the show's comedy is the plot.",
+    "teaser": "The isekai parody that made the genre laugh at itself — the protagonist's party is a useless goddess, a masochistic crusader and a loli mage who only casts one spell, and the show's comedy is the plot. Konosuba: God's Blessing on This Wonderful World!",
     "imageUrl": "",
     "byline": "Studio Deen",
     "exploreAction": {
@@ -503,7 +525,8 @@
       "Fantasy",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 31
   },
   {
     "id": "anime-mushoku-tensei-jobless-reincarnation",
@@ -525,7 +548,8 @@
       "Adventure",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 48
   },
   {
     "id": "anime-hunter-x-hunter-2011",
@@ -547,7 +571,8 @@
       "Action",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 148
   },
   {
     "id": "anime-gintama-tv",
@@ -569,7 +594,8 @@
       "Historical",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 201
   },
   {
     "id": "anime-jujutsu-kaisen-tv",
@@ -591,7 +617,8 @@
       "Dark Fantasy",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 47
   },
   {
     "id": "anime-demon-slayer-tv",
@@ -613,7 +640,8 @@
       "Dark Fantasy",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 55
   },
   {
     "id": "anime-chainsaw-man-tv",
@@ -635,7 +663,8 @@
       "Horror",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 12
   },
   {
     "id": "anime-vinland-saga-tv",
@@ -657,7 +686,8 @@
       "Action",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 48
   },
   {
     "id": "anime-the-promised-neverland-tv",
@@ -679,14 +709,15 @@
       "Horror",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 23
   },
   {
     "id": "anime-haikyuu-tv",
     "categoryId": "ANIME",
     "subtype": "Anime",
     "name": "Haikyuu!! (TV) (2014)",
-    "teaser": "The volleyball anime with correct physics — the rallies are choreographed so you can follow the ball's trajectory, and the 'low height' protagonist is the show's thesis about limits.",
+    "teaser": "The volleyball anime with correct physics — the rallies are choreographed so you can follow the ball's trajectory, and the 'low height' protagonist is the show's thesis about limits. Haikyuu!!",
     "imageUrl": "",
     "byline": "Production I.G",
     "exploreAction": {
@@ -701,7 +732,8 @@
       "Volleyball",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 85
   },
   {
     "id": "anime-attack-on-titan-tv",
@@ -723,7 +755,8 @@
       "Dystopian",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 89
   },
   {
     "id": "anime-death-note-tv",
@@ -745,7 +778,8 @@
       "Mystery",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 37
   },
   {
     "id": "anime-naruto-tv",
@@ -767,7 +801,8 @@
       "Ninja",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 220
   },
   {
     "id": "anime-bleach-tv",
@@ -789,7 +824,8 @@
       "Shonen",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 366
   },
   {
     "id": "anime-dragon-ball-z",
@@ -811,7 +847,8 @@
       "Adventure",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 291
   },
   {
     "id": "anime-my-hero-academia-tv",
@@ -833,7 +870,8 @@
       "Shonen",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 159
   },
   {
     "id": "anime-frieren-beyond-journey-s-end-tv",
@@ -855,7 +893,8 @@
       "Slice of Life",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "episodeCount": 28
   },
   {
     "id": "anime-spirited-away",

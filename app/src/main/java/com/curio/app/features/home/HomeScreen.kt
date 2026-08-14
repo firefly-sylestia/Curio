@@ -59,16 +59,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -79,7 +72,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
@@ -105,8 +97,12 @@ import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
+import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.paperStatCardColor
+import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
@@ -116,6 +112,7 @@ import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioForwardArrow
+import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
@@ -130,8 +127,10 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
@@ -211,6 +210,40 @@ private data class HomeHeroPair(
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
+    // v27u — Home tint experiments (Settings → Experiments → Home tint):
+    // the Home background + bottom nav can wear a category's tint. When
+    // "Follow my Spin lane" is on it wins over the manual picker (the
+    // manual toggles gray out in Experiments); otherwise the picker's
+    // category is used. Everything is OFF by default — Home stays plain.
+    val homeTintFollowLane = AppPreferences.homeTintFollowLaneState
+    val homeTintOn = homeTintFollowLane || AppPreferences.homeTintState
+    val homeTintCat: CurioCategory = if (homeTintFollowLane) {
+        val lane = runCatching { AppPreferences.getLastSpinCategories(context).singleOrNull() }
+            .getOrNull() ?: CategoryId.WILDCARD
+        CurioCategories.byId(lane)
+    } else {
+        val id = runCatching { CategoryId.valueOf(AppPreferences.homeTintCategoryIdState) }
+            .getOrDefault(CategoryId.WILDCARD)
+        CurioCategories.byId(id)
+    }
+    val homeBg = if (homeTintOn) homeTintCat.categoryBackgroundWash()
+        else settingsRoseAccent().copy(alpha = 0.10f).compositeOver(MaterialTheme.colorScheme.background)
+    // v27v — the quest hero tint resolution lives here at the TOP of the
+    // screen so the sticky top-bar pills (which render OUTSIDE the scroll
+    // column) can share it: when "Hero tint too" is on, the menu + profile
+    // pills wear the same tinted accent + on-accent ink as the hero instead
+    // of always falling back to the rose accent.
+    val heroTintOn = homeTintOn && !homeTintFollowLane && AppPreferences.homeHeroTintState
+    val heroFill = if (heroTintOn) homeTintCat.themedAccent() else homeRoseAccent()
+    // v28 — dark mode: the tinted hero's title + sticky pills stay
+    // white/creamish (never the category's tinted light twin); light mode
+    // keeps the pastel-aware on-accent ink as before.
+    val questInk = if (heroTintOn) homeTintCat.heroHeaderInk() else homeReadableInk(heroFill)
+    // Publish the wash so the Scaffold-level bottom nav (which can't read
+    // this screen's state) blends with the tinted Home page.
+    LaunchedEffect(homeBg) {
+        CurioNavTint.publishHomeWash(if (homeTintOn) homeBg else null)
+    }
     val displayName = remember { AppPreferences.getDisplayName(context) }
     // Saved-shelf unsave confirmation — set when the user taps the remove
     // bookmark on a saved quote row; the dialog confirms before removal.
@@ -307,12 +340,13 @@ fun HomeScreen(navController: NavController) {
         },
         gesturesEnabled = drawerState.isOpen || drawerState.isAnimationRunning
     ) {
-        // v6.7 — Home sits on the plain theme background: the category tint
-        // wash is removed from Home (other screens still tint via Settings).
+        // v6.7 — Home sits on the plain theme background (the category tint
+        // wash was removed from Home); v27u — the "Home tint" experiment can
+        // restore a category-tinted background.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(homeBg)
         ) {
             // ── Watermark backdrop — muted category glyphs behind all ──
             //    content (same treatment as the Spin page). The quest is
@@ -357,11 +391,10 @@ fun HomeScreen(navController: NavController) {
             // chip row is gone). The banner wears the muted rose-wood hero
             // accent — in pastel mode (the shipped default) it resolves to
             // the airy rose-wood pastel twin, otherwise the calm base.
-            val heroFill = homeRoseAccent()
-            // Use the actual pastel fill as the ink source too, so the
-            // cleaner pink-rose hue carries through the greeting, stat icons
-            // and hero watermark instead of falling back to a brown raw accent.
-            val questInk = homeReadableInk(heroFill)
+            // v27u/v27v — hero tint is resolved at the TOP of the screen
+            // (shared with the sticky pills); questInk = the readable ink on
+            // the active fill, carried through greeting, stat icons + watermark.
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -492,7 +525,11 @@ fun HomeScreen(navController: NavController) {
                             // v27 — experimental paper-title underline (two
                             // short lines under the name; OFF by default).
                             if (AppPreferences.paperHeaderCutsState) {
-                                PaperTitleLines(ink = questInk)
+                                PaperTitleLines(
+                                    ink = questInk,
+                                    title = displayName,
+                                    fontSize = 36.sp
+                                )
                             }
                             // Flex spacer — pins the stat card to the bottom
                             // of the banner, just above the tear.
@@ -506,10 +543,14 @@ fun HomeScreen(navController: NavController) {
                             // light, a warm rose-brown in dark) when the
                             // "Paper stat card" experiment is on.
                             val paperStatsOn = AppPreferences.paperStatCardsState
-                            val paperStatBg = if (isCurioDarkTheme())
-                                lerp(heroFill, Color(0xFF2A211C), 0.50f)
-                            else
-                                lerp(heroFill, Color(0xFFFFF6EB), 0.62f)
+                            // v27u — shared paper color (same cream/rose-brown
+                            // blend Profile's stat pane uses). With the Home
+                            // tint on, the stat card takes a 5% whisper of the
+                            // category shade — creamy, not colored.
+                            val statGlass = if (homeTintOn) lerp(heroFill, homeTintCat.accent, 0.05f) else heroFill
+                            val paperStatBg = paperStatCardColor(heroFill).let { base ->
+                                if (homeTintOn) lerp(base, homeTintCat.accent, 0.05f) else base
+                            }
                             // v27h — the Topics stat always shows the TRUE
                             // catalog total: the splash warm-cache seeds the
                             // first frame, then a lightweight IO count of the
@@ -534,61 +575,43 @@ fun HomeScreen(navController: NavController) {
                             // path so the holes stay transparent and the hero
                             // banner shows through.
                             val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
+                            val ringsOn = holesOn && AppPreferences.paperHoleRingsState
+                            // v27v — which 3D ring look the holes wear.
+                            val ringStyle = AppPreferences.paperHoleRingStyleState
                             Surface(
                                 shape = statShape,
-                                color = if (holesOn) Color.Transparent else if (paperStatsOn) paperStatBg else Color.Transparent,
-                                shadowElevation = if (paperStatsOn) 3.dp else 0.dp
+                                color = Color.Transparent,
+                                shadowElevation = if (paperStatsOn) 3.dp else 0.dp,
+                                // v28 — dark mode elevation visibility
+                                // (glow + hairline on the paper card).
+                                modifier = if (paperStatsOn) {
+                                    Modifier
+                                        .curioDarkGlow(3.dp, statShape)
+                                } else Modifier
                             ) {
                                 // The fill must wear the card's own shape —
                                 // Surface does not clip its content, so a plain
                                 // background() would bleed square corners past
                                 // the torn/rounded border.
+                                // v27u — the paper surface (fill + 3-hole column
+                                // + pressed rims or tilted book rings) lives in
+                                // the shared paperStatCardFill component, so
+                                // Profile's stat pane wears the same card.
                                 Box(
                                     modifier = when {
-                                        holesOn -> Modifier.drawWithCache {
-                                            val holeR = 5.dp.toPx()
-                                            val holeX = 13.dp.toPx()
-                                            // Punch through the SAME outline the
-                                            // Surface wears (torn or rounded), so
-                                            // the card edge and the holes read as
-                                            // one piece of paper.
-                                            val outline = statShape.createOutline(size, LayoutDirection.Ltr, this)
-                                            val basePath = (outline as? Outline.Generic)?.path
-                                            val path = Path().apply {
-                                                if (basePath != null) {
-                                                    addPath(basePath)
-                                                } else {
-                                                    addRoundRect(
-                                                        RoundRect(Rect(Offset.Zero, size), CornerRadius(20.dp.toPx()))
-                                                    )
-                                                }
-                                                repeat(3) { i ->
-                                                    val cy = size.height * (i + 1) / 4f
-                                                    addOval(Rect(Offset(holeX, cy), holeR), Path.Direction.Clockwise)
-                                                }
-                                                fillType = PathFillType.EvenOdd
-                                            }
-                                            onDrawBehind {
-                                                drawPath(path, paperStatBg)
-                                                // A faint pressed rim around each
-                                                // hole — the paper edge catching light.
-                                                repeat(3) { i ->
-                                                    val cy = size.height * (i + 1) / 4f
-                                                    drawCircle(
-                                                        color = questInk.copy(alpha = 0.15f),
-                                                        radius = holeR + 1.5.dp.toPx(),
-                                                        center = Offset(holeX, cy),
-                                                        style = Stroke(width = 1.5.dp.toPx())
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        paperStatsOn -> Modifier.background(paperStatBg, statShape)
+                                        paperStatsOn -> Modifier.paperStatCardFill(
+                                            shape = statShape,
+                                            fill = paperStatBg,
+                                            holesOn = holesOn,
+                                            ringsOn = ringsOn,
+                                            ringStyle = ringStyle,
+                                            ink = questInk
+                                        )
                                         else -> Modifier.background(
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    heroFill.copy(alpha = 0.12f),
-                                                    lerp(heroFill, Color.White, 0.26f).copy(alpha = 0.55f)
+                                                    statGlass.copy(alpha = 0.12f),
+                                                    lerp(statGlass, Color.White, 0.26f).copy(alpha = 0.55f)
                                                 )
                                             ),
                                             RoundedCornerShape(20.dp)
@@ -1038,14 +1061,11 @@ fun HomeScreen(navController: NavController) {
             val frostShift = FastOutSlowInEasing.transform(stickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
             val stickyDark = isCurioDarkTheme()
-            // Re-resolve the hero ink here — the original questInk lives in
-            // the scroll Column's scope; the sticky bar is OUTSIDE it.
-            val heroPillBg = homeRoseAccent()
-            // In default light mode the old shared pastel helper returned
-            // white, which made the menu/profile glyphs disappear into the
-            // pale floating pill. Keep pastel and dark behavior intact, but
-            // use the theme's readable dark ink for the default light state.
-            val heroPillIcon = homeReadableInk(heroPillBg)
+            // v27v — the resting pills follow the HERO TINT (hoisted at the
+            // top of the screen): when "Hero tint too" is on, the menu +
+            // profile pills wear the tinted accent + on-accent ink.
+            val heroPillBg = heroFill
+            val heroPillIcon = questInk
             val heroPillRim = lerp(heroPillBg, heroPillIcon, 0.42f)
             // Both morph endpoints are fully opaque. The old hero endpoint
             // used a translucent ink wash, which let the banner show through
@@ -1250,6 +1270,8 @@ private fun TopBarPill(
         shadowElevation = elevation,
         modifier = Modifier
             .size(42.dp)
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(elevation, shape)
             // Material's default indication is a circular ripple. On these
             // small floating pills it expands beyond the color fade and reads
             // as a circular visual glitch, so remove the ripple and let the
@@ -1488,8 +1510,12 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = cat.categorySurface(),
-        shadowElevation = 0.dp,
-        modifier = Modifier.fillMaxWidth()
+        // v27u — recents rows sit on a soft 2dp lift.
+        shadowElevation = 2.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier
@@ -1669,7 +1695,10 @@ private fun FirstTimeEmpty(
                     // secondary button never reads as a foreign cream pill
                     // on the tinted first-run card.
                     color = lerp(surface, MaterialTheme.colorScheme.surfaceContainerLow, 0.5f),
-                    shadowElevation = 2.dp
+                    shadowElevation = 2.dp,
+                    // v28 — dark mode elevation visibility.
+                    modifier = Modifier
+                        .curioDarkGlow(2.dp, RoundedCornerShape(50))
                 ) {
                     Text(
                         "Pick a lane",
@@ -2056,8 +2085,12 @@ private fun ExploreTopicRow(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = category.categorySurface(),
-        shadowElevation = 0.dp,
-        modifier = Modifier.fillMaxWidth()
+        // v27u — recents rows sit on a soft 2dp lift.
+        shadowElevation = 2.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier
@@ -2085,11 +2118,15 @@ private fun ExploreTopicRow(
                         // unexplored earlier and came back to (resumed).
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = accent.copy(alpha = 0.14f),
+                            // v27n — opaque tinted pill (was 14% alpha, which
+                            // let the elevation shadow bleed through).
+                            color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
                             // Same hairline rim as the detail page's #tag
                             // chips — the deep ink text + pastel fill alone
                             // read muddy on the tinted card (v7.32).
-                            shadowElevation = 2.dp
+                            // v27u — pill lift trimmed to 1dp so it reads as
+                            // a chip on the card rather than a floating tile.
+                            shadowElevation = 1.dp
                         ) {
                             Text(
                                 text = tag,
@@ -2159,6 +2196,8 @@ private fun CurrentlyExploringCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(24.dp))
     ) {
         Box {
             // Watermark glyph — the session's category, like the hero's.
@@ -2178,11 +2217,14 @@ private fun CurrentlyExploringCard(
             Surface(
                 onClick = onStop,
                 shape = CircleShape,
-                color = accent.copy(alpha = 0.14f),
+                // v27n — opaque tinted stop button (was 14% alpha).
+                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
                 shadowElevation = 2.dp,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(10.dp)
+                    // v28 — dark mode elevation visibility.
+                    .curioDarkGlow(2.dp, CircleShape)
             ) {
                 CurioIcon(
                     name = CurioIcons.Stop,

@@ -59,6 +59,7 @@ import com.curio.app.data.AudioQuality
 import com.curio.app.data.AudioQualitySettings
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -85,6 +86,26 @@ enum class SettingsPage(val title: String, val subtitle: String) {
     PREFERENCES("Preferences", "Search, explore, and pet behavior"),
     RECORDING("Recording", "Voice-note quality and dictation"),
     DATA("Backup & restore", "Keep your captures safe")
+}
+
+/**
+ * v27t — the rows of one settings page, standalone. Rendered by
+ * [SettingsSectionScreen] behind its hero, and reused by the wide two-pane
+ * hub ([SettingsHubScreen]) so the tablet Settings screen shows the nav list
+ * on the left and the selected page's options on the right.
+ */
+@Composable
+internal fun SettingsPageContent(
+    page: SettingsPage,
+    navController: NavController,
+    highlightKey: String? = null
+) {
+    when (page) {
+        SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
+        SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
+        SettingsPage.RECORDING -> RecordingSection(highlightKey)
+        SettingsPage.DATA -> DataSection(navController, highlightKey)
+    }
 }
 
 @Composable
@@ -132,12 +153,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         ) {
             item { CurioSectionLabel(page.title) }
             item {
-                when (page) {
-                    SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
-                    SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
-                    SettingsPage.RECORDING -> RecordingSection(highlightKey)
-                    SettingsPage.DATA -> DataSection(navController, highlightKey)
-                }
+                SettingsPageContent(page, navController, highlightKey)
             }
         }
         // Side scroll indicator — thin overlay knob, grows on touch.
@@ -206,6 +222,16 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v28 — dark-mode elevation visibility: black shadows vanish on the
+        // midnight surfaces, so dark mode draws a soft light glow (default
+        // ON). The v28 hairline outline option was REMOVED — dark cards rely
+        // on the glow + shine instead. Light mode is untouched.
+        SettingsRowPulse(highlightKey == "appearance-glow") {
+            CompactSwitchRow("Glow shadows", "Dark mode: soft light glow so elevation stays visible", AppPreferences.darkGlowState) {
+                AppPreferences.setDarkGlowEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "appearance-entry") {
             CompactSwitchRow("Entry date & mood", "Date, mood, and attachments on saved entries", AppPreferences.entryMetaEnabledState) {
                 AppPreferences.setEntryMetaEnabled(context, it)
@@ -254,6 +280,9 @@ private fun PreferencesSection(highlightKey: String? = null) {
     // v19 — the explore search-engine picker (which engine the "Explore in
     // browser" button opens).
     var showSearchEngineDialog by remember { mutableStateOf(false) }
+    // v27s — the explore music-service picker (which service the "Watch in"
+    // button opens for albums, artists & songs).
+    var showMusicServiceDialog by remember { mutableStateOf(false) }
     // v26 — shared notification-permission gate (live-notification row).
     val enableNotifications = rememberNotificationPermissionGate()
 
@@ -302,6 +331,18 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 "Explore in browser opens ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}"
             ) {
                 showSearchEngineDialog = true
+            }
+        }
+        CurioSettingsDivider()
+        // v27s — which music service the "Watch in" explore button opens for
+        // albums, artists and songs (next to the search-engine picker).
+        SettingsRowPulse(highlightKey == "pref-music-service") {
+            CurioSettingsRow(
+                CurioIcons.MusicNote,
+                "Music service",
+                "Watch in opens ${MusicService.fromId(AppPreferences.musicServiceState).displayName} for albums, artists & songs"
+            ) {
+                showMusicServiceDialog = true
             }
         }
         CurioSettingsDivider()
@@ -452,7 +493,9 @@ private fun PreferencesSection(highlightKey: String? = null) {
                             selected -> MaterialTheme.colorScheme.onPrimary
                             else -> MaterialTheme.colorScheme.onSurface
                         },
-                        shadowElevation = if (selected) 3.dp else 1.dp,
+                        // v27q — flat 2dp: selection reads through the solid
+                        // primary/black fill, not a raise.
+                        shadowElevation = 2.dp,
                         modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Text(
@@ -485,6 +528,16 @@ private fun PreferencesSection(highlightKey: String? = null) {
             onSelected = { engine ->
                 AppPreferences.setSearchEngine(context, engine)
                 showSearchEngineDialog = false
+            }
+        )
+    }
+    if (showMusicServiceDialog) {
+        MusicServiceDialog(
+            current = MusicService.fromId(AppPreferences.musicServiceState),
+            onDismiss = { showMusicServiceDialog = false },
+            onSelected = { service ->
+                AppPreferences.setMusicService(context, service)
+                showMusicServiceDialog = false
             }
         )
     }

@@ -1,1344 +1,1344 @@
 [
-  {
-    "id": "meme-rickrolling",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Rickrolling (2007)",
-    "teaser": "The bait-and-switch prank where a promised link leads to Rick Astley's 'Never Gonna Give You Up' — the meme started on 4chan in 2007 and Astley now embraces it, performing at events.",
-    "imageUrl": "",
-    "byline": "4chan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Rickrolling (2007) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the original video and notice the era — the '80s dance moves are the joke. The meme's genius is that the 'prank' is the format."
-    },
-    "tags": [
-      "Meme",
-      "Prank",
-      "Music Video",
-      "2000s"
-    ],
-    "tier": 1
+ {
+  "id": "meme-rickrolling",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Rickrolling (2007)",
+  "teaser": "The bait-and-switch prank where a promised link leads to Rick Astley's 'Never Gonna Give You Up' — the meme started on 4chan in 2007 and Astley now embraces it, performing at events.",
+  "imageUrl": "",
+  "byline": "4chan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Rickrolling (2007) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the original video and notice the era — the '80s dance moves are the joke. The meme's genius is that the 'prank' is the format."
   },
-  {
-    "id": "meme-nyan-cat",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Nyan Cat (2011)",
-    "teaser": "The pixel cat with a pop-tart body flying through space — the song's 8-bit loop was made in a few hours, and the video's simplicity is the appeal.",
-    "imageUrl": "",
-    "byline": "saraj00n",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Nyan Cat (2011) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch it and notice the loop — the repetition is the trance. The meme's genius is that the 'simple' is the charm."
-    },
-    "tags": [
-      "Meme",
-      "Animation",
-      "Music",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Prank",
+   "Music Video",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-nyan-cat",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Nyan Cat (2011)",
+  "teaser": "The pixel cat with a pop-tart body flying through space — the song's 8-bit loop was made in a few hours, and the video's simplicity is the appeal.",
+  "imageUrl": "",
+  "byline": "saraj00n",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Nyan Cat (2011) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch it and notice the loop — the repetition is the trance. The meme's genius is that the 'simple' is the charm."
   },
-  {
-    "id": "meme-doge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Doge (2013)",
-    "teaser": "The Shiba Inu with the comic-sans inner monologue ('such wow') — the photo of Kabosu went viral in 2013, and the 'doge' inspired the Dogecoin cryptocurrency.",
-    "imageUrl": "",
-    "byline": "Kabosu",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Doge (2013) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the comic-sans captions and notice the grammar — the broken English is the humor. The meme's genius is that the 'grammar' is the joke."
-    },
-    "tags": [
-      "Meme",
-      "Dog",
-      "Crypto",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Animation",
+   "Music",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-doge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Doge (2013)",
+  "teaser": "The Shiba Inu with the comic-sans inner monologue ('such wow') — the photo of Kabosu went viral in 2013, and the 'doge' inspired the Dogecoin cryptocurrency.",
+  "imageUrl": "",
+  "byline": "Kabosu",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Doge (2013) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the comic-sans captions and notice the grammar — the broken English is the humor. The meme's genius is that the 'grammar' is the joke."
   },
-  {
-    "id": "meme-the-dress",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The Dress (2015)",
-    "teaser": "The dress that broke the internet — is it blue and black or white and gold? The photo divided the world and taught millions about color perception.",
-    "imageUrl": "",
-    "byline": "Caitlin McNeill",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Dress (2015) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the dress and notice your perception — the lighting is the illusion. The phenomenon's genius is that the 'debate' was the science."
-    },
-    "tags": [
-      "Viral",
-      "Optics",
-      "Debate",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Dog",
+   "Crypto",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-dress",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The Dress (2015)",
+  "teaser": "The dress that broke the internet — is it blue and black or white and gold? The photo divided the world and taught millions about color perception.",
+  "imageUrl": "",
+  "byline": "Caitlin McNeill",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Dress (2015) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the dress and notice your perception — the lighting is the illusion. The phenomenon's genius is that the 'debate' was the science."
   },
-  {
-    "id": "meme-harlem-shake",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Harlem Shake (2013)",
-    "teaser": "The 30-second dance video format — one person dances alone then the crowd joins — spawned thousands of remakes within weeks, including by the US Navy.",
-    "imageUrl": "",
-    "byline": "Filthy Frank",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Harlem Shake (2013) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the original and notice the structure — the 'drop' is the format. The meme's genius is that the 'template' was the spread."
-    },
-    "tags": [
-      "Viral",
-      "Dance",
-      "Meme",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Optics",
+   "Debate",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-harlem-shake",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Harlem Shake (2013)",
+  "teaser": "The 30-second dance video format — one person dances alone then the crowd joins — spawned thousands of remakes within weeks, including by the US Navy.",
+  "imageUrl": "",
+  "byline": "Filthy Frank",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Harlem Shake (2013) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the original and notice the structure — the 'drop' is the format. The meme's genius is that the 'template' was the spread."
   },
-  {
-    "id": "meme-planking",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Planking (2011)",
-    "teaser": "The dare to lie face-down, stiff as a board, in absurd places — the 'planking' trend went global in 2011 and died as fast as it spread.",
-    "imageUrl": "",
-    "byline": "Australia",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Planking (2011) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the planking photos and notice the locations — the absurdity is the joke. The trend's genius is that the 'form' was the meme."
-    },
-    "tags": [
-      "Viral",
-      "Dare",
-      "Meme",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Dance",
+   "Meme",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-planking",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Planking (2011)",
+  "teaser": "The dare to lie face-down, stiff as a board, in absurd places — the 'planking' trend went global in 2011 and died as fast as it spread.",
+  "imageUrl": "",
+  "byline": "Australia",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Planking (2011) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the planking photos and notice the locations — the absurdity is the joke. The trend's genius is that the 'form' was the meme."
   },
-  {
-    "id": "meme-ice-bucket-challenge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Ice Bucket Challenge (2014)",
-    "teaser": "The ALS ice bucket challenge raised $115M for research — the dare went viral in 2014, and the 'nomination' mechanic (nominate three) is the spread engine.",
-    "imageUrl": "",
-    "byline": "Pete Frates",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Ice Bucket Challenge (2014) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the videos and notice the nominations — the chain is the engine. The challenge's genius is that the 'charity' was the content."
-    },
-    "tags": [
-      "Viral",
-      "Charity",
-      "Dare",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Dare",
+   "Meme",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-ice-bucket-challenge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Ice Bucket Challenge (2014)",
+  "teaser": "The ALS ice bucket challenge raised $115M for research — the dare went viral in 2014, and the 'nomination' mechanic (nominate three) is the spread engine.",
+  "imageUrl": "",
+  "byline": "Pete Frates",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Ice Bucket Challenge (2014) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the videos and notice the nominations — the chain is the engine. The challenge's genius is that the 'charity' was the content."
   },
-  {
-    "id": "meme-mannequin-challenge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Mannequin Challenge (2016)",
-    "teaser": "The frozen-in-place video trend — people hold a pose while the camera moves through, and even the White House made one.",
-    "imageUrl": "",
-    "byline": "Miami",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Mannequin Challenge (2016) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the camera movement and notice the freeze — the 'frozen' is the format. The trend's genius is that the 'stillness' was the content."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Meme",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Charity",
+   "Dare",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-mannequin-challenge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Mannequin Challenge (2016)",
+  "teaser": "The frozen-in-place video trend — people hold a pose while the camera moves through, and even the White House made one.",
+  "imageUrl": "",
+  "byline": "Miami",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Mannequin Challenge (2016) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the camera movement and notice the freeze — the 'frozen' is the format. The trend's genius is that the 'stillness' was the content."
   },
-  {
-    "id": "meme-dabbing",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Dabbing (2015)",
-    "teaser": "The arm-crook dance move — the 'dab' was a hip-hop dance that became a global meme, and athletes, politicians and grandparents all did it.",
-    "imageUrl": "",
-    "byline": "Atlanta",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Dabbing (2015) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the dab and notice the move — the 'sneeze' is the origin. The trend's genius is that the 'move' was the meme."
-    },
-    "tags": [
-      "Dance",
-      "Meme",
-      "Trend",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Meme",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-dabbing",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Dabbing (2015)",
+  "teaser": "The arm-crook dance move — the 'dab' was a hip-hop dance that became a global meme, and athletes, politicians and grandparents all did it.",
+  "imageUrl": "",
+  "byline": "Atlanta",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Dabbing (2015) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the dab and notice the move — the 'sneeze' is the origin. The trend's genius is that the 'move' was the meme."
   },
-  {
-    "id": "meme-keyboard-cat",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Keyboard Cat (2007)",
-    "teaser": "The cat 'playing' a keyboard — the video was made in 1984 and went viral in 2007, and the 'Play Him Off, Keyboard Cat' format is the meme's structure.",
-    "imageUrl": "",
-    "byline": "Charlie Schmidt",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Keyboard Cat (2007) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the keyboard cat and notice the 'play off' — the cat is the outro. The meme's genius is that the 'fail' is the setup."
-    },
-    "tags": [
-      "Meme",
-      "Cat",
-      "Music",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Dance",
+   "Meme",
+   "Trend",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-keyboard-cat",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Keyboard Cat (2007)",
+  "teaser": "The cat 'playing' a keyboard — the video was made in 1984 and went viral in 2007, and the 'Play Him Off, Keyboard Cat' format is the meme's structure.",
+  "imageUrl": "",
+  "byline": "Charlie Schmidt",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Keyboard Cat (2007) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the keyboard cat and notice the 'play off' — the cat is the outro. The meme's genius is that the 'fail' is the setup."
   },
-  {
-    "id": "meme-bad-luck-brian",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Bad Luck Brian (2012)",
-    "teaser": "The yearbook photo of a kid in a sweater vest — the 'bad luck' captions (dating his cousin, etc.) made it the face of misfortune.",
-    "imageUrl": "",
-    "byline": "Kyle Craven",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Bad Luck Brian (2012) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the captions and notice the pattern — the 'misfortune' is the genre. The meme's genius is that the 'photo' is the template."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Advice",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Cat",
+   "Music",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-bad-luck-brian",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Bad Luck Brian (2012)",
+  "teaser": "The yearbook photo of a kid in a sweater vest — the 'bad luck' captions (dating his cousin, etc.) made it the face of misfortune.",
+  "imageUrl": "",
+  "byline": "Kyle Craven",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Bad Luck Brian (2012) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the captions and notice the pattern — the 'misfortune' is the genre. The meme's genius is that the 'photo' is the template."
   },
-  {
-    "id": "meme-success-kid",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Success Kid (2011)",
-    "teaser": "The toddler with the clenched fist — the photo was taken at a beach, and the 'success' captions made it the meme of small victories.",
-    "imageUrl": "",
-    "byline": "Lanning Grice",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Success Kid (2011) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the captions and notice the scale — the 'small win' is the humor. The meme's genius is that the 'fist' is the triumph."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Triumph",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Advice",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-success-kid",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Success Kid (2011)",
+  "teaser": "The toddler with the clenched fist — the photo was taken at a beach, and the 'success' captions made it the meme of small victories.",
+  "imageUrl": "",
+  "byline": "Lanning Grice",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Success Kid (2011) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the captions and notice the scale — the 'small win' is the humor. The meme's genius is that the 'fist' is the triumph."
   },
-  {
-    "id": "meme-grumpy-cat",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Grumpy Cat (2012)",
-    "teaser": "The permanently grumpy-looking cat — the feline's 'resting grump face' (actually dwarfism) made her a franchise worth $100M, and her death in 2019 was worldwide news.",
-    "imageUrl": "",
-    "byline": "Tardar Sauce",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Grumpy Cat (2012) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the grumpy face and notice the 'meme' career — the cat was the brand. The phenomenon's genius is that the 'grump' was the fortune."
-    },
-    "tags": [
-      "Meme",
-      "Cat",
-      "Fame",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Triumph",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-grumpy-cat",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Grumpy Cat (2012)",
+  "teaser": "The permanently grumpy-looking cat — the feline's 'resting grump face' (actually dwarfism) made her a franchise worth $100M, and her death in 2019 was worldwide news.",
+  "imageUrl": "",
+  "byline": "Tardar Sauce",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Grumpy Cat (2012) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the grumpy face and notice the 'meme' career — the cat was the brand. The phenomenon's genius is that the 'grump' was the fortune."
   },
-  {
-    "id": "meme-trollface",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Trollface (2008)",
-    "teaser": "The hand-drawn grin from a 2008 MS Paint comic — the 'troll' face became the symbol of internet mischief, and the image is now used in a legal battle over meme ownership.",
-    "imageUrl": "",
-    "byline": "Whynne",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Trollface (2008) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the grin and notice the 'troll' — the mischief is the meme. The image's genius is that the 'simple' is the symbol."
-    },
-    "tags": [
-      "Meme",
-      "Drawing",
-      "Trolling",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Cat",
+   "Fame",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-trollface",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Trollface (2008)",
+  "teaser": "The hand-drawn grin from a 2008 MS Paint comic — the 'troll' face became the symbol of internet mischief, and the image is now used in a legal battle over meme ownership.",
+  "imageUrl": "",
+  "byline": "Whynne",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Trollface (2008) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the grin and notice the 'troll' — the mischief is the meme. The image's genius is that the 'simple' is the symbol."
   },
-  {
-    "id": "meme-forever-alone",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Forever Alone (2010)",
-    "teaser": "The lonely-face rage comic — 'forever alone' became the shorthand for romantic isolation, and the phrase is the meme's caption.",
-    "imageUrl": "",
-    "byline": "Anonymous",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Forever Alone (2010) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the comics and notice the loneliness — the 'feels' are the genre. The meme's genius is that the 'alone' is the empathy."
-    },
-    "tags": [
-      "Meme",
-      "Sad",
-      "Emotion",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Drawing",
+   "Trolling",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-forever-alone",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Forever Alone (2010)",
+  "teaser": "The lonely-face rage comic — 'forever alone' became the shorthand for romantic isolation, and the phrase is the meme's caption.",
+  "imageUrl": "",
+  "byline": "Anonymous",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Forever Alone (2010) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the comics and notice the loneliness — the 'feels' are the genre. The meme's genius is that the 'alone' is the empathy."
   },
-  {
-    "id": "meme-me-gusta",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Me Gusta (2010)",
-    "teaser": "The Spanish 'I like it' face from rage comics — the creepy smile is the meme, and the 'me gusta' became the response to anything darkly pleasing.",
-    "imageUrl": "",
-    "byline": "Rage Comics",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Me Gusta (2010) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the face and notice the creep — the 'like' is the discomfort. The meme's genius is that the 'Spanish' is the punchline."
-    },
-    "tags": [
-      "Meme",
-      "Drawing",
-      "Emotion",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Sad",
+   "Emotion",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-me-gusta",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Me Gusta (2010)",
+  "teaser": "The Spanish 'I like it' face from rage comics — the creepy smile is the meme, and the 'me gusta' became the response to anything darkly pleasing.",
+  "imageUrl": "",
+  "byline": "Rage Comics",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Me Gusta (2010) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the face and notice the creep — the 'like' is the discomfort. The meme's genius is that the 'Spanish' is the punchline."
   },
-  {
-    "id": "meme-advice-animals",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Advice Animals (2010)",
-    "teaser": "The image-macro format — a photo with a caption split into top/bottom — spawned hundreds of 'advice animals' (Confession Bear, Scumbag Steve, etc.).",
-    "imageUrl": "",
-    "byline": "Reddit",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Advice Animals (2010) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the format and notice the template — the caption is the joke. The format's genius is that the 'template' was the meme machine."
-    },
-    "tags": [
-      "Meme",
-      "Template",
-      "Format",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Drawing",
+   "Emotion",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-advice-animals",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Advice Animals (2010)",
+  "teaser": "The image-macro format — a photo with a caption split into top/bottom — spawned hundreds of 'advice animals' (Confession Bear, Scumbag Steve, etc.).",
+  "imageUrl": "",
+  "byline": "Reddit",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Advice Animals (2010) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the format and notice the template — the caption is the joke. The format's genius is that the 'template' was the meme machine."
   },
-  {
-    "id": "meme-double-rainbow",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Double Rainbow (2010)",
-    "teaser": "The viral video of a man crying 'double rainbow all the way' — the joy was so genuine it became a meme, and the phrase entered the language.",
-    "imageUrl": "",
-    "byline": "Paul Vasquez",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Double Rainbow (2010) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the video and notice the emotion — the 'rainbow' is the wonder. The viral's genius is that the 'real' was the content."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Emotion",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Template",
+   "Format",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-double-rainbow",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Double Rainbow (2010)",
+  "teaser": "The viral video of a man crying 'double rainbow all the way' — the joy was so genuine it became a meme, and the phrase entered the language.",
+  "imageUrl": "",
+  "byline": "Paul Vasquez",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Double Rainbow (2010) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the video and notice the emotion — the 'rainbow' is the wonder. The viral's genius is that the 'real' was the content."
   },
-  {
-    "id": "meme-charlie-bit-my-finger",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Charlie Bit My Finger (2007)",
-    "teaser": "The baby-brother-bites-big-brother video — it became one of the most-viewed videos in YouTube history, and the family sold it as an NFT in 2021 for $761,000.",
-    "imageUrl": "",
-    "byline": "The Davies-Carr Family",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Charlie Bit My Finger (2007) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the video and notice the 'bit' — the sibling is the comedy. The viral's genius is that the 'family' was the content."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Kids",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Emotion",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-charlie-bit-my-finger",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Charlie Bit My Finger (2007)",
+  "teaser": "The baby-brother-bites-big-brother video — it became one of the most-viewed videos in YouTube history, and the family sold it as an NFT in 2021 for $761,000.",
+  "imageUrl": "",
+  "byline": "The Davies-Carr Family",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Charlie Bit My Finger (2007) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the video and notice the 'bit' — the sibling is the comedy. The viral's genius is that the 'family' was the content."
   },
-  {
-    "id": "meme-leave-britney-alone",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Leave Britney Alone (2007)",
-    "teaser": "The tearful defense of Britney Spears — the video was mocked relentlessly, but it was one of the first viral 'personal' videos, and Crocker later became a documentarian.",
-    "imageUrl": "",
-    "byline": "Chris Crocker",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Leave Britney Alone (2007) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the video and notice the earnestness — the 'leave her alone' is the cry. The viral's genius is that the 'mockery' was the fame."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Emotion",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Kids",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-leave-britney-alone",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Leave Britney Alone (2007)",
+  "teaser": "The tearful defense of Britney Spears — the video was mocked relentlessly, but it was one of the first viral 'personal' videos, and Crocker later became a documentarian.",
+  "imageUrl": "",
+  "byline": "Chris Crocker",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Leave Britney Alone (2007) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the video and notice the earnestness — the 'leave her alone' is the cry. The viral's genius is that the 'mockery' was the fame."
   },
-  {
-    "id": "meme-david-after-dentist",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "David After Dentist (2008)",
-    "teaser": "The video of a boy loopy after anesthesia — 'Is this real life?' became a global catchphrase, and the video earned the family a reported $500,000+ in ad revenue.",
-    "imageUrl": "",
-    "byline": "David DeVore",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "David After Dentist (2008) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the video and notice the phrase — the 'real life' is the meme. The viral's genius is that the 'loopy' was the content."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Kids",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Emotion",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-david-after-dentist",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "David After Dentist (2008)",
+  "teaser": "The video of a boy loopy after anesthesia — 'Is this real life?' became a global catchphrase, and the video earned the family a reported $500,000+ in ad revenue.",
+  "imageUrl": "",
+  "byline": "David DeVore",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "David After Dentist (2008) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the video and notice the phrase — the 'real life' is the meme. The viral's genius is that the 'loopy' was the content."
   },
-  {
-    "id": "meme-star-wars-kid",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Star Wars Kid (2003)",
-    "teaser": "The Quebec teen's homemade lightsaber video — classmates posted it without his consent, and it became the first major 'viral video' and a landmark case in cyberbullying.",
-    "imageUrl": "",
-    "byline": "Ghyslain Raza",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Star Wars Kid (2003) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the aftermath and notice the consent — the 'kid' was the first victim. The viral's genius is that the 'privacy' was the lesson."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Bullying",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Kids",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-star-wars-kid",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Star Wars Kid (2003)",
+  "teaser": "The Quebec teen's homemade lightsaber video — classmates posted it without his consent, and it became the first major 'viral video' and a landmark case in cyberbullying.",
+  "imageUrl": "",
+  "byline": "Ghyslain Raza",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Star Wars Kid (2003) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the aftermath and notice the consent — the 'kid' was the first victim. The viral's genius is that the 'privacy' was the lesson."
   },
-  {
-    "id": "meme-all-your-base-are-belong-to-us",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "All Your Base Are Belong to Us (2000)",
-    "teaser": "The famously bad English translation from a 1992 Sega game — 'All your base are belong to us' became the internet's first big catchphrase meme.",
-    "imageUrl": "",
-    "byline": "Zero Wing",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "All Your Base Are Belong to Us (2000) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the translation and notice the grammar — the 'error' is the joke. The meme's genius is that the 'mistake' was the content."
-    },
-    "tags": [
-      "Meme",
-      "Translation",
-      "Gaming",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Bullying",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-all-your-base-are-belong-to-us",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "All Your Base Are Belong to Us (2000)",
+  "teaser": "The famously bad English translation from a 1992 Sega game — 'All your base are belong to us' became the internet's first big catchphrase meme.",
+  "imageUrl": "",
+  "byline": "Zero Wing",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "All Your Base Are Belong to Us (2000) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the translation and notice the grammar — the 'error' is the joke. The meme's genius is that the 'mistake' was the content."
   },
-  {
-    "id": "meme-i-can-has-cheezburger",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "I Can Has Cheezburger? (2007)",
-    "teaser": "The cat photo with the broken-English caption — the 'lolcat' era defined early internet humor, and the website became a multi-million-dollar business.",
-    "imageUrl": "",
-    "byline": "LOLcats",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "I Can Has Cheezburger? (2007) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the captions and notice the grammar — the 'lolspeak' is the format. The meme's genius is that the 'language' was the invention."
-    },
-    "tags": [
-      "Meme",
-      "Cat",
-      "Grammar",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Translation",
+   "Gaming",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-i-can-has-cheezburger",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "I Can Has Cheezburger? (2007)",
+  "teaser": "The cat photo with the broken-English caption — the 'lolcat' era defined early internet humor, and the website became a multi-million-dollar business.",
+  "imageUrl": "",
+  "byline": "LOLcats",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "I Can Has Cheezburger? (2007) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the captions and notice the grammar — the 'lolspeak' is the format. The meme's genius is that the 'language' was the invention."
   },
-  {
-    "id": "meme-numa-numa",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Numa Numa (2004)",
-    "teaser": "The webcam lip-sync to the Romanian song 'Dragostea Din Tei' — the 'Numa Numa guy' was the first viral video star, pre-YouTube.",
-    "imageUrl": "",
-    "byline": "Gary Brolsma",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Numa Numa (2004) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the video and notice the webcam — the 'amateur' is the charm. The viral's genius is that the 'home' was the studio."
-    },
-    "tags": [
-      "Viral",
-      "Video",
-      "Music",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Cat",
+   "Grammar",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-numa-numa",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Numa Numa (2004)",
+  "teaser": "The webcam lip-sync to the Romanian song 'Dragostea Din Tei' — the 'Numa Numa guy' was the first viral video star, pre-YouTube.",
+  "imageUrl": "",
+  "byline": "Gary Brolsma",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Numa Numa (2004) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the video and notice the webcam — the 'amateur' is the charm. The viral's genius is that the 'home' was the studio."
   },
-  {
-    "id": "meme-the-running-man-challenge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The Running Man Challenge (2016)",
-    "teaser": "The 'Running Man' dance challenge — two New Jersey students' video spawned a global trend, and the police, military and celebrities all joined.",
-    "imageUrl": "",
-    "byline": "New Jersey",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Running Man Challenge (2016) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the videos and notice the move — the 'running man' is the format. The trend's genius is that the 'challenge' was the spread."
-    },
-    "tags": [
-      "Dance",
-      "Viral",
-      "Trend",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Viral",
+   "Video",
+   "Music",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-running-man-challenge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The Running Man Challenge (2016)",
+  "teaser": "The 'Running Man' dance challenge — two New Jersey students' video spawned a global trend, and the police, military and celebrities all joined.",
+  "imageUrl": "",
+  "byline": "New Jersey",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Running Man Challenge (2016) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the videos and notice the move — the 'running man' is the format. The trend's genius is that the 'challenge' was the spread."
   },
-  {
-    "id": "meme-in-my-feelings-challenge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "In My Feelings Challenge (2018)",
-    "teaser": "The dance challenge to Drake's 'In My Feelings' — the 'Keke, do you love me?' dance spawned videos from everyone including celebrities, and several people got hurt filming it.",
-    "imageUrl": "",
-    "byline": "Shiggy",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "In My Feelings Challenge (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the videos and notice the car — the 'open door' is the format. The trend's genius is that the 'danger' was the drama."
-    },
-    "tags": [
-      "Dance",
-      "Viral",
-      "Trend",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Dance",
+   "Viral",
+   "Trend",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-in-my-feelings-challenge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "In My Feelings Challenge (2018)",
+  "teaser": "The dance challenge to Drake's 'In My Feelings' — the 'Keke, do you love me?' dance spawned videos from everyone including celebrities, and several people got hurt filming it.",
+  "imageUrl": "",
+  "byline": "Shiggy",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "In My Feelings Challenge (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the videos and notice the car — the 'open door' is the format. The trend's genius is that the 'danger' was the drama."
   },
-  {
-    "id": "meme-bottle-cap-challenge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Bottle Cap Challenge (2019)",
-    "teaser": "The challenge to unscrew a bottle cap with a spinning kick — martial artists and athletes around the world attempted the 'cap' twist.",
-    "imageUrl": "",
-    "byline": "Max Holloway",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Bottle Cap Challenge (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the kicks and notice the technique — the 'spin' is the format. The trend's genius is that the 'skill' was the content."
-    },
-    "tags": [
-      "Dare",
-      "Viral",
-      "Trend",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Dance",
+   "Viral",
+   "Trend",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-bottle-cap-challenge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Bottle Cap Challenge (2019)",
+  "teaser": "The challenge to unscrew a bottle cap with a spinning kick — martial artists and athletes around the world attempted the 'cap' twist.",
+  "imageUrl": "",
+  "byline": "Max Holloway",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Bottle Cap Challenge (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the kicks and notice the technique — the 'spin' is the format. The trend's genius is that the 'skill' was the content."
   },
-  {
-    "id": "meme-10-year-challenge",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "10 Year Challenge (2019)",
-    "teaser": "The 'how it started / how it's going' photo trend — the format was also used by researchers to track aging and facial recognition effects.",
-    "imageUrl": "",
-    "byline": "Twitter",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "10 Year Challenge (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the photos and notice the format — the 'before/after' is the meme. The trend's genius is that the 'nostalgia' was the engine."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Nostalgia",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Dare",
+   "Viral",
+   "Trend",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-10-year-challenge",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "10 Year Challenge (2019)",
+  "teaser": "The 'how it started / how it's going' photo trend — the format was also used by researchers to track aging and facial recognition effects.",
+  "imageUrl": "",
+  "byline": "Twitter",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "10 Year Challenge (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the photos and notice the format — the 'before/after' is the meme. The trend's genius is that the 'nostalgia' was the engine."
   },
-  {
-    "id": "meme-area-51-raid",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Area 51 Raid (2019)",
-    "teaser": "The joke event 'Storm Area 51, They Can't Stop All of Us' drew 2 million RSVPs — the 'Naruto run' punchline made the meme, and ~150 people actually showed up.",
-    "imageUrl": "",
-    "byline": "Facebook",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Area 51 Raid (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the event page and notice the joke — the 'raid' was the punchline. The meme's genius is that the 'impossible' was the format."
-    },
-    "tags": [
-      "Meme",
-      "Joke",
-      "Event",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Nostalgia",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-area-51-raid",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Area 51 Raid (2019)",
+  "teaser": "The joke event 'Storm Area 51, They Can't Stop All of Us' drew 2 million RSVPs — the 'Naruto run' punchline made the meme, and ~150 people actually showed up.",
+  "imageUrl": "",
+  "byline": "Facebook",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Area 51 Raid (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the event page and notice the joke — the 'raid' was the punchline. The meme's genius is that the 'impossible' was the format."
   },
-  {
-    "id": "meme-doge-crypto",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Doge (Crypto) (2013)",
-    "teaser": "The joke cryptocurrency born from the doge meme — it reached a $90B market cap in 2021, and the 'meme coin' proved that internet culture is a financial asset class.",
-    "imageUrl": "",
-    "byline": "Jackson Palmer",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Doge (Crypto) (2013) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the dogecoin history and notice the 'joke' — the irony is the point. The phenomenon's genius is that the 'meme' was the money."
-    },
-    "tags": [
-      "Crypto",
-      "Meme",
-      "Finance",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Joke",
+   "Event",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-doge-crypto",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Doge (Crypto) (2013)",
+  "teaser": "The joke cryptocurrency born from the doge meme — it reached a $90B market cap in 2021, and the 'meme coin' proved that internet culture is a financial asset class.",
+  "imageUrl": "",
+  "byline": "Jackson Palmer",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Doge (Crypto) (2013) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the dogecoin history and notice the 'joke' — the irony is the point. The phenomenon's genius is that the 'meme' was the money."
   },
-  {
-    "id": "meme-the-backrooms",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The Backrooms (2019)",
-    "teaser": "The creepypasta of an endless yellow room you 'noclip' into — the image is a real photo, and the Backrooms spawned a genre of liminal-space horror.",
-    "imageUrl": "",
-    "byline": "4chan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Backrooms (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the image and notice the liminality — the 'empty' is the horror. The phenomenon's genius is that the 'noclip' is the premise."
-    },
-    "tags": [
-      "Creepypasta",
-      "Horror",
-      "Meme",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Crypto",
+   "Meme",
+   "Finance",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-backrooms",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The Backrooms (2019)",
+  "teaser": "The creepypasta of an endless yellow room you 'noclip' into — the image is a real photo, and the Backrooms spawned a genre of liminal-space horror.",
+  "imageUrl": "",
+  "byline": "4chan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Backrooms (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the image and notice the liminality — the 'empty' is the horror. The phenomenon's genius is that the 'noclip' is the premise."
   },
-  {
-    "id": "meme-slender-man",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Slender Man (2009)",
-    "teaser": "The faceless tall figure created in a Photoshop contest — the character spawned games, films and a real crime, and the 'Slender Man' is the internet's most famous original monster.",
-    "imageUrl": "",
-    "byline": "Eric Knudsen",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Slender Man (2009) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the origin thread and notice the 'contest' — the meme was a game. The phenomenon's genius is that the 'made' was the myth."
-    },
-    "tags": [
-      "Creepypasta",
-      "Horror",
-      "Meme",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Creepypasta",
+   "Horror",
+   "Meme",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-slender-man",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Slender Man (2009)",
+  "teaser": "The faceless tall figure created in a Photoshop contest — the character spawned games, films and a real crime, and the 'Slender Man' is the internet's most famous original monster.",
+  "imageUrl": "",
+  "byline": "Eric Knudsen",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Slender Man (2009) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the origin thread and notice the 'contest' — the meme was a game. The phenomenon's genius is that the 'made' was the myth."
   },
-  {
-    "id": "meme-scp-foundation",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "SCP Foundation (2007)",
-    "teaser": "The collaborative horror wiki about a secret foundation containing anomalies — the 'Secure, Contain, Protect' format lets anyone write an entry, and the SCP database is the internet's greatest shared mythology.",
-    "imageUrl": "",
-    "byline": "4chan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "SCP Foundation (2007) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read an SCP entry and notice the format — the 'containment' is the structure. The phenomenon's genius is that the 'collaborative' is the myth."
-    },
-    "tags": [
-      "Creepypasta",
-      "Horror",
-      "Writing",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Creepypasta",
+   "Horror",
+   "Meme",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-scp-foundation",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "SCP Foundation (2007)",
+  "teaser": "The collaborative horror wiki about a secret foundation containing anomalies — the 'Secure, Contain, Protect' format lets anyone write an entry, and the SCP database is the internet's greatest shared mythology.",
+  "imageUrl": "",
+  "byline": "4chan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "SCP Foundation (2007) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read an SCP entry and notice the format — the 'containment' is the structure. The phenomenon's genius is that the 'collaborative' is the myth."
   },
-  {
-    "id": "meme-the-mandela-effect",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The Mandela Effect (2015)",
-    "teaser": "The false-memory phenomenon named for a shared 'memory' of Mandela dying in prison — the 'effect' is real (memory is constructive), and the 'Berenstain Bears' is the classic example.",
-    "imageUrl": "",
-    "byline": "Fiona Broome",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Mandela Effect (2015) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Test your own memory of the 'Berenstain' spelling — the 'mismemory' is the phenomenon. The effect's genius is that the 'error' is the science."
-    },
-    "tags": [
-      "Conspiracy",
-      "Psychology",
-      "Meme",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Creepypasta",
+   "Horror",
+   "Writing",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-mandela-effect",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The Mandela Effect (2015)",
+  "teaser": "The false-memory phenomenon named for a shared 'memory' of Mandela dying in prison — the 'effect' is real (memory is constructive), and the 'Berenstain Bears' is the classic example.",
+  "imageUrl": "",
+  "byline": "Fiona Broome",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Mandela Effect (2015) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Test your own memory of the 'Berenstain' spelling — the 'mismemory' is the phenomenon. The effect's genius is that the 'error' is the science."
   },
-  {
-    "id": "meme-wojak",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Wojak (2010)",
-    "teaser": "The sad, bald drawing — the 'feels guy' became the template for a family of memes (NPC, Doomer, the 'Chad' contrast), and Wojak is the internet's emotional palette.",
-    "imageUrl": "",
-    "byline": "Anonymous",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Wojak (2010) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the faces and notice the range — the 'feels' is the genre. The meme's genius is that the 'simple' is the empathy."
-    },
-    "tags": [
-      "Meme",
-      "Drawing",
-      "Emotion",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Conspiracy",
+   "Psychology",
+   "Meme",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-wojak",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Wojak (2010)",
+  "teaser": "The sad, bald drawing — the 'feels guy' became the template for a family of memes (NPC, Doomer, the 'Chad' contrast), and Wojak is the internet's emotional palette.",
+  "imageUrl": "",
+  "byline": "Anonymous",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Wojak (2010) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the faces and notice the range — the 'feels' is the genre. The meme's genius is that the 'simple' is the empathy."
   },
-  {
-    "id": "meme-the-chad",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The Chad (2013)",
-    "teaser": "The handsome-jawline drawing — the 'Chad' is the confident opposite of the 'Virgin' in the meme format, and the Chad/Virgin contrast is the internet's favorite binary.",
-    "imageUrl": "",
-    "byline": "4chan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Chad (2013) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the contrast format and notice the satire — the 'Chad' is the joke. The meme's genius is that the 'binary' is the structure."
-    },
-    "tags": [
-      "Meme",
-      "Drawing",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Drawing",
+   "Emotion",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-chad",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The Chad (2013)",
+  "teaser": "The handsome-jawline drawing — the 'Chad' is the confident opposite of the 'Virgin' in the meme format, and the Chad/Virgin contrast is the internet's favorite binary.",
+  "imageUrl": "",
+  "byline": "4chan",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Chad (2013) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the contrast format and notice the satire — the 'Chad' is the joke. The meme's genius is that the 'binary' is the structure."
   },
-  {
-    "id": "meme-stonks",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Stonks (2019)",
-    "teaser": "The 'Stonks' meme — a businessman with the misspelled word over a rising chart — satirizes financial illiteracy, and the format is the internet's stock-market commentary.",
-    "imageUrl": "",
-    "byline": "Meme",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Stonks (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the captions and notice the spelling — the 'error' is the joke. The meme's genius is that the 'finance' is the satire."
-    },
-    "tags": [
-      "Meme",
-      "Finance",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Drawing",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-stonks",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Stonks (2019)",
+  "teaser": "The 'Stonks' meme — a businessman with the misspelled word over a rising chart — satirizes financial illiteracy, and the format is the internet's stock-market commentary.",
+  "imageUrl": "",
+  "byline": "Meme",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Stonks (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the captions and notice the spelling — the 'error' is the joke. The meme's genius is that the 'finance' is the satire."
   },
-  {
-    "id": "meme-simp",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Simp (2019)",
-    "teaser": "The slang for someone who does too much for a romantic interest — the word went from 4chan to mainstream in a year, and the 'simp' is the 2020s' favorite insult.",
-    "imageUrl": "",
-    "byline": "TikTok",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Simp (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the usage and notice the evolution — the 'word' is the culture. The slang's genius is that the 'insult' is the mirror."
-    },
-    "tags": [
-      "Slang",
-      "Internet Culture",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Finance",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-simp",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Simp (2019)",
+  "teaser": "The slang for someone who does too much for a romantic interest — the word went from 4chan to mainstream in a year, and the 'simp' is the 2020s' favorite insult.",
+  "imageUrl": "",
+  "byline": "TikTok",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Simp (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the usage and notice the evolution — the 'word' is the culture. The slang's genius is that the 'insult' is the mirror."
   },
-  {
-    "id": "meme-yeet",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Yeet (2018)",
-    "teaser": "The exclamation for a powerful throw — the word's origin is a 2014 Vine dance, and 'yeet' became the decade's most versatile slang (verb, noun, exclamation).",
-    "imageUrl": "",
-    "byline": "Internet",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Yeet (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the original Vine and notice the throw — the 'motion' is the word. The slang's genius is that the 'versatile' is the life."
-    },
-    "tags": [
-      "Slang",
-      "Dance",
-      "Exclamation",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Slang",
+   "Internet Culture",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-yeet",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Yeet (2018)",
+  "teaser": "The exclamation for a powerful throw — the word's origin is a 2014 Vine dance, and 'yeet' became the decade's most versatile slang (verb, noun, exclamation).",
+  "imageUrl": "",
+  "byline": "Internet",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Yeet (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the original Vine and notice the throw — the 'motion' is the word. The slang's genius is that the 'versatile' is the life."
   },
-  {
-    "id": "meme-sus",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Sus (2018)",
-    "teaser": "Short for 'suspicious' — the Among Us boom of 2020 made 'sus' a global word, and the game's 'sussy' humor became the year's dominant meme.",
-    "imageUrl": "",
-    "byline": "Among Us",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Sus (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read how Among Us turned 'sus' into a global word, then watch a round — notice the accusation pattern that makes it funny."
-    },
-    "tags": [
-      "Slang",
-      "Gaming",
-      "Meme",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Slang",
+   "Dance",
+   "Exclamation",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-sus",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Sus (2018)",
+  "teaser": "Short for 'suspicious' — the Among Us boom of 2020 made 'sus' a global word, and the game's 'sussy' humor became the year's dominant meme.",
+  "imageUrl": "",
+  "byline": "Among Us",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Sus (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read how Among Us turned 'sus' into a global word, then watch a round — notice the accusation pattern that makes it funny."
   },
-  {
-    "id": "meme-cheugy",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Cheugy (2021)",
-    "teaser": "The slang for 'trying too hard to be trendy' — coined by a teenager, and the word's rise to a dictionary entry in a year is a case study in viral language.",
-    "imageUrl": "",
-    "byline": "Gaby Rasson",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Cheugy (2021) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the examples and notice the 'trying' — the satire is the point. The slang's genius is that the 'meta' is the meaning."
-    },
-    "tags": [
-      "Slang",
-      "Satire",
-      "Generation",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Slang",
+   "Gaming",
+   "Meme",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-cheugy",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Cheugy (2021)",
+  "teaser": "The slang for 'trying too hard to be trendy' — coined by a teenager, and the word's rise to a dictionary entry in a year is a case study in viral language.",
+  "imageUrl": "",
+  "byline": "Gaby Rasson",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Cheugy (2021) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the examples and notice the 'trying' — the satire is the point. The slang's genius is that the 'meta' is the meaning."
   },
-  {
-    "id": "meme-gigachad",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Gigachad (2021)",
-    "teaser": "The ultra-muscular 'Gigachad' — the extreme of the Chad format, and the image became the internet's shorthand for impossible confidence.",
-    "imageUrl": "",
-    "byline": "Meme",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Gigachad (2021) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the image and notice the extreme — the 'max' is the joke. The meme's genius is that the 'exaggeration' is the satire."
-    },
-    "tags": [
-      "Meme",
-      "Body",
-      "Satire",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Slang",
+   "Satire",
+   "Generation",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-gigachad",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Gigachad (2021)",
+  "teaser": "The ultra-muscular 'Gigachad' — the extreme of the Chad format, and the image became the internet's shorthand for impossible confidence.",
+  "imageUrl": "",
+  "byline": "Meme",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Gigachad (2021) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the image and notice the extreme — the 'max' is the joke. The meme's genius is that the 'exaggeration' is the satire."
   },
-  {
-    "id": "meme-distracted-boyfriend",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Distracted Boyfriend (2017)",
-    "teaser": "The stock photo of a man glancing at another woman while his girlfriend stares — the 'distracted boyfriend' became the internet's favorite relationship meme format.",
-    "imageUrl": "",
-    "byline": "Photographer",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Distracted Boyfriend (2017) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the captions and notice the triangle — the 'glance' is the format. The meme's genius is that the 'stock' was the canvas."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Format",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Body",
+   "Satire",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-distracted-boyfriend",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Distracted Boyfriend (2017)",
+  "teaser": "The stock photo of a man glancing at another woman while his girlfriend stares — the 'distracted boyfriend' became the internet's favorite relationship meme format.",
+  "imageUrl": "",
+  "byline": "Photographer",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Distracted Boyfriend (2017) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the captions and notice the triangle — the 'glance' is the format. The meme's genius is that the 'stock' was the canvas."
   },
-  {
-    "id": "meme-two-buttons",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Two Buttons (2015)",
-    "teaser": "The panel where a character must choose between two buttons — the 'choice' format is the internet's way of asking impossible questions.",
-    "imageUrl": "",
-    "byline": "Meme",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Two Buttons (2015) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the dilemma — the 'choice' is the joke. The meme's genius is that the 'impossible' is the format."
-    },
-    "tags": [
-      "Meme",
-      "Format",
-      "Choice",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Format",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-two-buttons",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Two Buttons (2015)",
+  "teaser": "The panel where a character must choose between two buttons — the 'choice' format is the internet's way of asking impossible questions.",
+  "imageUrl": "",
+  "byline": "Meme",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Two Buttons (2015) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the dilemma — the 'choice' is the joke. The meme's genius is that the 'impossible' is the format."
   },
-  {
-    "id": "meme-this-is-fine",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "This Is Fine (2013)",
-    "teaser": "The dog sitting in a burning room saying 'this is fine' — the comic became the internet's anthem for denial, and the artist later used it as a mental-health fundraiser.",
-    "imageUrl": "",
-    "byline": "KC Green",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "This Is Fine (2013) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the comic and notice the denial — the 'fine' is the irony. The meme's genius is that the 'burning' is the truth."
-    },
-    "tags": [
-      "Meme",
-      "Comic",
-      "Anxiety",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Format",
+   "Choice",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-this-is-fine",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "This Is Fine (2013)",
+  "teaser": "The dog sitting in a burning room saying 'this is fine' — the comic became the internet's anthem for denial, and the artist later used it as a mental-health fundraiser.",
+  "imageUrl": "",
+  "byline": "KC Green",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "This Is Fine (2013) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the comic and notice the denial — the 'fine' is the irony. The meme's genius is that the 'burning' is the truth."
   },
-  {
-    "id": "meme-hide-the-pain-harold",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Hide the Pain Harold (2011)",
-    "teaser": "The stock-photo model whose smile doesn't reach his eyes — 'Hide the Pain Harold' became the face of forced politeness, and the real man now embraces his fame.",
-    "imageUrl": "",
-    "byline": "András Arató",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Hide the Pain Harold (2011) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the smile and notice the eyes — the 'pain' is the meme. The phenomenon's genius is that the 'fake' is the honesty."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Stock",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Comic",
+   "Anxiety",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-hide-the-pain-harold",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Hide the Pain Harold (2011)",
+  "teaser": "The stock-photo model whose smile doesn't reach his eyes — 'Hide the Pain Harold' became the face of forced politeness, and the real man now embraces his fame.",
+  "imageUrl": "",
+  "byline": "András Arató",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Hide the Pain Harold (2011) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the smile and notice the eyes — the 'pain' is the meme. The phenomenon's genius is that the 'fake' is the honesty."
   },
-  {
-    "id": "meme-side-eyeing-chloe",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Side-Eyeing Chloe (2013)",
-    "teaser": "The toddler's side-eye at her crying sister — the photo became the internet's shorthand for judgment, and Chloe's parents have monetized her fame into a brand.",
-    "imageUrl": "",
-    "byline": "Chloe Clem",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Side-Eyeing Chloe (2013) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the side-eye and notice the judgment — the 'look' is the meme. The phenomenon's genius is that the 'child' was the content."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Kids",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Stock",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-side-eyeing-chloe",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Side-Eyeing Chloe (2013)",
+  "teaser": "The toddler's side-eye at her crying sister — the photo became the internet's shorthand for judgment, and Chloe's parents have monetized her fame into a brand.",
+  "imageUrl": "",
+  "byline": "Chloe Clem",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Side-Eyeing Chloe (2013) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the side-eye and notice the judgment — the 'look' is the meme. The phenomenon's genius is that the 'child' was the content."
   },
-  {
-    "id": "meme-surprised-pikachu",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Surprised Pikachu (2018)",
-    "teaser": "The shocked Pikachu frame used to mock people shocked by predictable outcomes — the 'surprised Pikachu' is the internet's favorite irony format.",
-    "imageUrl": "",
-    "byline": "Pokémon",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Surprised Pikachu (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the 'predictable' — the irony is the joke. The meme's genius is that the 'shock' is the satire."
-    },
-    "tags": [
-      "Meme",
-      "Anime",
-      "Irony",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Kids",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-surprised-pikachu",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Surprised Pikachu (2018)",
+  "teaser": "The shocked Pikachu frame used to mock people shocked by predictable outcomes — the 'surprised Pikachu' is the internet's favorite irony format.",
+  "imageUrl": "",
+  "byline": "Pokémon",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Surprised Pikachu (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the 'predictable' — the irony is the joke. The meme's genius is that the 'shock' is the satire."
   },
-  {
-    "id": "meme-woman-yelling-at-cat",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Woman Yelling at Cat (2019)",
-    "teaser": "The housewife yelling at the confused white cat — the two-image format became the internet's favorite argument template.",
-    "imageUrl": "",
-    "byline": "The Real Housewives",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Woman Yelling at Cat (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the pairing — the 'yelling' is the setup. The meme's genius is that the 'cat' is the punchline."
-    },
-    "tags": [
-      "Meme",
-      "Format",
-      "Irony",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Anime",
+   "Irony",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-woman-yelling-at-cat",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Woman Yelling at Cat (2019)",
+  "teaser": "The housewife yelling at the confused white cat — the two-image format became the internet's favorite argument template.",
+  "imageUrl": "",
+  "byline": "The Real Housewives",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Woman Yelling at Cat (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the pairing — the 'yelling' is the setup. The meme's genius is that the 'cat' is the punchline."
   },
-  {
-    "id": "meme-expanding-brain",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "Expanding Brain (2017)",
-    "teaser": "The four-panel brain expansion format — each stage adds a worse idea, and the 'expanding brain' is the internet's IQ satire.",
-    "imageUrl": "",
-    "byline": "Meme",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Expanding Brain (2017) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the escalation — the 'bigger' is the joke. The meme's genius is that the 'scale' is the satire."
-    },
-    "tags": [
-      "Meme",
-      "Format",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Format",
+   "Irony",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-expanding-brain",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "Expanding Brain (2017)",
+  "teaser": "The four-panel brain expansion format — each stage adds a worse idea, and the 'expanding brain' is the internet's IQ satire.",
+  "imageUrl": "",
+  "byline": "Meme",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "Expanding Brain (2017) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the escalation — the 'bigger' is the joke. The meme's genius is that the 'scale' is the satire."
   },
-  {
-    "id": "meme-the-first-world-problems",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'First World Problems' (2011)",
-    "teaser": "The complaint meme about trivial inconveniences — the 'first world problems' format satirizes privilege, and the phrase entered the dictionary.",
-    "imageUrl": "",
-    "byline": "Internet",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'First World Problems' (2011) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the complaints and notice the 'trivial' — the satire is the point. The meme's genius is that the 'first world' is the frame."
-    },
-    "tags": [
-      "Meme",
-      "Satire",
-      "Format",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Format",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-first-world-problems",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'First World Problems' (2011)",
+  "teaser": "The complaint meme about trivial inconveniences — the 'first world problems' format satirizes privilege, and the phrase entered the dictionary.",
+  "imageUrl": "",
+  "byline": "Internet",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'First World Problems' (2011) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the complaints and notice the 'trivial' — the satire is the point. The meme's genius is that the 'first world' is the frame."
   },
-  {
-    "id": "meme-the-scumbag-steve",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Scumbag Steve' (2011)",
-    "teaser": "The sideways-hat photo of 'Scumbag Steve' — the caption format for selfish behavior made it one of the first great advice-animal memes.",
-    "imageUrl": "",
-    "byline": "Meme",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Scumbag Steve' (2011) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the captions and notice the 'scumbag' — the behavior is the joke. The meme's genius is that the 'photo' is the template."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Satire",
+   "Format",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-scumbag-steve",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Scumbag Steve' (2011)",
+  "teaser": "The sideways-hat photo of 'Scumbag Steve' — the caption format for selfish behavior made it one of the first great advice-animal memes.",
+  "imageUrl": "",
+  "byline": "Meme",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Scumbag Steve' (2011) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the captions and notice the 'scumbag' — the behavior is the joke. The meme's genius is that the 'photo' is the template."
   },
-  {
-    "id": "meme-the-oag-overly-attached-girlfriend",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'OAG' (Overly Attached Girlfriend) (2012)",
-    "teaser": "The Justin Bieber contest video that spawned the 'Overly Attached Girlfriend' — the dead-eyed smile became the meme of possessive love, and Laina became a YouTube star.",
-    "imageUrl": "",
-    "byline": "Laina Morris",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'OAG' (Overly Attached Girlfriend) (2012) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the smile and notice the 'attachment' — the obsession is the joke. The meme's genius is that the 'contest' was the origin."
-    },
-    "tags": [
-      "Meme",
-      "Photo",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-oag-overly-attached-girlfriend",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'OAG' (Overly Attached Girlfriend) (2012)",
+  "teaser": "The Justin Bieber contest video that spawned the 'Overly Attached Girlfriend' — the dead-eyed smile became the meme of possessive love, and Laina became a YouTube star.",
+  "imageUrl": "",
+  "byline": "Laina Morris",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'OAG' (Overly Attached Girlfriend) (2012) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the smile and notice the 'attachment' — the obsession is the joke. The meme's genius is that the 'contest' was the origin."
   },
-  {
-    "id": "meme-the-blinking-white-guy",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Blinking White Guy' (2017)",
-    "teaser": "The GIF of a man blinking in confusion — clipped from a gaming video, the 'blinking guy' became the internet's universal 'wait, what?' reaction.",
-    "imageUrl": "",
-    "byline": "Drew Scanlon",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Blinking White Guy' (2017) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the GIF and notice the blink — the confusion is the reaction. The meme's genius is that the 'clip' is the universal."
-    },
-    "tags": [
-      "Meme",
-      "Video",
-      "Confusion",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Photo",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-blinking-white-guy",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Blinking White Guy' (2017)",
+  "teaser": "The GIF of a man blinking in confusion — clipped from a gaming video, the 'blinking guy' became the internet's universal 'wait, what?' reaction.",
+  "imageUrl": "",
+  "byline": "Drew Scanlon",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Blinking White Guy' (2017) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the GIF and notice the blink — the confusion is the reaction. The meme's genius is that the 'clip' is the universal."
   },
-  {
-    "id": "meme-the-they-did-surgery-on-a-grape",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'They Did Surgery on a Grape' (2019)",
-    "teaser": "The video of an eye surgery performed on a grape — the absurdity of the 'grape surgery' made it a viral joke about wasted medical genius.",
-    "imageUrl": "",
-    "byline": "Twitter",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'They Did Surgery on a Grape' (2019) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Watch the video and notice the absurdity — the 'grape' is the punchline. The meme's genius is that the 'waste' is the humor."
-    },
-    "tags": [
-      "Meme",
-      "Video",
-      "Absurdity",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Video",
+   "Confusion",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-they-did-surgery-on-a-grape",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'They Did Surgery on a Grape' (2019)",
+  "teaser": "The video of an eye surgery performed on a grape — the absurdity of the 'grape surgery' made it a viral joke about wasted medical genius.",
+  "imageUrl": "",
+  "byline": "Twitter",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'They Did Surgery on a Grape' (2019) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Watch the video and notice the absurdity — the 'grape' is the punchline. The meme's genius is that the 'waste' is the humor."
   },
-  {
-    "id": "meme-the-ight-imma-head-out",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Ight, Imma Head Out' (2018)",
-    "teaser": "The SpongeBob frame of him leaving his chair — 'ight, imma head out' is the internet's universal exit meme.",
-    "imageUrl": "",
-    "byline": "SpongeBob",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Ight, Imma Head Out' (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the exit — the 'leaving' is the joke. The meme's genius is that the 'frame' is the universal."
-    },
-    "tags": [
-      "Meme",
-      "Anime",
-      "Exit",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Video",
+   "Absurdity",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-ight-imma-head-out",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Ight, Imma Head Out' (2018)",
+  "teaser": "The SpongeBob frame of him leaving his chair — 'ight, imma head out' is the internet's universal exit meme.",
+  "imageUrl": "",
+  "byline": "SpongeBob",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Ight, Imma Head Out' (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the exit — the 'leaving' is the joke. The meme's genius is that the 'frame' is the universal."
   },
-  {
-    "id": "meme-the-venn-diagram-format",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Venn Diagram' Format (2018)",
-    "teaser": "The two-circle Venn diagram used to mock false equivalence — the 'venn' format is the internet's favorite logic joke.",
-    "imageUrl": "",
-    "byline": "Internet",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Venn Diagram' Format (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the overlap — the 'logic' is the joke. The meme's genius is that the 'math' is the satire."
-    },
-    "tags": [
-      "Meme",
-      "Format",
-      "Logic",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Anime",
+   "Exit",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-venn-diagram-format",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Venn Diagram' Format (2018)",
+  "teaser": "The two-circle Venn diagram used to mock false equivalence — the 'venn' format is the internet's favorite logic joke.",
+  "imageUrl": "",
+  "byline": "Internet",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Venn Diagram' Format (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the overlap — the 'logic' is the joke. The meme's genius is that the 'math' is the satire."
   },
-  {
-    "id": "meme-the-arthur-fist",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Arthur Fist' (2016)",
-    "teaser": "The clenched-fist frame from the cartoon Arthur — the 'Arthur fist' is the internet's universal anger reaction.",
-    "imageUrl": "",
-    "byline": "Arthur",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Arthur Fist' (2016) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Look at the fist and notice the anger — the 'clench' is the emotion. The meme's genius is that the 'frame' is the universal."
-    },
-    "tags": [
-      "Meme",
-      "Anime",
-      "Anger",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Format",
+   "Logic",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-arthur-fist",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Arthur Fist' (2016)",
+  "teaser": "The clenched-fist frame from the cartoon Arthur — the 'Arthur fist' is the internet's universal anger reaction.",
+  "imageUrl": "",
+  "byline": "Arthur",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Arthur Fist' (2016) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Look at the fist and notice the anger — the 'clench' is the emotion. The meme's genius is that the 'frame' is the universal."
   },
-  {
-    "id": "meme-the-drake-hotline-bling-meme",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Drake Hotline Bling' Meme (2016)",
-    "teaser": "The two-panel format using Drake rejecting then accepting — the 'Hotline Bling' meme is the internet's favorite comparison template.",
-    "imageUrl": "",
-    "byline": "Drake",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Drake Hotline Bling' Meme (2016) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the contrast — the 'reject/accept' is the joke. The meme's genius is that the 'two' is the format."
-    },
-    "tags": [
-      "Meme",
-      "Video",
-      "Format",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Meme",
+   "Anime",
+   "Anger",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-drake-hotline-bling-meme",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Drake Hotline Bling' Meme (2016)",
+  "teaser": "The two-panel format using Drake rejecting then accepting — the 'Hotline Bling' meme is the internet's favorite comparison template.",
+  "imageUrl": "",
+  "byline": "Drake",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Drake Hotline Bling' Meme (2016) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the contrast — the 'reject/accept' is the joke. The meme's genius is that the 'two' is the format."
   },
-  {
-    "id": "meme-the-galaxy-brain",
-    "categoryId": "INTERNET",
-    "subtype": "Meme",
-    "name": "The 'Galaxy Brain' (2018)",
-    "teaser": "The four-panel brain format where the last idea is incomprehensible — the 'galaxy brain' satirizes overthinking.",
-    "imageUrl": "",
-    "byline": "Meme",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The 'Galaxy Brain' (2018) end-to-end",
-      "durationMinutes": 30,
-      "instruction": "Read the formats and notice the escalation — the 'galaxy' is the punchline. The meme's genius is that the 'overthink' is the satire."
-    },
-    "tags": [
-      "Meme",
-      "Format",
-      "Satire",
-      "2010s"
-    ],
-    "tier": 1
-  }
+  "tags": [
+   "Meme",
+   "Video",
+   "Format",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "meme-the-galaxy-brain",
+  "categoryId": "INTERNET",
+  "subtype": "Meme",
+  "name": "The 'Galaxy Brain' (2018)",
+  "teaser": "The four-panel brain format where the last idea is incomprehensible — the 'galaxy brain' satirizes overthinking.",
+  "imageUrl": "",
+  "byline": "Meme",
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The 'Galaxy Brain' (2018) end-to-end",
+   "durationMinutes": 30,
+   "instruction": "Read the formats and notice the escalation — the 'galaxy' is the punchline. The meme's genius is that the 'overthink' is the satire."
+  },
+  "tags": [
+   "Meme",
+   "Format",
+   "Satire",
+   "2010s"
+  ],
+  "tier": 1
+ }
 ]

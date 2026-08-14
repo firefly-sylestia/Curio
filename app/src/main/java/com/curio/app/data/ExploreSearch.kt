@@ -24,6 +24,23 @@ enum class SearchEngine(val id: String, val displayName: String, val description
     }
 }
 
+/**
+ * v27s — the music services the "Watch in" explore action can open for
+ * Album / Artist / Song topics. Chosen in Settings next to the search
+ * engine; YouTube Music stays the default so the pre-setting behavior
+ * (YouTube search for music) is unchanged until the user switches.
+ */
+enum class MusicService(val id: String, val displayName: String, val description: String) {
+    YOUTUBE_MUSIC("youtube_music", "YouTube Music", "The music side of YouTube"),
+    APPLE_MUSIC("apple_music", "Apple Music", "Apple's streaming catalog"),
+    SPOTIFY("spotify", "Spotify", "The big green streaming app");
+
+    companion object {
+        fun fromId(id: String?): MusicService =
+            entries.firstOrNull { it.id == id } ?: YOUTUBE_MUSIC
+    }
+}
+
 fun buildExploreQuery(topic: CurioTopic): String {
     val parts = mutableListOf<String>()
     if (topic.subtype.equals("Album", ignoreCase = true)) {
@@ -40,6 +57,41 @@ fun buildGoogleSearchUrl(topic: CurioTopic): String =
 
 fun buildYouTubeSearchUrl(topic: CurioTopic): String =
     "https://www.youtube.com/results?search_query=" + Uri.encode(buildExploreQuery(topic))
+
+/**
+ * v27s — the search URL for [service] (the selected service by default,
+ * read reactively from [AppPreferences.musicServiceState] so the Topic
+ * Reveal dialog reopens the right service the moment the user changes it
+ * in Settings). Used by the "Watch in" action on Album / Artist / Song
+ * topics.
+ */
+fun buildMusicServiceSearchUrl(
+    topic: CurioTopic,
+    service: MusicService = MusicService.fromId(AppPreferences.musicServiceState)
+): String {
+    val q = Uri.encode(buildExploreQuery(topic))
+    return when (service) {
+        MusicService.YOUTUBE_MUSIC -> "https://music.youtube.com/search?q=$q"
+        // v29 — the storefront segment ("us") is REQUIRED: without it Apple's
+        // server redirects and the Apple Music app never recognizes the link,
+        // so "in-app" opens never hand off. music.apple.com/{cc}/search?term=
+        // is the canonical web-search URL the app understands.
+        MusicService.APPLE_MUSIC -> "https://music.apple.com/us/search?term=$q"
+        // Spotify's web search path (/search/{query}) is the correct deep
+        // link: it hands off into the installed app or opens the web player.
+        MusicService.SPOTIFY -> "https://open.spotify.com/search/$q"
+    }
+}
+
+/**
+ * v27s — the music lanes: Album / Artist / Song topics route the reveal
+ * dialog's second action ("Watch in") to the user's chosen music service
+ * instead of plain YouTube.
+ */
+fun CurioTopic.isMusicTopic(): Boolean =
+    subtype.equals("Album", ignoreCase = true) ||
+        subtype.equals("Artist", ignoreCase = true) ||
+        subtype.equals("Song", ignoreCase = true)
 
 /**
  * v19 — the search URL for [engine] (the selected engine by default, read

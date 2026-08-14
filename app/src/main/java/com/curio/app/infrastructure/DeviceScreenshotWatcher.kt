@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
@@ -46,6 +47,27 @@ object DeviceScreenshotWatcher {
     private var lastSeenId = -1L
     private val seenPaths: MutableSet<String> = Collections.synchronizedSet(HashSet())
 
+    // v27t — the scan does a MediaStore query plus a FULL FILE COPY of the
+    // screenshot (SessionShots.copyFrom). Running that on the main thread
+    // froze the app at the exact moment the system is still writing and
+    // indexing the file, so the heavy work runs on a single serialized
+    // background thread and only the session-state update hops back to main.
+    private val scanThread by lazy {
+        HandlerThread("curio-screenshot-scan").also { it.start() }
+    }
+    private val scanHandler by lazy { Handler(scanThread.looper) }
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    // v29 — coalescing + retry: a burst of MediaStore change events (or a
+    // scan that takes a while) only ever queues ONE pass; a re-run is
+    // requested while a pass is in flight and drained right after, so rapid
+    // screenshot bursts never pile up work on the scan thread. A single
+    // delayed re-pass ~1.5s later catches rows MediaStore hadn't indexed
+    // yet when the change event fired (the reason a fresh screenshot
+    // sometimes never attached).
+    @Volatile private var scanQueued = false
+    @Volatile private var scanning = false
+
     /** Registers the MediaStore observer (idempotent). */
     fun start(context: Context) {
         if (observer != null) return
@@ -54,7 +76,7 @@ object DeviceScreenshotWatcher {
         lastSeenId = newestRowId(context.contentResolver)
         observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
             override fun onChange(selfChange: Boolean) {
-                scan(context)
+                scanAsync(context)
             }
         }
         runCatching {
@@ -75,6 +97,44 @@ object DeviceScreenshotWatcher {
             observer = null
         }
         seenPaths.clear()
+    }
+
+    /**
+     * v27t — queues a scan on the serialized background thread (a burst of
+     * screenshots is processed one at a time, never in parallel). The
+     * observer still fires on the main thread, but [scan]'s query + file
+     * copy never touch it. v29 — coalesces bursts (one pass drains all
+     * pending requests) and schedules a delayed re-pass for rows that
+     * MediaStore indexes late.
+     */
+    private fun scanAsync(context: Context) {
+        scanQueued = true
+        if (scanning) return
+        scanHandler.post { drain(context) }
+    }
+
+    /** Runs queued passes until quiet, then schedules the late-index retry. */
+    private fun drain(context: Context) {
+        scanning = true
+        try {
+            while (scanQueued) {
+                scanQueued = false
+                scan(context)
+            }
+        } finally {
+            scanning = false
+        }
+        // v29 — a screenshot can land in MediaStore a moment AFTER its
+        // change event; one delayed re-pass catches it. Idempotent via
+        // [lastSeenId] + [seenPaths].
+        scanHandler.postDelayed({ retryScan(context) }, 1500L)
+    }
+
+    /** Second chance for late-indexed rows (skips when a pass is active). */
+    private fun retryScan(context: Context) {
+        if (scanQueued || scanning) return
+        scanQueued = true
+        scanHandler.post { drain(context) }
     }
 
     private fun hasReadPermission(context: Context): Boolean {
@@ -135,28 +195,42 @@ object DeviceScreenshotWatcher {
                     val id = cursor.getLong(idCol)
                     if (id > lastSeenId) lastSeenId = id
                     val name = cursor.getString(nameCol).orEmpty()
-                    if (!looksLikeScreenshot(name)) continue
                     val filePath = cursor.getString(pathCol)
+                    if (!looksLikeScreenshot(name, filePath)) continue
                     if (filePath.isNullOrBlank()) continue
                     if (!seenPaths.add(filePath)) continue
                     val shotUri = ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                     )
                     val saved = SessionShots.copyFrom(context, shotUri)
-                    if (saved != null) target(saved)
+                    if (saved != null) {
+                        val attach = target
+                        // State updates (session screenshot list, pending
+                        // write package) hop back to the main thread — the
+                        // file copy itself stays off it.
+                        mainHandler.post { attach(saved) }
+                    }
                 }
             }
         }
     }
 
-    /** True for the common screenshot naming patterns across OEMs. */
-    private fun looksLikeScreenshot(name: String): Boolean {
+    /**
+     * True for the common screenshot naming patterns across OEMs, or any
+     * image filed under a /Screenshots/ folder (some OEMs name shots
+     * IMG_… but still put them there). v29 — the DATA-path check catches
+     * shots the name alone misses.
+     */
+    private fun looksLikeScreenshot(name: String, filePath: String?): Boolean {
         val lower = name.lowercase()
-        return lower.startsWith("screenshot") ||
+        if (lower.contains("screenshot") ||
             lower.startsWith("screen shot") ||
-            lower.startsWith("screencapture") ||
-            lower.startsWith("screenshot_") ||
-            lower.contains("screenshot")
+            lower.startsWith("screencapture")
+        ) {
+            return true
+        }
+        val path = filePath?.lowercase().orEmpty()
+        return path.contains("/screenshots/") || path.endsWith("/screenshots")
     }
 
     /**

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.pastelFillInk
 
 /**
  * Open Notebook format body — CURIO_SPEC §8.6 (Wildcard).
@@ -102,7 +103,6 @@ fun OpenNotebookFormat(
                     choice = choice,
                     selected = selectedFormat == choice,
                     accent = accent,
-                    tint = tint,
                     onClick = { selectedFormat = choice }
                 )
             }
@@ -207,14 +207,17 @@ private fun NotebookChoiceRow(
     choice: NotebookChoice,
     selected: Boolean,
     accent: Color,
-    tint: Color,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) tint else MaterialTheme.colorScheme.surface,
-        shadowElevation = if (selected) 3.dp else 1.dp,
+        // v27q — selection reads as a SOLID accent fill with pastel-aware
+        // ink (the old tint fill was translucent and let the shadow bleed);
+        // elevation stays a flat 2dp.
+        color = if (selected) accent else MaterialTheme.colorScheme.surface,
+        contentColor = if (selected) pastelFillInk(accent) else MaterialTheme.colorScheme.onSurface,
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -243,7 +246,7 @@ private fun NotebookChoiceRow(
             CurioIcon(
                 name = choice.glyph,
                 contentDescription = null,
-                tint = if (selected) accent
+                tint = if (selected) pastelFillInk(accent)
                        else MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 20.dp
             )
@@ -252,13 +255,14 @@ private fun NotebookChoiceRow(
                 Text(
                     text = choice.label,
                     style = MaterialTheme.typography.titleSmall,
-                    color = if (selected) accent
+                    color = if (selected) pastelFillInk(accent)
                            else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = choice.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (selected) pastelFillInk(accent).copy(alpha = 0.8f)
+                           else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

@@ -51,9 +51,9 @@ import com.curio.app.ui.theme.CurioIcons
  * directly). Mirrors the [com.curio.app.navigation.LightboxTarget] pattern.
  *
  * Spin publishes its deck wash; Cabinet publishes its active-filter wash
- * (null when showing "All" — a plain page). Home stays plain and the bar
- * falls back to the theme surface whenever the active route publishes no
- * wash.
+ * (null when showing "All" — a plain page). Home publishes its category
+ * tint wash only when the "Home tint" experiment is on; the bar falls back
+ * to the theme surface whenever the active route publishes no wash.
  */
 object CurioNavTint {
     var spinWash by mutableStateOf<Color?>(null)
@@ -64,6 +64,11 @@ object CurioNavTint {
     // composed.
     var cabinetWash by mutableStateOf<Color?>(null)
         private set
+    // Home's category-tint wash — published by HomeScreen when the "Home
+    // tint" experiment is on so the nav bar blends with the tinted Home
+    // page. Null when the experiment is off (Home stays plain).
+    var homeWash by mutableStateOf<Color?>(null)
+        private set
 
     fun publishSpinWash(color: Color?) {
         spinWash = color
@@ -71,6 +76,10 @@ object CurioNavTint {
 
     fun publishCabinetWash(color: Color?) {
         cabinetWash = color
+    }
+
+    fun publishHomeWash(color: Color?) {
+        homeWash = color
     }
 }
 
@@ -271,15 +280,17 @@ fun CurioNavigationRail(
 
 /**
  * Shared nav-chrome container color: each tab's category-tinted page wash
- * (Spin's deck wash, the Cabinet's active-filter wash) matching the page
- * background the user is looking at. Home stays on the plain theme surface
- * and any route that publishes no wash falls back to the surface too.
+ * (Spin's deck wash, the Cabinet's active-filter wash, Home's experiment
+ * tint) matching the page background the user is looking at. Home stays on
+ * the plain theme surface unless the "Home tint" experiment is on, and any
+ * route that publishes no wash falls back to the surface too.
  */
 @Composable
 private fun curioNavContainerColor(routePrefix: String?): Color {
     val target = when (routePrefix) {
         CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.surface
         CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
+        CurioRoutes.HOME -> CurioNavTint.homeWash ?: MaterialTheme.colorScheme.surface
         else -> MaterialTheme.colorScheme.surface
     }
     return animateColorAsState(

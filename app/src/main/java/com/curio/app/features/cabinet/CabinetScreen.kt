@@ -93,6 +93,7 @@ import com.curio.app.ui.components.CurioSortOption
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.pet.PetLandmark
@@ -109,6 +110,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.headerAccent
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -452,15 +454,17 @@ fun CabinetScreen(navController: NavController) {
         // As the grid scrolls the bar lifts, pops (0.97 → 1.0) and frosts in
         // (Profile's pill mechanism), pinning just below the ragged tear
         // while the entry cards pass underneath it.
-        CabinetStickyChipBar(
-            gridState = gridState,
-            entries = entries,
-            selectedFilter = selectedFilter,
-            showLegacyOnly = showLegacyOnly,
-            onSelectAll = { selectedFilter = null; showLegacyOnly = false },
-            onSelectCategory = { selectedFilter = it; showLegacyOnly = false },
-            onToggleLegacy = { selectedFilter = null; showLegacyOnly = !showLegacyOnly }
-        )
+        if (searchActive) {
+            CabinetStickyChipBar(
+                gridState = gridState,
+                entries = entries,
+                selectedFilter = selectedFilter,
+                showLegacyOnly = showLegacyOnly,
+                onSelectAll = { selectedFilter = null; showLegacyOnly = false },
+                onSelectCategory = { selectedFilter = it; showLegacyOnly = false },
+                onToggleLegacy = { selectedFilter = null; showLegacyOnly = !showLegacyOnly }
+            )
+        }
 
         // ── Torn rose hero banner — drawn ON TOP of the scroll content; the
         // search field expands INSIDE the banner when search is active. The
@@ -494,7 +498,7 @@ fun CabinetScreen(navController: NavController) {
             // @Composable slot isn't the last parameter, and the trailing
             // form fails to bind it under K2 ("no value passed for
             // 'trailing'" / "too many arguments").
-            trailing = { ink ->
+            trailing = { ink, backdrop ->
                 if (selectionMode) {
                     CabinetHeroActionPill(
                         onClick = {
@@ -506,6 +510,7 @@ fun CabinetScreen(navController: NavController) {
                         },
                         label = if (allVisibleSelected) "Clear" else "Select all",
                         ink = ink,
+                        backdrop = backdrop,
                         emphasized = true
                     )
                     CabinetHeroActionPill(
@@ -514,6 +519,7 @@ fun CabinetScreen(navController: NavController) {
                         },
                         label = "Delete (${selectedEntryIds.size})",
                         ink = ink,
+                        backdrop = backdrop,
                         emphasized = true,
                         destructive = true
                     )
@@ -521,7 +527,8 @@ fun CabinetScreen(navController: NavController) {
                         onClick = { selectionMode = false; selectedEntryIds = emptySet() },
                         glyph = CurioIcons.Close,
                         contentDescription = "Cancel selection",
-                        ink = ink
+                        ink = ink,
+                        backdrop = backdrop
                     )
                 } else {
                     CabinetHeroActionPill(
@@ -530,7 +537,8 @@ fun CabinetScreen(navController: NavController) {
                             selectedEntryIds = emptySet()
                         },
                         label = "Select",
-                        ink = ink
+                        ink = ink,
+                        backdrop = backdrop
                     )
                     // v26 — sort dropdown: the label opens the field list,
                     // the arrow toggles ascending/descending universally.
@@ -545,13 +553,19 @@ fun CabinetScreen(navController: NavController) {
                         onSelect = { cabinetSortField = it },
                         onToggleDirection = { sortAscending = !sortAscending },
                         ink = ink,
+                        backdrop = backdrop,
+                        // v30 — the trailing slot receives the hero FILL
+                        // (active category accent / rose / tertiary), which
+                        // lights the dropdown's selected row.
+                        accent = backdrop,
                         emphasized = true
                     )
                     CabinetHeroActionPill(
                         onClick = { searchActive = true },
                         glyph = CurioIcons.Search,
                         contentDescription = "Search captures",
-                        ink = ink
+                        ink = ink,
+                        backdrop = backdrop
                     )
                 }
             }
@@ -627,7 +641,9 @@ private fun CabinetHeroHeader(
     onSearchQueryChange: (String) -> Unit,
     onCloseSearch: () -> Unit,
     searchFocus: FocusRequester,
-    trailing: @Composable (ink: Color) -> Unit,
+    // v27n — the slot also receives the banner fill so hero pills can
+    // resolve an OPAQUE glass fill (lerp of the ink into the banner).
+    trailing: @Composable (ink: Color, backdrop: Color) -> Unit,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
     compact: Boolean = false
@@ -651,7 +667,10 @@ private fun CabinetHeroHeader(
     }
     val targetInk = when {
         legacyMode -> MaterialTheme.colorScheme.onTertiary
-        activeCat != null -> activeCat.onAccent()
+        // v28 — dark mode: white/creamish hero text (the tinted light twin
+        // would read as pastel title over the deep banner); light keeps the
+        // pastel-aware on-accent ink exactly as before.
+        activeCat != null -> activeCat.heroHeaderInk()
         else -> settingsReadableInk(targetFill)
     }
     val fill by animateColorAsState(targetFill, tween(CurioMotion.Durations.Morph), label = "cabinetHeroFill")
@@ -737,14 +756,15 @@ private fun CabinetHeroHeader(
                                 label = "Cancel",
                                 glyph = CurioIcons.Close,
                                 contentDescription = "Close search",
-                                ink = ink
+                                ink = ink,
+                                backdrop = fill
                             )
                         } else {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                trailing(ink)
+                                trailing(ink, fill)
                             }
                         }
                     }
@@ -798,10 +818,15 @@ private fun CabinetHeroHeader(
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                                 keyboardActions = KeyboardActions(onSearch = {}),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = ink.copy(alpha = 0.16f),
-                                    unfocusedContainerColor = ink.copy(alpha = 0.16f),
-                                    focusedBorderColor = ink.copy(alpha = 0.55f),
-                                    unfocusedBorderColor = ink.copy(alpha = 0.30f),
+                                    // v29 — frosted-glass container (banner
+                                    // lifted toward white) + full-ink borders:
+                                    // the old ink-at-16% container + dark
+                                    // border mix read too dark in light and
+                                    // pastel.
+                                    focusedContainerColor = lerp(fill, Color.White, 0.30f),
+                                    unfocusedContainerColor = lerp(fill, Color.White, 0.30f),
+                                    focusedBorderColor = ink.copy(alpha = 0.65f),
+                                    unfocusedBorderColor = ink.copy(alpha = 0.40f),
                                     cursorColor = ink,
                                     focusedTextColor = ink,
                                     unfocusedTextColor = ink,
@@ -827,7 +852,11 @@ private fun CabinetHeroHeader(
                                 // v27 — experimental paper-title underline (two
                                 // short lines under the title text; OFF by default).
                                 if (AppPreferences.paperHeaderCutsState) {
-                                    PaperTitleLines(ink = ink)
+                                    PaperTitleLines(
+                                        ink = ink,
+                                        title = title,
+                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                                    )
                                 }
                                 Text(
                                     subtitle,
@@ -909,13 +938,11 @@ private fun BoxScope.CabinetStickyChipBar(
                 FilterChipLite(
                     label = "All",
                     accent = MaterialTheme.colorScheme.primary,
-                    tint = MaterialTheme.colorScheme.primaryContainer,
-                    ink = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ink = MaterialTheme.colorScheme.onPrimary,
                     // Opaque unselected pill — the chip reads as a solid
                     // surface over the backdrop, not a see-through wash.
                     chipSurface = surface,
                     popProgress = popProgress,
-                    elevation = elevation,
                     selected = selectedFilter == null && !showLegacyOnly,
                     onClick = onSelectAll
                 )
@@ -934,17 +961,14 @@ private fun BoxScope.CabinetStickyChipBar(
             ) { popProgress, surface, elevation ->
                 FilterChipLite(
                     label = cat.displayName,
-                    accent = cat.categoryInk(),
-                    tint = cat.tint,
-                    // The button (label text) never adapts to the category —
-                    // it stays on the neutral theme ink in every state, so
-                    // only the background carries the tint.
-                    ink = MaterialTheme.colorScheme.onSurfaceVariant,
+                    accent = cat.themedAccent(),
+                    // v27q — the selected label flips to the on-accent ink so
+                    // it stays readable on the solid accent fill.
+                    ink = cat.onAccent(),
                     // Opaque category pill — full-strength chip surface so
                     // the tinted pill reads solid on the backdrop.
                     chipSurface = surface,
                     popProgress = popProgress,
-                    elevation = elevation,
                     selected = selectedFilter == cat.id && !showLegacyOnly,
                     onClick = { onSelectCategory(cat.id) }
                 )
@@ -968,11 +992,9 @@ private fun BoxScope.CabinetStickyChipBar(
                     FilterChipLite(
                         label = "Legacy",
                         accent = MaterialTheme.colorScheme.tertiary,
-                        tint = MaterialTheme.colorScheme.tertiaryContainer,
-                        ink = MaterialTheme.colorScheme.onTertiaryContainer,
+                        ink = MaterialTheme.colorScheme.onTertiary,
                         chipSurface = surface,
                         popProgress = popProgress,
-                        elevation = elevation,
                         selected = showLegacyOnly,
                         onClick = onToggleLegacy
                     )
@@ -1004,8 +1026,11 @@ private fun CabinetChipPop(
     // track the scroll 1:1 while the bar eased, which read as a slightly
     // mechanical, janky pop. Easing it settles every pill in sync with the
     // bar's glide.
+    // v29 — pills REST at full size (1.0) and only pop subtly (1.05) while
+    // the bar actually pins: the old 0.90 rest scale made every pill look
+    // like it was GROWING when the Cabinet opened.
     val eased = FastOutSlowInEasing.transform(pillProgress)
-    val pillScale = androidx.compose.ui.util.lerp(0.90f, 1f, eased)
+    val pillScale = androidx.compose.ui.util.lerp(1f, 1.05f, eased)
     // v7.96 — COLOR MORPH: as each pill pops, its neutral surface blooms
     // toward its accent [popSurface] and it lifts with a soft shadow — every
     // chip ripples with its own color as the bar pins, instead of scaling
@@ -1053,6 +1078,9 @@ private fun BoxScope.CabinetHeroSymbol(
 private fun CabinetHeroActionPill(
     onClick: () -> Unit,
     ink: Color,
+    // v27n — the banner fill behind the pill (the opaque-fill conversion
+    // needs it to resolve the same perceived tint on the banner).
+    backdrop: Color,
     label: String? = null,
     glyph: String? = null,
     contentDescription: String? = null,
@@ -1061,29 +1089,45 @@ private fun CabinetHeroActionPill(
 ) {
     // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
     // banner (especially in light mode), so hero actions like Select /
-    // Sort / Search read as invisible. The glass stays frosted but clear.
+    // Sort / Search read as invisible.
+    // v27n — the fill is now OPAQUE (ink lerped into the banner at the old
+    // glass alpha): a translucent fill let the elevation shadow bleed
+    // through as a blurry broken background; the opaque lerp resolves to
+    // the exact same perceived tint on the banner.
+    // v29 — the fills are now a LIGHT frosted glass (the banner lifted
+    // toward white): the v27r ink-lean fills (lerp toward the ink at
+    // 0.30/0.35/0.55) read too dark in light + pastel themes. Lifting
+    // toward white keeps the same visible-pill look with full-ink glyphs
+    // that pop in every mode — creamy in light/pastel, brighter glass on
+    // the deep dark banner. Destructive stays the darkest pill (a whisper
+    // of black) so delete reads as the danger action.
     val fill = when {
-        destructive -> ink.copy(alpha = 0.65f)
-        emphasized -> ink.copy(alpha = 0.55f)
-        else -> ink.copy(alpha = 0.30f)
+        destructive -> lerp(backdrop, Color.Black, 0.14f)
+        emphasized -> lerp(backdrop, Color.White, 0.24f)
+        else -> lerp(backdrop, Color.White, 0.38f)
     }
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fill,
-        shadowElevation = 3.dp
+        shadowElevation = 3.dp,
+        // v28 — dark mode elevation visibility (glow + hairline).
+        modifier = Modifier
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+            // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero
+            // controls read as substantial buttons, not tiny chips.
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             if (glyph != null) {
                 CurioIcon(
                     name = glyph,
                     contentDescription = contentDescription,
                     tint = ink,
-                    size = 18.dp
+                    size = 22.dp
                 )
             }
             if (label != null) {
@@ -1101,18 +1145,17 @@ private fun CabinetHeroActionPill(
 private fun FilterChipLite(
     label: String,
     accent: Color,
-    tint: Color,
     ink: Color,
     chipSurface: Color = MaterialTheme.colorScheme.surfaceVariant,
     // v27n — the capsule is defined by its fill + elevation shadow, no
     // outline ring. v7.96 — premium pop: the capsule wears a soft vertical
     // sheen (top light / slightly deeper base) instead of a flat fill; as
     // [popProgress] goes 0→1 the unselected label blooms toward [accent]
-    // and the pill lifts with [elevation]'s shadow — the per-pill color pop
-    // on top of the scale pop. Selected chips keep their accent-container
-    // gradient.
+    // — the per-pill color pop on top of the scale pop. v27q — selected
+    // pills wear a SOLID accent gradient (the old accent-container tints
+    // were translucent and let the shadow bleed) and elevation stays a flat
+    // 2dp.
     popProgress: Float = 0f,
-    elevation: Dp = 0.dp,
     selected: Boolean,
     onClick: () -> Unit
 ) {
@@ -1126,9 +1169,9 @@ private fun FilterChipLite(
         )
     }
     val fillBrush = if (selected) {
-        // Accent-container gradient — deeper at the base like the category
-        // card fills, so the active pill reads premium rather than flat.
-        Brush.verticalGradient(listOf(tint, lerp(tint, Color.Black, 0.10f)))
+        // v27q — SOLID accent gradient — deeper at the base like the
+        // category card fills, so the active pill reads premium.
+        Brush.verticalGradient(listOf(accent, lerp(accent, Color.Black, 0.10f)))
     } else {
         // Neutral capsule with a whisper of top light (the rigid-card sheen).
         Brush.verticalGradient(
@@ -1139,7 +1182,11 @@ private fun FilterChipLite(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = Color.Transparent,
-        shadowElevation = if (selected) elevation.coerceAtLeast(3.dp) else elevation
+        // v27q — flat 2dp in both states (no selected raise).
+        shadowElevation = 2.dp,
+        // v28 — dark mode elevation visibility (glow + hairline).
+        modifier = Modifier
+            .curioDarkGlow(2.dp, RoundedCornerShape(50))
     ) {
         Box(
             modifier = Modifier

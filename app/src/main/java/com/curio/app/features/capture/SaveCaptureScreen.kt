@@ -99,6 +99,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.EmberBurst
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -552,13 +553,27 @@ fun SaveCaptureScreen(
             else -> 0L
         }
         val tintWash = AppPreferences.tintWashEffective()
-        val stripColor = if (tintWash) cat.tint else MaterialTheme.colorScheme.surfaceContainerHigh
+        // v29 — the strip wears the SAME category-tinted card surface as the
+        // rest of the app ([categorySurface] is fully OPAQUE — the old lerp
+        // of the accent at 20% over surfaceContainerHigh was also opaque but
+        // its tint didn't match the cards in dark mode, where it read as a
+        // muddy near-grey instead of the category's mid-tone). The ink rides
+        // the category's readable ink ([categoryInk]: deep accent in light,
+        // light twin in dark, deep twin in pastel) so the topic text stays
+        // readable on the strip in every theme.
+        val stripColor = if (tintWash) {
+            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
         val stripInk = if (tintWash) cat.categoryInk() else MaterialTheme.colorScheme.onSurface
         Surface(
             color = stripColor,
             shape = RoundedCornerShape(20.dp),
             shadowElevation = 3.dp,
+            // v29 — dark mode elevation visibility (glow).
             modifier = Modifier
+                .curioDarkGlow(3.dp, RoundedCornerShape(20.dp))
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
@@ -569,8 +584,13 @@ fun SaveCaptureScreen(
             ) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = if (tintWash) cat.themedAccent().copy(alpha = 0.15f)
-                            else MaterialTheme.colorScheme.surfaceVariant
+                    // v27u — opaque icon plate (was the accent at 15% alpha —
+                    // no transparency anywhere on the strip).
+                    color = if (tintWash) {
+                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.themedAccent(), 0.15f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
                 ) {
                     CurioIcon(
                         name = cat.iconGlyph,
@@ -1020,8 +1040,14 @@ private fun TagEditorRow(
                 tags.forEach { tag ->
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = if (AppPreferences.tintWashEffective()) tint.copy(alpha = 0.14f)
-                                else MaterialTheme.colorScheme.surfaceVariant,
+                        // v27n — opaque tinted chip (was the accent tint at
+                        // 14% alpha, which let the elevation shadow bleed
+                        // through).
+                        color = if (AppPreferences.tintWashEffective()) {
+                            lerp(MaterialTheme.colorScheme.surface, tint.copy(alpha = 1f), 0.14f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        },
                         shadowElevation = 2.dp
                     ) {
                         Row(
@@ -1167,8 +1193,13 @@ private fun SessionAttachmentsCard(
                 Surface(
                     onClick = onAddScreenshot,
                     shape = RoundedCornerShape(14.dp),
-                    color = if (tintWash) cat.tint.copy(alpha = 0.14f)
-                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    // v27n — opaque tinted tile (was the accent tint at 14%
+                    // alpha, which let the elevation shadow bleed through).
+                    color = if (tintWash) {
+                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.accent, 0.14f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
                     shadowElevation = 2.dp,
                     modifier = Modifier.size(84.dp)
                 ) {
@@ -1516,7 +1547,9 @@ private fun FormatBodyForCategory(
                     shape = RoundedCornerShape(50),
                     color = if (i == activeIndex) category.themedAccent()
                             else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    shadowElevation = if (i == activeIndex) 3.dp else 1.dp,
+                    // v27q — flat 2dp: selection reads through the solid
+                    // accent fill.
+                    shadowElevation = 2.dp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Row(
@@ -1761,10 +1794,13 @@ private fun FormatChip(
             if (active.format != fmt) onSwitch(fmt)
         },
         shape = RoundedCornerShape(50),
-        color = if (AppPreferences.tintWashEffective() && active.format == fmt) category.tint
+        // v27q — the tint-wash fill is the OPAQUE 20% lerp (the raw tint is
+        // translucent and let the shadow bleed); elevation stays flat 2dp.
+        color = if (AppPreferences.tintWashEffective() && active.format == fmt)
+                lerp(MaterialTheme.colorScheme.surface, category.accent, 0.20f)
                 else if (active.format == fmt) category.themedAccent()
                 else category.categorySurface(MaterialTheme.colorScheme.surface),
-        shadowElevation = if (active.format == fmt) 3.dp else 1.dp,
+        shadowElevation = 2.dp,
         modifier = Modifier.padding(vertical = 2.dp)
     ) {
         Row(

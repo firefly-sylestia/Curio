@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -41,6 +43,7 @@ import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioEntry
+import com.curio.app.data.TopicProgressStore
 import com.curio.app.data.formatSessionShort
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -107,6 +110,8 @@ fun CurioEntryCard(
                 onLongClick = onLongClick
             )
             // v9.x — theme-style edge shine (hairline + top shine).
+            // v28 — dark mode elevation visibility (glow + hairline).
+            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
             .categoryEdgeShine(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
         // v9.x — AMOLED cards are proper pitch black now: the old grey
@@ -117,10 +122,10 @@ fun CurioEntryCard(
         } else {
             cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
         },
-        // v27n — elevation replaces the outline: selected cards lift higher
-        // (raised instead of ringed), AMOLED cards wear the faint container
-        // step since shadows are invisible on pure black.
-        shadowElevation = if (selected) 8.dp else 3.dp,
+        // v27q — elevation is a flat 2dp in both states: selection reads
+        // through the check badge in the header corner, not a raise (the old
+        // 8/3 raise smeared the card while it animated).
+        shadowElevation = 2.dp,
         tonalElevation = 1.dp
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -181,6 +186,56 @@ fun CurioEntryCard(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
+                }
+
+                // ── v29 — progress lives IN the hero: the card's hero
+                //    header FILLS with progress (50% → half filled, 100% →
+                //    fully colored) and a small opaque count pill in the
+                //    bottom-right corner opens the editor. Same
+                //    TopicProgressStore as the reveal + detail heroes.
+                val progressTarget = entry.topic.progressTarget
+                if (progressTarget != null && progressTarget > 0) {
+                    val current = TopicProgressStore.get(entry.topic.id)
+                    val fraction = (current.toFloat() / progressTarget).coerceIn(0f, 1f)
+                    val fillInk = cat.onAccent()
+                    if (current > 0) {
+                        // Rising fill — anchored to the hero's bottom edge:
+                        // half done = half filled. Denser at the base with a
+                        // bright level line at the current progress mark; the
+                        // card's own gradient shows through above the level.
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .fillMaxHeight(fraction)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            fillInk.copy(alpha = 0.34f),
+                                            fillInk.copy(alpha = 0.08f)
+                                        )
+                                    )
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .fillMaxWidth()
+                                    .height(2.dp)
+                                    .background(fillInk.copy(alpha = 0.55f))
+                            )
+                        }
+                    }
+                    CurioProgressPill(
+                        topic = entry.topic,
+                        accent = accent,
+                        ink = cat.accent,
+                        background = lerp(accent, Color.White, 0.85f),
+                        showBar = false,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                    )
                 }
             }
 
@@ -245,6 +300,7 @@ fun CurioEntryCard(
         }
     }
 }
+
 
 /**
  * A scaled-down version of the torn-hero watermark: a mirrored pair of

@@ -1,1322 +1,1322 @@
 [
-  {
-    "id": "song-purple-rain",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Purple Rain (1984)",
-    "teaser": "Prince wrote it as a guitar showcase and the film's concert scene is a real performance — the solo at the end is a single unedited take, and the song's gospel choir is the 'rain' made sound.",
-    "imageUrl": "",
-    "byline": "Prince",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Purple Rain (1984) end-to-end",
-      "durationMinutes": 9,
-      "instruction": "Listen to the full nine minutes with the solo — it's one unedited take. The song's genius is that the grief is the guitar; the lyrics are the weather."
-    },
-    "tags": [
-      "Rock",
-      "Ballad",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+ {
+  "id": "song-purple-rain",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Purple Rain (1984)",
+  "teaser": "Prince wrote it as a guitar showcase and the film's concert scene is a real performance — the solo at the end is a single unedited take, and the song's gospel choir is the 'rain' made sound.",
+  "imageUrl": "",
+  "byline": "Prince",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Purple Rain (1984) end-to-end",
+   "durationMinutes": 9,
+   "instruction": "Listen to the full nine minutes with the solo — it's one unedited take. The song's genius is that the grief is the guitar; the lyrics are the weather."
   },
-  {
-    "id": "song-hotel-california",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Hotel California (1976)",
-    "teaser": "The song's lyrics were written as a literal road trip gone wrong — the 'you can check out any time you like, but you can never leave' line is the song's thesis, and the famous dual guitar solo was improvised.",
-    "imageUrl": "",
-    "byline": "Eagles",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Hotel California (1976) end-to-end",
-      "durationMinutes": 6,
-      "instruction": "Listen for the dual guitar outro — two solos trading phrases. The song's genius is that the hotel is a metaphor you can't pin down; the ambiguity is the point."
-    },
-    "tags": [
-      "Rock",
-      "Classic",
-      "American",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Ballad",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-hotel-california",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Hotel California (1976)",
+  "teaser": "The song's lyrics were written as a literal road trip gone wrong — the 'you can check out any time you like, but you can never leave' line is the song's thesis, and the famous dual guitar solo was improvised.",
+  "imageUrl": "",
+  "byline": "Eagles",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Hotel California (1976) end-to-end",
+   "durationMinutes": 6,
+   "instruction": "Listen for the dual guitar outro — two solos trading phrases. The song's genius is that the hotel is a metaphor you can't pin down; the ambiguity is the point."
   },
-  {
-    "id": "song-sweet-child-o-mine",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Sweet Child o' Mine (1987)",
-    "teaser": "The riff started as a string-skipping warm-up exercise that Slash called a joke — Axl wrote the lyrics in five minutes about his girlfriend, and the song became the band's biggest hit.",
-    "imageUrl": "",
-    "byline": "Guns N' Roses",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Sweet Child o' Mine (1987) end-to-end",
-      "durationMinutes": 5,
-      "instruction": "Listen to the intro and notice the 'joke' riff — the warm-up became the hook. The song's genius is that the guitar solo is a conversation with the vocal."
-    },
-    "tags": [
-      "Rock",
-      "Hard Rock",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Classic",
+   "American",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-sweet-child-o-mine",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Sweet Child o' Mine (1987)",
+  "teaser": "The riff started as a string-skipping warm-up exercise that Slash called a joke — Axl wrote the lyrics in five minutes about his girlfriend, and the song became the band's biggest hit.",
+  "imageUrl": "",
+  "byline": "Guns N' Roses",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Sweet Child o' Mine (1987) end-to-end",
+   "durationMinutes": 5,
+   "instruction": "Listen to the intro and notice the 'joke' riff — the warm-up became the hook. The song's genius is that the guitar solo is a conversation with the vocal."
   },
-  {
-    "id": "song-creep",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Creep (1992)",
-    "teaser": "The band hated the song and nearly left it off the album — it became their only mainstream hit, and the 'special' lyric is about Thom Yorke's real crush at university.",
-    "imageUrl": "",
-    "byline": "Radiohead",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Creep (1992) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the quiet-loud structure — the verse is a whisper, the chorus is a scream. The song's genius is that the self-loathing is the hook."
-    },
-    "tags": [
-      "Alternative",
-      "Rock",
-      "British",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Hard Rock",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-creep",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Creep (1992)",
+  "teaser": "The band hated the song and nearly left it off the album — it became their only mainstream hit, and the 'special' lyric is about Thom Yorke's real crush at university.",
+  "imageUrl": "",
+  "byline": "Radiohead",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Creep (1992) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the quiet-loud structure — the verse is a whisper, the chorus is a scream. The song's genius is that the self-loathing is the hook."
   },
-  {
-    "id": "song-seven-nation-army",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Seven Nation Army (2003)",
-    "teaser": "The iconic riff is a bass line played on a guitar with a pitch-shifter — Jack White wrote it while touring and the 'seven nation army' was his phrase for the US military draft.",
-    "imageUrl": "",
-    "byline": "The White Stripes",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Seven Nation Army (2003) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the riff and notice it's a guitar pretending to be a bass. The song's genius is that the riff carries the whole song; the lyrics are the counter-melody."
-    },
-    "tags": [
-      "Garage Rock",
-      "Alternative",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Alternative",
+   "Rock",
+   "British",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-seven-nation-army",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Seven Nation Army (2003)",
+  "teaser": "The iconic riff is a bass line played on a guitar with a pitch-shifter — Jack White wrote it while touring and the 'seven nation army' was his phrase for the US military draft.",
+  "imageUrl": "",
+  "byline": "The White Stripes",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Seven Nation Army (2003) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the riff and notice it's a guitar pretending to be a bass. The song's genius is that the riff carries the whole song; the lyrics are the counter-melody."
   },
-  {
-    "id": "song-dancing-queen",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Dancing Queen (1976)",
-    "teaser": "Written for the Swedish king's wedding, the song's 'young and sweet, only seventeen' line was about a real 17-year-old who danced at a club ABBA visited — it's the only song ABBA wrote for a woman.",
-    "imageUrl": "",
-    "byline": "ABBA",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Dancing Queen (1976) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the piano intro and the key change — the song is engineered joy. The song's genius is that the disco beat is the 'dance' made literal."
-    },
-    "tags": [
-      "Pop",
-      "Disco",
-      "Swedish",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Garage Rock",
+   "Alternative",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-dancing-queen",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Dancing Queen (1976)",
+  "teaser": "Written for the Swedish king's wedding, the song's 'young and sweet, only seventeen' line was about a real 17-year-old who danced at a club ABBA visited — it's the only song ABBA wrote for a woman.",
+  "imageUrl": "",
+  "byline": "ABBA",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Dancing Queen (1976) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the piano intro and the key change — the song is engineered joy. The song's genius is that the disco beat is the 'dance' made literal."
   },
-  {
-    "id": "song-superstition",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Superstition (1972)",
-    "teaser": "Stevie wrote the drum groove first — the 'superstition' lyrics came after, and the song's famous clavinet riff is played on a real Hohner Clavinet through a wah pedal.",
-    "imageUrl": "",
-    "byline": "Stevie Wonder",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Superstition (1972) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the clavinet — it's the song's engine. The song's genius is that the groove is the thesis; the lyrics are the afterthought that made it a hit."
-    },
-    "tags": [
-      "Funk",
-      "Soul",
-      "American",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Disco",
+   "Swedish",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-superstition",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Superstition (1972)",
+  "teaser": "Stevie wrote the drum groove first — the 'superstition' lyrics came after, and the song's famous clavinet riff is played on a real Hohner Clavinet through a wah pedal.",
+  "imageUrl": "",
+  "byline": "Stevie Wonder",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Superstition (1972) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the clavinet — it's the song's engine. The song's genius is that the groove is the thesis; the lyrics are the afterthought that made it a hit."
   },
-  {
-    "id": "song-comfortably-numb",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Comfortably Numb (1979)",
-    "teaser": "The two guitar solos were recorded by two different guitarists (David Gilmour twice, years apart) — the song's lyrics are about Roger Waters' stage collapse and the doctor who injected him.",
-    "imageUrl": "",
-    "byline": "Pink Floyd",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Comfortably Numb (1979) end-to-end",
-      "durationMinutes": 6,
-      "instruction": "Listen for the two solos — the first is distant, the second is the climax. The song's genius is that the numbness is the narrator and the music is the feeling."
-    },
-    "tags": [
-      "Progressive",
-      "Rock",
-      "British",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Funk",
+   "Soul",
+   "American",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-comfortably-numb",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Comfortably Numb (1979)",
+  "teaser": "The two guitar solos were recorded by two different guitarists (David Gilmour twice, years apart) — the song's lyrics are about Roger Waters' stage collapse and the doctor who injected him.",
+  "imageUrl": "",
+  "byline": "Pink Floyd",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Comfortably Numb (1979) end-to-end",
+   "durationMinutes": 6,
+   "instruction": "Listen for the two solos — the first is distant, the second is the climax. The song's genius is that the numbness is the narrator and the music is the feeling."
   },
-  {
-    "id": "song-don-t-stop-believin",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Don't Stop Believin' (1981)",
-    "teaser": "The song flopped on release and became a hit years later through karaoke — the 'streetlight people' lyric is about real people in a real Detroit club, and the song's key change is its famous kick.",
-    "imageUrl": "",
-    "byline": "Journey",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Don't Stop Believin' (1981) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the key change before the final chorus — it's the song's ignition. The song's genius is that the 'believin'' is the instruction."
-    },
-    "tags": [
-      "Rock",
-      "Classic",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Progressive",
+   "Rock",
+   "British",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-don-t-stop-believin",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Don't Stop Believin' (1981)",
+  "teaser": "The song flopped on release and became a hit years later through karaoke — the 'streetlight people' lyric is about real people in a real Detroit club, and the song's key change is its famous kick.",
+  "imageUrl": "",
+  "byline": "Journey",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Don't Stop Believin' (1981) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the key change before the final chorus — it's the song's ignition. The song's genius is that the 'believin'' is the instruction."
   },
-  {
-    "id": "song-crazy-in-love",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Crazy in Love (2003)",
-    "teaser": "The horn sample is from a 1970s Chi-Lites song and the 'uh oh' hook was improvised — Beyoncé's debut solo hit was written in a studio with Jay-Z in two days.",
-    "imageUrl": "",
-    "byline": "Beyoncé",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Crazy in Love (2003) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the horn sample and the 'uh oh' — both are the hooks. The song's genius is that the horns are the chaos; the beat is the control."
-    },
-    "tags": [
-      "R&B",
-      "Pop",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Classic",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-crazy-in-love",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Crazy in Love (2003)",
+  "teaser": "The horn sample is from a 1970s Chi-Lites song and the 'uh oh' hook was improvised — Beyoncé's debut solo hit was written in a studio with Jay-Z in two days.",
+  "imageUrl": "",
+  "byline": "Beyoncé",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Crazy in Love (2003) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the horn sample and the 'uh oh' — both are the hooks. The song's genius is that the horns are the chaos; the beat is the control."
   },
-  {
-    "id": "song-i-will-survive",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "I Will Survive (1978)",
-    "teaser": "Written as the B-side after the label demanded a song about Gaynor's real injury — the 'survive' anthem became the first disco song to top the charts after disco's fall, a comeback in itself.",
-    "imageUrl": "",
-    "byline": "Gloria Gaynor",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "I Will Survive (1978) end-to-end",
-      "durationMinutes": 3,
-      "instruction": "Listen for the string section and the spoken intro — the song is a speech. The song's genius is that the defiance is the hook; the 'survive' is the thesis."
-    },
-    "tags": [
-      "Disco",
-      "Soul",
-      "American",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "R&B",
+   "Pop",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-i-will-survive",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "I Will Survive (1978)",
+  "teaser": "Written as the B-side after the label demanded a song about Gaynor's real injury — the 'survive' anthem became the first disco song to top the charts after disco's fall, a comeback in itself.",
+  "imageUrl": "",
+  "byline": "Gloria Gaynor",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "I Will Survive (1978) end-to-end",
+   "durationMinutes": 3,
+   "instruction": "Listen for the string section and the spoken intro — the song is a speech. The song's genius is that the defiance is the hook; the 'survive' is the thesis."
   },
-  {
-    "id": "song-london-calling",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "London Calling (1979)",
-    "teaser": "Written as a warning about the Thames flooding London — the band predicted the 'ice age' of climate change 40 years early, and the song's bassline is its most copied riff.",
-    "imageUrl": "",
-    "byline": "The Clash",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "London Calling (1979) end-to-end",
-      "durationMinutes": 4,
-      "instruction": "Listen for the bassline and the flood imagery — the warning is real. The song's genius is that the punk rage is a prophecy."
-    },
-    "tags": [
-      "Punk",
-      "Rock",
-      "British",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Disco",
+   "Soul",
+   "American",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-london-calling",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "London Calling (1979)",
+  "teaser": "Written as a warning about the Thames flooding London — the band predicted the 'ice age' of climate change 40 years early, and the song's bassline is its most copied riff.",
+  "imageUrl": "",
+  "byline": "The Clash",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "London Calling (1979) end-to-end",
+   "durationMinutes": 4,
+   "instruction": "Listen for the bassline and the flood imagery — the warning is real. The song's genius is that the punk rage is a prophecy."
   },
-  {
-    "id": "song-bohemian-rhapsody",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Bohemian Rhapsody (1975)",
-    "teaser": "Freddie Mercury wrote most of it on the piano in his flat and the label refused to release a six-minute song with no chorus — it became one of the best-selling singles ever. The 'Galileo' backing vocals took three weeks to layer.",
-    "imageUrl": "",
-    "byline": "Queen",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Bohemian Rhapsody (1975)",
-      "durationMinutes": 6,
-      "instruction": "Listen with headphones and count the distinct sections — it's opera, ballad and hard rock in one track. Then listen for the multitracked 'Galileo' pile-up that takes the song to its peak."
-    },
-    "tags": [
-      "Rock",
-      "Progressive",
-      "British",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Punk",
+   "Rock",
+   "British",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-bohemian-rhapsody",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Bohemian Rhapsody (1975)",
+  "teaser": "Freddie Mercury wrote most of it on the piano in his flat and the label refused to release a six-minute song with no chorus — it became one of the best-selling singles ever. The 'Galileo' backing vocals took three weeks to layer.",
+  "imageUrl": "",
+  "byline": "Queen",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Bohemian Rhapsody (1975)",
+   "durationMinutes": 6,
+   "instruction": "Listen with headphones and count the distinct sections — it's opera, ballad and hard rock in one track. Then listen for the multitracked 'Galileo' pile-up that takes the song to its peak."
   },
-  {
-    "id": "song-smells-like-teen-spirit",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Smells Like Teen Spirit (1991)",
-    "teaser": "Kurt Cobain wrote the riff after mishearing a friend's slogan about a deodorant, and the band was sure it would flop — the music video's bored-mascot chaos made MTV viewers think the crowd was real.",
-    "imageUrl": "",
-    "byline": "Nirvana",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Smells Like Teen Spirit (1991)",
-      "durationMinutes": 5,
-      "instruction": "Listen for the verse dynamics — it's the quiet-loud formula that ended an era of hair metal. Then watch the music video and notice the mascot's eyes: the apathy is the point."
-    },
-    "tags": [
-      "Grunge",
-      "Alternative",
-      "American",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Progressive",
+   "British",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-smells-like-teen-spirit",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Smells Like Teen Spirit (1991)",
+  "teaser": "Kurt Cobain wrote the riff after mishearing a friend's slogan about a deodorant, and the band was sure it would flop — the music video's bored-mascot chaos made MTV viewers think the crowd was real.",
+  "imageUrl": "",
+  "byline": "Nirvana",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Smells Like Teen Spirit (1991)",
+   "durationMinutes": 5,
+   "instruction": "Listen for the verse dynamics — it's the quiet-loud formula that ended an era of hair metal. Then watch the music video and notice the mascot's eyes: the apathy is the point."
   },
-  {
-    "id": "song-billie-jean",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Billie Jean (1982)",
-    "teaser": "The bassline was built from a drum machine demo Quincy Jones wanted to cut, and the 'Not my lover' lyric was about a real fan's claim. The video broke MTV's color barrier in 1983.",
-    "imageUrl": "",
-    "byline": "Michael Jackson",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Billie Jean (1982)",
-      "durationMinutes": 5,
-      "instruction": "Listen for the bassline first — it's the whole song's engine, and Jackson's vocal enters over it like a second instrument. Then count the empty beats in the intro: the tension is the hook."
-    },
-    "tags": [
-      "Pop",
-      "R&B",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Grunge",
+   "Alternative",
+   "American",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-billie-jean",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Billie Jean (1982)",
+  "teaser": "The bassline was built from a drum machine demo Quincy Jones wanted to cut, and the 'Not my lover' lyric was about a real fan's claim. The video broke MTV's color barrier in 1983.",
+  "imageUrl": "",
+  "byline": "Michael Jackson",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Billie Jean (1982)",
+   "durationMinutes": 5,
+   "instruction": "Listen for the bassline first — it's the whole song's engine, and Jackson's vocal enters over it like a second instrument. Then count the empty beats in the intro: the tension is the hook."
   },
-  {
-    "id": "song-imagine",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Imagine (1971)",
-    "teaser": "Lennon wrote it at his piano in Tittenhurst Park with Yoko watching, and the white room in the video is that actual house. It's the most-performed protest song of the 20th century without a single angry note.",
-    "imageUrl": "",
-    "byline": "John Lennon",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Imagine (1971)",
-      "durationMinutes": 3,
-      "instruction": "Listen to the spare arrangement — just piano, voice and a string sweep that enters late. The radicalism is in how quiet it is; the 'no possessions' line lands because nothing is shouted."
-    },
-    "tags": [
-      "Pop",
-      "Ballad",
-      "British",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "R&B",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-imagine",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Imagine (1971)",
+  "teaser": "Lennon wrote it at his piano in Tittenhurst Park with Yoko watching, and the white room in the video is that actual house. It's the most-performed protest song of the 20th century without a single angry note.",
+  "imageUrl": "",
+  "byline": "John Lennon",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Imagine (1971)",
+   "durationMinutes": 3,
+   "instruction": "Listen to the spare arrangement — just piano, voice and a string sweep that enters late. The radicalism is in how quiet it is; the 'no possessions' line lands because nothing is shouted."
   },
-  {
-    "id": "song-like-a-rolling-stone",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Like a Rolling Stone (1965)",
-    "teaser": "Dylan nearly shelved the six-minute draft as a novel fragment, and a session drummer's organ figure became the most famous riff in rock. It's the song that made pop lyrics literary.",
-    "imageUrl": "",
-    "byline": "Bob Dylan",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Like a Rolling Stone (1965)",
-      "durationMinutes": 6,
-      "instruction": "Listen for the organ — it enters like a second voice answering every line. The song's question ('how does it feel?') is asked to the listener, not the subject."
-    },
-    "tags": [
-      "Folk Rock",
-      "Rock",
-      "American",
-      "1960s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Ballad",
+   "British",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-like-a-rolling-stone",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Like a Rolling Stone (1965)",
+  "teaser": "Dylan nearly shelved the six-minute draft as a novel fragment, and a session drummer's organ figure became the most famous riff in rock. It's the song that made pop lyrics literary.",
+  "imageUrl": "",
+  "byline": "Bob Dylan",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Like a Rolling Stone (1965)",
+   "durationMinutes": 6,
+   "instruction": "Listen for the organ — it enters like a second voice answering every line. The song's question ('how does it feel?') is asked to the listener, not the subject."
   },
-  {
-    "id": "song-stairway-to-heaven",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Stairway to Heaven (1971)",
-    "teaser": "The band kept it off singles for years so the album would sell, and the famous 'guitar store' ban was born from butchered covers. The recorder solo was played on a Mellotron, not real flutes.",
-    "imageUrl": "",
-    "byline": "Led Zeppelin",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Stairway to Heaven (1971)",
-      "durationMinutes": 8,
-      "instruction": "Listen through headphones and track the volume arc — it's a quiet-to-loud journey in one song. The 'ooh-ooh' before the solo is the song's center of gravity."
-    },
-    "tags": [
-      "Rock",
-      "Progressive",
-      "British",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Folk Rock",
+   "Rock",
+   "American",
+   "1960s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-stairway-to-heaven",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Stairway to Heaven (1971)",
+  "teaser": "The band kept it off singles for years so the album would sell, and the famous 'guitar store' ban was born from butchered covers. The recorder solo was played on a Mellotron, not real flutes.",
+  "imageUrl": "",
+  "byline": "Led Zeppelin",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Stairway to Heaven (1971)",
+   "durationMinutes": 8,
+   "instruction": "Listen through headphones and track the volume arc — it's a quiet-to-loud journey in one song. The 'ooh-ooh' before the solo is the song's center of gravity."
   },
-  {
-    "id": "song-yesterday",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Yesterday (1965)",
-    "teaser": "Paul McCartney dreamed the melody and wrote the working title 'Scrambled Eggs' before settling on lyrics — it's the most-covered song ever, with over 2,200 recorded versions.",
-    "imageUrl": "",
-    "byline": "The Beatles",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Yesterday (1965)",
-      "durationMinutes": 2,
-      "instruction": "Listen for the string quartet — it was the first Beatles song to use classical instruments. The melody is so natural it feels inevitable; try to hear it without the violins and it loses half its sadness."
-    },
-    "tags": [
-      "Pop",
-      "Ballad",
-      "British",
-      "1960s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Progressive",
+   "British",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-yesterday",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Yesterday (1965)",
+  "teaser": "Paul McCartney dreamed the melody and wrote the working title 'Scrambled Eggs' before settling on lyrics — it's the most-covered song ever, with over 2,200 recorded versions.",
+  "imageUrl": "",
+  "byline": "The Beatles",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Yesterday (1965)",
+   "durationMinutes": 2,
+   "instruction": "Listen for the string quartet — it was the first Beatles song to use classical instruments. The melody is so natural it feels inevitable; try to hear it without the violins and it loses half its sadness."
   },
-  {
-    "id": "song-hallelujah",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Hallelujah (1984)",
-    "teaser": "Cohen wrote dozens of verses over five years — the song's famous 'secret chord' is a David reference, and it flopped on release before Jeff Buckley's 1994 cover made it immortal.",
-    "imageUrl": "",
-    "byline": "Leonard Cohen",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Hallelujah (1984)",
-      "durationMinutes": 7,
-      "instruction": "Listen to the Buckley version after the Cohen original and hear how the same words change meaning with a different voice. The song is about broken love disguised as scripture."
-    },
-    "tags": [
-      "Folk",
-      "Ballad",
-      "Canadian",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Ballad",
+   "British",
+   "1960s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-hallelujah",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Hallelujah (1984)",
+  "teaser": "Cohen wrote dozens of verses over five years — the song's famous 'secret chord' is a David reference, and it flopped on release before Jeff Buckley's 1994 cover made it immortal.",
+  "imageUrl": "",
+  "byline": "Leonard Cohen",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Hallelujah (1984)",
+   "durationMinutes": 7,
+   "instruction": "Listen to the Buckley version after the Cohen original and hear how the same words change meaning with a different voice. The song is about broken love disguised as scripture."
   },
-  {
-    "id": "song-respect",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Respect (1967)",
-    "teaser": "Written by Otis Redding as a man's plea, Aretha flipped the pronouns and demanded it — her version became a civil-rights and feminist anthem, and the 'R-E-S-P-E-C-T' spelling was her idea.",
-    "imageUrl": "",
-    "byline": "Aretha Franklin",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Respect (1967)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the spelling section — it's the song's thesis in letters. Then notice how the backing singers answer every line: the call-and-response is the argument."
-    },
-    "tags": [
-      "Soul",
-      "R&B",
-      "American",
-      "1960s"
-    ],
-    "tier": 1
+  "tags": [
+   "Folk",
+   "Ballad",
+   "Canadian",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-respect",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Respect (1967)",
+  "teaser": "Written by Otis Redding as a man's plea, Aretha flipped the pronouns and demanded it — her version became a civil-rights and feminist anthem, and the 'R-E-S-P-E-C-T' spelling was her idea.",
+  "imageUrl": "",
+  "byline": "Aretha Franklin",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Respect (1967)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the spelling section — it's the song's thesis in letters. Then notice how the backing singers answer every line: the call-and-response is the argument."
   },
-  {
-    "id": "song-purple-haze",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Purple Haze (1967)",
-    "teaser": "Hendrix said the lyric came from a dream about walking under the sea — the famous opening riff is a tritone, the 'devil's interval' banned in medieval church music.",
-    "imageUrl": "",
-    "byline": "Jimi Hendrix",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Purple Haze (1967)",
-      "durationMinutes": 3,
-      "instruction": "Listen to the opening riff and hear the tritone — it's deliberately unsettling. Then notice how the solo bends the same interval back into melody."
-    },
-    "tags": [
-      "Rock",
-      "Psychedelic",
-      "American",
-      "1960s"
-    ],
-    "tier": 1
+  "tags": [
+   "Soul",
+   "R&B",
+   "American",
+   "1960s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-purple-haze",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Purple Haze (1967)",
+  "teaser": "Hendrix said the lyric came from a dream about walking under the sea — the famous opening riff is a tritone, the 'devil's interval' banned in medieval church music.",
+  "imageUrl": "",
+  "byline": "Jimi Hendrix",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Purple Haze (1967)",
+   "durationMinutes": 3,
+   "instruction": "Listen to the opening riff and hear the tritone — it's deliberately unsettling. Then notice how the solo bends the same interval back into melody."
   },
-  {
-    "id": "song-what-a-wonderful-world",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "What a Wonderful World (1967)",
-    "teaser": "Satchmo recorded it at 66, and the label shelved it for a year — it only charted in the US after being used in a film. The song was written as an antidote to Vietnam-era cynicism.",
-    "imageUrl": "",
-    "byline": "Louis Armstrong",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "What a Wonderful World (1967)",
-      "durationMinutes": 2,
-      "instruction": "Listen to Armstrong's voice — recorded after his throat problems, it's the sound of a man who knows the world isn't wonderful and sings anyway. The trumpet at the end is his own instrument replying."
-    },
-    "tags": [
-      "Jazz",
-      "Ballad",
-      "American",
-      "1960s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Psychedelic",
+   "American",
+   "1960s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-what-a-wonderful-world",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "What a Wonderful World (1967)",
+  "teaser": "Satchmo recorded it at 66, and the label shelved it for a year — it only charted in the US after being used in a film. The song was written as an antidote to Vietnam-era cynicism.",
+  "imageUrl": "",
+  "byline": "Louis Armstrong",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "What a Wonderful World (1967)",
+   "durationMinutes": 2,
+   "instruction": "Listen to Armstrong's voice — recorded after his throat problems, it's the sound of a man who knows the world isn't wonderful and sings anyway. The trumpet at the end is his own instrument replying."
   },
-  {
-    "id": "song-thriller",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Thriller (1982)",
-    "teaser": "The 14-minute video cost more than most films of the era and the song's famous Vincent Price rap was recorded in two takes — the werewolf howl is a real wolf recording.",
-    "imageUrl": "",
-    "byline": "Michael Jackson",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Thriller (1982)",
-      "durationMinutes": 6,
-      "instruction": "Listen for the Vincent Price rap at the end — it's horror as pop. The song's bassline is the horror; the video just makes it visible."
-    },
-    "tags": [
-      "Pop",
-      "Funk",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Jazz",
+   "Ballad",
+   "American",
+   "1960s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-thriller",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Thriller (1982)",
+  "teaser": "The 14-minute video cost more than most films of the era and the song's famous Vincent Price rap was recorded in two takes — the werewolf howl is a real wolf recording.",
+  "imageUrl": "",
+  "byline": "Michael Jackson",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Thriller (1982)",
+   "durationMinutes": 6,
+   "instruction": "Listen for the Vincent Price rap at the end — it's horror as pop. The song's bassline is the horror; the video just makes it visible."
   },
-  {
-    "id": "song-every-breath-you-take",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Every Breath You Take (1983)",
-    "teaser": "Sting wrote it in Jamaica after a divorce, and was horrified to realize people thought it romantic — it's a song about surveillance, not love, and it's one of the most-played songs ever.",
-    "imageUrl": "",
-    "byline": "The Police",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Every Breath You Take (1983)",
-      "durationMinutes": 4,
-      "instruction": "Listen to the lyrics as a threat, not a promise — the stalker's logic is the song. The bass is the heartbeat; the song never resolves the tension."
-    },
-    "tags": [
-      "Rock",
-      "New Wave",
-      "British",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Funk",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-every-breath-you-take",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Every Breath You Take (1983)",
+  "teaser": "Sting wrote it in Jamaica after a divorce, and was horrified to realize people thought it romantic — it's a song about surveillance, not love, and it's one of the most-played songs ever.",
+  "imageUrl": "",
+  "byline": "The Police",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Every Breath You Take (1983)",
+   "durationMinutes": 4,
+   "instruction": "Listen to the lyrics as a threat, not a promise — the stalker's logic is the song. The bass is the heartbeat; the song never resolves the tension."
   },
-  {
-    "id": "song-my-heart-will-go-on",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "My Heart Will Go On (1997)",
-    "teaser": "James Horner wrote the theme secretly because the director hated songs in his films — Celine recorded it in one take, and the 'Titanic' flute is actually a synthesized penny whistle.",
-    "imageUrl": "",
-    "byline": "Celine Dion",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "My Heart Will Go On (1997)",
-      "durationMinutes": 5,
-      "instruction": "Listen for the synthesized whistle — it's not a real instrument. The song's melody was built from a demo Horner kept hidden; the director only heard it after the film was cut."
-    },
-    "tags": [
-      "Pop",
-      "Ballad",
-      "Canadian",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "New Wave",
+   "British",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-my-heart-will-go-on",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "My Heart Will Go On (1997)",
+  "teaser": "James Horner wrote the theme secretly because the director hated songs in his films — Celine recorded it in one take, and the 'Titanic' flute is actually a synthesized penny whistle.",
+  "imageUrl": "",
+  "byline": "Celine Dion",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "My Heart Will Go On (1997)",
+   "durationMinutes": 5,
+   "instruction": "Listen for the synthesized whistle — it's not a real instrument. The song's melody was built from a demo Horner kept hidden; the director only heard it after the film was cut."
   },
-  {
-    "id": "song-shape-of-you",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Shape of You (2017)",
-    "teaser": "Sheeran wrote it about his girlfriend in 10 minutes, and the marimba riff was sampled from a demo he made with a toy. It became the most-streamed song on Spotify's history.",
-    "imageUrl": "",
-    "byline": "Ed Sheeran",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Shape of You (2017)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the marimba — it's the song's memory hook, and the verse's rhythmic switch ('the club isn't the best place') is the same riff in disguise. The song is a loop wearing a narrative."
-    },
-    "tags": [
-      "Pop",
-      "Dance",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Ballad",
+   "Canadian",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-shape-of-you",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Shape of You (2017)",
+  "teaser": "Sheeran wrote it about his girlfriend in 10 minutes, and the marimba riff was sampled from a demo he made with a toy. It became the most-streamed song on Spotify's history.",
+  "imageUrl": "",
+  "byline": "Ed Sheeran",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Shape of You (2017)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the marimba — it's the song's memory hook, and the verse's rhythmic switch ('the club isn't the best place') is the same riff in disguise. The song is a loop wearing a narrative."
   },
-  {
-    "id": "song-blinding-lights",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Blinding Lights (2019)",
-    "teaser": "The Weeknd wanted a song that sounded like 'Take On Me' and 'It's All Coming Back to Me Now' — the 1980s synthwave production made it the most-streamed song in Spotify history.",
-    "imageUrl": "",
-    "byline": "The Weeknd",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Blinding Lights (2019)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the drum machine and the synth arpeggio — they're pure 1980s. The song's loneliness is hidden under the dance beat; the 'I can't see clearly' line is literal in the video."
-    },
-    "tags": [
-      "Synthwave",
-      "Pop",
-      "Canadian",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Dance",
+   "British",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-blinding-lights",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Blinding Lights (2019)",
+  "teaser": "The Weeknd wanted a song that sounded like 'Take On Me' and 'It's All Coming Back to Me Now' — the 1980s synthwave production made it the most-streamed song in Spotify history.",
+  "imageUrl": "",
+  "byline": "The Weeknd",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Blinding Lights (2019)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the drum machine and the synth arpeggio — they're pure 1980s. The song's loneliness is hidden under the dance beat; the 'I can't see clearly' line is literal in the video."
   },
-  {
-    "id": "song-old-town-road",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Old Town Road (2019)",
-    "teaser": "Made with a $30 beat from a teenager on YouTube, the song was removed from the country charts and Billy Ray Cyrus joined a remix — it spent 19 weeks at #1, a record.",
-    "imageUrl": "",
-    "byline": "Lil Nas X",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Old Town Road (2019)",
-      "durationMinutes": 2,
-      "instruction": "Listen for the banjo over the trap beat — the genre clash is the point. The song's viral life is its real story; the remix with Cyrus is the chapter that made it history."
-    },
-    "tags": [
-      "Country Rap",
-      "Trap",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Synthwave",
+   "Pop",
+   "Canadian",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-old-town-road",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Old Town Road (2019)",
+  "teaser": "Made with a $30 beat from a teenager on YouTube, the song was removed from the country charts and Billy Ray Cyrus joined a remix — it spent 19 weeks at #1, a record.",
+  "imageUrl": "",
+  "byline": "Lil Nas X",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Old Town Road (2019)",
+   "durationMinutes": 2,
+   "instruction": "Listen for the banjo over the trap beat — the genre clash is the point. The song's viral life is its real story; the remix with Cyrus is the chapter that made it history."
   },
-  {
-    "id": "song-royals",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Royals (2013)",
-    "teaser": "Lorde wrote the hook after seeing a photo of a Royals baseball cap, and the label nearly cut the track — the minimal production was the 16-year-old's rebellion against opulent pop.",
-    "imageUrl": "",
-    "byline": "Lorde",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Royals (2013)",
-      "durationMinutes": 3,
-      "instruction": "Listen for what's NOT there — the song has almost no bass and no chorus explosion. The minimalism is the message: luxury is the absence of need."
-    },
-    "tags": [
-      "Art Pop",
-      "Minimal",
-      "New Zealander",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Country Rap",
+   "Trap",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-royals",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Royals (2013)",
+  "teaser": "Lorde wrote the hook after seeing a photo of a Royals baseball cap, and the label nearly cut the track — the minimal production was the 16-year-old's rebellion against opulent pop.",
+  "imageUrl": "",
+  "byline": "Lorde",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Royals (2013)",
+   "durationMinutes": 3,
+   "instruction": "Listen for what's NOT there — the song has almost no bass and no chorus explosion. The minimalism is the message: luxury is the absence of need."
   },
-  {
-    "id": "song-rolling-in-the-deep",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Rolling in the Deep (2010)",
-    "teaser": "Adele wrote it in 10 minutes after a breakup, and the stomping percussion was recorded by stamping on a floor — the 'gonna make you love me' threat is the whole song.",
-    "imageUrl": "",
-    "byline": "Adele",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Rolling in the Deep (2010)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the stomp — it's a foot on a wooden floor, and it IS the beat. The song's anger is in the restraint; the key change at the end is a door slamming."
-    },
-    "tags": [
-      "Soul",
-      "Pop",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Art Pop",
+   "Minimal",
+   "New Zealander",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-rolling-in-the-deep",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Rolling in the Deep (2010)",
+  "teaser": "Adele wrote it in 10 minutes after a breakup, and the stomping percussion was recorded by stamping on a floor — the 'gonna make you love me' threat is the whole song.",
+  "imageUrl": "",
+  "byline": "Adele",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Rolling in the Deep (2010)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the stomp — it's a foot on a wooden floor, and it IS the beat. The song's anger is in the restraint; the key change at the end is a door slamming."
   },
-  {
-    "id": "song-uptown-funk",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Uptown Funk (2014)",
-    "teaser": "Bruno Mars and Ronson wrote it after a week of funk references — the bassline was built from Chic's 'Good Times' and the horns were recorded live in a Nashville studio.",
-    "imageUrl": "",
-    "byline": "Mark Ronson",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Uptown Funk (2014)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the bassline — it's a direct descendant of 1970s funk. The song's genius is that it sounds improvised but every fill is placed; count the horn stabs."
-    },
-    "tags": [
-      "Funk",
-      "Pop",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Soul",
+   "Pop",
+   "British",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-uptown-funk",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Uptown Funk (2014)",
+  "teaser": "Bruno Mars and Ronson wrote it after a week of funk references — the bassline was built from Chic's 'Good Times' and the horns were recorded live in a Nashville studio.",
+  "imageUrl": "",
+  "byline": "Mark Ronson",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Uptown Funk (2014)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the bassline — it's a direct descendant of 1970s funk. The song's genius is that it sounds improvised but every fill is placed; count the horn stabs."
   },
-  {
-    "id": "song-wonderwall",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Wonderwall (1995)",
-    "teaser": "Noel Gallagher wrote it about a friend, not a lover, and the song's five-chord pattern became the acoustic-guitar standard of a generation — it's one of the most-covered songs of the 1990s.",
-    "imageUrl": "",
-    "byline": "Oasis",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Wonderwall (1995)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the 'maybe' that starts the chorus — it's the song's engine. The song is a promise that never lands; the narrator doesn't know if the wall will break either."
-    },
-    "tags": [
-      "Britpop",
-      "Rock",
-      "British",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "Funk",
+   "Pop",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-wonderwall",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Wonderwall (1995)",
+  "teaser": "Noel Gallagher wrote it about a friend, not a lover, and the song's five-chord pattern became the acoustic-guitar standard of a generation — it's one of the most-covered songs of the 1990s.",
+  "imageUrl": "",
+  "byline": "Oasis",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Wonderwall (1995)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the 'maybe' that starts the chorus — it's the song's engine. The song is a promise that never lands; the narrator doesn't know if the wall will break either."
   },
-  {
-    "id": "song-lose-yourself",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Lose Yourself (2002)",
-    "teaser": "Eminem wrote the hook in the studio bathroom during the filming of 8 Mile — the song's 'one shot' theme is literally about the take he was about to film.",
-    "imageUrl": "",
-    "byline": "Eminem",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Lose Yourself (2002)",
-      "durationMinutes": 5,
-      "instruction": "Listen to the opening — the record scratch and the first verse are a single breath. The song's anxiety is the point: the palm-sweat moment is the song."
-    },
-    "tags": [
-      "Hip Hop",
-      "Rap",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Britpop",
+   "Rock",
+   "British",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-lose-yourself",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Lose Yourself (2002)",
+  "teaser": "Eminem wrote the hook in the studio bathroom during the filming of 8 Mile — the song's 'one shot' theme is literally about the take he was about to film.",
+  "imageUrl": "",
+  "byline": "Eminem",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Lose Yourself (2002)",
+   "durationMinutes": 5,
+   "instruction": "Listen to the opening — the record scratch and the first verse are a single breath. The song's anxiety is the point: the palm-sweat moment is the song."
   },
-  {
-    "id": "song-sicko-mode",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Sicko Mode (2018)",
-    "teaser": "The song is three beats stitched together with no chorus — it was literally made in the studio with producer switch-ups mid-session, and the beat changes are the hook.",
-    "imageUrl": "",
-    "byline": "Travis Scott",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Sicko Mode (2018)",
-      "durationMinutes": 5,
-      "instruction": "Listen for the beat switches — there are three, and each one resets the song's momentum. The song's structure is its subject: chaos as composition."
-    },
-    "tags": [
-      "Hip Hop",
-      "Trap",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Hip Hop",
+   "Rap",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-sicko-mode",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Sicko Mode (2018)",
+  "teaser": "The song is three beats stitched together with no chorus — it was literally made in the studio with producer switch-ups mid-session, and the beat changes are the hook.",
+  "imageUrl": "",
+  "byline": "Travis Scott",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Sicko Mode (2018)",
+   "durationMinutes": 5,
+   "instruction": "Listen for the beat switches — there are three, and each one resets the song's momentum. The song's structure is its subject: chaos as composition."
   },
-  {
-    "id": "song-gangnam-style",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Gangnam Style (2012)",
-    "teaser": "The first YouTube video to pass a billion views — PSY's 'horse dance' was based on his own actual bad dancing, and the lyrics mock Seoul's wealthy Gangnam district.",
-    "imageUrl": "",
-    "byline": "PSY",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Gangnam Style (2012)",
-      "durationMinutes": 4,
-      "instruction": "Watch the video and notice the satire — the 'rich' scenes are all absurd. The song's joke is that the dancer is neither rich nor cool; the dance is the punchline."
-    },
-    "tags": [
-      "K-Pop",
-      "Electronic",
-      "Korean",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Hip Hop",
+   "Trap",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-gangnam-style",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Gangnam Style (2012)",
+  "teaser": "The first YouTube video to pass a billion views — PSY's 'horse dance' was based on his own actual bad dancing, and the lyrics mock Seoul's wealthy Gangnam district.",
+  "imageUrl": "",
+  "byline": "PSY",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Gangnam Style (2012)",
+   "durationMinutes": 4,
+   "instruction": "Watch the video and notice the satire — the 'rich' scenes are all absurd. The song's joke is that the dancer is neither rich nor cool; the dance is the punchline."
   },
-  {
-    "id": "song-dynamite",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Dynamite (2020)",
-    "teaser": "The first all-Korean-group song to debut at #1 on the Hot 100 — the disco-pop track was released during lockdown and its music video's retro styling is a direct 1970s homage.",
-    "imageUrl": "",
-    "byline": "BTS",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Dynamite (2020)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the disco strings and the handclaps — the 1970s references are precise. The song's joy is political: a Korean group singing 'light it up like dynamite' in English was a statement."
-    },
-    "tags": [
-      "K-Pop",
-      "Pop",
-      "Korean",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "K-Pop",
+   "Electronic",
+   "Korean",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-dynamite",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Dynamite (2020)",
+  "teaser": "The first all-Korean-group song to debut at #1 on the Hot 100 — the disco-pop track was released during lockdown and its music video's retro styling is a direct 1970s homage.",
+  "imageUrl": "",
+  "byline": "BTS",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Dynamite (2020)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the disco strings and the handclaps — the 1970s references are precise. The song's joy is political: a Korean group singing 'light it up like dynamite' in English was a statement."
   },
-  {
-    "id": "song-gangsta-s-paradise",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Gangsta's Paradise (1995)",
-    "teaser": "The song samples Stevie Wonder's 'Pastime Paradise' and was written for a film about gang life — it became one of the best-selling rap singles ever, and Coolio wrote the chorus as a moral warning.",
-    "imageUrl": "",
-    "byline": "Coolio",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Gangsta's Paradise (1995)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the Stevie Wonder sample — the choir underneath is his original. The song's power is the contrast between the serene sample and the violent verses."
-    },
-    "tags": [
-      "Hip Hop",
-      "Rap",
-      "American",
-      "1990s"
-    ],
-    "tier": 1
+  "tags": [
+   "K-Pop",
+   "Pop",
+   "Korean",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-gangsta-s-paradise",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Gangsta's Paradise (1995)",
+  "teaser": "The song samples Stevie Wonder's 'Pastime Paradise' and was written for a film about gang life — it became one of the best-selling rap singles ever, and Coolio wrote the chorus as a moral warning.",
+  "imageUrl": "",
+  "byline": "Coolio",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Gangsta's Paradise (1995)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the Stevie Wonder sample — the choir underneath is his original. The song's power is the contrast between the serene sample and the violent verses."
   },
-  {
-    "id": "song-africa",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Africa (1982)",
-    "teaser": "The band wrote it as a joke about Westerners romanticizing Africa, and the song's famous backing vocals took hours to record — it became a meme decades later, loved for being sincere.",
-    "imageUrl": "",
-    "byline": "Toto",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Africa (1982)",
-      "durationMinutes": 5,
-      "instruction": "Listen for the kalimba (thumb piano) — it's the song's signature sound, played by the keyboardist who'd never touched one before. The song's earnestness is why the meme works."
-    },
-    "tags": [
-      "Rock",
-      "Pop",
-      "American",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Hip Hop",
+   "Rap",
+   "American",
+   "1990s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-africa",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Africa (1982)",
+  "teaser": "The band wrote it as a joke about Westerners romanticizing Africa, and the song's famous backing vocals took hours to record — it became a meme decades later, loved for being sincere.",
+  "imageUrl": "",
+  "byline": "Toto",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Africa (1982)",
+   "durationMinutes": 5,
+   "instruction": "Listen for the kalimba (thumb piano) — it's the song's signature sound, played by the keyboardist who'd never touched one before. The song's earnestness is why the meme works."
   },
-  {
-    "id": "song-i-will-always-love-you",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "I Will Always Love You (1973)",
-    "teaser": "Dolly wrote it as a farewell to her mentor Porter Wagoner and refused to sell the publishing — Whitney's 1992 cover made it one of the best-selling singles ever, and Dolly kept her rights.",
-    "imageUrl": "",
-    "byline": "Dolly Parton",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "I Will Always Love You (1973)",
-      "durationMinutes": 3,
-      "instruction": "Listen to Dolly's original first — it's a country ballad, not a power anthem. Then hear Whitney's a cappella opening: the song was always about the space between two people."
-    },
-    "tags": [
-      "Country",
-      "Ballad",
-      "American",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Rock",
+   "Pop",
+   "American",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-i-will-always-love-you",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "I Will Always Love You (1973)",
+  "teaser": "Dolly wrote it as a farewell to her mentor Porter Wagoner and refused to sell the publishing — Whitney's 1992 cover made it one of the best-selling singles ever, and Dolly kept her rights.",
+  "imageUrl": "",
+  "byline": "Dolly Parton",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "I Will Always Love You (1973)",
+   "durationMinutes": 3,
+   "instruction": "Listen to Dolly's original first — it's a country ballad, not a power anthem. Then hear Whitney's a cappella opening: the song was always about the space between two people."
   },
-  {
-    "id": "song-jolene",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Jolene (1973)",
-    "teaser": "The song's melody was inspired by a real girl who flirted with her husband, and the name came from a young fan — Dolly wrote it in one afternoon and the 'pleading' vocal is a country masterclass.",
-    "imageUrl": "",
-    "byline": "Dolly Parton",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Jolene (1973)",
-      "durationMinutes": 3,
-      "instruction": "Listen to the desperation in the first verse — the narrator doesn't ask, she begs. The song's genius is that Jolene is never described as evil; she's just beautiful, and that's enough."
-    },
-    "tags": [
-      "Country",
-      "Pop",
-      "American",
-      "1970s"
-    ],
-    "tier": 1
+  "tags": [
+   "Country",
+   "Ballad",
+   "American",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-jolene",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Jolene (1973)",
+  "teaser": "The song's melody was inspired by a real girl who flirted with her husband, and the name came from a young fan — Dolly wrote it in one afternoon and the 'pleading' vocal is a country masterclass.",
+  "imageUrl": "",
+  "byline": "Dolly Parton",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Jolene (1973)",
+   "durationMinutes": 3,
+   "instruction": "Listen to the desperation in the first verse — the narrator doesn't ask, she begs. The song's genius is that Jolene is never described as evil; she's just beautiful, and that's enough."
   },
-  {
-    "id": "song-take-on-me",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Take On Me (1985)",
-    "teaser": "The song charted in three different decades and its rotoscope animation video was a technical breakthrough — the band re-recorded it four times over three years before it hit.",
-    "imageUrl": "",
-    "byline": "a-ha",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Take On Me (1985)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the synth riff — it's one of the most recognizable in pop. The video's sketch-to-real transition is the song made visual: the pencil world is the synth world."
-    },
-    "tags": [
-      "Synthpop",
-      "New Wave",
-      "Norwegian",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Country",
+   "Pop",
+   "American",
+   "1970s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-take-on-me",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Take On Me (1985)",
+  "teaser": "The song charted in three different decades and its rotoscope animation video was a technical breakthrough — the band re-recorded it four times over three years before it hit.",
+  "imageUrl": "",
+  "byline": "a-ha",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Take On Me (1985)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the synth riff — it's one of the most recognizable in pop. The video's sketch-to-real transition is the song made visual: the pencil world is the synth world."
   },
-  {
-    "id": "song-sweet-dreams-are-made-of-this",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Sweet Dreams (Are Made of This) (1983)",
-    "teaser": "The song was built on a $20 drum machine loop and Annie Lennox's iconic video look was a last-minute decision — the band was broke and the label nearly cut them.",
-    "imageUrl": "",
-    "byline": "Eurythmics",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Sweet Dreams (Are Made of This) (1983)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the drum machine — it's the whole song's skeleton, and the bassline enters like a third voice. The video's gender-play is the song's real subject: identity as costume."
-    },
-    "tags": [
-      "Synthpop",
-      "New Wave",
-      "British",
-      "1980s"
-    ],
-    "tier": 1
+  "tags": [
+   "Synthpop",
+   "New Wave",
+   "Norwegian",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-sweet-dreams-are-made-of-this",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Sweet Dreams (Are Made of This) (1983)",
+  "teaser": "The song was built on a $20 drum machine loop and Annie Lennox's iconic video look was a last-minute decision — the band was broke and the label nearly cut them.",
+  "imageUrl": "",
+  "byline": "Eurythmics",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Sweet Dreams (Are Made of This) (1983)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the drum machine — it's the whole song's skeleton, and the bassline enters like a third voice. The video's gender-play is the song's real subject: identity as costume."
   },
-  {
-    "id": "song-video-games",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Video Games (2011)",
-    "teaser": "Made on a laptop in a bedroom and uploaded to YouTube, the song's lo-fi production launched a million imitators — the vintage-film aesthetic was also homemade.",
-    "imageUrl": "",
-    "byline": "Lana Del Rey",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Video Games (2011)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the film-sound effects under the vocals — the song was literally scored like a movie. The 'heaven is a place on earth' sample is the ghost in the machine."
-    },
-    "tags": [
-      "Dream Pop",
-      "Ballad",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Synthpop",
+   "New Wave",
+   "British",
+   "1980s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-video-games",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Video Games (2011)",
+  "teaser": "Made on a laptop in a bedroom and uploaded to YouTube, the song's lo-fi production launched a million imitators — the vintage-film aesthetic was also homemade.",
+  "imageUrl": "",
+  "byline": "Lana Del Rey",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Video Games (2011)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the film-sound effects under the vocals — the song was literally scored like a movie. The 'heaven is a place on earth' sample is the ghost in the machine."
   },
-  {
-    "id": "song-somebody-that-i-used-to-know",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Somebody That I Used to Know (2011)",
-    "teaser": "The song's duet structure was inspired by a breakup, and the 'body paint' music video is one continuous shot — the artist spent years away from music after its success.",
-    "imageUrl": "",
-    "byline": "Gotye",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Somebody That I Used to Know (2011)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the two voices — they never sing together, which IS the song. The 'now you're just somebody' line is the thesis; the video's paint makes it literal."
-    },
-    "tags": [
-      "Indie Pop",
-      "Art Pop",
-      "Australian",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Dream Pop",
+   "Ballad",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-somebody-that-i-used-to-know",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Somebody That I Used to Know (2011)",
+  "teaser": "The song's duet structure was inspired by a breakup, and the 'body paint' music video is one continuous shot — the artist spent years away from music after its success.",
+  "imageUrl": "",
+  "byline": "Gotye",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Somebody That I Used to Know (2011)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the two voices — they never sing together, which IS the song. The 'now you're just somebody' line is the thesis; the video's paint makes it literal."
   },
-  {
-    "id": "song-hey-ya",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Hey Ya! (2003)",
-    "teaser": "André 3000 wrote a breakup song disguised as a party anthem — the band's 'shake it like a Polaroid' line is a real instruction, and the song's sadness is hidden under pure joy.",
-    "imageUrl": "",
-    "byline": "OutKast",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Hey Ya! (2003)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the key change at the end — it's the song's confession. The funk is the mask; the lyrics are a relationship falling apart in a club."
-    },
-    "tags": [
-      "Funk",
-      "Hip Hop",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Indie Pop",
+   "Art Pop",
+   "Australian",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-hey-ya",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Hey Ya! (2003)",
+  "teaser": "André 3000 wrote a breakup song disguised as a party anthem — the band's 'shake it like a Polaroid' line is a real instruction, and the song's sadness is hidden under pure joy. Hey Ya!",
+  "imageUrl": "",
+  "byline": "OutKast",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Hey Ya! (2003)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the key change at the end — it's the song's confession. The funk is the mask; the lyrics are a relationship falling apart in a club."
   },
-  {
-    "id": "song-happy",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Happy (2013)",
-    "teaser": "The song was written for a film and rejected, then released as a single — the 24-hour music video was shot in 24 locations with real people dancing, and the claps were recorded in the studio.",
-    "imageUrl": "",
-    "byline": "Pharrell Williams",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Happy (2013)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the claps — they're the song's heartbeat, recorded by Pharrell's own hands. The song's simplicity is the craft; there's no bridge, just joy."
-    },
-    "tags": [
-      "Pop",
-      "Soul",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Funk",
+   "Hip Hop",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-happy",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Happy (2013)",
+  "teaser": "The song was written for a film and rejected, then released as a single — the 24-hour music video was shot in 24 locations with real people dancing, and the claps were recorded in the studio.",
+  "imageUrl": "",
+  "byline": "Pharrell Williams",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Happy (2013)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the claps — they're the song's heartbeat, recorded by Pharrell's own hands. The song's simplicity is the craft; there's no bridge, just joy."
   },
-  {
-    "id": "song-can-t-stop-the-feeling",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Can't Stop the Feeling! (2016)",
-    "teaser": "Written for a Trolls movie, the song's disco revival made it the biggest-selling single of 2016 — the 'happy' is engineered, which is exactly the point.",
-    "imageUrl": "",
-    "byline": "Justin Timberlake",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Can't Stop the Feeling! (2016)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the falsetto 'nothing can stop me' — it's the song's peak, and it arrives without a build. The song is pure chemical joy; the disco strings are the prescription."
-    },
-    "tags": [
-      "Pop",
-      "Disco",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Soul",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-can-t-stop-the-feeling",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Can't Stop the Feeling! (2016)",
+  "teaser": "Written for a Trolls movie, the song's disco revival made it the biggest-selling single of 2016 — the 'happy' is engineered, which is exactly the point. Can't Stop the Feeling!",
+  "imageUrl": "",
+  "byline": "Justin Timberlake",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Can't Stop the Feeling! (2016)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the falsetto 'nothing can stop me' — it's the song's peak, and it arrives without a build. The song is pure chemical joy; the disco strings are the prescription."
   },
-  {
-    "id": "song-toxic",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Toxic (2003)",
-    "teaser": "The song's strings were sampled from a Bollywood film and the 'toxic' lyric was Britney's own idea — it's considered one of the greatest pop songs ever by critics.",
-    "imageUrl": "",
-    "byline": "Britney Spears",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Toxic (2003)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the Bollywood strings — they're the song's secret weapon. The song's danger is in the beat; the lyrics are the warning label."
-    },
-    "tags": [
-      "Dance Pop",
-      "Electropop",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Disco",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-toxic",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Toxic (2003)",
+  "teaser": "The song's strings were sampled from a Bollywood film and the 'toxic' lyric was Britney's own idea — it's considered one of the greatest pop songs ever by critics.",
+  "imageUrl": "",
+  "byline": "Britney Spears",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Toxic (2003)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the Bollywood strings — they're the song's secret weapon. The song's danger is in the beat; the lyrics are the warning label."
   },
-  {
-    "id": "song-umbrella",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Umbrella (2007)",
-    "teaser": "The song was written for Britney Spears, who turned it down — Rihanna's version became her breakthrough, and the 'ella ella' hook was almost cut for being too silly.",
-    "imageUrl": "",
-    "byline": "Rihanna",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Umbrella (2007)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the 'ella ella' hook — it's the song's memory engine, and the beat's heartbeat is the rain. The song's promise ('under my umbrella') is the whole story."
-    },
-    "tags": [
-      "Pop",
-      "R&B",
-      "Barbadian",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Dance Pop",
+   "Electropop",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-umbrella",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Umbrella (2007)",
+  "teaser": "The song was written for Britney Spears, who turned it down — Rihanna's version became her breakthrough, and the 'ella ella' hook was almost cut for being too silly.",
+  "imageUrl": "",
+  "byline": "Rihanna",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Umbrella (2007)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the 'ella ella' hook — it's the song's memory engine, and the beat's heartbeat is the rain. The song's promise ('under my umbrella') is the whole story."
   },
-  {
-    "id": "song-single-ladies-put-a-ring-on-it",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Single Ladies (Put a Ring on It) (2008)",
-    "teaser": "Beyoncé recorded it in a single day and the choreography was inspired by a 1960s dance troupe — the black-and-white video was shot in one take per angle.",
-    "imageUrl": "",
-    "byline": "Beyoncé",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Single Ladies (Put a Ring on It) (2008)",
-      "durationMinutes": 3,
-      "instruction": "Watch the video and count the three dancers — the precision is the performance. The song's demand is its power: the ring is the argument."
-    },
-    "tags": [
-      "Pop",
-      "R&B",
-      "American",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "R&B",
+   "Barbadian",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-single-ladies-put-a-ring-on-it",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Single Ladies (Put a Ring on It) (2008)",
+  "teaser": "Beyoncé recorded it in a single day and the choreography was inspired by a 1960s dance troupe — the black-and-white video was shot in one take per angle.",
+  "imageUrl": "",
+  "byline": "Beyoncé",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Single Ladies (Put a Ring on It) (2008)",
+   "durationMinutes": 3,
+   "instruction": "Watch the video and count the three dancers — the precision is the performance. The song's demand is its power: the ring is the argument."
   },
-  {
-    "id": "song-havana",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Havana (2017)",
-    "teaser": "The song's 'Havana, ooh na-na' hook was improvised in the studio, and the video's old-movie aesthetic hides a twist — the song's Cuba longing is real, but the ending is a joke.",
-    "imageUrl": "",
-    "byline": "Camila Cabello",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Havana (2017)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the trumpet — it's the song's soul, played by a real session musician. The song is a love letter to a city the singer barely knew; that's the ache."
-    },
-    "tags": [
-      "Pop",
-      "Latin",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "R&B",
+   "American",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-havana",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Havana (2017)",
+  "teaser": "The song's 'Havana, ooh na-na' hook was improvised in the studio, and the video's old-movie aesthetic hides a twist — the song's Cuba longing is real, but the ending is a joke.",
+  "imageUrl": "",
+  "byline": "Camila Cabello",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Havana (2017)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the trumpet — it's the song's soul, played by a real session musician. The song is a love letter to a city the singer barely knew; that's the ache."
   },
-  {
-    "id": "song-despacito",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Despacito (2017)",
-    "teaser": "The Justin Bieber remix made the Spanish-language original the most-streamed song in history — the song's 'despacito' (slowly) is both a tempo and a request.",
-    "imageUrl": "",
-    "byline": "Luis Fonsi",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Despacito (2017)",
-      "durationMinutes": 4,
-      "instruction": "Listen to the original, not the remix — the Spanish phrasing is the song's architecture. The 'despacito' hook is the whole song in one word."
-    },
-    "tags": [
-      "Latin Pop",
-      "Reggaeton",
-      "Puerto Rican",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Latin",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-despacito",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Despacito (2017)",
+  "teaser": "The Justin Bieber remix made the Spanish-language original the most-streamed song in history — the song's 'despacito' (slowly) is both a tempo and a request.",
+  "imageUrl": "",
+  "byline": "Luis Fonsi",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Despacito (2017)",
+   "durationMinutes": 4,
+   "instruction": "Listen to the original, not the remix — the Spanish phrasing is the song's architecture. The 'despacito' hook is the whole song in one word."
   },
-  {
-    "id": "song-waka-waka-this-time-for-africa",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Waka Waka (This Time for Africa) (2010)",
-    "teaser": "Written for the 2010 World Cup, the song's chorus samples a 1980s Cameroonian hit — the dance moves in the video are real African dances.",
-    "imageUrl": "",
-    "byline": "Shakira",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Waka Waka (This Time for Africa) (2010)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the sampled Cameroonian guitar — the song is a translation. The 'Waka Waka' hook is a real Tsonga phrase meaning 'do it do it'."
-    },
-    "tags": [
-      "Pop",
-      "World",
-      "Colombian",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Latin Pop",
+   "Reggaeton",
+   "Puerto Rican",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-waka-waka-this-time-for-africa",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Waka Waka (This Time for Africa) (2010)",
+  "teaser": "Written for the 2010 World Cup, the song's chorus samples a 1980s Cameroonian hit — the dance moves in the video are real African dances.",
+  "imageUrl": "",
+  "byline": "Shakira",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Waka Waka (This Time for Africa) (2010)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the sampled Cameroonian guitar — the song is a translation. The 'Waka Waka' hook is a real Tsonga phrase meaning 'do it do it'."
   },
-  {
-    "id": "song-firework",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Firework (2010)",
-    "teaser": "Perry wrote it after reading Jack Kerouac's On the Road — the song's 'firework' metaphor was inspired by a real comment from a fan who felt invisible.",
-    "imageUrl": "",
-    "byline": "Katy Perry",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Firework (2010)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the key change before the final chorus — it's the song's ignition. The song's pep talk is engineered, but the engineering is the craft."
-    },
-    "tags": [
-      "Pop",
-      "Dance",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "World",
+   "Colombian",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-firework",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Firework (2010)",
+  "teaser": "Perry wrote it after reading Jack Kerouac's On the Road — the song's 'firework' metaphor was inspired by a real comment from a fan who felt invisible.",
+  "imageUrl": "",
+  "byline": "Katy Perry",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Firework (2010)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the key change before the final chorus — it's the song's ignition. The song's pep talk is engineered, but the engineering is the craft."
   },
-  {
-    "id": "song-born-this-way",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Born This Way (2011)",
-    "teaser": "Gaga wrote it as a direct answer to the bullying she survived in school — the song's 'born this way' became a queer anthem and the music video is a birth-to-rebirth allegory.",
-    "imageUrl": "",
-    "byline": "Lady Gaga",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Born This Way (2011)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the spoken opening — it's a sermon, not a verse. The song's radicalism is that it refuses to argue: the self is the fact."
-    },
-    "tags": [
-      "Pop",
-      "Dance",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Dance",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-born-this-way",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Born This Way (2011)",
+  "teaser": "Gaga wrote it as a direct answer to the bullying she survived in school — the song's 'born this way' became a queer anthem and the music video is a birth-to-rebirth allegory.",
+  "imageUrl": "",
+  "byline": "Lady Gaga",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Born This Way (2011)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the spoken opening — it's a sermon, not a verse. The song's radicalism is that it refuses to argue: the self is the fact."
   },
-  {
-    "id": "song-all-too-well",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "All Too Well (2012)",
-    "teaser": "The 10-minute version's release in 2021 broke records — the song's 'scarf' lyric is famously autobiographical, and the song's real subject is the memory of a memory.",
-    "imageUrl": "",
-    "byline": "Taylor Swift",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "All Too Well (2012)",
-      "durationMinutes": 5,
-      "instruction": "Listen for the scarf — it's the song's emotional anchor, and it never comes back. The song's genius is that the narrator can't stop telling the story she's telling."
-    },
-    "tags": [
-      "Country Pop",
-      "Ballad",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop",
+   "Dance",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-all-too-well",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "All Too Well (2012)",
+  "teaser": "The 10-minute version's release in 2021 broke records — the song's 'scarf' lyric is famously autobiographical, and the song's real subject is the memory of a memory.",
+  "imageUrl": "",
+  "byline": "Taylor Swift",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "All Too Well (2012)",
+   "durationMinutes": 5,
+   "instruction": "Listen for the scarf — it's the song's emotional anchor, and it never comes back. The song's genius is that the narrator can't stop telling the story she's telling."
   },
-  {
-    "id": "song-circles",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Circles (2019)",
-    "teaser": "The song's chord progression literally circles — the title is the structure — and the chorus's falsetto was recorded in one take.",
-    "imageUrl": "",
-    "byline": "Post Malone",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Circles (2019)",
-      "durationMinutes": 4,
-      "instruction": "Listen for the circle — the progression returns to the start, and the song never resolves. The song's trap is that you can't leave a loop you're in."
-    },
-    "tags": [
-      "Pop Rap",
-      "Alternative",
-      "American",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Country Pop",
+   "Ballad",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-circles",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Circles (2019)",
+  "teaser": "The song's chord progression literally circles — the title is the structure — and the chorus's falsetto was recorded in one take.",
+  "imageUrl": "",
+  "byline": "Post Malone",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Circles (2019)",
+   "durationMinutes": 4,
+   "instruction": "Listen for the circle — the progression returns to the start, and the song never resolves. The song's trap is that you can't leave a loop you're in."
   },
-  {
-    "id": "song-snooze",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Snooze (2022)",
-    "teaser": "SZA wrote it about being so in love she can't sleep — the song's 'snooze' is both the state and the excuse, and the album it came from won Album of the Year.",
-    "imageUrl": "",
-    "byline": "SZA",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Snooze (2022)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the falsetto 'I'll touch you in the morning' — the promise is the song's core. The production's warmth is the love; the lyrics are the anxiety."
-    },
-    "tags": [
-      "R&B",
-      "Soul",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Pop Rap",
+   "Alternative",
+   "American",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-snooze",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Snooze (2022)",
+  "teaser": "SZA wrote it about being so in love she can't sleep — the song's 'snooze' is both the state and the excuse, and the album it came from won Album of the Year.",
+  "imageUrl": "",
+  "byline": "SZA",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Snooze (2022)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the falsetto 'I'll touch you in the morning' — the promise is the song's core. The production's warmth is the love; the lyrics are the anxiety."
   },
-  {
-    "id": "song-kill-bill",
-    "categoryId": "SONGS",
-    "subtype": "Song",
-    "name": "Kill Bill (2022)",
-    "teaser": "The song's revenge fantasy samples a 1980s R&B hit and the video's bridal-gore aesthetic made it a viral moment — the humor is the point, the violence is the joke.",
-    "imageUrl": "",
-    "byline": "SZA",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Kill Bill (2022)",
-      "durationMinutes": 3,
-      "instruction": "Listen for the sampled Diana Ross hook — the sweetness is the contrast. The song's confession ('I might kill my ex') is funny precisely because it's sung so gently."
-    },
-    "tags": [
-      "R&B",
-      "Alt R&B",
-      "American",
-      "2020s"
-    ],
-    "tier": 1
-  }
+  "tags": [
+   "R&B",
+   "Soul",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-kill-bill",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Kill Bill (2022)",
+  "teaser": "The song's revenge fantasy samples a 1980s R&B hit and the video's bridal-gore aesthetic made it a viral moment — the humor is the point, the violence is the joke.",
+  "imageUrl": "",
+  "byline": "SZA",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Kill Bill (2022)",
+   "durationMinutes": 3,
+   "instruction": "Listen for the sampled Diana Ross hook — the sweetness is the contrast. The song's confession ('I might kill my ex') is funny precisely because it's sung so gently."
+  },
+  "tags": [
+   "R&B",
+   "Alt R&B",
+   "American",
+   "2020s"
+  ],
+  "tier": 1
+ }
 ]

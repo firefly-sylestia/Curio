@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -576,7 +577,14 @@ private fun MoodBoardCanvas(
         // The AMOLED theme style does NOT black this out — the mood board's
         // tinted canvas is its identity, so only the manual Settings toggle
         // turns it off (tintWashEnabledState, not tintWashEffective).
-        color = if (AppPreferences.tintWashEnabledState) tint else Color.Transparent,
+        // v27n — the INLINE board's tint is OPAQUE (lerp of the accent into
+        // the surface at the tint's 20% strength): a translucent board let
+        // the elevation shadow bleed through as a blurry wash. The
+        // full-screen editor keeps its translucent tint — it has no shadow
+        // (shadowElevation 0), so nothing bleeds.
+        color = if (AppPreferences.tintWashEnabledState) {
+            if (fullScreen) tint else lerp(MaterialTheme.colorScheme.surface, accent, 0.20f)
+        } else Color.Transparent,
         tonalElevation = 0.dp,
         // Faint accent rule — the board sits on the tinted page, so a slim
         // category-colored border keeps it from visually blending into the

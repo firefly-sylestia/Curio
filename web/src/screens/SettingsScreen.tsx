@@ -85,6 +85,12 @@ const SEARCH_ENGINES = [
   { id: 'yahoo', label: 'Yahoo' },
 ];
 
+const MUSIC_SERVICES = [
+  { id: 'youtube_music', label: 'YouTube Music' },
+  { id: 'apple_music', label: 'Apple Music' },
+  { id: 'spotify', label: 'Spotify' },
+];
+
 const ThemePicker: React.FC<{ selected: string; onSelect: (theme: string) => void }> = ({ selected, onSelect }) => {
   const { isDark } = useTheme();
   const themes = [
@@ -119,6 +125,7 @@ export const SettingsScreen: React.FC = () => {
   const [petChatter, setPetChatter] = useState(localStorage.getItem('curio-pet-chatter') || 'cozy');
   const [petGames, setPetGames] = useState(localStorage.getItem('curio-pet-games') || 'normal');
   const [searchEngine, setSearchEngine] = useState(localStorage.getItem('curio-search-engine') || 'google');
+  const [musicService, setMusicService] = useState(localStorage.getItem('curio-music-service') || 'youtube_music');
 
   const handleSettingChange = (key: string, value: boolean) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -140,6 +147,11 @@ export const SettingsScreen: React.FC = () => {
   const handleSearchEngine = (val: string) => {
     setSearchEngine(val);
     localStorage.setItem('curio-search-engine', val);
+  };
+
+  const handleMusicService = (val: string) => {
+    setMusicService(val);
+    localStorage.setItem('curio-music-service', val);
   };
 
   return (
@@ -192,6 +204,15 @@ export const SettingsScreen: React.FC = () => {
                   selected={searchEngine}
                   onChange={handleSearchEngine}
                 />
+                <div className="pt-3">
+                  <SegmentedRow
+                    label="Music service"
+                    description="Opened for albums, artists & songs"
+                    options={MUSIC_SERVICES.map(s => ({ value: s.id, label: s.label }))}
+                    selected={musicService}
+                    onChange={handleMusicService}
+                  />
+                </div>
               </div>
             </div>
           </div>

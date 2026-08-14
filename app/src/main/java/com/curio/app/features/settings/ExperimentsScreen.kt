@@ -4,16 +4,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -27,12 +35,16 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioCategoryChip
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.curioDialogContainerColor
 
 /**
  * Experimental controls live here instead of inside Appearance. Each switch
@@ -41,6 +53,10 @@ import com.curio.app.ui.theme.CurioIcons
 @Composable
 fun ExperimentsScreen(navController: NavController) {
     val context = LocalContext.current
+    // v27u — the manual tint-category picker (single-select chips).
+    // v27v — the ring-style picker (Coil spring / Split ring / Oblique coil).
+    var showTintCategoryPicker by remember { mutableStateOf(false) }
+    var showRingStylePicker by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -119,7 +135,32 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPaperHeaderHolesEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Paper stat card", "Streak · Cabinet · Topics on a soft rose paper card", AppPreferences.paperStatCardsState) {
+                    ExperimentSwitchRow("Hole rings", "3D steel rings through the pin holes (needs Stamped pin holes on)", AppPreferences.paperHoleRingsState) {
+                        AppPreferences.setPaperHoleRingsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // v27v — pick between the three 3D ring looks; only
+                    // enabled while Hole rings is on.
+                    val ringStyleEnabled = AppPreferences.paperHoleRingsState
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(if (ringStyleEnabled) 1f else 0.45f)
+                    ) {
+                        CurioSettingsRow(
+                            CurioIcons.Tune,
+                            "Ring style",
+                            when (AppPreferences.paperHoleRingStyleState) {
+                                "split" -> "Split ring"
+                                "oblique" -> "Oblique coil"
+                                else -> "Coil spring"
+                            }
+                        ) {
+                            if (ringStyleEnabled) showRingStylePicker = true
+                        }
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Paper stat card", "Soft rose paper card on the stat panes (Home + Profile)", AppPreferences.paperStatCardsState) {
                         AppPreferences.setPaperStatCardsEnabled(context, it)
                     }
                     CurioSettingsDivider()
@@ -129,6 +170,44 @@ fun ExperimentsScreen(navController: NavController) {
                     CurioSettingsDivider()
                     ExperimentSwitchRow("Deeper header color", "Torn-hero headers wear a slightly darker category accent (on by default)", AppPreferences.headerDeepState) {
                         AppPreferences.setHeaderDeepEnabled(context, it)
+                    }
+                }
+            }
+            item { CurioSectionLabel("Home tint") }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Home tint", "Home background + bottom nav take a category tint", AppPreferences.homeTintState) {
+                        AppPreferences.setHomeTintEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // Grayed out when following the Spin lane (the lane wins
+                    // over the manual toggles) or when Home tint is off.
+                    val heroTintEnabled = AppPreferences.homeTintState && !AppPreferences.homeTintFollowLaneState
+                    ExperimentSwitchRow("Hero tint too", "The quest hero also wears the tint", AppPreferences.homeHeroTintState, enabled = heroTintEnabled) {
+                        AppPreferences.setHomeHeroTintEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Follow my Spin lane", "Tint follows the category you last picked on Spin", AppPreferences.homeTintFollowLaneState) {
+                        AppPreferences.setHomeTintFollowLaneEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // Manual source — grayed out while following the Spin lane.
+                    val pickerEnabled = !AppPreferences.homeTintFollowLaneState
+                    val tintCatName = runCatching {
+                        CurioCategories.byId(CategoryId.valueOf(AppPreferences.homeTintCategoryIdState)).displayName
+                    }.getOrDefault("Surprise")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(if (pickerEnabled) 1f else 0.45f)
+                    ) {
+                        CurioSettingsRow(
+                            CurioIcons.Palette,
+                            "Tint category",
+                            tintCatName
+                        ) {
+                            if (pickerEnabled) showTintCategoryPicker = true
+                        }
                     }
                 }
             }
@@ -152,6 +231,104 @@ fun ExperimentsScreen(navController: NavController) {
             title = "Experiments",
             subtitle = "Try ideas before they ship",
             onBack = { navController.popBackStack() }
+        )
+    }
+
+    // ── Tint category picker — single-select chips over the visible lanes ──
+    if (showTintCategoryPicker) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { showTintCategoryPicker = false },
+            title = { Text("Tint category") },
+            text = {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CurioCategories.visible.forEach { cat ->
+                        CurioCategoryChip(
+                            category = cat,
+                            selected = cat.id.name == AppPreferences.homeTintCategoryIdState,
+                            onClick = { AppPreferences.setHomeTintCategory(context, cat.id) }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showTintCategoryPicker = false },
+                    colors = curioDialogActionButtonColors()
+                ) {
+                    Text("Done")
+                }
+            }
+        )
+    }
+
+    // ── Ring style picker — the three 3D ring looks, single-select ──
+    if (showRingStylePicker) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { showRingStylePicker = false },
+            title = { Text("Ring style") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(
+                        Triple("coil", "Coil spring", "Wire coil through the hole — spiral-notebook look"),
+                        Triple("split", "Split ring", "Closed metal torus — keyring / binder-ring look"),
+                        Triple("oblique", "Oblique coil", "Short coil segments springing out of the hole")
+                    ).forEach { (value, label, desc) ->
+                        Surface(
+                            onClick = { AppPreferences.setPaperHoleRingStyle(context, value) },
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                            color = if (AppPreferences.paperHoleRingStyleState == value)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.surface,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                            ) {
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = if (AppPreferences.paperHoleRingStyleState == value)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    desc,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (AppPreferences.paperHoleRingStyleState == value)
+                                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        "The stat cards on Home and Profile preview the change immediately.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showRingStylePicker = false },
+                    colors = curioDialogActionButtonColors()
+                ) {
+                    Text("Done")
+                }
+            }
         )
     }
 }

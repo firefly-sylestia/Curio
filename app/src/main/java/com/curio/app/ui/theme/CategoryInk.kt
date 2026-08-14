@@ -141,6 +141,24 @@ fun CurioCategory.onAccent(): Color = when {
 }
 
 /**
+ * v28 — ink for HERO HEADER title text/icons sitting on a category banner
+ * fill, on EVERY screen: light mode keeps the pastel-aware [onAccent]
+ * resolution exactly as before (deep ink on airy pastel fills, white on
+ * deep accents), but DARK mode always reads WHITE/creamish — the same
+ * cream-white blend the shared rose heroes already use ([pastelFillInk]).
+ * A category-tinted hero (Cabinet's active-filter banner, the saved-entry
+ * detail hero, Home's hero-tint experiment) must never show its tinted
+ * light twin as title text over midnight; the cream keeps the hue whisper
+ * while staying crisp light-on-deep. The cream is blended from the themed
+ * accent (the banner fill family), mirroring [settingsReadableInk].
+ */
+@Composable
+fun CurioCategory.heroHeaderInk(): Color {
+    if (isCurioDarkTheme()) return pastelFillInk(themedAccent())
+    return onAccent()
+}
+
+/**
  * v12 — fill for CATEGORY ACCENT BUTTONS (deck control pills, CTAs, the
  * reveal CTA): every style wears the TRUE category accent (pastel-aware), so
  * Material buttons carry the same rich category identity as the cards

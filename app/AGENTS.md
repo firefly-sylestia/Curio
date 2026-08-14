@@ -99,11 +99,439 @@ app/src/main/java/com/curio/app/
   `Modifier.shadow()` must precede the fill in the chain (shadow-after-
   background paints a blur ON TOP of the fill); `shadowElevation` only
   renders cleanly on OPAQUE fills — translucent/glass fills are replaced by
-  opaque `lerp(fill, accent, alpha)` blends (avatar, badge medals, chips,
-  Level·Saved·Lanes pane, lane tiles, "+N" badge tile). The Spin deck peek
-  cards stay FLAT (`shadowElevation = 0.dp`) — v24 rejected deck shadows
-  (they animate weirdly) and the elevation pass re-adding a 2dp halo caused
-  the boxy artifact during the reel.
+  opaque `lerp(fill, accent, alpha)` blends (app-wide pass: badge medals,
+  avatar, chips, stat pane, lane tiles, hero glass pills, tag/tick pills,
+  quest cards/stamps, capture formats, picker/preset rows, editor toolbars,
+  coming-soon tiles). Hero pills resolve the banner fill as their blend
+  backdrop: `CabinetHeroActionPill` receives it via the hero `trailing`
+  slot, `SettingsHeroActionPill` defaults to `settingsRoseAccent()`,
+  `CurioSortDropdown` takes it as a required `backdrop` param. TRUE frosted
+  glass over heroes/imagery gets `shadowElevation = 0` instead (glass can't
+  hold a shadow — it bleeds through). The Spin deck peek cards stay FLAT
+  (`shadowElevation = 0.dp`) — v24 rejected deck shadows (they animate
+  weirdly) and the elevation pass re-adding a 2dp halo caused the boxy
+  artifact during the reel.
+- **v27q — NO selection raises: elevation is a FLAT 2dp in both states
+  for every selectable chip/card/row/tile** (was 3/1, 4/2, 6/3, 8/3, 3/0
+  raises). Selection must read through a FILL change instead: SOLID
+  accent fill with on-accent content (`themedAccent()`+`onAccent()`,
+  `primary`+`onPrimary`, `curioDialogActionColor()`+`dialogRowSelectedInk()`
+  [white except AMOLED black], or `accent`+`pastelFillInk(accent)` for
+  generic accents) — never a translucent lerp (bleeds the shadow) and
+  never an elevation raise. Existing non-elevation cues stay: topic-card
+  check badge, category-card solid gradient, pet "Your pet" pill, swatch
+  check marks. Exceptions: non-selection state toggles keep their own
+  elevation (3D button, paper-stats toggle, field-border toggle,
+  fullscreen capture), and the fan-deck's per-card depth shadows are deck
+  order, not selection.
+- **v27r — badge medals + quest passport stamps are BORDER-defined, not
+  shadow-defined** (user verdict after the elevation pass: the medals
+  looked wrong and their shadows clipped at the shelf edges — "weirdly
+  getting cut"). `CurioBadgeMedal` keeps the v27n opaque fills but wears
+  the pre-elevation ring borders: inner glyph plate (1.5dp white@0.55 /
+  1dp outlineVariant@0.5 when locked), ribbon gem (1dp white@0.85),
+  earned marker (1.5dp white), locked silhouette (1dp outlineVariant@0.7),
+  and the "+N" tile keeps its sage ring —  NO shadows anywhere in
+  CurioBadges.kt. `PassportStamp` in Quests keeps its flat 2dp elevation
+  PLUS its restored 1dp ring (accent ring for UNSEEN, neutral otherwise).
+- **v27r — FIXED-COLOR controls never wear a solid accent fill.** The
+  note-paper toolbar controls (FormatToolButton in paper mode,
+  CompactPaperChip, NotePaperColorToggle) use a MODERATED tint
+  `lerp(surfaceContainerHighest, accent, 0.45f)` with the accent as
+  glyph/label ink — a solid amber block in dark was too saturated and
+  white-on-amber unreadable (pastelFillInk assumes pastel-adjusted
+  fills; fixed colors like paperControlAccent 0xFFE3B84F / paperAccent
+  0xFF9A7B2F never pastel-adapt). Category-accent fills keep the solid
+  accent + onAccent/pastelFillInk contract.
+- **v27t — pet studio persistence + paper experiments rework.** (1) Custom
+  pet designs now APPLY: `saveAsNewPet`, `selectCustomPet`, and pet-species
+  switches persist the working design as the ACTIVE design
+  (`AppPreferences.setPetDesign`) — the sprite + floating pet read only the
+  active design (`petDesignState`), so before this the custom slots were
+  studio-only and "Save as new pet" never actually put the design on the
+  pet. Selecting a built-in pet with a custom design re-tags its species and
+  persists (custom follows the pet); picking the default look clears the
+  active design; deleting the ACTIVE slot clears it too.
+  (2) `PaperTitleLines` ("Title cut lines" experiment) sizes to the hero
+  title: length scales with the title text + font size (reaches ~3 chars
+  past the text end, capped 16em / 300dp, floored 5em), drawn as two
+  slightly curved pen strokes (quadratic beziers, wide-soft + narrow-dark
+  felt-pen passes, round caps) at a -2° hand-written tilt. Callers pass
+  `title` + `fontSize` (Home name 36sp, Entry Detail topic name
+  headlineMedium, others headlineSmall). (3) "Stamped pin holes" are now
+  DIARY-SPIRAL punches: 3 holes, 5.5dp radius at 14dp from the left edge,
+  each wearing a two-tone pressed rim — faint 1dp lip ring, top-left white
+  highlight arc (160°→290°), bottom-right ink shadow arc (340°→110°).
+- **v27u — border-free main/reveal cards; opaque save-page strip + explore
+  pills.** (1) The Spin ticket's drawn gradient rim border (1.5dp stroke +
+  1dp bevel) and its AMOLED edge-shine rim light are GONE, and the Topic
+  Reveal hero's matching rim is gone too — the shared-element morph stays
+  clean because both cards changed together. The `heroBorderState` pref API
+  stays dormant (default true, nothing reads it). (2) The SaveCapture topic
+  strip no longer wears `cat.tint` (accent @ 20% alpha) under its 3dp
+  shadow — translucent fills bleed shadows (v27n rule) — it now uses an
+  opaque `lerp(surfaceContainerHigh, cat.accent, 0.20f)` fill, and the
+  strip's icon plate is opaque (`lerp(surfaceContainerHigh, themedAccent,
+  0.15f)`). (3) The explore dialog's two action pills ("Explore" browser
+  + "Watch in" service) are now VISIBLE soft-tinted pills — the old
+  TextButton had no container color, so the pill shape was invisible — with
+  clean glyph icons (travel_explore globe for the browser, the service's
+  glyph youtube_activity/play_circle/music_note for watch), tinted with the
+  pill ink, no brand tiles, 12dp apart. `curioDialogActionButtonColors`
+  gained an optional `containerColor` param. (4) "Title cut lines" rework:
+  the two underlines now span ~88% of the title width (shorter — the old
+  +3-char stretch ran past the text) and are drawn as a NATURAL hand
+  double underline — two gently wavy cubic strokes in the lower half that
+  converge slightly toward the right (a single pen motion, never crossing;
+  bottom line a touch longer + offset right), felt-pen edge, -2° tilt.
+  (5) "Stamped pin holes" gained a sibling "Hole rings" toggle: tilted
+  metal book rings through the 3 holes (foreshortened ellipse, metal
+  gradient, specular highlight, contact shade, per-ring tilt -9°/-3°/3°)
+  instead of the pressed rims. The paper stat card is now SHARED:
+  `paperStatCardFill` / `paperStatCardColor` in
+  `ui/components/PaperStatCard.kt` render the opaque paper fill + 3-hole
+  EvenOdd punch + rims/rings, used by Home's Streak · Cabinet · Topics bar
+  AND Profile's Level · Saved · Lanes pane (same toggles: paper card,
+  holes,  rings, torn edges; Profile's tear seed 0x6B4E3E). (6) NEW "Home tint"
+  experiments (Settings → Experiments → Home tint, all default OFF):
+  "Home tint" — the Home background + bottom nav wear a category's
+  `categoryBackgroundWash()` (Home was previously always plain; the wash is
+  published to the nav chrome via `CurioNavTint.homeWash` so the bar blends
+  on the Home route); "Hero tint too" — the quest hero swaps the rose for
+  the category's `themedAccent()` with `onAccent()` ink; "Follow my Spin
+  lane" — the tint follows the category picked on Spin
+  (`getLastSpinCategories`, single lane, else Wildcard) and WINS over the
+  manual toggles (Hero tint + Tint category gray out in Experiments);
+  "Tint category" — a manual single-select picker (default Surprise /
+  Wildcard). The Streak · Cabinet · Topics card takes a 5% whisper of the
+  category shade (`lerp(fill, accent, 0.05f)`) — creamy, not colored.
+  Toggles: `homeTintState` / `homeHeroTintState` /
+  `homeTintFollowLaneState` / `homeTintCategoryIdState`. (7) Home's
+  Recents rows (`ExploreTopicRow` + `RecentEntryRow`, both opaque category
+  fills) lift from 0dp to a soft 2dp elevation, and the small
+  Unexplored/Resumed tag pills inside them trim from 2dp to 1dp so they
+  read as chips on the card instead of floating tiles.
+- **v27v — pet eyes: 2s look-timeout + touch-scroll detection.** The pet's
+  pointer-aware eyes (`PetPointer` in `ui/pet/CurioPetSprite.kt`) used to
+  aim at the LAST pointer position FOREVER — the pet kept staring at the
+  final scroll/tap point long after you stopped touching. Now `PetPointer`
+  bumps `activityTick` on every event (hover/press/drag/scroll/release)
+  and each sprite keys a `lookStrength` Animatable on it: full aim while
+  events keep arriving, then ease back to the neutral glance ~2s after the
+  last one (or once a held press releases). Also, touch vertical scrolling
+  is a DRAG of `Move` events — wheel-only `Scroll` events never fire on
+  phones, so the eye-roll only worked with a mouse wheel. The tracker now
+  accumulates the vertical travel of a press-drag and fires the roll once
+  it clearly scrolls, gated to one roll per ~350ms so a fast fling gives a
+  few discrete rolls instead of restarting every frame.
+- **v29 — per-topic progress (pages read / episodes watched).**
+  `CurioTopic` gained optional `pageCount` (BOOKS) and `episodeCount`
+  (ANIME) — both parsed by `TopicJsonLoader`, both absent from legacy
+  JSON (null = no progress tracking; anime films deliberately carry no
+  `episodeCount`, a film has no episodes to track). Progress itself lives
+  in `data/TopicProgressStore.kt` — a SharedPreferences JSON map keyed by
+  topic id, exposed as reactive Compose state (`progressState`), seeded
+  once from `MainActivity.onCreate`, and shared by every surface: the
+  Topic Reveal hero, the Cabinet entry cards, and the EntryDetail hero.
+  The shared control is `ui/components/CurioProgressPill.kt`: a LONG
+  accent-shaped floating button (% ring + count + slim bar + Edit hint),
+  tap → slider editor dialog (0..target with Reset/Finished/Save). On the
+  reveal hero it straddles the card's bottom edge (the action row drops
+  16→40dp when progress exists); on Cabinet cards it's a compact strip in
+  the card body; on EntryDetail it floats over the hero's bottom edge.
+  Always-on (no experiment toggle, per user decision).
+- **v29 — hero sort/search/select controls redesigned (Cabinet + Topic
+  Database).** `CurioSortDropdown` is now ONE pill with two tap zones —
+  the label + chevron opens the dropdown, a `VerticalDivider` separates
+  it from the arrow zone that toggles ascending/descending (was two
+  separate pills); the pill is bigger (44dp tall, labelLarge, 22dp arrow)
+  and the dropdown redesigned (20dp corners, tonal elevation, a "Sort by"
+  header, a check on the active field). The hero pills
+  (`SettingsHeroActionPill`, `CabinetHeroActionPill`) and the sort pill
+  dropped the v27r ink-lean fills (lerp toward ink at 0.30/0.35/0.55 —
+  read TOO DARK in light + pastel) for a LIGHT frosted glass: the banner
+  fill lifted toward white (`lerp(backdrop, White, 0.24f)` emphasized /
+  `0.38f` normal; destructive stays a black-lean `0.14f`), so full-ink
+  glyphs pop in light, dark, pastel and AMOLED. Both heroes' SEARCH
+  fields match: the ink-at-16% container became `lerp(fill, White, 0.30f)`
+  with full-ink borders (0.65/0.40). Pills also grew (14/10dp padding,
+  22dp glyph).
+- **v29 — Spin FilterSheet: ≤4 columns + visible inactive elevation.**
+  The chip grid swapped `GridCells.Adaptive(112dp)` (stretched two huge
+  slab-chips on phones, 5+ on tablets) for a `BoxWithConstraints` fixed
+  count: `(maxWidth / 92.dp).toInt().coerceIn(2, 4)` — compact pill
+  columns capped at four in a row. `CompactChip` now lifts the INACTIVE
+  fill a whisper of white (`lerp(chipSurface, White, 0.04 dark / 0.10
+  light)`) with a 2dp shadow in BOTH states + `curioDarkGlow`, so
+  unselected chips read as raised pills off the tinted sheet instead of
+  flat tiles.
+- **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
+  the translucent `category.tint` (accent @ 20% alpha) attach boxes
+  looking broken (v27n rule: translucent fills bleed the elevation
+  shadow). New shared `categoryTintFill(accent)` in
+  `CaptureFormatComponents.kt` resolves the same perceived tint as an
+  OPAQUE `lerp(surfaceContainerHigh, accent, 0.16f)`; `ImageThumb`,
+  `AddImageButton` (Reel Notes/Field Notes = review + field notes) and
+  `JournalVoiceNoteRow` (Marginalia journal voice-note capsule) all use
+  it now.
+- **v29 — save-capture topic strip matches the category + glow.** The
+  strip fill switched from `lerp(surfaceContainerHigh, accent, 0.20f)`
+  (muddy near-grey in dark) to `cat.categorySurface(surfaceContainerHigh)`
+  — the SAME opaque card-family tint as the rest of the app — with
+  `curioDarkGlow(3dp)` so the 3dp elevation shows in dark mode; ink stays
+  `cat.categoryInk()` (deep accent in light, light twin in dark, deep twin
+  in pastel) so the topic text is readable in every theme.
+- **v29 — Spotify/Apple Music explore links + auto-copy.** Apple Music's
+  URL gained the REQUIRED storefront segment
+  (`https://music.apple.com/us/search?term=…` — without `/us/` the server
+  redirects and the app never recognizes the link); Spotify keeps
+  `https://open.spotify.com/search/…` (verified correct). Because neither
+  app reliably hands off an in-app SEARCH from a web link, tapping
+  Explore / Watch in now AUTO-COPYs `buildExploreQuery(topic)` to the
+  clipboard (with a short toast) so the user can paste the topic name
+  into the app's own search box. New `CurioIcons.ContentCopy`
+  (`content_copy`, verified present in the bundled font subset).
+- **v29 — per-topic progress UI redesigned (pill + editor + placements).**
+  `CurioProgressPill` is now a COMPACT OPAQUE pill (count + optional slim
+  category-accent bar) with a new signature `(topic, accent, ink,
+  background, showBar)` — the old long accent-shaped control with the
+  `fill`/`contentColor` params is gone. The editor is a brand-new
+  `CurioProgressEditorDialog` in `ui/components/CurioProgressPill.kt`: the
+  dialog CONTAINER is the category accent (opaque, content rides the
+  on-accent color), a circular progress ring with big % + count, −/+ round
+  steppers (±1 precise change), a stepped slider (`steps = target-1`, capped
+  at 600), and ONLY Finish (quick-set to target) + Save (persist + close)
+  — NO Reset, NO Cancel (dismiss = tap-outside/back). Placements: Topic
+  Reveal hero shows a small OPAQUE frosted count badge at the TOP-RIGHT
+  corner (`lerp(accent, White, 0.85)` fill + accent text — the old
+  bottom-straddling pill that clipped during the shared-element morph is
+  gone); Entry Detail shows a small pill at the hero's BOTTOM-RIGHT (tint
+  background `lerp(surfaceContainerHigh, accent, 0.16)` + accent bar); the
+  Cabinet card shows progress IN the hero (see below).
+- **v29 — Cabinet card hero FILLS with progress.** `CurioEntryCard`'s 96dp
+  hero header now renders a rising progress fill anchored to its bottom
+  edge (`fillMaxHeight(fraction)` of the on-accent ink, denser at the base
+  with a bright 2dp level line at the current mark) plus a small opaque
+  count pill at the hero's bottom-right corner (tap → editor) — 50%
+  progress = half the hero colored, 100% = fully filled. Works on AMOLED
+  too (onAccent resolves to white there, so the fill reads as a brightening
+  over the black-glass hero). The old bottom body strip was removed.
+- **v29 — Cabinet + Topic DB category pills stop GROWING on entry.** The
+  sticky chip bars' per-pill pop rested at 0.90 scale, so every pill looked
+  like it was growing the moment the screen opened. `CabinetChipPop` and
+  `DatabaseChipPop` now rest at FULL size (1.0) and only breathe subtly
+  (1.0 → 1.05) as the bar actually pins on scroll; the color-bloom + lift
+  language is unchanged.
+- **v29 — device-screenshot watcher hardened.** `DeviceScreenshotWatcher`
+  coalesces MediaStore change bursts (one scan pass drains all queued
+  requests instead of piling up work), schedules ONE delayed re-pass
+  (~1.5s) to catch screenshots MediaStore indexes a beat AFTER the change
+  event (the reason a fresh shot sometimes never attached), and widens
+  `looksLikeScreenshot` to also match any image filed under a
+  `/Screenshots/` folder (some OEMs name shots IMG_…). The heavy query +
+  file copy stay on the serialized scan thread.
+- **v29 — progress never vanishes.** `TopicProgressStore.writeAll` now uses
+  `commit()` (was `apply()` — an async write could be lost when the
+  process died right after saving, showing as progress silently reset), and
+  `MainActivity.onResume` re-seeds the in-memory progress map from prefs so
+  a killed-in-background process heals on return instead of waiting for a
+  restart.
+- **v29 — Topic Database opens with ZERO loading (prebuilt index).**
+  `scripts/build_topic_index.py` (LOCAL tool, gitignored per the
+  `/scripts/*.py` rule — run `python3 scripts/build_topic_index.py` after
+  ANY topic edit) merges every `assets/topics/*.json` into ONE
+  `app/src/main/assets/topic_index.json` (`{"version":1,"topics":[…]}`, ~0.8MB
+  APK delta after asset compression) with the lowercased search keys and
+  the sort YEAR precomputed at BUILD time (same precedence as the DB's
+  `topicYear`: name paren → targetName paren → teaser year → instruction
+  year → decade tag). `TopicJsonLoader.loadIndex()` parses it once
+  (reusing `parseTopic`, cached, `cachedIndex()` sync accessor) and
+  `MainActivity` prewarms it in the background at cold start. The Topic
+  Database renders from the index when present (grouped per lane, wildcard
+  lane = wildcard.json originals only) — no per-category parses, no runtime
+  lowercase/year work — and gracefully falls back to the live per-category
+  load when the asset is missing. Scaling note for 20k+: the same
+  precompute-at-build idea is the path — a SQLite/FTS5 or FlatBuffers index
+  would keep instant queries at any size (see Prompt.md).
+- **v28 — scrolling pets look UP/DOWN in a line, never a circle.** The v27v
+  "roll" played a FULL 2π CIRCLE of the eyes on every scroll — it read as
+  the pet's eyes spinning whenever you scrolled. Replaced with a vertical
+  scroll-look: `PetPointer` now exposes `scrollDir` (+1 down / -1 up) and
+  `scrollTick` (increments per scroll event) instead of `rollTick`; wheel
+  scrolls use `scrollDelta.y`'s sign and touch-drag scrolls use the
+  finger's INCREMENTAL vertical travel (2dp threshold + 60ms gate). Each
+  sprite runs a `scrollLook` Animatable keyed on `scrollTick`: ease to the
+  scroll  direction (150ms), HOLD while scroll events keep arriving
+  (restarting the effect), then settle back to neutral ~400ms after the
+  last event. The scroll look wins over the pointer aim while active, so
+  dragging never mixes the aim with a spin. **v28 touch-direction fix:**
+  the touch-drag branch fed the raw finger delta into the SAME mapping as
+  the wheel — but a touch finger moves OPPOSITE to the content (swiping
+  UP scrolls the page DOWN), so on a phone scrolling down made the pet
+  look UP. The touch branch now inverts the finger delta
+  (`dy > 0 → -1, else 1`), so  the pet always looks the way the CONTENT
+  moves — consistent with the wheel branch (scrolling down = look down).
+  **v29 removal:** scroll-following is GONE entirely — the user wanted the
+  eyes "normal again, no scroll following". `scrollDir`/`scrollTick`/the
+  scrollLook Animatable are removed; the eyes aim only at real taps/hover
+  (the tracker cancels the aim as soon as a press starts dragging), so
+  scrolling no longer moves the gaze at all.
+- **v28 — dark-mode elevation visibility: soft light glow + hairline
+  outline.** Compose's black shadows are INVISIBLE on the app's midnight
+  surfaces, so dark mode now draws elevation two extra ways via two new
+  composable modifiers in `ui/components/DarkElevation.kt`:
+  `Modifier.curioDarkGlow(elevation, shape)` — a soft WHITE-tinted shadow
+  (16% alpha) that reads as a gentle lift on near-black — and
+  `Modifier.curioDarkOutline(shape)` — a faint light hairline (12% white)
+  along the surface edge, the standard dark-UI card language. Both are
+  dark-mode-only (light mode renders exactly as before: the Surface's own
+  black shadowElevation) and are driven by two Appearance toggles
+  (`darkGlowState` default ON, `darkOutlineState` default ON — the glow is
+  the default-on look, the outline is the Appearance option). Wired into
+  the shared elevated components + main screens: CurioSettingsCard,
+  CurioSearchField, CurioEntryCard, CurioCategoryCard, FilterChipLite,
+  hero action pills (Settings/Cabinet), CurioSortDropdown, CurioTopBar,
+  PaperCard surfaces, dialog option rows, Home (stat card, recents rows,
+  sticky top pills, session card, pick-a-lane), Profile (stat pane, lanes
+  tiles), Topic Reveal (already-there button, teaser card), and the
+  Category Picker's preset chips + Original/New page tabs + Mix button.
+  Glow must precede the fill in the modifier chain (rule 11).
+  **v29 removal:** the user rejected the outline look — `curioDarkOutline`
+  (and its `darkOutlineState` pref + 'Card outlines' settings row) is
+  REMOVED entirely; only `curioDarkGlow` remains (dark-mode-only).
+- **v28 — AMOLED is BORDER-FREE (full border-removal audit).** Two
+  systematic border sources were removed from AMOLED: (1)
+  `Modifier.categoryEdgeShine` no longer draws its full-edge HAIRLINE RING
+  in AMOLED (`hairlineAlpha = 0` — white rings around every pill/card read
+  as clunky "borders" on pure black); the TOP-LIT GLASS shine is
+  strengthened (0.45→0.52 with accent, 0.22→0.30 without) since it's now
+  the sole edge cue. Material keeps its accent rim (its identity); the
+  default Curio style was already border-free. (2) `curioDarkOutline` (the
+  v28 hairline) never draws in AMOLED either. The AMOLED raised look is
+  now top-lit glass shine + the v28 soft glow — no rings. Intentional
+  design borders kept: CurioBadges coin rims + the Quests passport stamp
+  ring (both are element identity, not elevation). **v29 exception:** the
+  user asked for a border BACK on the AMOLED MAIN deck card only —
+  `categoryEdgeShine` gained an `amoledHairline` param (default false)
+  that redraws the hairline ring just for that card; everything else stays
+  border-free.
+- **v28 — Spin FilterSheet: live chip search + 1dp chips.** The deck's
+  filter bottom sheet (`FilterSheet` in `SpinScreen.kt`) gained a
+  `CurioSearchField` under the subtitle: typing narrows EVERY chip group
+  (Type / Genre / Era / Origin / Franchise) live via a `filteredGroups`
+  derivation (case-insensitive substring), and an empty search shows
+  "No filters match …" instead of the plain empty message. The sheet's
+  `CompactChip` selectable chips dropped from 2dp to 1dp elevation (cards
+  2dp / chips 1dp) so they read as chips, not tiles.
+- **v28 — Category card selected state: SATURATED, not darker.**
+  `CurioCategoryCard`'s selected fill used `cardGradient` whose start is
+  black-DARKENED (`categoryCardFill` 10% light / 28% dark) plus a
+  `cardContentInk` sheen that is a deep ink in pastel light — so tapping
+  a tile read DARKER than the idle tint. Selected now blooms to the raw
+  saturated `category.accent` melting into the page, content flips to
+  white (`selectedInk`), and the sheen is a true white 14% glow. `cardInk`
+  / `cardContentInk` import removed.
+- **v28 — Category Picker rows tightened.** The quick-mix preset chips and
+  the Original/New page tabs both wore `categoryEdgeShine` (a white ring
+  in AMOLED — the "huge borders") and the preset row's 6dp vertical
+  padding pushed the two rows apart. The AMOLED ring removal + the row
+  spacing tweaks (preset row padding vertical 6dp → top 4/bottom 1, tabs
+  row top 1/bottom 4, chip vertical padding 6dp → 4dp) pull the rows
+  together; both pills + the Mix button also gained the soft glow.
+- **v28 — Topic Reveal hero gradient matches the Spin ticket in LIGHT
+  mode.** The reveal hero's `HeroCard` used `cat.headerAccent()` (a
+  0.88-deepened accent in light mode, v27j) while the Spin ticket wears
+  `themedAccent()` — so the morph read a shade darker in light (dark's
+  0.94 factor hid it). It also rebuilt the gradient via `cardGradient`
+  while the ticket uses a different pastel-light recipe (its second stop
+  IS the on-hue tint; cardGradient's is only 30% toward it). The hero now
+  mirrors the ticket EXACTLY: `themedAccent()` + the same pastel-light
+  stops (`lerp(accent, Black, 0.05)` → `lightAccentTint(0.22, 0.80)`) in
+  pastel light, `cardGradient` everywhere else — pixel-identical morph in
+  every theme.
+- **v27v — custom pet designs ALWAYS win + custom-pet procedural defaults.**
+  (1) The sprite's design resolution (`CurioPetSprite`) forced
+  `evolutionDesign(BABY, null)` for ANY baby-stage pet (level < 15) — so
+  "Save" confirmed but the pet never changed for most users. Now a saved
+  custom design ALWAYS wins, regardless of growth stage; the stage-based
+  evolution art only applies when NO custom design exists. Animations,
+  view angles and the curled sleep pose all flow from the winning design
+  automatically (a custom pet is its own new pet). (2)
+  `PetDesign.withCustomPetDefaults()` — a custom pet is its OWN art:
+  procedural accessories (leaf/badge/halo), antenna (nightcap + thinking
+  ?), tail and belly stay OFF; only the effects layer (sparkles, Z's,
+  whooshes) stays on. Blush + eyes are FACE features, not procedural
+  layers, so they stay enabled automatically. Applied by  `saveAsNewPet()` and when saving updates a custom slot (plain Curie
+  saves keep the working design exactly as edited).
+- **v27v — 3D steel ring styles, Home tint pills, softer torn edges, paper
+  detail meta card.** (1) The "Hole rings" experiment now draws REAL 3D
+  steel rings through the 3 punch holes (`PaperStatCard.kt`) in three
+  selectable looks — "coil" (spring wire through the hole: bright front
+  arc over the paper, dark back arc receding into the hole), "split"
+  (closed metal torus with a split gap + top glint), "oblique" (a few
+  short coil segments springing diagonally out of the hole) — picked via a
+  new Experiments → Ring style row (`paperHoleRingStyleState`, default
+  "coil"; each style shares the steel gradient + contact shadow). (2) Home
+  tint: `heroTintOn`/`heroFill`/`questInk` are hoisted to the top of
+  `HomeScreen` so the sticky MENU + PROFILE pills wear the hero tint too
+  when "Hero tint too" is on (they previously always fell back to rose);
+  follow-my-Spin-lane still never tints the hero. (3) `TornStatPaperShape`
+  rework: the top edge is a NEW re-seeded tear (soft waves + gentle ragged
+  layer, no longer the inverted hero seam) and the three sides are SOFTER
+  (amplitude 3.5→2.2dp, high-frequency octave faded) so the card reads as
+  real torn paper, not spikes. (4) The paper & headers experiments now
+  extend to Entry Detail's Date · Mood · Session · Type meta card — when
+  "Paper stat card" is on it swaps the frosted glass for the shared opaque
+  paper surface (paperStatCardFill with the same holes/rings/torn
+  toggles; torn seed = per-entry tearSeed xor 0x6B4E3E).
+- **v28 — dark-mode hero headers read white/creamish on EVERY screen.**
+  New `CurioCategory.heroHeaderInk()` (`CategoryInk.kt`): light mode keeps
+  the pastel-aware `onAccent()` resolution exactly, but DARK mode always
+  resolves WHITE/creamish (`pastelFillInk(themedAccent())` — the same
+  cream-white blend the shared rose heroes use), so a category-tinted hero
+  never shows its tinted light twin as title text over midnight. Applied
+  to the three category-tinted heroes that used `onAccent()` directly:
+  Cabinet's active-filter banner (`CabinetHeroHeader`), the saved-entry
+  detail hero (`heroInk` in `EntryDetailScreen`), and Home's hero-tint
+  experiment title + sticky pills (`questInk`). Home/Profile/Settings/History
+  heroes already resolved creamish via their `*ReadableInk` helpers —
+  unchanged.
+- **v28 — Settings hero tear is WHITE paper in dark mode + detail hero
+  tears never flatten.** (1) The Settings hero under-sheet was the ONLY
+  hero using `MaterialTheme.colorScheme.surface` (midnight in dark mode)
+  with an `onSurface` rim (white-ish in dark) — so the Settings tear read
+  dark/gray while every other screen's tear stayed white. It now matches
+  the app-wide pattern: warm cream `0xFFFDFCF9` sheet + the same black
+  0.20 rim as Home, in EVERY theme (AMOLED keeps its rose 0.45 sheet so
+  the seam reads through the pure-black banner). (2) The detail-only
+  "guaranteed movement" oscillation in `SoftTearParams.broadDisp` ran at
+  ~2.8 cycles — nearly the SAME wavelength as the main wave — so for
+  unlucky seeds it reinforced the wave's flat plateaus and the detail
+  hero's torn edge read as huge straight lines (the white sheet stayed
+  bumpy because its exposed lip uses its own restrained rhythm). Replaced
+  with two phase-offset, incommensurate mid-frequency octaves (17π ≈ 8.5
+  and 23π ≈ 11.5 cycles, ~2.1dp + ~1.3dp, amplitudes hoisted to
+  `meanderA`/`meanderB` since `density` is only in constructor scope):
+  the seam now ALWAYS meanders on a ~35-45dp scale for every entry hash,
+  in both the hero clip and its aligned under-sheet (same `disp`).
+- **v28 — hole rings now THREAD THROUGH the hole (all 3 styles).** The
+  v27v rings were drawn as flat ellipses LARGER than the punch hole and
+  centered on it, so they read as metal rings glued AROUND the hole
+  ("just changes the look of the hole"). All three styles in
+  `PaperStatCard.kt` now share a real through-hole structure:
+  `drawHoleInterior` shades the punched opening dark (a deep pocket, so
+  anything drawn inside reads as BEHIND the paper), the wire's BACK arc is
+  a dark, smaller-radius arc receding inside the hole (coil/split/oblique
+  each with their own back angles), the FRONT arc rides the hole rim in
+  bright steel — its tube half over the opening, half on the paper — and
+  darkened 26° DIVES at each end of the front arc show the wire sinking
+  back in, plus the shared contact shadow. "coil" = spiral-notebook wire
+  (front arc 145°→395° at 1.02×holeR, back arc 35°→145° at 0.72×holeR);
+  "split" = keyring loop (front top half 160°→360° at 1.05×holeR, back
+  bottom half 20°→160° at 0.82×holeR, split gap at 260°, rim shade over
+  the back wire); "oblique" = foreshortened coil bulging out of the hole
+  (front ellipse 1.35×holeR, back arc inside, per-hole tilt). All three
+  now visibly pass through the hole instead of decorating it.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.

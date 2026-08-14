@@ -1,0 +1,177 @@
+# Curio Desktop Release — native Windows installers for the Compose
+# Multiplatform desktop port (desktop/ module).
+#
+# Runs on the same v* tags as the Android release workflow: this job builds
+# the Windows distribution (the Curio.exe app image via jpackage, plus the
+# .msi installer) and attaches both to the release. The Android workflow may
+# create the release body first; this workflow only writes its own body when
+# it creates the release (update_release_body is false), so the two never
+# clobber each other's text.
+name: Curio Desktop Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: curio-desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    name: Build Windows installer (.exe app image + .msi)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      # The tag (e.g. "v1.2.3") becomes the installer's package version —
+      # consumed by desktop/build.gradle.kts (mirrors the Android release
+      # workflow's RELEASE_VERSION convention).
+      RELEASE_VERSION: ${{ github.ref_name }}
+
+    steps:
+      - name: Check out Curio
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # Fail fast on code/data errors BEFORE spending minutes on WiX +
+      # jpackage: the compile+jar build is the same gate the desktop CI job
+      # runs on every push, so a red log here is a code problem, not a
+      # packaging problem.
+      - name: Compile the desktop module first
+        shell: pwsh
+        run: ./gradlew.bat :desktop:build --stacktrace
+
+      # jpackage needs the WiX Toolset to produce the .msi installer. The
+      # runner image ships it (choco confirms the package is present), but
+      # the install FOLDER is versioned and changes between runners (v3.11,
+      # v3.14, ...) — the old hardcoded v3.11 path broke once the image
+      # moved to WiX 3.14. Discover the folder instead. jpackage actually
+      # locates the toolset itself (it scans Program Files for "WiX Toolset
+      # v*"), so WIX/PATH here are belt-and-braces: WIX keeps the standard
+      # %WIX% convention (installation ROOT, which contains bin\), and PATH
+      # gets the bin dir so candle.exe/light.exe are callable directly.
+      - name: Install WiX Toolset (for the .msi installer)
+        shell: pwsh
+        run: |
+          choco install wixtoolset --yes --no-progress
+          $wixRoot = Get-ChildItem "C:\Program Files (x86)\WiX Toolset*" -Directory |
+              Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $wixRoot) {
+            Write-Error "WiX Toolset not found under 'C:\Program Files (x86)\WiX Toolset*'"
+            exit 1
+          }
+          $wixBin = Join-Path $wixRoot.FullName "bin"
+          if (-not (Test-Path (Join-Path $wixBin "candle.exe"))) {
+            Write-Error "candle.exe not found at $wixBin - WiX install looks broken"
+            exit 1
+          }
+          "WIX=$($wixRoot.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "$wixBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "WiX Toolset ready: $($wixRoot.FullName) (bin: $wixBin)"
+
+      # Builds the Windows-only distributions from nativeDistributions
+      # (Msi — Dmg/Deb are macOS/Linux formats and are skipped on Windows):
+      # the app image (contains Curio.exe) + the .msi installer.
+      - name: Build the Windows distribution (app image + MSI)
+        shell: pwsh
+        run: ./gradlew.bat :desktop:packageDistributionForCurrentOS --stacktrace
+
+      - name: Collect installers and build the portable zip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $root = "desktop/build/compose/binaries/main"
+          $msi = Get-ChildItem "$root/msi/*.msi" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $msi) {
+            Write-Error "No MSI installer was produced under $root/msi"
+            exit 1
+          }
+          # Compose Desktop's Windows output directory is version-dependent:
+          # recent plugin versions use `app-image` rather than `app`. Find the
+          # actual jpackage image by its executable instead of guessing the
+          # intermediate folder name.
+          $exe = Get-ChildItem $root -Recurse -File -Filter "Curio.exe" -ErrorAction SilentlyContinue |
+              Select-Object -First 1
+          if (-not $exe) {
+            Write-Error "No Curio.exe app image was produced under $root"
+            exit 1
+          }
+          $appDir = $exe.Directory
+          if (-not $appDir) {
+            Write-Error "Curio.exe has no parent app-image directory"
+            exit 1
+          }
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          if ([string]::IsNullOrWhiteSpace($version)) { $version = "1.0.0" }
+          $zipName = "Curio-Windows-$version-portable.zip"
+          Compress-Archive -Path "$($appDir.FullName)\*" -DestinationPath $zipName -Force
+          echo "Installer: $($msi.FullName)"
+          echo "Portable:  $($PWD.Path)\$zipName"
+          Get-Item "$($appDir.FullName)\Curio.exe" | Select-Object Name, Length
+
+      - name: Write Windows release body
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          if ([string]::IsNullOrWhiteSpace($version)) { $version = "1.0.0" }
+          # jpackage names the MSI from its numeric package version (the
+          # Gradle script strips prerelease/build suffixes, v1.0.2-beta ->
+          # 1.0.2), so derive the same numeric core for the body's MSI row.
+          # The portable zip keeps the FULL tag version to distinguish
+          # prerelease artifacts from later stable ones.
+          $msiVersion = $version.Split('-')[0].Split('+')[0]
+          if ([string]::IsNullOrWhiteSpace($msiVersion)) { $msiVersion = "1.0.0" }
+          # String array joined with newlines (a YAML block scalar can't
+          # hold an unindented PowerShell here-string; `` `` is an escaped
+          # backtick in double-quoted strings, so the markdown code spans
+          # survive).
+          $body = @(
+            "## Curio Desktop for Windows",
+            "",
+            "Curio is now a native Windows app (the Compose Multiplatform desktop port).",
+            "",
+            "| File | Best for |",
+            "|---|---|",
+            "| ``Curio-Windows-$version-portable.zip`` | Portable — unzip anywhere and run ``Curio.exe``, no install |",
+            "| ``Curio-$msiVersion.msi`` | Installer — adds a Start-menu shortcut and an uninstaller |",
+            "",
+            "**Windows 10/11, 64-bit.** The window remembers its size, position, theme and last deck between runs."
+          ) -join [Environment]::NewLine
+          Set-Content -Path release-body-windows.md -Value $body -Encoding utf8
+
+      - name: Determine prerelease status
+        id: prerelease
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_NAME -match "alpha|beta|rc") {
+            "value=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          } else {
+            "value=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          prerelease: ${{ steps.prerelease.outputs.value }}
+          # update_release_body is intentionally false: the Android release
+          # workflow may have already created the release body for this tag,
+          # and it must not be clobbered. The Windows body is only applied
+          # when this workflow creates the release first.
+          update_release_body: false
+          body_path: release-body-windows.md
+          files: |
+            desktop/build/compose/binaries/main/msi/*.msi
+            Curio-Windows-*-portable.zip
+          fail_on_unmatched_files: true

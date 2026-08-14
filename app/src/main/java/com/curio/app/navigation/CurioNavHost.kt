@@ -115,6 +115,7 @@ import com.curio.app.ui.components.CurioBottomBar
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
+import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
 
 // Must match TopicRevealScreen's RevealBottomBarHeight: the hidden
@@ -349,7 +350,9 @@ fun CurioNavHost(
 
     // The floating explore bubble now lives in the explore service's overlay
     // window (over other apps), so the Scaffold simply fills the screen.
-    Box(modifier = Modifier.fillMaxSize()) {
+    // v27t — the root also tracks the pointer (hover / press / wheel) so the
+    // pet's eyes follow the cursor anywhere on screen (Chromebook / desktop).
+    Box(modifier = Modifier.fillMaxSize().then(PetPointer.trackerModifier())) {
         Scaffold(
             bottomBar = {
                 if (!wide && showBottomBar) {

@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -237,7 +238,9 @@ private fun PromoStatusCard(on: Boolean, onToggle: () -> Unit) {
     val icon = if (on) CurioIcons.Check else CurioIcons.Close
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = accent.copy(alpha = 0.12f),
+        // v27n — opaque tinted fill (was 12% alpha, which let the elevation
+        // shadow bleed through).
+        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.12f),
         shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -385,9 +388,13 @@ fun PromoShareCard(topicsTotal: Int) {
                     // wordmark so the card reads as a curated pick.
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(Color.White.copy(alpha = 0.22f))
+                            // v27n — shadow FIRST + OPAQUE glass fill (lerp of
+                            // the white into the rose banner at the old glass
+                            // alpha): the old order painted the shadow on top
+                            // of a translucent white pill.
                             .shadow(2.dp, RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(50))
+                            .background(lerp(PromoRoseDeep, Color.White, 0.22f))
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -496,9 +503,11 @@ fun PromoShareCard(topicsTotal: Int) {
 private fun PromoChip(glyph: String, label: String, ink: Color) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(Color.White.copy(alpha = 0.20f))
+            // v27n — shadow FIRST + OPAQUE glass fill (see the editors'-choice
+            // chip above for the same fix).
             .shadow(2.dp, RoundedCornerShape(50))
+            .clip(RoundedCornerShape(50))
+            .background(lerp(PromoRoseDeep, Color.White, 0.20f))
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)

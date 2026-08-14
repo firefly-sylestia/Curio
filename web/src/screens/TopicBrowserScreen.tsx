@@ -135,7 +135,7 @@ export const TopicBrowserScreen: React.FC = () => {
           ) : (
             <div className="space-y-1 pb-8">
               {filtered.map(row => row.section ? (
-                <div key={row.key} className="flex items-center gap-2 pt-4 pb-1 px-1">
+                <div key={row.key} className="flex items-center gap-2 pt-2 pb-1 px-1">
                   <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: row.section.accent }} />
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
                     {row.section.displayName}
