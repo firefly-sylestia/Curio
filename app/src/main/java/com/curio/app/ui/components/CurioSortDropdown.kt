@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -116,7 +117,14 @@ fun CurioSortDropdown(
                 verticalAlignment = Alignment.CenterVertically,
                 // v30 — uniform hero-pill height: 42dp like the action pills
                 // (was 44dp — the sort pill read too thick next to them).
-                modifier = Modifier.heightIn(min = 42.dp)
+                // v58 — slimmer: tighter label/arrow padding trims the pill's
+                // wideness to sit closer to the icon-only Search pill, a
+                // widthIn floor keeps it from collapsing too small, and NO
+                // maxWidth caps how far a long label ("Category · All") can
+                // stretch it.
+                modifier = Modifier
+                    .heightIn(min = 42.dp)
+                    .widthIn(min = 96.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
                 Row(
@@ -125,7 +133,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(pillShape)
                         .clickable { expanded = true }
-                        .padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp)
+                        .padding(start = 10.dp, end = 8.dp, top = 10.dp, bottom = 10.dp)
                 ) {
                     Text(
                         text = selected?.label.orEmpty(),
@@ -152,7 +160,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable(onClick = onToggleDirection)
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 6.dp)
                         .heightIn(min = 40.dp)
                 ) {
                     CurioIcon(
