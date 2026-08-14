@@ -50,6 +50,7 @@ import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
@@ -850,13 +851,30 @@ fun CurioPetSprite(
                                     }
                                 }
                             } else {
+                                // v64 — procedural eye size preset + placement:
+                                // scale each eye around its own center (left eye
+                                // center col 4.5, right 10.5, row 7 in the same
+                                // 16-space the eyes are authored in), then apply
+                                // the user's offset. The designer's Eyes section
+                                // writes these fields; the sprite reads them so
+                                // the live pet and every preview stay in sync.
+                                val scaleF = when (activeDesign.eyeScale) {
+                                    0 -> 0.85f
+                                    2 -> 1.2f
+                                    else -> 1f
+                                }
+                                val offX = activeDesign.eyeOffsetX
+                                val offY = activeDesign.eyeOffsetY
                                 EYE_STYLE_PIXELS[eyes]?.forEach { (c, r, slot) ->
                                     val color = when (slot) {
                                         "white" -> white
                                         "star" -> starEye
                                         else -> ink
                                     }
-                                    drawPx(c, r, color)
+                                    val centerC = if (c < 8) 4.5f else 10.5f
+                                    val nc = ((centerC + (c - centerC) * scaleF) + offX).roundToInt()
+                                    val nr = ((7f + (r - 7f) * scaleF) + offY).roundToInt()
+                                    drawPx(nc, nr, color)
                                 }
                             }
                         }

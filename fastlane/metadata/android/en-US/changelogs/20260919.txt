@@ -11,6 +11,7 @@ ADD
 - Topic History: explored, pinned, liked and disliked topics in one place.
 - Profile: streak, XP, levels, badges, tagline and lane shortcuts.
 - Curie pet: evolving companion with moods, games, three voices, 150+ reactions and a full Pet Designer.
+- Pet Designer: auto-import builds a full pet from an image (colors → body → bob animation → auto-saved), brush size with a live on-canvas indicator, fill-with-transparency Clear tool, selected-color chip in the tool tray, and eye size presets + arrow placement adjuster with a live preview.
 - Quests: daily and journey quests, path chains, medals and a badge shelf.
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 - Settings: themes (Curio / AMOLED / Material), pastel colors, Adaptive Hero, notifications, recording and lane management.

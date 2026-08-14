@@ -351,6 +351,32 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v65 — Pet Designer: auto-import, brush size, transparent fill,
+  tool-tray color chip, eye presets + placement.** (1) **Auto-import**
+  (`autoImportNext` flag + "Auto-import image" in `ImportMenuDialog`):
+  the picked PNG runs the whole pipeline in one tap — dominant colors
+  map into the four custom slots (`buildImportReview` +
+  `addCustomColor`), the image snaps to the extended palette, BOTH body
+  and curled grids fill (`PetDesign.bodyAsCurled`), a 4-frame "happy"
+  bob animation is added, and the result is saved immediately
+  (`AppPreferences.setPetDesign`). (2) **Zoom slider removed** from the
+  pixel editor — replaced by `BrushSizeRow` (sizes 1–4) and `brushSize`
+  state; Brush/Erase paint a brushSize×brushSize square (`applyTool` +
+  `applyToolToRows`), and `PixelGrid` draws an on-canvas ring showing
+  the exact footprint when Brush/Erase is armed. (3) **CLEAR tool**
+  (`PaintTool.CLEAR`): flood-fills a region with transparency — removes
+  a solid background; acts once per gesture like FILL (both editors).
+  (4) **Selected-color chip in the tool tray**: `ToolTray` gains a
+  `paintHex` swatch + `onPaintTap` (tray row is now horizontally
+  scrollable). (5) **Eyes section** (Settings page, `EyeControls`): 3
+  size presets (Small/Medium/Large → `eyeScale` 0/1/2), an arrow cross
+  pad adjusting `eyeOffsetX`/`eyeOffsetY` (−6..6), a live bobbing
+  sprite preview (`rememberInfiniteTransition`), and Reset. New
+  `PetDesign` fields `eyeScale`/`eyeOffsetX`/`eyeOffsetY` serialize as
+  `eyesize=`/`eyeoffx=`/`eyeoffy=` (tolerant parser, defaults 1/0/0);
+  `CurioPetSprite` scales each eye around its own center (left 4.5,
+  right 10.5, row 7 in 16-space) then applies the offset — the live
+  pet, previews and saved designs all render the same look.
 - **v59.3 → REVERTED (v64) — toggleable serif body text + tighter label
   tracking.** v59.3 added a "Serif body text" Appearance toggle
   (`AppPreferences.loraBodyState` / KEY_LORA_BODY), `CurioLoraBodyTypography`

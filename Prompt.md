@@ -30,10 +30,35 @@ animation and user can adjust the placement with arrows."
 All 5 code files byte-match the pre-revert state; `git diff --check`
 clean; brace balance OK. No Gradle locally (env rule) — CI on push.
 
-### Pending — the pet designer / capture tools request
-Not started yet (this session): the advanced animation system, zoom-slider
-removal + brush-size/indicator, selected-color chips next to pen/fill, 3
-eye-size presets + arrow eye-placement adjuster with preview animation.
+### DONE — the pet designer tools request (v65)
+The user's answers to the clarifying questions: "yess all of it and also
+auto save so it doesnt get lost" (import options: auto-colors + full pet
++ bob + auto-save), "Both" (both eyes targets), "both and also add color
+removed like if a backgroud with certain color got added add a way to
+clear it, maybe fill with transarecy" (brush indicator + fill-with-
+transparency Clear tool).
+
+1. **Auto-import** — new "Auto-import image" entry in the import menu:
+   dominant colors → 4 custom palette slots → full body + curled grids →
+   4-frame bob animation → immediate save (autoImportNext flag + the
+   pipeline in the PNG picker callback).
+2. **Zoom slider removed** from the pixel editor → `BrushSizeRow` (1–4)
+   + `brushSize` state; Brush/Erase paint squares; `PixelGrid` draws a
+   live on-canvas ring of the brush footprint.
+3. **CLEAR tool** — fill-with-transparency flood fill (removes a solid
+   background), once-per-gesture like FILL.
+4. **Selected-color chip** — `ToolTray` shows a paint swatch up front
+   (tappable → Brush); tray row scrolls horizontally.
+5. **Eyes section** (Settings) — `EyeControls`: Small/Medium/Large
+   presets (`eyeScale` 0/1/2), arrow cross pad (`eyeOffsetX/Y` −6..6),
+   live bobbing sprite preview, Reset. New `PetDesign` fields serialize
+   (`eyesize=`/`eyeoffx=`/`eyeoffy=`, tolerant parse) and
+   `CurioPetSprite` scales each eye around its center then offsets —
+   live pet + previews + saved designs all match.
+
+### Validation
+Brace balance OK (3 files); `git diff --check` clean; `validate_petdesigner.py`
+fails on HEAD too (pre-existing, unrelated). No Gradle locally (env rule) — CI on push.
 
 ## Prior — release-note format + per-commit update rules (v64)
 

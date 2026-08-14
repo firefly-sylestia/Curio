@@ -86,7 +86,19 @@ data class PetDesign(
      * an animation to play (built-in or user-drawn via `animations`), and
      * optional speech lines. Old designs without this field have none.
      */
-    val customActions: List<CustomPetAction> = emptyList()
+    val customActions: List<CustomPetAction> = emptyList(),
+    /**
+     * v64 — procedural eye size preset: 0 = small, 1 = medium, 2 = large.
+     * Scales the mood's procedural eye art around each eye's center (the
+     * same 16-space the Eyes editor authors in). Applies everywhere the
+     * sprite renders (live pet + designer previews); old designs without
+     * this field stay medium.
+     */
+    val eyeScale: Int = 1,
+    /** v64 — procedural eye placement shift (16-space cells, X axis). */
+    val eyeOffsetX: Int = 0,
+    /** v64 — procedural eye placement shift (16-space cells, Y axis). */
+    val eyeOffsetY: Int = 0
 ) {
     /** The palette keys a design may recolor. */
     companion object {
@@ -537,6 +549,10 @@ data class PetDesign(
         DEFAULT_REACTIONS.keys.forEach { event ->
             appendLine("react=$event;${reactions[event]?.toConfig() ?: DEFAULT_REACTIONS[event]?.toConfig() ?: PetReaction().toConfig()}")
         }
+        // v64 — procedural eye size preset + placement (16-space cells).
+        appendLine("eyesize=${eyeScale.coerceIn(0, 2)}")
+        appendLine("eyeoffx=${eyeOffsetX.coerceIn(-6, 6)}")
+        appendLine("eyeoffy=${eyeOffsetY.coerceIn(-6, 6)}")
         // v8.53 — custom actions (Phase 7): the whole config is URL-encoded
         // after `customAction=` so names/lines can safely carry any
         // characters (old parsers skip the line as an unknown key).
@@ -618,6 +634,10 @@ data class PetDesign(
         val animFrames = mutableMapOf<String, MutableMap<Int, PetAnimationFrame>>()
         // v8.53 — custom actions (Phase 7), parsed in line order.
         val customActions = mutableListOf<CustomPetAction>()
+        // v64 — procedural eye size preset + placement.
+        var eyeScale = 1
+        var eyeOffsetX = 0
+        var eyeOffsetY = 0
         text.lineSequence().forEach { raw ->
             val line = raw.trim()
             if (line.isEmpty()) return@forEach
@@ -739,6 +759,15 @@ data class PetDesign(
                             }
                         }
                     }
+                }
+                line.startsWith("eyesize=") && eq == 7 -> {
+                    eyeScale = line.substring(8).trim().toIntOrNull()?.coerceIn(0, 2) ?: 1
+                }
+                line.startsWith("eyeoffx=") && eq == 7 -> {
+                    eyeOffsetX = line.substring(8).trim().toIntOrNull()?.coerceIn(-6, 6) ?: 0
+                }
+                line.startsWith("eyeoffy=") && eq == 7 -> {
+                    eyeOffsetY = line.substring(8).trim().toIntOrNull()?.coerceIn(-6, 6) ?: 0
                 }
                 line.startsWith("anim=") && eq == 4 -> {
                     currentAnimId = line.substring(5).trim().lowercase().takeIf { it.isNotBlank() }
@@ -892,7 +921,10 @@ data class PetDesign(
             procedural = procedural,
             animations = builtAnimations,
             petSpeciesId = petId ?: fallback.petSpeciesId,
-            customActions = customActions
+            customActions = customActions,
+            eyeScale = eyeScale,
+            eyeOffsetX = eyeOffsetX,
+            eyeOffsetY = eyeOffsetY
         )
     }
 

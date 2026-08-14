@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -107,6 +108,10 @@ import com.curio.app.data.PetRegistry
 import com.curio.app.data.ReactionAnim
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import com.curio.app.data.animationById
 import com.curio.app.data.definition
@@ -146,8 +151,10 @@ private val PALETTE_SLOTS = listOf(
     PaletteSlot('y', "Eyes")
 )
 
-/** The paint tools (v8.35): brush, fill bucket, eraser, eyedropper. */
-private enum class PaintTool { BRUSH, FILL, ERASER, EYEDROPPER }
+/** The paint tools (v8.35): brush, fill bucket, eraser, eyedropper.
+ *  v64 — CLEAR: fill a region with transparency (removes a solid
+ *  background), and BRUSH/ERASER respect the brush size. */
+private enum class PaintTool { BRUSH, FILL, ERASER, EYEDROPPER, CLEAR }
 
 // v8.45 — the old editor tabs are replaced by the universal-editor model in
 // PetDesignerModels.kt (PetDesignerPage + PetEditorTarget).
@@ -261,6 +268,12 @@ fun PetDesignerScreen(navController: NavController) {
     var pickerCategory by remember { mutableStateOf<String?>(null) }
     // v8.52 — the studio toolbar's import menu (PNG vs paste-text).
     var importMenuOpen by remember { mutableStateOf(false) }
+    // v64 — when true, the next picked PNG runs the AUTO-import pipeline
+    // (dominant-color mapping → body + curled + bob animation → save)
+    // instead of opening the guided color-review dialog.
+    var autoImportNext by remember { mutableStateOf(false) }
+    // v64 — the brush paints a brushSize×brushSize square; 1 = single cell.
+    var brushSize by rememberSaveable { mutableStateOf(1) }
     // v8.52 — the Settings → Accessories dialog.
     var accessoriesOpen by remember { mutableStateOf(false) }
     // v9.5 — evolution: the 3-choice path picker dialog (shown at level 15).
@@ -293,8 +306,7 @@ fun PetDesignerScreen(navController: NavController) {
     var toast by remember { mutableStateOf<String?>(null) }
     // Preview mood so the user can see the design in different poses.
     var previewMood by rememberSaveable { mutableStateOf(CurioPet.Mood.HAPPY) }
-    // v8.36 — body editor zoom.
-    var gridZoom by rememberSaveable { mutableStateOf(1f) }
+
     // Kept for dormant reaction/custom-action editor implementations.
     var reactEvent by rememberSaveable { mutableStateOf(PetReactionEvents.TOUCH) }
     var reactionLineDraft by remember(savedText) {
@@ -326,7 +338,36 @@ fun PetDesignerScreen(navController: NavController) {
         val pixels = IntArray(grid * grid)
         scaled.getPixels(pixels, 0, grid, 0, 0, grid, grid)
         importPngTarget = null
-        importReview = buildImportReview(pixels, grid, design, target)
+        if (autoImportNext) {
+            // v64 — AUTO-import: map the dominant colors into the four custom
+            // slots, snap the image to the extended palette, fill BOTH the
+            // body and curled grids, add a bobbing animation, and save so
+            // the work can never be lost.
+            autoImportNext = false
+            var review = buildImportReview(pixels, grid, design, 1)
+            review.unique.take(4).forEach { review = addCustomColor(it.rgb, review) }
+            var auto = applyImport(review, design)
+            auto = auto.copy(curledRows = PetDesign.bodyAsCurled(auto.bodyRows))
+            auto = auto.copy(
+                animations = auto.animations + (
+                    "happy" to PetAnimation(
+                        "happy", "Happy", "HAPPY",
+                        listOf(
+                            PetAnimationFrame(140, 0f, 1f, 0f),
+                            PetAnimationFrame(160, -6f, 1.05f, 0f),
+                            PetAnimationFrame(160, 0f, 0.96f, 0f),
+                            PetAnimationFrame(160, -3f, 1.03f, 0f)
+                        )
+                    )
+                    )
+            )
+            pushUndo()
+            design = auto
+            AppPreferences.setPetDesign(context, auto.toText())
+            toast = "Auto-imported — full pet built, bob added & saved"
+        } else {
+            importReview = buildImportReview(pixels, grid, design, target)
+        }
     }
 
     // v8.46 — snapshots the current design before the next mutation so one
@@ -367,13 +408,30 @@ fun PetDesignerScreen(navController: NavController) {
         val grid = targetGrid
         when (tool) {
             PaintTool.BRUSH -> {
-                design = design.withPixel(grid, row, col, paintKey)
+                // v64 — brush size paints a brushSize×brushSize square
+                // centered on the tapped cell (withPixel bounds-checks).
+                val half = (brushSize - 1) / 2
+                for (dr in -half..half) {
+                    for (dc in -half..half) {
+                        design = design.withPixel(grid, row + dr, col + dc, paintKey)
+                    }
+                }
             }
             PaintTool.FILL -> {
                 design = design.withFloodFill(grid, row, col, paintKey)
             }
+            PaintTool.CLEAR -> {
+                // v64 — fill with transparency: flood-fill the region with
+                // empty cells, removing a solid background color.
+                design = design.withFloodFill(grid, row, col, '.')
+            }
             PaintTool.ERASER -> {
-                design = design.withPixel(grid, row, col, '.')
+                val half = (brushSize - 1) / 2
+                for (dr in -half..half) {
+                    for (dc in -half..half) {
+                        design = design.withPixel(grid, row + dr, col + dc, '.')
+                    }
+                }
             }
             PaintTool.EYEDROPPER -> {
                 val rows = if (grid == "curled") design.curledRows else design.bodyRows
@@ -801,15 +859,19 @@ fun PetDesignerScreen(navController: NavController) {
                         design = design,
                         grid = editingGrid,
                         tool = activeTool,
-                        zoom = gridZoom,
+                        brushSize = brushSize,
                         onTool = { row, col, continuous ->
-                            // Fill + eyedropper act once per gesture; brush
-                            // and eraser paint continuously while dragging.
-                            // One undo snapshot per gesture, not per cell.
+                            // Fill + clear + eyedropper act once per gesture;
+                            // brush and eraser paint continuously while
+                            // dragging. One undo snapshot per gesture, not
+                            // per cell.
                             val mutating = activeTool == PaintTool.BRUSH ||
-                                activeTool == PaintTool.FILL || activeTool == PaintTool.ERASER
+                                activeTool == PaintTool.FILL || activeTool == PaintTool.ERASER ||
+                                activeTool == PaintTool.CLEAR
                             if (mutating && !continuous) pushUndo()
-                            if (activeTool == PaintTool.FILL || activeTool == PaintTool.EYEDROPPER) {
+                            if (activeTool == PaintTool.FILL || activeTool == PaintTool.CLEAR ||
+                                activeTool == PaintTool.EYEDROPPER
+                            ) {
                                 if (!continuous) applyTool(row, col, snapshot = false)
                             } else {
                                 applyTool(row, col, snapshot = false)
@@ -819,10 +881,16 @@ fun PetDesignerScreen(navController: NavController) {
                     Spacer(Modifier.height(12.dp))
                     ToolTray(
                         activeTool = activeTool,
-                        onSelect = { activeTool = it }
+                        onSelect = { activeTool = it },
+                        paintHex = design.colorOf(paintKey),
+                        onPaintTap = { activeTool = PaintTool.BRUSH }
                     )
                     Spacer(Modifier.height(8.dp))
-                    SliderRow(label = "Zoom", value = gridZoom, max = 3f) { gridZoom = it }
+                    BrushSizeRow(
+                        brushSize = brushSize,
+                        activeTool = activeTool,
+                        onBrushSize = { brushSize = it }
+                    )
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SmallAction("Copy body → asleep", enabled = editingGrid == "body") {
@@ -963,6 +1031,33 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
+            // ── Eyes (Settings page, v64) — size presets + placement ─
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Eyes",
+                    "Pick an eye size preset, then nudge the placement — the pet bobs live so you can see the look in motion"
+                ) {
+                    EyeControls(
+                        design = design,
+                        onEyeScale = { scale ->
+                            pushUndo()
+                            design = design.copy(eyeScale = scale)
+                        },
+                        onNudge = { dx, dy ->
+                            pushUndo()
+                            design = design.copy(
+                                eyeOffsetX = (design.eyeOffsetX + dx).coerceIn(-6, 6),
+                                eyeOffsetY = (design.eyeOffsetY + dy).coerceIn(-6, 6)
+                            )
+                        },
+                        onReset = {
+                            pushUndo()
+                            design = design.copy(eyeScale = 1, eyeOffsetX = 0, eyeOffsetY = 0)
+                        }
+                    )
+                }
+            }
+
             // ── Shapes & randomize (Settings page) ───────────────────
             item {
                 if (page == PetDesignerPage.SETTINGS) SectionCard(
@@ -1045,6 +1140,12 @@ fun PetDesignerScreen(navController: NavController) {
                     onPng = {
                         importMenuOpen = false
                         importPngTarget = if (editingGrid == "curled") 2 else 1
+                        pngPicker.launch("image/*")
+                    },
+                    onAutoPng = {
+                        importMenuOpen = false
+                        autoImportNext = true
+                        importPngTarget = 1
                         pngPicker.launch("image/*")
                     },
                     onText = {
@@ -1373,6 +1474,8 @@ private fun ToolbarIcon(
 @Composable
 private fun ImportMenuDialog(
     onPng: () -> Unit,
+    // v64 — auto-import: dominant colors → body + curled + bob animation → save.
+    onAutoPng: () -> Unit,
     onText: () -> Unit,
     onCopy: () -> Unit,
     onDismiss: () -> Unit
@@ -1392,6 +1495,7 @@ private fun ImportMenuDialog(
         )
         Spacer(Modifier.height(4.dp))
         ImportMenuOption(CurioIcons.Image, "Import PNG", "Sample image colors before applying") { onPng() }
+        ImportMenuOption(CurioIcons.AutoAwesome, "Auto-import image", "Map colors, build the full pet, add a bob animation and save — one tap") { onAutoPng() }
         ImportMenuOption(CurioIcons.FormatText, "Paste design text", "Copy from clipboard, edit by hand") { onText() }
         ImportMenuOption(CurioIcons.Share, "Copy design text", "Share the text format with a friend") { onCopy() }
         Spacer(Modifier.height(4.dp))
@@ -2833,7 +2937,8 @@ private fun AnimationTimelineEditor(
             // grid both stay on the frame you're editing.
             playing = false
             val tool = frameTool
-            val mutating = tool == PaintTool.BRUSH || tool == PaintTool.FILL || tool == PaintTool.ERASER
+            val mutating = tool == PaintTool.BRUSH || tool == PaintTool.FILL || tool == PaintTool.ERASER ||
+                tool == PaintTool.CLEAR
             if (mutating && !continuous) onPushUndo()
             if (tool == PaintTool.EYEDROPPER) {
                 if (!continuous) {
@@ -2846,9 +2951,9 @@ private fun AnimationTimelineEditor(
                     }
                 }
             } else if (tool != null) {
-                // FILL acts once per gesture (mirror the main editor) so
-                // a drag doesn't re-run the bucket at every cell.
-                if (tool == PaintTool.FILL) {
+                // FILL/CLEAR act once per gesture (mirror the main editor)
+                // so a drag doesn't re-run the bucket at every cell.
+                if (tool == PaintTool.FILL || tool == PaintTool.CLEAR) {
                     if (!continuous) paintFrame(selectedFrame, frameGrid, row, col)
                 } else {
                     paintFrame(selectedFrame, frameGrid, row, col)
@@ -2903,7 +3008,9 @@ private fun AnimationTimelineEditor(
         Spacer(Modifier.height(10.dp))
         ToolTray(
             activeTool = frameTool,
-            onSelect = { frameTool = it; playing = false }
+            onSelect = { frameTool = it; playing = false },
+            paintHex = design.colorOf(framePaintKey),
+            onPaintTap = { frameTool = PaintTool.BRUSH; playing = false }
         )
         Spacer(Modifier.height(8.dp))
         SliderRow(label = "Zoom", value = frameZoom, max = 3f) { frameZoom = it }
@@ -2954,14 +3061,38 @@ private fun applyToolToRows(
     tool: PaintTool?,
     key: Char,
     row: Int,
-    col: Int
+    col: Int,
+    brushSize: Int = 1
 ): List<String>? {
     if (row !in rows.indices) return null
     if (col !in rows[row].indices) return null
     return when (tool) {
-        PaintTool.BRUSH -> setCell(rows, row, col, key)
-        PaintTool.ERASER -> setCell(rows, row, col, '.')
+        PaintTool.BRUSH -> {
+            var out = rows
+            val half = (brushSize - 1) / 2
+            for (dr in -half..half) {
+                for (dc in -half..half) {
+                    val nr = row + dr
+                    val nc = col + dc
+                    if (nr in out.indices && nc in out[nr].indices) out = setCell(out, nr, nc, key)
+                }
+            }
+            out
+        }
+        PaintTool.ERASER -> {
+            var out = rows
+            val half = (brushSize - 1) / 2
+            for (dr in -half..half) {
+                for (dc in -half..half) {
+                    val nr = row + dr
+                    val nc = col + dc
+                    if (nr in out.indices && nc in out[nr].indices) out = setCell(out, nr, nc, '.')
+                }
+            }
+            out
+        }
         PaintTool.FILL -> floodFillRows(rows, row, col, key)
+        PaintTool.CLEAR -> floodFillRows(rows, row, col, '.')
         PaintTool.EYEDROPPER, null -> null
     }
 }
@@ -3372,6 +3503,62 @@ private fun TransportIconButton(
 
 
 
+/** v64 — brush-size picker: replaces the old Zoom slider in the pixel
+ *  editor. Sizes 1–4 paint that many cells across; the on-canvas ring in
+ *  [PixelGrid] shows the footprint live. */
+@Composable
+private fun BrushSizeRow(
+    brushSize: Int,
+    activeTool: PaintTool?,
+    onBrushSize: (Int) -> Unit
+) {
+    val painting = activeTool == PaintTool.BRUSH || activeTool == PaintTool.ERASER
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            "Brush",
+            style = MaterialTheme.typography.labelMedium,
+            color = if (painting) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(88.dp)
+        )
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                .padding(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            (1..4).forEach { size ->
+                val selected = brushSize == size
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    onClick = { onBrushSize(size) }
+                ) {
+                    Text(
+                        "$size",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+                        ),
+                        color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            "px",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 /** One HSL slider with its label. */
 @Composable
 private fun SliderRow(label: String, value: Float, max: Float, onChange: (Float) -> Unit) {
@@ -3529,20 +3716,155 @@ private fun GridTab(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** A paint-tool chip with icon + label. */
+/** v64 — the Eyes section: 3 size presets + a live bobbing preview +
+ *  arrow placement adjuster. Writes eyeScale / eyeOffsetX / eyeOffsetY
+ *  into the design; the sprite renders them everywhere. */
 @Composable
+private fun EyeControls(
+    design: PetDesign,
+    onEyeScale: (Int) -> Unit,
+    onNudge: (Int, Int) -> Unit,
+    onReset: () -> Unit
+) {
+    // Live preview: the pet bobs gently so the eye placement reads in
+    // motion (same feel as the auto-import bob animation).
+    val bob = rememberInfiniteTransition(label = "eyePreviewBob")
+    val bobY by bob.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "eyePreviewBobY"
+    )
+    val bobDp = ((bobY - 0.5f) * 10f).dp
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                .padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.Mood.HAPPY,
+                spriteSize = 84.dp,
+                design = design,
+                modifier = Modifier.graphicsLayer { translationY = bobDp.toPx() }
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Eye size",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                0 to "Small",
+                1 to "Medium",
+                2 to "Large"
+            ).forEach { (scale, label) ->
+                val selected = design.eyeScale == scale
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                    onClick = { onEyeScale(scale) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+                        ),
+                        color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 9.dp)
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+        Text(
+            "Placement",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        // ── Arrow cross pad (↑ / ← · values · → / ↓) ────────────────
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            EyePadButton(CurioIcons.KeyboardArrowUp, "Eyes up") { onNudge(0, -1) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                EyePadButton(CurioIcons.ChevronLeft, "Eyes left") { onNudge(-1, 0) }
+                Column(
+                    modifier = Modifier.widthIn(min = 84.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "X ${design.eyeOffsetX}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "Y ${design.eyeOffsetY}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                EyePadButton(CurioIcons.ChevronRight, "Eyes right") { onNudge(1, 0) }
+            }
+            EyePadButton(CurioIcons.KeyboardArrowDown, "Eyes down") { onNudge(0, 1) }
+        }
+        Spacer(Modifier.height(10.dp))
+        SmallAction("Reset eyes", enabled = design.eyeScale != 1 || design.eyeOffsetX != 0 || design.eyeOffsetY != 0) {
+            onReset()
+        }
+    }
+}
+
+/** v64 — one circular arrow button in the eye-placement pad. */
+@Composable
+private fun EyePadButton(icon: String, desc: String, onClick: () -> Unit) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+        onClick = onClick,
+        modifier = Modifier.size(44.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = icon,
+                contentDescription = desc,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                size = 22.dp
+            )
+        }
+    }
+}
+
 private fun ToolChip(tool: PaintTool, selected: Boolean, onClick: () -> Unit) {
     val icon = when (tool) {
         PaintTool.BRUSH -> CurioIcons.Brush
         PaintTool.FILL -> CurioIcons.Fill
         PaintTool.ERASER -> CurioIcons.Eraser
         PaintTool.EYEDROPPER -> CurioIcons.Colorize
+        PaintTool.CLEAR -> CurioIcons.Fill
     }
     val label = when (tool) {
         PaintTool.BRUSH -> "Brush"
         PaintTool.FILL -> "Fill"
         PaintTool.ERASER -> "Erase"
         PaintTool.EYEDROPPER -> "Pick"
+        PaintTool.CLEAR -> "Clear"
     }
     Surface(
         shape = RoundedCornerShape(14.dp),
@@ -3671,7 +3993,7 @@ private fun CanvasStatus(activeTool: PaintTool?) {
                 )
                 Text(
                     if (editing) "Tap the tool again to release it and scroll"
-                    else "Pick Brush, Fill, Erase, or Pick below — the canvas stays scroll-safe until then",
+                    else "Pick Brush, Fill, Clear, Erase, or Pick below — the canvas stays scroll-safe until then",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3681,20 +4003,58 @@ private fun CanvasStatus(activeTool: PaintTool?) {
 }
 
 /** v8.46 — the tool tray: picking a tool arms editing; the helper text
- *  explains the selected tool. */
+ *  explains the selected tool. v64 — a swatch chip up front always shows
+ *  which paint color the Brush/Fill/Clear tools will use. */
 @Composable
 private fun ToolTray(
     activeTool: PaintTool?,
-    onSelect: (PaintTool?) -> Unit
+    onSelect: (PaintTool?) -> Unit,
+    paintHex: String? = null,
+    onPaintTap: (() -> Unit)? = null
 ) {
     Column {
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(18.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .padding(4.dp),
+                .padding(4.dp)
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            if (paintHex != null) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color.Transparent,
+                    onClick = onPaintTap ?: {},
+                    modifier = Modifier
+                        .padding(end = 2.dp)
+                        .border(
+                            1.dp,
+                            if (activeTool == PaintTool.BRUSH) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                            RoundedCornerShape(14.dp)
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(hexColor(paintHex))
+                                .border(1.dp, Color.White.copy(alpha = 0.7f), CircleShape)
+                        )
+                        Text(
+                            "Paint",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
             PaintTool.entries.forEach { tool ->
                 ToolChip(
                     tool = tool,
@@ -3717,6 +4077,7 @@ private fun toolIcon(tool: PaintTool?): String = when (tool) {
     PaintTool.FILL -> CurioIcons.Fill
     PaintTool.ERASER -> CurioIcons.Eraser
     PaintTool.EYEDROPPER -> CurioIcons.Colorize
+    PaintTool.CLEAR -> CurioIcons.Fill
     null -> CurioIcons.Brush
 }
 
@@ -3725,6 +4086,7 @@ private fun toolLabel(tool: PaintTool?): String = when (tool) {
     PaintTool.FILL -> "Fill"
     PaintTool.ERASER -> "Erase"
     PaintTool.EYEDROPPER -> "Pick"
+    PaintTool.CLEAR -> "Clear"
     null -> "no tool"
 }
 
@@ -3733,6 +4095,7 @@ private fun toolHelper(tool: PaintTool?): String = when (tool) {
     PaintTool.FILL -> "Tap a region to fill it with the selected color."
     PaintTool.ERASER -> "Drag to erase pixels back to empty."
     PaintTool.EYEDROPPER -> "Tap a pixel to pick its color, then paint with it."
+    PaintTool.CLEAR -> "Tap a region to fill it with transparency — removes a solid background."
     null -> "Pick a tool to start editing — with no tool, the canvas scrolls safely."
 }
 
@@ -3870,6 +4233,7 @@ private fun PixelGrid(
     blueprintRows: List<String>? = null,
     showBlueprint: Boolean = false,
     zoom: Float = 1f,
+    brushSize: Int = 1,
     onTool: (Int, Int, Boolean) -> Unit
 ) {
     val gridSize = design.gridSize
@@ -3980,6 +4344,20 @@ private fun PixelGrid(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 gridContent()
             }
+        }
+        // v64 — on-canvas brush indicator: a ring at the grid's center shows
+        // the exact footprint of the current brush size (Brush/Erase only).
+        val ringTool = tool == PaintTool.BRUSH || tool == PaintTool.ERASER
+        if (ringTool && brushSize > 1) {
+            val ringDp = with(density) { (cellPx * brushSize).toDp() }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(ringDp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Black.copy(alpha = 0.18f))
+                    .border(1.5.dp, Color.White.copy(alpha = 0.9f), RoundedCornerShape(10.dp))
+            )
         }
     }
 }
