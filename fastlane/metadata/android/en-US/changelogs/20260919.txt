@@ -30,5 +30,6 @@ FIX
 - Pet no longer gets stuck chattering after leaving Spin.
 - Cabinet progress lines and the detail-view progress pill are clearly visible in light and pastel mode; the detail pill moved to the screen's bottom corner.
 - The reading/watching progress editor dialog is properly category-colored and readable in every theme, including the topic reveal page.
+- Pet Designer auto-import, brush size and eye tools compile and run correctly.
 - Category-colored text is readable in light and pastel mode.
 - Home button always works, even after opening Cabinet from Profile.

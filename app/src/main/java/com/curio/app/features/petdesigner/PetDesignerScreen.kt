@@ -322,6 +322,16 @@ fun PetDesignerScreen(navController: NavController) {
     // can sample colors from the image, name them by purpose, then apply.
     var importReview by remember { mutableStateOf<ImportReview?>(null) }
 
+    // v8.46 — snapshots the current design before the next mutation so one
+    // Undo restores exactly where the user was (gesture grouping: pass
+    // snapshot=false on drag-continuation cells, snapshot=true on tap/start).
+    // Declared ABOVE the picker: the auto-import path (v64) calls it inside
+    // the picker callback, and local functions can't be forward-referenced.
+    fun pushUndo() {
+        undoStack = (undoStack + design).takeLast(50)
+        redoStack = emptyList()
+    }
+
     // v8.35/v8.37 — PNG import: pick an image, resample to the canvas, then
     // open the review step instead of snapping immediately.
     val pngPicker = rememberLauncherForActivityResult(
@@ -368,14 +378,6 @@ fun PetDesignerScreen(navController: NavController) {
         } else {
             importReview = buildImportReview(pixels, grid, design, target)
         }
-    }
-
-    // v8.46 — snapshots the current design before the next mutation so one
-    // Undo restores exactly where the user was (gesture grouping: pass
-    // snapshot=false on drag-continuation cells, snapshot=true on tap/start).
-    fun pushUndo() {
-        undoStack = (undoStack + design).takeLast(50)
-        redoStack = emptyList()
     }
 
     fun undo() {
@@ -3851,6 +3853,8 @@ private fun EyePadButton(icon: String, desc: String, onClick: () -> Unit) {
     }
 }
 
+/** A paint-tool chip with icon + label. */
+@Composable
 private fun ToolChip(tool: PaintTool, selected: Boolean, onClick: () -> Unit) {
     val icon = when (tool) {
         PaintTool.BRUSH -> CurioIcons.Brush
