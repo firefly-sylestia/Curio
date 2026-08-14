@@ -1,31 +1,34 @@
 # Prompt.md — Request log
 
-## Current request — update toast: tappable → Support + once per version (v63b)
+## Current request — release-note format + per-commit update rules (v64)
 
 ### What was asked
-"Make the update toast tappable to open Support & diagnostics" + "and
-show it only once not everytime the app opens."
+"Similar to Prompt.md make the release note update by yours add
+instructions... similar to app notes use less words and simpler arrange
+them like fix add remove, and write with all of the apps feature in that
+format, just add and fix as it will be first release. And you've to update
+them each commit and remove something if they got removed without ever
+getting pushed then no need to add removed note."
 
 ### What was done
-1. **Tappable toast** — `CurioToast.show(text, glyph, actionLabel,
-   actionId)`; `CurioToastMessage` carries `actionLabel`/`actionId`;
-   `CurioInAppToastHost` takes `onAction: (actionId) -> Unit` and makes
-   the pill `Modifier.clickable` when an action exists, rendering
-   "Open" (primary, ExtraBold) after a divider; tapping dismisses +
-   forwards. NavHost maps `"support"` → `navController.navigate(
-   CurioRoutes.SUPPORT)`.
-2. **Once per version** — the `lastNotifiedUpdateVersion` gate moved
-   BEFORE both announcements in `notifyIfUpdateAvailable`: on the first
-   launch that finds a newer release it records the tag then shows the
-   toast + posts the notification; later launches return early. (Old
-   behavior: the toast fired on EVERY launch; only the notification was
-   deduped.)
+1. **Changelog rewritten leaner** — `fastlane/metadata/.../changelogs/
+   20260919.txt` now uses short `ADD` / `FIX` bullets covering every
+   shipped feature (first release → no REMOVE section). Voice = the
+   app/AGENTS.md version bullets, not store copywriting.
+2. **Per-commit rule added to the DOX chain**:
+   - Root `AGENTS.md` → "Updating What's New" now mandates updating the
+     release notes on EVERY commit that ships a user-visible change, and
+     documents the ADD/FIX/REMOVE bullet format + the "REMOVE only for
+     shipped features" rule (never-shipped removals get no note).
+   - `fastlane/AGENTS.md` → new "Changelog Format Contract" (concise
+     one-line bullets, edit the current versionCode file in place, new
+     file only on versionCode bump).
+3. **REMOVE discipline** — a feature removed before it ever reached a
+   pushed release gets NO note; only shipped features get a REMOVE line.
 
 ### Validation
-Brace/paren balance: CurioInAppToast 48/48, CurioNavHost 450/450,
-UpdateChecker 173/175 (keeps its pre-existing +2 close comment-parenthesis
-imbalance, delta balanced). `git diff --check` clean. No Gradle locally
-(env rule) — CI on push is the gate.
+`git diff --check` clean. Text/docs only — no Gradle needed (env rule).
+CI on push is the gate.
 
 ## Prior — update notice → in-app toast (v63)
 

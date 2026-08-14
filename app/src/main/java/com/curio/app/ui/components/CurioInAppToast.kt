@@ -32,7 +32,7 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.delay
 
 /** One in-app toast message currently showing. */
-private data class CurioToastMessage(
+internal data class CurioToastMessage(
     val id: Long,
     val text: String,
     val glyph: String? = null,
@@ -56,7 +56,7 @@ private data class CurioToastMessage(
 object CurioToast {
 
     /** The message currently shown; null = nothing. */
-    var current by mutableStateOf<CurioToastMessage?>(null)
+    internal var current by mutableStateOf<CurioToastMessage?>(null)
         private set
     private var nextId = 0L
 

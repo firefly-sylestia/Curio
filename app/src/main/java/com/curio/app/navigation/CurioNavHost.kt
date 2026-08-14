@@ -996,11 +996,16 @@ fun CurioNavHost(
                 }
             }
         )
-        // v63 — the app's IN-APP toast (the update notice, etc.) floats above
-        // every screen; the bottom clearance clears the bottom nav bar so the
-        // pill reads over content, never over the bar.
-        // v63b — toasts with an action are tappable: the update toast's
-        // "support" action opens Support & diagnostics.
+    }
+
+    // v63 — the app's IN-APP toast (the update notice, etc.) floats above
+    // every screen; the bottom clearance clears the bottom nav bar so the
+    // pill reads over content, never over the bar. It lives in its own
+    // full-size Box at the NavHost root (after the Scaffold), so `align`
+    // resolves to a BoxScope regardless of the enclosing screen state.
+    // v63b — toasts with an action are tappable: the update toast's
+    // "support" action opens Support & diagnostics.
+    Box(modifier = Modifier.fillMaxSize()) {
         CurioInAppToastHost(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

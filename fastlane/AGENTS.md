@@ -26,15 +26,28 @@ App store metadata and release notes for distributing Curio on Android app store
 ### Store Metadata
 - `full_description.txt` — Comprehensive app description (up to 4000 characters)
 - `short_description.txt` — Brief tagline (up to 80 characters)
-- `changelogs/{versionCode}.txt` — What's new in each release (up to 500 characters)
+- `changelogs/{versionCode}.txt` — What's new in each release (concise `ADD` / `FIX` / `REMOVE` bullets — see the Changelog Format Contract below; may exceed the store's 500-char display truncation by design)
 
 ### Naming
 - Changelog files are named by Android `versionCode` (integer), not version name
 - Locale codes follow Android convention (e.g., `en-US`, `de`, `fr`)
 
+### Changelog Format Contract
+
+The release notes (`changelogs/{versionCode}.txt`) are updated on **EVERY commit** that ships a user-visible change — same discipline as Prompt.md (see root AGENTS.md → "Updating What's New"). Keep them short and scannable.
+
+**Structure:** bullets grouped under `ADD` / `FIX` / `REMOVE` headers.
+
+- **One short line per change**, feature first, no prose: e.g. `- Cabinet: search, sort and category filter chips.`
+- Use simple, direct words — the app/AGENTS.md version-bullet voice, not store copywriting.
+- **REMOVE only for shipped features.** If a feature is removed before it ever reached a pushed release, add NO REMOVE note — users never saw it.
+- When a change lands, edit the CURRENT `{versionCode}.txt` in place (add a bullet, tighten an existing one, drop a stale one). Only create a new file when the versionCode bumps.
+- First-release changelogs cover all shipped features under `ADD` + `FIX` only.
+
 ## Work Guidance
 
 - When adding a new release, create a changelog file with the correct version code
+- Update the current release's changelog on every commit that changes user-visible behavior (per the format contract above)
 - Update `full_description.txt` only when product positioning or major features change
 - Keep `short_description.txt` concise and actionable
 - For new locales, create a new locale directory (e.g., `de/`) and add translated metadata

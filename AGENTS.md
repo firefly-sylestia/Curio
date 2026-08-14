@@ -207,16 +207,23 @@ applies to settings-gated experiments.
    "SMALL TEXT-ONLY CHANGES — DO NOT PUSH" above)
 9. **Update Prompt.md** — with completion summary and any follow-up notes
 
-## Updating "What's New" (In-App Changelog)
+## Updating "What's New" (Release Notes)
 
-Whenever you make significant changes, you MUST update the "What's New" section inside the app:
+**The release notes are updated on EVERY commit that ships a user-visible change** — not just significant ones. Same discipline as Prompt.md: the log moves with the code. Keep the notes short and scannable; never write prose paragraphs.
 
 ### What to Update
 
 1. **In-App Changelog** — only when the active `app/` module has a changelog screen. The Curio app has no changelog screen yet. When a changelog screen exists, add a new entry at the top of its list following the existing entry structure and style.
 
 2. **Fastlane Store Changelog** — `fastlane/metadata/android/en-US/changelogs/{versionCode}.txt`
-   - See `fastlane/AGENTS.md` for store conventions (≤500 chars, versionCode naming)
+   - See `fastlane/AGENTS.md` for the format contract (concise `ADD` / `FIX` / `REMOVE` bullets, per-commit updates, removal rules).
+   - Edit the CURRENT `{versionCode}.txt` in place as changes land; only create a new file when the versionCode bumps.
+
+### Release-Note Format
+
+- Group bullets under `ADD` / `FIX` / `REMOVE` headers.
+- One short line per change — feature name first, no fluff: "Cabinet: search, sort and category filter chips."
+- **REMOVE is for shipped features only.** If a feature is removed before it ever reached a pushed release, do NOT add a REMOVE note — it never existed for users.
 
 ### What NOT to Update
 
