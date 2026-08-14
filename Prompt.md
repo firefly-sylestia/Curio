@@ -1,6 +1,46 @@
 # Prompt.md — Request log
 
-## Current request — Topic Reveal: Like/dislike into the strip + one editorial font (v50)
+## Current request — reveal light-mode pill tints + bigger corner chips + lag log (v51)
+
+### What was asked
+1. "In light mode I still feel the author / Watch-for / tag chips are
+   whitish too much — give me a solution."
+2. Make the corner category chip + pin + dismiss a little larger.
+3. A log dump: constant `Background concurrent mark compact GC` lines
+   (every ~1s, heap 110-160MB), `Skipped 3320 frames` + `Skipped 849
+   frames` (cold start), `Suspending all threads took ~11ms`, app
+   eventually killed + restarted — "the app was lagging too much, and
+   constantly that runs on background".
+
+### What was done
+1. **Hero pill glass deepens** (`HeroCard.pillGlass`): pastel light
+   0.80 → 0.60 toward white, non-pastel light 0.50 → 0.42 — the lane
+   accent visibly tints the action / byline / subtype pills.
+2. **Strip tag chips carry color:** opaque tinted fill
+   `lerp(surface, themedAccent(), 0.22 → 0.32)`.
+3. **Corner controls larger:** category chip padding 12/7 → 14/9 + 18dp
+   glyph; pin/close circles 22dp/8dp pad → 24dp/9dp pad (42dp circle).
+4. **Lag log — diagnosis + retained-footprint fix:** the log shows a
+   near-full heap (66-160MB, mid-range A356E) with a full-heap
+   (mark-compact) GC roughly every second and main-thread stalls — the
+   app was allocating hard against a heap that stayed near-full.
+   `TopicJsonLoader.clearCache()` (fired on `TRIM_MEMORY_RUNNING_LOW`)
+   only dropped the per-category pools, leaving the 16k-topic prebuilt
+   index + lowercased key strings (~30-60MB) resident — so a trim never
+   actually relieved pressure. Now `clearCache()` also nulls
+   `indexCache` + resets `canonicalTopicCount`; all three rebuild
+   lazily on next use (index is one file, cached after). This is the
+   retained-footprint lever; the streaming/parallel-load work from v49
+   already addressed transient parse churn. (The per-frame pet idle
+   recomposition remains a candidate on-screen jank source but was NOT
+   touched — too risky to refactor the sprite blind.)
+
+### Validation
+Brace/paren balance matches each file's baseline (+3/+3 on the reveal's
+pre-existing +1 comment imbalance; loader clean); `git diff --check`
+clean. Changelog + `app/AGENTS.md` v51 bullet updated.
+
+## Prior — Topic Reveal: Like/dislike into the strip + one editorial font (v50)
 
 ### What was asked
 "In topic reveal screen: can we place the like and dislike button at the

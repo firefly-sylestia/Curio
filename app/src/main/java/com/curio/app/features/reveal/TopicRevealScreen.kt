@@ -608,15 +608,17 @@ fun TopicRevealScreen(
                 modifier = Modifier.weight(1f, fill = false)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                    // v51 — a touch larger so the corner chips read as real
+                    // controls next to the pin/close circles.
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     CurioIcon(
                         name = cat.iconGlyph,
                         contentDescription = null,
                         tint = cat.categoryInk(),
-                        size = 16.dp
+                        size = 18.dp
                     )
                     Text(
                         text = cat.displayName.uppercase(),
@@ -651,8 +653,10 @@ fun TopicRevealScreen(
                     name = if (isPinned) CurioIcons.Bookmark else CurioIcons.BookmarkBorder,
                     contentDescription = if (isPinned) "Unpin this topic" else "Pin this topic for later",
                     tint = if (isPinned) cat.onAccent() else MaterialTheme.colorScheme.onSurface,
-                    size = 22.dp,
-                    modifier = Modifier.padding(8.dp)
+                    // v51 — slightly larger corner controls (24dp glyph on a
+                    // 42dp circle).
+                    size = 24.dp,
+                    modifier = Modifier.padding(9.dp)
                 )
             }
 
@@ -675,8 +679,10 @@ fun TopicRevealScreen(
                     name = CurioIcons.Close,
                     contentDescription = "Close and return to the deck",
                     tint = MaterialTheme.colorScheme.onSurface,
-                    size = 22.dp,
-                    modifier = Modifier.padding(8.dp)
+                    // v51 — slightly larger corner controls (24dp glyph on a
+                    // 42dp circle).
+                    size = 24.dp,
+                    modifier = Modifier.padding(9.dp)
                 )
             }
         }
@@ -824,7 +830,10 @@ fun TopicRevealScreen(
                         shape = RoundedCornerShape(50),
                         // v27n — opaque tinted fill (was 22% alpha, which let
                         // the elevation shadow bleed through).
-                        color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.22f),
+                        // v51 — the tinted fill carries more of the lane's
+                        // accent (22 → 32%) so the chips stop reading whitish
+                        // against the pastel page wash in light mode.
+                        color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.32f),
                         shadowElevation = 2.dp
                     ) {
                         Text(
@@ -1593,19 +1602,18 @@ private fun HeroCard(
     // v37 — the hero pill glass (action badge, byline, subtype): a frosted
     // glass off the hero accent instead of the old washed `ink.copy(alpha)`
     // tint, so the pills stay crisp on any hero gradient.
-    // v43 — retuned so the pills never read as stark white blobs: PASTEL
-    // white blobs: PASTEL light keeps a strong accent-kiss (only 80% toward
-    // white instead of the old 92% — the lane's tint shows through the
-    // frost), the deep non-pastel banner gets a 50% frosted accent glass,
-    // and dark keeps a bright lift off the deep hero (55% toward the page-
-    // ink lift). All three are OPAQUE fills that carry the accent hue —
-    // theme aware, never transparent, never flat white.
+    // v43 — retuned so the pills never read as stark white blobs (the old
+    // 92% white lift); all three states are OPAQUE fills that carry the
+    // accent hue — theme aware, never transparent, never flat white.
+    // v51 — light mode still read whitish: pastel light now leans only 60%
+    // toward white (a real accent-kiss — the lane's tint clearly shows
+    // through the frost) and non-pastel light deepens to 42%.
     val pillGlass = if (dark) {
         lerp(accent, curioPillLift(), 0.55f)
     } else if (AppPreferences.pastelColorsState) {
-        lerp(accent, Color.White, 0.80f)
+        lerp(accent, Color.White, 0.60f)
     } else {
-        lerp(accent, Color.White, 0.50f)
+        lerp(accent, Color.White, 0.42f)
     }
 
     // ── Gradient brush — match the Spin ticket's formula so the card

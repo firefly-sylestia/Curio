@@ -324,6 +324,16 @@ object TopicJsonLoader {
             cacheGeneration += 1L
             cache.clear()
         }
+        // v51 — the memory-pressure shed is now COMPLETE: the prebuilt index
+        // (16k TopicIndexEntry objects + the lowercased key copies of every
+        // name/subtype/byline/teaser string) and the canonical count are
+        // dropped too. Previously only the per-category pools were released,
+        // so ~30-60MB stayed resident after a TRIM_MEMORY callback — the
+        // heap sat near-full and background GCs fired every second on
+        // mid-range devices (the reported "constantly GC-ing" lag). All
+        // three are rebuilt lazily on next use.
+        indexCache = null
+        canonicalTopicCount = -1
     }
 
     // ── Internal ───────────────────────────────────────────────────────────

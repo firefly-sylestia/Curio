@@ -351,6 +351,24 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v51 — reveal pill tints + bigger corner chips + complete memory shed.**
+  (1) **Hero pills less whitish in light mode** (`HeroCard.pillGlass`):
+  pastel light 80% → 60% toward white, non-pastel light 50% → 42% — the
+  lane's accent clearly shows through the frost now. (2) **Strip tag chips
+  carry color:** the opaque tinted fill blends 22% → 32% of the lane
+  accent (`lerp(surface, themedAccent(), …)`) so they stop reading whitish
+  on the pastel page wash. (3) **Corner controls larger:** the top-bar
+  category chip padding 12/7 → 14/9 with an 18dp glyph, and the pin/close
+  circles grow to a 24dp glyph on a 42dp circle. (4) **`TopicJsonLoader`
+  complete memory shed:** `clearCache()` (fired on
+  `TRIM_MEMORY_RUNNING_LOW`) now also drops `indexCache` + the canonical
+  count — previously ~30-60MB (16k TopicIndexEntry + lowercased key
+  copies) stayed resident after a trim, keeping the heap near-full so
+  background GCs fired every second on mid-range devices (the user's
+  "Background concurrent mark compact GC" log). All rebuilt lazily.
+  Diagnosis of the pasted log (sustained GC churn + `Skipped 3320
+  frames`): heap 110-160MB near-full + main-thread stalls from the GC
+  storm; the shed is the retained-footprint lever.
 - **v50 — Topic Reveal: Like/dislike into the strip + one editorial font.**
   (1) **Sentiment pair moved into the bottom band** (TopicRevealScreen):
   the section-6.5 row that scrolled in the body below the ActionPromptCard
