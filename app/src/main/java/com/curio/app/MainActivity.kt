@@ -18,6 +18,7 @@ import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.TopicProgressStore
 import com.curio.app.data.UpdateChecker
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen

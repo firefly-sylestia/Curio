@@ -94,7 +94,6 @@ import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.BadgeTier
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeMedal
-import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.MergedChainBadge
 import com.curio.app.ui.components.badgeTier
 import com.curio.app.ui.components.mergedChainBadges
@@ -654,18 +653,10 @@ private fun PathsCard(
             }
         }
         Spacer(Modifier.height(6.dp))
-        // v42 — the MERGED pinned strip: earned chain medals first by rarity
-        // (a chain's bronze→silver upgrade shows as ONE medal at its best
-        // tier), then locked silhouettes. Tapping a medal opens its detail.
-        CurioBadgeStrip(
-            earnedLimit = 5,
-            lockedPreview = 2,
-            medalSize = 46.dp,
-            onViewAll = { showBadges = true },
-            onBadgeClick = { badgeDetail = it }
-        )
         // Badge shelf — one tappable row that opens the merged shelf dialog.
-        Spacer(Modifier.height(4.dp))
+        // (v58 — the pinned medal strip that used to sit ABOVE this row is
+        // gone from the quest view: only this shelf row + the path-card
+        // medals remain; the full shelf still opens from here.)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
