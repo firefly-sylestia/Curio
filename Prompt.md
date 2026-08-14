@@ -1,6 +1,23 @@
 # Prompt.md — Request log
 
-## Current request — shared hero follows the Spin lane + settings declutter (v30)
+## Current request — Category pill chevron (v30 follow-up)
+
+### What was asked
+"Give the Category pill a chevron that flips up/down when the chips are
+open."
+
+### What was done
+`CabinetHeroActionPill` + `SettingsHeroActionPill` gained optional
+`trailingGlyph` / `trailingContentDescription` (a small 18dp trailing icon
+after the label, ink at 0.85). The Category pill in both the Cabinet and
+Topic Browser heroes passes `KeyboardArrowDown` when closed and
+`KeyboardArrowUp` when open, with matching show/hide content
+-descriptions — the chips-open state reads as an accordion.
+
+### Validation
+Brace check OK (3 files), `git diff --check` clean; CI on push is the gate.
+
+## Prior — shared hero follows the Spin lane + settings declutter (v30)
 
 ### What was asked
 1. Remove the "Glow shadows" option from Appearance ("it's not good").

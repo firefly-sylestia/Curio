@@ -672,6 +672,12 @@ fun TopicDatabaseScreen(navController: NavController) {
                     glyph = CurioIcons.Tune,
                     label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
                     ink = ink,
+                    // v30 — chevron flips with the chips: ▾ when closed, ▴
+                    // when open.
+                    trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
+                        else CurioIcons.KeyboardArrowDown,
+                    trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
+                        else "Show category chips",
                     emphasized = categoryFilterOpen
                 )
             },

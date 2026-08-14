@@ -420,6 +420,9 @@ fun SettingsHeroActionPill(
     label: String? = null,
     glyph: String? = null,
     contentDescription: String? = null,
+    // v30 — optional trailing glyph (the Category pill's up/down chevron).
+    trailingGlyph: String? = null,
+    trailingContentDescription: String? = null,
     emphasized: Boolean = false,
     modifier: Modifier = Modifier,
     // v27n — the banner fill behind the pill (the opaque-fill conversion
@@ -475,6 +478,14 @@ fun SettingsHeroActionPill(
                     label,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = ink
+                )
+            }
+            if (trailingGlyph != null) {
+                CurioIcon(
+                    name = trailingGlyph,
+                    contentDescription = trailingContentDescription,
+                    tint = ink.copy(alpha = 0.85f),
+                    size = 18.dp
                 )
             }
         }

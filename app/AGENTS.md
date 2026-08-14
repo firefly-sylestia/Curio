@@ -278,7 +278,9 @@ app/src/main/java/com/curio/app/
   a `heightIn(min = 42.dp)` so they match the 22dp-glyph pills — the sort
   pill no longer reads thick next to Select/Search. (2) A new **Category**
   pill rides a SECOND row directly under the hero's top pill row (Tune
-  glyph + active-filter label, `emphasized` while open): tapping it
+  glyph + active-filter label + an up/down chevron that flips with the
+  chips — ▾ closed / ▴ open, via the pills' optional `trailingGlyph`,
+  `emphasized` while open): tapping it
   reveals the sticky category chip bar — the same chips that appear while
   searching — in BOTH the Cabinet and the Topic Database. The heroes grow
   +52dp to fit it (`CabinetHeroBannerHeight` 180→232, compact 140→192;
