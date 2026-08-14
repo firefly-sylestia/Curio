@@ -107,6 +107,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
 import com.curio.app.data.TourController
@@ -118,7 +119,6 @@ import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
-import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.SmartDensityMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicJsonLoader
@@ -537,11 +537,17 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         }
         r
     }
-    // v7.80 — done topics (explored or marked "Already …") never appear in
-    // the deck — not even as fan/peek cards. Falls back to the full
-    // filtered pool when everything is done so the fan never empties.
-    val deckPool = remember(filteredPool, ExploreSessionStore.doneTopicsState) {
-        val open = filteredPool.filterNot { ExploreSessionStore.isDone(it.categoryId, it.name) }
+    // v59 — a topic leaves the deck ONLY when it has a SAVED entry in the
+    // Cabinet ("it only goes away when it gets logged"). Exploring without
+    // saving no longer removes it, so an unexplored or explored-but-unsaved
+    // topic stays dealable — even as fan/peek cards. Falls back to the full
+    // filtered pool when everything is saved so the fan never empties.
+    val savedEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+        runCatching { CurioRepositoryHolder.repo.observeAll().collect { value = it } }
+    }
+    val savedTopicIds = remember(savedEntries) { savedEntries.map { it.topic.id }.toSet() }
+    val deckPool = remember(filteredPool, savedTopicIds) {
+        val open = filteredPool.filterNot { it.id in savedTopicIds }
         if (open.isNotEmpty()) open else filteredPool
     }
     // Smart filter groups — buckets raw tags into Type · Genre · Era ·
@@ -806,23 +812,15 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         CurioPet.noteSpinning(false)
 
         // Pick a single topic — tier-biased, sentiment-weighted (liked /
-        // disliked topics + category affinity), and never an already-
-        // explored or done topic while alternatives remain. "Done" topics
-        // (explored, or marked "Already watched / listened / read / explored"
-        // on the reveal screen) are excluded exactly like captured ones —
-        // v7.80. pickFrom still falls back to the full pool when everything
-        // is exhausted, so the shuffle never runs dry.
-        val exploredIds = runCatching {
-            CurioRepositoryHolder.repo.getAll().map { it.topic.id }.toSet()
-        }.getOrDefault(emptySet())
-        val doneIds = filteredPool
-            .filter { ExploreSessionStore.isDone(it.categoryId, it.name) }
-            .map { it.id }
-            .toSet()
+        // disliked topics + category affinity), and never a topic that is
+        // already SAVED in the Cabinet while alternatives remain (v59: only
+        // a logged entry removes a topic — exploring without saving leaves
+        // it dealable). pickFrom still falls back to the full pool when
+        // everything is exhausted, so the shuffle never runs dry.
         val primary = pickFrom(
             filteredPool,
             recentTopicIds,
-            exploredIds + doneIds,
+            savedTopicIds,
             AppPreferences.topicSentimentsState,
             AppPreferences.categoryAffinityMap()
         )
@@ -4499,7 +4497,8 @@ private fun buildDeckHand(pool: List<CurioTopic>, center: CurioTopic?): List<Cur
 /**
  * Weighted picker — tier bias (tier 1 human-curated marquee first), then
  * tier 2, tier 3, while excluding topics in [recentIds] and any topic the
- * user already explored (captured). Sentiment further skews the weights:
+ * user already SAVED (logged in the Cabinet). Sentiment further skews the
+ * weights:
  * liked topics get 2x, disliked drop to 0.25x, and each topic's CATEGORY
  * affinity (net likes − dislikes in that category) boosts or dampens the
  * whole genre — never fully blocked. Falls back gracefully when the pool
@@ -4525,16 +4524,17 @@ private fun buildDeckHand(pool: List<CurioTopic>, center: CurioTopic?): List<Cur
 private fun pickFrom(
     pool: List<CurioTopic>,
     recentIds: Set<String>,
-    exploredIds: Set<String>,
+    savedIds: Set<String>,
     sentiments: Map<String, String>,
     categoryAffinity: Map<String, Int>
 ): CurioTopic? {
     if (pool.isEmpty()) return null
     var candidates = pool.filterNot { it.id in recentIds }
-    // Explored topics (already captured) are excluded entirely — falling
-    // back to the full candidate pool only when everything is explored so
-    // the shuffle never runs dry.
-    val unvisited = candidates.filterNot { it.id in exploredIds }
+    // SAVED entries (logged in the Cabinet) are excluded entirely —
+    // falling back to the full candidate pool only when everything is
+    // saved so the shuffle never runs dry. Exploring without saving no
+    // longer removes a topic (v59).
+    val unvisited = candidates.filterNot { it.id in savedIds }
     if (unvisited.isNotEmpty()) candidates = unvisited
     if (candidates.isEmpty()) return null
     if (candidates.size == 1) return candidates[0]

@@ -1,6 +1,59 @@
 # Prompt.md — Request log
 
-## Current request — save page: chips + take tabs pin under the topic strip; mood pill in the strip; attach-tile ink (v58)
+## Current request — deck excludes only saved entries + uniform Cabinet card height + shuffle explanation (v59)
+
+### What was asked
+1. Cabinet topic cards get different heights with title length — make one
+   fixed height without cutting the title.
+2. Home tap-and-hold on Recents/Saved rows — user retracted: "nevermind
+   ignore that".
+3. "Make it so if a topic is in recents but unexplored and there is no
+   saved for it, it will appear in the deck — it only goes away when it
+   gets logged."
+4. "Tell me actually how the randomiser shuffle works — does everything
+   have equal chances or is it fixed? Give me suggestions."
+
+### User decisions (ask_user)
+- Tap-and-hold on Home rows: IGNORED (user retracted).
+- Deck rule: **"Only saved entries leave"** — a topic stays dealable
+  until it has a SAVED entry in the Cabinet; exploring without saving no
+  longer removes it.
+
+### What was done
+1. **Deck exclusion → saved-only** (SpinScreen.kt): the old v7.80 done-set
+   exclusion (explored or "Already …" topics left the deck forever) is
+   gone. `deckPool` (fan/peek) and the landed `pickFrom` call now exclude
+   by `savedTopicIds` only — a reactive set from a new
+   `produceState<List<CurioEntry>>` over `repo.observeAll()` (the Cabinet
+   flow; replaces the per-spin `repo.getAll()` + `doneIds` block).
+   `pickFrom`'s `exploredIds` param renamed `savedIds`, docs updated;
+   `ExploreSessionStore` import removed from Spin (no longer referenced).
+   The done set + `recordExplored`'s `addDone` stay intact — they still
+   drive the reveal's "Already …" marked state and Topic Database done
+   markers, just not deck exclusion.
+2. **Uniform Cabinet card height** (CurioTopicCard.kt): title reserves
+   exactly two lines (`minLines = 2` + `maxLines = 2`, ellipsis) so every
+   grid card is identical height; short titles leave a blank second line,
+   long ones ellipsize instead of cutting or stretching the card.
+3. **Shuffle explanation** — delivered in the reply (see below).
+
+### How the shuffle actually works (answered in-reply)
+- NOT equal chances. Pool = filtered category pool minus (a) the last 20
+  spun topics (anti-repeat), (b) saved Cabinet entries. Then a WEIGHTED
+  draw: tier 1 marquee = 100, tier 2 = 60, tier 3 = 20 (≈5:3:1); liked
+  topics 2×, disliked 0.25×; category affinity up to 2.5× / down to
+  0.25×; Films get a recency boost (2020s 1.6× → pre-1980 0.55×). The
+  6-card fan is a plain `shuffled()`. Suggestions offered: a "Pure
+  random" Experiments toggle, gentler tier weights, adjustable anti-repeat
+  window, and a "why this topic" hint — pending user pick.
+
+### Validation
+Brace/paren balance on SpinScreen + CurioTopicCard (OK); no
+`ExploreSessionStore` refs left in Spin; `minLines` proven available
+(already used in FieldMindObservationScreen); `git diff --check` clean.
+No Gradle locally (env rule) — CI on push is the gate.
+
+## Prior — save page: chips + take tabs pin under the topic strip; mood pill in the strip; attach-tile ink (v58)
 
 ### What was asked
 "In journal, field notes and review the attach option (+ icon and text)

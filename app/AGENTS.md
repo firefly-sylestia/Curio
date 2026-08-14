@@ -351,6 +351,24 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v59 — deck excludes only SAVED entries; uniform Cabinet card height.**
+  (1) **"Only saved entries leave"** — per user decision, a topic stays in
+  the shuffle deck until it has a SAVED entry in the Cabinet. The old
+  v7.80 done-set exclusion (explored or "Already …" marked topics left
+  the deck forever) is gone from Spin: `deckPool` (fan/peek cards) and
+  the landed `pickFrom` call now exclude by `savedTopicIds` only — a
+  reactive set derived from a new `produceState` over
+  `CurioRepositoryHolder.repo.observeAll()` (the Cabinet's flow; the
+  old per-spin `repo.getAll()` + `doneIds` computation was dropped).
+  `pickFrom`'s `exploredIds` param renamed `savedIds` + comments updated.
+  `ExploreSessionStore` is no longer referenced from Spin (import
+  removed); `recordExplored`'s `addDone` + the done set stay intact —
+  they still drive the reveal's "Already …" state and the Topic
+  Database's done markers, just not deck exclusion.
+  (2) **Uniform Cabinet card height** — `CurioEntryCard`'s title now
+  reserves exactly two lines (`minLines = 2` + existing `maxLines = 2`):
+  short titles leave a blank second line, long ones ellipsize (never
+  cut), so every grid card is the same height regardless of title length.
 - **v58 — save page: chips + take tabs pin under the topic strip; mood pill in the strip; attach-tile ink.**
   (1) **Header hoisted to the topic.** The multi-take section state
   (`sections`/`activeIndex`/`nextId`/`pendingRemoveIndex`/`pendingFormatSwitch`

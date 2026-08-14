@@ -235,7 +235,12 @@ fun CurioEntryCard(
                         fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
+                    // v59 — reserve exactly TWO lines so every Cabinet card
+                    // is the same height regardless of title length: short
+                    // titles leave a blank second line, long ones ellipsize
+                    // (never cut) instead of pushing the card taller.
                     maxLines = 2,
+                    minLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Row(
