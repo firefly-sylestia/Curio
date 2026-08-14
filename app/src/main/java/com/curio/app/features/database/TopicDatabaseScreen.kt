@@ -3,12 +3,12 @@ package com.curio.app.features.database
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -663,15 +663,22 @@ fun TopicDatabaseScreen(navController: NavController) {
         // below the ragged tear while the topic rows pass underneath it.
         // v30 — hidden by default; the Category pill (now INSIDE the hero,
         // beside the title) or search reveal it, matching the Cabinet.
-        // v52b — the category chip bar animates in/out (slides down with a
-        // fade) instead of popping instantly when the Category pill opens
-        // or search starts, matching the Cabinet.
+        // v52b — the category chip bar animates in/out instead of popping
+        // instantly when the Category pill opens or search starts, matching
+        // the Cabinet.
+        // v69 — the bar is positioned with a large .offset(y = barTop), so
+        // expandVertically's height+clip animation hid it until the clip
+        // finished (a delayed pop with no visible motion). A vertical SLIDE
+        // translates the whole bar instead — the chips emerge from under
+        // the torn hero with a real slide + fade.
         AnimatedVisibility(
             visible = chipsVisible,
-            enter = expandVertically(
+            enter = slideInVertically(
+                initialOffsetY = { -it },
                 animationSpec = tween(300, easing = FastOutSlowInEasing)
             ) + fadeIn(animationSpec = tween(220)),
-            exit = shrinkVertically(
+            exit = slideOutVertically(
+                targetOffsetY = { -it },
                 animationSpec = tween(260, easing = FastOutSlowInEasing)
             ) + fadeOut(animationSpec = tween(160))
         ) {

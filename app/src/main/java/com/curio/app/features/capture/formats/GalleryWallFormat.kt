@@ -1,6 +1,7 @@
 package com.curio.app.features.capture.formats
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.curio.app.data.CaptureData
 import com.curio.app.data.NotePaperColor
@@ -517,13 +518,6 @@ private fun MoodBoardCanvas(
     val density = LocalDensity.current
     var canvasWPx by remember { mutableFloatStateOf(0f) }
     var canvasHPx by remember { mutableFloatStateOf(0f) }
-    // The inline crop is intentionally based on the board's extent, but that
-    // extent must not be recomputed from a tile while it is being dragged.
-    // Otherwise moving the outermost tile changes maxX/maxY, which changes the
-    // scale/offset in the same gesture and makes the viewport appear to shrink
-    // or jump. Grow this extent only when tiles are added, never on movement.
-    var stableBoardMaxX by remember { mutableFloatStateOf(0f) }
-    var stableBoardMaxY by remember { mutableFloatStateOf(0f) }
     var draggingTileId by remember { mutableStateOf<Int?>(null) }
     var inPinZone by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -554,34 +548,16 @@ private fun MoodBoardCanvas(
     // margins (displayed outside the visible board — the "inaccurate" small-
     // view dragging). boardMaxX/Y = the collage's raw extent (full canvas in
     // the full-screen editor and on empty boards).
-    // Seed the crop extent ONCE per editing session and never re-grow it:
-    // a fresh board seeds to the full canvas (1:1 — new tiles land inside
-    // and the viewport never moves), while an edit-mode board seeds to the
-    // saved collage's extent so the fit matches the saved look. The extent
-    // stays FROZEN afterward — adding a tile must not re-fit (re-scale) the
-    // whole board, because that made every existing tile visibly jump and
-    // the board appear to "re-size mid-edit". Dragging never changes the
-    // extent either, so the scale/offset stay constant during a drag and
-    // the tile follows the finger 1:1 (no snaps). Removing a tile keeps the
-    // extent so the crop remains stable for the session.
-    LaunchedEffect(tiles.size, canvasWPx, canvasHPx) {
-        if (!fullScreen && stableBoardMaxX <= 0f) {
-            if (tiles.isNotEmpty()) {
-                val extentX = tiles.maxOfOrNull {
-                    finiteOr(it.offsetXPx) + positiveFiniteOr(it.widthPx, 0f)
-                }?.takeIf { it.isFinite() } ?: 0f
-                val extentY = tiles.maxOfOrNull {
-                    finiteOr(it.offsetYPx) + positiveFiniteOr(it.heightPx, 0f)
-                }?.takeIf { it.isFinite() } ?: 0f
-                stableBoardMaxX = extentX
-                stableBoardMaxY = extentY
-            } else if (canvasWPx > 0f && canvasHPx > 0f) {
-                // Fresh board: the visible canvas IS the board (1:1).
-                stableBoardMaxX = canvasWPx
-                stableBoardMaxY = canvasHPx
-            }
-        }
-    }
+    // v69 — the inline editor fits EXACTLY like the saved card: the crop
+    // extent is the CURRENT tile set's bounding box. The drag preview lives
+    // inside the tile, so `tiles` only changes on commit — the fit stays
+    // constant mid-drag (the tile follows the finger 1:1) and updates once
+    // on release, exactly what the saved view recomputes from the saved
+    // layouts. The old once-per-session freeze kept the editor stable but
+    // diverged from the saved card the moment a tile was added or dragged
+    // past the frozen extent — the saved view then re-fitted and the board
+    // "resized" between edit and detail (a fresh board even showed 1:1
+    // while the saved card zoomed to the content).
     val liveExtentX = tiles.maxOfOrNull {
         finiteOr(it.offsetXPx) + positiveFiniteOr(it.widthPx, 0f)
     }?.takeIf { it.isFinite() } ?: 0f
@@ -589,9 +565,9 @@ private fun MoodBoardCanvas(
         finiteOr(it.offsetYPx) + positiveFiniteOr(it.heightPx, 0f)
     }?.takeIf { it.isFinite() } ?: 0f
     val boardMaxX = if (fullScreen || tiles.isEmpty()) canvasWPx
-        else positiveFiniteOr(stableBoardMaxX, liveExtentX)
+        else positiveFiniteOr(liveExtentX, canvasWPx)
     val boardMaxY = if (fullScreen || tiles.isEmpty()) canvasHPx
-        else positiveFiniteOr(stableBoardMaxY, liveExtentY)
+        else positiveFiniteOr(liveExtentY, canvasHPx)
     val (boardScale, boardOffsetX, boardOffsetY) = if (fullScreen || tiles.isEmpty()) {
         Triple(1f, 0f, 0f)
     } else {
@@ -614,8 +590,11 @@ private fun MoodBoardCanvas(
         )
     }
 
+    // v69 — the mood board imports through the ANDROID PHOTO PICKER (the
+    // universal system picker: one consistent gallery/camera grid on every
+    // device) instead of the raw documents UI.
     val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenMultipleDocuments()
+        contract = ActivityResultContracts.PickMultipleVisualMedia()
     ) { uris ->
         uris.forEach { uri ->
             runCatching {
@@ -964,7 +943,11 @@ private fun MoodBoardCanvas(
 
                 // ── Floating "+" add button ──────────────────────────
                 Surface(
-                    onClick = { imagePicker.launch(arrayOf("image/*")) },
+                    onClick = {
+                        imagePicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
                     shape = RoundedCornerShape(28.dp),
                     color = accent,
                     shadowElevation = 0.dp,

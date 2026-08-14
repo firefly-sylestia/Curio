@@ -5,11 +5,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
@@ -492,15 +493,21 @@ fun CabinetScreen(navController: NavController) {
         // searching OR when the Category pill is open; v42 — the Category
         // pill moved INSIDE the hero, so the bar sits directly under the
         // banner again.
-        // v52b — the category/search chip bar animates in/out (slides down
-        // with a fade) instead of popping instantly when the Category pill
-        // opens or search starts.
+        // v52b — the category/search chip bar animates in/out instead of
+        // popping instantly when the Category pill opens or search starts.
+        // v69 — the bar is positioned with a large .offset(y = barTop), so
+        // expandVertically's height+clip animation hid it until the clip
+        // finished (a delayed pop with no visible motion). A vertical SLIDE
+        // translates the whole bar instead — the chips emerge from under
+        // the torn hero with a real slide + fade.
         AnimatedVisibility(
             visible = chipsVisible,
-            enter = expandVertically(
+            enter = slideInVertically(
+                initialOffsetY = { -it },
                 animationSpec = tween(300, easing = FastOutSlowInEasing)
             ) + fadeIn(animationSpec = tween(220)),
-            exit = shrinkVertically(
+            exit = slideOutVertically(
+                targetOffsetY = { -it },
                 animationSpec = tween(260, easing = FastOutSlowInEasing)
             ) + fadeOut(animationSpec = tween(160))
         ) {

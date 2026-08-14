@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — hero-tinted icons, pill search, tear filter hero, sort icons (v68)
+## Current request — mood board editor fixes + chip-bar animation (v69)
+
+### What was asked
+"in moodboard make the import be universal. and fix the inline editor
+still behaving differently with glitches and saving it in detail view
+doesnt show the same inline view as it was in editing. and its still
+resizing. make the mood collapse once a mood is selected. and in cabinet
+and topic browser the category row appear is glitchy it appears with a
+delay and with no animation so fix that."
+
+### What was done
+1. **Universal import** — mood board image picker switched from
+   `OpenMultipleDocuments` (raw documents UI) to the Android Photo
+   Picker (`PickMultipleVisualMedia` + `PickVisualMediaRequest(ImageOnly)`).
+2. **Inline editor == saved view** — `MoodBoardCanvas`'s crop extent was
+   frozen once per session (stableBoardMaxX/Y + seeding LaunchedEffect),
+   which diverged from the saved card the moment a tile was added or
+   dragged past it (saved view re-fitted → "resizing"). The extent is now
+   the live tile-set bounding box — same formula as the saved view; the
+   drag preview lives inside the tile, so the fit stays constant mid-drag.
+3. **Mood collapse on pick** — `moodSelectorOpen = false` inside
+   `MoodChipsRow.onMoodChange`.
+4. **Chip-bar animation** — the Cabinet/Topic DB chip bars sit at a large
+   `.offset(y = barTop)`, so `expandVertically` (height+clip) hid them
+   until the clip finished (delayed pop). Enter/exit switched to
+   `slideInVertically/slideOutVertically` + fade so the chips slide out
+   from under the torn hero.
+
+### Validation
+Brace balance OK (4 files); `git diff --check` clean. No Gradle locally
+(env rule) — CI on push.
+
+## Prior — hero-tinted icons, pill search, tear filter hero, sort icons (v68)
 
 ### What was asked
 "the settings and profile icon get rose color but it should be theme aware

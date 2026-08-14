@@ -35,5 +35,9 @@ FIX
 - Search bars are pill-shaped across Settings, the Spin filter sheet and Topic History.
 - Spin filter sheet wears the app's tear-hero banner with a bigger category name and cleaner group margins.
 - Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
+- Mood board images import through the universal Android photo picker.
+- The mood board editor now shows exactly what the saved entry shows — no more resizing or layout jumps between editing and the detail view.
+- Picking a mood collapses the mood selector right away.
+- Cabinet and Topic Browser category chips slide in smoothly from under the hero instead of popping in late.
 - Category-colored text is readable in light and pastel mode.
 - Home button always works, even after opening Cabinet from Profile.

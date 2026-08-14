@@ -351,6 +351,28 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v69 — universal mood-board import, editor/saved fit consistency,
+  mood collapse-on-pick, chip-bar slide animation.** (1) **Mood-board
+  import is now the ANDROID PHOTO PICKER** (`PickMultipleVisualMedia` +
+  `PickVisualMediaRequest(ImageOnly)` in `MoodBoardCanvas`) instead of
+  the raw `OpenMultipleDocuments` documents UI — one universal
+  gallery/camera grid on every device. (2) **The inline editor now fits
+  EXACTLY like the saved card** (`MoodBoardCanvas`): the crop extent is
+  the CURRENT tile set's bounding box instead of a once-per-session
+  frozen extent. The freeze kept the editor stable but diverged from
+  the saved view the moment a tile was added/dragged past it — the
+  saved card re-fitted and the board "resized" between edit and detail
+  (fresh boards even showed 1:1 while the saved card zoomed to the
+  content). The drag preview lives inside the tile, so the fit stays
+  constant mid-drag and updates on commit — identical to what the saved
+  view recomputes from `tileLayouts`. (3) **Mood picker collapses once
+  a mood is picked** (`SaveCaptureScreen` mood pill): `moodSelectorOpen
+  = false` inside `onMoodChange`. (4) **Cabinet + Topic Browser chip bar
+  slides in properly**: the bar is positioned with a large
+  `.offset(y = barTop)`, so `expandVertically`'s height+clip animation
+  hid it until the clip finished (delayed pop, no visible motion); the
+  enter/exit are now `slideInVertically/slideOutVertically` + fade, so
+  the chips emerge from under the torn hero.
 - **v68 — hero-tinted icons, pill search bars, tear-hero filter sheet,
   sort-type icons.** (1) **Settings + Profile icons theme-aware**
   (`SettingsHeroHeader` + `ProfileHero`): the hero watermark symbols /

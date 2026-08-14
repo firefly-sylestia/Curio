@@ -779,6 +779,10 @@ fun SaveCaptureScreen(
                             // entry + meta card see it even before the
                             // editor re-emits.
                             activeSection.data = activeSection.data?.withMood(m)
+                            // v69 — picking a mood collapses the selector
+                            // right away (one tap to set, no extra tap to
+                            // close) — the strip pill shows the result.
+                            moodSelectorOpen = false
                         },
                         header = null
                     )
