@@ -51,7 +51,7 @@ import com.curio.app.data.reflectionQuestion
 import com.curio.app.data.toJsonString
 import com.curio.app.ui.components.ExploreBubbleContent
 import com.curio.app.ui.theme.CurioShapes
-import com.curio.app.ui.theme.CurioTypography
+import com.curio.app.ui.theme.curioAppTypography
 import com.curio.app.ui.theme.curioColorScheme
 import com.curio.app.ui.theme.isCurioDarkThemeForContext
 import com.curio.app.ui.theme.pastelAccent
@@ -534,7 +534,7 @@ class ExploreSessionService : Service() {
                 if (session != null) {
                     MaterialTheme(
                         colorScheme = curioColorScheme(),
-                        typography = CurioTypography,
+                        typography = curioAppTypography(),
                         shapes = CurioShapes
                     ) {
                         ExploreBubbleContent(

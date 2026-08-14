@@ -1,12 +1,14 @@
 package com.curio.app.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.curio.app.R
+import com.curio.app.data.AppPreferences
 
 /**
  * Curio's typography — see Curio typography contract.
@@ -200,13 +202,33 @@ val CurioTypography: Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        // v59.3 — 0.5 → 0.3sp: chips/pills read calmer, less stretched.
+        letterSpacing = 0.3.sp
     ),
     labelSmall = TextStyle(
         fontFamily = GeomFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        // v59.3 — 0.5 → 0.3sp (see labelMedium).
+        letterSpacing = 0.3.sp
     )
 )
+
+/**
+ * The same scale with the BODY styles set to the Lora serif (v59.3) — the
+ * toggleable "Serif body text" look (bodyLarge/Medium/Small wear Lora at
+ * zero tracking so the serif keeps its natural rhythm). [CurioTypography]
+ * stays as the neutral-sans variant, so toggling off is a pure family swap.
+ */
+val CurioLoraBodyTypography: Typography = CurioTypography.copy(
+    bodyLarge = CurioTypography.bodyLarge.copy(fontFamily = LoraFontFamily, letterSpacing = 0.sp),
+    bodyMedium = CurioTypography.bodyMedium.copy(fontFamily = LoraFontFamily, letterSpacing = 0.sp),
+    bodySmall = CurioTypography.bodySmall.copy(fontFamily = LoraFontFamily, letterSpacing = 0.sp)
+)
+
+/** The active typography — reads the "Serif body text" preference so the
+ *  whole app's body voice swaps live when the toggle changes. */
+@Composable
+fun curioAppTypography(): Typography =
+    if (AppPreferences.loraBodyState) CurioLoraBodyTypography else CurioTypography

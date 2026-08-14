@@ -351,6 +351,18 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v59.3 — toggleable serif body text + tighter label tracking.**
+  (1) **"Serif body text" Appearance toggle** (default ON): new
+  `AppPreferences.loraBodyState` (KEY_LORA_BODY, seeded in
+  `initThemeMode`); `CurioTypography` gains `CurioLoraBodyTypography`
+  (bodyLarge/Medium/Small → `LoraFontFamily` at 0 tracking; the base
+  [CurioTypography] stays as the neutral-sans variant so toggling off is
+  a pure family swap) + `@Composable curioAppTypography()` that reads the
+  pref. `CurioTheme` and the ExploreSessionService bubble theme now use
+  it, so the whole app's body voice (settings copy, cards, form fields,
+  entry content) swaps live when the toggle changes.
+  (2) **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips and
+  pills read calmer, less stretched.
 - **v59.2 — watermark icons: fewer in the drawer, screen-matched elsewhere.**
   (1) **Drawer calms down** — the Home nav-drawer hero now scatters 3
   mirrored pairs (was 5), smaller (34–42dp vs 44–56dp) and fainter

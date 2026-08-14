@@ -1,6 +1,32 @@
 # Prompt.md — Request log
 
-## Current request — watermark icons: fewer in the drawer, screen-matched elsewhere (v59.2)
+## Current request — toggleable serif body text + tighter label tracking (v59.3)
+
+### What was asked
+"give me suggestions for more typography changes i still don't like some"
+→ presented options across body voice, hierarchy, and the reveal long-
+form; user picked via Other: "Tighten label tracking, Body → Lora serif
+everywhere, add that body lora serif everywhere as a toggle".
+
+### What was done
+1. **"Serif body text" Appearance toggle** (default ON):
+   `AppPreferences.loraBodyState` (KEY_LORA_BODY, seeded in initThemeMode,
+   setter `setLoraBodyEnabled`). `CurioTypography.kt` gains
+   `CurioLoraBodyTypography` (bodyLarge/Medium/Small → LoraFontFamily at 0
+   tracking; base [CurioTypography] stays the neutral-sans variant) and
+   `@Composable curioAppTypography()` reading the pref. `CurioTheme` and
+   the ExploreSessionService bubble theme now use it — the whole app's
+   body voice swaps live when the toggle flips.
+2. **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips/pills
+   read calmer.
+
+### Validation
+Balance on all 5 files clean (160/160 + 1045/1045, 58/58, 22/22 +
+186/186, 91/91 + 317/317, 140/140 + 307/307), unused CurioTypography
+import dropped from the service, no ui.theme→AppPreferences cycle.
+Committed locally; push pending user confirmation.
+
+## Prior — watermark icons: fewer in the drawer, screen-matched elsewhere (v59.2)
 
 ### What was asked
 "in the drawer use less watermark icons, and in other screen use
