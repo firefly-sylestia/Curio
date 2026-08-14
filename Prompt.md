@@ -1,6 +1,35 @@
 # Prompt.md — Request log
 
-## Current request — Category pill chevron (v30 follow-up)
+## Current request — Windows download docs + PR/push = APK only (v31)
+
+### What was asked
+1. "Add instruction of how to download the windows version of the app."
+2. "Return the PR push to build just the APK, and make the tag push to
+   release both desktop and APK."
+
+### What was done
+- **README.md:** new **"Install on Windows (Desktop App)"** section under
+  Quick Start — Releases-page download steps, portable zip vs `.msi`
+  choice, SmartScreen "Run anyway" note (not code-signed), data location
+  (`%USERPROFILE%\.curio`), and a not-yet-ported disclaimer. System
+  Requirements table gained a Windows row (Windows 10/11 64-bit).
+- **desktop-release.yml → tag-only:** removed the `push`/`pull_request`
+  triggers (my earlier v28 addition) — PR/push CI now builds just the
+  Android APK via android.yml. The workflow runs only on `v*` tags (+ manual
+  dispatch): builds `Curio.exe` + `.msi` and attaches the portable zip +
+  installer to the release next to the APKs from release.yml. The artifact
+  upload step is now manual-dispatch-only (`if: !startsWith(ref,
+  'refs/tags/')`) since tag runs attach the files to the release.
+- **android.yml:** `push`/`pull_request` branches now `[main, Alpha]` so
+  the PR/push APK build runs on the active branch. The desktop JVM compile
+  job stays (compile gate only, no .exe).
+- Docs: `.github/AGENTS.md` desktop-release + android sections updated.
+
+### Validation
+YAML re-validated (`npx yaml-lint`), `git diff --check` clean; CI on
+push/tag is the gate.
+
+## Prior — Category pill chevron (v30 follow-up)
 
 ### What was asked
 "Give the Category pill a chevron that flips up/down when the chips are
