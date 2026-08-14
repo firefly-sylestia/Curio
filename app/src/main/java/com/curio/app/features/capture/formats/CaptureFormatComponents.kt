@@ -588,6 +588,12 @@ class QuoteCardsState(
         while (size < quotes.size) add(true)
     }
 
+    // v57 — optional hook so formats that keep a SECOND, index-aligned
+    // position list (the mood board's full-screen arrangement) can trim it
+    // when a card is deleted. Default null — all other formats are
+    // unaffected.
+    var onCardRemoved: ((Int) -> Unit)? = null
+
     /** Whether any card has real text — drives the format's canSave. */
     val hasContent: Boolean get() = quotes.any { it.isNotBlank() }
 
@@ -614,6 +620,9 @@ class QuoteCardsState(
         if (index < positions.size) positions.removeAt(index)
         if (index < widths.size) widths.removeAt(index)
         if (index < onBoard.size) onBoard.removeAt(index)
+        // v57 — let a format's secondary position list (full-screen board)
+        // stay aligned after the delete.
+        onCardRemoved?.invoke(index)
     }
 
     /** v7.20 — the mood board commits a dragged card's new top-left here. */

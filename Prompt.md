@@ -1,6 +1,60 @@
 # Prompt.md — Request log
 
-## Current request — topic dataset thread lifecycle (lag + device heating) (v56)
+## Current request — mood board dual layouts (inline vs full-screen) + quote pinch-to-expand (v57)
+
+### What was asked
+"The moodboard editing has become so inaccurate — where I place in
+inline and then where I place in expanded view both became different in
+save. How about save both inline editor view and full screen view
+separately — use a different view so I can save 2 different views. And
+in save and share, save both of the views. Also the quote card can be
+stretched but it can't be expanded — add pinch-to-expand too, like
+zoom-expand."
+
+### User decisions (ask_user)
+- Saved card shows the INLINE layout; the expanded dialog shows the
+  FULL-SCREEN layout — give an option for each (save/share).
+- Tiles AND quote cards are separate per view.
+
+### What was done
+1. **Data model** (`CaptureData.GalleryWall`): new `tileLayoutsFull` +
+   `quotePositionsFull` (Gson default-empty — legacy entries fall back
+to the inline ones in every consumer). `withImageUris` remaps both
+layout lists.
+2. **Editor** (`GalleryWallFormat`): second `fullTiles` state list +
+   `fullQuotePositions` state list, both seeded from the saved full
+data (fallback: inline). The full-screen canvas now edits `fullTiles`
+and routes quote moves/resizes to `fullQuotePositions` via new
+`MoodBoardCanvas` params (`quotePositionsOverride` /
+`onMoveQuoteOverride` / `onResizeQuoteOverride`; null = inline board
+unchanged). `QuoteCardsState` gained an `onCardRemoved` hook so the
+index-aligned full-screen list trims on card delete. `canSave` counts
+`fullTiles`; the save `LaunchedEffect` keys on both full lists so
+full-screen edits re-emit the entry.
+3. **Detail** (`EntryDetailScreen`): the expanded dialog renders
+   `tileLayoutsFull`/`quotePositionsFull` (fallback inline); the small
+   saved card keeps rendering the inline `tileLayouts`.
+4. **Export** (`MoodBoardExport`): new `MoodBoardLayout` enum
+   (INLINE/FULL) threaded through save/share → exportBoard →
+   renderBoardBitmap → MoodBoardShareCard. Bitmaps preload against the
+   SAME chosen layout's tiles (indices line up).
+   `MoodBoardExportActions` gained an Inline view / Full-screen view
+   frosted-pill picker above the Save/Share buttons.
+5. **Quote pinch-to-expand** (`MoodBoardZoom.MoodBoardFloatingCard`):
+   editor-only 2-finger pinch handler placed BEFORE the drag handler
+   (only consumes once a 2nd finger lands, so 1-finger drags pass
+   through): live-resizes the card's width like the resize grip and
+   commits on release (clamped to the same min/max). The drag handler
+   skips deltas while `resizing` so a pinch never slides the card.
+
+### Validation
+Brace/paren balance on all 6 files vs baselines (CaptureData's −1 is
+pre-existing); `git diff --check` clean; imports verified (MoodBoardExport
+import in detail, CaptureData in the format, gesture imports already in
+MoodBoardZoom); export callers updated in lockstep. No Gradle locally
+(env rule) — CI on push is the gate.
+
+## Prior — topic dataset thread lifecycle (lag + device heating) (v56)
 
 ### What was asked
 "The dataset thread — manage it properly, check its lifecycle —

@@ -836,6 +836,50 @@ private fun MoodBoardFloatingCard(
             )
             .rotate(rotation)
             .onSizeChanged { measuredHeightPx = it.height }
+            // v57 — pinch-to-expand (EDITOR ONLY, when a resize handler
+            // exists): two fingers on the card grow/shrink its width live
+            // and commit it on release through the same path as the resize
+            // grip. Placed BEFORE the drag handler so it wins on 2-finger
+            // gestures — it only consumes once a second finger lands, so
+            // single-finger drags pass through untouched.
+            .then(
+                if (currentOnResize != null) Modifier.pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        var pinching = false
+                        var baseZoom = 1f
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val pressed = event.changes.count { it.pressed }
+                            if (pressed >= 2) {
+                                if (!pinching) {
+                                    pinching = true
+                                    resizing = true
+                                    baseZoom = event.calculateZoom()
+                                } else {
+                                    // Live preview: the card's width tracks
+                                    // the pinch (render px), clamped like the
+                                    // resize grip.
+                                    val z = event.calculateZoom()
+                                    val target = (currentW * (z / baseZoom))
+                                        .coerceIn(currentMinW, currentMaxW)
+                                    resizeDelta = target - currentW
+                                }
+                                event.changes.forEach { it.consume() }
+                            } else if (pinching) {
+                                // Fingers lifted — commit like the grip.
+                                resizing = false
+                                val commitW = (currentW + resizeDelta)
+                                    .coerceIn(currentMinW, currentMaxW)
+                                currentOnResize?.invoke(commitW)
+                                resizeDelta = 0f
+                                pinching = false
+                            }
+                            if (event.changes.all { !it.pressed }) break
+                        }
+                    }
+                } else Modifier
+            )
             .then(
                 if (currentOnMove != null) Modifier.pointerInput(Unit) {
                     detectDragGestures(
@@ -868,6 +912,16 @@ private fun MoodBoardFloatingCard(
                             dragDelta = Offset.Zero
                         },
                         onDrag = { change, amount ->
+                            // v57 — while a TWO-FINGER pinch is in flight
+                            // (resizing = true), the pinch handler owns the
+                            // gesture: skip the drag delta so the card only
+                            // widens instead of also sliding with the first
+                            // finger (consumption is advisory in pointer
+                            // input, so the drag handler still sees these
+                            // events). resizing is snapshot-backed, so this
+                            // never-restarting coroutine reads its CURRENT
+                            // value.
+                            if (resizing) return@detectDragGestures
                             change.consume()
                             // Clamp the ACCUMULATED delta so the card sticks
                             // at the edges (clamping only the visual position

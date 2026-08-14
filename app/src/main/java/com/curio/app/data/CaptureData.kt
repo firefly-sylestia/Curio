@@ -336,7 +336,14 @@ sealed class CaptureData {
         val imageCount: Int,
         val caption: String,
         val imageUris: List<String> = emptyList(),
+        // v57 — the INLINE arrangement: what the small saved card shows and
+        // what the inline editor arranges (editor board pixels).
         val tileLayouts: List<TileLayout> = emptyList(),
+        // v57 — the FULL-SCREEN arrangement: what the expanded dialog shows
+        // and what the full-screen editor arranges (its own board pixels).
+        // Empty (legacy entries) → the expanded dialog falls back to
+        // [tileLayouts] so old boards keep their single arrangement.
+        val tileLayoutsFull: List<TileLayout> = emptyList(),
         // Note-paper style for the caption box (ruled / torn / torn with
         // rules). Legacy entries omit it (Gson → null) and fall back to
         // [paperStyle] → [NotePaperStyle.RULED].
@@ -352,10 +359,15 @@ sealed class CaptureData {
         val quoteTilts: List<Float> = emptyList(),
         val quoteStyles: List<NotePaperStyle> = emptyList(),
         val quoteColors: List<NotePaperColor> = emptyList(),
-        // v7.20 — per-card placement for the floating quote boxes (editor
-        // board pixels; (-1,-1) = never dragged → deterministic slot).
-        // Legacy entries lack it (Gson → empty) → all cards use slots.
+        // v7.20 — per-card placement for the floating quote boxes (INLINE
+        // editor board pixels; (-1,-1) = never dragged → deterministic
+        // slot). Legacy entries lack it (Gson → empty) → all cards use
+        // slots.
         val quotePositions: List<QuotePos> = emptyList(),
+        // v57 — the FULL-SCREEN editor's per-card placements (its own board
+        // pixels). Empty (legacy entries) → the expanded dialog falls back
+        // to [quotePositions].
+        val quotePositionsFull: List<QuotePos> = emptyList(),
         // v7.22 — per-card placement flag: true = the card floats ON the
         // board (added via the board's Quote chip), false = it renders as a
         // separate quote box BELOW the board (added via the bottom Add-quote
@@ -602,7 +614,8 @@ sealed class CaptureData {
         is Marginalia -> copy(imageUris = imageUris.orEmpty().map(remap))
         is GalleryWall -> copy(
             imageUris = imageUris.orEmpty().map(remap),
-            tileLayouts = tileLayouts.orEmpty().map { it.copy(uri = remap(it.uri)) }
+            tileLayouts = tileLayouts.orEmpty().map { it.copy(uri = remap(it.uri)) },
+            tileLayoutsFull = tileLayoutsFull.orEmpty().map { it.copy(uri = remap(it.uri)) }
         )
         is FieldNotes -> copy(imageUris = imageUris.orEmpty().map(remap))
         is OpenNotebook -> subData?.let { copy(subData = it.withImageUris(remap)) } ?: this

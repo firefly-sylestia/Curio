@@ -68,6 +68,13 @@ import kotlinx.coroutines.withContext
  */
 object MoodBoardExport {
 
+    /**
+     * v57 — which arrangement a Save/Share PNG renders: the INLINE layout
+     * (what the small saved card shows) or the FULL-SCREEN layout (what the
+     * expanded dialog shows). Each is saved separately on the entry.
+     */
+    enum class MoodBoardLayout { INLINE, FULL }
+
     /** Requested PNG long side in px — capped below by the device pixel budget. */
     private const val EXPORT_LONG_SIDE = 4096
 
@@ -89,6 +96,7 @@ object MoodBoardExport {
         category: CurioCategory,
         boardSeed: Int,
         entryId: String,
+        layout: MoodBoardLayout = MoodBoardLayout.INLINE,
         onDone: (String?) -> Unit
     ) {
         // exportBoard is suspend (preloads bitmaps off-thread, renders on the
@@ -96,7 +104,7 @@ object MoodBoardExport {
         // share path — plain callers just get [onDone] on the main thread.
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         scope.launch {
-            val path = exportBoard(context, data, category, boardSeed, entryId) { bitmap, fileName ->
+            val path = exportBoard(context, data, category, boardSeed, entryId, layout) { bitmap, fileName ->
                 withContext(Dispatchers.IO) {
                     val p = saveBitmapToGallery(context, bitmap, fileName)
                     bitmap.recycle()
@@ -118,11 +126,12 @@ object MoodBoardExport {
         category: CurioCategory,
         boardSeed: Int,
         entryId: String,
+        layout: MoodBoardLayout = MoodBoardLayout.INLINE,
         onDone: () -> Unit
     ) {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         scope.launch {
-            val path = exportBoard(context, data, category, boardSeed, entryId) { bitmap, fileName ->
+            val path = exportBoard(context, data, category, boardSeed, entryId, layout) { bitmap, fileName ->
                 withContext(Dispatchers.IO) {
                     try {
                         val file = File(context.cacheDir, "share").apply { mkdirs() }
@@ -162,8 +171,15 @@ object MoodBoardExport {
         category: CurioCategory,
         boardSeed: Int,
         entryId: String,
+        layout: MoodBoardLayout,
         emit: suspend (Bitmap, String) -> String?
     ): String? {
+        // v57 — render the chosen arrangement: the FULL layout when asked
+        // (falling back to the inline one for legacy entries that only ever
+        // saved a single board). Bitmaps preload against the SAME tile list
+        // the render draws, so indices always line up.
+        val renderLayouts = if (layout == MoodBoardLayout.FULL && data.tileLayoutsFull.isNotEmpty())
+            data.tileLayoutsFull else data.tileLayouts
         // Preload every collage image as a full-size software bitmap so the
         // off-screen capture never races an async Coil load. Always recycled
         // when the export finishes — including on any failure/early-return
@@ -177,7 +193,7 @@ object MoodBoardExport {
         // trying to use a recycled bitmap". A fresh decode owned by the
         // export is safe to recycle without touching the UI's cache.
         val bitmaps = withContext(Dispatchers.IO) {
-            data.tileLayouts.map { t ->
+            renderLayouts.map { t ->
                 runCatching {
                     val request = ImageRequest.Builder(context)
                         .data(t.uri)
@@ -201,7 +217,7 @@ object MoodBoardExport {
         return try {
             withContext(Dispatchers.Main) {
                 val fileName = "moodboard_${entryId.take(8)}.png"
-                val bitmap = renderBoardBitmap(context, data, category, boardSeed, bitmaps)
+                val bitmap = renderBoardBitmap(context, data, category, boardSeed, bitmaps, layout)
                     ?: return@withContext null
                 emit(bitmap, fileName)
             }
@@ -223,14 +239,18 @@ object MoodBoardExport {
         data: CaptureData.GalleryWall,
         category: CurioCategory,
         boardSeed: Int,
-        bitmaps: List<Bitmap?>
+        bitmaps: List<Bitmap?>,
+        layout: MoodBoardLayout
     ): Bitmap? {
         // v7.27 — FULL-BLEED export: the canvas mirrors the BOARD's own
         // aspect ratio (not a fixed 3:4 card), so the board fills the image
         // edge to edge — exactly the expanded full-screen view — with no
         // header, caption or below-board quote boxes around it.
-        val maxX = data.tileLayouts.maxOfOrNull { it.offsetXPx + it.widthPx } ?: 0f
-        val maxY = data.tileLayouts.maxOfOrNull { it.offsetYPx + it.heightPx } ?: 0f
+        // v57 — the extent comes from the SAME arrangement being rendered.
+        val renderLayouts = if (layout == MoodBoardLayout.FULL && data.tileLayoutsFull.isNotEmpty())
+            data.tileLayoutsFull else data.tileLayouts
+        val maxX = renderLayouts.maxOfOrNull { it.offsetXPx + it.widthPx } ?: 0f
+        val maxY = renderLayouts.maxOfOrNull { it.offsetYPx + it.heightPx } ?: 0f
         val (width, height) = exportCanvasSize(maxX, maxY)
 
         return withContext(Dispatchers.Main) {
@@ -249,7 +269,8 @@ object MoodBoardExport {
                             data = data,
                             category = category,
                             boardSeed = boardSeed,
-                            bitmaps = bitmaps
+                            bitmaps = bitmaps,
+                            layout = layout
                         )
                     }
                 }
@@ -444,9 +465,17 @@ private fun MoodBoardShareCard(
     data: CaptureData.GalleryWall,
     category: CurioCategory,
     boardSeed: Int,
-    bitmaps: List<Bitmap?>
+    bitmaps: List<Bitmap?>,
+    layout: MoodBoardExport.MoodBoardLayout
 ) {
     val density = LocalDensity.current
+    // v57 — the export renders the chosen arrangement: the FULL layout when
+    // asked (falling back to the inline one for legacy entries), with the
+    // full-screen quote placements alongside.
+    val renderLayouts = if (layout == MoodBoardExport.MoodBoardLayout.FULL && data.tileLayoutsFull.isNotEmpty())
+        data.tileLayoutsFull else data.tileLayouts
+    val renderQuotePositions = if (layout == MoodBoardExport.MoodBoardLayout.FULL && data.quotePositionsFull.isNotEmpty())
+        data.quotePositionsFull else data.quotePositions
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -465,9 +494,9 @@ private fun MoodBoardShareCard(
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val viewW = maxWidth.value * density.density
             val viewH = maxHeight.value * density.density
-            if (data.tileLayouts.isNotEmpty() && viewW > 0f && viewH > 0f) {
-                val maxX = data.tileLayouts.maxOfOrNull { it.offsetXPx + it.widthPx } ?: 0f
-                val maxY = data.tileLayouts.maxOfOrNull { it.offsetYPx + it.heightPx } ?: 0f
+            if (renderLayouts.isNotEmpty() && viewW > 0f && viewH > 0f) {
+                val maxX = renderLayouts.maxOfOrNull { it.offsetXPx + it.widthPx } ?: 0f
+                val maxY = renderLayouts.maxOfOrNull { it.offsetYPx + it.heightPx } ?: 0f
                 val scale = if (maxX > 0f && maxY > 0f) {
                     (viewW / maxX).coerceAtMost(viewH / maxY)
                 } else 1f
@@ -481,7 +510,7 @@ private fun MoodBoardShareCard(
                         IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
                     }
                 ) {
-                    data.tileLayouts.forEachIndexed { i, tile ->
+                    renderLayouts.forEachIndexed { i, tile ->
                         val bmp = bitmaps.getOrNull(i)
                         if (bmp == null) return@forEachIndexed
                         Box(
@@ -521,7 +550,7 @@ private fun MoodBoardShareCard(
                             styles = data.quoteStyles.orEmpty(),
                             colors = data.quoteColors.orEmpty(),
                             tilts = data.quoteTilts.orEmpty(),
-                            positions = data.quotePositions.orEmpty(),
+                            positions = renderQuotePositions,
                             onBoard = data.quoteOnBoard.orEmpty(),
                             canvasWPx = maxX,
                             canvasHPx = maxY,

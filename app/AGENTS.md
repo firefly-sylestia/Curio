@@ -351,6 +351,34 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v57 — mood board dual layouts (inline vs full-screen) + quote pinch-to-expand.**
+  (1) **Two saved arrangements** — `CaptureData.GalleryWall` gains
+  `tileLayoutsFull` + `quotePositionsFull` (Gson default-empty; the
+  `withImageUris` remap covers both layout lists). The INLINE layout is
+  what the small saved card + inline editor arrange; the FULL-SCREEN
+  layout is what the expanded dialog + full-screen editor arrange.
+  Legacy entries (empty full fields) fall back to the inline ones, so
+  old boards keep their single arrangement. (2) **GalleryWallFormat**
+  keeps a second `fullTiles` list + `fullQuotePositions` list (both
+  seeded from saved full data, falling back to inline); the full-screen
+  canvas edits `fullTiles` and routes quote moves/resizes to
+  `fullQuotePositions` via new `quotePositionsOverride` /
+  `onMoveQuoteOverride` / `onResizeQuoteOverride` params on
+  `MoodBoardCanvas` (null = inline board unchanged). `QuoteCardsState`
+  gained a `onCardRemoved` hook so the index-aligned full-screen list
+  stays in sync when a card is deleted. `canSave` counts `fullTiles`
+  too, and the save `LaunchedEffect` keys on both full lists so
+  full-screen edits re-emit the entry. (3) **Expanded dialog** renders
+  `tileLayoutsFull`/`quotePositionsFull` (fallback inline). (4)
+  **Save/Share PNG** gained `MoodBoardExport.MoodBoardLayout`
+  (INLINE/FULL) — `MoodBoardExportActions` shows an Inline / Full-screen
+  pill picker above Save/Share, and the export preloads bitmaps + renders
+  against the chosen arrangement (both layouts keep quote placements in
+  sync with their tile list). (5) **Quote cards pinch-to-expand** —
+  `MoodBoardFloatingCard` gained a 2-finger pinch handler (editor only,
+  before the drag handler) that live-preview-resizes the card's width
+  like the resize grip and commits on release; the drag handler skips
+  deltas while `resizing` so a pinch never slides the card.
 - **v56 — topic dataset thread lifecycle: bounded parses, cached counts, tiered memory shed.**
   (1) **Bounded parse concurrency** — `TopicJsonLoader` gained a
   `Semaphore(2)` (`gated {}`) around every file read+parse (`parseAsset` +

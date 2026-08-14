@@ -2834,65 +2834,158 @@ private fun MoodBoardExportActions(
 ) {
     val context = LocalContext.current
     var busy by remember { mutableStateOf(false) }
+    // v57 — Save/Share can render EITHER arrangement: the inline layout (what
+    // the small saved card shows) or the full-screen layout (what the expanded
+    // dialog shows) — the two views are saved separately on the entry now.
+    var exportLayout by remember { mutableStateOf(MoodBoardExport.MoodBoardLayout.INLINE) }
     // v7.26 — Save/Share wear the same WHITE FROSTED-GLASS look as the hero's
     // Date · Mood · Type grid card: a translucent pane (the page wash blurred)
     // under a white 0.78 glass tint, a hairline slate rim, and deep-slate ink
     // that reads on white in every theme.
     val frostInk = Color(0xFF232A35)
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        FrostedExportButton(
-            busy = busy,
-            icon = CurioIcons.Image,
-            label = "Save PNG",
-            frostInk = frostInk,
-            category = category,
-            onClick = {
-                if (busy) return@FrostedExportButton
-                busy = true
-                MoodBoardExport.saveMoodBoardPng(
-                    context = context,
-                    authority = authority,
-                    data = data,
-                    category = category,
-                    boardSeed = boardSeed,
-                    entryId = entryId
-                ) { path ->
-                    busy = false
-                    android.widget.Toast.makeText(
-                        context,
-                        if (path != null) "Mood board saved to Gallery"
-                        else "Couldn't save the mood board",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                }
-            },
-            modifier = Modifier.weight(1f)
-        )
-        FrostedExportButton(
-            busy = busy,
-            icon = CurioIcons.Share,
-            label = "Share PNG",
-            frostInk = frostInk,
-            category = category,
-            onClick = {
-                if (busy) return@FrostedExportButton
-                busy = true
-                MoodBoardExport.shareMoodBoardPng(
-                    context = context,
-                    authority = authority,
-                    data = data,
-                    category = category,
-                    boardSeed = boardSeed,
-                    entryId = entryId
-                ) {
-                    busy = false
-                }
-            },
-            modifier = Modifier.weight(1f)
-        )
+        // Layout picker — two compact glass pills, the same frosted language
+        // as the buttons below.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ExportLayoutPill(
+                label = "Inline view",
+                selected = exportLayout == MoodBoardExport.MoodBoardLayout.INLINE,
+                frostInk = frostInk,
+                category = category,
+                onClick = { exportLayout = MoodBoardExport.MoodBoardLayout.INLINE },
+                modifier = Modifier.weight(1f)
+            )
+            ExportLayoutPill(
+                label = "Full-screen view",
+                selected = exportLayout == MoodBoardExport.MoodBoardLayout.FULL,
+                frostInk = frostInk,
+                category = category,
+                onClick = { exportLayout = MoodBoardExport.MoodBoardLayout.FULL },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            FrostedExportButton(
+                busy = busy,
+                icon = CurioIcons.Image,
+                label = "Save PNG",
+                frostInk = frostInk,
+                category = category,
+                onClick = {
+                    if (busy) return@FrostedExportButton
+                    busy = true
+                    MoodBoardExport.saveMoodBoardPng(
+                        context = context,
+                        authority = authority,
+                        data = data,
+                        category = category,
+                        boardSeed = boardSeed,
+                        entryId = entryId,
+                        layout = exportLayout
+                    ) { path ->
+                        busy = false
+                        android.widget.Toast.makeText(
+                            context,
+                            if (path != null) "Mood board saved to Gallery"
+                            else "Couldn't save the mood board",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            )
+            FrostedExportButton(
+                busy = busy,
+                icon = CurioIcons.Share,
+                label = "Share PNG",
+                frostInk = frostInk,
+                category = category,
+                onClick = {
+                    if (busy) return@FrostedExportButton
+                    busy = true
+                    MoodBoardExport.shareMoodBoardPng(
+                        context = context,
+                        authority = authority,
+                        data = data,
+                        category = category,
+                        boardSeed = boardSeed,
+                        entryId = entryId,
+                        layout = exportLayout
+                    ) {
+                        busy = false
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+/**
+ * v57 — one side of the Save/Share layout picker: a frosted-glass pill in
+ * the same language as the export buttons below, tinted with the category
+ * wash when selected so the active view reads at a glance.
+ */
+@Composable
+private fun ExportLayoutPill(
+    label: String,
+    selected: Boolean,
+    frostInk: Color,
+    category: CurioCategory,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = Color.Transparent,
+        shadowElevation = 0.dp,
+        modifier = modifier
+    ) {
+        Box(Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                category.categoryBackgroundWash(),
+                                category.categorySurface(MaterialTheme.colorScheme.surface)
+                            )
+                        )
+                    )
+                    .clip(RoundedCornerShape(14.dp))
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        if (selected) Color.White.copy(alpha = 0.66f)
+                        else Color.White.copy(alpha = 0.30f)
+                    )
+            )
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                    color = frostInk.copy(alpha = if (selected) 1f else 0.72f)
+                )
+            }
+        }
     }
 }
 
@@ -3444,14 +3537,21 @@ private fun ExpandedMoodBoardDialog(
                 val dialogW = with(density) { maxWidth.toPx() }
                 val dialogH = with(density) { maxHeight.toPx() }
 
-                if (sanitizeTileLayouts(data.tileLayouts.orEmpty()).isNotEmpty()) {
+                // v57 — the expanded dialog shows the FULL-SCREEN arrangement
+                // (saved separately from the inline one the small card
+                // renders). Legacy entries have no full layout → fall back to
+                // the inline one so old boards keep their single arrangement.
+                val expandedLayouts = sanitizeTileLayouts(data.tileLayoutsFull.ifEmpty { data.tileLayouts }.orEmpty())
+                val expandedQuotePositions = data.quotePositionsFull.ifEmpty { data.quotePositions }.orEmpty()
+
+                if (expandedLayouts.isNotEmpty()) {
                     // Fit the collage to the dialog with the SAME shared
                     // [fitTileLayout] the inline card uses — bounds →
                     // uniform scale → centered — so the full-screen board
                     // always matches the small card. Pinch on the board
                     // magnifies it; double-tap a tile magnifies the tile
                     // centered + straight.
-                    val fit = fitTileLayout(data.tileLayouts, dialogW, dialogH)
+                    val fit = fitTileLayout(expandedLayouts, dialogW, dialogH)
                     val scaledTiles = fit.scaledTiles
                     val boardW = fit.boardW
                     val boardH = fit.boardH
@@ -3498,7 +3598,7 @@ private fun ExpandedMoodBoardDialog(
                             styles = data.quoteStyles.orEmpty(),
                             colors = data.quoteColors.orEmpty(),
                             tilts = data.quoteTilts.orEmpty(),
-                            positions = data.quotePositions.orEmpty(),
+                            positions = expandedQuotePositions,
                             onBoard = data.quoteOnBoard.orEmpty(),
                             canvasWPx = boardW,
                             canvasHPx = boardH,
