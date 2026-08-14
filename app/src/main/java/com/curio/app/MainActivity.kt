@@ -80,9 +80,15 @@ class MainActivity : ComponentActivity() {
         // + years precomputed at build time) is parsed once here, and the
         // per-category pools land in the loader cache while the user does
         // anything else. Both are cached, so screens read them instantly.
+        // v55 — NonCancellable: a rotation (activity destroy) mid-warmup
+        // used to cancel loadIndex and restart the whole parse; the warm-up
+        // now runs to completion regardless (parses are bounded by the
+        // loader's gate, so it can't hog the CPU).
         lifecycleScope.launch {
-            runCatching { TopicJsonLoader.loadIndex() }
-            runCatching { TopicJsonLoader.preloadAll() }
+            withContext(kotlinx.coroutines.NonCancellable) {
+                runCatching { TopicJsonLoader.loadIndex() }
+                runCatching { TopicJsonLoader.preloadAll() }
+            }
         }
         // v53 — update notifier on app start: a toast whenever a check finds
         // a newer release, and a notification ONCE per version (never
@@ -114,8 +120,11 @@ class MainActivity : ComponentActivity() {
         // Topic catalogs are immutable and reloadable. Release the process
         // cache when Android reports real running-low pressure instead of
         // retaining every parsed topic object through the next screen.
+        // v55 — the shed is TIERED inside the loader (pools at RUNNING_LOW,
+        // the heavy 16k-entry index only at RUNNING_CRITICAL+) so a trim
+        // never triggers a full re-parse storm that lags + heats the device.
         if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
-            TopicJsonLoader.clearCache()
+            TopicJsonLoader.shedForMemory(level)
         }
     }
 

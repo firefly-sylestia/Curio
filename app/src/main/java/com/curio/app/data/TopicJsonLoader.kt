@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Semaphore
 import org.json.JSONObject
 
 /**
@@ -80,6 +81,25 @@ object TopicJsonLoader {
     private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val cacheWriteLock = Any()
     @Volatile private var cacheGeneration: Long = 0L
+    /**
+     * v55 — bounds how many JSON files parse AT ONCE (max 2). The cold-start
+     * prewarm, a wildcard merge and several screens can all request lanes
+     * together; without a gate they'd parse every file in parallel and
+     * saturate all cores — the lag + device heating on mid-range phones.
+     * Blocking acquires are fine on Dispatchers.IO (the pool is far larger
+     * than 2). Never held across another gated section, so no deadlock.
+     */
+    private val parseGate = Semaphore(2)
+
+    /** Runs a blocking parse body under [parseGate] (max 2 concurrent). */
+    private fun <T> gated(block: () -> T): T {
+        parseGate.acquire()
+        try {
+            return block()
+        } finally {
+            parseGate.release()
+        }
+    }
 
     /**
      * Installs the [android.content.res.AssetManager] used to read
@@ -140,17 +160,15 @@ object TopicJsonLoader {
             // the rest so subsequent per-category loads are free.
             val merged = mutableListOf<CurioTopic>()
             val seenIds = mutableSetOf<String>()
-            // 1. Collect from every non-wildcard category.
+            // 1. Collect from every non-wildcard category. v55 — route
+            // through the shared [load] instead of parsing the file directly:
+            // a lane the prewarm (or a screen) is already parsing is SHARED,
+            // never double-parsed by the merge, and every parse stays under
+            // the bounded [parseGate].
             CategoryId.values()
                 .filter { it != CategoryId.WILDCARD }
                 .forEach { otherId ->
-                    val topics = cache[otherId]
-                        ?: parseAsset("$ASSET_DIR/${otherId.routeSlug}.json", otherId)
-                            .also {
-                                synchronized(cacheWriteLock) {
-                                    if (cacheGeneration == generation) cache[otherId] = it
-                                }
-                            }
+                    val topics = load(otherId)
                     topics.forEach { t ->
                         if (seenIds.add(t.id)) merged.add(t)
                     }
@@ -218,18 +236,23 @@ object TopicJsonLoader {
      */
     @Volatile private var canonicalTopicCount: Int = -1
 
+    /**
+     * Per-lane topic counts (v55): Spin's "Mixed · N" deck label and the
+     * picker's totals call [countFor] on EVERY deck change — each call used
+     * to re-read + re-parse the whole category file just for a length.
+     * Cached once per lane (invalidated with the pools on memory pressure);
+     * parses run under the bounded [parseGate].
+     */
+    private val countsCache = ConcurrentHashMap<CategoryId, Int>()
+
     suspend fun countCanonicalTopics(): Int = withContext(Dispatchers.IO) {
         canonicalTopicCount.takeIf { it >= 0 }?.let { return@withContext it }
-        val am = assets ?: return@withContext 0
+        // v55 — derive from the per-lane count cache: each lane's file is
+        // parsed at most ONCE per process (shared with countFor), instead
+        // of a separate full re-parse of all ten files here.
         val count = CategoryId.values()
             .filter { it != CategoryId.WILDCARD }
-            .sumOf { id ->
-                runCatching {
-                    am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
-                        JSONArray(it.readText()).length()
-                    }
-                }.getOrDefault(0)
-            }
+            .sumOf { id -> countFor(id) }
         canonicalTopicCount = count
         count
     }
@@ -238,16 +261,22 @@ object TopicJsonLoader {
      * Counts the topics in one category's file without constructing or
      * caching CurioTopic objects. Used for the "Mixed · N topics" deck
      * labels, where only a truthful total is needed. Wildcard resolves to
-     * the canonical total across all categories.
+     * the canonical total across all categories. v55 — cached per lane so
+     * repeated label recomputes never re-parse the file.
      */
     suspend fun countFor(id: CategoryId): Int = withContext(Dispatchers.IO) {
         if (id == CategoryId.WILDCARD) return@withContext countCanonicalTopics()
+        countsCache[id]?.let { return@withContext it }
         val am = assets ?: return@withContext 0
-        runCatching {
-            am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
-                JSONArray(it.readText()).length()
-            }
-        }.getOrDefault(0)
+        val count = gated {
+            runCatching {
+                am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
+                    JSONArray(it.readText()).length()
+                }
+            }.getOrDefault(0)
+        }
+        countsCache[id] = count
+        count
     }
 
     // ── Prebuilt Topic Database index (v29) ───────────────────────────────
@@ -315,25 +344,28 @@ object TopicJsonLoader {
     /** Synchronous accessor — null until [loadIndex] first succeeds. */
     fun cachedIndex(): List<TopicIndexEntry>? = indexCache
 
-    /** Clears the cache. Safe to call from Android memory callbacks. */
-    fun clearCache() {
-        // Advance the generation and clear under the same monitor used by
-        // load() insertion. A clear can never land between the generation
-        // check and an old parse being written back into the cache.
+    /**
+     * v55 — memory-pressure shed, TIERED so a trim never triggers a full
+     * re-parse storm (the lag + heating):
+     *  - RUNNING_LOW (the common mid-range case): drop the per-category
+     *    pools, the per-lane counts and the canonical count — each is one
+     *    file, cheap to rebuild lazily. The prebuilt 16k-entry INDEX stays:
+     *    rebuilding it is the single heaviest parse, and the Topic Database
+     *    re-requests it the moment it opens.
+     *  - RUNNING_CRITICAL / COMPLETE: also drop the index.
+     * The generation guard still stops a stale in-flight parse from
+     * refilling a cache Android just asked us to release.
+     */
+    fun shedForMemory(level: Int) {
         synchronized(cacheWriteLock) {
             cacheGeneration += 1L
             cache.clear()
         }
-        // v51 — the memory-pressure shed is now COMPLETE: the prebuilt index
-        // (16k TopicIndexEntry objects + the lowercased key copies of every
-        // name/subtype/byline/teaser string) and the canonical count are
-        // dropped too. Previously only the per-category pools were released,
-        // so ~30-60MB stayed resident after a TRIM_MEMORY callback — the
-        // heap sat near-full and background GCs fired every second on
-        // mid-range devices (the reported "constantly GC-ing" lag). All
-        // three are rebuilt lazily on next use.
-        indexCache = null
+        countsCache.clear()
         canonicalTopicCount = -1
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+            indexCache = null
+        }
     }
 
     // ── Internal ───────────────────────────────────────────────────────────
@@ -352,19 +384,23 @@ object TopicJsonLoader {
     private fun parseAsset(path: String, id: CategoryId): List<CurioTopic> {
         val am = assets
             ?: throw TopicLoadException(path, id, "TopicJsonLoader.install(context) not called")
-        val raw = try {
-            am.open(path).bufferedReader().use { it.readText() }
-        } catch (t: Throwable) {
-            throw TopicLoadException(path, id, "open/read failed: ${t.message}", t)
-        }
-        return try {
-            val array = JSONArray(raw)
-            List(array.length()) { i ->
-                val obj = array.getJSONObject(i)
-                parseTopic(obj)
+        // v55 — the whole read+parse runs under the bounded gate: at most
+        // two files parse at once across prewarm, merges and screens.
+        return gated {
+            val raw = try {
+                am.open(path).bufferedReader().use { it.readText() }
+            } catch (t: Throwable) {
+                throw TopicLoadException(path, id, "open/read failed: ${t.message}", t)
             }
-        } catch (t: Throwable) {
-            throw TopicLoadException(path, id, "parse failed: ${t.message}", t)
+            try {
+                val array = JSONArray(raw)
+                List(array.length()) { i ->
+                    val obj = array.getJSONObject(i)
+                    parseTopic(obj)
+                }
+            } catch (t: Throwable) {
+                throw TopicLoadException(path, id, "parse failed: ${t.message}", t)
+            }
         }
     }
 

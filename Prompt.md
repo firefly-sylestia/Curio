@@ -1,6 +1,47 @@
 # Prompt.md — Request log
 
-## Current request — remove device-screenshot auto-attach (lag on screenshot) (v55)
+## Current request — topic dataset thread lifecycle (lag + device heating) (v56)
+
+### What was asked
+"The dataset thread — manage it properly, check its lifecycle —
+sometimes it's lagging a lot and heating my device."
+
+### What was done (TopicJsonLoader + MainActivity)
+1. **Bounded parse concurrency:** new `Semaphore(2)` + `gated {}` helper
+wraps every file read+parse (`parseAsset`, and `countFor`'s length
+read). The cold-start prewarm, a wildcard merge and several screens
+request lanes together; without a gate they parsed every file in
+parallel and saturated all cores — lag + heat. Blocking acquires are
+fine on Dispatchers.IO (pool ≫ 2); nothing nests gated sections, so no
+deadlock (checked: wildcard merge holds no gate while calling `load`;
+`countCanonicalTopics`→`countFor` never recurses on WILDCARD).
+2. **Wildcard merge via shared `load()`:** the merge used to parse each
+uncached lane DIRECTLY — double-parsing files the prewarm was already
+loading. Now `load(otherId)` (in-flight dedupe + gate) — lanes in flight
+are shared, never re-parsed.
+3. **Per-lane count cache (`countsCache`):** `countFor` re-read +
+re-parsed the whole category file on EVERY Spin deck change / picker
+recompute just for a length (the hot "Mixed · N" label path). Cached
+once per lane; `countCanonicalTopics` now derives from it (one parse per
+file shared across both). Cleared with the pools on pressure.
+4. **Tiered memory shed:** `shedForMemory(level)` replaces
+`clearCache()` — RUNNING_LOW drops pools + counts (cheap single-file
+rebuilds) but KEEPS the 16k-entry prebuilt index (its rebuild is the
+single heaviest parse and the Topic Database re-requests it the moment
+it opens; v51's full shed is what made a trim re-parse EVERYTHING — the
+reported lag/heat). Index drops only at RUNNING_CRITICAL (100) /
+COMPLETE (150). Generation guard unchanged.
+5. **Prewarm lifecycle:** the MainActivity warmup now runs under
+`withContext(NonCancellable)` — a rotation (activity destroy) mid-warmup
+used to cancel `loadIndex` and restart the whole parse.
+
+### Validation
+`clearCache()` fully replaced (no references); brace/paren balance on
+both files; `git diff --check` clean; deadlock/recursion traced (no
+nested gate holds; count sum never recurses into WILDCARD). No Gradle
+locally (env rule) — CI on push is the gate.
+
+## Prior — remove device-screenshot auto-attach (lag on screenshot) (v55)
 
 ### What was asked
 "When I take a screenshot the app starts to lag. Remove that auto attach

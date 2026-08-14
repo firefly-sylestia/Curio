@@ -351,6 +351,27 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v56 — topic dataset thread lifecycle: bounded parses, cached counts, tiered memory shed.**
+  (1) **Bounded parse concurrency** — `TopicJsonLoader` gained a
+  `Semaphore(2)` (`gated {}`) around every file read+parse (`parseAsset` +
+  `countFor`): the cold-start prewarm, a wildcard merge and several
+  screens can all request lanes together; without a gate they parsed
+  every file in parallel and saturated all cores — lag + device heating
+  on mid-range phones. Max 2 concurrent parses; blocking acquires are
+  fine on Dispatchers.IO and nothing nests gated sections (no deadlock).
+  (2) **Wildcard merge routes through shared `load()`** instead of parsing
+  lanes directly — a lane the prewarm/screens are already parsing is
+  SHARED, never double-parsed by the merge. (3) **Per-lane count cache**
+  (`countsCache`): `countFor` re-read + re-parsed the whole category file
+  on EVERY Spin deck change / picker recompute just for a length; now one
+  parse per lane per process, and `countCanonicalTopics` derives from it.
+  (4) **Tiered memory shed** (`shedForMemory(level)` replaces
+  `clearCache()`): RUNNING_LOW drops pools + counts (cheap single-file
+  rebuilds) but KEEPS the 16k-entry index — v51's full shed made a trim
+  re-parse everything (the reported lag/heat); the index only drops at
+  RUNNING_CRITICAL/COMPLETE. (5) **Prewarm survives rotation**: the
+  MainActivity warmup runs under `NonCancellable` so a mid-warmup
+  activity destroy no longer restarts the whole index parse.
 - **v55 — device-screenshot AUTO-ATTACH removed (per user: it lagged on screenshot).**
   `DeviceScreenshotWatcher` (the MediaStore ContentObserver that watched
   for new screenshots while a session / pending write was live and copied
