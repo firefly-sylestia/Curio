@@ -97,6 +97,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
@@ -580,14 +581,22 @@ fun settingsRoseAccent(): Color {
 /** Readable ink for content sitting on the settings rose banner (Home's
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
-fun settingsReadableInk(fill: Color): Color = when {
-    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
-        MaterialTheme.colorScheme.onPrimary
-    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
-        MaterialTheme.colorScheme.onSurface
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
-        MaterialTheme.colorScheme.onSurface
-    else -> pastelFillInk(fill)
+fun settingsReadableInk(fill: Color): Color {
+    // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
+    // Hero), the text must be accent-aware: white/cream on the deep accent
+    // (never the fixed dark onSurface, which was invisible on a vivid
+    // lane banner in non-pastel). The lane branch resolves like every
+    // category hero ([heroHeaderInk]); the plain rose keeps the old ink.
+    heroLaneCategory()?.let { return it.heroHeaderInk() }
+    return when {
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
+            MaterialTheme.colorScheme.onPrimary
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
+            MaterialTheme.colorScheme.onSurface
+        !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
+            MaterialTheme.colorScheme.onSurface
+        else -> pastelFillInk(fill)
+    }
 }
 
 /** Compact hub for the redesigned settings experience — the Profile-style

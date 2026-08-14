@@ -1557,7 +1557,14 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
  * on — so the hero, empty state and drawer all wear the SAME rose-wood.
  */
 @Composable
-private fun homeReadableInk(fill: Color): Color = when {
+private fun homeReadableInk(fill: Color): Color {
+    // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
+    // Hero), the text must be accent-aware: white/cream on the deep accent
+    // (never the fixed dark onSurface, which was invisible on a vivid lane
+    // banner in non-pastel). The lane branch resolves like every category
+    // hero ([heroHeaderInk]); the plain rose keeps the old ink.
+    heroLaneCategory()?.let { return it.heroHeaderInk() }
+    return when {
     // v9.x — mirror Settings' ink so Material/AMOLED hero text stays
     // readable on the scheme-driven hero fills.
     AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
@@ -1567,6 +1574,7 @@ private fun homeReadableInk(fill: Color): Color = when {
     !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
         MaterialTheme.colorScheme.onSurface
     else -> pastelFillInk(fill)
+    }
 }
 
 @Composable

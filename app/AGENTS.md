@@ -351,6 +351,31 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v32 — non-pastel peek/hero color fixes + pastel-dark readability.**
+  (1) **Non-pastel deck peeks** (`SpinScreen.PeekCard`) step like pastel
+  ones — an HSL lightness drop (light 0.14/0.20 near/far, dark
+  0.11/0.16) + the 0.75x saturation pull — instead of the old black-lerp
+  slabs (0.40/0.52) that read near-black in light mode; the deck keeps
+  its hero-brightest hierarchy with visible gradients. (2) **Category/
+  lane-colored heroes calmer + readable in non-pastel:** `headerAccent()`
+  pulls saturation ~15% (cap 0.60) so a vivid lane accent isn't
+  blinding, and the shared-hero inks (`settingsReadableInk`/
+  `homeReadableInk`/`profileReadableInk`) now resolve via
+  `heroLaneCategory()?.heroHeaderInk()` — white/cream on the deep
+  accent — instead of the fixed dark `onSurface` that made lane-banner
+  text invisible in non-pastel light. (3) **Paper stat card dark =
+  hue-matched deep paper** (`paperStatCardColor`): dark mode builds the
+  deep paper from the base/hero HUE (per-screen color-aware — Home rose,
+  Profile hero, a detail page's category) instead of the fixed muddy
+  brown, with a whisper of warm brown so it still reads as paper.
+  (4) **Pastel-dark control text:** the Categories/Filter bottom-bar
+  labels (`deckControlInk` in `SpinScreen`) and Topic Reveal's
+  Start exploring / Express yourself flip to the bright cream-white
+  (`pastelFillInk`) the heroes use, and `themedButtonFill()` deepens the
+  pastel-dark fill (lightness x0.82) so the buttons pop off the page
+  wash. (5) **Orbit dots pastel dark** carry their color again: the
+  85%-white `pastelFillInk` resolution for the dots is overridden to a
+  ~60% white-lerp so they stay light on midnight but clearly tinted.
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation

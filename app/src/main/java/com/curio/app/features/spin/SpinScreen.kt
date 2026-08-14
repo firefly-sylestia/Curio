@@ -2959,15 +2959,25 @@ private fun PeekCard(
                 )
             }
         } else {
-            // Non-pastel peeks deepen MORE and pull saturation down so the
-            // vivid device/category stops recede quietly behind the hero
-            // instead of shining.
-            val level = if (far) 0.52f else 0.40f
+            // v32 — non-pastel peeks step like the pastel ones: an HSL
+            // lightness drop (hue kept, saturation pulled) instead of the
+            // old black-lerp slabs (0.40/0.52) that read as near-black
+            // cards in light mode. The deck keeps its hierarchy — hero
+            // brightest, near a step down, far a step further — while the
+            // peeks stay in the accent family with a visible gradient.
+            val drop = if (darkMode) {
+                if (far) 0.16f else 0.11f
+            } else {
+                if (far) 0.20f else 0.14f
+            }
             blendStops.map { stop ->
-                val c = lerp(stop, Color.Black, level)
-                val h = toHsl(c)
-                // v7.18 — 5% less saturated: pull eased 0.80x → 0.75x.
-                fromHsl(h.h, (h.s * 0.75f).coerceAtMost(0.50f), h.l)
+                val h = toHsl(stop)
+                fromHsl(
+                    h.h,
+                    // v7.18 — 5% less saturated: pull eased 0.80x → 0.75x.
+                    (h.s * 0.75f).coerceAtMost(0.50f),
+                    (h.l - drop).coerceIn(0f, 1f)
+                )
             }
         }
     }
@@ -3399,6 +3409,12 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
             MaterialTheme.colorScheme.onSurface
         !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
             deepHueInk(color)
+        // v32 — pastel DARK: the old pastelFillInk resolution lerped 85%
+        // toward white, so the orbiting dots read as a white necklace with
+        // no color. Pull only ~60% so they stay light on midnight while
+        // clearly carrying the pastel hue.
+        AppPreferences.pastelColorsState && isCurioDarkTheme() ->
+            lerp(color, Color.White, 0.60f)
         else -> pastelFillInk(color)
     }
     AnimatedVisibility(
@@ -3655,6 +3671,22 @@ private fun BottomCta(
 }
 
 /**
+ * v32 — label/icon ink for the Categories/Filter deck controls. In pastel
+ * DARK mode the muted pastel fills sit close to the page wash, so the ink
+ * flips to the bright cream-white ([pastelFillInk]) the heroes use — crisp
+ * on the deepened pastel fill instead of a washed tint. Other modes keep
+ * the accent-aware ink exactly as before.
+ */
+@Composable
+private fun deckControlInk(cat: CurioCategory, selected: Boolean): Color {
+    if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        val fill = if (selected) cat.themedButtonFill() else deckControlSurface(cat)
+        return pastelFillInk(fill)
+    }
+    return if (selected) cat.themedButtonInk() else cat.categoryInk()
+}
+
+/**
  * Unselected deck-control fill — the device surface container in the
  * Material style (nothing foreign on the device palette), the tinted
  * category surface otherwise (the page wash's stronger sibling).
@@ -3714,14 +3746,15 @@ private fun VerticalDeckButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                tint = deckControlInk(cat, selected),
                 size = 22.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                // v32 — pastel dark flips to the bright cream ([deckControlInk]).
+                color = deckControlInk(cat, selected),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -3772,7 +3805,7 @@ private fun DeckControlButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                tint = deckControlInk(cat, selected),
                 size = 24.dp
             )
             Text(
@@ -3788,7 +3821,8 @@ private fun DeckControlButton(
                 // onAccent, whose Material value (onPrimaryContainer) left
                 // the text dark-on-primary in light and light-on-primary in
                 // dark — mismatched siblings on the same fill.
-                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                // v32 — pastel dark flips to the bright cream ([deckControlInk]).
+                color = deckControlInk(cat, selected),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

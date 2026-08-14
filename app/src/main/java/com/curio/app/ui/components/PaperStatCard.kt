@@ -22,7 +22,9 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.toHsl
 
 /**
  * v27u — the shared "paper stat card" surface used by the Home Streak ·
@@ -95,11 +97,21 @@ fun Modifier.paperStatCardFill(
     }
 }
 
-/** The paper card's warm cream in light mode, warm rose-brown in dark. */
+/**
+ * The paper card's warm cream in light mode, a HUE-MATCHED deep paper in
+ * dark. v32 — dark mode no longer blends toward a fixed warm brown: the
+ * deep paper is built from the [base] (the hero/fill it sits on) HUE, so
+ * the Home rose, a Profile hero or a detail page's category color each get
+ * a deep paper of their OWN shade — theme- and color-aware. A whisper of
+ * warm brown keeps it reading as paper, not paint.
+ */
 @Composable
-fun paperStatCardColor(base: Color): Color =
-    if (isCurioDarkTheme()) lerp(base, Color(0xFF2A211C), 0.50f)
-    else lerp(base, Color(0xFFFFF6EB), 0.62f)
+fun paperStatCardColor(base: Color): Color {
+    if (!isCurioDarkTheme()) return lerp(base, Color(0xFFFFF6EB), 0.62f)
+    val a = toHsl(base)
+    val deep = fromHsl(a.h, (a.s * 0.55f).coerceIn(0.08f, 0.40f), 0.15f)
+    return lerp(deep, Color(0xFF2A211C), 0.20f)
+}
 
 /** The pressed two-tone rim around a punch hole (light top-left, shadow bottom-right). */
 private fun DrawScope.drawPressedRim(center: Offset, holeR: Float, ink: Color) {

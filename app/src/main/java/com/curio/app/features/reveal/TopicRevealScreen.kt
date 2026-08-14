@@ -1354,6 +1354,14 @@ private fun RevealStartButton(
     // v10 — fixed height matches the paired "Express yourself" button so
     // the two actions read as a unified row instead of mismatched siblings.
     val startShape = RoundedCornerShape(50)
+    // v32 — pastel dark: the muted pastel fill washed the label out; the
+    // fill is deepened via [themedButtonFill] and the label flips to the
+    // bright cream-white the heroes use.
+    val contentInk = if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        pastelFillInk(cat.themedButtonFill())
+    } else {
+        cat.themedButtonInk()
+    }
     Button(
         onClick = onClick,
         enabled = enabled,
@@ -1364,9 +1372,9 @@ private fun RevealStartButton(
             // AMOLED overrides to pitch-black (accent becomes the edge
             // shine); Material wears the device primary with the accent rim.
             containerColor = cat.themedButtonFill(),
-            contentColor = cat.themedButtonInk(),
+            contentColor = contentInk,
             disabledContainerColor = cat.themedButtonFill().copy(alpha = 0.35f),
-            disabledContentColor = cat.themedButtonInk().copy(alpha = 0.45f)
+            disabledContentColor = contentInk.copy(alpha = 0.45f)
         ),
         contentPadding = PaddingValues(
             horizontal = metrics.startPadH,
@@ -1384,7 +1392,7 @@ private fun RevealStartButton(
             CurioIcon(
                 CurioIcons.AutoAwesome,
                 null,
-                tint = cat.onAccent(),
+                tint = contentInk,
                 size = metrics.icon
             )
             Text(
@@ -1420,7 +1428,15 @@ private fun RevealAlreadyButton(
     // categorySurface falls back to the device surface so it stays a proper
     // Material control.
     val surface = cat.categorySurface()
-    val ink = if (enabled) cat.categoryInk() else cat.categoryInk().copy(alpha = 0.40f)
+    // v32 — pastel dark: the Express yourself label flips to the bright
+    // cream-white so it reads crisply on the tinted dark surface.
+    val ink = if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        pastelFillInk(surface)
+    } else if (enabled) {
+        cat.categoryInk()
+    } else {
+        cat.categoryInk().copy(alpha = 0.40f)
+    }
     val shineAccent = cat.themedAccent()
     Surface(
         onClick = onClick,

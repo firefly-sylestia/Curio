@@ -1,6 +1,58 @@
 # Prompt.md — Request log
 
-## Current request — hero/category-chip/cream-tint fixes + faster Home (v31)
+## Current request — non-pastel peek/hero color fixes + pastel-dark readability (v32)
+
+### What was asked
+1. Pastel OFF (non-pastel): the Spin deck peek cards behind the main card
+don't have the gradient like pastel and are too dark in light mode.
+2. Non-pastel: the shared hero banner colors (the category/lane-colored
+ones) are too bright/vibrant, blinding, and the texts are not visible.
+3. Same fixes in dark mode (non-pastel).
+4. Pastel dark: suggestions for the paper stat card color; the category
+and filter text on the Spin screen (not inside the chips); the small
+round things around the spin button look white during the spin animation.
+5. "Ask me for confirmation" before building.
+
+### User decisions (ask_user)
+- Hero: yes — the category/lane-colored heroes (Adaptive Hero lane,
+Cabinet filter, detail hero); fix text ink (accent-aware, white/cream)
++ soften the vivid fill, non-pastel light AND dark.
+- Paper stat card dark: **hue-matched deep paper** — theme-aware AND
+color-aware (the deep paper carries the hue of the hero/base it sits
+on, e.g. the detail page's own color).
+- Spin text: the **bottom bar button labels** (Categories / Filter), and
+also the **Topic Reveal "Start exploring" / "Express yourself"** text.
+
+### What was done
+1. **Peek cards (non-pastel, light + dark):** `PeekCard` now steps like
+   pastel — HSL lightness drop (light 0.14/0.20, dark 0.11/0.16) + the
+   0.75x saturation pull — instead of the near-black black-lerp slabs
+   (0.40/0.52).
+2. **Category/lane heroes calmer + readable:** `headerAccent()` pulls
+   saturation ~15% (non-pastel) so vivid accents aren't blinding; the
+   shared-hero inks (`settingsReadableInk`/`homeReadableInk`/
+   `profileReadableInk`) resolve via `heroLaneCategory()?.heroHeaderInk()`
+   — white/cream on the deep accent instead of the fixed dark onSurface
+   that made lane-banner text invisible in non-pastel light.
+3. **Paper stat card dark = hue-matched deep paper:**
+   `paperStatCardColor` builds the deep paper from the base HUE
+   (per-screen color-aware), a whisper of warm brown keeps it paper.
+4. **Pastel-dark control text:** Categories/Filter bottom-bar labels
+   (new `deckControlInk`) + Topic Reveal's Start exploring / Express
+   yourself flip to the bright cream-white (`pastelFillInk`), and
+   `themedButtonFill()` deepens the pastel-dark fill (lightness x0.82)
+   so the buttons pop off the page wash.
+5. **Orbit dots (pastel dark):** the dots use a ~60% white-lerp instead
+   of the 85% white `pastelFillInk` resolution — light on midnight but
+   clearly carrying the pastel hue.
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean
+(Pre-existing single paren imbalance in TopicRevealScreen confirmed
+present in HEAD, not introduced here); CI on push is the gate.
+Changelog + `app/AGENTS.md` v32 bullet updated.
+
+## Prior — hero/category-chip/cream-tint fixes + faster Home (v31)
 
 ### What was asked
 1. "The filter chip in cabinet and topic browser is even bigger now — the

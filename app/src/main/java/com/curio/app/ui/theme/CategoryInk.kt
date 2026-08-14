@@ -79,12 +79,20 @@ fun CurioCategory.themedAccent(): Color {
 @Composable
 fun CurioCategory.headerAccent(): Color {
     val base = themedAccent()
-    if (!AppPreferences.headerDeepState) return base
+    // v32 — non-pastel category banners were TOO VIVID (blinding) next to
+    // the calm pastel headers: pull saturation ~15% so a vivid lane accent
+    // reads rich but not neon. Pastel accents are already airy — unchanged.
+    // The calming applies even when the Deeper header color toggle is off.
+    val calm = if (AppPreferences.pastelColorsState) base else {
+        val b = toHsl(base)
+        fromHsl(b.h, (b.s * 0.85f).coerceAtMost(0.60f), b.l)
+    }
+    if (!AppPreferences.headerDeepState) return calm
     // Hue-preserving deepen: pull lightness down rather than lerping toward
     // black (which would grey the hue). Light mode deepens a touch more so
     // the banner reads a shade richer on the cream page; dark mode deepens
     // only a whisper so the already-deep accent doesn't sink into midnight.
-    val hsl = toHsl(base)
+    val hsl = toHsl(calm)
     val factor = if (isCurioDarkTheme()) 0.94f else 0.88f
     return fromHsl(hsl.h, hsl.s, hsl.l * factor)
 }
@@ -166,7 +174,18 @@ fun CurioCategory.heroHeaderInk(): Color {
  * via [com.curio.app.ui.components.curioButtonColors] where used.
  */
 @Composable
-fun CurioCategory.themedButtonFill(): Color = themedAccent()
+fun CurioCategory.themedButtonFill(): Color {
+    val base = themedAccent()
+    // v32 — pastel DARK: the muted pastel accents sit very close to the
+    // pastel page wash, so buttons sank into the page and their text read
+    // washed. Buttons now step a clear shade deeper so the control pops and
+    // the bright ink is crisp on top. Other modes keep the accent exactly.
+    if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        val a = toHsl(base)
+        return fromHsl(a.h, a.s, a.l * 0.82f)
+    }
+    return base
+}
 
 /** Content ink for [themedButtonFill] — pastel-aware like the card fills. */
 @Composable
