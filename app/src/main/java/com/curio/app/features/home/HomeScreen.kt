@@ -227,7 +227,7 @@ fun HomeScreen(navController: NavController) {
         CurioCategories.byId(id)
     }
     val homeBg = if (homeTintOn) homeTintCat.categoryBackgroundWash()
-        else settingsRoseAccent().copy(alpha = 0.10f).compositeOver(MaterialTheme.colorScheme.background)
+        else androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)
     // v27v — the quest hero tint resolution lives here at the TOP of the
     // screen so the sticky top-bar pills (which render OUTSIDE the scroll
     // column) can share it: when "Hero tint too" is on, the menu + profile
