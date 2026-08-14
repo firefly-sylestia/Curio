@@ -351,6 +351,28 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v42 — merged badge shelf + quest-paths card grid + profile polish.**
+  (1) **Merged badge shelf:** `CurioBadges.kt` gains `MergedChainBadge`
+  + `mergedChainBadges()` — ONE medal per quest CHAIN (category) showing
+  the chain's HIGHEST-earned stage (best rarity); earning a chain's
+  bronze then silver upgrades the single medal to silver instead of
+  stacking duplicates. The shelf (Quests strip + dialog + Profile strip)
+  sorts earned badges first by rarity, then locked chains (silhouettes
+  preview their best rarity; SECRET badges never show locked). New
+  `CurioBadgeDetailDialog` (shared Profile + Quests) shows the medal,
+  tier chip, name, description and live progress (+XP, and a
+  "· upgraded" chip on merged tiles when earlier rarities were earned).
+  Quests' `PathsCard` was redesigned from flat rows to a **card-per-path
+  grid**: each card wears the chain glyph, a live progress bar, its merged
+  medal, and opens `PathDetailDialog` (stage trail with Go chips). The
+  old per-stage `BadgeTile`/`BadgeShelf` grid is removed (dead).
+  (2) **Profile:** tapping any badge (earned or locked) on the Profile
+  strip opens `CurioBadgeDetailDialog`; the Edit profile / streak / level
+  pills are now OPAQUE (`lerp(fill, White, 0.18)` light, rose twin on
+  AMOLED, +2dp shadow + dark glow) like the stat pane instead of the old
+  `ink@18%` tint that smeared on busy banners; the "YOUR PROFILE" kicker
+  stepped labelSmall → labelMedium (wider tracking) and the pills row
+  spacing tightened (8dp gaps, even 58dp+ cells).
 - **v41 — Explore dialog declutter + canonical pet-dialog doc.**
   (1) **Explore dialog:** the two helper paragraphs (the engine/verb
   intro and the timed-explore note) are gone; the dialog is now the

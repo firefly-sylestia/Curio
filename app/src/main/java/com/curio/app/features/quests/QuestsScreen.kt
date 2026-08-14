@@ -92,9 +92,12 @@ import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.BadgeTier
+import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeMedal
 import com.curio.app.ui.components.CurioBadgeStrip
+import com.curio.app.ui.components.MergedChainBadge
 import com.curio.app.ui.components.badgeTier
+import com.curio.app.ui.components.mergedChainBadges
 import com.curio.app.ui.components.tierAccent
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
@@ -599,30 +602,31 @@ private fun CurrentQuestCard(
 }
 
 /**
- * v8.7 — "Quest paths": ONE compact card replaces the wall of per-chain
- * cards and the always-visible badge grid. Every unfinished path is a
- * tappable row — tap to expand its stage trail (the next actionable stage
- * carries a Go chip). The badge shelf lives behind a single tappable row
- * that opens a dialog, so no part of the page is a dead display board.
+ * v42 — "Quest paths": every path is a tappable CARD in a two-column grid
+ * (no more boring list rows). Each card shows the chain glyph, its live
+ * progress, and the chain's merged medal (best-earned tier). Tapping a card
+ * opens its stage trail in a dialog — the next actionable stage carries a
+ * Go chip. Below sits the MERGED badge shelf: one medal per chain, earned
+ * badges first by rarity, and tapping a medal opens its detail dialog.
  */
 @Composable
 private fun PathsCard(
     onNavigate: (String) -> Unit = {}
 ) {
-    val activeChains = CurioQuests.Chains.filter { chain ->
-        CurioQuests.chainProgress(chain) < chain.stages.size
-    }
     val allStages = CurioQuests.allStages()
     val unlockedCount = allStages.count { CurioQuests.isStageDone(it) }
     var showBadges by rememberSaveable { mutableStateOf(false) }
+    // v42 — per-path detail + medal detail both open from this card.
+    var pathDetail by remember { mutableStateOf<QuestChain?>(null) }
+    var badgeDetail by remember { mutableStateOf<QuestStage?>(null) }
     CurioSettingsCard {
         CurioCardHeader(
             CurioIcons.Flag,
             "Quest paths",
-            "${activeChains.size} open · $unlockedCount badges earned"
+            "${CurioQuests.Chains.size} paths · $unlockedCount badges"
         )
-        Spacer(Modifier.height(2.dp))
-        if (activeChains.isEmpty()) {
+        Spacer(Modifier.height(6.dp))
+        if (CurioQuests.Chains.isEmpty()) {
             Text(
                 "Every path complete. The whole shelf is yours!",
                 style = MaterialTheme.typography.bodySmall,
@@ -630,19 +634,37 @@ private fun PathsCard(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-        activeChains.forEach { chain ->
-            PathRow(chain = chain, onNavigate = onNavigate)
+        // v42 — card-per-path grid: completed paths keep their medals, open
+        // ones show live progress. Tap a card for its stage trail.
+        CurioQuests.Chains.chunked(2).forEach { rowChains ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                rowChains.forEach { chain ->
+                    PathCard(
+                        chain = chain,
+                        onClick = { pathDetail = chain },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (rowChains.size == 1) Spacer(Modifier.weight(1f))
+            }
         }
-        // v8.27 — PINNED badges: the earned medals (and a couple of locked
-        // silhouettes for aspiration) live ON the page; the row below still
-        // opens the full two-column shelf.
+        Spacer(Modifier.height(6.dp))
+        // v42 — the MERGED pinned strip: earned chain medals first by rarity
+        // (a chain's bronze→silver upgrade shows as ONE medal at its best
+        // tier), then locked silhouettes. Tapping a medal opens its detail.
         CurioBadgeStrip(
             earnedLimit = 5,
             lockedPreview = 2,
-            onViewAll = { showBadges = true }
+            medalSize = 46.dp,
+            onViewAll = { showBadges = true },
+            onBadgeClick = { badgeDetail = it }
         )
-        // Badge shelf — one tappable row that opens the grid in a dialog
-        // (v8.7 — no permanent two-column board dominating the page).
+        // Badge shelf — one tappable row that opens the merged shelf dialog.
         Spacer(Modifier.height(4.dp))
         Row(
             modifier = Modifier
@@ -672,7 +694,7 @@ private fun PathsCard(
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold)
                 )
                 Text(
-                    "$unlockedCount of ${allStages.size} earned",
+                    "$unlockedCount of ${allStages.size} stages earned",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -689,115 +711,384 @@ private fun PathsCard(
             )
         }
     }
+    // v42 — medal detail: tapping a pinned badge or a shelf tile opens its
+    // name, tier, description, and live progress.
+    badgeDetail?.let { stage ->
+        CurioBadgeDetailDialog(stage = stage, onDismiss = { badgeDetail = null })
+    }
+    // v42 — per-path dialog: the chain's stage trail with Go chips.
+    pathDetail?.let { chain ->
+        PathDetailDialog(
+            chain = chain,
+            onNavigate = onNavigate,
+            onDismiss = { pathDetail = null }
+        )
+    }
     if (showBadges) {
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { showBadges = false },
-            title = { Text("Badges · $unlockedCount of ${allStages.size} earned") },
-            text = {
-                Column(
-                    modifier = Modifier
-                        .heightIn(max = 440.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    allStages.chunked(2).forEach { row ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            row.forEach { stage ->
-                                BadgeTile(
-                                    stage = stage,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            if (row.size == 1) Spacer(Modifier.weight(1f))
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showBadges = false }, colors = curioDialogActionButtonColors()) { Text("Close") }
+        MergedBadgeShelfDialog(
+            onDismiss = { showBadges = false },
+            onBadgeClick = { stage ->
+                badgeDetail = stage
+                showBadges = false
             }
         )
     }
 }
 
-/** One quest path row — tap to expand its stage trail. */
+/** v42 — ONE path card in the quest-paths grid: glyph, progress, medal. */
 @Composable
-private fun PathRow(
+private fun PathCard(
     chain: QuestChain,
-    onNavigate: (String) -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val chainDone = CurioQuests.chainProgress(chain)
-    // v8.7 — rows are compact by default; tapping expands the stage trail
-    // (the next actionable stage carries a Go/Start chip).
-    var expanded by rememberSaveable(chain.id) { mutableStateOf(false) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    val done = CurioQuests.chainProgress(chain)
+    val complete = done == chain.stages.size
+    // The card wears the chain's merged medal — its best-earned tier, or a
+    // silhouette previewing its best rarity while locked.
+    val merged = mergedChainBadges().firstOrNull { it.chain.id == chain.id }
+    val display = merged?.displayStage ?: chain.stages.last()
+    val tier = badgeTier(display)
+    val accent = tierAccent(tier)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        // v27n — OPAQUE fills so the elevation shadow stays clean.
+        color = if (complete) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, curioSageInk(), 0.08f)
+        } else {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.06f)
+        },
+        border = BorderStroke(1.dp, accent.copy(alpha = if (complete) 0.35f else 0.22f)),
+        shadowElevation = 2.dp,
+        modifier = modifier
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp)
         ) {
-            CurioIcon(
-                name = chain.glyph,
-                contentDescription = null,
-                tint = Color.White,
-                size = 18.dp
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        name = chain.glyph,
+                        contentDescription = null,
+                        tint = Color.White,
+                        size = 17.dp
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        chain.title,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        chain.subtitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                // The chain's merged medal (best-earned tier).
+                CurioBadgeMedal(stage = display, medalSize = 34.dp)
+            }
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { done.toFloat() / chain.stages.size.coerceAtLeast(1) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(50)),
+                color = if (complete) curioSageInk() else accent,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
+            Spacer(Modifier.height(5.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    if (complete) "Complete · +${chain.stages.sumOf { it.xpReward }} XP"
+                    else "$done / ${chain.stages.size} stages",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (complete) curioSageInk() else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (complete) {
+                    CurioIcon(CurioIcons.Check, null, tint = curioSageInk(), size = 14.dp)
+                } else {
+                    Text(
+                        tier.displayName.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.6.sp
+                        ),
+                        color = accent,
+                        maxLines = 1
+                    )
+                }
+            }
         }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                chain.title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                chain.subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        Text(
-            "$chainDone/${chain.stages.size}",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = if (chainDone == chain.stages.size) curioSageInk() else curioRoseInk()
-        )
-        CurioIcon(
-            name = if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-            contentDescription = if (expanded) "Collapse ${chain.title}" else "Expand ${chain.title}",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            size = 18.dp
-        )
     }
-    // v8.3 — the chain's NEXT actionable stage carries a Go/Start chip too.
-    AnimatedVisibility(visible = expanded) {
-        Column {
-            val nextIndex = chain.stages.indexOfFirst { !CurioQuests.isStageDone(it) }
-            chain.stages.forEachIndexed { index, stage ->
-                val done = CurioQuests.isStageDone(stage)
-                val isCurrent = !done && stage.id == CurioQuests.currentQuest()?.id
-                ChainStageRow(
-                    index = index,
-                    stage = stage,
-                    done = done,
-                    isCurrent = isCurrent,
-                    isNext = index == nextIndex,
-                    onNavigate = { stage.navRoute?.let(onNavigate) }
+}
+
+/** v42 — a path's stage trail in a dialog (tap the card to open it). */
+@Composable
+private fun PathDetailDialog(
+    chain: QuestChain,
+    onNavigate: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val done = CurioQuests.chainProgress(chain)
+    val merged = mergedChainBadges().firstOrNull { it.chain.id == chain.id }
+    val display = merged?.displayStage ?: chain.stages.last()
+    val nextIndex = chain.stages.indexOfFirst { !CurioQuests.isStageDone(it) }
+    AlertDialog(
+        containerColor = curioDialogContainerColor(),
+        shape = CurioDialogShape,
+        onDismissRequest = onDismiss,
+        title = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CurioBadgeMedal(stage = display, medalSize = 56.dp)
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    chain.title,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    "$done of ${chain.stages.size} stages · ${chain.subtitle}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 380.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                chain.stages.forEachIndexed { index, stage ->
+                    val stageDone = CurioQuests.isStageDone(stage)
+                    val isCurrent = !stageDone && stage.id == CurioQuests.currentQuest()?.id
+                    ChainStageRow(
+                        index = index,
+                        stage = stage,
+                        done = stageDone,
+                        isCurrent = isCurrent,
+                        isNext = index == nextIndex,
+                        onNavigate = {
+                            stage.navRoute?.let { route ->
+                                onNavigate(route)
+                                onDismiss()
+                            }
+                        }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close") }
+        }
+    )
+}
+
+/** v42 — the MERGED badge shelf: one medal per chain, earned first by
+ *  rarity with labeled sections; locked chains silhouette their best tier.
+ */
+@Composable
+private fun MergedBadgeShelfDialog(
+    onDismiss: () -> Unit,
+    onBadgeClick: (QuestStage) -> Unit
+) {
+    val merged = mergedChainBadges()
+    val earned = merged.filter { it.earned }
+    val locked = merged.filterNot { it.earned }
+    val allStages = CurioQuests.allStages()
+    val unlockedCount = allStages.count { CurioQuests.isStageDone(it) }
+    AlertDialog(
+        containerColor = curioDialogContainerColor(),
+        shape = CurioDialogShape,
+        onDismissRequest = onDismiss,
+        title = { Text("Badge shelf · $unlockedCount stages earned") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 440.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                if (earned.isNotEmpty()) {
+                    ShelfSectionLabel("Earned")
+                    earned.chunked(2).forEach { rowBadges ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            rowBadges.forEach { m ->
+                                MergedBadgeTile(
+                                    m = m,
+                                    onClick = { onBadgeClick(m.displayStage) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (rowBadges.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+                if (locked.isNotEmpty()) {
+                    ShelfSectionLabel("Locked · still to earn")
+                    locked.chunked(2).forEach { rowBadges ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            rowBadges.forEach { m ->
+                                MergedBadgeTile(
+                                    m = m,
+                                    onClick = { onBadgeClick(m.displayStage) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (rowBadges.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close") }
+        }
+    )
+}
+
+/** v42 — a small caps section label inside the shelf dialog. */
+@Composable
+private fun ShelfSectionLabel(text: String) {
+    Text(
+        text.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.1.sp
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 2.dp, top = 4.dp, bottom = 2.dp)
+    )
+}
+
+/** v42 — one MERGED medal tile: the chain's best-earned tier stands in for
+ *  the whole chain; an "upgraded" chip shows when earlier rarities were
+ *  earned too. Locked chains preview their highest-rarity silhouette.
+ */
+@Composable
+private fun MergedBadgeTile(
+    m: MergedChainBadge,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tier = badgeTier(m.displayStage)
+    val accent = tierAccent(tier)
+    val secretLocked = !m.earned && tier == BadgeTier.SECRET
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        // v27n — OPAQUE fills (the old alphas let the elevation shadow bleed).
+        color = if (m.earned) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.10f)
+        } else {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.surfaceVariant, 0.35f)
+        },
+        border = BorderStroke(1.dp, accent.copy(alpha = if (m.earned) 0.30f else 0.10f)),
+        shadowElevation = 2.dp,
+        modifier = modifier
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp)
+        ) {
+            CurioBadgeMedal(stage = m.displayStage, medalSize = 54.dp)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                m.chain.title,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = if (m.earned) FontWeight.ExtraBold else FontWeight.SemiBold
+                ),
+                color = if (m.earned) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(3.dp))
+            if (m.earned) {
+                // Best earned rarity; an "upgraded" chip when earlier tiers
+                // were earned too (bronze → silver shows silver + upgraded).
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        tier.displayName.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.6.sp
+                        ),
+                        color = accent,
+                        maxLines = 1
+                    )
+                    if (m.earnedTiers.size > 1) {
+                        Text(
+                            "· upgraded",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = curioSageInk(),
+                            maxLines = 1
+                        )
+                    }
+                }
+            } else if (secretLocked) {
+                Text(
+                    "Secret · hidden",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            } else {
+                val progress = CurioQuests.stageProgress(m.displayStage)
+                Text(
+                    "$progress / ${m.displayStage.target}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+                Spacer(Modifier.height(5.dp))
+                LinearProgressIndicator(
+                    progress = { (progress.toFloat() / m.displayStage.target.coerceAtLeast(1)).coerceIn(0f, 1f) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50)),
+                    color = accent,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
         }
@@ -1432,128 +1723,6 @@ private fun DailyQuestRow(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-/** The badge shelf — every chain stage as a badge in a two-column grid. */
-@Composable
-private fun BadgeShelf() {
-    val allStages = CurioQuests.allStages()
-    val unlockedCount = allStages.count { CurioQuests.isStageDone(it) }
-    CurioSettingsCard {
-        CurioCardHeader(
-            CurioIcons.EmojiEvents,
-            "Badges",
-            "$unlockedCount of ${allStages.size} earned"
-        )
-        Spacer(Modifier.height(4.dp))
-        allStages.chunked(2).forEach { row ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 3.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                row.forEach { stage ->
-                    BadgeTile(
-                        stage = stage,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-/**
- * One badge tile — a round MEDAL with a per-stage glyph (v8.13). Earned
- * badges show the badge IN FULL: gradient medal + gold check, title and
- * reward — no task text and no progress bar. Locked badges are silhouette
- * medals with the stage's progress, so the shelf reads as a set of badges
- * rather than a list of chores.
- */
-@Composable
-private fun BadgeTile(
-    stage: QuestStage,
-    modifier: Modifier = Modifier
-) {
-    val unlocked = CurioQuests.isStageDone(stage)
-    val progress = CurioQuests.stageProgress(stage)
-    val tier = badgeTier(stage)
-    val accent = tierAccent(tier)
-    val secretLocked = !unlocked && tier == BadgeTier.SECRET
-    Surface(
-        shape = RoundedCornerShape(20.dp),
-        // v27n — OPAQUE fills (the old 10–40% alphas let the elevation
-        // shadow bleed through as a blurry broken background).
-        color = if (unlocked) {
-            lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.10f)
-        } else {
-            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.surfaceVariant, 0.40f)
-        },
-        shadowElevation = 2.dp,
-        modifier = modifier
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)
-        ) {
-            // The medal — shared with Profile and the unlock toast, so every
-            // badge renders identically everywhere.
-            CurioBadgeMedal(stage = stage, medalSize = 58.dp)
-            Spacer(Modifier.height(8.dp))
-            Text(
-                if (secretLocked) "???" else stage.title,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = if (unlocked) FontWeight.ExtraBold else FontWeight.SemiBold
-                ),
-                color = if (unlocked) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(2.dp))
-            if (unlocked) {
-                // v8.28 — earned badges show the badge IN FULL: the metal tier
-                // chip and the reward, no task text, no progress bar.
-                Text(
-                    "${tier.displayName} · +${stage.xpReward} XP",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = accent,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            } else if (secretLocked) {
-                // Secret badges never reveal their identity, title or target.
-                Text(
-                    "Secret · hidden",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            } else {
-                Text(
-                    "$progress / ${stage.target}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(6.dp))
-                LinearProgressIndicator(
-                    progress = { (progress.toFloat() / stage.target.coerceAtLeast(1)).coerceIn(0f, 1f) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(50)),
-                    color = accent,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
             }
         }
     }

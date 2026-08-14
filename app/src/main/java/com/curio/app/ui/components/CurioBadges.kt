@@ -9,18 +9,25 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,8 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.curio.app.data.CurioQuests
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioSageInk
@@ -200,6 +209,126 @@ fun badgeTierRank(tier: BadgeTier): Int = when (tier) {
     BadgeTier.GOLD -> 2
     BadgeTier.PLATINUM -> 3
     BadgeTier.SECRET -> 4
+}
+
+/**
+ * v42 — MERGED badge shelf. One medal per quest CHAIN (category): the
+ * chain's HIGHEST-earned stage (its best rarity) stands in for the whole
+ * chain, so earning Deck bronze then silver upgrades the single Deck medal
+ * to silver instead of stacking two medals. Locked chains show a silhouette
+ * of their highest-rarity stage for aspiration. Used by the Quests badge
+ * dialog and the Profile strip so every shelf reads the same.
+ */
+data class MergedChainBadge(
+    val chain: CurioQuests.QuestChain,
+    /** The stage this chain's medal currently displays (best earned, else best rarity). */
+    val displayStage: CurioQuests.QuestStage,
+    val earned: Boolean,
+    /** Every earned tier in this chain, rarest first (drives the "upgraded" chip). */
+    val earnedTiers: List<BadgeTier>
+)
+
+/** Merge every chain into one display badge each. */
+fun mergedChainBadges(): List<MergedChainBadge> = CurioQuests.Chains.map { chain ->
+    val earned = chain.stages.filter { CurioQuests.isStageDone(it) }
+        .sortedByDescending { badgeTierRank(badgeTier(it)) }
+    val best = earned.firstOrNull()
+    // A locked chain previews its highest-rarity stage (aspiration); a
+    // fully-earned chain stands on its best medal.
+    val display = best ?: chain.stages.maxByOrNull { badgeTierRank(badgeTier(it)) }!!
+    MergedChainBadge(
+        chain = chain,
+        displayStage = display,
+        earned = best != null,
+        earnedTiers = earned.map { badgeTier(it) }.distinct()
+    )
+}.sortedByDescending { m -> badgeTierRank(badgeTier(m.displayStage)) }
+
+/**
+ * v42 — the shared badge DETAIL dialog: a medal, its tier chip, name,
+ * description, and (for locked badges) live progress. Opened by tapping a
+ * badge on the Profile and in the Quests badge shelf.
+ */
+@Composable
+fun CurioBadgeDetailDialog(
+    stage: CurioQuests.QuestStage,
+    onDismiss: () -> Unit
+) {
+    val unlocked = CurioQuests.isStageDone(stage)
+    val tier = badgeTier(stage)
+    val accent = tierAccent(tier)
+    val secretLocked = !unlocked && tier == BadgeTier.SECRET
+    val progress = CurioQuests.stageProgress(stage)
+    AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = RoundedCornerShape(28.dp),
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                if (secretLocked) "Secret badge" else "${tier.displayName} badge",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = accent
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CurioBadgeMedal(stage = stage, medalSize = 84.dp)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    if (secretLocked) "???" else stage.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    tier.displayName.uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = accent
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    if (secretLocked) "A rare badge hides here. Keep exploring to reveal it."
+                    else stage.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(12.dp))
+                if (unlocked) {
+                    Text(
+                        "Earned · +${stage.xpReward} XP",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = curioSageInk()
+                    )
+                } else if (!secretLocked) {
+                    Text(
+                        "$progress / ${stage.target} · +${stage.xpReward} XP",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = accent
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { (progress.toFloat() / stage.target.coerceAtLeast(1)).coerceIn(0f, 1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(50)),
+                        color = accent,
+                        trackColor = accent.copy(alpha = 0.16f)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Close") }
+        }
+    )
 }
 
 /** Secret badges hide their identity (and never show as locked silhouettes). */
@@ -457,12 +586,16 @@ fun CurioBadgeStrip(
     lockedPreview: Int = 2,
     medalSize: Dp = 44.dp,
     onViewAll: () -> Unit = {},
+    onBadgeClick: ((CurioQuests.QuestStage) -> Unit)? = null,
     modifier: Modifier = Modifier,
     emptyText: String = "Complete quests to pin your first badge"
 ) {
-    val allStages = CurioQuests.allStages()
-    val earned = allStages.filter { CurioQuests.isStageDone(it) }
-    val locked = allStages.filterNot { CurioQuests.isStageDone(it) }
+    // v42 — the strip now shows the MERGED shelf (one medal per chain):
+    // earned chains first by best-earned rarity, then a few locked chain
+    // silhouettes for aspiration. Tapping a medal opens its detail dialog.
+    val merged = mergedChainBadges()
+    val earned = merged.filter { it.earned }
+    val locked = merged.filterNot { it.earned }
     if (earned.isEmpty()) {
         Text(
             emptyText,
@@ -475,12 +608,18 @@ fun CurioBadgeStrip(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = modifier.fillMaxWidth()
     ) {
-        // Earned medals, rarest first.
+        // Earned chain medals, best-earned rarity first.
         items(
-            earned.sortedByDescending { badgeTierRank(badgeTier(it)) }.take(earnedLimit),
-            key = { it.id }
-        ) { stage ->
-            CurioBadgeMedal(stage = stage, medalSize = medalSize)
+            earned.take(earnedLimit),
+            key = { it.chain.id }
+        ) { m ->
+            Box(
+                modifier = Modifier.then(
+                    if (onBadgeClick != null) Modifier.clickable { onBadgeClick(m.displayStage) } else Modifier
+                )
+            ) {
+                CurioBadgeMedal(stage = m.displayStage, medalSize = medalSize)
+            }
         }
         if (earned.size > earnedLimit) {
             item {
@@ -509,12 +648,18 @@ fun CurioBadgeStrip(
                 }
             }
         }
-        // A couple of locked silhouettes for aspiration — never Secrets.
+        // A couple of locked chain silhouettes for aspiration — never Secrets.
         items(
-            locked.filterNot { isSecretBadge(it) }.take(lockedPreview),
-            key = { it.id }
-        ) { stage ->
-            CurioBadgeMedal(stage = stage, medalSize = medalSize)
+            locked.filterNot { isSecretBadge(it.displayStage) }.take(lockedPreview),
+            key = { it.chain.id }
+        ) { m ->
+            Box(
+                modifier = Modifier.then(
+                    if (onBadgeClick != null) Modifier.clickable { onBadgeClick(m.displayStage) } else Modifier
+                )
+            ) {
+                CurioBadgeMedal(stage = m.displayStage, medalSize = medalSize)
+            }
         }
     }
 }

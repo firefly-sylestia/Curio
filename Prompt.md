@@ -1,43 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — Explore dialog declutter + pet dialogs doc (v41)
+## Current request — merged badge shelf + quest-paths card grid + profile polish (v42)
 
 ### What was asked
-1. "When I tap explore now, let's clear its dialog texts, just keep the
-   explore 'topic'." — strip the helper paragraphs; keep the topic.
-2. "Keep your research your own" — rephrase it, avoid the em dash, keep
-   it natural, and let the user APPROVE the rephrase.
-3. "Fully export the pet dialogs into the docs — proper format for
-   future changes" — a titled, structured doc below the current lines so
-   rephrased dialogs can be integrated later.
+1. Quests: show completed badges at the top of the badge shelf, by
+   rarity; merge same-category badges (a Deck bronze that earns silver
+   shows as ONE upgraded medal — the bronze no longer stacks at the top).
+2. The quest paths view is boring — redesign its view and layout.
+3. From Profile, tapping a badge should open that badge with its name.
+4. Profile: better "Your profile" font size; make the Edit profile /
+   2-day streak / level-name boxes OPAQUE like the stat box (readable),
+   and fix their spacing.
 
 ### User decisions (ask_user)
-- Pledge wording: **Option 2** — "Keep your research yours. Read the
-  real sources instead of AI summaries, and the discovery is all yours."
-- Dialog text: **Remove both** helper paragraphs (the "Time to…" and the
-  timed-explore note) — title + pledge + the two pill buttons only.
-- Doc scope: **All pet speech** — CurioPet.kt pools + CurioPetBrain.kt
-  dynamic lines + TourController.kt tour script.
+- Shelf ordering: **Merged + labeled sections** — one medal per chain,
+  earned first by rarity, with Earned / Locked section labels.
+- Badge tap: **Badge detail dialog** (name, tier, description, progress).
+- Paths redesign: **Card-per-path grid** (two-column tappable cards).
 
 ### What was done
-1. **Explore dialog** (`TopicRevealScreen`): removed both helper
-  paragraphs; the text block is now the single approved pledge line
-  (bold) + the (unchanged) bubble opt-in row. Title stays
-  "Explore {topic}?". The unused `action` val in the dialog block was
-  removed.
-2. **docs/pet-dialogs.md** — full canonical export: growth-voice legend
-  (BABY / FIRST_EVO / FINAL_EVO), event reactions, streak milestones,
-  evolution ceremony, mood bubbles (with warm-bond twins), greetings +
-  welcome-backs, touch tiers, games (spin cheer, play initiation, landmark
-  pokes, jig, dizzy, drawer, peek/chameleon/spark + interactive moments),
-  memory/fact lines, the brain's say()/coined lines, the tour script, and
-  the mature routine lines — plus an integration checklist (keep pool
-  names, bullet order, placeholders `__LANE__`/`$lane`/`$streak`/…
-  identical when porting).
+1. **CurioBadges.kt** — `MergedChainBadge` + `mergedChainBadges()`: one
+   medal per chain at its best-earned tier (silhouette of its best rarity
+   when locked; SECRET never shows locked). `CurioBadgeDetailDialog`:
+   medal, tier chip, name, description, +XP and live progress bar.
+   `CurioBadgeStrip` now renders the MERGED shelf and takes `onBadgeClick`.
+2. **QuestsScreen.kt** — `PathsCard` rebuilt: card-per-path 2-col grid
+   (glyph, progress bar, merged medal, tier chip); tap → `PathDetailDialog`
+   (stage trail + Go chips); merged pinned strip + `MergedBadgeShelfDialog`
+   (Earned / Locked sections, "· upgraded" chip when earlier rarities were
+   earned). Removed dead `BadgeShelf`/`BadgeTile` grid.
+3. **ProfileScreen.kt** — strip badges (earned + locked) open
+   `CurioBadgeDetailDialog`; Edit/streak/level pills now OPAQUE
+   (lerp toward white / rose twin on AMOLED, 2dp shadow + dark glow);
+   "YOUR PROFILE" kicker labelSmall → labelMedium with wider tracking;
+   pill row spacing tightened (8dp gaps).
 
 ### Validation
 No Gradle locally (env rule). Brace balance + `git diff --check` clean.
-CI on push is the gate. Changelog + `app/AGENTS.md` v41 bullet updated.
+CI on push is the gate. Changelog + `app/AGENTS.md` v42 bullet updated.
 
 ### What was asked
 1. Topic Reveal: a small glitch when it opens — a white/creamy strip at

@@ -89,6 +89,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
@@ -649,9 +650,11 @@ private fun ProfileHero(
                         )
                         Text(
                             "YOUR PROFILE",
-                            style = MaterialTheme.typography.labelSmall.copy(
+                            // v42 — bumped from labelSmall so the kicker
+                            // reads at a proper header size on the banner.
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 1.2.sp
+                                letterSpacing = 1.4.sp
                             ),
                             color = ink.copy(alpha = 0.88f)
                         )
@@ -723,14 +726,20 @@ private fun ProfileHero(
                     // on narrow phones. The labels are deliberately compact
                     // and ellipsized inside their own cell rather than being
                     // allowed to push the neighboring control off the edge.
+                    // v42 — the action pills (Edit profile · streak · level)
+                    // are now OPAQUE like the stat pane below: a solid
+                    // lifted-glass fill instead of the old ink@18% tint that
+                    // smeared against the busy banner. Same construction as
+                    // the Level · Saved · Lanes pane so all four boxes match.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         ProfileHeroAction(
                             icon = CurioIcons.Edit,
                             label = "Edit profile",
+                            fill = fill,
                             ink = ink,
                             onClick = onEditName,
                             modifier = Modifier.weight(1f)
@@ -739,6 +748,7 @@ private fun ProfileHero(
                             ProfileHeroAction(
                                 icon = CurioIcons.LocalFire,
                                 label = "$displayStreak-day streak",
+                                fill = fill,
                                 ink = ink,
                                 modifier = Modifier.weight(1f)
                             )
@@ -746,6 +756,7 @@ private fun ProfileHero(
                         ProfileHeroAction(
                             icon = CurioIcons.WorkspacePremium,
                             label = CurioQuests.levelTitle(level),
+                            fill = fill,
                             ink = ink,
                             modifier = Modifier.weight(1f)
                         )
@@ -857,25 +868,34 @@ private fun ProfileHero(
 private fun ProfileHeroAction(
     icon: String,
     label: String,
+    fill: Color,
     ink: Color,
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    // v42 — OPAQUE lifted-glass fill, the stat pane's construction: a solid
+    // lerp toward white (dark twin on AMOLED) so the pill never dissolves
+    // into the banner and the elevation shadow stays clean behind it.
+    val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+    val pillColor = if (amoled) lerp(fill, CurioColors.HomeRosewood, 0.30f)
+                    else lerp(fill, Color.White, 0.18f)
     Surface(
         onClick = onClick ?: {},
         enabled = onClick != null,
         shape = RoundedCornerShape(18.dp),
-        color = ink.copy(alpha = 0.18f),
+        color = pillColor,
         contentColor = ink,
-        shadowElevation = 0.dp,
-        modifier = modifier.heightIn(min = 58.dp)
+        shadowElevation = 2.dp,
+        modifier = modifier
+            .heightIn(min = 58.dp)
+            .curioDarkGlow(2.dp, RoundedCornerShape(18.dp))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 7.dp),
+                .padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             CurioIcon(icon, null, tint = ink, size = 16.dp)
             Text(
@@ -1038,6 +1058,12 @@ private fun ProgressAndAchievementsCard(
     val unlocked = allStages.filter { CurioQuests.isStageDone(it) }
     val total = allStages.size
     val fraction = if (total == 0) 0f else unlocked.size.toFloat() / total
+    // v42 — tapping a badge on the Profile opens its detail dialog (name,
+    // tier, description, live progress for locked badges).
+    var badgeDialog by remember { mutableStateOf<CurioQuests.QuestStage?>(null) }
+    badgeDialog?.let { stage ->
+        CurioBadgeDetailDialog(stage = stage, onDismiss = { badgeDialog = null })
+    }
 
     Column(
         modifier = Modifier
@@ -1157,6 +1183,8 @@ private fun ProgressAndAchievementsCard(
             lockedPreview = 2,
             medalSize = 46.dp,
             onViewAll = onOpenQuests,
+            // v42 — tap any medal (earned or locked) to open its detail.
+            onBadgeClick = { badgeDialog = it },
             emptyText = currentQuest?.let { "Next: ${it.title}" }
                 ?: "Keep exploring to unlock your first badge."
         )
