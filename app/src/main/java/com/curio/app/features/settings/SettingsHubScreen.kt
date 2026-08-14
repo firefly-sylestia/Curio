@@ -545,7 +545,7 @@ fun SettingsHubScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(settingsRoseAccent().copy(alpha = 0.10f).compositeOver(MaterialTheme.colorScheme.background))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (the Home/Profile language). Settings is category-neutral, so the

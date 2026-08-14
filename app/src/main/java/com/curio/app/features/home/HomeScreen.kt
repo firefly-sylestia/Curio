@@ -102,6 +102,7 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
 import com.curio.app.features.onboarding.CurioOnboardingState
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
@@ -226,7 +227,7 @@ fun HomeScreen(navController: NavController) {
         CurioCategories.byId(id)
     }
     val homeBg = if (homeTintOn) homeTintCat.categoryBackgroundWash()
-        else MaterialTheme.colorScheme.background
+        else settingsRoseAccent().copy(alpha = 0.10f).compositeOver(MaterialTheme.colorScheme.background)
     // v27v — the quest hero tint resolution lives here at the TOP of the
     // screen so the sticky top-bar pills (which render OUTSIDE the scroll
     // column) can share it: when "Hero tint too" is on, the menu + profile

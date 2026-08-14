@@ -454,15 +454,17 @@ fun CabinetScreen(navController: NavController) {
         // As the grid scrolls the bar lifts, pops (0.97 → 1.0) and frosts in
         // (Profile's pill mechanism), pinning just below the ragged tear
         // while the entry cards pass underneath it.
-        CabinetStickyChipBar(
-            gridState = gridState,
-            entries = entries,
-            selectedFilter = selectedFilter,
-            showLegacyOnly = showLegacyOnly,
-            onSelectAll = { selectedFilter = null; showLegacyOnly = false },
-            onSelectCategory = { selectedFilter = it; showLegacyOnly = false },
-            onToggleLegacy = { selectedFilter = null; showLegacyOnly = !showLegacyOnly }
-        )
+        if (searchActive) {
+            CabinetStickyChipBar(
+                gridState = gridState,
+                entries = entries,
+                selectedFilter = selectedFilter,
+                showLegacyOnly = showLegacyOnly,
+                onSelectAll = { selectedFilter = null; showLegacyOnly = false },
+                onSelectCategory = { selectedFilter = it; showLegacyOnly = false },
+                onToggleLegacy = { selectedFilter = null; showLegacyOnly = !showLegacyOnly }
+            )
+        }
 
         // ── Torn rose hero banner — drawn ON TOP of the scroll content; the
         // search field expands INSIDE the banner when search is active. The

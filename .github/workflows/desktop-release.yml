@@ -98,13 +98,19 @@ jobs:
             Write-Error "No MSI installer was produced under $root/msi"
             exit 1
           }
-          $appDir = Get-ChildItem "$root/app" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $appDir) {
-            Write-Error "No app image was produced under $root/app"
+          # Compose Desktop's Windows output directory is version-dependent:
+          # recent plugin versions use `app-image` rather than `app`. Find the
+          # actual jpackage image by its executable instead of guessing the
+          # intermediate folder name.
+          $exe = Get-ChildItem $root -Recurse -File -Filter "Curio.exe" -ErrorAction SilentlyContinue |
+              Select-Object -First 1
+          if (-not $exe) {
+            Write-Error "No Curio.exe app image was produced under $root"
             exit 1
           }
-          if (-not (Test-Path "$($appDir.FullName)\Curio.exe")) {
-            Write-Error "Curio.exe not found in the app image"
+          $appDir = $exe.Directory
+          if (-not $appDir) {
+            Write-Error "Curio.exe has no parent app-image directory"
             exit 1
           }
           $version = $env:GITHUB_REF_NAME.TrimStart("v")

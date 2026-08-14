@@ -70,7 +70,7 @@ object AppPreferences {
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     // v28 — dark-mode elevation visibility: black shadows vanish on
     // near-black surfaces, so dark mode can draw a soft LIGHT glow shadow
-    // (default ON). The v28 hairline outline option was REMOVED.
+    // (default OFF). The v28 hairline outline option was REMOVED.
     private const val KEY_DARK_GLOW = "dark_glow"
     private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
     // v7.7 — experimental peek-card redesign, four independent toggles so
@@ -215,9 +215,9 @@ object AppPreferences {
 
     // v28 — dark-mode elevation: black shadows are invisible on the
     // midnight surfaces, so dark mode draws a soft LIGHT glow shadow
-    // (default ON; the v28 hairline outline option was REMOVED — dark cards
-    // rely on the glow + shine instead). Light mode is untouched either way.
-    var darkGlowState by mutableStateOf(true)
+    // (default OFF; users can opt into the glow from Appearance). Light mode
+    // is untouched either way.
+    var darkGlowState by mutableStateOf(false)
         private set
 
     // Pastel crown depth (v7.12, EXPERIMENTAL) — when pastel mode is ON
@@ -611,9 +611,9 @@ object AppPreferences {
     }
 
     // ── Dark-mode elevation (v28) ────────────────────────────────────
-    /** Whether dark mode draws the soft light glow shadow (default on). */
+    /** Whether dark mode draws the soft light glow shadow (default off). */
     fun isDarkGlowEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_DARK_GLOW, true)
+        prefs(context).getBoolean(KEY_DARK_GLOW, false)
 
     fun setDarkGlowEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_DARK_GLOW, enabled).apply()

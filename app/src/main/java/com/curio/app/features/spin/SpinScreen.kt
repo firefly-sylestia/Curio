@@ -1754,7 +1754,7 @@ private fun FilterSheet(
                 BoxWithConstraints(
                     modifier = Modifier.weight(1f)
                 ) {
-                    val gridCols = (maxWidth / 92.dp).toInt().coerceIn(2, 4)
+                    val gridCols = 3
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridCols),
                         modifier = Modifier.fillMaxSize(),
@@ -1894,7 +1894,7 @@ private fun ActiveFilterChip(
     Surface(
         shape = RoundedCornerShape(50),
         color = accent,
-        shadowElevation = 0.dp
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
@@ -1966,7 +1966,7 @@ private fun CompactChip(
     ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                 ),
                 color = if (selected) ink else MaterialTheme.colorScheme.onSurface,

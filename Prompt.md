@@ -1,20 +1,25 @@
 # Prompt.md — Request log
 
-## Current request — fix release Kotlin compilation errors in shared dropdown
+## Current request — app theme, filters, Cabinet controls, and desktop artifact collection
 
 ### What was asked
-Fix CI errors for `:app:kspReleaseKotlin`, `compileDebugKotlin`, and `compileReleaseKotlin` involving `CurioDropdownMenu`, `CurioDropdownItem`, and `Shape`.
+Update only the Android app UI under `app/` for global Rose/Azure Sky hero tinting, default-off glow shadows, larger left-aligned three-column Spin filters, and collapsible Cabinet categories shown during active search. Also fix the desktop tag-release workflow's portable app-image discovery.
 
-### Root causes
-- `EntryDetailScreen.kt` used the shared dropdown composables without importing them, causing unresolved references and cascading composable-context errors.
-- `CurioDropdownMenu.kt` imported `Shape` from `androidx.compose.foundation.shape`; the Compose `Shape` type is `androidx.compose.ui.graphics.Shape`.
+### Decisions
+- Hero tint is global for Home, Profile, Settings, and navigation chrome: Rose by default, Azure Sky when selected.
+- Glow shadows are off by default; the existing Appearance setting remains available.
+- Cabinet category chips are hidden in the normal compact state and shown while search is active, disappearing when search is dismissed.
+- The workflow file is an explicit exception to the app-only scope.
 
-### Fix
-- Added `CurioDropdownMenu` and `CurioDropdownItem` imports to `EntryDetailScreen.kt`.
-- Corrected the `Shape` import in `CurioDropdownMenu.kt`.
+### Changes in progress
+- `AppPreferences.kt`: dark glow default changed to false.
+- `HomeScreen.kt`: plain Home wash now follows the shared hero tint subtly.
+- `SpinScreen.kt`: fixed three-column filter grid, larger filter typography, and 2dp active-chip elevation.
+- `CabinetScreen.kt`: category chip bar is shown during active search.
+- `.github/workflows/desktop-release.yml`: locate `Curio.exe` recursively so both `app` and `app-image` Compose output layouts work.
 
 ### Validation
-Source-level import and reference audit completed. Gradle compile/build commands are prohibited in this environment; CI remains the build gate.
+No Gradle compile/build/lint/test commands may be run locally. Use source audits, `git diff --check`, and CI as the build gate.
 
 
 ## Prior — app-only quick-fact check: NOTHING under 30/50 words (v28)
@@ -609,7 +614,7 @@ on the watch button, tinted with the pill ink, on visible soft-tinted pills,
 ### Validation
 Brace balance OK (3 files), `git diff --check` clean, no leftover
 BrandMonogram/engineTile/watchTile/SearchEngine refs. No Gradle locally
-(env rule) — CI on push is the gate. Docs: app/AGENTS.md v27u bullet.
+(env rule) �� CI on push is the gate. Docs: app/AGENTS.md v27u bullet.
 
 ## Prior — main-card border removal + save-page opaque fills (v27u)
 
@@ -978,7 +983,7 @@ Add a new preference option inside Settings → Personalize and move preference-
 ### Decisions (user-confirmed via ask_user)
 - Moved into new **Preferences** screen: **Search engine, Pet games, Pet chatter, Explore sessions, Floating explore bubble, Live explore notification**. (NOT moved: Voice-to-text stays in Recording; "Explore bubble option in Explore dialog" stays in Notifications.)
 - Placement: **right after Appearance** in Personalize.
-- Judgment call flagged: **Display over other apps** (the overlay-permission row) moved to Preferences with the bubble — it wasn't in the options list, but its grant/decline machinery (launcher + ON_RESUME observer) is inseparable from the bubble toggle, so splitting them would duplicate complex logic.
+- Judgment call flagged: **Display over other apps** (the overlay-permission row) moved to Preferences with the bubble ��� it wasn't in the options list, but its grant/decline machinery (launcher + ON_RESUME observer) is inseparable from the bubble toggle, so splitting them would duplicate complex logic.
 
 ### Changes
 - `SettingsPage.PREFERENCES` enum entry + `PreferencesSection` composable (search engine + SearchEngineDialog, explore sessions, live notification with POST_NOTIFICATIONS flow, floating bubble + overlay permission with launcher/ON_RESUME handling, pet chatter, pet games).

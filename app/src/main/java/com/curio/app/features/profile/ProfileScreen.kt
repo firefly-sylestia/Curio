@@ -72,6 +72,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioQuests
@@ -257,7 +258,7 @@ fun ProfileScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(settingsRoseAccent().copy(alpha = 0.10f).compositeOver(MaterialTheme.colorScheme.background))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (the Home/Spin language). Full-page collage like Home: the glyphs
