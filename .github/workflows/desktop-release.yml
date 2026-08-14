@@ -164,7 +164,17 @@ jobs:
           # hold an unindented PowerShell here-string; `` `` is an escaped
           # backtick in double-quoted strings, so the markdown code spans
           # survive).
+          # Editable release note — same RELEASE_NOTES.md contract as the
+          # Android workflow, so whichever workflow creates the release first
+          # still ships the note above its install guide. Always included
+          # when the file exists.
+          $releaseNotes = ""
+          $notesPath = Join-Path $env:GITHUB_WORKSPACE "RELEASE_NOTES.md"
+          if (Test-Path $notesPath) {
+            $releaseNotes = (Get-Content -Path $notesPath -Raw).TrimEnd() + [Environment]::NewLine + "---" + [Environment]::NewLine
+          }
           $body = @(
+            $releaseNotes,
             "## Curio Desktop for Windows",
             "",
             "Curio is now a native Windows app (the Compose Multiplatform desktop port).",

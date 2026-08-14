@@ -97,6 +97,23 @@ dispatch for testing — PR/push CI builds just the Android APK, see
 - Validates the build output with hard guards: the `.msi` must exist, the
   app image must contain `Curio.exe`; unmatched upload files fail the run.
 
+### Editable release note (`RELEASE_NOTES.md`)
+
+`RELEASE_NOTES.md` at the repo root is the EDITABLE release note the
+user maintains. Both tag workflows embed it at the TOP of the GitHub
+release body when they create the release:
+
+- `release.yml` (Android) and `desktop-release.yml` (Windows) read the
+  file on tag runs and prepend its content, followed by a `---` rule,
+  ABOVE their auto-generated install guide (the APK table for Android;
+  the portable zip / MSI table for desktop). The install help is always
+  appended after the note, never replaced by it.
+- The file is always included when present — no template guard. The user
+  updates it before tagging; the v1.0 launch copy is the shipped default.
+- The desktop workflow only writes a body when IT creates the release
+  first (same `update_release_body: false` race handling), so either
+  workflow winning the race still ships the note.
+
 ### Contributor templates
 
 - Bug reports collect reproducible steps, expected and actual behavior, Curio area, app/device versions, logs, and sanitized screenshots.

@@ -137,6 +137,21 @@ jobs:
           min_android="8.0"
 
           body="$GITHUB_WORKSPACE/release-body.md"
+          : > "$body"
+
+          # Editable release note — RELEASE_NOTES.md at the repo root. Its
+          # content is embedded at the TOP of the release body, above the
+          # install guide, so "what's new" reads first. The user updates this
+          # file before tagging; it is always included as-is.
+          if [ -f "$GITHUB_WORKSPACE/RELEASE_NOTES.md" ]; then
+            {
+              cat "$GITHUB_WORKSPACE/RELEASE_NOTES.md"
+              echo ""
+              echo "---"
+              echo ""
+            } >> "$body"
+          fi
+
           {
             echo "## Curio $vname ($vcode)"
             echo ""
@@ -144,7 +159,7 @@ jobs:
             echo ""
             echo "| File | Best for | Size |"
             echo "|---|---|---|"
-          } > "$body"
+          } >> "$body"
 
           for apk in *.apk; do
             base="${apk%.apk}"
