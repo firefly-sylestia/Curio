@@ -960,7 +960,8 @@ fun TopicRevealScreen(
 
     if (showExploreDialog && resolved != null) {
         val topic = resolved
-        val action = topic.exploreAction
+        // v41 — the `action` val (verb/duration copy) was removed with the
+        // dialog's helper paragraphs; the pills only need the service glyphs.
         // v27s — music topics (Album / Artist / Song) route the second pill
         // to the user's chosen music service; everything else stays YouTube.
         val musicTopic = topic.isMusicTopic()
@@ -1008,28 +1009,15 @@ fun TopicRevealScreen(
                 )
             },
             text = {
+                // v41 — the dialog is a single line now: the two helper
+                // paragraphs (the engine/verb intro and the timed-explore
+                // note) are gone, leaving the title, the pledge, and the two
+                // pill actions. The pledge is the approved user rephrase —
+                // no em dash, natural voice.
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        // v23 — the browser button searches the user's chosen
-                        // engine (pickable in onboarding + Settings), so the
-                        // copy stays engine-neutral. v27s — music topics name
-                        // the chosen music service instead of YouTube.
-                        "Time to ${action.verb.lowercase()} ${action.targetName}: roughly ${action.durationMinutes} min. Search in your browser with any search engine, or open ${if (musicTopic) watchService.displayName else "YouTube"}.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        "Your explore gets timed (not a countdown), and when you come back we'll ask if you're done so you can write it down.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    // v22 — the no-AI pledge, bold so it leads the dialog's
-                    // intent: research stays the user's own words. v27s — the
-                    // avoid-AI note is spelled out: read real sources, skip
-                    // the AI summaries.
-                    Text(
-                        "Keep your research your own — skip the AI summaries and read the real sources. Stay curious: this is your curiosity, in your own words.",
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                        "Keep your research yours. Read the real sources instead of AI summaries, and the discovery is all yours.",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     // ── v22/v23 — opt-in for the floating explore bubble ──

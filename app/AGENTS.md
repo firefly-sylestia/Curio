@@ -351,6 +351,24 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v41 — Explore dialog declutter + canonical pet-dialog doc.**
+  (1) **Explore dialog:** the two helper paragraphs (the engine/verb
+  intro and the timed-explore note) are gone; the dialog is now the
+  title ("Explore {topic}?"), the rephrased no-AI pledge — "Keep your
+  research yours. Read the real sources instead of AI summaries, and
+  the discovery is all yours." (user-approved, no em dash) — and the two
+  pill actions. The now-unused `action` val was removed from the dialog
+  block (the pill glyphs only need the music-service resolution).
+  (2) **docs/pet-dialogs.md** — the canonical, source-of-truth doc for
+  every Curie/pet spoken line (BABY / FIRST_EVO / FINAL_EVO voices),
+  organized by group: event reactions, streak milestones, evolution
+  ceremony, mood bubbles, greetings/welcome-backs, touch tiers, games,
+  memory/fact lines, the learning brain's composed + coined lines, the
+  tour script, and the mature routine lines. Each section lists the
+  current FIRST_EVO pools with BABY/FINAL_EVO twins inline, plus an
+  integration checklist (keep pool names, bullet order, and placeholders
+  like `__LANE__` / `$lane` / `$streak` identical when porting rephrased
+  lines).
 - **v40 — reveal bottom-band wash + smooth tab crossfade + lane tiles open Cabinet.**
   (1) **Reveal bottom band:** `TopicRevealScreen`'s band now wears
   `cat.categoryBackgroundWash()` (the page's own wash) instead of

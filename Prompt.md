@@ -1,6 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — reveal bottom-band glitch + Profile→Cabinet animation + lane icons + lane-filtered Cabinet (v40)
+## Current request — Explore dialog declutter + pet dialogs doc (v41)
+
+### What was asked
+1. "When I tap explore now, let's clear its dialog texts, just keep the
+   explore 'topic'." — strip the helper paragraphs; keep the topic.
+2. "Keep your research your own" — rephrase it, avoid the em dash, keep
+   it natural, and let the user APPROVE the rephrase.
+3. "Fully export the pet dialogs into the docs — proper format for
+   future changes" — a titled, structured doc below the current lines so
+   rephrased dialogs can be integrated later.
+
+### User decisions (ask_user)
+- Pledge wording: **Option 2** — "Keep your research yours. Read the
+  real sources instead of AI summaries, and the discovery is all yours."
+- Dialog text: **Remove both** helper paragraphs (the "Time to…" and the
+  timed-explore note) — title + pledge + the two pill buttons only.
+- Doc scope: **All pet speech** — CurioPet.kt pools + CurioPetBrain.kt
+  dynamic lines + TourController.kt tour script.
+
+### What was done
+1. **Explore dialog** (`TopicRevealScreen`): removed both helper
+  paragraphs; the text block is now the single approved pledge line
+  (bold) + the (unchanged) bubble opt-in row. Title stays
+  "Explore {topic}?". The unused `action` val in the dialog block was
+  removed.
+2. **docs/pet-dialogs.md** — full canonical export: growth-voice legend
+  (BABY / FIRST_EVO / FINAL_EVO), event reactions, streak milestones,
+  evolution ceremony, mood bubbles (with warm-bond twins), greetings +
+  welcome-backs, touch tiers, games (spin cheer, play initiation, landmark
+  pokes, jig, dizzy, drawer, peek/chameleon/spark + interactive moments),
+  memory/fact lines, the brain's say()/coined lines, the tour script, and
+  the mature routine lines — plus an integration checklist (keep pool
+  names, bullet order, placeholders `__LANE__`/`$lane`/`$streak`/…
+  identical when porting).
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean.
+CI on push is the gate. Changelog + `app/AGENTS.md` v41 bullet updated.
 
 ### What was asked
 1. Topic Reveal: a small glitch when it opens — a white/creamy strip at
