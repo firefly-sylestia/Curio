@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -119,6 +118,7 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.CurioEditorialBody
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -575,7 +575,7 @@ fun TopicRevealScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-        // ── 1. Top bar (pin bookmark + close ✕) ────────────────────────
+        // ── 1. Top bar (category chip + pin bookmark + close ✕) ────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -584,6 +584,39 @@ fun TopicRevealScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // v35 — frosted category chip: the lane's glyph + small-caps
+            // name pinned to the top-left, so the category reads at a
+            // glance next to the pin/close buttons (weight leaves the
+            // end-aligned group in place).
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.weight(1f, fill = false)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    CurioIcon(
+                        name = cat.iconGlyph,
+                        contentDescription = null,
+                        tint = cat.categoryInk(),
+                        size = 16.dp
+                    )
+                    Text(
+                        text = cat.displayName.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp
+                        ),
+                        color = cat.categoryInk(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
             // Pin for later — filled bookmark when pinned (category accent),
             // outline when not. Only meaningful once the topic has resolved.
             Surface(
@@ -1354,6 +1387,14 @@ private fun RevealStartButton(
     // v10 — fixed height matches the paired "Express yourself" button so
     // the two actions read as a unified row instead of mismatched siblings.
     val startShape = RoundedCornerShape(50)
+    // v32 — pastel dark: the muted pastel fill washed the label out; the
+    // fill is deepened via [themedButtonFill] and the label flips to the
+    // bright cream-white the heroes use.
+    val contentInk = if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        pastelFillInk(cat.themedButtonFill())
+    } else {
+        cat.themedButtonInk()
+    }
     Button(
         onClick = onClick,
         enabled = enabled,
@@ -1364,9 +1405,9 @@ private fun RevealStartButton(
             // AMOLED overrides to pitch-black (accent becomes the edge
             // shine); Material wears the device primary with the accent rim.
             containerColor = cat.themedButtonFill(),
-            contentColor = cat.themedButtonInk(),
+            contentColor = contentInk,
             disabledContainerColor = cat.themedButtonFill().copy(alpha = 0.35f),
-            disabledContentColor = cat.themedButtonInk().copy(alpha = 0.45f)
+            disabledContentColor = contentInk.copy(alpha = 0.45f)
         ),
         contentPadding = PaddingValues(
             horizontal = metrics.startPadH,
@@ -1384,7 +1425,7 @@ private fun RevealStartButton(
             CurioIcon(
                 CurioIcons.AutoAwesome,
                 null,
-                tint = cat.onAccent(),
+                tint = contentInk,
                 size = metrics.icon
             )
             Text(
@@ -1420,7 +1461,15 @@ private fun RevealAlreadyButton(
     // categorySurface falls back to the device surface so it stays a proper
     // Material control.
     val surface = cat.categorySurface()
-    val ink = if (enabled) cat.categoryInk() else cat.categoryInk().copy(alpha = 0.40f)
+    // v32 — pastel dark: the Express yourself label flips to the bright
+    // cream-white so it reads crisply on the tinted dark surface.
+    val ink = if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        pastelFillInk(surface)
+    } else if (enabled) {
+        cat.categoryInk()
+    } else {
+        cat.categoryInk().copy(alpha = 0.40f)
+    }
     val shineAccent = cat.themedAccent()
     Surface(
         onClick = onClick,
@@ -1663,6 +1712,8 @@ private fun HeroCard(
                     .padding(20.dp)
             ) {
                 // ── Top — action badge (verb + duration) ────────────────
+                // v35 — the plain dot is now the action's own verb icon
+                // (headphones / play / book / restaurant…) for instant charm.
                 if (action != null) {
                     Surface(
                         shape = RoundedCornerShape(50),
@@ -1674,11 +1725,11 @@ private fun HeroCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(ink)
+                            CurioIcon(
+                                name = verbIcon(action.verb),
+                                contentDescription = null,
+                                tint = ink,
+                                size = 14.dp
                             )
                             Text(
                                 text = "${action.verb} for ~${action.durationMinutes} min",
@@ -1696,6 +1747,24 @@ private fun HeroCard(
                 // measured line count feeds the hero's height so long names
                 // wrap in full instead of being cut at 3 lines (v8.36).
                 Spacer(Modifier.weight(1f))
+                // v35 — category eyebrow: a small frosted caps pill above
+                // the title, so the hierarchy reads eyebrow → title → pills.
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = ink.copy(alpha = 0.16f),
+                    shadowElevation = 0.dp
+                ) {
+                    Text(
+                        text = cat.displayName.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp
+                        ),
+                        color = ink.copy(alpha = 0.92f),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
                 Text(
                     text = resolved?.name ?: cat.displayName,
                     style = MaterialTheme.typography.displaySmall.copy(
@@ -1834,24 +1903,43 @@ private fun TeaserCard(
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                CurioIcon(
-                    name = CurioIcons.AutoAwesome,
-                    contentDescription = null,
-                    tint = cat.categoryInk(),
-                    size = 16.dp
-                )
+                // v35 — the curiosity glyph in a small accent-tinted tile,
+                // matching the ActionPromptCard's icon-tile language.
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Lightbulb,
+                        contentDescription = null,
+                        tint = cat.categoryInk(),
+                        size = 16.dp,
+                        modifier = Modifier.padding(7.dp)
+                    )
+                }
+                // v35 — eyebrow: a small-caps kicker. The old titleSmall
+                // label was SMALLER than the fact body below it (inverted
+                // hierarchy); the caps kicker reads as a label above the
+                // editorial serif body.
                 Text(
-                    text = "One quirky fact to get you curious",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = "One quirky fact to get you curious".uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = cat.categoryInk(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(12.dp))
+            // v35 — the fact reads in the Lora editorial serif (17/27sp),
+            // clearly larger than its kicker.
             Text(
                 text = teaser ?: "Loading topic…",
-                style = MaterialTheme.typography.bodyLarge,
+                style = CurioEditorialBody,
                 color = MaterialTheme.colorScheme.onSurface,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis
@@ -1912,11 +2000,25 @@ private fun ActionPromptCard(
                         )
                     }
                 }
+                // v35 — subtle trailing affordance so the card reads as
+                // actionable.
+                CurioIcon(
+                    name = CurioIcons.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                    size = 18.dp
+                )
             }
             Spacer(Modifier.height(10.dp))
             Text(
                 text = action.instruction,
-                style = MaterialTheme.typography.bodyMedium,
+                // v35 — the instruction reads in the Lora editorial serif
+                // (a touch smaller than the teaser body since it's a
+                // secondary paragraph).
+                style = CurioEditorialBody.copy(
+                    fontSize = 15.sp,
+                    lineHeight = 23.sp
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis

@@ -19,6 +19,8 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * One quick-mix preset: label, glyph, and the lanes it ticks.
@@ -102,8 +104,16 @@ fun PickerPresetChip(
         shape = shape,
         // v27q — selection reads as a SOLID primary fill with onPrimary
         // content; elevation stays a flat 2dp in both states.
+        // v33 — the UNselected pill is a proper raised pill that stands off
+        // the category wash: it lifts clearly toward the page background
+        // (cream in light, a lighter glass in dark) instead of the old
+        // surfaceVariant blend that melted into the tinted picker.
         color = if (selected) MaterialTheme.colorScheme.primary
-                else lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceVariant, 0.70f),
+                else lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    curioPillLift(),
+                    if (isCurioDarkTheme()) 0.18f else 0.60f
+                ),
         shadowElevation = 2.dp,
         modifier = Modifier
             // v28 — dark mode: soft glow + top-lit shine, no border rings.
@@ -111,7 +121,7 @@ fun PickerPresetChip(
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

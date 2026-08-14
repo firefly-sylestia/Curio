@@ -58,7 +58,8 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 20260919
-        versionName = envReleaseVersion ?: "1.0.0"
+        // v34 — bumped by 0.1 per request (release tags still override via env).
+        versionName = envReleaseVersion ?: "1.0.1"
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.

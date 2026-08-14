@@ -93,6 +93,7 @@ import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioEditorialBody
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -580,9 +581,11 @@ private fun OnboardingSlide(slide: OnboardingSlideData) {
 
             Text(
                 text = slide.subtext,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                // v35 — the intro subtext reads in the Lora editorial serif
+                // (the curated-magazine voice) instead of the UI sans.
+                style = CurioEditorialBody.copy(
                     fontSize = 18.sp,
-                    lineHeight = 26.sp
+                    lineHeight = 27.sp
                 ),
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
@@ -630,8 +633,7 @@ private fun SetupSlide(
 
             Text(
                 text = "Grant what you like. You can change it anytime in Settings.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = ink.copy(alpha = 0.85f),
+                style = CurioEditorialBody.copy(color = ink.copy(alpha = 0.85f)),
                 textAlign = TextAlign.Center
             )
 
@@ -978,9 +980,9 @@ private fun ThemeSlide() {
 
             Text(
                 text = "Light, dark, or follow your phone, and keep Curio's soft pastel colors?",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = CurioEditorialBody.copy(
                     fontSize = 18.sp,
-                    lineHeight = 26.sp
+                    lineHeight = 27.sp
                 ),
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center
@@ -1143,9 +1145,9 @@ private fun SearchSlide() {
 
             Text(
                 text = "Pick which search engine the Explore button opens in your browser. You can change it anytime in Settings.",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = CurioEditorialBody.copy(
                     fontSize = 18.sp,
-                    lineHeight = 26.sp
+                    lineHeight = 27.sp
                 ),
                 color = ink.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center

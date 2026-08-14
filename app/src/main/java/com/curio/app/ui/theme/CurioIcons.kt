@@ -78,6 +78,7 @@ object CurioIcons {
     const val Info        = "info"
     const val Edit        = "edit"
     const val Share       = "share"
+    const val Lightbulb   = "lightbulb"        // 💡 — curiosity/fact teaser (v35)
     const val Delete      = "delete"
     const val Replay      = "replay"
     const val Refresh     = "refresh"

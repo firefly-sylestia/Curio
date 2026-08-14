@@ -68,10 +68,10 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.0.0"` (default; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
+- `versionName = "1.0.1"` (default, bumped by 0.1 in v34 per user request; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
-- Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
+- Bundles `material_symbols_outlined.ttf` + `geom.ttf` + `lora.ttf` (v35 — the Lora editorial serif, OFL, variable wght 400–700, ~212KB) directly in `app/src/main/res/font/`; none depend on another module or source tree
 
 ### Curio Database (separate from FieldMind)
 - Curio installs as a separate app under `applicationId = "com.curio.app"` — its data directory is `/data/data/com.curio.app/databases/` (DB name TBD when persistence lands).
@@ -315,6 +315,150 @@ app/src/main/java/com/curio/app/
   ask for it, and when the bubble is OFF with the permission still granted
   an inline "Remove overlay permission" row appears to revoke it (a
   separate revoke-trip flag keeps the return from re-enabling the bubble).
+- **v31 — Adaptive Hero + hero picker, Category pill below the hero,
+  slimmer sort pill, background-tinted surfaces, faster Home.**
+  (1) **"Hero follows Spin lane" renamed "Adaptive Hero"** (Appearance
+  toggle + Settings hub row) and the Profile hero finally follows the
+  lane: `profileRoseAccent()` now runs the same `heroLaneCategory()`
+  check Home/Settings have (it was the only shared hero missing it).
+  (2) **Hero picker is a 2-option segmented control** (Rose hero / Sky
+  azure hero) replacing the "Sky azure hero" switch — Sky azure is
+  GREYED OUT (visible but unselectable, the Material-coming-soon
+  pattern; a one-time migration flips a previously-enabled azure back to
+  rose), and the whole control greys while Adaptive Hero is on.
+  (3) **Category pill moved OUT of the hero** in Cabinet + Topic
+  Browser: it rides its own fixed row just below the hero (page-level
+  pill: on-surface ink over surface-high glass), so the heroes returned
+  to their original heights (`CabinetHeroBannerHeight` 232→180,
+  compact 192→140; the settings `extraRow` slot + `SettingsHeroExtraRow-
+  Height` are gone) and the header text never moves down. The sticky
+  chip bar sits below the pill row (chip-bar offsets derive from
+  `barTop`/heroTotal + `CabinetCategoryPillRowHeight`).
+  (4) **Sort pill slims down:** `CurioSortDropdown` swaps its fully-
+  rounded 50dp capsule for 16dp corners with tighter padding (keeps the
+  uniform 42dp height). (5) **Cream → small tint of the page
+  background, in every theme:** `CurioSettingsCard` (Profile + Settings
+  hub + sub-pages) lerps `surfaceContainerLow` 30% toward `background`;
+  the ink-glass hero pills + sort pill lift toward the page background
+  in light mode via a new `curioPillLift()` helper (dark/AMOLED keep the
+  white lift for visibility); dialogs pull a step toward the background
+  in every theme (`curioDialogContainerColor`); and the settings-family
+  sub-pages (Appearance/Preferences/Support/Backup/Experiments/Promo)
+  now wear the same rose-lean page tint as the hub/Profile instead of
+  the plain cream background (`heroPageBackground(lerp(background,
+  settingsRoseAccent(), 0.10f))` — the spin-lane wash still wins when
+  Adaptive Hero is on). (6) **Home opens faster:** the canonical topic
+  count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
+  parsed the whole ~14k-topic catalog on EVERY return to Home; one
+  parse per process now).
+- **v35 — typography pass: Lora serif + reveal hierarchy + icons.**
+  (1) **New font:** `app/src/main/res/font/lora.ttf` (Lora variable,
+  OFL) bundled; `LoraFontFamily` (multi-entry variable pattern like
+  geom) + `CurioEditorialBody` (17/27sp) and `CurioEditorialLead`
+  (18/29sp SemiBold) top-level styles in CurioTypography.kt. Long-form
+  reading text now uses the serif: the reveal teaser/quick-fact body,
+  the ActionPromptCard instruction (15/23sp), and the onboarding intro
+  subtext (18/27sp on the rose hero). Handwriting/journal fields keep
+  Patrick Hand. (2) **Global type polish:** `bodyLarge` letter-spacing
+  0.5 → 0.3sp, `titleLarge` SemiBold → Bold. (3) **Reveal hero
+  hierarchy:** a small-caps category eyebrow pill (`displayName` caps,
+  labelSmall ExtraBold, 1.5sp tracking) sits above the 34sp title, and
+  the action badge's plain dot is replaced by the verb's own icon
+  (`verbIcon(action.verb)` — headphones/play/book/restaurant…).
+  (4) **Reveal top bar:** a frosted category chip (glyph + caps name,
+  `weight(1f, fill=false)` keeps the pin/close group end-aligned).
+  (5) **TeaserCard:** the inverted hierarchy is fixed — the
+  titleSmall label became a small-caps kicker (labelSmall ExtraBold,
+  1.2sp tracking, category ink) and the fact body reads in
+  `CurioEditorialBody`; the flat sparkle is now a lightbulb
+  (`CurioIcons.Lightbulb`, new constant) in an accent-tinted circular
+  tile. (6) **ActionPromptCard:** trailing `arrow_forward` affordance
+  + serif instruction. (7) **Onboarding:** intro paragraphs (welcome,
+  permissions, theme, search-engine slides) read in Lora.
+- **v34 — Cabinet/Topic Browser hero tidy-up + version bump.**
+  (1) **Sort pill matches the other pills again:** `CurioSortDropdown`
+  corners are back to the fully-rounded 50dp capsule (the v31 16dp
+  corners read rectangular next to the capsule search/select pills);
+  the 42dp height + tight padding keep it slim. (2) **Category pill
+  below search+sort:** the Sort dropdown and Search pill moved OUT of
+  the hero into a controls row below the banner, and the Category pill
+  rides the row BELOW them (both `CabinetScreen` and
+  `TopicDatabaseScreen`; new `CabinetControlsRowHeight` /
+  `DatabaseControlsRowHeight` constants + updated `contentTop`,
+  chip-bar tops and back-to-top padding). The controls row hides while
+  searching (the hero morphs into the search field + Cancel pill, the
+  old hero-pill behavior). (3) **Hero = clean title header:**
+  `CabinetHeroHeader` dropped its `backVisible`/`onBack`/`trailing`
+  params — the conditional back pill and all action pills are gone from
+  the banner — and the title block sits at the TOP (no flex spacer).
+  `SettingsHeroHeader` gained `titleAtTop: Boolean = false` (default
+  keeps all 12 other callers exactly as before; the Topic Database
+  passes true and keeps its back pill since it's a pushed screen).
+  (4) **Select button removed:** the Cabinet's Select pill is gone —
+  long-press enters selection (already existed); the pills in the
+  controls row are page-level now (`onSurface` ink over
+  `surfaceContainerHigh` glass, sort accent = active filter's
+  `themedAccent` or theme primary). (5) **Selection shows only
+  Clear + Delete:** while selecting, the controls row shows just
+  Clear/Select-all + Delete(N) — no cancel, no category pill.
+  (6) **Version:** `versionName` default 1.0.0 → **1.0.1**
+  (`app/build.gradle.kts`; release tags still override via env).
+- **v33 — picker pills, filter-sheet accordion, pastel-dark lane hero.**
+  (1) **Category picker proper pills:** the Original / New page tabs
+  (`PickerPageTab`) and the quick-mix preset chips (`PickerPresetChip`)
+  grow from 4dp to 8dp vertical padding (real ~34dp pills), and their
+  unselected fill now lifts toward `curioPillLift()` (cream in light,
+  lighter glass in dark — `lerp(surfaceContainerHigh, curioPillLift(),
+  0.18/0.60)`) so they stand off the category wash instead of the old
+  `surfaceVariant`/`surfaceContainerHigh` blend that melted into the
+  tinted picker. (2) **Spin FilterSheet accordion:** the Type · Genres ·
+  Era · Origin · Franchise headers became tappable `FilterGroupPill`s
+  (`FilterGroupKey` enum + `FilterGroups.chipsFor`) — one group open at
+  a time, tap the open pill to collapse (selections survive; `null`
+  stays collapsed), tap another to swap, search-narrowed groups fall
+  back to the first available; chips slide in via `expandVertically` +
+  `fadeIn` (tween/FastOutSlowIn) inside an `animateContentSize` column,
+  with a rotating chevron and a per-group selected-count badge. The
+  old LazyVerticalGrid + `GridItemSpan` section grid is gone. (3)
+  **Chips raised neutral:** `CompactChip` light-mode inactive fill
+  lifts to `curioPillLift()` at 0.55 (was White at 0.32) so unselected
+  chips read as neutral raised pills off the pastel sheet; gains a
+  `fillMaxWidth` param (false in the accordion FlowRow so chips wrap
+  at natural pill width). (4) **Filter sheet background:** the sheet
+  container now wears `categoryBackgroundWash()` — the same soft page
+  tint as the Spin page — instead of the stronger card-level
+  `categorySurface` that read as the raw hero color (Material keeps its
+  device surface). (5) **Pastel-dark lane hero darker:** `headerAccent()`
+  steps pastel-dark banners down (lightness x0.80, floor 0.30) whether
+  or not the Deeper header toggle is on; the plain rose hero keeps its
+  deep `HomeRosewoodDark` twin untouched. (6) **Hero picker rename:**
+  the greyed "Sky azure hero" option (and its hint) is renamed
+  "Azure hero" — behavior unchanged (still visible but unselectable).
+- **v32 — non-pastel peek/hero color fixes + pastel-dark readability.**
+  (1) **Non-pastel deck peeks** (`SpinScreen.PeekCard`) step like pastel
+  ones — an HSL lightness drop (light 0.14/0.20 near/far, dark
+  0.11/0.16) + the 0.75x saturation pull — instead of the old black-lerp
+  slabs (0.40/0.52) that read near-black in light mode; the deck keeps
+  its hero-brightest hierarchy with visible gradients. (2) **Category/
+  lane-colored heroes calmer + readable in non-pastel:** `headerAccent()`
+  pulls saturation ~15% (cap 0.60) so a vivid lane accent isn't
+  blinding, and the shared-hero inks (`settingsReadableInk`/
+  `homeReadableInk`/`profileReadableInk`) now resolve via
+  `heroLaneCategory()?.heroHeaderInk()` — white/cream on the deep
+  accent — instead of the fixed dark `onSurface` that made lane-banner
+  text invisible in non-pastel light. (3) **Paper stat card dark =
+  hue-matched deep paper** (`paperStatCardColor`): dark mode builds the
+  deep paper from the base/hero HUE (per-screen color-aware — Home rose,
+  Profile hero, a detail page's category) instead of the fixed muddy
+  brown, with a whisper of warm brown so it still reads as paper.
+  (4) **Pastel-dark control text:** the Categories/Filter bottom-bar
+  labels (`deckControlInk` in `SpinScreen`) and Topic Reveal's
+  Start exploring / Express yourself flip to the bright cream-white
+  (`pastelFillInk`) the heroes use, and `themedButtonFill()` deepens the
+  pastel-dark fill (lightness x0.82) so the buttons pop off the page
+  wash. (5) **Orbit dots pastel dark** carry their color again: the
+  85%-white `pastelFillInk` resolution for the dots is overridden to a
+  ~60% white-lerp so they stay light on midnight but clearly tinted.
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation

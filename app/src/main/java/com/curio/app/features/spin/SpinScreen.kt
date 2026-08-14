@@ -2,6 +2,7 @@ package com.curio.app.features.spin
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -13,10 +14,12 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -140,6 +143,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -155,7 +159,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -1480,6 +1483,25 @@ private data class FilterGroups(
 )
 
 /**
+ * v33 — the filter sheet's accordion groups. The Type · Genres · Era ·
+ * Origin · Franchise headers are tappable pills: tapping one expands that
+ * group's chips, tapping the open pill again collapses it (selections
+ * survive), and tapping a different pill swaps — one group open at a time.
+ */
+private enum class FilterGroupKey(val label: String) {
+    TYPE("Type"), GENRES("Genres"), ERA("Era"), ORIGIN("Origin"), FRANCHISE("Franchise")
+}
+
+/** The chips of a group from the (possibly search-narrowed) groups. */
+private fun FilterGroups.chipsFor(key: FilterGroupKey): List<String> = when (key) {
+    FilterGroupKey.TYPE -> types
+    FilterGroupKey.GENRES -> genres
+    FilterGroupKey.ERA -> eras
+    FilterGroupKey.ORIGIN -> origins
+    FilterGroupKey.FRANCHISE -> franchises
+}
+
+/**
  * Franchise tags — set aside as their OWN filter row (MCU, Star Wars, …)
  * instead of burying them among genres, so film/anime/comics decks can be
  * filtered by universe. Kept to the recognizable blockbusters; the sheet
@@ -1612,12 +1634,15 @@ private fun FilterSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         // v11 — the Material style wears the device surface container (no
-        // foreign category tint on the device palette); Curio/AMOLED keep
-        // the tinted category surface that melts into the washed page.
+        // foreign category tint on the device palette); Curio/AMOLED wear
+        // the category wash. v33 — the sheet uses the SOFT page wash (the
+        // same background tint as the Spin page behind it), not the
+        // stronger card-level categorySurface that read as the raw hero
+        // color and glared against the washed page.
         containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
             MaterialTheme.colorScheme.surfaceContainerLow
         } else {
-            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+            cat.categoryBackgroundWash()
         },
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
@@ -1744,115 +1769,113 @@ private fun FilterSheet(
                         .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                 )
 
-                // ── Compact lazy chip grid — grouped Type · Genre · Era ·
-                //    Origin sections, each capped to a handful of chips so
-                //    the sheet stays tidy instead of 100+ raw tags. v29 —
-                //    columns capped at 2–4 per row: the old Adaptive(112dp)
-                //    stretched two huge slab-chips on phones (overwhelming)
-                //    and more than four wide on tablets. Fixed compact pill
-                //    columns keep the sheet scannable in every width. ─────
-                Box(
-                    modifier = Modifier.weight(1f)
+                // ── v33 — accordion filter groups: Type · Genres · Era ·
+                //    Origin · Franchise are tappable PILLS now. Tapping a
+                //    pill expands that group's chips; tapping the open pill
+                //    again collapses it (selections survive); tapping a
+                //    different pill closes the current group and opens that
+                //    one — one group open at a time, with a smooth animated
+                //    expansion (chevron flips, chips slide in). The open
+                //    group is the FIRST available one by default so the
+                //    sheet never looks empty. ───────────────────────────
+                val groupPills = FilterGroupKey.entries
+                    .filter { key -> filteredGroups.chipsFor(key).isNotEmpty() }
+                var openGroup by rememberSaveable {
+                    mutableStateOf(groupPills.firstOrNull())
+                }
+                val effectiveGroup = remember(openGroup, filteredGroups) {
+                    when {
+                        // null means the user deliberately collapsed — stay
+                        // collapsed (selections survive, nothing reopens).
+                        openGroup == null -> null
+                        openGroup in groupPills -> openGroup
+                        // The open group emptied out under search — fall back
+                        // to the first group that still has chips.
+                        else -> groupPills.firstOrNull()
+                    }
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    val gridCols = 3
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(gridCols),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
+                    // ── Group pills row ───────────────────────────────
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                    if (filteredGroups.types.size > 1) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            SectionLabel("Type", Modifier.padding(bottom = 2.dp))
-                        }
-                        items(filteredGroups.types) { st ->
-                            CompactChip(
-                                label = st,
-                                selected = st in draftSubtypes,
+                        groupPills.forEach { key ->
+                            val groupChips = filteredGroups.chipsFor(key)
+                            val selectedCount = if (key == FilterGroupKey.TYPE) {
+                                groupChips.count { it in draftSubtypes }
+                            } else {
+                                groupChips.count { it in draftFilters }
+                            }
+                            FilterGroupPill(
+                                label = key.label,
+                                open = effectiveGroup == key,
+                                selectedCount = selectedCount,
                                 accent = cat.themedAccent(),
                                 ink = cat.onAccent(),
                                 chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                                 onClick = {
-                                    draftSubtypes = if (st in draftSubtypes) draftSubtypes - st else draftSubtypes + st
+                                    openGroup = if (openGroup == key) null else key
                                 }
                             )
                         }
                     }
-                    if (filteredGroups.genres.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            SectionLabel(
-                                "Genres",
-                                Modifier.padding(top = if (filteredGroups.types.size > 1) 6.dp else 0.dp, bottom = 2.dp)
+
+                    // ── Open group's chips, animated ─────────────────
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateContentSize(
+                                animationSpec = tween(320, easing = FastOutSlowInEasing)
                             )
-                        }
-                        items(filteredGroups.genres) { tag ->
-                            CompactChip(
-                                label = tag,
-                                selected = tag in draftFilters,
-                                accent = cat.themedAccent(),
-                                ink = cat.onAccent(),
-                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                onClick = {
-                                    draftFilters = if (tag in draftFilters) draftFilters - tag else draftFilters + tag
+                    ) {
+                        AnimatedVisibility(
+                            visible = effectiveGroup != null,
+                            enter = expandVertically(
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(220)),
+                            exit = shrinkVertically(
+                                animationSpec = tween(260, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(160))
+                        ) {
+                            effectiveGroup?.let { key ->
+                                val isSubtypeGroup = key == FilterGroupKey.TYPE
+                                Column(Modifier.fillMaxWidth()) {
+                                    SectionLabel(key.label, Modifier.padding(bottom = 4.dp))
+                                    FlowRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        filteredGroups.chipsFor(key).forEach { chip ->
+                                            CompactChip(
+                                                label = chip,
+                                                selected = if (isSubtypeGroup) chip in draftSubtypes else chip in draftFilters,
+                                                accent = cat.themedAccent(),
+                                                ink = cat.onAccent(),
+                                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                                fillMaxWidth = false,
+                                                onClick = {
+                                                    if (isSubtypeGroup) {
+                                                        draftSubtypes = if (chip in draftSubtypes) draftSubtypes - chip else draftSubtypes + chip
+                                                    } else {
+                                                        draftFilters = if (chip in draftFilters) draftFilters - chip else draftFilters + chip
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
-                            )
+                            }
                         }
-                    }
-                    if (filteredGroups.eras.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            SectionLabel("Era", Modifier.padding(top = 6.dp, bottom = 2.dp))
-                        }
-                        items(filteredGroups.eras) { era ->
-                            CompactChip(
-                                label = era,
-                                selected = era in draftFilters,
-                                accent = cat.themedAccent(),
-                                ink = cat.onAccent(),
-                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                onClick = {
-                                    draftFilters = if (era in draftFilters) draftFilters - era else draftFilters + era
-                                }
-                            )
-                        }
-                    }
-                    if (filteredGroups.origins.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            SectionLabel("Origin", Modifier.padding(top = 6.dp, bottom = 2.dp))
-                        }
-                        items(filteredGroups.origins) { origin ->
-                            CompactChip(
-                                label = origin,
-                                selected = origin in draftFilters,
-                                accent = cat.themedAccent(),
-                                ink = cat.onAccent(),
-                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                onClick = {
-                                    draftFilters = if (origin in draftFilters) draftFilters - origin else draftFilters + origin
-                                }
-                            )
-                        }
-                    }
-                    if (filteredGroups.franchises.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            SectionLabel(
-                                "Franchise",
-                                Modifier.padding(top = if (filteredGroups.types.size > 1) 6.dp else 6.dp, bottom = 2.dp)
-                            )
-                        }
-                        items(filteredGroups.franchises) { franchise ->
-                            CompactChip(
-                                label = franchise,
-                                selected = franchise in draftFilters,
-                                accent = cat.themedAccent(),
-                                ink = cat.onAccent(),
-                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                onClick = {
-                                    draftFilters = if (franchise in draftFilters) draftFilters - franchise else draftFilters + franchise
-                                }
-                            )
-                        }
-                    }
                     }
                 }
             }
@@ -1942,6 +1965,7 @@ private fun CompactChip(
     accent: Color,
     ink: Color = Color.White,
     chipSurface: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    fillMaxWidth: Boolean = true,
     onClick: () -> Unit
 ) {
     // Plain Surface + clickable (no M3 minimum touch-target inflation) keeps
@@ -1950,14 +1974,14 @@ private fun CompactChip(
     // white so unselected chips read as raised pills off the category-tinted
     // sheet (the old flat surface blended in and the 1dp shadow was
     // invisible), and dark mode adds the light glow so the elevation shows
-    // on midnight too. Pastel-mode fix: the sheet and the chips resolve the
-    // SAME airy pastel (categorySurface ignores the base surface step in
-    // light mode), so the original 0.10 white whisper vanished and the 2dp
-    // elevation read as nothing — the light-mode lift is now a clear surface
-    // step (0.32) that visibly stands off the tinted sheet. Dark mode keeps
-    // its small lift: the chip is already a stronger tint blend than the
-    // sheet there and wears curioDarkGlow.
-    val inactiveFill = lerp(chipSurface, Color.White, if (isCurioDarkTheme()) 0.04f else 0.32f)
+    // on midnight too.
+    // v33 — RAISED NEUTRAL pills: light mode lifts the unselected chips
+    // clearly toward the page background (cream) instead of the 0.32 white
+    // whisper that still melted into the pastel sheet — a neutral raised
+    // pill that visibly stands off the wash in every light theme. Dark mode
+    // keeps its small lift: the chip is already a stronger tint blend than
+    // the sheet there and wears curioDarkGlow.
+    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.55f)
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else inactiveFill,
@@ -1965,7 +1989,7 @@ private fun CompactChip(
         // the unselected chips read as raised pills, not flat tiles.
         shadowElevation = 2.dp,
         modifier = Modifier
-            .fillMaxWidth()
+            .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
             .curioDarkGlow(2.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
@@ -1982,6 +2006,74 @@ private fun CompactChip(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
             )
         }
+}
+
+/**
+ * v33 — accordion group pill for the filter sheet: the group name, a badge
+ * with how many selections live inside, and a chevron that flips as the
+ * group expands/collapses. Open groups wear the category accent; closed
+ * pills are the same raised neutral as the filter chips, so the pill row
+ * stands off the wash in every theme.
+ */
+@Composable
+private fun FilterGroupPill(
+    label: String,
+    open: Boolean,
+    selectedCount: Int,
+    accent: Color,
+    ink: Color,
+    chipSurface: Color,
+    onClick: () -> Unit
+) {
+    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.55f)
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (open) 180f else 0f,
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
+        label = "filterGroupChevron"
+    )
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (open) accent else inactiveFill,
+        shadowElevation = 2.dp,
+        modifier = Modifier
+            .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            .clip(RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 14.dp, end = 10.dp, top = 7.dp, bottom = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (open) FontWeight.ExtraBold else FontWeight.Bold
+                ),
+                color = if (open) ink else MaterialTheme.colorScheme.onSurface
+            )
+            if (selectedCount > 0) {
+                Surface(
+                    shape = CircleShape,
+                    color = if (open) ink.copy(alpha = 0.24f) else accent
+                ) {
+                    Text(
+                        text = "$selectedCount",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                    )
+                }
+            }
+            CurioIcon(
+                CurioIcons.KeyboardArrowDown,
+                null,
+                tint = if (open) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp,
+                modifier = Modifier.graphicsLayer { rotationZ = chevronRotation }
+            )
+        }
+    }
 }
 
 
@@ -2959,15 +3051,25 @@ private fun PeekCard(
                 )
             }
         } else {
-            // Non-pastel peeks deepen MORE and pull saturation down so the
-            // vivid device/category stops recede quietly behind the hero
-            // instead of shining.
-            val level = if (far) 0.52f else 0.40f
+            // v32 — non-pastel peeks step like the pastel ones: an HSL
+            // lightness drop (hue kept, saturation pulled) instead of the
+            // old black-lerp slabs (0.40/0.52) that read as near-black
+            // cards in light mode. The deck keeps its hierarchy — hero
+            // brightest, near a step down, far a step further — while the
+            // peeks stay in the accent family with a visible gradient.
+            val drop = if (darkMode) {
+                if (far) 0.16f else 0.11f
+            } else {
+                if (far) 0.20f else 0.14f
+            }
             blendStops.map { stop ->
-                val c = lerp(stop, Color.Black, level)
-                val h = toHsl(c)
-                // v7.18 — 5% less saturated: pull eased 0.80x → 0.75x.
-                fromHsl(h.h, (h.s * 0.75f).coerceAtMost(0.50f), h.l)
+                val h = toHsl(stop)
+                fromHsl(
+                    h.h,
+                    // v7.18 — 5% less saturated: pull eased 0.80x → 0.75x.
+                    (h.s * 0.75f).coerceAtMost(0.50f),
+                    (h.l - drop).coerceIn(0f, 1f)
+                )
             }
         }
     }
@@ -3399,6 +3501,12 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
             MaterialTheme.colorScheme.onSurface
         !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
             deepHueInk(color)
+        // v32 — pastel DARK: the old pastelFillInk resolution lerped 85%
+        // toward white, so the orbiting dots read as a white necklace with
+        // no color. Pull only ~60% so they stay light on midnight while
+        // clearly carrying the pastel hue.
+        AppPreferences.pastelColorsState && isCurioDarkTheme() ->
+            lerp(color, Color.White, 0.60f)
         else -> pastelFillInk(color)
     }
     AnimatedVisibility(
@@ -3655,6 +3763,22 @@ private fun BottomCta(
 }
 
 /**
+ * v32 — label/icon ink for the Categories/Filter deck controls. In pastel
+ * DARK mode the muted pastel fills sit close to the page wash, so the ink
+ * flips to the bright cream-white ([pastelFillInk]) the heroes use — crisp
+ * on the deepened pastel fill instead of a washed tint. Other modes keep
+ * the accent-aware ink exactly as before.
+ */
+@Composable
+private fun deckControlInk(cat: CurioCategory, selected: Boolean): Color {
+    if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
+        val fill = if (selected) cat.themedButtonFill() else deckControlSurface(cat)
+        return pastelFillInk(fill)
+    }
+    return if (selected) cat.themedButtonInk() else cat.categoryInk()
+}
+
+/**
  * Unselected deck-control fill — the device surface container in the
  * Material style (nothing foreign on the device palette), the tinted
  * category surface otherwise (the page wash's stronger sibling).
@@ -3714,14 +3838,15 @@ private fun VerticalDeckButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                tint = deckControlInk(cat, selected),
                 size = 22.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                // v32 — pastel dark flips to the bright cream ([deckControlInk]).
+                color = deckControlInk(cat, selected),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -3772,7 +3897,7 @@ private fun DeckControlButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                tint = deckControlInk(cat, selected),
                 size = 24.dp
             )
             Text(
@@ -3788,7 +3913,8 @@ private fun DeckControlButton(
                 // onAccent, whose Material value (onPrimaryContainer) left
                 // the text dark-on-primary in light and light-on-primary in
                 // dark — mismatched siblings on the same fill.
-                color = if (selected) cat.themedButtonInk() else cat.categoryInk(),
+                // v32 — pastel dark flips to the bright cream ([deckControlInk]).
+                color = deckControlInk(cat, selected),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

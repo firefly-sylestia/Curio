@@ -52,6 +52,7 @@ import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -197,7 +198,10 @@ fun SupportScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             // v30 — "Hero follows Spin lane": the page wears the lane wash.
-            .background(heroPageBackground())
+            // v31 — the Support page wears the soft page tint (a small
+            // rose-lean of the background shade; the spin-lane wash when
+            // Adaptive Hero is on) instead of the plain cream background.
+            .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
         // ── Watermark backdrop — muted category glyphs (settings family).
         // Wide windows: the NavHost's full-bleed collage replaces the page's

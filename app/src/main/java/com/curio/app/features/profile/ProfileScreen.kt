@@ -72,6 +72,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
@@ -104,13 +105,15 @@ import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.heroHeaderInk
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
-import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -959,6 +962,12 @@ private fun profileRoseAccent(): Color {
         // collage + the sticky pills instead of a tinted fill.
         return Color.Black
     }
+    // v31 — "Adaptive Hero" (v30's "Hero follows Spin lane"): Profile's
+    // hero must follow the spin lane like Home/Settings do — it was the
+    // only shared hero missing this check. In the Curio style the hero
+    // wears the last-picked lane's accent; Material/AMOLED keep their
+    // scheme roles above.
+    heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
@@ -981,7 +990,14 @@ private fun profileRoseAccent(): Color {
 
 /** Readable ink for content sitting on the rose banner (Home's helper). */
 @Composable
-private fun profileReadableInk(fill: Color): Color = when {
+private fun profileReadableInk(fill: Color): Color {
+    // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
+    // Hero), the text must be accent-aware: white/cream on the deep accent
+    // (never the fixed dark onSurface, which was invisible on a vivid lane
+    // banner in non-pastel). The lane branch resolves like every category
+    // hero ([heroHeaderInk]); the plain rose keeps the old ink.
+    heroLaneCategory()?.let { return it.heroHeaderInk() }
+    return when {
     // v9.x — mirror Settings' ink so Material/AMOLED hero text stays
     // readable on the scheme-driven hero fills.
     AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
@@ -991,6 +1007,7 @@ private fun profileReadableInk(fill: Color): Color = when {
     !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
         MaterialTheme.colorScheme.onSurface
     else -> pastelFillInk(fill)
+    }
 }
 
 /**

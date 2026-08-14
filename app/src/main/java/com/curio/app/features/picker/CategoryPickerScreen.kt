@@ -40,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,8 @@ import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
+import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.launch
 
 /**
@@ -485,8 +488,16 @@ fun PickerPageTab(
         shape = shape,
         // v27q — selection reads as a SOLID primary fill with onPrimary
         // content; elevation stays a flat 2dp in both states.
+        // v33 — the UNselected tab is a proper raised pill that stands off
+        // the category wash: it lifts clearly toward the page background
+        // (cream in light, a lighter glass in dark) instead of the flat
+        // surfaceContainerHigh that blended into the tinted picker.
         color = if (selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceContainerHigh,
+                else lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    curioPillLift(),
+                    if (isCurioDarkTheme()) 0.18f else 0.60f
+                ),
         shadowElevation = 2.dp,
         modifier = Modifier
             // v28 — dark mode: soft glow + top-lit shine, no border rings.
@@ -494,7 +505,7 @@ fun PickerPageTab(
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

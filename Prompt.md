@@ -1,6 +1,123 @@
 # Prompt.md — Request log
 
-## Current request — Windows download docs + PR/push = APK only (v31)
+## Current request — typography pass: Lora serif + reveal hierarchy + icons (v35)
+
+### What was asked
+"Typography hierarchy and sizing of the font, new fonts, making the app
+more beautiful — focus on the Topic Reveal screen using bold etc. for a
+better look. New icons inside Topic Reveal and other places too. Suggest
+me." (plus: "suggest some in intro screen too")
+
+### User decisions (ask_user — "suggest me")
+Picked ALL proposed items: reveal type hierarchy, new serif font, reveal
+icon upgrades, global type polish, category chip on the reveal top bar,
+and the intro (onboarding) screen too.
+
+### What was done
+1. **New font — Lora (OFL):** downloaded the Lora variable TTF
+   (wght 400–700, ~212KB) into `app/src/main/res/font/lora.ttf`;
+   `LoraFontFamily` (multi-entry variable pattern like geom) + top-level
+   `CurioEditorialBody` (17/27sp) and `CurioEditorialLead` (18/29sp
+   SemiBold) in CurioTypography.kt. Used for long-form reading text:
+   the reveal teaser/quick-fact, the ActionPromptCard instruction
+   (15/23sp), and the onboarding intro subtext (18/27sp on the rose
+   hero). Handwriting/journal fields keep Patrick Hand.
+2. **Global type polish:** `bodyLarge` letter-spacing 0.5 → 0.3sp;
+   `titleLarge` SemiBold → Bold.
+3. **Reveal hero hierarchy:** small-caps category eyebrow pill above the
+   34sp ExtraBold title (labelSmall ExtraBold, 1.5sp tracking); the
+   action badge's plain 8dp dot replaced by the verb's own icon
+   (`verbIcon(action.verb)`).
+4. **Reveal top bar:** frosted category chip (iconGlyph + caps
+   displayName, `weight(1f, fill=false)` keeps the pin/close group
+   end-aligned).
+5. **TeaserCard:** inverted hierarchy fixed — the titleSmall label
+   became a small-caps kicker (1.2sp tracking, category ink) and the
+   fact body reads in Lora; the flat AutoAwesome sparkle is now
+   `CurioIcons.Lightbulb` (new constant) in an accent-tinted circular
+   tile.
+6. **ActionPromptCard:** trailing `arrow_forward` affordance + serif
+   instruction.
+7. **Onboarding (intro):** the welcome/permissions/theme/search-engine
+   paragraphs read in Lora (18/27sp), matching the reveal's editorial
+   voice.
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean;
+font file verified as TrueType (`00 01 00 00`). CI on push is the gate.
+Changelog + `app/AGENTS.md` v35 bullet updated.
+
+## Prior — hero/category-chip/cream-tint fixes + faster Home (v31)
+
+### What was asked
+1. "The filter chip in cabinet and topic browser is even bigger now — the
+date default chip looks rounded and fat, fix it."
+2. "Place the category chip below the search and sort buttons and fix the
+header text going down as the category chip is taking its place."
+3. "When I go back to the home screen it opens up a little late, like
+it's lagging — fix that."
+4. "The profile isn't following the hero follows spin lane option."
+5. "The XP progress background, your lanes background, settings and
+preferences, and support and diagnostics backgrounds — make all of them
+get a small tint of the background color shade instead of looking cream,
+same in other themes too."
+6. "Gray out the sky azure hero and make it a 2 option with sky azure
+hero and rose hero, and when the hero follows spin lane is active gray
+out that."
+7. "Change the hero follows spin lane text name to Adaptive Hero."
+
+### User decisions (ask_user)
+- Cream tint source: **tint toward the page background** — no matter the
+theme or color (even when the spin-lane category option is on); applies
+not just in Profile but Settings and its sub-pages too, plus other
+cream-looking buttons and the dialog color — keeping text visible in
+both themes and pastel.
+- Sky azure: **grayed but visible, can't be picked** (the "Material ·
+coming soon" pattern); the whole hero picker grays while Adaptive Hero
+is on.
+
+### What was done
+1. **Sort pill slimmed** (`CurioSortDropdown`): fully-rounded 50dp
+   capsule → 16dp corners, tighter horizontal padding; keeps the uniform
+   42dp height.
+2. **Category pill moved below the hero** (Cabinet + Topic Browser): it
+   now rides its own fixed row just below the hero (page-level pill —
+   on-surface ink over surface-high glass) instead of a second row inside
+   the hero. Heroes returned to their original heights (Cabinet
+   232→180 / compact 192→140; the settings `extraRow` slot +
+   `SettingsHeroExtraRowHeight` removed) so the header text never moves
+   down. The sticky chip bar sits below the pill row; Cabinet's chip-bar
+   offsets now derive from a `barTop` parameter (wide-screen correct).
+3. **Home lag:** `TopicJsonLoader.countCanonicalTopics()` re-parsed the
+   whole ~14k-topic catalog on every return to Home (Home's Topics stat
+   produceState restarts on each tab switch back) — the count is now
+   cached in memory (one parse per process).
+4. **Profile follows the lane:** `profileRoseAccent()` gained the same
+   `heroLaneCategory()?.headerAccent()` check Home/Settings already had.
+5. **Cream → small tint of the page background, every theme:**
+   `CurioSettingsCard` (Profile + Settings hub + sub-pages) lerps its
+   surface 30% toward `background`; ink-glass hero pills + sort pill
+   lift toward the page background in light mode via a new
+   `curioPillLift()` helper (dark/AMOLED keep the white lift for
+   visibility); `curioDialogContainerColor()` pulls every theme's
+   dialog toward the background; the settings-family sub-pages
+   (Appearance/Preferences/Support/Backup/Experiments/Promo) wear the
+   same rose-lean page tint as the hub/Profile
+   (`heroPageBackground(lerp(background, settingsRoseAccent(), 0.10f))`)
+   — the spin-lane wash still wins when Adaptive Hero is on.
+6. **Hero picker:** "Sky azure hero" switch → 2-option segmented control
+   (Rose hero / Sky azure hero), Sky azure grayed/unselectable with a
+   one-time migration off azure, whole control grayed when Adaptive Hero
+   is on.
+7. **Renamed "Hero follows Spin lane" → "Adaptive Hero"** (Appearance
+toggle + Settings hub deep row).
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean
+on all edited files; CI on push is the gate. Changelog
+(`fastlane/.../20260919.txt`) + `app/AGENTS.md` v31 bullet updated.
+
+## Prior — no tool/Codebuff commit footers (agent instruction)
 
 ### What was asked
 1. "Add instruction of how to download the windows version of the app."

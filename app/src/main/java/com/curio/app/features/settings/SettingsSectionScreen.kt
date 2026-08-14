@@ -125,8 +125,11 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            // v30 — "Hero follows Spin lane": the page wears the lane wash.
-            .background(heroPageBackground())
+            // v31 — settings sub-pages wear the same soft page tint as the
+            // Settings hub and Profile (a small rose-lean of the background
+            // shade, in every theme; the spin-lane wash when Adaptive Hero
+            // is on) instead of the plain cream background.
+            .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (wildcard sparkle leads; settings is category-neutral).
@@ -175,6 +178,14 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
 @Composable
 private fun AppearanceSection(highlightKey: String? = null) {
     val context = LocalContext.current
+    // v31 — sky azure is greyed out (unavailable); if it was previously
+    // enabled, migrate the hero back to rose so the greyed option never
+    // stays in a selected-but-disabled state.
+    LaunchedEffect(Unit) {
+        if (AppPreferences.heroBlueState) {
+            AppPreferences.setHeroBlueEnabled(context, false)
+        }
+    }
     val themeStyles = listOf(AppPreferences.THEME_STYLE_DEFAULT, AppPreferences.THEME_STYLE_AMOLED, AppPreferences.THEME_STYLE_MATERIAL)
     val themes = listOf(AppPreferences.THEME_LIGHT, AppPreferences.THEME_DARK, AppPreferences.THEME_SYSTEM)
     val themeStyle = AppPreferences.themeStyleState
@@ -214,20 +225,30 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        // v27l — optional sky-azure hero variant for the shared torn banner
-        // (Home / Profile / Settings / Cabinet). Default OFF — the rose
-        // stays.
+        // v31 — the hero picker is a two-option control (Rose hero / Azure
+        // hero; v33 — "Sky azure" shortened to "Azure"). Azure stays
+        // VISIBLE but greyed out (can't be picked — the "Material · coming
+        // soon" pattern), and the whole control greys out while Adaptive
+        // Hero (below) is active, since the lane then owns the hero color.
         SettingsRowPulse(highlightKey == "appearance-hero") {
-            CompactSwitchRow("Sky azure hero", "The shared hero banner wears airy azure instead of rose", AppPreferences.heroBlueState) {
-                AppPreferences.setHeroBlueEnabled(context, it)
+            CompactSegmentedRow(
+                "Hero",
+                listOf("Rose hero", "Azure hero"),
+                if (AppPreferences.heroBlueState) 1 else 0,
+                enabled = !AppPreferences.heroFollowLaneState,
+                disabledIndices = setOf(1),
+                disabledHint = "Azure hero · unavailable for now"
+            ) { index ->
+                AppPreferences.setHeroBlueEnabled(context, index == 1)
             }
         }
         CurioSettingsDivider()
         // v30 — the shared hero AND its page background follow the category
         // last picked on Spin (the Cabinet's language) instead of the
-        // rose/azure. Off by default — rose stays.
+        // rose/azure. Off by default — rose stays. v31 — renamed
+        // "Adaptive Hero".
         SettingsRowPulse(highlightKey == "appearance-hero-lane") {
-            CompactSwitchRow("Hero follows Spin lane", "Shared hero and page take the category you last picked on Spin", AppPreferences.heroFollowLaneState) {
+            CompactSwitchRow("Adaptive Hero", "Shared hero and page take the category you last picked on Spin", AppPreferences.heroFollowLaneState) {
                 AppPreferences.setHeroFollowLaneEnabled(context, it)
             }
         }
