@@ -1,7 +1,11 @@
 package com.curio.app.data
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -58,9 +62,22 @@ object TopicJsonLoader {
 
     private const val ASSET_DIR = "topics"
 
-    /** Per-category caches. Guarded by [cacheMutex] for concurrent first-access safety. */
+    /** Per-category caches. Writes are guarded by [cacheWriteLock] + the
+     *  generation counter (a memory callback can never be undone by a
+     *  stale in-flight parse). */
     private val cache: MutableMap<CategoryId, List<CurioTopic>> = ConcurrentHashMap()
-    private val cacheMutex = Mutex()
+    /** Dedupes in-flight first loads: one shared parse per lane. DIFFERENT
+     *  lanes parse in parallel, while the same lane's concurrent callers
+     *  share a single parse. The old single global mutex held through the
+     *  whole parse, so the cold-start prewarm queue blocked Spin's load of
+     *  an unrelated lane until every category finished — and the screen's
+     *  index load double-parsed the big merged index alongside the prewarm. */
+    private val inFlight = ConcurrentHashMap<CategoryId, Deferred<List<CurioTopic>>>()
+    /** Short-held only: guards the in-flight slot map, NEVER the parse body. */
+    private val inFlightMutex = Mutex()
+    /** Parses run on this scope so a shared parse survives its creator's
+     *  cancellation — other awaiters still receive the result. */
+    private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val cacheWriteLock = Any()
     @Volatile private var cacheGeneration: Long = 0L
 
@@ -87,56 +104,77 @@ object TopicJsonLoader {
      * @throws TopicLoadException if the file is missing or malformed,
      *   or if [install] hasn't been called yet.
      */
-    suspend fun load(id: CategoryId): List<CurioTopic> = cacheMutex.withLock {
-        // Keep the cache check and parse in the same critical section. The
-        // previous check-then-parse sequence allowed concurrent first loads
-        // to parse the same large asset more than once, briefly multiplying
-        // its object graph during navigation or recomposition.
-        cache[id]?.let { return@withLock it }
+    suspend fun load(id: CategoryId): List<CurioTopic> {
+        // Fast path: already resident.
+        cache[id]?.let { return it }
+        // Fast path: a cold-start prewarm (or another screen) is already
+        // parsing this lane — share their parse instead of double-parsing
+        // the asset.
+        inFlight[id]?.let { return it.await() }
+        // Create the shared parse under a SHORT mutex (never held during the
+        // parse): the same lane's concurrent callers share one parse, while
+        // different lanes parse in parallel.
+        val deferred: Deferred<List<CurioTopic>> = inFlightMutex.withLock {
+            cache[id]?.let { hit -> return hit }
+            inFlight[id] ?: loadScope.async(Dispatchers.IO) { parseAndCache(id) }
+                .also { inFlight[id] = it }
+        }
+        return try {
+            deferred.await()
+        } finally {
+            // Compare-and-remove so only the CREATOR clears the slot — a
+            // waiter that got cancelled can never evict the shared parse.
+            inFlight.remove(id, deferred)
+        }
+    }
+
+    /**
+     * Parses [id]'s pool (merging every lane for WILDCARD) and caches it.
+     * The shared body behind the in-flight dedupe in [load]; runs on IO.
+     */
+    private suspend fun parseAndCache(id: CategoryId): List<CurioTopic> {
         val generation = cacheGeneration
-        val parsed = withContext(Dispatchers.IO) {
-            if (id == CategoryId.WILDCARD) {
-                // Wildcard = merge ALL categories into one big pool.
-                // Use cache for already-loaded categories, parse + cache
-                // the rest so subsequent per-category loads are free.
-                val merged = mutableListOf<CurioTopic>()
-                val seenIds = mutableSetOf<String>()
-                // 1. Collect from every non-wildcard category.
-                CategoryId.values()
-                    .filter { it != CategoryId.WILDCARD }
-                    .forEach { otherId ->
-                        val topics = cache[otherId]
-                            ?: parseAsset("$ASSET_DIR/${otherId.routeSlug}.json", otherId)
-                                .also {
-                                    synchronized(cacheWriteLock) {
-                                        if (cacheGeneration == generation) cache[otherId] = it
-                                    }
+        val parsed = if (id == CategoryId.WILDCARD) {
+            // Wildcard = merge ALL categories into one big pool.
+            // Use cache for already-loaded categories, parse + cache
+            // the rest so subsequent per-category loads are free.
+            val merged = mutableListOf<CurioTopic>()
+            val seenIds = mutableSetOf<String>()
+            // 1. Collect from every non-wildcard category.
+            CategoryId.values()
+                .filter { it != CategoryId.WILDCARD }
+                .forEach { otherId ->
+                    val topics = cache[otherId]
+                        ?: parseAsset("$ASSET_DIR/${otherId.routeSlug}.json", otherId)
+                            .also {
+                                synchronized(cacheWriteLock) {
+                                    if (cacheGeneration == generation) cache[otherId] = it
                                 }
-                        topics.forEach { t ->
-                            if (seenIds.add(t.id)) merged.add(t)
-                        }
+                            }
+                    topics.forEach { t ->
+                        if (seenIds.add(t.id)) merged.add(t)
                     }
-                // 2. Also pull in wildcard.json for any hand-curated
-                //    topics not already covered by the category files.
-                runCatching {
-                    parseAsset("$ASSET_DIR/${CategoryId.WILDCARD.routeSlug}.json", CategoryId.WILDCARD)
-                }.onFailure {
-                    android.util.Log.w("TopicJsonLoader", "wildcard.json skipped: ${it.message}")
-                }.getOrNull()?.forEach { t ->
-                    if (seenIds.add(t.id)) merged.add(t)
                 }
-                merged
-            } else {
-                parseAsset("$ASSET_DIR/${id.routeSlug}.json", id)
+            // 2. Also pull in wildcard.json for any hand-curated
+            //    topics not already covered by the category files.
+            runCatching {
+                parseAsset("$ASSET_DIR/${CategoryId.WILDCARD.routeSlug}.json", CategoryId.WILDCARD)
+            }.onFailure {
+                android.util.Log.w("TopicJsonLoader", "wildcard.json skipped: ${it.message}")
+            }.getOrNull()?.forEach { t ->
+                if (seenIds.add(t.id)) merged.add(t)
             }
+            merged
+        } else {
+            parseAsset("$ASSET_DIR/${id.routeSlug}.json", id)
         }
         // A memory callback can clear the concurrent map while this
-        // suspendable parse is in progress. Never let an old parse refill a
-        // cache that Android has just asked us to release.
+        // parse is in progress. Never let an old parse refill a cache
+        // that Android has just asked us to release.
         synchronized(cacheWriteLock) {
             if (cacheGeneration == generation) cache[id] = parsed
         }
-        parsed
+        return parsed
     }
 
     /**
@@ -223,47 +261,55 @@ object TopicJsonLoader {
     private const val INDEX_ASSET = "topic_index.json"
 
     @Volatile private var indexCache: List<TopicIndexEntry>? = null
+    /** Guards the index parse so the cold-start prewarm and the Topic
+     *  Database's own load share ONE parse instead of double-parsing the
+     *  merged 16k-topic index on a slow device. */
+    private val indexMutex = Mutex()
 
     /**
      * Loads (once) and caches the prebuilt database index. Null when the
      * asset is missing or malformed — callers fall back to per-category
-     * loads. Suspends on [Dispatchers.IO].
+     * loads. Suspends on [Dispatchers.IO]. Concurrent callers (the app
+     * prewarm + a screen) share a single parse.
      */
     suspend fun loadIndex(): List<TopicIndexEntry>? = withContext(Dispatchers.IO) {
         indexCache?.let { return@withContext it }
-        val am = assets ?: return@withContext null
-        val entries = runCatching {
-            val root = JSONObject(
-                am.open(INDEX_ASSET).bufferedReader().use { it.readText() }
-            )
-            val arr = root.getJSONArray("topics")
-            List(arr.length()) { i ->
-                val obj = arr.getJSONObject(i)
-                val topic = parseTopic(obj)
-                val year = if (obj.has("year") && !obj.isNull("year"))
-                    obj.optInt("year", 0).takeIf { it > 0 } else null
-                val keys = obj.optJSONObject("keys")
-                fun key(name: String, fallback: String): String {
-                    val k = keys?.optString(name, "")?.takeIf { it.isNotEmpty() }
-                    return k ?: fallback.lowercase()
-                }
-                val tagsArr = keys?.optJSONArray("tags")
-                val tagKeys = if (tagsArr != null)
-                    List(tagsArr.length()) { j -> tagsArr.getString(j) }
-                else topic.tags.map(String::lowercase)
-                TopicIndexEntry(
-                    topic = topic,
-                    year = year,
-                    nameKey = key("name", topic.name),
-                    subtypeKey = key("subtype", topic.subtype),
-                    bylineKey = key("byline", topic.byline),
-                    teaserKey = key("teaser", topic.teaser),
-                    tagKeys = tagKeys
+        indexMutex.withLock {
+            indexCache?.let { return@withContext it }
+            val am = assets ?: return@withContext null
+            val entries = runCatching {
+                val root = JSONObject(
+                    am.open(INDEX_ASSET).bufferedReader().use { it.readText() }
                 )
-            }
-        }.getOrNull()
-        indexCache = entries
-        entries
+                val arr = root.getJSONArray("topics")
+                List(arr.length()) { i ->
+                    val obj = arr.getJSONObject(i)
+                    val topic = parseTopic(obj)
+                    val year = if (obj.has("year") && !obj.isNull("year"))
+                        obj.optInt("year", 0).takeIf { it > 0 } else null
+                    val keys = obj.optJSONObject("keys")
+                    fun key(name: String, fallback: String): String {
+                        val k = keys?.optString(name, "")?.takeIf { it.isNotEmpty() }
+                        return k ?: fallback.lowercase()
+                    }
+                    val tagsArr = keys?.optJSONArray("tags")
+                    val tagKeys = if (tagsArr != null)
+                        List(tagsArr.length()) { j -> tagsArr.getString(j) }
+                    else topic.tags.map(String::lowercase)
+                    TopicIndexEntry(
+                        topic = topic,
+                        year = year,
+                        nameKey = key("name", topic.name),
+                        subtypeKey = key("subtype", topic.subtype),
+                        bylineKey = key("byline", topic.byline),
+                        teaserKey = key("teaser", topic.teaser),
+                        tagKeys = tagKeys
+                    )
+                }
+            }.getOrNull()
+            indexCache = entries
+            entries
+        }
     }
 
     /** Synchronous accessor — null until [loadIndex] first succeeds. */

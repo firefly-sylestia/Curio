@@ -724,7 +724,10 @@ fun HomeScreen(navController: NavController) {
                     )
                 }
             }
-            Spacer(Modifier.height(20.dp))
+            // v49 — one consistent 12dp section rhythm below the shuffle
+            // deck: the old 20dp ends stacked with the 20dp spacer before
+            // Saved (40dp of dead space when no session/queue is live).
+            Spacer(Modifier.height(12.dp))
 
             // ── 2. Currently exploring — live session card ──────────────
             val activeSession = ExploreSessionStore.activeSessionState
@@ -768,7 +771,7 @@ fun HomeScreen(navController: NavController) {
                         ExploreSessionService.stop(context)
                     }
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(12.dp))
             }
 
             // ── 3. Queued explores — sessions set aside for later ──────
@@ -820,10 +823,8 @@ fun HomeScreen(navController: NavController) {
                         }
                     }
                 }
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(12.dp))
             }
-
-            Spacer(Modifier.height(20.dp))
 
             // ── 4. Saved — bookmarked quotes + pinned topics ───────────
             val savedQuotes = AppPreferences.savedQuotesState
@@ -862,17 +863,22 @@ fun HomeScreen(navController: NavController) {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
-                                    Text(
-                                        "View all",
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    CurioIcon(
-                                        CurioIcons.History,
-                                        "Open Topic History",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        size = 14.dp
-                                    )
+                                // v49 — View all reads like the section
+                                // titles (onBackground ink), text + icon the
+                                // same color — the old theme-primary mauve
+                                // washed out against the cream pill in pastel
+                                // light.
+                                Text(
+                                    "View all",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                CurioIcon(
+                                    CurioIcons.History,
+                                    "Open Topic History",
+                                    tint = MaterialTheme.colorScheme.onBackground,
+                                    size = 14.dp
+                                )
                                 }
                             }
                         }
@@ -905,7 +911,7 @@ fun HomeScreen(navController: NavController) {
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(12.dp))
 
             // ── 5. Recents — explored + unexplored topics and recent entries ──
             Column(
@@ -945,11 +951,11 @@ fun HomeScreen(navController: NavController) {
                                 Text(
                                     "View all",
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                                 CurioForwardArrow(
                                     "Open Recents",
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = MaterialTheme.colorScheme.onBackground,
                                     size = 16.dp
                                 )
                             }

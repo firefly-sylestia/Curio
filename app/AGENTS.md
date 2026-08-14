@@ -351,6 +351,36 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v49 — topic-load speed + smooth Topic Browser wheel scroll + Home spacing.**
+  (1) **TopicJsonLoader shares in-flight parses instead of serializing:**
+  the old single global `cacheMutex` was held for the ENTIRE parse, so
+  the cold-start prewarm queue (`loadIndex` + `preloadAll` in
+  `MainActivity`) blocked Spin's load of an unrelated lane until every
+  category finished, and the Topic Browser's index load double-parsed
+  the merged 16k-topic index alongside the prewarm. `load(id)` now uses
+  a per-lane `inFlight` map + short-held `inFlightMutex` + a
+  `loadScope`: DIFFERENT lanes parse in parallel, the same lane's
+  concurrent callers await ONE shared parse (creator-only
+  compare-and-remove), and the shared parse survives its creator's
+  cancellation. `loadIndex()` gains its own `indexMutex` + double-check
+  so prewarm + screen share one parse. (2) **Topic Browser fallback is
+  never fatal:** a failed per-category load in the no-index fallback
+  used to throw inside the `produceState` producer and freeze the
+  screen on "Loading topics…" forever — now `mapNotNull` + `runCatching`
+  skips just that lane. (3) **Wheel-scroll smoothness:** the
+  `snapshotFlow { index to offset }` collect wrote to the saveable
+  registry on EVERY scroll frame (60x/s over a 16k list) — it now
+  persists only when `firstVisibleItemIndex` changes
+  (`distinctUntilChanged`, restore lands at the row top), and the
+  `items(rows, ...)` call gained `contentType` so section headers and
+  topic rows recycle their own LazyColumn slots. (4) **Home spacing:**
+  the section rhythm below the hero is one consistent 12dp (the old
+  20dp ends stacked with the pre-Saved 20dp spacer = 40dp of dead
+  space between the Shuffle the deck card and Saved when no
+  session/queue is live; the doubled spacer is removed), and both
+  "View all" pills (Saved + Recents) now use `onBackground` ink for
+  text AND icon — matching the section titles instead of the washed
+  theme-primary mauve on the cream pill.
 - **v48 — streaming backup RESTORE (OOM fix, mirrors the export).**
   `CurioBackupManager.restore` no longer reads the whole file into a
   String, builds a JSONObject tree, and Gson-parses the entire payload

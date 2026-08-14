@@ -86,6 +86,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.pastelFillInk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -233,9 +234,15 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // Load the canonical lanes; the wildcard lane reuses those
                 // caches (its pool merges every lane, then we keep only its
                 // own curiosities) so the extra lane adds no duplicate parses.
+                // v49 — a failed lane is SKIPPED, never fatal: an exception
+                // here used to kill the produceState producer and freeze the
+                // screen on "Loading topics…" forever. One bad file now
+                // drops just its lane; the rest of the catalog still renders.
                 CatalogState(
-                    entries = visibleCategories.map { cat ->
-                        cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
+                    entries = visibleCategories.mapNotNull { cat ->
+                        runCatching {
+                            cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
+                        }.getOrNull()
                     },
                     loading = false
                 )
@@ -417,6 +424,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // index+offset, scroll back once rows actually exist, and keep the
     // numbers fresh while the user scrolls (only when rows exist, so the
     // empty flash can't overwrite them).
+    // v49 — persist only when the first visible ROW changes, never on every
+    // scroll frame: the old snapshotFlow collected the pixel offset too, so
+    // a fast wheel scroll wrote to the saveable registry ~60x/second
+    // (per-frame churn on a 16k-row list). Restore now lands at the row
+    // top instead of mid-row — a sub-row precision loss no one can feel.
     val hasRows = rows.isNotEmpty()
     LaunchedEffect(hasRows) {
         if (hasRows && (savedScrollIndex > 0 || savedScrollOffset > 0)) {
@@ -425,12 +437,12 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     LaunchedEffect(listState, hasRows) {
         if (!hasRows) return@LaunchedEffect
-        snapshotFlow {
-            listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
-        }.collect { (index, offset) ->
-            savedScrollIndex = index
-            savedScrollOffset = offset
-        }
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .distinctUntilChanged()
+            .collect { index ->
+                savedScrollIndex = index
+                savedScrollOffset = 0
+            }
     }
     // v8.54 — switching the sort reorders the whole list, so land back at
     // the top instead of keeping a random index into the new ordering.
@@ -546,7 +558,15 @@ fun TopicDatabaseScreen(navController: NavController) {
                         }
                     }
                 } else {
-                    items(rows, key = { it.key }) { row ->
+                    items(
+                        rows,
+                        key = { it.key },
+                        // v49 — section headers and topic rows reuse their own
+                        // LazyColumn slots instead of being treated as one
+                        // interchangeable item type, so fast wheel scrolling
+                        // over a 16k-row catalog doesn't churn slot types.
+                        contentType = { row -> if (row.section != null) "section" else "topic" }
+                    ) { row ->
                         when {
                             row.section != null -> DatabaseSectionHeader(
                                 cat = row.section,

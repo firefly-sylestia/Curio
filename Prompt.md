@@ -1,24 +1,65 @@
 # Prompt.md — Request log
 
-## Current request — sort pill matches the Category pill capsule + padding (v49)
+## Current request — topic-load speed + smooth Topic Browser wheel + Home spacing (v49)
 
 ### What was asked
-"Why is the sort pill rectangular? Use the same dimension and size of the
-category pill in cabinet and topic browser."
+1. "Topics loading is so much faster now, but sometimes it doesn't load
+   when restarting and sometimes it causes lag. Tell me how to make it
+   even faster."
+2. "The scrolling wheel in the Topic Browser is so laggy — give me a
+   solution."
+3. Home: too much empty space around the pet house + Shuffle the deck
+   card below the hero tear (user clarified: the gaps between the card
+   and Saved, and between Saved and Recents).
+4. "Fix the color of the 'View all' text and match its icon" (user
+   picked: match the section-title ink).
 
 ### What was done
-`CurioSortDropdown` (the shared sort pill used by the Cabinet + Topic
-Browser heroes) now matches `CabinetHeroActionPill` exactly:
-- **Shape:** v42 18dp corners → full 50dp capsule (same as the Category
-  pill — the 18dp corners were what read as rectangular).
-- **Padding:** label zone 12/8/7/7 → 14/10/10/10 (the Category pill's
-  14dp horizontal / 10dp vertical), same 42dp min height.
-Both heroes inherit the fix from the single shared component.
+1. **TopicJsonLoader shares in-flight parses instead of serializing**
+   (`load` + `loadIndex`): the old single global `cacheMutex` was held
+   for the ENTIRE parse — the cold-start prewarm queue (`loadIndex` +
+   `preloadAll`) blocked Spin's load of an unrelated lane until every
+   category finished, and the Topic Browser's index load double-parsed
+   the merged 16k-topic index alongside the prewarm (the restart
+   stall/lag). Now: per-lane `inFlight` map + short-held `inFlightMutex`
+   + `loadScope` — DIFFERENT lanes parse in parallel, the same lane's
+   concurrent callers await ONE shared parse (creator-only
+   compare-and-remove, shared parse survives creator cancellation);
+   `loadIndex()` gained its own `indexMutex` + double-check so prewarm +
+   screen share one parse. `parseAndCache()` holds the old wildcard
+   merge + generation-guarded cache write.
+2. **Topic Browser fallback never fatal:** a failed per-category load in
+   the no-index fallback used to throw inside the `produceState`
+   producer and freeze the screen on "Loading topics…" forever — now
+   `mapNotNull` + `runCatching` skips just that lane.
+3. **Wheel-scroll smoothness:** the scroll-persist snapshotFlow
+   collected `(index, offset)` and wrote to the saveable registry on
+   EVERY scroll frame (~60x/s over a 16k list) — it now persists only
+   when `firstVisibleItemIndex` changes (`distinctUntilChanged`; restore
+   lands at the row top), and the list `items(rows, …)` gained
+   `contentType` (section vs topic) so LazyColumn recycles the right
+   slot types.
+4. **Home spacing:** one consistent 12dp section rhythm below the
+   shuffle deck — the 20dp section-end spacers stacked with the
+   unconditional pre-Saved 20dp spacer (40dp of dead space between the
+   Shuffle the deck card and Saved when no session/queue is live); the
+   doubled spacer is removed, all section gaps are 12dp.
+5. **View all pills (Saved + Recents):** text + icon now use
+   `onBackground` — the section-title ink — instead of the washed
+   theme-primary mauve on the cream pill.
 
 ### Validation
-Brace/paren balance + `git diff --check` clean (no Gradle locally — CI
-on push is the gate). Small single-file styling fix — no changelog/
-version bump; committed `9eb65eb`, NOT pushed (standing rule).
+Brace/paren balance + `git diff --check` clean on all 3 files (no Gradle
+locally — CI on push is the gate). Changelog + `app/AGENTS.md` v49
+bullet updated.
+
+## Prior — sort pill matches the Category pill capsule + padding (micro-fix)
+
+### What was done
+`CurioSortDropdown` (shared by the Cabinet + Topic Browser heroes) now
+matches `CabinetHeroActionPill` exactly: v42 18dp corners → full 50dp
+capsule, label-zone padding 12/8/7/7 → 14/10/10/10, same 42dp min
+height. Single-file styling fix — no version bump; committed `c47a183`.
 
 ## Prior — streaming backup RESTORE (OOM fix, mirrors the export) (v48)
 
