@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -96,7 +97,7 @@ fun CurioSortDropdown(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(44.dp)
+                modifier = Modifier.heightIn(min = 44.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
                 Row(
@@ -133,7 +134,7 @@ fun CurioSortDropdown(
                         .clip(CircleShape)
                         .clickable(onClick = onToggleDirection)
                         .padding(horizontal = 10.dp)
-                        .height(40.dp)
+                        .heightIn(min = 40.dp)
                 ) {
                     CurioIcon(
                         name = if (ascending) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,

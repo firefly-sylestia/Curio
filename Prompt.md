@@ -1,5 +1,17 @@
 # Prompt.md — Request log
 
+## Current request — font-scale icon alignment audit
+
+### What was asked
+Fix misaligned top-corner/menu/profile icons at high system font scale, audit the app for similar icon issues, and correct all affected shared controls.
+
+### What was done
+- `ui/theme/CurioIcons.kt`: made bundled Material Symbols render at a stable dp-equivalent size by compensating their text `sp` size for `LocalDensity.current.fontScale`; all shared icons now remain centered and do not grow out of their slots when accessibility text is enlarged.
+- `ui/components/CurioSortDropdown.kt`: changed fixed control heights to `heightIn(min = ...)` so text can accommodate font scaling without displacing or clipping the sort icons.
+
+### Validation
+Source audit completed across shared UI components. No Gradle compile/build/lint/test commands may be run locally; use `git diff --check` and CI as the build gate.
+
 ## Current request — app theme, filters, Cabinet controls, and desktop artifact collection
 
 ### What was asked
