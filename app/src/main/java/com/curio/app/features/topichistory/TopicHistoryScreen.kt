@@ -461,9 +461,11 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
     // aware (Material primary, pure black in AMOLED, rose in pastel).
     val fill = settingsRoseAccent()
     val ink = settingsReadableInk(fill)
-    // History's own watermark set: the BOOKS family (open book, library,
-    // quote, edit, …) instead of Home's wildcard casino/star scatter.
-    val heroSymbols = CurioIcons.heroWatermarkSymbols(CategoryFamily.BOOKS)
+    // History's own watermark set: clock/history glyphs instead of a
+    // category family.
+    // v59.2 — the Topic History hero scatters clock/history glyphs that
+    // match the screen instead of the books family.
+    val heroSymbols = CurioIcons.historyHeroSymbols()
     val heroPairs = listOf(
         HistoryHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
         HistoryHeroPair(biasX = 0.55f, biasY = -0.64f, size = 48.dp, rotation = 8f, alpha = 0.13f),

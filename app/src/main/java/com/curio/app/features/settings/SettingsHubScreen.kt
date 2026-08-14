@@ -231,10 +231,12 @@ fun SettingsHeroHeader(
                     .height(bannerHeight)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Mirrored watermark collage — the wildcard family's symbols
-                // pop around the banner edges (settings is category-neutral;
-                // the Profile hero's exact collage construction).
-                val symbols = CurioIcons.heroWatermarkSymbols(CategoryFamily.WILDCARD)
+                // Mirrored watermark collage — screen-matched symbols pop
+                // around the banner edges (settings is category-neutral).
+                // v59.2 — the Settings hero scatters gear/slider/appearance
+                // glyphs that match the screen instead of the generic
+                // wildcard set.
+                val symbols = CurioIcons.settingsHeroSymbols()
                 val pairs = listOf(
                     SettingsHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
                     SettingsHeroPair(biasX = 0.55f, biasY = -0.64f, size = 48.dp, rotation = 8f, alpha = 0.13f),

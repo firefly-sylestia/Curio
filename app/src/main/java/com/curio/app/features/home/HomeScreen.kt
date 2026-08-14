@@ -1795,13 +1795,15 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     val sheetShape = remember(HOME_DRAWER_TEAR_SEED) {
         SoftTornSheetShape(HOME_DRAWER_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
     }
-    val heroSymbols = CurioIcons.heroWatermarkSymbols(CategoryFamily.WILDCARD)
+    // v59.2 — the drawer scatters FEWER, smaller, fainter watermarks (3
+    // mirrored pairs instead of 5) so the brand + greeting dominate, and
+    // the glyphs match the drawer's navigation purpose instead of the
+    // generic wildcard set.
+    val heroSymbols = CurioIcons.drawerHeroSymbols()
     val heroPairs = listOf(
-        HomeHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
-        HomeHeroPair(biasX = 0.55f, biasY = -0.64f, size = 48.dp, rotation = 8f, alpha = 0.13f),
-        HomeHeroPair(biasX = 0.94f, biasY = -0.12f, size = 56.dp, rotation = 14f, alpha = 0.14f),
-        HomeHeroPair(biasX = 0.56f, biasY = 0.34f, size = 50.dp, rotation = 10f, alpha = 0.13f),
-        HomeHeroPair(biasX = 0.94f, biasY = 0.62f, size = 44.dp, rotation = 6f, alpha = 0.11f)
+        HomeHeroPair(biasX = 0.93f, biasY = -0.84f, size = 34.dp, rotation = 12f, alpha = 0.07f),
+        HomeHeroPair(biasX = 0.56f, biasY = -0.52f, size = 38.dp, rotation = 8f, alpha = 0.08f),
+        HomeHeroPair(biasX = 0.92f, biasY = 0.08f, size = 42.dp, rotation = 14f, alpha = 0.08f)
     )
 
     ModalDrawerSheet(

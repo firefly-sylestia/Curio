@@ -351,6 +351,24 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v59.2 — watermark icons: fewer in the drawer, screen-matched elsewhere.**
+  (1) **Drawer calms down** — the Home nav-drawer hero now scatters 3
+  mirrored pairs (was 5), smaller (34–42dp vs 44–56dp) and fainter
+  (alpha 0.07–0.08 vs 0.11–0.14) so the brand + greeting dominate, and
+  its glyphs are navigation-flavored (`drawerHeroSymbols`: menu /
+  explore / auto_awesome / star / diamond / bolt — the first 6 of the
+  old wildcard set were casino/explore/bolt/star/nightlight).
+  (2) **Screen-matched hero watermarks** — new `CurioIcons` sets:
+  `settingsHeroSymbols()` (gears/sliders/appearance: settings, tune,
+  dark_mode, light_mode, contrast, palette, colorize, backup,
+  notifications, layers) now feeds the Settings hub hero;
+  `historyHeroSymbols()` (history, schedule, restore, replay, refresh,
+  timer, calendar_today, undo, auto_stories, menu_book) feeds the Topic
+  History hero (was the BOOKS family). Home keeps the wildcard set (its
+  quest IS wildcard, per user); Profile/Cabinet keep their lane/category
+  echo (deliberate Adaptive Hero behavior); Onboarding keeps wildcard
+  (welcome). All glyphs already used elsewhere in the app — verified in
+  the bundled Material Symbols subset, no tofu.
 - **v59 — deck excludes only SAVED entries; uniform Cabinet card height.**
   (1) **"Only saved entries leave"** — per user decision, a topic stays in
   the shuffle deck until it has a SAVED entry in the Cabinet. The old

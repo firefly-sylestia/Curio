@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — CI compile fix: v58 save-screen refactor (v59.1)
+## Current request — watermark icons: fewer in the drawer, screen-matched elsewhere (v59.2)
+
+### What was asked
+"in the drawer use less watermark icons, and in other screen use
+watermark icons according to that screen."
+
+### User decisions (ask_user)
+- Drawer icon count: **3 pairs but smaller + fainter** (was 5 pairs).
+- Scope: **all torn-hero screens** get purpose-matched watermark icons.
+
+### What was done
+1. **Drawer (HomeScreen.kt `HomeDrawerContent`):** 5 mirrored pairs → 3,
+   sizes 44–56dp → 34–42dp, alphas 0.11–0.14 → 0.07–0.08, so the brand
+   + greeting dominate. Symbols swapped to navigation-flavored
+   `CurioIcons.drawerHeroSymbols()` (menu / explore / auto_awesome /
+   star / diamond / bolt).
+2. **Settings hub hero:** `CurioIcons.settingsHeroSymbols()` — gears,
+   sliders, appearance + backup glyphs (was generic wildcard set).
+3. **Topic History hero:** `CurioIcons.historyHeroSymbols()` — clocks,
+   restores + a book (was the BOOKS family).
+4. **Kept by design:** Home hero stays wildcard (its quest is wildcard);
+   Profile + Cabinet keep their lane/category echo (deliberate Adaptive
+   Hero behavior); Onboarding keeps wildcard (welcome). All new glyphs
+   already used elsewhere in the app — verified in the bundled Material
+   Symbols subset (no tofu).
+
+### Validation
+Brace/paren balance on all 4 files (CurioIcons 13/13 + 68/68, Home
+261/261 + 865/865, SettingsHub 163/163 + 460/460, TopicHistory 136/136
++ 331/331), `git diff --check` clean, stale comments updated. Committed
+locally; push pending user confirmation.
+
+## Prior — CI compile fix: v58 save-screen refactor (v59.1)
 
 ### What was asked
 "fix this" — CI failed compiling the v58 save-page refactor in

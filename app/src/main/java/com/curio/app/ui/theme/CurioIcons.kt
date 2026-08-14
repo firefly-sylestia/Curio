@@ -244,6 +244,33 @@ object CurioIcons {
             "nightlight", "public", "spa", "diamond", "rocket_launch"
         )
     }
+
+    // ── Screen-matched hero watermark sets (v59.2) ───────────────────────
+    // The app-level torn heroes (drawer, Settings, Topic History) scatter
+    // glyphs that match the SCREEN's purpose instead of the generic
+    // wildcard set — navigation for the drawer, gears/sliders for Settings,
+    // clocks/history for Topic History. All glyphs below are already used
+    // elsewhere in the app, so they're verified present in the bundled
+    // Material Symbols subset (no tofu).
+
+    /** Settings hub hero — gears, sliders, appearance + backup glyphs. */
+    fun settingsHeroSymbols(): List<String> = listOf(
+        "settings", "tune", "dark_mode", "light_mode", "contrast",
+        "palette", "colorize", "backup", "notifications", "layers"
+    )
+
+    /** Topic History hero — clocks, restores and revisits (kept a book so
+     *  the topic-catalog flavor survives). */
+    fun historyHeroSymbols(): List<String> = listOf(
+        "history", "schedule", "restore", "replay", "refresh", "timer",
+        "calendar_today", "undo", "auto_stories", "menu_book"
+    )
+
+    /** Home nav-drawer hero — navigation + curiosity glyphs. Six entries
+     *  (the drawer scatters 3 mirrored pairs, so it needs only 6). */
+    fun drawerHeroSymbols(): List<String> = listOf(
+        "menu", "explore", "auto_awesome", "star", "diamond", "bolt"
+    )
 }
 
 /** The Material Symbols glyph a journal mood wears. */
