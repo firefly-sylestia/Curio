@@ -1,6 +1,67 @@
 # Prompt.md — Request log
 
-## Current request — mood board dual layouts (inline vs full-screen) + quote pinch-to-expand (v57)
+## Current request — save page: chips + take tabs pin under the topic strip; mood pill in the strip; attach-tile ink (v58)
+
+### What was asked
+"In journal, field notes and review the attach option (+ icon and text)
+isn't visible, and in journal the same with 'Record a voice note'. Make
+the 'How do you want to capture this one?' text go away, and make the
+voice / review / journal option float attached to the topic. Also the
+universal 'How did it make you feel?' doesn't work when adding a new
+take — fix it and keep it universal. And remove 'How did it make you
+feel' and add a mood status option inside the topic bar at the right
+side with a mood+ icon — tapping it opens the mood selector."
+
+### User decisions (ask_user)
+- Format chips + take tabs sit in a FIXED compact row under the topic
+  strip (floating with the topic); keep the row slim so it doesn't
+  take the whole screen.
+
+### What was done
+1. **Attach-tile ink** — `AddImageButton`, `ImageThumb` (empty state)
+   and `JournalVoiceNoteRow` drew icon+label in raw `accent` on the
+   16% `categoryTintFill` tile (invisible in pastel light). New
+   `internal fun tintedTileInk(accent)` (CaptureFormatComponents):
+   deep same-hue ink in light (`readableLightInk`), light twin in dark
+   (lerp toward white); applied to every attach tile (Journal / Field
+   notes / Review) and the voice-note row (IDLE mic+label, RECORDING
+   mic, STOPPED play).
+2. **Header hoisted to the topic** — the multi-take section state
+   (`sections`/`activeIndex`/`nextId`/`pendingRemoveIndex`/
+   `pendingFormatSwitch` + `snapshotActive`/`removeSection`/
+   `applyFormat` + the aggregate `allReady`/`combinedData`/
+   `anyTakeDraft`/`sectionDraftData` emissions) moved OUT of
+   `FormatBodyForCategory` into `SaveCaptureScreen` (remember keys:
+   `editingEntry?.format` + `editingEntry?.captureData ?: resumedDraftData`
+   — same re-init timing as the old body-level state). The format chips
+   (now ALWAYS one horizontally-scrollable row — the wide FlowRow wrap
+   is gone) + the take tabs pin in a compact fixed row UNDER the topic
+   strip, and the "How do you want to capture this one?" header text is
+   removed. `FormatBodyForCategory` is now editor-only (active take
+   under `key(current.id)`); the remove-take + switch-format confirm
+   dialogs moved to the screen next to the leave dialog. The emissions
+   `LaunchedEffect` also keys on `topic` so the Save CTA enables once
+   the topic loads. New `CaptureTakeTabs` composable (extracted tabs +
+   Add take); edit-mode header gated until the entry loads.
+3. **Mood in the topic strip** — the body's universal mood row is
+   gone. A capsule pill on the RIGHT side of the topic strip shows the
+   active take's mood (or a "Mood +" affordance: MoodHappy glyph + Add
+   "+") and toggles the shared mood selector pinned under the strip
+   (`MoodChipsRow(header = null)` — new optional `header` param). The
+   selector writes into the ACTIVE section (`mood` + stamp into
+   `data?.withMood(m)`), so it works identically for newly added takes.
+
+### Validation
+Brace/paren balance on all 3 files (SaveCaptureScreen 314/314 + depth
+0; CaptureFormatComponents + MarginaliaFormat OK); `git diff --check`
+clean; no stale refs (onCanSaveChange / onDraftDataChanged / val wide /
+windowWidthSizeClass / isWide / moodCapable / "How do you want to
+capture this one?" all gone); `glyph` (JournalMood.glyph) +
+SnapshotStateList imports added, adaptive imports removed; single `when
+(current.format)` opener (the split briefly duplicated it — removed).
+No Gradle locally (env rule) — CI on push is the gate.
+
+## Prior — mood board dual layouts (inline vs full-screen) + quote pinch-to-expand (v57)
 
 ### What was asked
 "The moodboard editing has become so inaccurate — where I place in

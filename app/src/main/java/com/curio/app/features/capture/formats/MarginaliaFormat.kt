@@ -40,6 +40,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.paperInk
 import com.curio.app.ui.theme.pastelFillInk
+import com.curio.app.ui.theme.tintedTileInk
 import kotlinx.coroutines.delay
 
 /**
@@ -375,14 +376,14 @@ private fun JournalVoiceNoteRow(
             ) {
                 CurioIcon(
                     CurioIcons.Mic, null,
-                    tint = if (permissionDenied) MaterialTheme.colorScheme.error else accent,
+                    tint = if (permissionDenied) MaterialTheme.colorScheme.error else tintedTileInk(accent),
                     size = 18.dp
                 )
                 Text(
                     text = if (permissionDenied) "Microphone permission needed"
                            else "Record a voice note",
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (permissionDenied) MaterialTheme.colorScheme.error else accent
+                    color = if (permissionDenied) MaterialTheme.colorScheme.error else tintedTileInk(accent)
                 )
             }
         }
@@ -399,7 +400,7 @@ private fun JournalVoiceNoteRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CurioIcon(CurioIcons.Mic, null, tint = accent, size = 18.dp)
+                CurioIcon(CurioIcons.Mic, null, tint = tintedTileInk(accent), size = 18.dp)
                 Text(
                     text = "Recording · ${seconds}s",
                     style = MaterialTheme.typography.labelLarge,
@@ -442,7 +443,7 @@ private fun JournalVoiceNoteRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CurioIcon(CurioIcons.PlayArrow, null, tint = accent, size = 18.dp)
+                CurioIcon(CurioIcons.PlayArrow, null, tint = tintedTileInk(accent), size = 18.dp)
                 Text(
                     text = buildString {
                         append("Voice note · ${seconds}s")

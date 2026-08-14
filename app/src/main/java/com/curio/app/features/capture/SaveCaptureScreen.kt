@@ -48,6 +48,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -85,8 +86,6 @@ import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.formatSessionShort
 import com.curio.app.data.shortName
-import com.curio.app.ui.adaptive.isWide
-import com.curio.app.ui.adaptive.windowWidthSizeClass
 import android.util.Log
 import com.curio.app.features.capture.formats.FieldNotesFormat
 import com.curio.app.features.capture.formats.GalleryWallFormat
@@ -108,6 +107,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.glyph
 import coil.compose.rememberAsyncImagePainter
 import java.io.File
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -567,6 +567,125 @@ fun SaveCaptureScreen(
             MaterialTheme.colorScheme.surfaceContainerHigh
         }
         val stripInk = if (tintWash) cat.categoryInk() else MaterialTheme.colorScheme.onSurface
+
+        // ── Universal multi-take editor state (v58) ──────────────────────
+        // Hoisted out of the format body so the take tabs + format chips pin
+        // in a compact row UNDER the topic strip (floating with the topic)
+        // and the mood pill can live INSIDE the strip — universal across
+        // every take. Section state (format + live data per take) is held
+        // here so switching takes never loses in-progress content; the old
+        // body-level rules apply unchanged.
+        val defaultFormat = if (cat.defaultFormat == CaptureFormat.OpenNotebook)
+            CaptureFormat.SoundBite else cat.defaultFormat
+        val sectionEntryFormat = editingEntry?.format
+        val sectionInitData = editingEntry?.captureData ?: resumedDraftData
+        val sections = remember(sectionEntryFormat, sectionInitData) {
+            mutableStateListOf<CaptureSectionState>().apply {
+                when {
+                    sectionInitData is CaptureData.Portfolio && sectionInitData.sections.isNotEmpty() ->
+                        sectionInitData.sections.forEachIndexed { i, s ->
+                            add(CaptureSectionState(i, s.format).apply {
+                                seed = s.data
+                                data = s.data
+                                mood = s.data.moodOf()
+                                canSave = true
+                            })
+                        }
+                    sectionInitData is CaptureData.OpenNotebook ->
+                        add(CaptureSectionState(0, sectionInitData.subFormat).apply {
+                            seed = sectionInitData.subData
+                            data = sectionInitData.subData
+                            mood = sectionInitData.subData.moodOf()
+                            canSave = true
+                        })
+                    sectionInitData != null ->
+                        add(CaptureSectionState(0, sectionEntryFormat ?: defaultFormat).apply {
+                            seed = sectionInitData
+                            data = sectionInitData
+                            mood = sectionInitData.moodOf()
+                            canSave = true
+                        })
+                    else -> add(CaptureSectionState(0, defaultFormat))
+                }
+            }
+        }
+        // Mood-board edits reopen on their board section; everything else
+        // starts on the first take.
+        var activeIndex by remember(sectionEntryFormat, sectionInitData) {
+            mutableIntStateOf(
+                (sectionInitData as? CaptureData.Portfolio)
+                    ?.sections?.indexOfFirst { it.format == CaptureFormat.GalleryWall }
+                    ?.coerceAtLeast(0) ?: 0
+            )
+        }
+        var nextId by remember(sectionEntryFormat, sectionInitData) {
+            mutableIntStateOf(sections.maxOfOrNull { it.id }?.plus(1) ?: 0)
+        }
+
+        // Snapshot the outgoing section's data so switching back restores it.
+        fun snapshotActive() {
+            sections.getOrNull(activeIndex)?.let { it.seed = it.data }
+        }
+
+        // Removes a take and re-anchors the active index — shared by the X
+        // button's direct-remove path and the remove-confirmation dialog so
+        // the two can never drift apart.
+        fun removeSection(i: Int) {
+            if (i < activeIndex) activeIndex--
+            sections.removeAt(i)
+            if (activeIndex >= sections.size) activeIndex = sections.size - 1
+        }
+
+        // Switching a FILLED section's format clears its content — confirm
+        // first so a fat-finger on the format chips never silently wipes a
+        // take.
+        var pendingFormatSwitch by remember { mutableStateOf<CaptureFormat?>(null) }
+        // Removing a take that holds drafted content (or a live recording)
+        // also confirms first — in edit mode every take arrives prefilled,
+        // so the X must never silently throw away drafted changes.
+        var pendingRemoveIndex by remember { mutableStateOf<Int?>(null) }
+        fun applyFormat(section: CaptureSectionState, fmt: CaptureFormat) {
+            section.format = fmt
+            section.canSave = false
+            section.data = null
+            section.seed = null
+            section.busy = false
+        }
+
+        // ── Aggregate: all sections must be filled to save ──────────────
+        val allReady = sections.isNotEmpty() && sections.all { it.canSave && it.data != null }
+        val combinedData: CaptureData? = when {
+            !allReady -> null
+            sections.size == 1 -> sections[0].data
+            else -> CaptureData.Portfolio(
+                sections.map { CaptureData.CaptureSection(it.format, it.data!!) }
+            )
+        }
+        // ANY take holding drafted content (or a live recording) — the leave
+        // / switch / remove guards key on this.
+        val anyTakeDraft = sections.any { it.data != null || it.busy }
+        // BEST-EFFORT draft snapshot for autosave — non-null even before
+        // every section is complete, so a partial multi-section draft still
+        // autosaves the filled content instead of nothing.
+        val sectionDraftData: CaptureData? = when {
+            sections.isEmpty() -> null
+            sections.size == 1 -> sections[0].data
+            else -> {
+                val filled = sections.mapNotNull { s ->
+                    s.data?.let { CaptureData.CaptureSection(s.format, it) }
+                }
+                if (filled.isNotEmpty()) CaptureData.Portfolio(filled) else null
+            }
+        }
+        LaunchedEffect(allReady, combinedData, anyTakeDraft, sections.toList(), topic) {
+            canSave = allReady && topic != null && (editEntryId == null || editingEntry != null)
+            hasAnyDraft = anyTakeDraft
+            currentCaptureData = combinedData
+            draftData = sectionDraftData
+        }
+        // The strip's mood pill toggles the shared mood selector pinned
+        // under the strip (see the capture header below).
+        var moodSelectorOpen by remember { mutableStateOf(false) }
         Surface(
             color = stripColor,
             shape = RoundedCornerShape(20.dp),
@@ -600,7 +719,7 @@ fun SaveCaptureScreen(
                         modifier = Modifier.padding(6.dp)
                     )
                 }
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     // v27 — the session duration sits ALONGSIDE the topic in
                     // the strip (long topics ellipsize so the pill never wraps).
                     Row(
@@ -640,6 +759,126 @@ fun SaveCaptureScreen(
                         color = stripInk.copy(alpha = 0.7f)
                     )
                 }
+
+                // ── Mood pill (v58) — the active take's mood lives in the
+                // topic strip now instead of the scrolling body: shows the
+                // take's mood (or a "Mood +" affordance) and toggles the
+                // shared selector pinned under the strip.
+                val activeMood = sections.getOrNull(activeIndex)?.mood
+                Surface(
+                    onClick = { moodSelectorOpen = !moodSelectorOpen },
+                    shape = RoundedCornerShape(50),
+                    color = if (tintWash) lerp(stripColor, cat.themedAccent(), 0.18f)
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.curioDarkGlow(2.dp, RoundedCornerShape(50))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        CurioIcon(
+                            name = activeMood?.glyph ?: CurioIcons.MoodHappy,
+                            contentDescription = "Current mood",
+                            tint = if (tintWash) cat.categoryInk() else stripInk,
+                            size = 16.dp
+                        )
+                        Text(
+                            text = activeMood?.label ?: "Mood",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = if (tintWash) cat.categoryInk() else stripInk
+                        )
+                        if (activeMood == null) {
+                            CurioIcon(
+                                name = CurioIcons.Add,
+                                contentDescription = "Add mood",
+                                tint = if (tintWash) cat.categoryInk() else stripInk,
+                                size = 14.dp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Pinned capture header (v58) — the format chips + take tabs
+        // float ATTACHED to the topic strip (fixed under it, never scrolling
+        // away with the body): one compact horizontally-scrollable row so it
+        // never eats the screen. The strip's mood pill expands the shared
+        // mood selector here.
+        val activeSection = sections.getOrNull(activeIndex)
+        // Edit mode: hold the header until the saved entry loads (the section
+        // state re-initializes from it) so it never flashes empty chips.
+        val editingLoaded = editEntryId == null || editingEntry != null
+        if (activeSection != null && editingLoaded) {
+            if (moodSelectorOpen) {
+                Surface(
+                    color = Color.Transparent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 2.dp)
+                ) {
+                    MoodChipsRow(
+                        mood = activeSection.mood,
+                        accent = cat.themedAccent(),
+                        onMoodChange = { m ->
+                            activeSection.mood = m
+                            // Stamp into the take's live data so the saved
+                            // entry + meta card see it even before the
+                            // editor re-emits.
+                            activeSection.data = activeSection.data?.withMood(m)
+                        },
+                        header = null
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                // ── Compact format chips — control the ACTIVE section ────
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val onSwitch = { target: CaptureFormat ->
+                        // Confirm when this take holds ANY content — text,
+                        // quotes, a rating, images, a voice note, tiles or a
+                        // live recording. An empty take switches freely.
+                        if (activeSection.data != null || activeSection.busy) {
+                            pendingFormatSwitch = target
+                        } else {
+                            applyFormat(activeSection, target)
+                        }
+                    }
+                    CAPTURE_FORMATS.forEach { fmt ->
+                        FormatChip(fmt = fmt, active = activeSection, category = cat, onSwitch = onSwitch)
+                    }
+                }
+                // ── Take tabs + add another take ─────────────────────────
+                CaptureTakeTabs(
+                    category = cat,
+                    sections = sections,
+                    activeIndex = activeIndex,
+                    onSelect = { i -> snapshotActive(); activeIndex = i },
+                    onRequestRemove = { i ->
+                        val section = sections.getOrNull(i)
+                        if (section != null && (section.data != null || section.busy)) {
+                            pendingRemoveIndex = i
+                        } else {
+                            removeSection(i)
+                        }
+                    },
+                    onAddTake = {
+                        snapshotActive()
+                        sections.add(CaptureSectionState(nextId++, defaultFormat))
+                        activeIndex = sections.lastIndex
+                    }
+                )
             }
         }
 
@@ -681,19 +920,11 @@ fun SaveCaptureScreen(
                     } else {
                         FormatBodyForCategory(
                             category = cat,
-                            // Dispatch on the SAVED entry's format in edit mode so
-                            // the right body renders regardless of category default.
-                            entryFormat = editingEntry?.format,
-                            // Edit mode seeds from the saved entry; a fresh capture
-                            // seeds from the RESUMED autosaved draft (if any).
-                            initialData = editingEntry?.captureData ?: resumedDraftData,
+                            sections = sections,
+                            activeIndex = activeIndex,
                             // Reuse the saved entry's id-derived seed so the editor's
                             // watermark pattern matches the saved view exactly.
-                            boardSeed = editEntryId?.hashCode(),
-                            onCanSaveChange = { canSave = it && topic != null && (editEntryId == null || editingEntry != null) },
-                            onDraftChange = { hasAnyDraft = it },
-                            onDataChanged = { currentCaptureData = it },
-                            onDraftDataChanged = { draftData = it }
+                            boardSeed = editEntryId?.hashCode()
                         )
                     }
 
@@ -858,6 +1089,96 @@ fun SaveCaptureScreen(
                 }
             }
         }
+    }
+
+    // ── Confirm before removing a take with drafted content ─────────────
+    pendingRemoveIndex?.let { removeIdx ->
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { pendingRemoveIndex = null },
+            title = { Text("Remove this take?") },
+            text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
+            confirmButton = {
+                TextButton(onClick = {
+                    removeSection(removeIdx)
+                    pendingRemoveIndex = null
+                }) {
+                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { pendingRemoveIndex = null },
+                    colors = curioDialogActionButtonColors()
+                ) {
+                    Text("Keep editing")
+                }
+            }
+        )
+    }
+
+    // ── Confirm before switching a filled take's format ──────────────────
+    // Offers THREE paths: keep the current content as its own take and
+    // switch this one (Save and switch), clear this take and switch
+    // (Switch), or stay put (Keep editing).
+    pendingFormatSwitch?.let { fmt ->
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { pendingFormatSwitch = null },
+            title = { Text("Switch format?") },
+            text = { Text("Switch to ${fmt.shortName}? You can keep what you've added here as its own take first, or switch and clear it.") },
+            dismissButton = {
+                TextButton(
+                    onClick = { pendingFormatSwitch = null },
+                    colors = curioDialogActionButtonColors()
+                ) {
+                    Text("Keep editing")
+                }
+            },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = {
+                        val section = sections.getOrNull(activeIndex)
+                        if (section != null) applyFormat(section, fmt)
+                        pendingFormatSwitch = null
+                    }) {
+                        Text("Switch and clear", color = MaterialTheme.colorScheme.error)
+                    }
+                    Button(
+                        onClick = {
+                            val section = sections.getOrNull(activeIndex)
+                            if (section != null) {
+                                // Snapshot the drafted content into a NEW take
+                                // at this position, then switch this take's
+                                // format — nothing is lost, and the drafts live
+                                // on as their own tabs.
+                                val saved = CaptureSectionState(nextId++, section.format).apply {
+                                    seed = section.data
+                                    data = section.data
+                                    mood = section.mood
+                                    canSave = section.canSave
+                                }
+                                sections.add(activeIndex, saved)
+                                // activeIndex still points at the ORIGINAL take
+                                // (the new one was inserted BEFORE it) — switch
+                                // that one to the new format.
+                                applyFormat(section, fmt)
+                            }
+                            pendingFormatSwitch = null
+                        },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = curioDialogActionColor(),
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text("Save and switch")
+                    }
+                }
+            }
+        )
     }
 
     // ── Three-way leave dialog (save and switch / keep editing / discard) ─
@@ -1323,323 +1644,25 @@ private fun SessionNoteFloatingPill(
 }
 
 /**
- * Universal capture body — the redesigned "How do you want to capture this
- * one?" picker, now offered for EVERY category (the Wildcard pick-any style
- * became universal). A compact chip row pre-selects the category's dedicated
- * format; users can add multiple different takes (sections) which all save
- * into ONE entry. On save, a single section stores bare data (backward
- * compatible) while 2+ sections store a [CaptureData.Portfolio] — the detail
- * page then shows a section switcher.
- *
- * Section state (format + live data) is held here so switching sections
- * never loses in-progress content: each editor emits its data continuously,
- * and the outgoing section's data is snapshotted as the next activation's
- * seed. [initialData] (edit mode) may be a Portfolio, a legacy
- * OpenNotebook, or a bare format payload — all are unwrapped into sections.
+ * Universal capture body — renders the ACTIVE take's format editor. The
+ * section state (takes, active index, format switching, aggregation) is
+ * hoisted to the screen so the format chips + take tabs pin in a compact
+ * row under the topic strip and the mood pill lives inside the strip; this
+ * function only composes the active editor, keyed by section id so
+ * switching takes never bleeds editor state. The editor emits its data
+ * continuously and the screen aggregates + re-emits canSave / draft state.
  */
 @Composable
 private fun FormatBodyForCategory(
     category: CurioCategory,
-    onCanSaveChange: (Boolean) -> Unit,
-    onDataChanged: (CaptureData?) -> Unit,
-    onDraftChange: (Boolean) -> Unit = {},
-    entryFormat: CaptureFormat? = null,
-    initialData: CaptureData? = null,
-    boardSeed: Int? = null,
-    onDraftDataChanged: (CaptureData?) -> Unit = {}
+    sections: SnapshotStateList<CaptureSectionState>,
+    activeIndex: Int,
+    boardSeed: Int? = null
 ) {
-    // Wildcard has no dedicated page — default its first take to Voice.
-    val defaultFormat = if (category.defaultFormat == CaptureFormat.OpenNotebook)
-        CaptureFormat.SoundBite else category.defaultFormat
-
-    val sections = remember(entryFormat, initialData) {
-        mutableStateListOf<CaptureSectionState>().apply {
-            when {
-                initialData is CaptureData.Portfolio && initialData.sections.isNotEmpty() ->
-                    initialData.sections.forEachIndexed { i, s ->
-                        add(CaptureSectionState(i, s.format).apply {
-                            seed = s.data
-                            data = s.data
-                            mood = s.data.moodOf()
-                            canSave = true
-                        })
-                    }
-                initialData is CaptureData.OpenNotebook ->
-                    add(CaptureSectionState(0, initialData.subFormat).apply {
-                        seed = initialData.subData
-                        data = initialData.subData
-                        mood = initialData.subData.moodOf()
-                        canSave = true
-                    })
-                initialData != null ->
-                    add(CaptureSectionState(0, entryFormat ?: defaultFormat).apply {
-                        seed = initialData
-                        data = initialData
-                        mood = initialData.moodOf()
-                        canSave = true
-                    })
-                else -> add(CaptureSectionState(0, defaultFormat))
-            }
-        }
-    }
-    // Mood-board edits reopen on their board section; everything else starts
-    // on the first take.
-    var activeIndex by remember(entryFormat, initialData) {
-        mutableIntStateOf(
-            (initialData as? CaptureData.Portfolio)
-                ?.sections?.indexOfFirst { it.format == CaptureFormat.GalleryWall }
-                ?.coerceAtLeast(0) ?: 0
-        )
-    }
-    var nextId by remember(entryFormat, initialData) {
-        mutableIntStateOf(sections.maxOfOrNull { it.id }?.plus(1) ?: 0)
-    }
-
-    // Snapshot the outgoing section's data so switching back restores it.
-    fun snapshotActive() {
-        sections.getOrNull(activeIndex)?.let { it.seed = it.data }
-    }
-
-    // Removes a take and re-anchors the active index — shared by the X
-    // button's direct-remove path and the remove-confirmation dialog so the
-    // two can never drift apart.
-    fun removeSection(i: Int) {
-        if (i < activeIndex) activeIndex--
-        sections.removeAt(i)
-        if (activeIndex >= sections.size) activeIndex = sections.size - 1
-    }
-
-    // Switching a FILLED section's format clears its content — confirm first
-    // so a fat-finger on the format chips never silently wipes a take.
-    var pendingFormatSwitch by remember { mutableStateOf<CaptureFormat?>(null) }
-    // Removing a take that holds drafted content (or a live recording) also
-    // confirms first — in edit mode every take arrives prefilled, so the X
-    // must never silently throw away drafted changes.
-    var pendingRemoveIndex by remember { mutableStateOf<Int?>(null) }
-    fun applyFormat(section: CaptureSectionState, fmt: CaptureFormat) {
-        section.format = fmt
-        section.canSave = false
-        section.data = null
-        section.seed = null
-        section.busy = false
-    }
-
-    // ── Aggregate: all sections must be filled to save ──────────────────
-    val allReady = sections.isNotEmpty() && sections.all { it.canSave && it.data != null }
-    val combinedData: CaptureData? = when {
-        !allReady -> null
-        sections.size == 1 -> sections[0].data
-        else -> CaptureData.Portfolio(
-            sections.map { CaptureData.CaptureSection(it.format, it.data!!) }
-        )
-    }
-    // ANY take holding drafted content (or a live recording) — the leave /
-    // switch / remove guards key on this, so a rating, images or a voice
-    // note without the required text still count as "content you'd lose".
-    val hasAnyDraft = sections.any { it.data != null || it.busy }
-    // BEST-EFFORT draft snapshot for autosave — unlike [combinedData] this
-    // is non-null even before every section is complete, so a partial
-    // multi-section draft (one take filled, one empty) still autosaves the
-    // filled content instead of nothing.
-    val draftData: CaptureData? = when {
-        sections.isEmpty() -> null
-        sections.size == 1 -> sections[0].data
-        else -> {
-            val filled = sections.mapNotNull { s ->
-                s.data?.let { CaptureData.CaptureSection(s.format, it) }
-            }
-            if (filled.isNotEmpty()) CaptureData.Portfolio(filled) else null
-        }
-    }
-    LaunchedEffect(allReady, combinedData, hasAnyDraft, sections.toList()) {
-        onCanSaveChange(allReady)
-        onDraftChange(hasAnyDraft)
-        onDataChanged(combinedData)
-        onDraftDataChanged(draftData)
-    }
-
-    // Wide windows wrap the six format chips (see below); compact phones
-    // keep the horizontal scroll.
-    val wide = windowWidthSizeClass().isWide
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // ── Universal mood — ONE "How did it make you feel?" row for every
-        // format, sitting right above the capture options. It reflects the
-        // ACTIVE take's mood; picking one writes it into that take's data
-        // (behind the "Entry date & mood" setting).
-        val active = sections.getOrNull(activeIndex)
-        // Every format (including the mood board) carries the shared mood
-        // row now — GalleryWall gained a mood field so a picked mood persists.
-        // OpenNotebook wraps a sub-format which always carries mood too.
-        val moodCapable = true
-        // v30 — the "Entry date & mood" option was removed: mood is always on.
-        if (active != null && moodCapable) {
-            MoodChipsRow(
-                mood = active.mood,
-                accent = category.themedAccent(),
-                onMoodChange = { m ->
-                    active.mood = m
-                    // Stamp into the take's live data so the saved entry +
-                    // meta card see it even before the editor re-emits.
-                    active.data = active.data?.withMood(m)
-                }
-            )
-        }
-
-        Text(
-            text = "How do you want to capture this one?",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        // ── Compact format chips — control the ACTIVE section ────────────
-        // Wide windows wrap the six chips so the whole format set is visible
-        // at a glance; compact phones keep the horizontal scroll.
-        if (active != null) {
-            val onSwitch = { target: CaptureFormat ->
-                // Confirm when this take holds ANY content — text, quotes, a
-                // rating, images, a voice note, tiles or a live recording.
-                // canSave's rule (primary text only) let optional-only drafts
-                // switch silently and vanish; hasAnyDraft keeps every draft
-                // protected. An empty take switches freely.
-                if (active.data != null || active.busy) {
-                    pendingFormatSwitch = target
-                } else {
-                    applyFormat(active, target)
-                }
-            }
-            if (wide) {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CAPTURE_FORMATS.forEach { fmt ->
-                        FormatChip(fmt = fmt, active = active, category = category, onSwitch = onSwitch)
-                    }
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CAPTURE_FORMATS.forEach { fmt ->
-                        FormatChip(fmt = fmt, active = active, category = category, onSwitch = onSwitch)
-                    }
-                }
-            }
-        }
-
-        // ── Section tabs + add another take ──────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            sections.forEachIndexed { i, s ->
-                Surface(
-                    onClick = { snapshotActive(); activeIndex = i },
-                    shape = RoundedCornerShape(50),
-                    color = if (i == activeIndex) category.themedAccent()
-                            else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                    // v27q — flat 2dp: selection reads through the solid
-                    // accent fill.
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.padding(vertical = 2.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(
-                            start = 12.dp,
-                            end = if (sections.size > 1) 4.dp else 12.dp,
-                            top = 8.dp,
-                            bottom = 8.dp
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        CurioIcon(
-                            name = formatGlyph(s.format),
-                            contentDescription = null,
-                            tint = if (i == activeIndex) category.onAccent()
-                                   else MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 14.dp
-                        )
-                        Text(
-                            text = "${i + 1} · ${s.format.shortName}",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                            color = if (i == activeIndex) category.onAccent() else MaterialTheme.colorScheme.onSurface
-                        )
-                        if (sections.size > 1) {
-                            Surface(
-                                onClick = {
-                                    val section = sections.getOrNull(i)
-                                    // Confirm removal when the take holds ANY
-                                    // drafted content (text, quotes, a rating,
-                                    // images, a voice note, tiles) or a live
-                                    // recording; an empty take removes freely.
-                                    if (section != null && (section.data != null || section.busy)) {
-                                        pendingRemoveIndex = i
-                                    } else {
-                                        removeSection(i)
-                                    }
-                                },
-                                shape = CircleShape,
-                                color = Color.Transparent
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.Close,
-                                    contentDescription = "Remove take",
-                                    tint = if (i == activeIndex) category.onAccent()
-                                           else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 16.dp,
-                                    modifier = Modifier.padding(4.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            Surface(
-                onClick = {
-                    snapshotActive()
-                    sections.add(CaptureSectionState(nextId++, defaultFormat))
-                    activeIndex = sections.lastIndex
-                },
-                shape = RoundedCornerShape(50),
-                color = if (AppPreferences.tintWashEffective()) category.tint else category.themedAccent(),
-                modifier = Modifier.padding(vertical = 2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    CurioIcon(
-                        name = CurioIcons.Add,
-                        contentDescription = null,
-                        tint = if (AppPreferences.tintWashEffective()) category.categoryInk() else category.onAccent(),
-                        size = 16.dp
-                    )
-                    Text(
-                        text = "Add take",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = if (AppPreferences.tintWashEffective()) category.categoryInk() else category.onAccent()
-                    )
-                }
-            }
-        }
-
-        // ── Active section's format body ─────────────────────────────────
-        val current = sections.getOrNull(activeIndex)
-        if (current != null) {
-            key(current.id) {
-                when (current.format) {
+    val current = sections.getOrNull(activeIndex)
+    if (current != null) {
+        key(current.id) {
+            when (current.format) {
                     CaptureFormat.SoundBite -> SoundBiteFormat(
                         category.themedAccent(), category.tint,
                         { current.canSave = it },
@@ -1685,96 +1708,105 @@ private fun FormatBodyForCategory(
                 }
             }
         }
-    }
+}
 
-    // ── Confirm before removing a take with drafted content ─────────────
-    pendingRemoveIndex?.let { removeIdx ->
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { pendingRemoveIndex = null },
-            title = { Text("Remove this take?") },
-            text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
-            confirmButton = {
-                TextButton(onClick = {
-                    removeSection(removeIdx)
-                    pendingRemoveIndex = null
-                }) {
-                    Text("Remove", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { pendingRemoveIndex = null },
-                    colors = curioDialogActionButtonColors()
+/**
+ * The pinned take tabs + "Add take" row — sits with the format chips under
+ * the topic strip so switching takes never scrolls away. [onRequestRemove]
+ * is invoked when the user taps a take's X; the screen decides whether to
+ * confirm (drafted content) or remove directly.
+ */
+@Composable
+private fun CaptureTakeTabs(
+    category: CurioCategory,
+    sections: SnapshotStateList<CaptureSectionState>,
+    activeIndex: Int,
+    onSelect: (Int) -> Unit,
+    onRequestRemove: (Int) -> Unit,
+    onAddTake: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        sections.forEachIndexed { i, s ->
+            Surface(
+                onClick = { onSelect(i) },
+                shape = RoundedCornerShape(50),
+                color = if (i == activeIndex) category.themedAccent()
+                        else category.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
+                // v27q — flat 2dp: selection reads through the solid
+                // accent fill.
+                shadowElevation = 2.dp,
+                modifier = Modifier.padding(vertical = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(
+                        start = 12.dp,
+                        end = if (sections.size > 1) 4.dp else 12.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text("Keep editing")
-                }
-            }
-        )
-    }
-
-    // ── Confirm before switching a filled take's format ──────────────────
-    // Offers THREE paths: keep the current content as its own take and
-    // switch this one (Save and switch), clear this take and switch
-    // (Switch), or stay put (Keep editing).
-    pendingFormatSwitch?.let { fmt ->
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { pendingFormatSwitch = null },
-            title = { Text("Switch format?") },
-            text = { Text("Switch to ${fmt.shortName}? You can keep what you've added here as its own take first, or switch and clear it.") },
-            dismissButton = {
-                TextButton(
-                    onClick = { pendingFormatSwitch = null },
-                    colors = curioDialogActionButtonColors()
-                ) {
-                    Text("Keep editing")
-                }
-            },
-            confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(onClick = {
-                        val section = sections.getOrNull(activeIndex)
-                        if (section != null) applyFormat(section, fmt)
-                        pendingFormatSwitch = null
-                    }) {
-                        Text("Switch and clear", color = MaterialTheme.colorScheme.error)
-                    }
-                    Button(
-                        onClick = {
-                            val section = sections.getOrNull(activeIndex)
-                            if (section != null) {
-                                // Snapshot the drafted content into a NEW take
-                                // at this position, then switch this take's
-                                // format — nothing is lost, and the drafts live
-                                // on as their own tabs.
-                                val saved = CaptureSectionState(nextId++, section.format).apply {
-                                    seed = section.data
-                                    data = section.data
-                                    mood = section.mood
-                                    canSave = section.canSave
-                                }
-                                sections.add(activeIndex, saved)
-                                // activeIndex still points at the ORIGINAL take
-                                // (the new one was inserted BEFORE it) — switch
-                                // that one to the new format.
-                                applyFormat(section, fmt)
-                            }
-                            pendingFormatSwitch = null
-                        },
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = curioDialogActionColor(),
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        Text("Save and switch")
+                    CurioIcon(
+                        name = formatGlyph(s.format),
+                        contentDescription = null,
+                        tint = if (i == activeIndex) category.onAccent()
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 14.dp
+                    )
+                    Text(
+                        text = "${i + 1} · ${s.format.shortName}",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = if (i == activeIndex) category.onAccent() else MaterialTheme.colorScheme.onSurface
+                    )
+                    if (sections.size > 1) {
+                        Surface(
+                            onClick = { onRequestRemove(i) },
+                            shape = CircleShape,
+                            color = Color.Transparent
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Close,
+                                contentDescription = "Remove take",
+                                tint = if (i == activeIndex) category.onAccent()
+                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 16.dp,
+                                modifier = Modifier.padding(4.dp)
+                            )
+                        }
                     }
                 }
             }
-        )
+        }
+        Surface(
+            onClick = onAddTake,
+            shape = RoundedCornerShape(50),
+            color = if (AppPreferences.tintWashEffective()) category.tint else category.themedAccent(),
+            modifier = Modifier.padding(vertical = 2.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Add,
+                    contentDescription = null,
+                    tint = if (AppPreferences.tintWashEffective()) category.categoryInk() else category.onAccent(),
+                    size = 16.dp
+                )
+                Text(
+                    text = "Add take",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = if (AppPreferences.tintWashEffective()) category.categoryInk() else category.onAccent()
+                )
+            }
+        }
     }
 }
 
@@ -1841,9 +1873,9 @@ private class CaptureSectionState(val id: Int, initialFormat: CaptureFormat) {
     var canSave by mutableStateOf(false)
     var data by mutableStateOf<CaptureData?>(null)
     var seed by mutableStateOf<CaptureData?>(null)
-    // The take's mood — held HERE (one universal row above the format
-    // options drives it) and stamped into the section's data on every
-    // editor emit + mood change, so all formats share one picker.
+    // The take's mood — held HERE (the topic-strip mood pill drives it, one
+    // universal selector for every take) and stamped into the section's data
+    // on every editor emit + mood change.
     var mood by mutableStateOf<JournalMood?>(null)
     // True while a live recording is in progress — format-switch confirmation
     // must also trigger here (data/canSave are null mid-recording).

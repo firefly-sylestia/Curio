@@ -69,6 +69,8 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.glyph
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.readableLightInk
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.notePaperInk
 import com.curio.app.ui.theme.paperAccent
@@ -222,6 +224,19 @@ fun categoryTintFill(accent: Color): Color =
     lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, 0.16f)
 
 /**
+ * Ink that reads on a [categoryTintFill] tile in EVERY theme — those tiles
+ * are only a 16% accent wash, so raw pastel/light accents wash out on them
+ * (the attach icons + labels were invisible in pastel light mode). Light
+ * mode resolves the deep same-hue twin (the categoryInk rule);
+ * dark mode lifts the accent toward its light twin so deep accents don't
+ * sink into the dark tile.
+ */
+@Composable
+internal fun tintedTileInk(accent: Color): Color =
+    if (isCurioDarkTheme()) lerp(accent, Color.White, 0.45f)
+    else readableLightInk(accent)
+
+/**
  * Small image placeholder thumbnail — 80dp square with rounded corners.
  * Used by Reel Notes (poster/still attach) and Field Notes (single photo
  * attach). [onClick] opens the image in lightbox (Phase 4), [onRemove]
@@ -259,7 +274,7 @@ fun ImageThumb(
                 CurioIcon(
                     name = CurioIcons.Image,
                     contentDescription = "Attached image $index",
-                    tint = accent,
+                    tint = tintedTileInk(accent),
                     size = 28.dp
                 )
             }
@@ -321,13 +336,13 @@ fun AddImageButton(
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = "Add image",
-                    tint = accent,
+                    tint = tintedTileInk(accent),
                     size = 22.dp
                 )
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,
-                    color = accent
+                    color = tintedTileInk(accent)
                 )
             }
         }
@@ -914,14 +929,20 @@ fun QuoteCardEditor(
 fun MoodChipsRow(
     mood: JournalMood?,
     accent: Color,
-    onMoodChange: (JournalMood?) -> Unit
+    onMoodChange: (JournalMood?) -> Unit,
+    // v58 — optional header line: the save screen's mood selector lives in
+    // the topic strip now (the strip's mood pill expands it), so it passes
+    // null and the chips render bare under the strip.
+    header: String? = "How did it make you feel?"
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = "How did it make you feel?",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (header != null) {
+            Text(
+                text = header,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

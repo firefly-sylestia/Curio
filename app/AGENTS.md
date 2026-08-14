@@ -351,6 +351,35 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v58 — save page: chips + take tabs pin under the topic strip; mood pill in the strip; attach-tile ink.**
+  (1) **Header hoisted to the topic.** The multi-take section state
+  (`sections`/`activeIndex`/`nextId`/`pendingRemoveIndex`/`pendingFormatSwitch`
+  + `snapshotActive`/`removeSection`/`applyFormat` + the aggregate
+  `allReady`/`combinedData`/`anyTakeDraft`/`sectionDraftData` emissions)
+  moved OUT of `FormatBodyForCategory` into `SaveCaptureScreen` so the
+  format chips + take tabs can pin in a compact horizontally-scrollable
+  row UNDER the topic strip (they used to live inside the scrolling body
+  under a now-removed "How do you want to capture this one?" header;
+  wide windows no longer wrap the chips into a tall FlowRow — always one
+  slim row). `FormatBodyForCategory` is now editor-only (active take,
+  `key(current.id)`); the two take-confirm dialogs (remove / switch
+  format) live at screen level next to the leave dialog.
+  (2) **Mood lives in the topic strip.** The universal "How did it make
+  you feel?" row is gone from the body; a capsule pill on the RIGHT side
+  of the topic strip shows the active take's mood (or a "Mood +"
+  affordance with `MoodHappy` glyph) and toggles the shared mood selector
+  (bare `MoodChipsRow(header = null)` — new optional `header` param)
+  pinned under the strip. Picking a mood writes it into the ACTIVE
+  section (works identically for newly added takes), stamped into the
+  take's data via `withMood` as before. The emissions `LaunchedEffect`
+  also keys on `topic` so the save CTA enables the moment the topic loads.
+  (3) **Attach-tile ink.** `AddImageButton`, `ImageThumb` (empty state)
+  and `JournalVoiceNoteRow` (Marginalia) drew their icon+label in raw
+  `accent` on the 16% `categoryTintFill` tile — invisible in pastel
+  light. New `internal fun tintedTileInk(accent)` (CaptureFormatComponents)
+  resolves a deep same-hue ink in light (`readableLightInk`) and a light
+  twin in dark (lerp toward white), applied to the attach tiles in every
+  format (Journal/Field notes/Review).
 - **v57 — mood board dual layouts (inline vs full-screen) + quote pinch-to-expand.**
   (1) **Two saved arrangements** — `CaptureData.GalleryWall` gains
   `tileLayoutsFull` + `quotePositionsFull` (Gson default-empty; the
