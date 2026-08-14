@@ -1,6 +1,33 @@
 # Prompt.md — Request log
 
-## Current request — sort pill slimmer in Cabinet + Topic Browser (v62)
+## Current request — update notice → in-app toast (v63)
+
+### What was asked
+"remove the toast for update replace it with in app toast not the android
+toast"
+
+### What was done
+1. **New in-app toast bus** (`ui/components/CurioInAppToast.kt`):
+   `object CurioToast` (snapshot state, `show(text, glyph)` /
+   `dismiss(id)`, main-thread) + `CurioInAppToastHost` composable — a
+   themed pill (curioDialogContainerColor, primary glyph, 6dp lift) that
+   slides up, holds ~3.5s, fades. Generic — future background notices
+   reuse it.
+2. **Hosted at the NavHost root** (CurioNavHost's root Box, after the
+   Scaffold): floats above every screen, cleared past the bottom nav
+   (navigationBarsPadding + 96dp). State set before the UI composes is
+   picked up on the host's first frame.
+3. **UpdateChecker** no longer uses `android.widget.Toast` (import
+   removed) — `CurioToast.show(text, glyph = CurioIcons.Download)`;
+   the once-per-version notification is untouched.
+
+### Validation
+Brace/paren balance: new file 32/32; CurioNavHost 448/448 (delta +5
+pairs); UpdateChecker keeps its pre-existing +2 close comment-parenthesis
+imbalance with a balanced delta. `git diff --check` clean. No Gradle
+locally (env rule) — CI on push is the gate.
+
+## Prior — sort pill slimmer in Cabinet + Topic Browser (v62)
 
 ### What was asked
 "and stil the sort pill in cabinet and topic browser is too wide please

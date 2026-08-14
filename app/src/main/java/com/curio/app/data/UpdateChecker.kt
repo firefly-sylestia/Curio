@@ -8,12 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.curio.app.BuildConfig
 import com.curio.app.R
+import com.curio.app.ui.components.CurioToast
+import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -265,7 +266,8 @@ object UpdateChecker {
     /**
      * v53 — background update notifier, run on app start. When the latest
      * release is newer than the installed build:
-     *  - a TOAST announces it on every check that finds an update, and
+     *  - an IN-APP toast ([CurioToast]) announces it on every check that
+     *    finds an update (v63 — replaces the old android.widget.Toast), and
      *  - a NOTIFICATION fires ONCE per version ([AppPreferences] remembers
      *    the last announced tag), so a pending update never re-notifies on
      *    every launch.
@@ -277,14 +279,15 @@ object UpdateChecker {
         val release = fetchLatestRelease() ?: return@withContext
         if (!isNewer(release.tagName, BuildConfig.VERSION_NAME)) return@withContext
         withContext(Dispatchers.Main) {
-            Toast.makeText(
-                appContext,
+            // In-app toast — rendered by CurioInAppToastHost in the NavHost;
+            // global state survives the check racing the UI's first frame.
+            CurioToast.show(
                 "Curio ${release.tagName} is available — update in Support & diagnostics",
-                Toast.LENGTH_LONG
-            ).show()
+                glyph = CurioIcons.Download
+            )
         }
         // Notification — only once per version ("once the update comes,
-        // not always"). The toast above still fires on every check.
+        // not always"). The in-app toast above still fires on every check.
         val lastNotified = AppPreferences.getLastNotifiedUpdateVersion(appContext)
         if (lastNotified == release.tagName) return@withContext
         AppPreferences.setLastNotifiedUpdateVersion(appContext, release.tagName)
