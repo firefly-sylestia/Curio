@@ -4,11 +4,17 @@ import android.content.Context
 import android.net.Uri
 import androidx.room.withTransaction
 import com.google.gson.Gson
+import com.google.gson.JsonIOException
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import org.json.JSONObject
 import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.lang.reflect.Type
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Date
@@ -75,6 +81,10 @@ object CurioBackupManager {
     private const val TYPE_FLOAT = "float"
     private const val TYPE_STRING = "string"
     private const val TYPE_STRING_SET = "stringset"
+
+    /** Gson type for the typed-preferences map (export writes, restore reads). */
+    private val PREFERENCES_TYPE: Type =
+        object : TypeToken<Map<String, Map<String, PrefEntry>>>() {}.type
 
     /**
      * The SharedPreferences files holding genuine user data. Crash logs
@@ -174,7 +184,7 @@ object CurioBackupManager {
                 writer.name("preferences")
                 gson.toJson(
                     prefs,
-                    object : TypeToken<Map<String, Map<String, PrefEntry>>>() {}.type,
+                    PREFERENCES_TYPE,
                     writer
                 )
 
@@ -289,211 +299,211 @@ object CurioBackupManager {
      */
     @Suppress("SENSELESS_COMPARISON", "USELESS_ELVIS") // legacy-blob nulls bypass the non-null types
     suspend fun restore(context: Context, uri: Uri): RestoreResult {
-        val json = withContext(Dispatchers.IO) {
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                input.bufferedReader(Charsets.UTF_8).use { it.readText() }
-            } ?: throw IllegalStateException("Could not open the backup file")
+        val gson = Gson()
+        // ── v47 — STREAMING restore. The old path read the whole backup into
+        //    a String, built a JSONObject tree, then Gson-parsed the ENTIRE
+        //    payload (every media byte[] decoded and resident at once) —
+        //    restoring a large file could OOM exactly like the old export.
+        //    Restore now reads the file TWICE with a streaming JsonReader:
+        //    pass 1 validates the envelope, every capture and the preferences
+        //    keys (nothing written, nothing held — the same full pre-flight,
+        //    so a truncated/crafted file never touches live data); pass 2
+        //    walks the sections, decoding + writing each media file ONE AT A
+        //    TIME as it is reached, recording only tiny path maps, and only
+        //    then wipes + rewrites the database. Peak memory is one media
+        //    file's bytes instead of the whole archive.
+        val captureCount = withContext(Dispatchers.IO) {
+            validateBackupStream(gson, context, uri)
         }
 
-        val root = runCatching { JSONObject(json) }
-            .getOrNull() ?: throw IllegalArgumentException("That file is not a readable Curio backup.")
-        val rawCaptures = root.optJSONArray("captures")
-            ?: throw IllegalArgumentException("This backup is missing its captures data")
-        require(root.optJSONObject("preferences") != null) {
-            "This backup is missing its settings data"
-        }
-        // Validate the records before deleting any current media or database
-        // rows. A truncated JSON file must never be treated as an empty
-        // backup and erase the user's existing Curio data. IDs must also be
-        // unique: Room's REPLACE policy would otherwise silently discard an
-        // earlier attacker-supplied record.
-        val seenCaptureIds = mutableSetOf<String>()
-        for (index in 0 until rawCaptures.length()) {
-            val capture = rawCaptures.optJSONObject(index)
-                ?: throw IllegalArgumentException("Backup capture ${index + 1} is invalid")
-            val rawId = capture.optString("id")
-            require(rawId.isNotBlank()) {
-                "Backup capture ${index + 1} has no id"
-            }
-            require(seenCaptureIds.add(rawId)) {
-                "Backup contains duplicate capture id"
-            }
-            require(capture.optString("format").isNotBlank()) {
-                "Backup capture ${index + 1} has no format"
-            }
-            require(capture.has("formatDataJson") && !capture.isNull("formatDataJson")) {
-                "Backup capture ${index + 1} has no capture data"
-            }
-        }
-        require(root.optString("format") == FORMAT_NAME) {
-            "That file isn't a Curio backup"
-        }
-        require(root.optInt("version", -1) >= 0) {
-            "This backup has no valid format version"
-        }
-        val payload = runCatching {
-            Gson().fromJson(json, BackupPayload::class.java)
-        }.getOrNull() ?: throw IllegalArgumentException("That file is not a readable Curio backup.")
-        require(payload.format == FORMAT_NAME) { "That file isn't a Curio backup" }
-        require(payload.version <= FORMAT_VERSION) {
-            "This backup was made by a newer version of Curio"
-        }
+        // Path maps the media pass records (strings only — tiny) and the
+        // capture rewrite below reads instead of holding byte arrays.
+        val audioPaths = mutableMapOf<String, String>()
+        val imagePathsByCapture = mutableMapOf<String, MutableMap<String, String>>()
+        val shotPaths = mutableMapOf<String, String>()
+        val shotIndexByPath = mutableMapOf<String, Int>()
+        val captures = mutableListOf<CaptureEntity>()
+        val captureIds = mutableSetOf<String>()
+        // uri -> the (captureId, per-entry index) destinations it restores to
+        // (one write per capture per unique URI index, matching the old code).
+        val imageDests = mutableMapOf<String, LinkedHashSet<Pair<String, Int>>>()
+        var payloadPreferences: Map<String, Map<String, PrefEntry>> = emptyMap()
+        var pendingWrite: PendingWriteBackup? = null
+        var speciesCatalogJson: String? = null
 
-        // Gson allocates older payloads without Kotlin constructor defaults.
-        // Treat omitted collections as empty so a v1–v3 backup cannot fail
-        // before the actual capture migration begins.
-        val payloadCaptures = payload.captures.orEmpty()
-        require(payloadCaptures.size == rawCaptures.length()) {
-            "This backup contains an invalid captures list"
-        }
-        // Fully validate and normalize every capture before touching current
-        // media or Room. Gson can bypass Kotlin constructor defaults, so this
-        // also protects older backups whose required strings were omitted.
-        val validatedCaptures = payloadCaptures.mapIndexed { index, capture ->
-            val id = capture.id.orEmpty()
-            val format = capture.format.orEmpty()
-            val formatDataJson = capture.formatDataJson.orEmpty()
-            require(isSafeStorageSegment(id)) {
-                "Backup capture ${index + 1} has an unsafe id"
-            }
-            require(format.isNotBlank()) { "Backup capture ${index + 1} has no format" }
-            require(formatDataJson.isNotBlank()) { "Backup capture ${index + 1} has no capture data" }
-            require(runCatching { CaptureFormat.valueOf(format) }.isSuccess) {
-                "Backup capture ${index + 1} has an unknown format"
-            }
-            runCatching { CaptureConverters.deserializeCaptureData(formatDataJson) }
-                .getOrElse {
-                    throw IllegalArgumentException("Backup capture ${index + 1} has invalid capture data")
+        withContext(Dispatchers.IO) {
+            try {
+                val input = context.contentResolver.openInputStream(uri)
+                    ?: throw IllegalStateException("Could not open the backup file")
+                input.use { raw ->
+                    val reader = JsonReader(InputStreamReader(raw, Charsets.UTF_8))
+                    reader.beginObject()
+                    while (reader.hasNext()) {
+                        when (reader.nextName()) {
+                            "format", "version", "exportedAtMillis" -> reader.skipValue()
+                            "captures" -> {
+                                reader.beginArray()
+                                while (reader.hasNext()) {
+                                    val capture = gson.fromJson(reader, CaptureEntity::class.java)
+                                    captures.add(capture)
+                                    captureIds.add(capture.id.orEmpty())
+                                    // Pre-index session shots in capture order
+                                    // (the same getOrPut order the old restore
+                                    // used) and pre-compute each capture's
+                                    // image destinations so the media pass
+                                    // knows where every URI goes.
+                                    deserializeStringList(capture.sessionScreenshotsJson).forEach { path ->
+                                        if (path !in shotIndexByPath) shotIndexByPath[path] = shotIndexByPath.size
+                                    }
+                                    runCatching {
+                                        val data = CaptureConverters.deserializeCaptureData(capture.formatDataJson.orEmpty())
+                                        val uris = data.imageUrisAll()
+                                        if (uris.isNotEmpty()) {
+                                            val idxByUri = mutableMapOf<String, Int>()
+                                            uris.forEach { uri -> if (uri !in idxByUri) idxByUri[uri] = idxByUri.size }
+                                            idxByUri.forEach { (uri, idx) ->
+                                                imageDests.getOrPut(uri) { linkedSetOf() }.add(capture.id.orEmpty() to idx)
+                                            }
+                                        }
+                                    }
+                                }
+                                reader.endArray()
+                            }
+                            "preferences" -> payloadPreferences = gson.fromJson(reader, PREFERENCES_TYPE)
+                            "audioFiles" -> {
+                                reader.beginObject()
+                                while (reader.hasNext()) {
+                                    val id = reader.nextName()
+                                    val bytes = Base64.getDecoder().decode(reader.nextString())
+                                    // Only captures present in the payload get
+                                    // their recording (orphan keys are skipped,
+                                    // exactly like the old per-capture lookup).
+                                    if (id in captureIds) {
+                                        runCatching { AudioStorageManager.restoreAudio(context, id, bytes) }
+                                            .getOrNull()?.let { audioPaths[id] = it }
+                                    }
+                                }
+                                reader.endObject()
+                            }
+                            "imageFiles" -> {
+                                reader.beginObject()
+                                while (reader.hasNext()) {
+                                    val uri = reader.nextName()
+                                    val bytes = Base64.getDecoder().decode(reader.nextString())
+                                    imageDests[uri]?.forEach { (captureId, idx) ->
+                                        runCatching { ImageStorageManager.restoreImage(context, captureId, idx, bytes) }
+                                            .getOrNull()?.let { newPath ->
+                                                imagePathsByCapture.getOrPut(captureId) { mutableMapOf() }[uri] = newPath
+                                            }
+                                    }
+                                }
+                                reader.endObject()
+                            }
+                            "sessionShots" -> {
+                                reader.beginObject()
+                                while (reader.hasNext()) {
+                                    val path = reader.nextName()
+                                    val bytes = Base64.getDecoder().decode(reader.nextString())
+                                    val idx = shotIndexByPath.getOrPut(path) { shotIndexByPath.size }
+                                    runCatching { SessionShots.restore(context, "shot-$idx", bytes) }
+                                        .getOrNull()?.let { shotPaths[path] = it }
+                                }
+                                reader.endObject()
+                            }
+                            "pendingWrite" -> {
+                                pendingWrite = if (reader.peek() == JsonToken.NULL) {
+                                    reader.nextNull()
+                                    null
+                                } else {
+                                    gson.fromJson(reader, PendingWriteBackup::class.java)
+                                }
+                            }
+                            "speciesCatalogJson" -> {
+                                speciesCatalogJson = if (reader.peek() == JsonToken.NULL) {
+                                    reader.nextNull()
+                                    null
+                                } else {
+                                    reader.nextString()
+                                }
+                            }
+                            else -> reader.skipValue()
+                        }
+                    }
+                    reader.endObject()
                 }
-            capture.copy(
-                id = id,
+            } catch (e: JsonIOException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            } catch (e: JsonSyntaxException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            } catch (e: IllegalStateException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            } catch (e: IOException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            }
+        }
+
+        // Rebuild every capture's storage references from the recorded path
+        // maps (media files were already written above, one at a time).
+        val restoredCaptures = captures.map { capture ->
+            // Normalize Gson-bypassed nulls exactly like the old pre-flight
+            // (pre-v6 backups have no sessionScreenshotsJson, pre-tags ones
+            // have no tagsJson — the NOT NULL columns must never see null).
+            var updated = capture.copy(
+                id = capture.id.orEmpty(),
                 topicId = capture.topicId.orEmpty(),
                 categoryId = capture.categoryId.orEmpty(),
                 topicName = capture.topicName.orEmpty(),
                 topicSubtype = capture.topicSubtype.orEmpty(),
                 topicTeaser = capture.topicTeaser.orEmpty(),
-                format = format,
-                formatDataJson = formatDataJson,
+                format = capture.format.orEmpty(),
+                formatDataJson = capture.formatDataJson.orEmpty(),
                 tagsJson = capture.tagsJson.orEmpty().ifBlank { "[]" },
-                // v6 column is NOT NULL — a pre-v6 backup (Gson Unsafe skips
-                // constructor defaults) must normalize to the empty array
-                // exactly like tagsJson, or the insert would throw.
                 sessionScreenshotsJson = capture.sessionScreenshotsJson.orEmpty().ifBlank { "[]" }
             )
-        }
-        val payloadPreferences = payload.preferences.orEmpty()
-        require(payloadPreferences.keys.all { it in USER_PREF_FILES }) {
-            "This backup contains an unknown preferences file"
-        }
-
-        // Restore audio (v2): wipe current recordings, then write each
-        // bundled one to filesDir/audio/{id}.m4a and rewrite the capture's
-        // audioFilePath so the restored file resolves on this device.
-        // Audio writes can be multi-MB, so this runs off the main thread
-        // (v2.1). A single failed write only drops that one recording — the
-        // capture itself still restores (missing audio degrades gracefully
-        // in EntryDetail).
-        val audioFiles = payload.audioFiles.orEmpty()
-        val imageFiles = payload.imageFiles.orEmpty()
-        val sessionShots = payload.sessionShots.orEmpty()
-        // One shared index for the WHOLE restore: the same original session
-        // screenshot path appears on every entry saved from that session, so
-        // it must map to ONE restored file (matching export's dedup).
-        val shotIndexByPath = mutableMapOf<String, Int>()
-        val restoredCaptures = withContext(Dispatchers.IO) {
-            // Media is staged/overwritten only after the payload has been
-            // fully validated above. Do not wipe current media here: if a
-            // later Room insert fails, the existing files must remain usable.
-            validatedCaptures.map { capture ->
-                // Tags (v7.17): backups predating the tags column deserialize
-                // tagsJson to null (Gson Unsafe allocation skips constructor
-                // defaults) — normalize to the empty array so the NOT NULL
-                // column insert can't fail.
-                var updated = if (capture.tagsJson == null) capture.copy(tagsJson = "[]") else capture
-                // Backward compatibility for v3: backups created before the
-                // explicit provenance column have no isLegacy field. Preserve
-                // their already-imported rows once, while new FieldMind
-                // restores set the flag directly and never infer it here.
-                if (!updated.isLegacy && updated.topicSubtype == FieldMindLegacyImport.LEGACY_SUBTYPE) {
-                    updated = updated.copy(isLegacy = true)
-                }
-                // Audio (v2): never preserve an audio path from the source
-                // device. A backup is untrusted and its original absolute
-                // path may point anywhere on this device. Clear every stored
-                // path first; only a bundled recording below can establish a
-                // new, app-private destination.
-                val safeData = CaptureConverters.deserializeCaptureData(updated.formatDataJson)
-                    .withoutAudioPaths()
-                updated = updated.copy(formatDataJson = Gson().toJson(safeData))
-                audioFiles[capture.id]?.let { bytes ->
-                    val newPath = runCatching {
-                        AudioStorageManager.restoreAudio(context, capture.id, bytes)
-                    }.getOrNull()
-                    if (newPath != null) {
-                        runCatching {
-                            CaptureConverters.deserializeCaptureData(updated.formatDataJson)
-                                .withAudioPath(newPath)
-                        }.getOrNull()?.let { updated = updated.copy(formatDataJson = Gson().toJson(it)) }
-                    }
-                }
-                // Images (v3): write each bundled photo and rewrite every
-                // image URI in the capture (flat lists + mood-board tile
-                // layouts) to the restored file path. Same URI twice in one
-                // entry reuses one stored file.
+            // Backward compatibility for v3: backups created before the
+            // explicit provenance column have no isLegacy field. Preserve
+            // their already-imported rows once, while new FieldMind restores
+            // set the flag directly and never infer it here.
+            if (!updated.isLegacy && updated.topicSubtype == FieldMindLegacyImport.LEGACY_SUBTYPE) {
+                updated = updated.copy(isLegacy = true)
+            }
+            // Audio (v2): never preserve an audio path from the source device
+            // (a backup is untrusted). Clear every stored path first; only a
+            // bundled recording can establish a new app-private destination.
+            val safeData = CaptureConverters.deserializeCaptureData(updated.formatDataJson)
+                .withoutAudioPaths()
+            updated = updated.copy(formatDataJson = Gson().toJson(safeData))
+            audioPaths[capture.id]?.let { newPath ->
+                runCatching {
+                    CaptureConverters.deserializeCaptureData(updated.formatDataJson)
+                        .withAudioPath(newPath)
+                }.getOrNull()?.let { updated = updated.copy(formatDataJson = Gson().toJson(it)) }
+            }
+            // Images (v3): point every image URI (flat lists + mood-board
+            // tile layouts) at its restored file. Same URI twice in one
+            // entry reuses one stored file.
+            val imageMap = imagePathsByCapture[capture.id]
+            if (imageMap != null && imageMap.isNotEmpty()) {
                 runCatching {
                     val data = CaptureConverters.deserializeCaptureData(updated.formatDataJson)
                     if (data.imageUrisAll().isNotEmpty()) {
-                        val indexByUri = mutableMapOf<String, Int>()
-                        var remappedAny = false
-                        val remapped = data.withImageUris { uri ->
-                            val bytes = imageFiles[uri]
-                            if (bytes != null) {
-                                remappedAny = true
-                                val idx = indexByUri.getOrPut(uri) { indexByUri.size }
-                                Uri.fromFile(
-                                    File(ImageStorageManager.restoreImage(context, capture.id, idx, bytes))
-                                ).toString()
-                            } else {
-                                uri
-                            }
-                        }
-                        // Only rewrite the JSON when a photo actually moved
-                        // (skips pointless round-trips on legacy backups).
-                        if (remappedAny) {
-                            updated = updated.copy(formatDataJson = Gson().toJson(remapped))
-                        }
+                        val remapped = data.withImageUris { uri -> imageMap[uri] ?: uri }
+                        updated = updated.copy(formatDataJson = Gson().toJson(remapped))
                     }
                 }
-                // Session screenshots (v5): write each bundled shot and
-                // rewrite the capture's `sessionScreenshotsJson` paths to
-                // the restored file locations. The shared index maps one
-                // original path to one restored file across EVERY entry,
-                // preserving the one-session-shared-shots relationship.
-                runCatching {
-                    val paths = deserializeStringList(updated.sessionScreenshotsJson)
-                    if (paths.isNotEmpty()) {
-                        var remappedAny = false
-                        val remapped = paths.map { path ->
-                            val bytes = sessionShots[path]
-                            if (bytes != null) {
-                                remappedAny = true
-                                val idx = shotIndexByPath.getOrPut(path) { shotIndexByPath.size }
-                                SessionShots.restore(context, "shot-$idx", bytes)
-                            } else {
-                                path
-                            }
-                        }
-                        // Only rewrite the JSON when a shot actually moved
-                        // (skips pointless round-trips on legacy backups).
-                        if (remappedAny) {
-                            updated = updated.copy(
-                                sessionScreenshotsJson = Gson().toJson(remapped)
-                            )
-                        }
-                    }
-                }
-                updated
             }
+            // Session screenshots (v5): point every path at its restored
+            // file. The shared index maps one original path to one restored
+            // file across EVERY entry, preserving the shared-shots
+            // relationship.
+            runCatching {
+                val paths = deserializeStringList(updated.sessionScreenshotsJson)
+                if (paths.isNotEmpty()) {
+                    val remapped = paths.map { path -> shotPaths[path] ?: path }
+                    updated = updated.copy(sessionScreenshotsJson = Gson().toJson(remapped))
+                }
+            }
+            updated
         }
 
         val db = CurioDatabase.getInstance(context)
@@ -508,7 +518,7 @@ object CurioBackupManager {
         // just-restored files. Orphan cleanup can be performed independently
         // once a future storage index exists.
 
-        payload.speciesCatalogJson?.let { speciesJson ->
+        speciesCatalogJson?.let { speciesJson ->
             FieldMindLegacyImport.restoreSpeciesCatalog(context, speciesJson)
         }
 
@@ -553,20 +563,13 @@ object CurioBackupManager {
         ExploreSessionStore.seed(context)
         // v6 — restore the pending (unsaved) write handoff: the shared note
         // and screenshots survive a mid-write backup. Screenshot paths are
-        // remapped to the restored files through the SAME shared index as
-        // saved entries, so one original path still maps to one restored
-        // file even when an entry and the pending write share a shot.
-        val pendingWrite = payload.pendingWrite
+        // remapped through the SAME shared index as saved entries, so one
+        // original path still maps to one restored file even when an entry
+        // and the pending write share a shot.
         if (pendingWrite != null) {
             val cat = CategoryId.values().firstOrNull { it.name == pendingWrite.categoryId }
             if (cat != null && pendingWrite.topicName.isNotBlank()) {
-                val restoredPaths = pendingWrite.screenshotPaths.mapNotNull { path ->
-                    val bytes = sessionShots[path]
-                    if (bytes != null) {
-                        val idx = shotIndexByPath.getOrPut(path) { shotIndexByPath.size }
-                        runCatching { SessionShots.restore(context, "shot-$idx", bytes) }.getOrNull()
-                    } else null
-                }
+                val restoredPaths = pendingWrite.screenshotPaths.mapNotNull { path -> shotPaths[path] }
                 ExploreSessionStore.handoffWriteSession(
                     context,
                     cat,
@@ -582,7 +585,93 @@ object CurioBackupManager {
             // so the write page never shows dangling attachments.
             ExploreSessionStore.clearPendingWrite(context)
         }
-        return RestoreResult(payloadCaptures.size, payloadPreferences.size)
+        return RestoreResult(captures.size, payloadPreferences.size)
+    }
+
+    /**
+     * v47 — streaming validation pass for [restore]: reads the backup with a
+     * JsonReader (no full-file String, no JSONObject tree) and enforces the
+     * same contract the old JSONObject/Gson validation did — envelope
+     * format/version, a captures array with unique, safe, well-formed
+     * records, and preferences restricted to the known files. Throws before
+     * any destructive step; returns the capture count.
+     */
+    private fun validateBackupStream(gson: Gson, context: Context, uri: Uri): Int {
+        val input = context.contentResolver.openInputStream(uri)
+            ?: throw IllegalStateException("Could not open the backup file")
+        input.use { raw ->
+            val reader = JsonReader(InputStreamReader(raw, Charsets.UTF_8))
+            reader.beginObject()
+            var format: String? = null
+            var version = -1
+            var capturesSeen = false
+            var prefsSeen = false
+            var captureCount = 0
+            val seenIds = mutableSetOf<String>()
+            val prefFiles = mutableSetOf<String>()
+            try {
+                while (reader.hasNext()) {
+                    when (reader.nextName()) {
+                        "format" -> format = reader.nextString()
+                        "version" -> version = reader.nextInt()
+                        "exportedAtMillis" -> reader.skipValue()
+                        "captures" -> {
+                            capturesSeen = true
+                            reader.beginArray()
+                            while (reader.hasNext()) {
+                                captureCount++
+                                val cap = gson.fromJson(reader, CaptureEntity::class.java)
+                                val id = cap.id.orEmpty()
+                                val formatStr = cap.format.orEmpty()
+                                val formatDataJson = cap.formatDataJson.orEmpty()
+                                require(id.isNotBlank()) { "Backup capture $captureCount has no id" }
+                                require(seenIds.add(id)) { "Backup contains duplicate capture id" }
+                                require(formatStr.isNotBlank()) { "Backup capture $captureCount has no format" }
+                                require(formatDataJson.isNotBlank()) { "Backup capture $captureCount has no capture data" }
+                                require(isSafeStorageSegment(id)) { "Backup capture $captureCount has an unsafe id" }
+                                require(runCatching { CaptureFormat.valueOf(formatStr) }.isSuccess) {
+                                    "Backup capture $captureCount has an unknown format"
+                                }
+                                runCatching { CaptureConverters.deserializeCaptureData(formatDataJson) }
+                                    .getOrElse {
+                                        throw IllegalArgumentException("Backup capture $captureCount has invalid capture data")
+                                    }
+                            }
+                            reader.endArray()
+                        }
+                        "preferences" -> {
+                            prefsSeen = true
+                            reader.beginObject()
+                            while (reader.hasNext()) {
+                                val name = reader.nextName()
+                                prefFiles.add(name)
+                                reader.skipValue()
+                            }
+                            reader.endObject()
+                        }
+                        else -> reader.skipValue()
+                    }
+                }
+                reader.endObject()
+            } catch (e: JsonIOException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            } catch (e: JsonSyntaxException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            } catch (e: IllegalStateException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            } catch (e: IOException) {
+                throw IllegalArgumentException("That file is not a readable Curio backup.")
+            }
+            require(capturesSeen) { "This backup is missing its captures data" }
+            require(prefsSeen) { "This backup is missing its settings data" }
+            require(format == FORMAT_NAME) { "That file isn't a Curio backup" }
+            require(version >= 0) { "This backup has no valid format version" }
+            require(version <= FORMAT_VERSION) { "This backup was made by a newer version of Curio" }
+            require(prefFiles.all { it in USER_PREF_FILES }) {
+                "This backup contains an unknown preferences file"
+            }
+            return captureCount
+        }
     }
 
     /** Milliseconds of the last successful export, or 0 if never backed up. */

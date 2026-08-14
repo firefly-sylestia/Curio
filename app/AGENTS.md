@@ -351,6 +351,22 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v48 — streaming backup RESTORE (OOM fix, mirrors the export).**
+  `CurioBackupManager.restore` no longer reads the whole file into a
+  String, builds a JSONObject tree, and Gson-parses the entire payload
+  (every media byte[] decoded and resident at once — the same OOM class
+  as the old export). It now reads the file TWICE with a streaming
+  `JsonReader`: pass 1 (`validateBackupStream`) enforces the same
+  pre-flight (envelope format/version, captures array present with
+  unique/safe/well-formed records, preferences restricted to the known
+  files) without holding anything; pass 2 walks the sections — captures +
+  prefs parsed per-section, and each media file decoded + written ONE AT
+  A TIME (audio by capture id, images to their per-capture destinations
+  via a uri→(captureId,index) map, session shots via the shared index,
+  pending-write shots included) — recording only tiny path maps, then
+  the database is wiped + re-inserted in one transaction. Same semantics
+  and error messages as before; peak memory is one media file's bytes
+  instead of the whole archive.
 - **v47 — dark mode: deep high-contrast background tints + blackish picker idle cards.**
   (1) **Dark wash retuned** (`CategoryInk.kt`): `DEFAULT_DARK_WASH` no
   longer pulls un-tuned families' mid-tone 50% toward their LIGHT twin

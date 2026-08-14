@@ -1,38 +1,44 @@
 # Prompt.md — Request log
 
-## Current request — dark mode: deep high-contrast background tints + blackish picker idle cards (v47)
+## Current request — streaming backup RESTORE (OOM fix, mirrors the export) (v48)
 
 ### What was asked
-1. In dark mode the mixed-colors background tint and some normal color
-   background tints are too whitish with no contrast — fix it, give it
-   a sleek look with high dark-contrast background tint.
-2. In dark mode the category picker's inactive-state cards should be
-   blackish; keep the active state as it is.
+Apply the same streaming treatment to backup restore so restoring a
+huge file can't OOM either (follow-up to the v45 streaming export).
 
 ### What was done
-1. **Dark wash retuned** (`CategoryInk.kt`): `DEFAULT_DARK_WASH` was
-   `(0.5, 0.15)` — every un-tuned family's mid-tone lerped 50% toward
-   its LIGHT twin, so dark pages washed out pale over midnight. Now
-   `(0.16, 0.22)`: the mid-tone hugs the deep accent with a slightly
-   stronger blend. The two families that previously fell to that
-   default — **Music** (indigo) and **Visual Art** (teal) — got
-   `DARK_WASH_TUNING` entries (deep indigo `0xFF312E81` / deep
-   teal-forest `0xFF134E4A`), so every family now has a deep jewel wash.
-   (`categorySurface` inherits the darker mid-tones too, so cards,
-   chips and sheets get the contrast as well.)
-2. **Mixed-deck page wash deepened** (`CurioColors.mixedDeckWash`):
-   dark now blackens the blend 50% (was 35%) at a 42% blend (was 45%);
-   pastel-dark drops 55% → 42%. Mixed pages read sleek and dark, with
-   white ink and paper cards popping on them.
-3. **Picker idle cards blackish** (`CurioCategoryCard`): the Curio-style
-   dark idle surface is `surfaceContainerLow` lerped 55% toward black —
-   near-black idle tiles (edge shine + glyph still carry the lane). The
-   SELECTED tile keeps its vivid full-accent gradient unchanged.
+1. **Restore now streams** (`CurioBackupManager.restore`): the old path
+   read the whole file into a String, built a JSONObject tree, then
+   Gson-parsed the ENTIRE payload — every media byte[] decoded and
+   resident at once (the same OOM class as the old export). Restore now
+   reads the file TWICE with a streaming `JsonReader`:
+   - **Pass 1** (`validateBackupStream`): enforces the same pre-flight —
+     envelope format/version, captures array present with
+     unique/safe/well-formed records (id, format, formatDataJson
+     deserializable, safe storage segment), preferences restricted to
+     the known files. Nothing held, nothing written — a
+     truncated/crafted file never touches live data.
+   - **Pass 2**: walks the sections — captures + preferences parsed
+     per-section via `gson.fromJson(reader, ...)`; each media file
+     decoded + written ONE AT A TIME (audio by capture id with orphan
+     keys skipped, images to their per-capture destinations via a
+     uri→(captureId,index) map, session shots via the shared
+     `shotIndexByPath`, pending-write shots included). Only tiny path
+     maps are recorded; then the database is wiped + re-inserted in
+     one transaction, prefs/species-catalog/pending-write restored as
+     before. Same error messages and semantics; peak memory is one
+     media file's bytes instead of the whole archive.
+2. Imports: `JsonReader`/`JsonToken`/`JsonIOException`/`JsonSyntaxException`/
+   `InputStreamReader`/`IOException`/`Type` added; `org.json.JSONObject`
+   removed; shared `PREFERENCES_TYPE` used by both export and restore.
 
 ### Validation
 No Gradle locally (env rule). Brace/paren balance + `git diff --check`
-clean. CI on push is the gate. Changelog + `app/AGENTS.md` v47 bullet
-updated.
+clean; symbol scan shows every external type imported (same-package types
+need none). CI on push is the gate. Changelog + `app/AGENTS.md` v48
+bullet updated.
+
+## Prior — dark mode: deep high-contrast background tints + blackish picker idle cards (v47)
 
 ## Prior — progress UI: reveal dialog fix + cabinet visual-only line + detail corner (v46)
 
