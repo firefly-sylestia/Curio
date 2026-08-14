@@ -1,6 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — topic-load speed + smooth Topic Browser wheel + Home spacing (v49)
+## Current request — Topic Reveal: Like/dislike into the strip + one editorial font (v50)
+
+### What was asked
+"In topic reveal screen: can we place the like and dislike button at the
+strip and the tags below, properly placing it — moving the tags a little
+higher and not increasing the height of the strip. Also the font size of
+the quick fact and instructions doesn't match — match it, keeping it
+smaller than the current quick fact font."
+
+### User clarification
+Not the Spin deck — the reveal's bottom band. The pair goes below the
+tags (the tags are raised a touch), strip height stays fixed.
+
+### What was done
+1. **Sentiment pair into the bottom band** (TopicRevealScreen): the
+   section-6.5 row that scrolled in the body below the ActionPromptCard
+   is removed; Dislike/Like now sit in the fixed bottom band below the
+   tag chips (bottom-aligned, `navInset + 8dp` clearance). Tag row top
+   inset 24 → 14dp; `RevealBottomBarHeight` unchanged (80dp) — the strip
+   never grows. `SentimentButton` slimmed to fit (12/6dp padding, 16dp
+   icon, labelMedium). Browse mode still hides the pair; tags render
+   independently.
+2. **One editorial paragraph voice:** new file-level `RevealEditorialBody`
+   (`CurioEditorialBody.copy(fontSize = 15.sp, lineHeight = 23.sp)` — a
+   notch below the old 17sp fact) used by BOTH the TeaserCard quick fact
+   (was 17sp `CurioEditorialBody`) and the ActionPromptCard instruction
+   (was an inline 15sp copy) — matched exactly, and smaller than the old
+   quick fact. `TextStyle` import added.
+
+### Validation
+Brace/paren balance matches the HEAD baseline (+8/+8 on top of the
+pre-existing comment imbalance); `git diff --check` clean. Changelog +
+`app/AGENTS.md` v50 bullet updated.
+
+## Prior — topic-load speed + smooth Topic Browser wheel + Home spacing (v49)
 
 ### What was asked
 1. "Topics loading is so much faster now, but sometimes it doesn't load

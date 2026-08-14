@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -174,6 +175,15 @@ import com.curio.app.ui.theme.themedButtonInk
 // theme-aware strip that carries the tags row and keeps the page's fixed
 // footprint — the NavHost reserves the same 80dp slot the bar would use.
 private val RevealBottomBarHeight = 80.dp
+
+/** v49 — ONE editorial paragraph voice for the reveal's long-form copy: the
+ *  quick fact and the action instruction share this exact style — matched
+ *  size/leading, a notch below the original 17sp fact (15sp) so the page
+ *  reads lighter and the pair can never drift apart again. */
+private val RevealEditorialBody: TextStyle = CurioEditorialBody.copy(
+    fontSize = 15.sp,
+    lineHeight = 23.sp
+)
 
 @Composable
 fun TopicRevealScreen(
@@ -742,49 +752,9 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // ── 6.5 Like / dislike — feeds the shuffle weighting ──
-                // Hidden in Browse-Topics mode: reading from the database
-                // must not shape the shuffle (pure read-only).
-                if (!browseMode && resolved != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        SentimentButton(
-                            icon = CurioIcons.ThumbDown,
-                            label = "Dislike",
-                            active = sentiment == AppPreferences.SENTIMENT_DISLIKE,
-                            accent = cat.themedAccent(),
-                            ink = cat.onAccent(),
-                            onClick = {
-                                AppPreferences.setTopicSentiment(
-                                    context, cat.id, resolved.id,
-                                    if (sentiment == AppPreferences.SENTIMENT_DISLIKE)
-                                        AppPreferences.SENTIMENT_NONE
-                                    else AppPreferences.SENTIMENT_DISLIKE
-                                )
-                            }
-                        )
-                        SentimentButton(
-                            icon = CurioIcons.ThumbUp,
-                            label = "Like",
-                            active = sentiment == AppPreferences.SENTIMENT_LIKE,
-                            accent = cat.themedAccent(),
-                            ink = cat.onAccent(),
-                            onClick = {
-                                AppPreferences.setTopicSentiment(
-                                    context, cat.id, resolved.id,
-                                    if (sentiment == AppPreferences.SENTIMENT_LIKE)
-                                        AppPreferences.SENTIMENT_NONE
-                                    else AppPreferences.SENTIMENT_LIKE
-                                )
-                            }
-                        )
-                    }
-                }
+                // v49 — the Like/dislike pair moved OUT of the scroll body
+                // into the bottom band (below the tags row) — see the band
+                // section at the bottom of the screen.
 
                 // Bottom clearance — the bottom band (at navbar height)
                 // overlays the very bottom of the scroll area, so the last
@@ -842,7 +812,9 @@ fun TopicRevealScreen(
                     .offset(y = RevealBottomBarHeight + navInset)
                     .fillMaxWidth()
                     .height(RevealBottomBarHeight + navInset)
-                    .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = navInset + 8.dp),
+                    // v49 — nudged up (24 → 14dp inset) so the like/dislike
+                    // row below has room INSIDE the same strip height.
+                    .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = navInset + 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.Top
             ) {
@@ -865,6 +837,56 @@ fun TopicRevealScreen(
                         )
                     }
                 }
+            }
+        }
+
+        // ── Like / dislike — the band's lower slot (v49) ────────────────
+        // Moved down from the scroll body into the strip, BELOW the tags,
+        // filling the band's previously-empty lower space — the strip's
+        // height stays the fixed navbar height (80dp + inset). Hidden in
+        // Browse-Topics mode: reading from the database must not shape the
+        // shuffle (pure read-only).
+        if (!browseMode && resolved != null) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = RevealBottomBarHeight + navInset)
+                    .fillMaxWidth()
+                    .height(RevealBottomBarHeight + navInset)
+                    .padding(start = 16.dp, end = 16.dp, bottom = navInset + 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                SentimentButton(
+                    icon = CurioIcons.ThumbDown,
+                    label = "Dislike",
+                    active = sentiment == AppPreferences.SENTIMENT_DISLIKE,
+                    accent = cat.themedAccent(),
+                    ink = cat.onAccent(),
+                    onClick = {
+                        AppPreferences.setTopicSentiment(
+                            context, cat.id, resolved.id,
+                            if (sentiment == AppPreferences.SENTIMENT_DISLIKE)
+                                AppPreferences.SENTIMENT_NONE
+                            else AppPreferences.SENTIMENT_DISLIKE
+                        )
+                    }
+                )
+                SentimentButton(
+                    icon = CurioIcons.ThumbUp,
+                    label = "Like",
+                    active = sentiment == AppPreferences.SENTIMENT_LIKE,
+                    accent = cat.themedAccent(),
+                    ink = cat.onAccent(),
+                    onClick = {
+                        AppPreferences.setTopicSentiment(
+                            context, cat.id, resolved.id,
+                            if (sentiment == AppPreferences.SENTIMENT_LIKE)
+                                AppPreferences.SENTIMENT_NONE
+                            else AppPreferences.SENTIMENT_LIKE
+                        )
+                    }
+                )
             }
         }
     }
@@ -1952,11 +1974,12 @@ private fun TeaserCard(
             // v43 — the quick fact reads in the Lora editorial serif so it
             // matches the instruction paragraph below (ONE readable font for
             // the reveal's long-form copy instead of the old sans/serif mix).
-            // The fact is shown IN FULL — no line clamp, no read-more folding
-            // (the user asked to keep the whole text visible).
+            // v49 — the fact and the instruction share [RevealEditorialBody]
+            // (15sp — a notch smaller than the old 17sp fact). Shown IN FULL
+            // — no line clamp, no read-more folding.
             Text(
                 text = teaser ?: "Loading topic…",
-                style = CurioEditorialBody,
+                style = RevealEditorialBody,
                 color = MaterialTheme.colorScheme.onSurface,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis
@@ -2024,13 +2047,10 @@ private fun ActionPromptCard(
             Spacer(Modifier.height(10.dp))
             Text(
                 text = action.instruction,
-                // v35 — the instruction reads in the Lora editorial serif
-                // (a touch smaller than the teaser body since it's a
-                // secondary paragraph).
-                style = CurioEditorialBody.copy(
-                    fontSize = 15.sp,
-                    lineHeight = 23.sp
-                ),
+                // v35/v49 — the instruction reads in the Lora editorial
+                // serif; since v49 it IS the shared [RevealEditorialBody] —
+                // the exact same 15sp/23sp style as the quick fact above.
+                style = RevealEditorialBody,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis
@@ -2075,7 +2095,9 @@ private fun verbIcon(verb: String): String = when (verb.lowercase().trim()) {
     else -> "auto_awesome"
 }
 
-/** Circular like/dislike toggle — active state fills with the category accent. */
+/** Compact pill like/dislike toggle for the reveal's bottom band — active
+ *  state fills with the category accent. Slimmed (v49) so the pair fits the
+ *  strip's lower slot below the tags without growing the band. */
 @Composable
 private fun SentimentButton(
     icon: String,
@@ -2093,19 +2115,19 @@ private fun SentimentButton(
         shadowElevation = 2.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             CurioIcon(
                 name = icon,
                 contentDescription = label,
                 tint = if (active) ink else MaterialTheme.colorScheme.onSurface,
-                size = 18.dp
+                size = 16.dp
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = if (active) ink else MaterialTheme.colorScheme.onSurface
             )
         }

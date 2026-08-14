@@ -351,6 +351,21 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v50 — Topic Reveal: Like/dislike into the strip + one editorial font.**
+  (1) **Sentiment pair moved into the bottom band** (TopicRevealScreen):
+  the section-6.5 row that scrolled in the body below the ActionPromptCard
+  is gone; the Dislike/Like pills now live in the fixed bottom band BELOW
+  the tag chips, aligned bottom with `navInset + 8dp` clearance. The tag
+  row's top inset dropped 24 → 14dp to make room, and `RevealBottomBarHeight`
+  stays 80dp — the strip never grows. `SentimentButton` was slimmed to fit
+  (12/6dp padding, 16dp icon, labelMedium); browse mode still hides the
+  pair (read-only), tags render independently. (2) **Quick fact + action
+  instruction share ONE style:** new file-level `RevealEditorialBody`
+  (`CurioEditorialBody.copy(15sp/23sp)` — a notch below the old 17sp fact)
+  is now used by BOTH the TeaserCard quick fact (was `CurioEditorialBody`
+  17sp) and the ActionPromptCard instruction (was an inline 15sp copy), so
+  the two long-form paragraphs match exactly and can't drift again.
+  `TextStyle` import added.
 - **v49 — topic-load speed + smooth Topic Browser wheel scroll + Home spacing.**
   (1) **TopicJsonLoader shares in-flight parses instead of serializing:**
   the old single global `cacheMutex` was held for the ENTIRE parse, so
