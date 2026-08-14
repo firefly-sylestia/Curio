@@ -363,6 +363,21 @@ app/src/main/java/com/curio/app/
   entry content) swaps live when the toggle changes.
   (2) **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips and
   pills read calmer, less stretched.
+- **v61 — Spin filter sheet: bigger chips + louder typography/hierarchy.**
+  (1) **Filter chips bigger still** (`CompactChip`): 16 → 18sp label,
+  padding 16/11 → 20/13, glyph 17 → 19dp, gap 7 → 8dp, inactive weight
+  Medium → SemiBold. v44 grew them to 15sp, v52b to 16sp — this is the
+  third bump.
+  (2) **Whole-sheet type/hierarchy scaled up** (all private to
+  `SpinScreen.kt`): sheet header 22 → 24dp glyph + 24sp title; subtitle
+  bodySmall → bodyMedium; `CurioSearchField` gains an optional `textStyle`
+  param (shared component — Settings hub / Topic History unchanged) and
+  the sheet passes 18sp; "Active filters" label labelMedium → labelLarge;
+  `SectionLabel` 14 → 16sp ExtraBold (0.3sp tracking); `FilterGroupPill`
+  15 → 17sp label with 20/14/12/12 padding + 18dp chevron + bigger badge;
+  `ActiveFilterChip` labelLarge + roomier padding + 16dp close; group/chip
+  FlowRow gaps 8 → 10dp; Apply CTA 17sp with 14dp vertical padding + 20dp
+  icon.
 - **v60 — session-screenshot attach removed; mood-board crash + reveal strip fixes.**
   (1) **Session-screenshot FEATURE removed (user: "too scary", old shots
   kept attaching).** The save page's "Session screenshots" section

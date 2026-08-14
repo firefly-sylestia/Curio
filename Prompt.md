@@ -1,6 +1,32 @@
 # Prompt.md — Request log
 
-## Current request — session-screenshot removal + mood-board crash + reveal strip polish (v60)
+## Current request — Spin filter sheet: chips + typography bigger (v61)
+
+### What was asked
+"make the filters in spin page the filters chips even bigger whole filter
+page typography and heracry even bigger"
+
+### What was done (all in SpinScreen.kt + one optional param)
+1. **CompactChip bigger still** — 16 → 18sp label, padding 16/11 → 20/13,
+   glyph 17 → 19dp, gap 7 → 8dp, inactive weight Medium → SemiBold
+   (third bump: v44 15sp → v52b 16sp → v61 18sp).
+2. **Whole-sheet type/hierarchy scaled up:** header 22 → 24dp glyph +
+   24sp title; subtitle bodySmall → bodyMedium; `CurioSearchField` gained
+   an optional `textStyle` param (default bodyLarge — Settings hub /
+   Topic History unchanged) and the sheet passes 18sp; "Active filters"
+   label → labelLarge; `SectionLabel` → 16sp ExtraBold (0.3sp tracking);
+   `FilterGroupPill` → 17sp label, 20/14/12/12 padding, 18dp chevron,
+   bigger count badge; `ActiveFilterChip` → labelLarge + roomier padding
+   + 16dp close; group + chip FlowRow gaps 8 → 10dp; Apply CTA 17sp,
+   14dp vertical padding, 20dp icon.
+
+### Validation
+Brace/paren balance on both files (SpinScreen 1992/1992 vs HEAD
+1991/1991 — +1 balanced pair; CurioSearchField 31/31 unchanged),
+`git diff --check` clean. No Gradle locally (env rule) — CI on push is
+the gate.
+
+## Prior — session-screenshot removal + mood-board crash + reveal strip polish (v60)
 
 ### What was asked
 "why the sessio screenshot attahes my old screenshots like all of it,

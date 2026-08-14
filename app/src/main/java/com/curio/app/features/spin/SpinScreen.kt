@@ -1672,11 +1672,17 @@ private fun FilterSheet(
                     .padding(horizontal = 20.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 22.dp)
+                // v61 — the whole filter page stepped up a size: bigger
+                // header, search, section labels, chips and CTA so the
+                // hierarchy reads clearly top to bottom.
+                CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 24.dp)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = cat.displayName,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    ),
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
@@ -1701,7 +1707,7 @@ private fun FilterSheet(
             // a settings form.
             Text(
                 text = "Pick what you're in the mood for",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
             )
@@ -1711,6 +1717,7 @@ private fun FilterSheet(
                 query = filterQuery,
                 onQueryChange = { filterQuery = it },
                 placeholder = "Search filters",
+                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
             )
 
@@ -1723,7 +1730,7 @@ private fun FilterSheet(
                 ) {
                     Text(
                         text = "Active filters",
-                        style = MaterialTheme.typography.labelMedium.copy(
+                        style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.5.sp
                         ),
@@ -1818,8 +1825,8 @@ private fun FilterSheet(
                     // ── Group pills row ───────────────────────────────
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         groupPills.forEach { key ->
                             val groupChips = filteredGroups.chipsFor(key)
@@ -1873,8 +1880,8 @@ private fun FilterSheet(
                                     if (isSubtypeGroup) {
                                         FlowRow(
                                             modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp)
                                         ) {
                                             filteredGroups.chipsFor(key).forEach { chip ->
                                                 CompactChip(
@@ -1893,8 +1900,8 @@ private fun FilterSheet(
                                     } else {
                                         FlowRow(
                                             modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp)
                                         ) {
                                             filteredGroups.chipsFor(key).forEach { chip ->
                                                 CompactChip(
@@ -1928,16 +1935,19 @@ private fun FilterSheet(
                     containerColor = cat.themedButtonFill(),
                     contentColor = cat.themedButtonInk()
                 ),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
-                CurioIcon(CurioIcons.Check, null, tint = cat.themedButtonInk(), size = 18.dp)
-                Spacer(Modifier.width(6.dp))
+                CurioIcon(CurioIcons.Check, null, tint = cat.themedButtonInk(), size = 20.dp)
+                Spacer(Modifier.width(7.dp))
                 Text(
                     text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 )
             }
         }
@@ -1958,13 +1968,13 @@ private fun ActiveFilterChip(
         shadowElevation = 2.dp
     ) {
         Row(
-            modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            modifier = Modifier.padding(start = 14.dp, end = 7.dp, top = 7.dp, bottom = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
                 color = ink
             )
             Surface(
@@ -1975,7 +1985,7 @@ private fun ActiveFilterChip(
                 CurioIcon(
                     CurioIcons.Close, null,
                     tint = CurioColors.DeepPlum,
-                    size = 14.dp,
+                    size = 16.dp,
                     modifier = Modifier.padding(2.dp)
                 )
             }
@@ -1987,9 +1997,12 @@ private fun ActiveFilterChip(
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
+        // v61 — bigger section headers: 16sp ExtraBold with wider tracking
+        // so each group's label clearly outranks its chips below.
         style = MaterialTheme.typography.titleSmall.copy(
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 0.2.sp
+            fontSize = 16.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.3.sp
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier
@@ -2051,7 +2064,7 @@ private fun CompactChip(
         Row(
             modifier = Modifier
                 .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
-                .padding(horizontal = 16.dp, vertical = 11.dp),
+                .padding(horizontal = 20.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -2059,17 +2072,20 @@ private fun CompactChip(
                 name = filterChipIcon(label),
                 contentDescription = null,
                 tint = if (selected) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 17.dp
+                size = 19.dp
             )
-            Spacer(Modifier.width(7.dp))
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = label,
                 // v44 — bigger: 15sp label + roomier padding so the pills
                 // stand taller and fill the sheet's width.
                 // v52b — bigger still: 16sp.
+                // v61 — even bigger: 18sp label + 20/13 padding + 19dp
+                // glyph, and the unselected label steps up to SemiBold so
+                // the whole sheet's type hierarchy reads louder.
                 style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 16.sp,
-                    fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+                    fontSize = 18.sp,
+                    fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
                 ),
                 color = if (selected) ink else MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
@@ -2185,14 +2201,17 @@ private fun FilterGroupPill(
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 9.dp, bottom = 9.dp),
+            modifier = Modifier.padding(start = 20.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
         ) {
             Text(
                 text = label,
+                // v61 — group pills grow with the chips: 17sp label, roomier
+                // padding, bigger chevron + badge so the accordion row reads
+                // as one family with the filter chips below.
                 style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 15.sp,
+                    fontSize = 17.sp,
                     fontWeight = if (open) FontWeight.ExtraBold else FontWeight.Bold
                 ),
                 color = if (open) ink else MaterialTheme.colorScheme.onSurface
@@ -2204,9 +2223,9 @@ private fun FilterGroupPill(
                 ) {
                     Text(
                         text = "$selectedCount",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = ink,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
                 }
             }
@@ -2214,7 +2233,7 @@ private fun FilterGroupPill(
                 CurioIcons.KeyboardArrowDown,
                 null,
                 tint = if (open) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 16.dp,
+                size = 18.dp,
                 modifier = Modifier.graphicsLayer { rotationZ = chevronRotation }
             )
         }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -38,7 +39,10 @@ fun CurioSearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     placeholder: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v61 — optional text-style override so the Spin filter sheet can run
+    // its bigger-type page while the shared default stays unchanged.
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -64,7 +68,7 @@ fun CurioSearchField(
                 if (query.isEmpty()) {
                     Text(
                         placeholder,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = textStyle,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }
@@ -72,7 +76,7 @@ fun CurioSearchField(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge,
+                    textStyle = textStyle,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.fillMaxWidth()
                 )
