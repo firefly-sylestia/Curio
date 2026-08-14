@@ -1,6 +1,50 @@
 # Prompt.md — Request log
 
-## Current request — reveal light-mode pill tints + bigger corner chips + lag log (v51)
+## Current request — Apple Music deep link opens native search + backup-restore CI fix (v52)
+
+### What was asked
+1. CI compile failure on the v48 streaming-restore push: `Cannot infer
+type for type parameter 'T'` + cascading unresolved `id` /
+`format` / `formatDataJson` at CurioBackupManager.kt 347/349/355/359/365
+and 623-626 (compileDebug + compileRelease).
+2. "Fix the Apple Music link too — it opens the app but doesn't search
+or show a result; it shows a prompt to open the browser. Do a proper
+research and fix it."
+
+### What was done
+1. **CI fix:** Gson has NO `fromJson(JsonReader, Class<T>)` overload —
+only `fromJson(JsonReader, Type)` — so the two un-typed
+`gson.fromJson(reader, CaptureEntity::class.java)` calls couldn't infer
+T and bound to `Any!` (that's the cascade). Both now declare the type
+explicitly (`val capture: CaptureEntity` / `val cap: CaptureEntity`).
+2. **Apple Music deep link — root cause + fix (researched):** the old
+URL was `https://music.apple.com/{cc}/search?term=…` — a web-only page.
+The Android Apple Music app claims music.apple.com as an App Link, so
+the link opens the app, but the app has no NATIVE handler for the
+/search route and renders the web page in an in-app browser with an
+"Open in browser" banner — exactly what the user saw. The fix uses
+Apple's registered URL scheme: `music://music.apple.com/{cc}/search?
+term=…` — the app-urls reference documents that "any music.apple.com
+link works by switching out https with music"; the custom scheme routes
+through the app's native router (its search tab), bypassing the web page
+entirely. New shared `openSearchUrl(context, url)` catches
+`ActivityNotFoundException` (Apple Music not installed → custom scheme
+has no handler) and falls back to the https equivalent, preserving the
+old browser behavior. Both launch sites now use it:
+TopicRevealScreen.openExploreBrowserAndGoHome + HomeScreen's
+keep-exploring (the only two ACTION_VIEW sites for session.searchUrl;
+ExploreSessionService never opens URLs). Dead `Intent`/`Uri` imports
+removed from HomeScreen; Intent/Uri still used in the reveal (uninstall
+intent) so its imports stay.
+
+### Validation
+Brace/paren balance on all four files (reveal matches its HEAD baseline
+delta −2/−2 on the pre-existing +1 comment imbalance; ExploreSearch and
+HomeScreen balanced exactly); `git diff --check` clean; no leftover
+old-URL launches; music:// + openSearchUrl wired in both screens. No
+Gradle locally (env rule) — CI on push is the gate.
+
+## Prior — reveal light-mode pill tints + bigger corner chips + lag log (v51)
 
 ### What was asked
 1. "In light mode I still feel the author / Watch-for / tag chips are

@@ -344,7 +344,7 @@ object CurioBackupManager {
                             "captures" -> {
                                 reader.beginArray()
                                 while (reader.hasNext()) {
-                                    val capture = gson.fromJson(reader, CaptureEntity::class.java)
+                                    val capture: CaptureEntity = gson.fromJson(reader, CaptureEntity::class.java)
                                     captures.add(capture)
                                     captureIds.add(capture.id.orEmpty())
                                     // Pre-index session shots in capture order
@@ -620,7 +620,7 @@ object CurioBackupManager {
                             reader.beginArray()
                             while (reader.hasNext()) {
                                 captureCount++
-                                val cap = gson.fromJson(reader, CaptureEntity::class.java)
+                                val cap: CaptureEntity = gson.fromJson(reader, CaptureEntity::class.java)
                                 val id = cap.id.orEmpty()
                                 val formatStr = cap.format.orEmpty()
                                 val formatDataJson = cap.formatDataJson.orEmpty()

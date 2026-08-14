@@ -104,6 +104,7 @@ import com.curio.app.data.buildExploreSearchUrl
 import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
 import com.curio.app.data.isMusicTopic
+import com.curio.app.data.openSearchUrl
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -317,9 +318,7 @@ fun TopicRevealScreen(
      *  foreground (a background FGS start throws on Android 12+). */
     fun openExploreBrowserAndGoHome(session: ExploreSession) {
         showExploreDialog = false
-        runCatching {
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(session.searchUrl)))
-        }
+        openSearchUrl(context, session.searchUrl)
         navController.navigate(CurioRoutes.HOME) {
             popUpTo(CurioRoutes.HOME) { inclusive = false }
             launchSingleTop = true

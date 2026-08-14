@@ -351,6 +351,25 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v52 — Apple Music deep link opens native search + backup-restore compile fix.**
+  (1) **`buildMusicServiceSearchUrl` for Apple Music now uses the native
+  `music://` scheme** (`music://music.apple.com/{cc}/search?term=…`)
+  instead of `https://` — the Android Apple Music app renders
+  music.apple.com/search (a web-only page) in an in-app browser with an
+  "Open in browser" banner instead of searching, while `music://` is the
+  app's registered URL scheme (any music.apple.com path works with https
+  swapped for music), so its native router lands on the search tab. New
+  shared `openSearchUrl(context, url)` helper launches the URL and, on
+  `ActivityNotFoundException` (Apple Music not installed → no custom-scheme
+  handler), falls back to the https equivalent so the old browser behavior
+  is preserved; both launch sites (reveal's explore-and-go-home + Home's
+  keep-exploring) now use it. (2) **CI fix:** the streaming restore's two
+  `gson.fromJson(reader, CaptureEntity::class.java)` calls failed inference
+  — Gson has no `fromJson(JsonReader, Class<T>)` overload (only `Type`), so
+  un-typed calls bound to `Any!` ("Cannot infer type for type parameter
+  'T'" + cascading unresolved `id`/`format`/`formatDataJson` errors in
+  compileDebug/compileRelease). Both call sites now declare
+  `val capture: CaptureEntity` / `val cap: CaptureEntity` explicitly.
 - **v51 — reveal pill tints + bigger corner chips + complete memory shed.**
   (1) **Hero pills less whitish in light mode** (`HeroCard.pillGlass`):
   pastel light 80% → 60% toward white, non-pastel light 50% → 42% — the

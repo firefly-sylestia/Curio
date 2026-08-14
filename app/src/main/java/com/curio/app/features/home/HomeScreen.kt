@@ -101,6 +101,7 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
+import com.curio.app.data.openSearchUrl
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
@@ -145,8 +146,6 @@ import com.curio.app.ui.theme.themedAccent
 import kotlin.random.Random
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import android.content.Intent
-import android.net.Uri
 import java.util.Calendar
 
 /**
@@ -758,9 +757,7 @@ fun HomeScreen(navController: NavController) {
                         // Re-open the search page (the chosen search engine —
                         // YouTube for music) — the session keeps ticking in
                         // the background.
-                        runCatching {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(activeSession.searchUrl)))
-                        }
+                        openSearchUrl(context, activeSession.searchUrl)
                     },
                     onStop = {
                         // Top-corner stop — quiet teardown, same as the

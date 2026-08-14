@@ -1,5 +1,8 @@
 package com.curio.app.data
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import java.util.Locale
 
@@ -82,11 +85,41 @@ fun buildMusicServiceSearchUrl(
                 .takeIf { it.length == 2 }
                 ?.lowercase(Locale.ROOT)
             val path = storefront?.let { "/$it/search" } ?: "/search"
-            "https://music.apple.com$path?term=$q"
+            // v52 — the native `music://` scheme, not https. The Android
+            // Apple Music app renders music.apple.com/search (a web-only
+            // page) in an in-app browser with an "Open in browser" banner
+            // instead of searching natively. `music://` is Apple's registered
+            // scheme — any music.apple.com path works with https swapped for
+            // music — so the app's native router handles it and lands on the
+            // search tab. [openSearchUrl] falls back to the https URL when
+            // the app isn't installed (no handler for a custom scheme).
+            "music://music.apple.com$path?term=$q"
         }
         // Spotify's web search path (/search/{query}) is the correct deep
         // link: it hands off into the installed app or opens the web player.
         MusicService.SPOTIFY -> "https://open.spotify.com/search/$q"
+    }
+}
+
+/**
+ * v52 — launches [url] with a graceful fallback for Apple Music's custom
+ * scheme. `music://` has no handler when the Apple Music app isn't
+ * installed (a bare custom-scheme launch would throw
+ * ActivityNotFoundException), so the https equivalent is opened instead —
+ * preserving the old browser behavior.
+ */
+fun openSearchUrl(context: Context, url: String) {
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (e: ActivityNotFoundException) {
+        val httpsFallback = url.removePrefix("music://")
+        if (httpsFallback != url) {
+            runCatching {
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://$httpsFallback"))
+                )
+            }
+        }
     }
 }
 
