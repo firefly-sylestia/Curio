@@ -1944,12 +1944,13 @@ private fun TeaserCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            // v35 — the fact reads in the Lora editorial serif (17/27sp),
-            // clearly larger than its kicker.
+            Spacer(Modifier.height(10.dp))
+            // v37 — the quick fact is back on the plain Material bodyLarge
+            // (the Lora serif experiment read too "editorial" for the fact;
+            // the kicker above keeps the hierarchy).
             Text(
                 text = teaser ?: "Loading topic…",
-                style = CurioEditorialBody,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis

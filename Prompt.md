@@ -1,6 +1,34 @@
 # Prompt.md — Request log
 
-## Current request — hero controls back inside heroes + reveal pill polish + compact wildcard filters (v37)
+## Current request — onboarding proportions + page-pill indicator + reveal quick-fact revert (v38)
+
+### What was asked
+"In intro the weird spacing between the above Curio and middle things —
+make the tear even go down for proper size adjustments. Fix the pills
+indicator of page — they look odd — fix the placement and spacing. Also
+in reveal screen I didn't like the quick fact text typography, return it
+to what it was — just the quick facts one."
+
+### What was done
+1. **Intro hero/tear deeper:** `fillMaxHeight(0.70f → 0.76f)` — the tear
+   now sits just above the page pills, killing the dead band between the
+   dots and the Skip/Next controls.
+2. **Wordmark ↔ slide spacing:** the 6dp spacer under the pledge became
+   10dp; the pager gained `top = 8.dp` (content no longer crowds the
+   wordmark) and `bottom = 26.dp`.
+3. **Page indicator → proper pills:** `PageDot` active = 22×8dp capsule,
+   inactive = 8dp circles, same 8dp baseline, even 3dp gaps; row padding
+   14 → 12dp vertical. The old 12dp box × 1.2 scale blob is gone (the
+   `ui.draw.scale` import was removed; `foundation.layout.width` added).
+4. **Reveal quick fact reverted:** `TeaserCard`'s fact body is back on
+   `MaterialTheme.typography.bodyLarge` (was `CurioEditorialBody` Lora);
+   spacer 12 → 10dp. Lora stays on the ActionPromptCard instruction and
+   the onboarding subtext — only the quick fact went back.
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean;
+imports verified (`width` added, unused `scale` removed). CI on push is
+the gate. Changelog + `app/AGENTS.md` v38 bullet updated.
 
 ### What was asked
 "In cabinet and topic browser what you've done — the sorting/search

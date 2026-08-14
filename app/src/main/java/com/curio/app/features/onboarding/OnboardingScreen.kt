@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
@@ -57,7 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
@@ -223,15 +223,18 @@ fun OnboardingScreen(navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
             // ── The big torn-rose hero — covers well over half the screen
             //    (v7.111: deepened from 0.62 to 0.70 of the screen height so
-            //    the tear dips toward the lower third). EVERY slide renders
-            //    INSIDE the banner: intro texts, the theme options and the
-            //    permission cards all sit on the rose fill in its readable
-            //    ink, with the Curio wordmark + tagline at the top. Below
-            //    the tear are only the page dots and the Skip / Next controls.
+            //    the tear dips toward the lower third; v37: deepened again
+            //    to 0.76 so the tear sits just above the page dots and the
+            //    dead band between the dots and the bottom controls is
+            //    gone). EVERY slide renders INSIDE the banner: intro texts,
+            //    the theme options and the permission cards all sit on the
+            //    rose fill in its readable ink, with the Curio wordmark +
+            //    tagline at the top. Below the tear are only the page dots
+            //    and the Skip / Next controls.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.70f)
+                    .fillMaxHeight(0.76f)
             ) {
                 // The rose banner + ragged tear + watermark collage fill the
                 // whole box (drawn first; the wordmark + pager overlay it).
@@ -273,7 +276,7 @@ fun OnboardingScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(10.dp))
 
                     // ── Slide area — the pager fills the rest of the banner ──
                     HorizontalPager(
@@ -281,7 +284,7 @@ fun OnboardingScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .padding(start = 24.dp, end = 24.dp, bottom = 30.dp)
+                            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 26.dp)
                     ) { pageIndex ->
                         when (pageIndex) {
                             OnboardingSlides.size -> {
@@ -326,15 +329,19 @@ fun OnboardingScreen(navController: NavController) {
                 }
             }
 
-            // ── Page dots (empty on the final setup step — keeps layout stable) ─
+            // ── Page pills (empty on the final setup step — keeps layout
+            //    stable). v37 — proper pill indicators: the active page is a
+            //    wider capsule instead of the old oversized dot (a 12dp box
+            //    scaled 1.2x looked like a random blob), and the row carries
+            //    even gaps so the pills read as one tidy group.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 14.dp),
+                    .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 if (!isLastSlide) {
-                    // One dot per intro slide + one for the theme step + one
+                    // One pill per intro slide + one for the theme step + one
                     // for the search step.
                     (0..OnboardingSlides.size + 1).forEach { index ->
                         val selected = pagerState.currentPage == index
@@ -874,7 +881,12 @@ private fun hasMicPermission(context: Context): Boolean =
 
 @Composable
 private fun PageDot(selected: Boolean, onClick: () -> Unit) {
-    val size = if (selected) 12.dp else 8.dp
+    // v37 — a real pill indicator: the active page is a wider capsule
+    // (8dp tall × 22dp wide), the rest are plain 8dp circles, all sitting
+    // on the same 8dp vertical line with even gaps. The old version stacked
+    // a 1.2x scale on a 12dp box, so the active dot read as a random blob
+    // and the group looked uneven.
+    val width = if (selected) 22.dp else 8.dp
     val color = if (selected) {
         MaterialTheme.colorScheme.primary
     } else {
@@ -882,9 +894,9 @@ private fun PageDot(selected: Boolean, onClick: () -> Unit) {
     }
     Box(
         modifier = Modifier
-            .padding(horizontal = 4.dp)
-            .size(size)
-            .scale(if (selected) 1.2f else 1f)
+            .padding(horizontal = 3.dp)
+            .width(width)
+            .height(8.dp)
             .background(color, shape = CircleShape)
             .clickable(onClick = onClick)
     )

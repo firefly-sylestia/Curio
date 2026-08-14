@@ -351,6 +351,21 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v38 — onboarding proportions + page-pill indicator + reveal quick-fact revert.**
+  (1) **Hero/tear deeper:** the onboarding torn-rose hero deepens 0.70 →
+  0.76 of screen height so the tear sits just above the page pills and the
+  dead band between the dots and the Skip/Next controls disappears.
+  (2) **Wordmark ↔ slide spacing:** the 6dp spacer under the pledge became
+  10dp and the pager gained `top = 8.dp` / `bottom = 26.dp` so the slide
+  content centers evenly in the banner. (3) **Page indicator → pills:**
+  `PageDot` is a proper indicator now — the active page is a 22×8dp
+  capsule, the rest 8dp circles (no more 12dp box × 1.2 scale blob); the
+  row drops to `vertical = 12.dp` with even 3dp gaps; the unused
+  `ui.draw.scale` import was removed and `foundation.layout.width` added.
+  (4) **Reveal quick fact:** `TeaserCard`'s fact body reverts from
+  `CurioEditorialBody` (Lora) to `MaterialTheme.typography.bodyLarge`
+  (spacer 12 → 10dp) — the Lora voice stays on the ActionPromptCard
+  instruction and onboarding subtext, only the quick fact goes back.
 - **v37 — hero controls return + reveal pill polish + compact wildcard filters.**
   (1) **Cabinet/Topic Browser controls back INSIDE the hero:** the v34
   below-hero controls row is gone — the Sort dropdown + Search pill (and
