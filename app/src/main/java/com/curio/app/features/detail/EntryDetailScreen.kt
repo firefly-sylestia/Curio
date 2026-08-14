@@ -721,6 +721,8 @@ fun EntryDetailScreen(
                 // the amount done — background TINT for the pill, category
                 // accent for the progress bar — tapping opens the redesigned
                 // editor. Same TopicProgressStore everywhere.
+                // v45 — anchored tighter to the corner (12dp) so the pill
+                // reads as sitting ON the hero's bottom-right corner.
                 if (resolvedEntry.topic.progressTarget != null) {
                     CurioProgressPill(
                         topic = resolvedEntry.topic,
@@ -734,7 +736,7 @@ fun EntryDetailScreen(
                         showBar = true,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = 16.dp, bottom = 14.dp)
+                            .padding(end = 12.dp, bottom = 12.dp)
                     )
                 }
             }

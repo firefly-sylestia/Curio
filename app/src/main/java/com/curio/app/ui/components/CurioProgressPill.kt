@@ -70,7 +70,14 @@ fun CurioProgressPill(
     ink: Color,
     background: Color,
     modifier: Modifier = Modifier,
-    showBar: Boolean = true
+    showBar: Boolean = true,
+    // v45 — the editor dialog's content color. The pill's [ink] is tuned
+    // for the pill's OWN background, but the dialog sits on the ACCENT
+    // container — a pill ink that matches the accent (e.g. the reveal
+    // hero's deep-accent text on a light frosted pill) would render
+    // invisible against it. Defaults to [ink]; callers whose pill ink is
+    // accent-toned pass their on-accent ink here.
+    dialogContentColor: Color = ink
 ) {
     val target = topic.progressTarget ?: return
     if (target <= 0) return
@@ -83,7 +90,7 @@ fun CurioProgressPill(
         CurioProgressEditorDialog(
             topic = topic,
             accent = accent,
-            contentColor = ink,
+            contentColor = dialogContentColor,
             onDismiss = { showEditor = false }
         )
     }

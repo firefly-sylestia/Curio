@@ -1875,9 +1875,15 @@ private fun HeroCard(
                 CurioProgressPill(
                     topic = heroTopic,
                     accent = cat.accent,
+                    // v45 — the pill's text stays the deep accent (readable
+                    // on the light frosted pill), but the EDITOR dialog sits
+                    // on the accent container itself — it needs the on-accent
+                    // ink or every label renders invisible (the reported
+                    // blank-dialog bug).
                     ink = cat.accent,
                     background = lerp(cat.accent, Color.White, 0.85f),
                     showBar = false,
+                    dialogContentColor = cat.onAccent(),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(top = 16.dp, end = 16.dp)

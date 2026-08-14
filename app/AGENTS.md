@@ -351,6 +351,19 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v46 — progress UI: reveal dialog fix + cabinet visual-only line + detail corner.**
+  (1) **Reveal dialog blank bug** (`CurioProgressPill`): the reveal hero
+  passed `ink = cat.accent`, which the editor dialog used as its content
+  color ON the accent container — every label drew accent-on-accent
+  (invisible; only the alpha-blended arcs showed, the reported "thin line
+  of progress, no text"). `CurioProgressPill` gains `dialogContentColor`
+  (defaults to `ink`, so other callers are unchanged); the reveal passes
+  `cat.onAccent()`. (2) **Cabinet card** (`CurioEntryCard`): the rising
+  fill + tappable count pill are gone — progress is now a thin 4dp
+  on-accent line with a faint track along the hero's bottom edge (between
+  the hero and the title box below), VISUAL ONLY — no editor, card shape
+  unchanged. (3) **Detail hero**: the progress pill anchors tighter to the
+  hero's bottom-right corner (12dp).
 - **v45 — streaming backup export (OOM fix) + category-picker draft persistence.**
   (1) **Backup OOM fix** (`CurioBackupManager.export`): the old path
   loaded EVERY audio/image/session-shot byte[] into memory, base64-copied

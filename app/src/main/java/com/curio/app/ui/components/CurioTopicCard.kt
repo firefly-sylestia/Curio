@@ -32,7 +32,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -188,54 +187,34 @@ fun CurioEntryCard(
                     }
                 }
 
-                // ── v29 — progress lives IN the hero: the card's hero
-                //    header FILLS with progress (50% → half filled, 100% →
-                //    fully colored) and a small opaque count pill in the
-                //    bottom-right corner opens the editor. Same
-                //    TopicProgressStore as the reveal + detail heroes.
+                // ── v45 — progress is VISUAL ONLY on the card: a thin
+                //    accent line along the hero's bottom edge (between the
+                //    hero and the title box below), instead of the old
+                //    rising fill + tappable count pill. It never opens an
+                //    editor and never changes the card's shape — it reads
+                //    the same TopicProgressStore as the reveal + detail
+                //    heroes.
                 val progressTarget = entry.topic.progressTarget
                 if (progressTarget != null && progressTarget > 0) {
                     val current = TopicProgressStore.get(entry.topic.id)
                     val fraction = (current.toFloat() / progressTarget).coerceIn(0f, 1f)
-                    val fillInk = cat.onAccent()
                     if (current > 0) {
-                        // Rising fill — anchored to the hero's bottom edge:
-                        // half done = half filled. Denser at the base with a
-                        // bright level line at the current progress mark; the
-                        // card's own gradient shows through above the level.
+                        val fillInk = cat.onAccent()
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .fillMaxHeight(fraction)
-                                .background(
-                                    Brush.verticalGradient(
-                                        listOf(
-                                            fillInk.copy(alpha = 0.34f),
-                                            fillInk.copy(alpha = 0.08f)
-                                        )
-                                    )
-                                )
+                                .height(4.dp)
+                                .background(fillInk.copy(alpha = 0.22f))
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .fillMaxWidth()
-                                    .height(2.dp)
-                                    .background(fillInk.copy(alpha = 0.55f))
+                                    .fillMaxWidth(fraction)
+                                    .fillMaxHeight()
+                                    .background(fillInk)
                             )
                         }
                     }
-                    CurioProgressPill(
-                        topic = entry.topic,
-                        accent = accent,
-                        ink = cat.accent,
-                        background = lerp(accent, Color.White, 0.85f),
-                        showBar = false,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp)
-                    )
                 }
             }
 

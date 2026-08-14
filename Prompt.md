@@ -1,41 +1,41 @@
 # Prompt.md — Request log
 
-## Current request — streaming backup export (OOM fix) + picker draft persistence (v45)
+## Current request — progress UI: reveal dialog fix + cabinet visual-only line + detail corner (v46)
 
 ### What was asked
-1. Keep the category-picker state (selection + a tapped mix preset + the
-   scroll position/page) saved until the app restarts — leaving the
-   picker and reopening should restore it.
-2. Fix an instant app crash when taking a backup:
-   `java.lang.OutOfMemoryError` (no stack — heap exhausted) on a Samsung
-   SM-A356E / Android 16.
+1. Topic Reveal: opening the progress editor shows a bugged dialog — a
+   colored thin line of progress, no text. Only from the reveal screen.
+2. Detail page: place the progress bar at the bottom corner.
+3. Cabinet: don't show the tappable progress pill to edit — just the
+   visual. Remove the weird rising-fill progress; add a thin progress
+   line between the topic card's hero and the title box below, without
+   making the card's shape bigger.
 
 ### What was done
-1. **Backup OOM fix** (`CurioBackupManager.export`): the old export read
-   EVERY audio recording, image attachment and session screenshot into
-   memory, base64-copied the whole payload into one giant JSON String,
-   then copied that into a byte[] — several full copies of all media,
-   which OOM'd on a mid-range heap. The export now streams: a `JsonWriter`
-   writes the JSON incrementally and each media file is read +
-   base64-encoded ONE AT A TIME as its value is written (audio by capture
-   id, images deduped by URI, session shots deduped by original path,
-   pending-write shots included). Peak memory = one file's bytes, never
-   the whole archive. Output shape is byte-for-byte the same Gson payload
-   (same field names + single-line base64), so restore is unchanged.
-2. **Category picker draft** (`CategoryPickerScreen` +
-   `CategoryPickerDraft`): selection, multi-select mode, Original/New
-   page and BOTH grids' scroll offsets are mirrored live into a
-   process-scoped holder (via `snapshotFlow` + keyed `LaunchedEffect`s),
-   and the grids/pager seed from it on open. Leaving the picker (back /
-   swipe-down) and reopening restores exactly where you were — kept
-   saved until the app restarts. Committing a mix, tapping a lane open,
-   or Cancel clears the draft so the next open shows the persisted deck
-   fresh.
+1. **Reveal dialog blank bug** (`CurioProgressPill` + reveal call): the
+   reveal passed `ink = cat.accent`; the editor dialog used that same
+   color for its content ON the accent container — labels were
+   accent-on-accent (invisible), leaving only the alpha-blended arc
+   track (the "thin line"). `CurioProgressPill` gained `dialogContentColor`
+   (defaults to `ink` — detail/Cabinet callers unchanged); the reveal
+   passes `cat.onAccent()` so the dialog's title, %, steppers and slider
+   all read on the accent container.
+2. **Detail corner**: the progress pill was already at the hero's
+   bottom-right; anchored it tighter (12dp) so it reads as sitting on
+   the corner.
+3. **Cabinet card** (`CurioEntryCard`): removed the rising
+   `fillMaxHeight(fraction)` fill + the tappable `CurioProgressPill`.
+   Progress is now a VISUAL-ONLY thin 4dp on-accent line with a faint
+   track along the hero's bottom edge — between the hero and the title
+   box below — same TopicProgressStore read, no editor, no shape change.
+   Dropped the now-unused `lerp` import.
 
 ### Validation
 No Gradle locally (env rule). Brace/paren balance + `git diff --check`
-clean. CI on push is the gate. Changelog + `app/AGENTS.md` v45 bullet
+clean. CI on push is the gate. Changelog + `app/AGENTS.md` v46 bullet
 updated.
+
+## Prior — streaming backup export (OOM fix) + picker draft persistence (v45)
 
 ## Prior — Spin filter sheet: bigger color-tinted chips + flow Type group (v44)
 
