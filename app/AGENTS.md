@@ -351,6 +351,27 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v40 — reveal bottom-band wash + smooth tab crossfade + lane tiles open Cabinet.**
+  (1) **Reveal bottom band:** `TopicRevealScreen`'s band now wears
+  `cat.categoryBackgroundWash()` (the page's own wash) instead of
+  `categorySurface(surfaceContainer)` — the old strip resolved to a
+  lighter tint that read as a separate white/creamy slab at the bottom,
+  most visible behind the tags during the open fade. The reveal now reads
+  as one continuous surface (Material/AMOLED unchanged). (2) **Tab
+  switch animation:** `CurioNavHost` tab switches (enter + pop-enter) are
+  now a clean `fadeIn` instead of `scaleIn(0.97f) + fadeIn` — the
+  scale-fade read as the "old" animation opening the Cabinet from
+  Profile. (3) **Profile lane tiles open the Cabinet filtered:** new
+  `PendingCabinetFilter` out-of-band handoff in CurioRoutes (mirrors
+  PendingEntryOpen: `request(CategoryId)` + monotonic `trigger` +
+  `take()`); Profile's `LanesCard` gained `onOpenLane(CategoryId)` and
+  its tiles became clickable `Surface(onClick)`; `CabinetScreen` consumes
+  the pending filter once per request in a `LaunchedEffect(trigger)` and
+  applies it to `selectedFilter` (clearing legacy/search). (4) **Lane
+  glyph readability:** the tile icon wears `category.categoryInk()`
+  instead of `themedAccent()` — in pastel light `themedAccent` resolved
+  to a near-white pastel that washed out on the pale tile (the "whitish
+  icons" report); ink resolves a deep same-hue twin in light.
 - **v39 — filter-chip contrast + 3dp elevation + Cabinet decode cache.**
   (1) **Filter sheet contrast fixed:** `CompactChip` + `FilterGroupPill`
   light-mode inactive fills lift 0.55 → 0.82 toward `curioPillLift()` —

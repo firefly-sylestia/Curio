@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — filter-chip contrast + elevation + device-log noise + save freeze (v39)
+## Current request — reveal bottom-band glitch + Profile→Cabinet animation + lane icons + lane-filtered Cabinet (v40)
+
+### What was asked
+1. Topic Reveal: a small glitch when it opens — a white/creamy strip at
+   the bottom (the band behind the tags) looks weird; the hero opens
+   smoothly, make the whole screen even smoother.
+2. Opening the Cabinet from Profile shows the old animation.
+3. Lane icon colors are whitish in pastel mode.
+4. Make the lanes open that lane in Cabinet (pre-filtered).
+
+### What was done
+1. **Reveal bottom band = page wash:** `bandPaper` now resolves
+   `cat.categoryBackgroundWash()` (Curio) instead of
+   `categorySurface(surfaceContainer)` — the old lighter strip read as a
+   separate cream slab behind the tags during the open fade; the reveal
+   is one continuous surface now (Material/AMOLED unchanged).
+2. **Tab switches crossfade:** `CurioNavHost` tab-switch enter/pop-enter
+   replaced `scaleIn(0.97f)+fadeIn` with a clean `fadeIn` — the scale
+   read as the old zoom animation opening Cabinet from Profile.
+3. **Lane glyph readability:** Profile's lane tiles now tint the icon
+   with `category.categoryInk()` (deep same-hue twin in light/pastel)
+   instead of `themedAccent()` which resolved near-white in pastel light.
+4. **Lanes open the Cabinet pre-filtered:** new `PendingCabinetFilter`
+   handoff in CurioRoutes (request/trigger/take, mirrors PendingEntryOpen);
+   `LanesCard` tiles are clickable (`onOpenLane(CategoryId)`);
+   `CabinetScreen` consumes the pending filter in a
+   `LaunchedEffect(trigger)` and sets `selectedFilter` (clearing
+   legacy/search state).
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean;
+`scaleIn`/`scaleOut` imports still used (detail/pop routes). CI on push is
+the gate. Changelog + `app/AGENTS.md` v40 bullet updated.
 
 ### What was asked
 1. Filter page: background vs chip contrast is still bad — fix it; give

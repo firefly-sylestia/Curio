@@ -84,6 +84,7 @@ import com.curio.app.data.PromoMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -105,6 +106,7 @@ import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
@@ -330,6 +332,14 @@ fun ProfileScreen(navController: NavController) {
                         CurioSettingsCard(shadowElevation = 0.dp) {
                             LanesCard(
                                 counts = categoryCounts,
+                                // v39 — lane tiles open the Cabinet filtered to
+                                // that lane; the pending filter rides the
+                                // out-of-band handoff so the tab keeps its
+                                // normal nav route (see PendingCabinetFilter).
+                                onOpenLane = { categoryId ->
+                                    PendingCabinetFilter.request(categoryId)
+                                    navController.navigate(CurioRoutes.CABINET) { launchSingleTop = true }
+                                },
                                 onCabinet = { navController.navigate(CurioRoutes.CABINET) { launchSingleTop = true } }
                             )
                         }
@@ -1194,14 +1204,24 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
 }
 
 @Composable
-private fun LanesCard(counts: Map<CategoryId, Int>, onCabinet: () -> Unit) {
+private fun LanesCard(
+    counts: Map<CategoryId, Int>,
+    // v39 — tapping a lane tile opens the Cabinet filtered to that lane.
+    onOpenLane: (CategoryId) -> Unit,
+    onCabinet: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         CurioCardHeader(CurioIcons.Palette, "Your lanes", "Where you've been exploring")
         Spacer(Modifier.height(6.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(counts.entries.sortedByDescending { it.value }.take(4)) { (categoryId, count) ->
                 val category = CurioCategories.byId(categoryId)
+                // v39 — the tile is tappable now, and the glyph wears the
+                // READABLE category ink instead of themedAccent (which in
+                // pastel light resolves to a near-white pastel that washed
+                // out on the pale tile — the "whitish icons" report).
                 Surface(
+                    onClick = { onOpenLane(categoryId) },
                     shape = RoundedCornerShape(16.dp),
                     // v27n — OPAQUE category-tinted tile (was 14% alpha, which
                     // let the elevation shadow bleed through); the opaque lerp
@@ -1217,7 +1237,7 @@ private fun LanesCard(counts: Map<CategoryId, Int>, onCabinet: () -> Unit) {
                         .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        CurioIcon(category.iconGlyph, null, tint = category.themedAccent(), size = 20.dp)
+                        CurioIcon(category.iconGlyph, null, tint = category.categoryInk(), size = 20.dp)
                         Spacer(Modifier.height(4.dp))
                         Text(category.displayName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
                         Text("$count saved", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -800,14 +800,17 @@ fun TopicRevealScreen(
         // bar (see CurioNavHost.showBottomBar): a flat rectangle with no
         // torn seam or ragged edge — the tags row sits on it.
         // v9.x — the band is fully opaque and follows the active appearance.
-        // Curio uses the category surface (anchored to the surface container
-        // so the band reads as a slightly darker, more defined strip; the old
-        // `surface` base washed white/creamy on the tinted page). Material
-        // uses the device surface, and AMOLED stays pure black.
+        // v39 — the band now wears the SAME page wash as the reveal body
+        // (the old categorySurface strip resolved to a lighter tint that
+        // read as a separate white/creamy slab at the bottom — most visible
+        // during the open fade, right behind the tags). With the band
+        // matching the page, the reveal reads as one continuous surface and
+        // only the tags chips stand out. Material keeps its device surface,
+        // and AMOLED stays pure black.
         val bandPaper = when (AppPreferences.themeStyleState) {
             AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
             AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
-            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainer)
+            else -> cat.categoryBackgroundWash()
         }
         val bandInk = MaterialTheme.colorScheme.onSurface
         // v9.x — NavHost reserves the missing navbar footprint for Reveal

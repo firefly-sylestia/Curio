@@ -83,6 +83,7 @@ import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -153,6 +154,19 @@ fun CabinetScreen(navController: NavController) {
         mutableStateOf<CategoryId?>(null)
     }
     var showLegacyOnly by rememberSaveable(CabinetSessionToken) { mutableStateOf(false) }
+    // v39 — opening the Cabinet from a lane tile (Profile → "Your lanes")
+    // lands pre-filtered to that lane: the pending handoff is consumed once
+    // on first composition (keyed on the monotonic bump so re-opens fire).
+    LaunchedEffect(PendingCabinetFilter.trigger) {
+        PendingCabinetFilter.take()?.let { name ->
+            runCatching { CategoryId.valueOf(name) }.getOrNull()?.let { catId ->
+                selectedFilter = catId
+                showLegacyOnly = false
+                searchActive = false
+                searchQuery = ""
+            }
+        }
+    }
     // Saveable-backed scroll state — the grid keeps its position on rotation.
     val gridState = rememberLazyGridState()
 

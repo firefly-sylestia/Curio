@@ -28,6 +28,37 @@ object LightboxTarget {
 }
 
 /**
+ * Out-of-band handoff for opening the Cabinet pre-filtered to one lane
+ * (v39 — Profile's "Your lanes" tiles).
+ *
+ * The Cabinet is a bottom-nav tab route, so its filter can't ride a nav
+ * argument without breaking tab state restoration. Instead the caller
+ * stashes the lane's [CategoryId] name here before navigating, and the
+ * Cabinet screen consumes it once on first composition (a monotonic bump
+ * keyed in a LaunchedEffect so the NavHost recomposes when it fires).
+ */
+object PendingCabinetFilter {
+    private var categoryName: String? = null
+    private val counter = mutableIntStateOf(0)
+
+    /** Stashes a lane to open the Cabinet with when the tab next appears. */
+    fun request(categoryId: com.curio.app.data.CategoryId) {
+        categoryName = categoryId.name
+        counter.intValue++
+    }
+
+    /** Monotonic bump — the Cabinet keys its consume-effect on this. */
+    val trigger: Int get() = counter.intValue
+
+    /** Consumes and returns the pending lane's category name, if any. */
+    fun take(): String? {
+        val name = categoryName ?: return null
+        categoryName = null
+        return name
+    }
+}
+
+/**
  * Out-of-band handoff for the "Done exploring" notification action.
  *
  * The action's broadcast receiver tears the session down and launches
