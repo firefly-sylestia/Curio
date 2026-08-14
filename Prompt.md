@@ -1,6 +1,41 @@
 # Prompt.md — Request log
 
-## Current request — onboarding proportions + page-pill indicator + reveal quick-fact revert (v38)
+## Current request — filter-chip contrast + elevation + device-log noise + save freeze (v39)
+
+### What was asked
+1. Filter page: background vs chip contrast is still bad — fix it; give
+   BOTH active and inactive filter chips an elevation of 3.
+2. Device-log warnings: `libc access denied finding property
+   "vendor.perf.ems.egg"`, `ashmem pinning is deprecated since Android Q`,
+   `Suspending all threads took 11.661ms` (repeats).
+3. App sometimes freezes — especially when adding too many entries.
+
+### What was done
+1. **Contrast + elevation:** `CompactChip` / `FilterGroupPill` light-mode
+   inactive fills lift 0.55 → 0.82 toward `curioPillLift()` (neutral cream
+   vs the pale pastel wash — the old lift still read same-y); both states
+   get `shadowElevation` + `curioDarkGlow` 2 → 3dp. Same treatment on
+   `PickerPageTab` / `PickerPresetChip` (0.60 → 0.82, 3dp).
+2. **Freeze (real fix):** `CaptureRepository.observeAll()` gained a decode
+   cache keyed by a content signature — Room re-emits the full list on
+   every insert, so a large archive re-ran Gson decoding (and fresh Gson
+   allocations per `deserializeCaptureData`) for EVERY row per save; those
+   GC pauses are the freeze. Only new/changed rows decode now.
+3. **Device-log noise (NOT app bugs — no code change):**
+   - `libc access denied finding property "vendor.perf.ems.egg"` — the
+     system/vendor property (a Qualcomm perf hint) is restricted; the
+     framework probes it, not Curio. Cannot be silenced from an app.
+   - `ashmem pinning is deprecated since Android Q` — a deprecation log
+     from Android's native memory-mapping internals (typically triggered
+     by the OS/WebView). Apps can't opt out.
+   - `Suspending all threads took X ms` — ART GC pause log; it fired
+     because of the decode churn fixed in (2). It should become rare.
+
+### Validation
+No Gradle locally (env rule). Brace balance + `git diff --check` clean;
+cache map only touched on the flow's single collection dispatcher
+(flowOn(Dispatchers.Default)). CI on push is the gate. Changelog +
+`app/AGENTS.md` v39 bullet updated.
 
 ### What was asked
 "In intro the weird spacing between the above Curio and middle things —

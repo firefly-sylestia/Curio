@@ -351,6 +351,23 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v39 — filter-chip contrast + 3dp elevation + Cabinet decode cache.**
+  (1) **Filter sheet contrast fixed:** `CompactChip` + `FilterGroupPill`
+  light-mode inactive fills lift 0.55 → 0.82 toward `curioPillLift()` —
+  the old lift still read same-y against the pale pastel wash (both the
+  sheet and the chips are pastel tints); chips now go neutral cream and
+  clearly separate. Dark keeps its subtle 0.04 lift + glow. (2) **Both
+  states get 3dp elevation:** `shadowElevation` + `curioDarkGlow` 2 → 3dp
+  on the filter chips and group pills; same contrast/elevation applied to
+  the picker tabs (`PickerPageTab`) and preset chips (`PickerPresetChip`,
+  0.60 → 0.82 lift, 3dp). (3) **Cabinet freeze on mass saves:**
+  `CaptureRepository.observeAll()` now caches decoded `CurioEntry`s by a
+  signature (id + format + capturedAtMillis + formatDataJson/tags/
+  screenshots hash + sessionNote + deletedAt); Room re-emits the full list
+  on every insert, so a large archive re-ran Gson decoding for EVERY row
+  per save — the GC pauses froze the app. Now only new/changed rows
+  decode; the map is only touched from the flow's single collection
+  dispatcher.
 - **v38 — onboarding proportions + page-pill indicator + reveal quick-fact revert.**
   (1) **Hero/tear deeper:** the onboarding torn-rose hero deepens 0.70 →
   0.76 of screen height so the tear sits just above the page pills and the

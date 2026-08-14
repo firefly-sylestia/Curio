@@ -2025,16 +2025,22 @@ private fun CompactChip(
     // pill that visibly stands off the wash in every light theme. Dark mode
     // keeps its small lift: the chip is already a stronger tint blend than
     // the sheet there and wears curioDarkGlow.
-    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.55f)
+    // v38 — contrast fix: the 0.55 lift still read same-y against the pale
+    // pastel wash (the sheet and the chips are both pastel tints), so light
+    // mode now lifts almost fully toward the page background (0.82 — the
+    // chips go neutral cream and clearly separate from the category-tinted
+    // sheet); dark keeps its subtle lift. BOTH states now carry a 3dp
+    // elevation so the pills read raised off the sheet.
+    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else inactiveFill,
-        // v29 — a visible 2dp lift in BOTH states (inactive included) so
+        // v38 — a visible 3dp lift in BOTH states (inactive included) so
         // the unselected chips read as raised pills, not flat tiles.
-        shadowElevation = 2.dp,
+        shadowElevation = 3.dp,
         modifier = Modifier
             .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
-            .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
     ) {
@@ -2069,7 +2075,10 @@ private fun FilterGroupPill(
     chipSurface: Color,
     onClick: () -> Unit
 ) {
-    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.55f)
+    // v38 — same contrast + elevation language as the filter chips: closed
+    // pills lift almost fully toward the page background in light mode and
+    // both states carry a 3dp elevation.
+    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),
@@ -2078,9 +2087,9 @@ private fun FilterGroupPill(
     Surface(
         shape = RoundedCornerShape(50),
         color = if (open) accent else inactiveFill,
-        shadowElevation = 2.dp,
+        shadowElevation = 3.dp,
         modifier = Modifier
-            .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            .curioDarkGlow(3.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
     ) {

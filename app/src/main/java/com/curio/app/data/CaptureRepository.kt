@@ -13,13 +13,39 @@ import java.util.UUID
  */
 class CaptureRepository(private val dao: CaptureDao) {
 
+    // v38 — decode cache: Room re-emits the FULL list on every insert, so a
+    // large Cabinet re-ran Gson decoding (and fresh Gson allocations) for
+    // EVERY entry on each save — the GC pauses behind that are what froze
+    // the app while adding several entries in a row. Entries are cached by
+    // a signature of their mutable stored fields, so only new/changed rows
+    // decode; unchanged ones are returned from the map. The map is only
+    // touched from the flow's (single) collection dispatcher.
+    private val decodeCache = HashMap<String, Pair<String, CurioEntry>>()
+
     /** Observe all captures as [CurioEntry] flow for reactive UI updates. */
     fun observeAll(): Flow<List<CurioEntry>> =
         // Entity → domain conversion includes Gson decoding and topic lookup;
         // keep that work off the Compose/main collector so opening Cabinet
         // stays responsive even with a large restored FieldMind archive.
         dao.getAllFlow()
-            .map { entities -> entities.map { it.toEntry() } }
+            .map { entities ->
+                entities.map { entity ->
+                    // Fast signature — cheap string hashing, no JSON parsing.
+                    val sig = entity.id + "|" + entity.format + "|" +
+                        entity.capturedAtMillis + "|" + entity.formatDataJson.hashCode() +
+                        "|" + entity.tagsJson.hashCode() + "|" + entity.sessionNote +
+                        "|" + entity.sessionScreenshotsJson.hashCode() +
+                        "|" + entity.deletedAt
+                    val cached = decodeCache[entity.id]
+                    if (cached != null && cached.first == sig) {
+                        cached.second
+                    } else {
+                        val entry = entity.toEntry()
+                        decodeCache[entity.id] = sig to entry
+                        entry
+                    }
+                }
+            }
             .flowOn(Dispatchers.Default)
 
     /** Get all captures (one-shot). */
