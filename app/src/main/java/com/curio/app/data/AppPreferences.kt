@@ -350,9 +350,10 @@ object AppPreferences {
     // Explore browser button. Reactive so the Topic Reveal dialog copy and
     // the Settings row update the moment it changes.
     var searchEngineState by mutableStateOf(SearchEngine.GOOGLE.id)
-    // v27s — the chosen music service id ("youtube_music", "apple_music",
-    // "spotify") for the "Watch in" action on Album / Artist / Song topics.
-    var musicServiceState by mutableStateOf(MusicService.YOUTUBE_MUSIC.id)
+    // v27s — the chosen music service id ("youtube", "youtube_music",
+    // "apple_music", "spotify") for the "Watch in" action on Album /
+    // Artist / Song topics. YouTube is the default for new preferences.
+    var musicServiceState by mutableStateOf(MusicService.YOUTUBE.id)
     var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
@@ -580,7 +581,7 @@ object AppPreferences {
         themeStyleState = style
     }
 
-    // ── Pastel color mode ─────────────────────────────────────────────
+    // ── Pastel color mode ──────────────���──────────────────────────────
     /** Whether the pastel color mode is on (default on). */
     fun isPastelColorsEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_PASTEL_COLORS_ENABLED, true)
@@ -991,7 +992,7 @@ object AppPreferences {
      * until they switch.
      */
     fun getMusicService(context: Context): String =
-        prefs(context).getString(KEY_MUSIC_SERVICE, null) ?: MusicService.YOUTUBE_MUSIC.id
+        prefs(context).getString(KEY_MUSIC_SERVICE, null) ?: MusicService.YOUTUBE.id
 
     fun setMusicService(context: Context, service: MusicService) {
         prefs(context).edit().putString(KEY_MUSIC_SERVICE, service.id).apply()
@@ -1476,7 +1477,7 @@ object AppPreferences {
         }
     }
 
-    // ── Last-used Spin category — persisted so the Spin tab opens where ─
+    // ── Last-used Spin category — persisted so the Spin tab opens where ��
     //    the user left off, even across app launches (v5.5). Falls back
     //    to WILDCARD when unset or when a stored name no longer exists.
     fun getLastSpinCategory(context: Context): CategoryId {

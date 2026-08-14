@@ -30,7 +30,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -1751,7 +1750,7 @@ private fun FilterSheet(
                 //    stretched two huge slab-chips on phones (overwhelming)
                 //    and more than four wide on tablets. Fixed compact pill
                 //    columns keep the sheet scannable in every width. ─────
-                BoxWithConstraints(
+                Box(
                     modifier = Modifier.weight(1f)
                 ) {
                     val gridCols = 3

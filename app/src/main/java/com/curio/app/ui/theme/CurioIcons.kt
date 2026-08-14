@@ -348,6 +348,7 @@ fun SearchEngine.brandTile(): Pair<Color, String> = when (this) {
  * glyph + color instead).
  */
 fun MusicService.brandTile(): Pair<Color, String> = when (this) {
+    MusicService.YOUTUBE -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
     MusicService.YOUTUBE_MUSIC -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
     MusicService.APPLE_MUSIC -> Color(0xFFFA2D48) to CurioIcons.MusicNote
     MusicService.SPOTIFY -> Color(0xFF1DB954) to CurioIcons.PlayCircle
