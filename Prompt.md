@@ -1,6 +1,30 @@
 # Prompt.md — Request log
 
-## Current request — revert f991db1 (serif body text toggle) + new pet designer tools (v64)
+## Current request — progress visibility (cabinet line + detail pill) (v66)
+
+### What was asked
+"the progress indicator in cabinet isnt really visible in light mode pastel
+and please place the progress pill of detail view which is at hero buttom
+corner to the screen buttom corner. and fix its progress indicator too"
+
+### What was done
+1. **Cabinet progress line** (`CurioTopicCard` strip under the hero):
+   themedAccent resolves to a light pastel twin in pastel-light that
+   washed out on the cream hero — fill now uses `categoryInk()` in light
+   mode (hue-preserving deep accent) / accent in dark; track alpha
+   0.18 → 0.32, line 4 → 5dp.
+2. **Detail pill moved** to the screen bottom-right corner (out of the
+   hero Box into the screen-level Box beside `DetailStickyBar`, BottomEnd
+   + 16dp; no navigationBarsPadding — the NavHost Scaffold already pads).
+3. **Pill bar fixed** (`CurioProgressPill` slim bar): fill was accent
+   (pastel-light invisible) → deep category ink in light / accent in
+   dark; track 0.25 → 0.30 alpha. Reveal count-only badge untouched.
+
+### Validation
+Brace balance OK (3 files); `git diff --check` clean. No Gradle locally
+(env rule) — CI on push.
+
+## Prior — revert f991db1 (serif body text toggle) + new pet designer tools (v65)
 
 ### What was asked
 "...also revert this commit font changes" (f991db1 — toggleable serif body

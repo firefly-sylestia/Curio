@@ -48,7 +48,9 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -204,13 +206,19 @@ fun CurioEntryCard(
                     // track always shows while the target exists, so the
                     // progress line is visible even before any pages are
                     // read; the accent fill grows with progress.
-                    val fillColor = cat.themedAccent()
+                    // v66 — pastel light mode washes themedAccent to a light
+                    // pastel twin that disappears on the cream hero, so the
+                    // fill uses the deep category ink in light mode
+                    // (hue-preserving, readable) and the accent in dark; the
+                    // track lifts to a clearly visible alpha and the line
+                    // gains a dp of presence.
+                    val fillColor = if (isCurioDarkTheme()) cat.themedAccent() else cat.categoryInk()
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .height(4.dp)
-                            .background(fillColor.copy(alpha = 0.18f))
+                            .height(5.dp)
+                            .background(fillColor.copy(alpha = 0.32f))
                     ) {
                         if (current > 0) {
                             Box(

@@ -28,5 +28,6 @@ FIX
 - Backup export and restore stream in chunks so large archives can't crash.
 - Filter chips, sort pills and category pills have proper elevation and contrast in every theme.
 - Pet no longer gets stuck chattering after leaving Spin.
+- Cabinet progress lines and the detail-view progress pill are clearly visible in light and pastel mode; the detail pill moved to the screen's bottom corner.
 - Category-colored text is readable in light and pastel mode.
 - Home button always works, even after opening Cabinet from Profile.

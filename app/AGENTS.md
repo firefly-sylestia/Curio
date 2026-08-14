@@ -351,6 +351,23 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v66 — progress visibility + detail pill moved to the screen corner.**
+  (1) **Cabinet progress line visible in light/pastel** (`CurioTopicCard`
+  progress strip under the hero): `themedAccent()` resolves to a light
+  pastel twin in pastel light mode that washed out on the cream hero —
+  the fill now uses `categoryInk()` in light mode (hue-preserving deep
+  accent) and the accent in dark; the track lifts 0.18 → 0.32 alpha and
+  the line grows 4 → 5dp. (2) **Detail progress pill moved from the
+  hero's bottom-right corner to the SCREEN's bottom-right corner**
+  (`EntryDetailScreen`): the pill left the hero Box and now floats in
+  the screen-level Box beside `DetailStickyBar`, aligned BottomEnd with
+  a 16dp corner inset (the NavHost Scaffold already pads content above
+  the nav bar via `contentWindowInsets = navigationBars`, so no extra
+  inset). (3) **Its bar fixed too** (`CurioProgressPill` slim bar): the
+  fill was `accent` (light pastel in pastel light — invisible); it now
+  uses the deep category ink in light mode and the accent in dark, and
+  the track alpha lifts 0.25 → 0.30. The reveal hero's count-only
+  badge (`showBar = false`) is untouched.
 - **v65 — Pet Designer: auto-import, brush size, transparent fill,
   tool-tray color chip, eye presets + placement.** (1) **Auto-import**
   (`autoImportNext` flag + "Auto-import image" in `ImportMenuDialog`):

@@ -716,29 +716,6 @@ fun EntryDetailScreen(
                         }
                     }
                 }
-                // v29 — progress pill (books: pages / anime: episodes) at
-                // the hero's BOTTOM-RIGHT corner: a small compact pill with
-                // the amount done — background TINT for the pill, category
-                // accent for the progress bar — tapping opens the redesigned
-                // editor. Same TopicProgressStore everywhere.
-                // v45 — anchored tighter to the corner (12dp) so the pill
-                // reads as sitting ON the hero's bottom-right corner.
-                if (resolvedEntry.topic.progressTarget != null) {
-                    CurioProgressPill(
-                        topic = resolvedEntry.topic,
-                        accent = cat.themedAccent(),
-                        ink = cat.categoryInk(),
-                        background = lerp(
-                            MaterialTheme.colorScheme.surfaceContainerHigh,
-                            cat.themedAccent(),
-                            0.16f
-                        ),
-                        showBar = true,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(end = 12.dp, bottom = 12.dp)
-                    )
-                }
             }
 
         }
@@ -857,6 +834,32 @@ fun EntryDetailScreen(
             navController = navController,
             onDeleteRequest = { deleteDialogVisible = true }
         )
+
+        // v66 — the progress pill (books: pages / anime: episodes) floats at
+        // the SCREEN's bottom-right corner (was the hero's bottom-right) so
+        // it never rides away with the hero or overlaps the frosted meta
+        // card — a small compact pill with the amount done, background TINT
+        // for the pill, category accent for the progress bar; tapping opens
+        // the redesigned editor. Same TopicProgressStore everywhere.
+        if (resolvedEntry.topic.progressTarget != null) {
+            CurioProgressPill(
+                topic = resolvedEntry.topic,
+                accent = cat.themedAccent(),
+                ink = cat.categoryInk(),
+                background = lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    cat.themedAccent(),
+                    0.16f
+                ),
+                showBar = true,
+                // The NavHost Scaffold already pads its content above the
+                // system nav bar (contentWindowInsets = navigationBars), so
+                // no navigationBarsPadding here — 16dp from the corner.
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 16.dp)
+            )
+        }
     }
 
     if (deleteDialogVisible) {
