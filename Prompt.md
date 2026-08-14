@@ -1,6 +1,33 @@
 # Prompt.md — Request log
 
-## Current request — desktop-release: missing Curio.exe app image + PR builds (v28)
+## Current request — pastel-mode FilterSheet chips: invisible elevation (v29 follow-up)
+
+### What was asked
+"In pastel mode the filter chips elevation isn't visible as they have the
+same shade — fix it."
+
+### Root cause
+In the Spin FilterSheet (`CompactChip` in `SpinScreen.kt`), the sheet
+container resolves `cat.categorySurface(surfaceContainerLow)` and the chips
+resolve `cat.categorySurface(surfaceContainerHigh)` — but in LIGHT mode
+`categorySurface()` IGNORES its `base` parameter and always returns
+`lightSurfaceTint(accent)` (pastel: `lightAccentTint(accent, 0.28, 0.86)`).
+So sheet and chips were the SAME airy pastel; the v29 "whisper" lift
+(`lerp(chipSurface, White, 0.10)`) was invisible on the near-white pastel,
+and the 2dp elevation read as nothing. (Dark mode was already fine: the chip
+is a stronger tint blend than the sheet there + wears `curioDarkGlow`.)
+
+### What was done
+`CompactChip`'s light-mode inactive fill lift raised 0.10 → 0.32 toward
+white — a real surface step so unselected chips visibly stand off the
+tinted sheet in pastel AND plain light mode; dark keeps 0.04 + glow.
+Docs: `app/AGENTS.md` v29 FilterSheet bullet extended.
+
+### Validation
+No Gradle locally (env rule). Braces/imports unchanged (single constant
+edit); CI on push is the gate.
+
+## Prior — desktop-release: missing Curio.exe app image + PR builds (v28)
 
 ### What was asked
 Fix the desktop tag-release CI failure (`Write-Error: No Curio.exe app image

@@ -264,7 +264,13 @@ app/src/main/java/com/curio/app/
   fill a whisper of white (`lerp(chipSurface, White, 0.04 dark / 0.10
   light)`) with a 2dp shadow in BOTH states + `curioDarkGlow`, so
   unselected chips read as raised pills off the tinted sheet instead of
-  flat tiles.
+  flat tiles. **Pastel-mode follow-up:** the whisper was invisible — in
+  light mode `categorySurface()` ignores its `base` surface step, so the
+  sheet (`surfaceContainerLow`) and the chips (`surfaceContainerHigh`)
+  resolved to the SAME airy pastel and the 2dp elevation read as nothing.
+  The light-mode lift is now a clear surface step (`0.32` toward white,
+  dark keeps `0.04` + glow), so unselected chips visibly stand off the
+  tinted sheet in pastel AND plain light mode.
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation
