@@ -3541,8 +3541,14 @@ private fun ExpandedMoodBoardDialog(
                 // (saved separately from the inline one the small card
                 // renders). Legacy entries have no full layout → fall back to
                 // the inline one so old boards keep their single arrangement.
-                val expandedLayouts = sanitizeTileLayouts(data.tileLayoutsFull.ifEmpty { data.tileLayouts }.orEmpty())
-                val expandedQuotePositions = data.quotePositionsFull.ifEmpty { data.quotePositions }.orEmpty()
+                // v60 — .ifEmpty on a Gson-decoded list NPEs when the field
+                // decoded to null (Gson bypasses Kotlin defaults), crashing
+                // the expanded board's first measure — null-safe .orEmpty()
+                // first, then the empty fallback.
+                val expandedLayouts = sanitizeTileLayouts(
+                    data.tileLayoutsFull.orEmpty().ifEmpty { data.tileLayouts.orEmpty() }
+                )
+                val expandedQuotePositions = data.quotePositionsFull.orEmpty().ifEmpty { data.quotePositions.orEmpty() }
 
                 if (expandedLayouts.isNotEmpty()) {
                     // Fit the collage to the dialog with the SAME shared

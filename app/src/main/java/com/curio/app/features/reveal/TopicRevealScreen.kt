@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -809,7 +810,10 @@ fun TopicRevealScreen(
                     // row below has room INSIDE the same strip height.
                     // v52b — raised further (14 → 10dp) so the tag chips
                     // clear the like/dislike row with no overlap.
-                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = navInset + 8.dp),
+                    // v60 — raised once more (10 → 6dp): the tags can still
+                    // sit a little higher, giving the sentiment row below
+                    // clear breathing room at larger font scales.
+                    .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = navInset + 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.Top
             ) {
@@ -2118,6 +2122,15 @@ private fun SentimentButton(
     ink: Color = Color.White,
     onClick: () -> Unit
 ) {
+    // v60 — the active state POPS so a liked/disliked topic reads at a
+    // glance: the pill scales up on a fast ease, wears the category glow,
+    // and the label flips to ExtraBold, all on top of the accent fill +
+    // white ink. Inactive stays the quiet tinted glass.
+    val pillScale by animateFloatAsState(
+        targetValue = if (active) 1.08f else 1f,
+        animationSpec = tween(160, easing = FastOutSlowInEasing),
+        label = "sentimentScale"
+    )
     Surface(
         onClick = onClick,
         shape = CircleShape,
@@ -2126,7 +2139,12 @@ private fun SentimentButton(
         // instead of the generic surfaceVariant.
         color = if (active) accent else curioPillTintLift(),
         // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        modifier = Modifier
+            .scale(pillScale)
+            // v60 — active wears a category glow so the selection is
+            // unmistakable even where the accent is pale.
+            .curioDarkGlow(if (active) 4.dp else 0.dp, CircleShape)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -2137,11 +2155,13 @@ private fun SentimentButton(
                 name = icon,
                 contentDescription = label,
                 tint = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 15.dp
+                size = if (active) 17.dp else 15.dp
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (active) FontWeight.ExtraBold else FontWeight.SemiBold
+                ),
                 color = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

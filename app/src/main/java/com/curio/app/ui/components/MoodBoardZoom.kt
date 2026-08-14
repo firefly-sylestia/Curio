@@ -724,6 +724,15 @@ fun MoodBoardFloatingCards(
         // v42 — a resized card (saved.w >= 0) keeps its custom WIDTH; cards
         // never resized use the deterministic slot width as before.
         val cardW = if (saved.w >= 0f) saved.w else slot.w
+        // v60 — cap the fallback card's DISPLAY size on a scaled-up board.
+        // The slot width is ~41% of the raw board; when the collage is
+        // smaller than the canvas it zooms to fill (scale > 1), and the raw
+        // slot width multiplies by that zoom — a quote card could balloon
+        // to a huge slab in the small inline editor. Resized cards (saved.w
+        // set by the user's grip/pinch) keep the full scale — only the
+        // deterministic fallback cards are clamped to ~44% of the canvas.
+        val displayScale = if (saved.w >= 0f) scale
+            else scale.coerceAtMost((canvasWPx * 0.44f) / slot.w.coerceAtLeast(1f))
         MoodBoardFloatingCard(
             text = quote,
             style = styles.getOrElse(i) { NotePaperStyle.RULED },
@@ -731,8 +740,8 @@ fun MoodBoardFloatingCards(
             rotation = tilts.getOrElse(i) { (i * 4.2f % 8f) - 4f },
             x = placed.x * scale + offsetX,
             y = placed.y * scale + offsetY,
-            w = cardW * scale,
-            h = slot.h * scale,
+            w = cardW * displayScale,
+            h = slot.h * displayScale,
             boardW = canvasWPx * scale,
             boardH = canvasHPx * scale,
             seed = seed?.let { it + i * 0x1F31 },

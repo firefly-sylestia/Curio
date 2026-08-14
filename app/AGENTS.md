@@ -363,6 +363,38 @@ app/src/main/java/com/curio/app/
   entry content) swaps live when the toggle changes.
   (2) **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips and
   pills read calmer, less stretched.
+- **v60 — session-screenshot attach removed; mood-board crash + reveal strip fixes.**
+  (1) **Session-screenshot FEATURE removed (user: "too scary", old shots
+  kept attaching).** The save page's "Session screenshots" section
+  (auto-attached session shots + add-from-gallery + per-shot remove) is
+  gone — nothing reads or attaches screenshots anymore. The manifest
+  drops `READ_MEDIA_IMAGES`, `READ_EXTERNAL_STORAGE` (≤32) and
+  `FOREGROUND_SERVICE_MEDIA_PROJECTION` (nothing uses MediaProjection in
+  the tree — v55 removed the watcher and no capture code remains). The
+  shared session NOTE survives untouched (`SessionNoteFloatingPill` +
+  `peekWriteSessionNote`), and all legacy data paths are left inert and
+  read-only: `ExploreSession.screenshotPaths`, pending-write screenshots,
+  `CaptureEntity.sessionScreenshotsJson`, `SessionShots`, backup/restore
+  round-trip, and EntryDetail's display of ALREADY-saved screenshots.
+  (2) **Mood-board expanded-dialog crash fixed.** `ExpandedMoodBoardDialog`
+  called `.ifEmpty{}` on `tileLayoutsFull`/`quotePositionsFull` — Gson
+  bypasses Kotlin defaults, so pre-v57 entries decode those to NULL and
+  `Collection.isEmpty()` NPE'd on the dialog's first measure (the reported
+  crash). Now `orEmpty().ifEmpty{...}`; same null-guard applied to
+  MoodBoardExport's three `tileLayoutsFull.isNotEmpty()` /
+  `quotePositionsFull.isNotEmpty()` sites (save/share path).
+  (3) **Inline mood-board quote cards no longer balloon.** When the
+  collage is smaller than the canvas it zooms to fill (scale > 1) and the
+  raw slot width (~41% of the board) multiplied by that zoom — a quote
+  card could grow into a huge slab in the small inline editor.
+  `MoodBoardFloatingCards` caps the DISPLAY scale of never-resized
+  fallback cards at ~44% of the canvas (`displayScale`); user-resized
+  cards (saved.w) keep the full scale.
+  (4) **Reveal strip: tags raised + Like/Dislike active state POPS.** Tag
+  row top inset 10 → 6dp (clearer clearance between tags and the
+  sentiment row at larger font scales); `SentimentButton` active now
+  scales to 1.08 with a category glow (`curioDarkGlow` 4dp), ExtraBold
+  label and 17dp icon — a liked/disliked topic is unmistakable.
 - **v59.2 — watermark icons: fewer in the drawer, screen-matched elsewhere.**
   (1) **Drawer calms down** — the Home nav-drawer hero now scatters 3
   mirrored pairs (was 5), smaller (34–42dp vs 44–56dp) and fainter

@@ -178,8 +178,11 @@ object MoodBoardExport {
         // (falling back to the inline one for legacy entries that only ever
         // saved a single board). Bitmaps preload against the SAME tile list
         // the render draws, so indices always line up.
-        val renderLayouts = if (layout == MoodBoardLayout.FULL && data.tileLayoutsFull.isNotEmpty())
-            data.tileLayoutsFull else data.tileLayouts
+        // v60 — Gson bypasses Kotlin defaults, so these fields can decode to
+        // null: guard every isEmpty()/map with orEmpty() to avoid the
+        // Collection.isEmpty() crash on legacy boards.
+        val renderLayouts = if (layout == MoodBoardLayout.FULL && data.tileLayoutsFull.orEmpty().isNotEmpty())
+            data.tileLayoutsFull.orEmpty() else data.tileLayouts.orEmpty()
         // Preload every collage image as a full-size software bitmap so the
         // off-screen capture never races an async Coil load. Always recycled
         // when the export finishes — including on any failure/early-return
@@ -247,8 +250,8 @@ object MoodBoardExport {
         // edge to edge — exactly the expanded full-screen view — with no
         // header, caption or below-board quote boxes around it.
         // v57 — the extent comes from the SAME arrangement being rendered.
-        val renderLayouts = if (layout == MoodBoardLayout.FULL && data.tileLayoutsFull.isNotEmpty())
-            data.tileLayoutsFull else data.tileLayouts
+        val renderLayouts = if (layout == MoodBoardLayout.FULL && data.tileLayoutsFull.orEmpty().isNotEmpty())
+            data.tileLayoutsFull.orEmpty() else data.tileLayouts.orEmpty()
         val maxX = renderLayouts.maxOfOrNull { it.offsetXPx + it.widthPx } ?: 0f
         val maxY = renderLayouts.maxOfOrNull { it.offsetYPx + it.heightPx } ?: 0f
         val (width, height) = exportCanvasSize(maxX, maxY)
@@ -472,10 +475,10 @@ private fun MoodBoardShareCard(
     // v57 — the export renders the chosen arrangement: the FULL layout when
     // asked (falling back to the inline one for legacy entries), with the
     // full-screen quote placements alongside.
-    val renderLayouts = if (layout == MoodBoardExport.MoodBoardLayout.FULL && data.tileLayoutsFull.isNotEmpty())
-        data.tileLayoutsFull else data.tileLayouts
-    val renderQuotePositions = if (layout == MoodBoardExport.MoodBoardLayout.FULL && data.quotePositionsFull.isNotEmpty())
-        data.quotePositionsFull else data.quotePositions
+    val renderLayouts = if (layout == MoodBoardExport.MoodBoardLayout.FULL && data.tileLayoutsFull.orEmpty().isNotEmpty())
+        data.tileLayoutsFull.orEmpty() else data.tileLayouts.orEmpty()
+    val renderQuotePositions = if (layout == MoodBoardExport.MoodBoardLayout.FULL && data.quotePositionsFull.orEmpty().isNotEmpty())
+        data.quotePositionsFull.orEmpty() else data.quotePositions.orEmpty()
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -3,8 +3,6 @@ package com.curio.app.features.capture
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -70,7 +68,6 @@ import com.curio.app.data.CaptureDraftStore
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CaptureRepository
 import com.curio.app.data.ExploreSessionStore
-import com.curio.app.data.SessionShots
 import com.curio.app.data.JournalMood
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -108,8 +105,6 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.glyph
-import coil.compose.rememberAsyncImagePainter
-import java.io.File
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
@@ -208,69 +203,28 @@ fun SaveCaptureScreen(
         if (editEntryId != null) tags = editingEntry?.tags.orEmpty()
     }
 
-    // ── Session attachments (v27) — the explore session's SHARED note +
-    // captured screenshots, attached to this entry on save. On a fresh save
-    // they come from the pending write package (handed off when the session
-    // ended) and are read LIVE from the store — the device-screenshot
-    // watcher keeps appending to the pending package while this page is
-    // open, so the section must recompose on its own (no local copy). In
-    // edit mode the entry already carries them — kept in a local list so
-    // removals can re-write on save.
+    // ── Session note (v27) — the explore session's SHARED note, attached
+    // to this entry on save. On a fresh save it comes from the pending
+    // write package (handed off when the session ended); in edit mode the
+    // entry already carries it. (v60 — the session-SCREENSHOT attachment
+    // was removed: no more auto-attached shots, no photo permission.)
     var sessionNote by remember { mutableStateOf("") }
-    // Edit-mode-only local list; fresh saves read the store reactively.
-    var editSessionScreenshots by remember { mutableStateOf<List<String>>(emptyList()) }
     LaunchedEffect(editEntryId, editingEntry, topic?.name) {
-        if (editEntryId != null) {
-            sessionNote = editingEntry?.sessionNote.orEmpty()
-            editSessionScreenshots = editingEntry?.sessionScreenshots.orEmpty()
+        sessionNote = if (editEntryId != null) {
+            editingEntry?.sessionNote.orEmpty()
         } else {
-            sessionNote = ExploreSessionStore.peekWriteSessionNote(cat.id, topic?.name.orEmpty())
+            ExploreSessionStore.peekWriteSessionNote(cat.id, topic?.name.orEmpty())
         }
-    }
-    // Fresh save: live-reactive (peek reads the store's mutableStateOf, so
-    // a watcher append recomposes this automatically). Edit mode: the local
-    // list the user can trim before re-saving.
-    val sessionScreenshots: List<String> = if (editEntryId == null) {
-        ExploreSessionStore.peekWriteSessionScreenshots(cat.id, topic?.name.orEmpty())
-    } else {
-        editSessionScreenshots
     }
     // The shared-note button expands into a small editor card.
     var showNoteEditor by remember { mutableStateOf(false) }
-    // Photo-picker for adding more screenshots from the gallery.
-    val addScreenshotLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            val path = SessionShots.copyFrom(context, uri)
-            if (path != null) {
-                if (editEntryId == null) {
-                    ExploreSessionStore.appendPendingScreenshot(context, cat.id, topic?.name.orEmpty(), path)
-                } else {
-                    editSessionScreenshots = editSessionScreenshots + path
-                }
-            }
-        }
-    }
-    fun removeSessionScreenshot(path: String) {
-        SessionShots.delete(context, path)
-        if (editEntryId == null) {
-            ExploreSessionStore.removePendingScreenshot(context, cat.id, topic?.name.orEmpty(), path)
-        } else {
-            editSessionScreenshots = editSessionScreenshots.filterNot { it == path }
-        }
-    }
-    // The section + floating note button show only when a pending write
-    // handoff exists for THIS exact topic (fresh save) or the entry already
-    // carries attachments (edit mode). topic is a delegated property, so the
-    // name is read via safe-call rather than smart-cast.
+    // The floating note button shows when a pending write handoff exists
+    // for THIS exact topic (fresh save) or the entry already carries a note
+    // (edit mode), plus whenever a note has been typed. topic is a delegated
+    // property, so the name is read via safe-call rather than smart-cast.
     val hasSessionAttachments = editEntryId != null ||
         (topic?.let { ExploreSessionStore.hasPendingWriteFor(cat.id, it.name) } == true) ||
-        // v27h — never hide the section when there is actually something to
-        // show: a typed note or attached screenshots make it appear even if
-        // the pending-write match is somehow off (e.g. an edit resumed after
-        // a backup restore).
-        sessionNote.isNotBlank() || sessionScreenshots.isNotEmpty()
+        sessionNote.isNotBlank()
 
     // ── Draft autosave (v7.17) ──────────────────────────────────────────
     // While on this page, the current capture data is debounce-snapshotted
@@ -403,8 +357,7 @@ fun SaveCaptureScreen(
                             captureData = persistedData,
                             tags = tags,
                             sessionNote = sessionNote.takeIf { it.isNotBlank() }
-                                ?: existingEntry.sessionNote,
-                            sessionScreenshots = sessionScreenshots
+                                ?: existingEntry.sessionNote
                         )
                     } else {
                         CurioEntry(
@@ -417,8 +370,7 @@ fun SaveCaptureScreen(
                             captureData = persistedData,
                             tags = tags,
                             sessionTimeMillis = sessionMillis,
-                            sessionNote = sessionNote.takeIf { it.isNotBlank() },
-                            sessionScreenshots = sessionScreenshots
+                            sessionNote = sessionNote.takeIf { it.isNotBlank() }
                         )
                     }
                     runCatching { CurioRepositoryHolder.repo.save(entry) }
@@ -949,24 +901,6 @@ fun SaveCaptureScreen(
                         onAccentContent = cat.onAccent()
                     )
 
-                    // ── Session attachments (v27) — the explore session's
-                    // SHARED note + captured screenshots. Only when a session
-                    // handed them off (fresh save) or the entry already has
-                    // them (edit mode).
-                    if (hasSessionAttachments) {
-                        SessionAttachmentsCard(
-                            cat = cat,
-                            screenshots = sessionScreenshots,
-                            onAddScreenshot = {
-                                addScreenshotLauncher.launch(
-                                    androidx.activity.result.PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            },
-                            onRemoveScreenshot = { path -> removeSessionScreenshot(path) }
-                        )
-                    }
             }
             }
 
@@ -1427,122 +1361,6 @@ private fun TagEditorRow(
                 )
             }
         }
-    }
-}
-
-/**
- * v27k — the explore session's attachments card on the save page: the
- * shared session screenshots (auto-attached device shots, each removable
- * with a small cross). The SHARED NOTE moved to the floating pill above the
- * save CTA (see [SessionNoteFloatingPill]) so it stays reachable while the
- * format body is scrolled.
- */
-@Composable
-private fun SessionAttachmentsCard(
-    cat: CurioCategory,
-    screenshots: List<String>,
-    onAddScreenshot: () -> Unit,
-    onRemoveScreenshot: (String) -> Unit
-) {
-    val accent = cat.themedAccent()
-    val ink = cat.categoryInk()
-    val tintWash = AppPreferences.tintWashEffective()
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        // ── Header — title only; the note button floats above the save CTA ─
-        Text(
-            text = "From your explore session",
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        // ── Screenshots — auto-added during the session, shared, each
-        // removable with a small cross. The add tile stays so a session with
-        // no shots yet can still pick one from the gallery.
-        Text(
-                text = "Session screenshots",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                screenshots.forEach { path ->
-                    Box {
-                        val painter = rememberAsyncImagePainter(File(path))
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            shadowElevation = 2.dp,
-                            modifier = Modifier.size(84.dp)
-                        ) {
-                            androidx.compose.foundation.Image(
-                                painter = painter,
-                                contentDescription = "Session screenshot",
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                        // Small cross — remove the attachment.
-                        Surface(
-                            onClick = { onRemoveScreenshot(path) },
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surface,
-                            shadowElevation = 2.dp,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(2.dp)
-                                .size(20.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                CurioIcon(
-                                    name = CurioIcons.Close,
-                                    contentDescription = "Remove screenshot",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 12.dp
-                                )
-                            }
-                        }
-                    }
-                }
-                // Add-from-gallery tile.
-                Surface(
-                    onClick = onAddScreenshot,
-                    shape = RoundedCornerShape(14.dp),
-                    // v27n — opaque tinted tile (was the accent tint at 14%
-                    // alpha, which let the elevation shadow bleed through).
-                    color = if (tintWash) {
-                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.accent, 0.14f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.size(84.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.PhotoLibrary,
-                                contentDescription = null,
-                                tint = if (tintWash) ink else accent,
-                                size = 22.dp
-                            )
-                    Text(
-                        text = "Add",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (tintWash) ink else accent
-                    )
-                }
-            }
-        }
-    }
     }
 }
 

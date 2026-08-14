@@ -1,32 +1,50 @@
 # Prompt.md — Request log
 
-## Current request — toggleable serif body text + tighter label tracking (v59.3)
+## Current request — session-screenshot removal + mood-board crash + reveal strip polish (v60)
 
 ### What was asked
-"give me suggestions for more typography changes i still don't like some"
-→ presented options across body voice, hierarchy, and the reveal long-
-form; user picked via Other: "Tighten label tracking, Body → Lora serif
-everywhere, add that body lora serif everywhere as a toggle".
+"why the sessio screenshot attahes my old screenshots like all of it,
+remove that feature and its permission its too scary" — plus a crash
+report (Collection.isEmpty() NPE during measure) and three UI fixes:
+the small inline mood-board editor's quote looks too huge, the reveal
+bottom strip's tags can still go a little above, and the Like/Dislike
+active state is too vague.
 
 ### What was done
-1. **"Serif body text" Appearance toggle** (default ON):
-   `AppPreferences.loraBodyState` (KEY_LORA_BODY, seeded in initThemeMode,
-   setter `setLoraBodyEnabled`). `CurioTypography.kt` gains
-   `CurioLoraBodyTypography` (bodyLarge/Medium/Small → LoraFontFamily at 0
-   tracking; base [CurioTypography] stays the neutral-sans variant) and
-   `@Composable curioAppTypography()` reading the pref. `CurioTheme` and
-   the ExploreSessionService bubble theme now use it — the whole app's
-   body voice swaps live when the toggle flips.
-2. **labelMedium/labelSmall letterSpacing 0.5 → 0.3sp** — chips/pills
-   read calmer.
+1. **Session-screenshot feature removed.** The save page's "Session
+   screenshots" section (SessionAttachmentsCard + add-from-gallery +
+   per-shot remove + SessionShots/SessionShots.copyFrom/delete) is gone;
+   the manifest drops READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE (≤32) and
+   FOREGROUND_SERVICE_MEDIA_PROJECTION (no MediaProjection code exists
+   in-tree — v55 removed the watcher). The shared session NOTE survives
+   (SessionNoteFloatingPill + peekWriteSessionNote unchanged). Legacy
+   data paths kept inert + read-only: ExploreSession.screenshotPaths,
+   pending-write shots, CaptureEntity.sessionScreenshotsJson, SessionShots,
+   backup/restore, and EntryDetail's display of already-saved shots.
+2. **Crash fixed (the reported NPE):** `ExpandedMoodBoardDialog` called
+   `.ifEmpty{}` on `tileLayoutsFull`/`quotePositionsFull`, which Gson
+   decodes to NULL for pre-v57 entries (bypasses Kotlin defaults) →
+   `Collection.isEmpty()` NPE on the dialog's first measure. Now
+   `orEmpty().ifEmpty{...}`; same guard on MoodBoardExport's three
+   `.isNotEmpty()` sites (save/share path).
+3. **Inline mood-board quote cards no longer balloon:** when the collage
+   is smaller than the canvas it zooms to fill (scale > 1) and the raw
+   slot width (~41% of board) multiplied by that zoom. MoodBoardFloatingCards
+   now caps the DISPLAY scale of never-resized fallback cards at ~44% of
+   the canvas (`displayScale`); user-resized cards keep the full scale.
+4. **Reveal strip:** tags row top inset 10 → 6dp (clearer clearance);
+   SentimentButton active now scales to 1.08 with a category glow
+   (curioDarkGlow 4dp), ExtraBold label and 17dp icon.
 
 ### Validation
-Balance on all 5 files clean (160/160 + 1045/1045, 58/58, 22/22 +
-186/186, 91/91 + 317/317, 140/140 + 307/307), unused CurioTypography
-import dropped from the service, no ui.theme→AppPreferences cycle.
-Committed locally; push pending user confirmation.
+Brace/paren balance on all 5 code files (reveal keeps its pre-existing
++1 comment-parenthesis imbalance, delta exact vs HEAD), `git diff --check`
+clean, no leftover refs (SessionAttachmentsCard / sessionScreenshots /
+addScreenshotLauncher / SessionShots / .ifEmpty / .isNotEmpty on the
+full-layout fields all gone). No Gradle locally (env rule) — CI on push
+is the gate.
 
-## Prior — watermark icons: fewer in the drawer, screen-matched elsewhere (v59.2)
+## Prior — toggleable serif body text + tighter label tracking (v59.3)
 
 ### What was asked
 "in the drawer use less watermark icons, and in other screen use
