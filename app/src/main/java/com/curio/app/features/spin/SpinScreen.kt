@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -1548,10 +1549,25 @@ private val NationalityTags = setOf(
  * Derives compact, meaningful filter chips from a category's pool.
  * Eras are the most frequent decades/centuries present, genres and origins
  * are the most-used tags, each capped so the sheet stays tidy.
+ * v37 — Type caps at the top-8 most frequent when a pool carries more
+ * (the wildcard surprise deck merges every category, so its raw type list
+ * was a 60+ chip wall; individual categories keep their full list since
+ * they're typically well under 8). Genres/Eras/Origins caps rose (8/6/6)
+ * so sparse categories expose more filters instead of a thin sheet.
  */
 private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
     if (pool.isEmpty()) return FilterGroups(emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
-    val types = pool.map { it.subtype }.distinct().sorted()
+    val allTypes = pool.map { it.subtype }.distinct()
+    val typeCounts = pool.map { it.subtype }.groupingBy { it }.eachCount()
+    // v37 — wildcard-only: the surprise pool merges EVERY category, so the
+    // raw Type list was a wall of 60+ subtypes. Keep the compact, universal
+    // top-8 (most frequent) and drop the tail; individual categories keep
+    // their full (typically few) type list.
+    val types = if (allTypes.size > 8) {
+        allTypes.sortedByDescending { typeCounts[it] ?: 0 }.take(8).sorted()
+    } else {
+        allTypes.sorted()
+    }
     val counts = pool.flatMap { it.tags }.groupingBy { it }.eachCount()
     // Era chips: pick whichever family is more prevalent in this category —
     // decades (1970s…) for music/film, centuries (20th Century…) for books,
@@ -1566,12 +1582,12 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
     val centuriesTotal = centuries.sumOf { counts[it] ?: 0 }
     val eras = (if (decadesTotal >= centuriesTotal) decades else centuries)
         .sortedByDescending { counts[it] ?: 0 }
-        .take(4)
+        .take(6)
         .sorted()
     val origins = counts.keys
         .filter { it in NationalityTags }
         .sortedByDescending { counts[it] ?: 0 }
-        .take(3)
+        .take(6)
     // Franchise chips — the blockbuster universe tags get their own row
     // (MCU, Star Wars, …) instead of competing with genres for the top-4.
     // No .take cap: every supported franchise is exposed so lower-count
@@ -1586,7 +1602,7 @@ private fun buildFilterGroups(pool: List<CurioTopic>): FilterGroups {
                 it !in NationalityTags && it !in FranchiseTags
         }
         .sortedByDescending { counts[it] ?: 0 }
-        .take(4)
+        .take(8)
     return FilterGroups(types = types, genres = genres, eras = eras, origins = origins, franchises = franchises)
 }
 
@@ -1850,27 +1866,55 @@ private fun FilterSheet(
                                 val isSubtypeGroup = key == FilterGroupKey.TYPE
                                 Column(Modifier.fillMaxWidth()) {
                                     SectionLabel(key.label, Modifier.padding(bottom = 4.dp))
-                                    FlowRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        filteredGroups.chipsFor(key).forEach { chip ->
-                                            CompactChip(
-                                                label = chip,
-                                                selected = if (isSubtypeGroup) chip in draftSubtypes else chip in draftFilters,
-                                                accent = cat.themedAccent(),
-                                                ink = cat.onAccent(),
-                                                chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                                fillMaxWidth = false,
-                                                onClick = {
-                                                    if (isSubtypeGroup) {
+                                    // v37 — the TYPE group renders as a compact
+                                    // 2-column grid (the wildcard surprise deck
+                                    // carries up to 8 universal subtypes; a
+                                    // full-width flow row would stack them into
+                                    // a tall wall). The other groups keep the
+                                    // single-row flow.
+                                    if (isSubtypeGroup) {
+                                        LazyVerticalGrid(
+                                            columns = GridCells.Fixed(2),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(max = 160.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                            userScrollEnabled = false
+                                        ) {
+                                            items(filteredGroups.chipsFor(key)) { chip ->
+                                                CompactChip(
+                                                    label = chip,
+                                                    selected = chip in draftSubtypes,
+                                                    accent = cat.themedAccent(),
+                                                    ink = cat.onAccent(),
+                                                    chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                                    fillMaxWidth = true,
+                                                    onClick = {
                                                         draftSubtypes = if (chip in draftSubtypes) draftSubtypes - chip else draftSubtypes + chip
-                                                    } else {
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        FlowRow(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            filteredGroups.chipsFor(key).forEach { chip ->
+                                                CompactChip(
+                                                    label = chip,
+                                                    selected = chip in draftFilters,
+                                                    accent = cat.themedAccent(),
+                                                    ink = cat.onAccent(),
+                                                    chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                                    fillMaxWidth = false,
+                                                    onClick = {
                                                         draftFilters = if (chip in draftFilters) draftFilters - chip else draftFilters + chip
                                                     }
-                                                }
-                                            )
+                                                )
+                                            }
                                         }
                                     }
                                 }

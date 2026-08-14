@@ -351,6 +351,34 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v37 — hero controls return + reveal pill polish + compact wildcard filters.**
+  (1) **Cabinet/Topic Browser controls back INSIDE the hero:** the v34
+  below-hero controls row is gone — the Sort dropdown + Search pill (and
+  the selection pills Clear/Select-all, Delete, Cancel) ride the hero's
+  top row again via the existing `trailing` slot (`CabinetHeroHeader`
+  keeps its `(ink, backdrop)` slot; `SettingsHeroHeader`'s `trailing`
+  passes hero `ink`). `contentTop` reverts to reserving only the single
+  Category pill row below the banner; `CabinetControlsRowHeight` /
+  `DatabaseControlsRowHeight` constants are removed. The sort dropdown
+  keeps its capsule 50dp pill + `CurioDropdownMenu` accent-themed menu
+  (accent = active filter's `themedAccent` in Cabinet, rose in the
+  database). (2) **Reveal:** the duplicate category eyebrow pill inside
+  the HeroCard is removed (the top-bar chip already shows the lane); the
+  top-bar category chip + pin + close now wear `cat.categorySurface()`
+  (theme-aware tint in every mode instead of flat surfaceVariant);
+  Express yourself stepped Bold → ExtraBold to match the Start exploring
+  CTA; the ActionPromptCard's trailing arrow is gone; the hero's action
+  badge / byline / subtype pills use a new `pillGlass` — strong white
+  glass on pastel-light heroes, page-background lift on dark — instead
+  of the washed `ink.copy(alpha = 0.18f)`. (3) **Wildcard filter
+  compaction (FilterSheet only):** `buildFilterGroups` caps Type at the
+  top-8 most frequent subtypes when a pool exceeds 8 (the wildcard
+  surprise deck merges every category — its raw list was a 60+ chip
+  wall; individual categories keep their full list), and the TYPE group
+  renders in a compact 2-column `LazyVerticalGrid` (`heightIn max 160dp`,
+  no scroll) instead of a full-width flow stack. (4) **Sparse groups
+  filled out:** genres/eras/origins caps rise 4/4/3 → 8/6/6 so
+  categories with fewer than 4 options expose more filters.
 - **v35 — typography pass: Lora serif + reveal hierarchy + icons.**
   (1) **New font:** `app/src/main/res/font/lora.ttf` (Lora variable,
   OFL) bundled; `LoraFontFamily` (multi-entry variable pattern like

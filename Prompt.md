@@ -1,51 +1,52 @@
 # Prompt.md — Request log
 
-## Current request — typography pass: Lora serif + reveal hierarchy + icons (v35)
+## Current request — hero controls back inside heroes + reveal pill polish + compact wildcard filters (v37)
 
 ### What was asked
-"Typography hierarchy and sizing of the font, new fonts, making the app
-more beautiful — focus on the Topic Reveal screen using bold etc. for a
-better look. New icons inside Topic Reveal and other places too. Suggest
-me." (plus: "suggest some in intro screen too")
-
-### User decisions (ask_user — "suggest me")
-Picked ALL proposed items: reveal type hierarchy, new serif font, reveal
-icon upgrades, global type polish, category chip on the reveal top bar,
-and the intro (onboarding) screen too.
+"In cabinet and topic browser what you've done — the sorting/search
+buttons and the delete/cancel/select-all buttons are all out of the hero
+now, I wanted them inside that. Redesign them with proper pills and
+matching theme and style, and redesign the dropdown for sorting too. In
+topic reveal, remove the duplicate category pill chip from inside the
+hero. Give the corner category chip, pin and dismiss chip the theme-aware
+treatment. Make the font of Express yourself and Start exploring bold.
+Remove that useless arrow from the instruction. Change the pill background
+of listen category and artist/author or related inside the hero to
+something better. In wildcard, make the types filter more compact and
+more universal (too many types), only in wildcard, and add more filters
+per sub-type (types, genre, etc.) if some have fewer than 4."
 
 ### What was done
-1. **New font — Lora (OFL):** downloaded the Lora variable TTF
-   (wght 400–700, ~212KB) into `app/src/main/res/font/lora.ttf`;
-   `LoraFontFamily` (multi-entry variable pattern like geom) + top-level
-   `CurioEditorialBody` (17/27sp) and `CurioEditorialLead` (18/29sp
-   SemiBold) in CurioTypography.kt. Used for long-form reading text:
-   the reveal teaser/quick-fact, the ActionPromptCard instruction
-   (15/23sp), and the onboarding intro subtext (18/27sp on the rose
-   hero). Handwriting/journal fields keep Patrick Hand.
-2. **Global type polish:** `bodyLarge` letter-spacing 0.5 → 0.3sp;
-   `titleLarge` SemiBold → Bold.
-3. **Reveal hero hierarchy:** small-caps category eyebrow pill above the
-   34sp ExtraBold title (labelSmall ExtraBold, 1.5sp tracking); the
-   action badge's plain 8dp dot replaced by the verb's own icon
-   (`verbIcon(action.verb)`).
-4. **Reveal top bar:** frosted category chip (iconGlyph + caps
-   displayName, `weight(1f, fill=false)` keeps the pin/close group
-   end-aligned).
-5. **TeaserCard:** inverted hierarchy fixed — the titleSmall label
-   became a small-caps kicker (1.2sp tracking, category ink) and the
-   fact body reads in Lora; the flat AutoAwesome sparkle is now
-   `CurioIcons.Lightbulb` (new constant) in an accent-tinted circular
-   tile.
-6. **ActionPromptCard:** trailing `arrow_forward` affordance + serif
-   instruction.
-7. **Onboarding (intro):** the welcome/permissions/theme/search-engine
-   paragraphs read in Lora (18/27sp), matching the reveal's editorial
-   voice.
+1. **Controls back INSIDE the heroes (Cabinet + Topic Browser):** the
+   v34 below-hero controls row is removed; Sort + Search (and selection
+   pills Clear/Select-all, Delete, Cancel) ride the hero's top row again
+   via the `trailing` slot. `contentTop` reserves only the Category pill
+   row below the banner; `CabinetControlsRowHeight` /
+   `DatabaseControlsRowHeight` are deleted. Sort dropdown unchanged in
+   shape (capsule 50dp pill, `curioDarkGlow`, 42dp) and menu
+   (`CurioDropdownMenu` accent-tinted, accent-lit selected row) — the
+   "redesign" was already the shared v30 language, applied with the
+   hero ink/backdrop again.
+2. **Reveal cleanup:** duplicate category eyebrow removed from the
+   HeroCard; top-bar category chip + pin + close now wear
+   `cat.categorySurface(...)` (theme-aware in every mode); Express
+   yourself Bold → ExtraBold (Start exploring was already ExtraBold);
+   ActionPromptCard's trailing arrow deleted; hero pills (action badge,
+   byline, subtype) now use a proper frosted `pillGlass` (strong white
+   glass on pastel-light, `curioPillLift()` on dark) instead of the
+   washed `ink.copy(alpha = 0.18f)`.
+3. **Wildcard filter compaction (FilterSheet):** Type caps at the top-8
+   most frequent subtypes for any pool larger than 8 (wildcard's merged
+   pool was a 60+ chip wall; individual categories keep their full
+   list) and renders in a compact 2-column `LazyVerticalGrid` (max
+   160dp, no scroll). Genres/Eras/Origins caps raised 4/4/3 → 8/6/6 so
+   sparse categories show more filters.
 
 ### Validation
 No Gradle locally (env rule). Brace balance + `git diff --check` clean;
-font file verified as TrueType (`00 01 00 00`). CI on push is the gate.
-Changelog + `app/AGENTS.md` v35 bullet updated.
+`heightIn` import added; `fill`-was-undefined avoided by lerping off
+`accent` in `pillGlass`. CI on push is the gate. Changelog +
+`app/AGENTS.md` v37 bullet updated.
 
 ## Prior — hero/category-chip/cream-tint fixes + faster Home (v31)
 

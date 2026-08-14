@@ -65,6 +65,7 @@ import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.pet.PetLandmark
@@ -134,13 +135,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // visible (the pill or search); collapsed, content starts right below
     // the (taller) hero.
     val chipsVisible = categoryFilterOpen || searchActive
-    // v31 — the hero keeps its original height; the controls live in
-    // fixed rows just below it (v33 — the Sort + Search pills in their own
-    // row, the Category pill in the row below them), so the header text
-    // never moves down. Content reserves those rows (and the chip bar only
-    // when the chips are open).
-    val contentTop = DatabaseHeroTotalHeight + DatabaseControlsRowHeight +
-        DatabaseCategoryPillRowHeight +
+    // v36 — the Sort/Search pills live back INSIDE the hero (their top
+    // row), so content reserves only the single Category pill row below
+    // the banner (and the chip bar only when the chips are open).
+    val contentTop = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight +
         (if (chipsVisible) DatabaseChipBarHeight else 0.dp) + 12.dp
     val searchFocus = remember { FocusRequester() }
     LaunchedEffect(searchActive) {
@@ -606,7 +604,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // Floating just below the pinned chip bar, centered over the
                 // list — clear of the scroll-indicator strip on the right.
                 .align(Alignment.TopCenter)
-                .padding(top = DatabaseHeroTotalHeight + DatabaseControlsRowHeight + DatabaseCategoryPillRowHeight + 74.dp)
+                .padding(top = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight + 74.dp)
         ) {
             Surface(
                 onClick = {
@@ -636,65 +634,16 @@ fun TopicDatabaseScreen(navController: NavController) {
             }
         }
 
-        // ── v33 — controls row below the hero: the Sort dropdown and the
-        // Search pill moved OUT of the hero into their own row (the banner
-        // is a clean title header at top now). Page-level styling —
-        // on-surface ink over a surface-high glass instead of hero ink.
-        // Hidden while searching (the hero morphs into the search field and
-        // the Cancel pill takes over), matching the old hero-pill behavior.
-        if (!searchActive) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .offset(y = DatabaseHeroTotalHeight + 4.dp)
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CurioSortDropdown(
-                    options = listOf(
-                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default"),
-                        CurioSortOption(DatabaseSortField.NAME.name, "Name"),
-                        CurioSortOption(DatabaseSortField.YEAR.name, "Year")
-                    ),
-                    selectedKey = tdSortField,
-                    ascending = tdSortAscending,
-                    onSelect = { tdSortField = it },
-                    onToggleDirection = { tdSortAscending = !tdSortAscending },
-                    ink = MaterialTheme.colorScheme.onSurface,
-                    backdrop = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    accent = MaterialTheme.colorScheme.primary,
-                    emphasized = true
-                )
-                PetLandmark(
-                    id = "search",
-                    kind = PetLandmarks.Kind.FUN,
-                    screen = "database"
-                ) { lm ->
-                    SettingsHeroActionPill(
-                        onClick = { searchActive = true },
-                        glyph = CurioIcons.Search,
-                        contentDescription = "Search topics",
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        backdropOverride = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = lm
-                    )
-                }
-            }
-        }
-
-        // ── Category filter pill — v31: rides its own fixed row just below
-        // the hero; v33 — sits BELOW the Sort/Search controls row, exactly
-        // as requested (category under the search and sort pills). Tapping
-        // it toggles the sticky category chips below (the same chips search
-        // shows). Page-level control — on-surface ink over a surface-high
-        // glass.
+        // ── Category filter pill — v36: the Sort/Search pills live back
+        // inside the hero, so this pill rides its own fixed row just below
+        // the banner (the v31 position). Tapping it toggles the sticky
+        // category chips below (the same chips search shows). Page-level
+        // control — on-surface ink over a surface-high glass.
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .fillMaxWidth()
-                .offset(y = DatabaseHeroTotalHeight + DatabaseControlsRowHeight + 4.dp)
+                .offset(y = DatabaseHeroTotalHeight + 4.dp)
                 .padding(horizontal = 16.dp)
         ) {
             SettingsHeroActionPill(
@@ -729,11 +678,12 @@ fun TopicDatabaseScreen(navController: NavController) {
             )
         }
 
-        // ── Torn rose hero on top — rows disappear under the tear. v33 —
-        // the banner is a clean title header now: the Sort/Search pills
-        // moved below into the controls row (above), and the title sits at
-        // the TOP of the banner (titleAtTop). The search pill still morphs
-        // the hero into a search field while active.
+        // ── Torn rose hero on top — rows disappear under the tear. v36 —
+        // the Sort dropdown + Search pill ride the hero's top row again
+        // (they briefly sat in a below-hero row in v33; the user wanted
+        // them back on the banner), the title stays at the TOP
+        // (titleAtTop), and the search pill still morphs the hero into a
+        // search field while active.
         SettingsHeroHeader(
             title = "Topic Database",
             subtitle = if (totalTopics > 0) "$totalTopics topics across ${catalog.size} lanes" else "Every topic, one place",
@@ -744,7 +694,45 @@ fun TopicDatabaseScreen(navController: NavController) {
             onCloseSearch = { searchActive = false; searchQuery = "" },
             searchFocus = searchFocus,
             searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
-            titleAtTop = true
+            titleAtTop = true,
+            // Passed as a NAMED argument (not trailing-lambda syntax): the
+            // @Composable slot isn't the last parameter, and the trailing
+            // form fails to bind under K2.
+            trailing = { ink ->
+                // Sort dropdown — the label opens the field list, the arrow
+                // toggles ascending/descending universally (v26).
+                CurioSortDropdown(
+                    options = listOf(
+                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default"),
+                        CurioSortOption(DatabaseSortField.NAME.name, "Name"),
+                        CurioSortOption(DatabaseSortField.YEAR.name, "Year")
+                    ),
+                    selectedKey = tdSortField,
+                    ascending = tdSortAscending,
+                    onSelect = { tdSortField = it },
+                    onToggleDirection = { tdSortAscending = !tdSortAscending },
+                    ink = ink,
+                    backdrop = settingsRoseAccent(),
+                    accent = settingsRoseAccent(),
+                    emphasized = true
+                )
+                // Search pill — the pet landmark rides the header with the
+                // search box: the pet still walks over and pokes it, and
+                // the tour's Browse-Topics stop points at it.
+                PetLandmark(
+                    id = "search",
+                    kind = PetLandmarks.Kind.FUN,
+                    screen = "database"
+                ) { lm ->
+                    SettingsHeroActionPill(
+                        onClick = { searchActive = true },
+                        glyph = CurioIcons.Search,
+                        contentDescription = "Search topics",
+                        ink = ink,
+                        modifier = lm
+                    )
+                }
+            }
         )
     }
 }
@@ -819,19 +807,15 @@ private fun DatabaseFilterChip(
 // hero (not in a second hero row), so the hero keeps the shared settings
 // height and the header text never moves down.
 private val DatabaseHeroTotalHeight = SettingsHeroTotalHeight
-/** The controls row height below the hero — Sort + Search pills (v33:
- *  moved OUT of the hero into their own row so the banner is a clean
- *  title header at top). */
-private val DatabaseControlsRowHeight = 52.dp
-/** The Category pill row height below the controls row — a 42dp pill +
- *  breathing room. v31 — the row lives OUTSIDE the hero so the banner
- *  height (and the header text) never change. v33 — sits BELOW the
- *  Sort/Search row, as requested. */
+/** The Category pill row height below the hero — a 42dp pill + breathing
+ *  room. v31 — the row lives OUTSIDE the hero so the banner height (and
+ *  the header text) never change. v36 — the Sort/Search pills moved back
+ *  INTO the hero, so this is the only row below the banner again. */
 private val DatabaseCategoryPillRowHeight = 52.dp
-/** Where the chip bar rests below the hero + controls + Category pill row. */
-private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + DatabaseControlsRowHeight + DatabaseCategoryPillRowHeight + 4.dp
+/** Where the chip bar rests below the hero + Category pill row. */
+private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight + 4.dp
 /** Where the chip bar pins when scrolled — just below the Category row. */
-private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + DatabaseControlsRowHeight + DatabaseCategoryPillRowHeight + 2.dp
+private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight + 2.dp
 /** Scroll distance (dp) before the chip bar fully pins (Cabinet pill style). */
 private val DatabaseChipStickyThreshold = 56.dp
 /** The chip bar's layout height — scroll content starts below it. */
