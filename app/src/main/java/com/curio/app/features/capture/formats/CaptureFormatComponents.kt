@@ -30,10 +30,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
@@ -419,8 +422,16 @@ fun PaperLineField(
     onPaperColorChange: ((NotePaperColor) -> Unit)? = null,
     /** Optional trailing action (e.g. a small dictation button) shown at the
      *  field's top-right, level with the label. */
-    trailingAction: (@Composable () -> Unit)? = null
+    trailingAction: (@Composable () -> Unit)? = null,
+    /** v58 — when true, the paper style/color controls stay HIDDEN until the
+     *  field is tapped (focused) — a cleaner collapsed look; they appear the
+     *  moment the user starts writing. Default false keeps the controls
+     *  always visible for all other callers. */
+    paperOptionsOnFocus: Boolean = false
 ) {
+    // v58 — track focus so the paper options can reveal only while the
+    // user is actually writing in the field.
+    var focused by remember { mutableStateOf(false) }
     // Keep the label, paper/format controls, and paper field visually grouped;
     // the old 8dp rhythm made the compact controls look like separate
     // sections and consumed too much editing space.
@@ -444,7 +455,9 @@ fun PaperLineField(
         // The style chips live on their OWN full-width scrollable row — six
         // styles + the rules chip overflow a phone-width label row (Rows
         // don't wrap), so the chips scroll instead of pushing the label off.
-        if (onPaperStyleChange != null) {
+        // v58 — a field with paperOptionsOnFocus hides both controls until
+        // it's tapped; everything else renders them always.
+        if (onPaperStyleChange != null && (!paperOptionsOnFocus || focused)) {
             NotePaperStyleToggle(
                 style = paperStyle,
                 onStyleChange = onPaperStyleChange,
@@ -453,7 +466,7 @@ fun PaperLineField(
             )
         }
         // The color swatches live on their OWN row behind a toggle chip.
-        if (onPaperColorChange != null) {
+        if (onPaperColorChange != null && (!paperOptionsOnFocus || focused)) {
             NotePaperColorToggle(
                 color = paperColor,
                 onColorChange = onPaperColorChange,
@@ -496,7 +509,9 @@ fun PaperLineField(
                         innerTextField()
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focused = it.isFocused }
             )
         }
     }

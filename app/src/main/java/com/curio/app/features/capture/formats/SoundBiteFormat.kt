@@ -679,6 +679,9 @@ fun SoundBiteFormat(
             onPaperStyleChange = { titleStyle = it },
             paperColor = titleColor,
             onPaperColorChange = { titleColor = it },
+            // v58 — the quick title starts collapsed: its paper style/color
+            // options only appear once the user taps the slip to write.
+            paperOptionsOnFocus = true,
             trailingAction = if (voiceToTextEnabled) {
                 {
                     DictateFieldButton(
