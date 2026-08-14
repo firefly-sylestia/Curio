@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.lerp
@@ -102,6 +103,36 @@ private fun newLaneRank(id: CategoryId): Int = when (id) {
 }
 
 /**
+ * v44 — process-scoped draft of the category picker. The selection, the
+ * multi-select mode, the Original/New page and BOTH grids' scroll offsets
+ * are mirrored here live, so leaving the picker (back / swipe-down) and
+ * reopening restores exactly where you were — selection, preset mix and
+ * scroll position all survive navigation. The draft lives for the process
+ * ("kept saved until the restart"): an app restart clears it naturally, and
+ * committing a mix (or tapping a lane open) clears it so the next open
+ * shows the persisted deck fresh.
+ */
+object CategoryPickerDraft {
+    var selected: List<String>? = null
+    var multiSelect: Boolean = false
+    var page: Int = 0
+    var originalIndex: Int = 0
+    var originalOffset: Int = 0
+    var newIndex: Int = 0
+    var newOffset: Int = 0
+
+    fun clear() {
+        selected = null
+        multiSelect = false
+        page = 0
+        originalIndex = 0
+        originalOffset = 0
+        newIndex = 0
+        newOffset = 0
+    }
+}
+
+/**
  * Full-screen Category Picker.
  *
  * v27i — two swipeable pages behind the same deck grid:
@@ -143,8 +174,17 @@ fun CategoryPickerScreen(navController: NavController) {
         AppPreferences.getLastSpinCategories(context)
             .mapNotNull { id -> categories.firstOrNull { it.id == id } }
     }
-    val originalGridState = rememberLazyGridState()
-    val newGridState = rememberLazyGridState()
+    // v44 — the picker draft restores your place: grid scroll offsets (and
+    // the page + selection below) survive leaving the picker until restart.
+    val draft = CategoryPickerDraft
+    val originalGridState = rememberLazyGridState(
+        initialFirstVisibleItemIndex = if (draft.selected != null) draft.originalIndex else 0,
+        initialFirstVisibleItemScrollOffset = if (draft.selected != null) draft.originalOffset else 0
+    )
+    val newGridState = rememberLazyGridState(
+        initialFirstVisibleItemIndex = if (draft.selected != null) draft.newIndex else 0,
+        initialFirstVisibleItemScrollOffset = if (draft.selected != null) draft.newOffset else 0
+    )
     // Wide windows (tablet / landscape) spread the deck grid and cap the
     // sheet's content width so the picker stays readable on large screens.
     val wide = windowWidthSizeClass().isWide
@@ -157,10 +197,16 @@ fun CategoryPickerScreen(navController: NavController) {
         CurioCategories.byId(id)
     }
     // Null = not in multi-select mode (tap-to-open). Once set, cards toggle.
+    // v44 — seed from the process draft when one is staged (selection + mode
+    // restored), else from the persisted deck as before.
     var selectedSlugs by rememberSaveable {
-        mutableStateOf(persistedVisible.map { it.id.routeSlug })
+        mutableStateOf(
+            draft.selected ?: persistedVisible.map { it.id.routeSlug }
+        )
     }
-    var multiSelectMode by rememberSaveable { mutableStateOf(persistedVisible.size > 1) }
+    var multiSelectMode by rememberSaveable {
+        mutableStateOf(if (draft.selected != null) draft.multiSelect else persistedVisible.size > 1)
+    }
 
     val toggleSlug = { slug: String ->
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug
@@ -179,8 +225,40 @@ fun CategoryPickerScreen(navController: NavController) {
     }
 
     // ── v27i — the two pages (Original / New) + a scope for tab jumps ──
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    // v44 — reopen on the page you left (draft.page), restored until restart.
+    val pagerState = rememberPagerState(
+        initialPage = if (draft.selected != null) draft.page else 0,
+        pageCount = { 2 }
+    )
     val scope = rememberCoroutineScope()
+
+    // v44 — keep the draft live: every selection/mode/page/scroll change is
+    // mirrored into [CategoryPickerDraft] so leaving and reopening the
+    // picker restores exactly where you were (selection, preset mix, page
+    // and both grids' scroll offsets).
+    LaunchedEffect(selectedSlugs, multiSelectMode) {
+        draft.selected = selectedSlugs
+        draft.multiSelect = multiSelectMode
+    }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { draft.page = it }
+    }
+    LaunchedEffect(originalGridState) {
+        snapshotFlow {
+            originalGridState.firstVisibleItemIndex to originalGridState.firstVisibleItemScrollOffset
+        }.collect { (index, offset) ->
+            draft.originalIndex = index
+            draft.originalOffset = offset
+        }
+    }
+    LaunchedEffect(newGridState) {
+        snapshotFlow {
+            newGridState.firstVisibleItemIndex to newGridState.firstVisibleItemScrollOffset
+        }.collect { (index, offset) ->
+            draft.newIndex = index
+            draft.newOffset = offset
+        }
+    }
 
     // Same full-screen + swipe-down-dismiss pattern as the filter page — a
     // ModalBottomSheet expanded to full height with a drag handle.
@@ -349,6 +427,7 @@ fun CategoryPickerScreen(navController: NavController) {
                                         // The selection is persisted so it survives
                                         // back navigation, tab switches and relaunch.
                                         AppPreferences.setLastSpinCategories(context, listOf(cat.id))
+                                        CategoryPickerDraft.clear()
                                         navController.navigateToTab(CurioRoutes.SPIN)
                                     }
                                 },
@@ -381,6 +460,7 @@ fun CategoryPickerScreen(navController: NavController) {
                                             toggleSlug(slug)
                                         } else {
                                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
+                                            CategoryPickerDraft.clear()
                                             navController.navigateToTab(CurioRoutes.SPIN)
                                         }
                                     }
@@ -421,6 +501,9 @@ fun CategoryPickerScreen(navController: NavController) {
                         val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
                         if (ids.isEmpty()) return@Button
                         AppPreferences.setLastSpinCategories(context, ids)
+                        // The mix is committed — drop the draft so the next
+                        // picker open shows the persisted deck fresh.
+                        CategoryPickerDraft.clear()
                         navController.navigateToTab(CurioRoutes.SPIN)
                     },
                     enabled = selectedSlugs.isNotEmpty(),
@@ -451,9 +534,11 @@ fun CategoryPickerScreen(navController: NavController) {
                 }
                 TextButton(
                     onClick = {
-                        // Exit multi-select mode; selection is discarded.
+                        // Exit multi-select mode; selection is discarded (and
+                        // the draft cleared so the next open starts fresh).
                         multiSelectMode = false
                         selectedSlugs = emptyList()
+                        CategoryPickerDraft.clear()
                     }
                 ) {
                     Text(

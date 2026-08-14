@@ -351,6 +351,24 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v45 — streaming backup export (OOM fix) + category-picker draft persistence.**
+  (1) **Backup OOM fix** (`CurioBackupManager.export`): the old path
+  loaded EVERY audio/image/session-shot byte[] into memory, base64-copied
+  the whole payload into one giant JSON String, then copied that into a
+  byte[] — a large Cabinet OOM'd mid-backup on a mid-range device (crash
+  report: A356E / Android 16). Export now writes the JSON incrementally
+  with a `JsonWriter` and reads + base64-encodes each media file ONE AT A
+  TIME at the moment its value is written (audio keyed by capture id,
+  images deduped by URI, session shots deduped by original path, the
+  pending write's shots included). Output shape is byte-for-byte the same
+  Gson payload (same field names, same single-line base64) — restore is
+  unchanged. (2) **Category picker draft** (`CategoryPickerScreen` +
+  `CategoryPickerDraft`): the selection, multi-select mode, Original/New
+  page and BOTH grids' scroll offsets are mirrored live into a
+  process-scoped holder, so leaving the picker (back / swipe-down) and
+  reopening restores exactly where you were — "kept saved until the
+  restart". Committing a mix (or tapping a lane open / Cancel) clears the
+  draft so the next open shows the persisted deck fresh.
 - **v44 — Spin filter sheet: bigger color-tinted chips + flow Type group.**
   (1) **Bigger chips**: `CompactChip` labels bump to 15sp with roomier
   padding (14/9dp; the `FilterGroupPill`s match at 16/12/9dp) so the

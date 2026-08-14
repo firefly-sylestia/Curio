@@ -4,9 +4,13 @@ import android.content.Context
 import android.net.Uri
 import androidx.room.withTransaction
 import com.google.gson.Gson
+import com.google.gson.JsonWriter
+import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 import java.io.File
+import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
+import java.util.Base64
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
@@ -114,82 +118,10 @@ object CurioBackupManager {
                 .all
                 .mapValues { (_, v) -> v.toTypedEntry() }
         }
-        // Bundle SoundBite audio (v2): read each capture's bytes, keyed by
-        // capture id. Missing/unreadable files are skipped — the capture
-        // still backs up, just without its recording. File reads can be
-        // multi-MB, so this runs off the main thread (v2.1).
-        val audioFiles = withContext(Dispatchers.IO) {
-            val files = mutableMapOf<String, ByteArray>()
-            captures.forEach { capture ->
-                val path = runCatching {
-                    CaptureConverters.deserializeCaptureData(capture.formatDataJson)
-                }.getOrNull()?.audioPathOrNull()
-                if (!path.isNullOrBlank()) {
-                    runCatching {
-                        val file = File(path)
-                        if (file.isFile && file.length() > 0L) file.readBytes() else null
-                    }.getOrNull()?.let { files[capture.id] = it }
-                }
-            }
-            files
-        }
-        // Bundle image attachments (v3): read each capture's image bytes,
-        // keyed by the URI string (deduped — the same photo attached to
-        // several entries is stored once). Missing/unreadable sources are
-        // skipped — the capture still backs up, just without that photo.
-        val imageFiles = withContext(Dispatchers.IO) {
-            val files = mutableMapOf<String, ByteArray>()
-            captures.forEach { capture ->
-                val uris = runCatching {
-                    CaptureConverters.deserializeCaptureData(capture.formatDataJson)
-                }.getOrNull()?.imageUrisAll().orEmpty()
-                uris.forEach { uri ->
-                    if (!files.containsKey(uri)) {
-                        runCatching {
-                            context.contentResolver.openInputStream(Uri.parse(uri))
-                                ?.use { input -> input.readBytes() }
-                        }.getOrNull()?.let { files[uri] = it }
-                    }
-                }
-            }
-            files
-        }
-        // Bundle session screenshots (v5): read each capture's app-private
-        // session-shot files, keyed by their ORIGINAL absolute path
-        // (deduped — every entry saved from one session shares the same
-        // shots, so the same file is stored once). Missing/unreadable files
-        // are skipped — the capture still backs up, just without that shot.
         // v6 — read the pending (unsaved) write handoff ONCE: a background
         // append (device-screenshot watcher) could otherwise shift it between
-        // the bundle and the payload below.
+        // the shot bundle and the pending-write payload below.
         val pwTarget = ExploreSessionStore.pendingWriteTarget()
-
-        val sessionShots = withContext(Dispatchers.IO) {
-            val files = mutableMapOf<String, ByteArray>()
-            captures.forEach { capture ->
-                deserializeStringList(capture.sessionScreenshotsJson).forEach { path ->
-                    if (!files.containsKey(path)) {
-                        runCatching {
-                            val file = File(path)
-                            if (file.isFile && file.length() > 0L) file.readBytes() else null
-                        }.getOrNull()?.let { files[path] = it }
-                    }
-                }
-            }
-            // v6 — the pending write's screenshots ride the backup too, so a
-            // mid-write backup isn't lost.
-            pwTarget?.let { (cat, topic) ->
-                ExploreSessionStore.peekWriteSessionScreenshots(cat, topic).forEach { path ->
-                    if (!files.containsKey(path)) {
-                        runCatching {
-                            val file = File(path)
-                            if (file.isFile && file.length() > 0L) file.readBytes() else null
-                        }.getOrNull()?.let { files[path] = it }
-                    }
-                }
-            }
-            files
-        }
 
         // v6 — the pending (unsaved) write handoff payload: category, topic,
         // elapsed time, the shared note and its screenshots.
@@ -202,37 +134,145 @@ object CurioBackupManager {
                 screenshotPaths = ExploreSessionStore.peekWriteSessionScreenshots(cat, topic)
             )
         }
+        // A stale/corrupt imported catalog must not make an otherwise complete
+        // Curio backup fail. The catalog is supplementary data; captures and
+        // preferences remain the backup's required payload.
+        val speciesCatalogJson = runCatching {
+            FieldMindLegacyImport.speciesCatalogJson(context)
+        }.getOrNull()
 
-        val payload = BackupPayload(
-            format = FORMAT_NAME,
-            version = FORMAT_VERSION,
-            exportedAtMillis = System.currentTimeMillis(),
-            captures = captures,
-            preferences = prefs,
-            audioFiles = audioFiles,
-            imageFiles = imageFiles,
-            sessionShots = sessionShots,
-            pendingWrite = pendingWrite,
-            // A stale/corrupt imported catalog must not make an otherwise
-            // complete Curio backup fail. The catalog is supplementary data;
-            // captures and preferences remain the backup's required payload.
-            speciesCatalogJson = runCatching {
-                FieldMindLegacyImport.speciesCatalogJson(context)
-            }.getOrNull()
-        )
-        // With audio bundled, the base64 JSON can be tens of MB — serialize
-        // and write off the main thread (v2.1).
+        // v44 — STREAMING export. The old path read EVERY audio recording,
+        // image attachment and session screenshot into memory, base64-copied
+        // the whole payload into one giant JSON String, then copied that into
+        // a byte[] again — a backup with many (or large) media files blew the
+        // heap (OutOfMemoryError on a mid-range device). The JSON is now
+        // written incrementally to the chosen location and each media file is
+        // read + base64-encoded ONE AT A TIME as its value is written, so
+        // peak memory is one file's bytes (plus its base64), never the whole
+        // archive. The output shape is byte-for-byte the same Gson payload
+        // (same field names, same base64 encoding), so restore is unchanged.
+        val exportedAt = System.currentTimeMillis()
         withContext(Dispatchers.IO) {
-            val json = Gson().toJson(payload)
-            context.contentResolver.openOutputStream(uri)?.use { out ->
-                out.write(json.toByteArray(Charsets.UTF_8))
-            } ?: throw IllegalStateException("Could not open the chosen location for writing")
+            val stream = context.contentResolver.openOutputStream(uri)
+                ?: throw IllegalStateException("Could not open the chosen location for writing")
+            stream.use { out ->
+                val writer = JsonWriter(OutputStreamWriter(out, Charsets.UTF_8))
+                val gson = Gson()
+                val b64 = Base64.getEncoder()
+                writer.beginObject()
+                writer.name("format").value(FORMAT_NAME)
+                writer.name("version").value(FORMAT_VERSION)
+                writer.name("exportedAtMillis").value(exportedAt)
+
+                // Captures — one small row at a time.
+                writer.name("captures")
+                writer.beginArray()
+                captures.forEach { gson.toJson(it, CaptureEntity::class.java, writer) }
+                writer.endArray()
+
+                // Preferences — the small typed prefs map.
+                writer.name("preferences")
+                gson.toJson(
+                    prefs,
+                    object : TypeToken<Map<String, Map<String, PrefEntry>>>() {}.type,
+                    writer
+                )
+
+                // Audio (v2) — stream each recording the moment it is
+                // written, keyed by capture id. Missing/unreadable files are
+                // skipped exactly like the old map builder (restore treats a
+                // missing key as "no recording").
+                writer.name("audioFiles")
+                writer.beginObject()
+                captures.forEach { capture ->
+                    val path = runCatching {
+                        CaptureConverters.deserializeCaptureData(capture.formatDataJson)
+                    }.getOrNull()?.audioPathOrNull()
+                    if (!path.isNullOrBlank()) {
+                        val bytes = runCatching {
+                            val file = File(path)
+                            if (file.isFile && file.length() > 0L) file.readBytes() else null
+                        }.getOrNull()
+                        if (bytes != null) {
+                            writer.name(capture.id)
+                            writer.value(b64.encodeToString(bytes))
+                        }
+                    }
+                }
+                writer.endObject()
+
+                // Images (v3) — streamed + deduped by URI (the same photo
+                // attached to several entries is stored once).
+                writer.name("imageFiles")
+                writer.beginObject()
+                val writtenUris = HashSet<String>()
+                captures.forEach { capture ->
+                    val uris = runCatching {
+                        CaptureConverters.deserializeCaptureData(capture.formatDataJson)
+                    }.getOrNull()?.imageUrisAll().orEmpty()
+                    uris.forEach { uri ->
+                        if (writtenUris.add(uri)) {
+                            val bytes = runCatching {
+                                context.contentResolver.openInputStream(Uri.parse(uri))
+                                    ?.use { input -> input.readBytes() }
+                            }.getOrNull()
+                            if (bytes != null) {
+                                writer.name(uri)
+                                writer.value(b64.encodeToString(bytes))
+                            }
+                        }
+                    }
+                }
+                writer.endObject()
+
+                // Session screenshots (v5) — streamed + deduped by their
+                // ORIGINAL absolute path (every entry from one session shares
+                // the same shots, so each unique file is stored once). The
+                // pending write's shots ride along (v6).
+                writer.name("sessionShots")
+                writer.beginObject()
+                val writtenPaths = HashSet<String>()
+                val writeShot: (String) -> Unit = { path ->
+                    if (writtenPaths.add(path)) {
+                        val bytes = runCatching {
+                            val file = File(path)
+                            if (file.isFile && file.length() > 0L) file.readBytes() else null
+                        }.getOrNull()
+                        if (bytes != null) {
+                            writer.name(path)
+                            writer.value(b64.encodeToString(bytes))
+                        }
+                    }
+                }
+                captures.forEach { capture ->
+                    deserializeStringList(capture.sessionScreenshotsJson).forEach(writeShot)
+                }
+                pwTarget?.let { (cat, topic) ->
+                    ExploreSessionStore.peekWriteSessionScreenshots(cat, topic).forEach(writeShot)
+                }
+                writer.endObject()
+
+                writer.name("pendingWrite")
+                if (pendingWrite != null) {
+                    gson.toJson(pendingWrite, PendingWriteBackup::class.java, writer)
+                } else {
+                    writer.nullValue()
+                }
+                writer.name("speciesCatalogJson")
+                if (speciesCatalogJson != null) {
+                    writer.value(speciesCatalogJson)
+                } else {
+                    writer.nullValue()
+                }
+                writer.endObject()
+                writer.flush()
+            }
         }
 
         // Remember the last successful backup so Settings can show it.
         context.getSharedPreferences(META_PREFS, Context.MODE_PRIVATE)
             .edit()
-            .putLong(KEY_LAST_BACKUP_AT, payload.exportedAtMillis)
+            .putLong(KEY_LAST_BACKUP_AT, exportedAt)
             .putInt(KEY_LAST_BACKUP_COUNT, captures.size)
             .apply()
         return ExportResult(captures.size, uri)
