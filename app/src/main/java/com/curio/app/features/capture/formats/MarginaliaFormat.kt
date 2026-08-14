@@ -40,7 +40,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.paperInk
 import com.curio.app.ui.theme.pastelFillInk
-import com.curio.app.ui.theme.tintedTileInk
+import com.curio.app.features.capture.formats.tintedTileInk
 import kotlinx.coroutines.delay
 
 /**

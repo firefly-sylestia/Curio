@@ -1,6 +1,46 @@
 # Prompt.md — Request log
 
-## Current request — deck excludes only saved entries + uniform Cabinet card height + shuffle explanation (v59)
+## Current request — CI compile fix: v58 save-screen refactor (v59.1)
+
+### What was asked
+"fix this" — CI failed compiling the v58 save-page refactor in
+`SaveCaptureScreen.kt` + `MarginaliaFormat.kt` (unresolved
+`SnapshotStateList`, ~40 unresolved take-state references, bad
+`tintedTileInk` import).
+
+### Root causes
+1. `import androidx.compose.runtime.SnapshotStateList` — wrong package;
+   the type lives in `androidx.compose.runtime.snapshots`. The broken
+   import invalidated the `FormatBodyForCategory`/`CaptureTakeTabs`
+   signatures and cascaded into the downstream noise (`sections`,
+   `activeIndex`, `format` vs `CaptureFormat`, "not a @Composable
+   context" inside `forEachIndexed`, etc.).
+2. The two take-management dialogs (remove-take + switch-format) sat
+   AFTER the screen's root `Column` (closed at old line 1092) while the
+   v58-hoisted state (`sections`/`activeIndex`/`nextId`/
+   `pendingRemoveIndex`/`pendingFormatSwitch` + `removeSection`/
+   `applyFormat`) lives INSIDE it — Kotlin block scoping made every
+   reference in the dialogs unresolved.
+3. `MarginaliaFormat.kt` imported `com.curio.app.ui.theme.tintedTileInk`
+   — the helper is `internal` in
+   `com.curio.app.features.capture.formats.CaptureFormatComponents`.
+
+### What was done
+1. Import → `androidx.compose.runtime.snapshots.SnapshotStateList`.
+2. Moved both dialogs INSIDE the root Column (before its closing brace,
+   re-indented +4) so they see the take state; the Column closes after
+   the second dialog, and the screen-level leave dialog
+   (`showDiscardDialog`, which uses function-level state) stays at
+   function level as before.
+3. MarginaliaFormat import →
+   `com.curio.app.features.capture.formats.tintedTileInk`.
+
+### Validation
+Brace/paren balance on both files (310/310 + 754/754, 69/69 + 167/167),
+`git diff --check` clean, repo-wide grep for the wrong import paths
+clean. Committed locally; push pending user confirmation.
+
+## Prior — deck excludes only saved entries + uniform Cabinet card height + shuffle explanation (v59)
 
 ### What was asked
 1. Cabinet topic cards get different heights with title length — make one

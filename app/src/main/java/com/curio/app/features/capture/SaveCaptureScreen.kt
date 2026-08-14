@@ -48,7 +48,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -1089,96 +1089,95 @@ fun SaveCaptureScreen(
                 }
             }
         }
-    }
-
-    // ── Confirm before removing a take with drafted content ─────────────
-    pendingRemoveIndex?.let { removeIdx ->
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { pendingRemoveIndex = null },
-            title = { Text("Remove this take?") },
-            text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
-            confirmButton = {
-                TextButton(onClick = {
-                    removeSection(removeIdx)
-                    pendingRemoveIndex = null
-                }) {
-                    Text("Remove", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { pendingRemoveIndex = null },
-                    colors = curioDialogActionButtonColors()
-                ) {
-                    Text("Keep editing")
-                }
-            }
-        )
-    }
-
-    // ── Confirm before switching a filled take's format ──────────────────
-    // Offers THREE paths: keep the current content as its own take and
-    // switch this one (Save and switch), clear this take and switch
-    // (Switch), or stay put (Keep editing).
-    pendingFormatSwitch?.let { fmt ->
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = { pendingFormatSwitch = null },
-            title = { Text("Switch format?") },
-            text = { Text("Switch to ${fmt.shortName}? You can keep what you've added here as its own take first, or switch and clear it.") },
-            dismissButton = {
-                TextButton(
-                    onClick = { pendingFormatSwitch = null },
-                    colors = curioDialogActionButtonColors()
-                ) {
-                    Text("Keep editing")
-                }
-            },
-            confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        // ── Confirm before removing a take with drafted content ─────────
+        pendingRemoveIndex?.let { removeIdx ->
+            AlertDialog(
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
+                onDismissRequest = { pendingRemoveIndex = null },
+                title = { Text("Remove this take?") },
+                text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
+                confirmButton = {
                     TextButton(onClick = {
-                        val section = sections.getOrNull(activeIndex)
-                        if (section != null) applyFormat(section, fmt)
-                        pendingFormatSwitch = null
+                        removeSection(removeIdx)
+                        pendingRemoveIndex = null
                     }) {
-                        Text("Switch and clear", color = MaterialTheme.colorScheme.error)
+                        Text("Remove", color = MaterialTheme.colorScheme.error)
                     }
-                    Button(
-                        onClick = {
-                            val section = sections.getOrNull(activeIndex)
-                            if (section != null) {
-                                // Snapshot the drafted content into a NEW take
-                                // at this position, then switch this take's
-                                // format — nothing is lost, and the drafts live
-                                // on as their own tabs.
-                                val saved = CaptureSectionState(nextId++, section.format).apply {
-                                    seed = section.data
-                                    data = section.data
-                                    mood = section.mood
-                                    canSave = section.canSave
-                                }
-                                sections.add(activeIndex, saved)
-                                // activeIndex still points at the ORIGINAL take
-                                // (the new one was inserted BEFORE it) — switch
-                                // that one to the new format.
-                                applyFormat(section, fmt)
-                            }
-                            pendingFormatSwitch = null
-                        },
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = curioDialogActionColor(),
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { pendingRemoveIndex = null },
+                        colors = curioDialogActionButtonColors()
                     ) {
-                        Text("Save and switch")
+                        Text("Keep editing")
                     }
                 }
-            }
-        )
+            )
+        }
+
+        // ── Confirm before switching a filled take's format ──────────────
+        // Offers THREE paths: keep the current content as its own take and
+        // switch this one (Save and switch), clear this take and switch
+        // (Switch), or stay put (Keep editing).
+        pendingFormatSwitch?.let { fmt ->
+            AlertDialog(
+                containerColor = curioDialogContainerColor(),
+                shape = CurioDialogShape,
+                onDismissRequest = { pendingFormatSwitch = null },
+                title = { Text("Switch format?") },
+                text = { Text("Switch to ${fmt.shortName}? You can keep what you've added here as its own take first, or switch and clear it.") },
+                dismissButton = {
+                    TextButton(
+                        onClick = { pendingFormatSwitch = null },
+                        colors = curioDialogActionButtonColors()
+                    ) {
+                        Text("Keep editing")
+                    }
+                },
+                confirmButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        TextButton(onClick = {
+                            val section = sections.getOrNull(activeIndex)
+                            if (section != null) applyFormat(section, fmt)
+                            pendingFormatSwitch = null
+                        }) {
+                            Text("Switch and clear", color = MaterialTheme.colorScheme.error)
+                        }
+                        Button(
+                            onClick = {
+                                val section = sections.getOrNull(activeIndex)
+                                if (section != null) {
+                                    // Snapshot the drafted content into a NEW take
+                                    // at this position, then switch this take's
+                                    // format — nothing is lost, and the drafts live
+                                    // on as their own tabs.
+                                    val saved = CaptureSectionState(nextId++, section.format).apply {
+                                        seed = section.data
+                                        data = section.data
+                                        mood = section.mood
+                                        canSave = section.canSave
+                                    }
+                                    sections.add(activeIndex, saved)
+                                    // activeIndex still points at the ORIGINAL take
+                                    // (the new one was inserted BEFORE it) — switch
+                                    // that one to the new format.
+                                    applyFormat(section, fmt)
+                                }
+                                pendingFormatSwitch = null
+                            },
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = curioDialogActionColor(),
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Save and switch")
+                        }
+                    }
+                }
+            )
+        }
     }
 
     // ── Three-way leave dialog (save and switch / keep editing / discard) ─
