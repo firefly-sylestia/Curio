@@ -33,10 +33,13 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioPillTintLift
 
-/** One selectable sort field for [CurioSortDropdown]. */
+/** One selectable sort field for [CurioSortDropdown].
+ *  v68 — [glyph] is the sort-type icon shown in the pill (calendar for
+ *  Date/Year, text-field for Title/Name, tune for Category, …). */
 data class CurioSortOption(
     val key: String,
-    val label: String
+    val label: String,
+    val glyph: String = CurioIcons.Tune
 )
 
 /**
@@ -127,19 +130,29 @@ fun CurioSortDropdown(
                 // arrow 22 → 20dp, min-width floor 96 → 88dp — the pill
                 // hugs its label so it stops reading too wide next to the
                 // icon-only Search pill.
+                // v68 — the pill shows the SORT-TYPE icon ([selected.glyph])
+                // before the label and slims again: label-zone padding
+                // 8/6 → 6/4, zone gap 5 → 4dp, min-width 88 → 76dp, so the
+                // added glyph doesn't fatten it.
                 modifier = Modifier
                     .heightIn(min = 42.dp)
-                    .widthIn(min = 88.dp)
+                    .widthIn(min = 76.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .clip(pillShape)
                         .clickable { expanded = true }
-                        .padding(start = 8.dp, end = 6.dp, top = 10.dp, bottom = 10.dp)
+                        .padding(start = 6.dp, end = 4.dp, top = 10.dp, bottom = 10.dp)
                 ) {
+                    CurioIcon(
+                        name = selected?.glyph ?: CurioIcons.Tune,
+                        contentDescription = null,
+                        tint = ink,
+                        size = 16.dp
+                    )
                     Text(
                         text = selected?.label.orEmpty(),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),

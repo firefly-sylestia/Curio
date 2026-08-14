@@ -606,9 +606,11 @@ fun CabinetScreen(navController: NavController) {
                     // the arrow toggles ascending/descending universally.
                     CurioSortDropdown(
                         options = listOf(
-                            CurioSortOption(CabinetSortField.DATE.name, "Date"),
-                            CurioSortOption(CabinetSortField.TITLE.name, "Title"),
-                            CurioSortOption(CabinetSortField.CATEGORY.name, "Category")
+                            // v68 — each field carries its sort-type icon
+                            // (calendar / text / tune) shown in the pill.
+                            CurioSortOption(CabinetSortField.DATE.name, "Date", CurioIcons.CalendarToday),
+                            CurioSortOption(CabinetSortField.TITLE.name, "Title", CurioIcons.FormatText),
+                            CurioSortOption(CabinetSortField.CATEGORY.name, "Category", CurioIcons.Tune)
                         ),
                         selectedKey = cabinetSortField,
                         ascending = sortAscending,

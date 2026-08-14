@@ -184,8 +184,10 @@ fun SettingsHeroHeader(
     // v12 — AMOLED: the pure-black banner carries the rose accent through the
     // watermark collage + back pill (the black-glass language); the title
     // stays white for readability.
-    val symbolTint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-        CurioColors.HomeRosewood else ink
+    // v68 — theme-aware: the symbols ride the hero's READABLE ink (which
+    // already resolves per-theme and per spin-lane) instead of forcing the
+    // rose, so a lane-colored hero never wears mismatched rose icons.
+    val symbolTint = ink
     Box(
         modifier = Modifier
             .fillMaxWidth()            .height(totalHeight)
@@ -203,11 +205,14 @@ fun SettingsHeroHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(42.dp)
-                    .offset(y = bannerHeight - 18.dp)
-                .clip(sheetShape)                    .background(
+                    .offset(y = bannerHeight - 18.dp)                    .clip(sheetShape)                    .background(
+                    // v68 — the paper under the tear picks up a whisper of
+                    // the hero's own color instead of a flat cream, so the
+                    // lip always reads tinted with the banner. AMOLED keeps
+                    // the rose twin (black-on-black would hide the seam).
                     if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
                         CurioColors.HomeRosewood.copy(alpha = 0.45f)
-                    else Color(0xFFFDFCF9)
+                    else lerp(Color(0xFFFDFCF9), fill, 0.10f)
                 )
 
         )

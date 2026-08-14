@@ -726,9 +726,11 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // toggles ascending/descending universally (v26).
                 CurioSortDropdown(
                     options = listOf(
-                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default"),
-                        CurioSortOption(DatabaseSortField.NAME.name, "Name"),
-                        CurioSortOption(DatabaseSortField.YEAR.name, "Year")
+                        // v68 — each field carries its sort-type icon
+                        // (sparkles / text / calendar) shown in the pill.
+                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default", CurioIcons.AutoAwesome),
+                        CurioSortOption(DatabaseSortField.NAME.name, "Name", CurioIcons.FormatText),
+                        CurioSortOption(DatabaseSortField.YEAR.name, "Year", CurioIcons.CalendarToday)
                     ),
                     selectedKey = tdSortField,
                     ascending = tdSortAscending,

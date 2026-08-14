@@ -31,5 +31,9 @@ FIX
 - Cabinet progress lines and the detail-view progress pill are clearly visible in light and pastel mode; the detail pill moved to the screen's bottom corner.
 - The reading/watching progress editor dialog is properly category-colored and readable in every theme, including the topic reveal page.
 - Pet Designer auto-import, brush size and eye tools compile and run correctly.
+- Settings and Profile hero icons follow the hero color in every theme, and the paper under the hero tear picks up its tint.
+- Search bars are pill-shaped across Settings, the Spin filter sheet and Topic History.
+- Spin filter sheet wears the app's tear-hero banner with a bigger category name and cleaner group margins.
+- Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
 - Category-colored text is readable in light and pastel mode.
 - Home button always works, even after opening Cabinet from Profile.

@@ -128,6 +128,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
+import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
@@ -1665,52 +1666,116 @@ private fun FilterSheet(
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
         ) {
-            // ── Header row ────────────────────────────────────────────
-            Row(
+            // ── Torn-hero header (v68) — the sheet wears the app's tear
+            //    hero language: a category-colored banner with a soft torn
+            //    bottom edge, watermark glyphs and the category name in the
+            //    hero's headline ink — the same construction as the Settings
+            //    / Profile heroes, so the filter page reads as part of the
+            //    app instead of a plain form sheet.
+            val filterHeroSeed = 0x51F1E7 // deterministic — never re-rolls
+            val filterHeroFill = cat.themedAccent()
+            val filterHeroInk = cat.onAccent()
+            val filterHeroTorn = remember(filterHeroSeed) {
+                SoftTornBottomShape(filterHeroSeed, bold = true)
+            }
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .height(118.dp)
             ) {
-                // v61 — the whole filter page stepped up a size: bigger
-                // header, search, section labels, chips and CTA so the
-                // hierarchy reads clearly top to bottom.
-                CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 24.dp)
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = cat.displayName,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
+                // ── Torn-edge hairline shadow (the hero construction) ──
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(118.dp)
+                        .offset(y = 1.dp)
+                        .clip(filterHeroTorn)
+                        .background(Color.Black.copy(alpha = 0.20f))
                 )
-                if (activeCount > 0) {
-                    TextButton(
-                        onClick = {
-                            draftFilters = emptySet()
-                            draftSubtypes = emptySet()
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            "Clear all",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.error
+                // ── Category banner, torn bottom edge ───────────────────
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(118.dp)
+                        .clip(filterHeroTorn)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(filterHeroFill, lerp(filterHeroFill, Color.Black, 0.08f))
+                            )
                         )
+                ) {
+                    // Watermark glyphs — a large category symbol peeking
+                    // from the corner + a small twin, both in the hero ink.
+                    CurioIcon(
+                        cat.iconGlyph,
+                        null,
+                        tint = filterHeroInk.copy(alpha = 0.10f),
+                        size = 72.dp,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 10.dp, bottom = -6.dp)
+                    )
+                    CurioIcon(
+                        cat.iconGlyph,
+                        null,
+                        tint = filterHeroInk.copy(alpha = 0.07f),
+                        size = 40.dp,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = 14.dp, top = 10.dp)
+                    )
+                    // Title + subtitle + Clear all, riding the banner.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 20.dp, end = 14.dp, top = 16.dp, bottom = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = cat.displayName,
+                                // v68 — the header text steps up (26sp) so
+                                // the category name leads the page.
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontSize = 26.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                ),
+                                color = filterHeroInk,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            // v8.21 — a warm subtitle so the sheet reads
+                            // friendly, not like a settings form.
+                            Text(
+                                text = "Pick what you're in the mood for",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = filterHeroInk.copy(alpha = 0.85f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        if (activeCount > 0) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = filterHeroInk.copy(alpha = 0.16f),
+                                onClick = {
+                                    draftFilters = emptySet()
+                                    draftSubtypes = emptySet()
+                                }
+                            ) {
+                                Text(
+                                    "Clear all",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = filterHeroInk,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
-
-            // v8.21 — a warm subtitle so the sheet reads friendly, not like
-            // a settings form.
-            Text(
-                text = "Pick what you're in the mood for",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
-            )
 
             // ── v28 — filter search: narrow the chips live ──────────
             CurioSearchField(
@@ -1718,7 +1783,7 @@ private fun FilterSheet(
                 onQueryChange = { filterQuery = it },
                 placeholder = "Search filters",
                 textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 10.dp)
             )
 
             // ── Active filter summary chips — this is what was missing ─
@@ -1819,7 +1884,9 @@ private fun FilterSheet(
                         .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
-                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 4.dp),
+                        // v68 — proper margins: 14dp under the tear/divider
+                        // so the accordion never crowds the header.
+                        .padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // ── Group pills row ───────────────────────────────
@@ -1869,7 +1936,10 @@ private fun FilterSheet(
                             effectiveGroup?.let { key ->
                                 val isSubtypeGroup = key == FilterGroupKey.TYPE
                                 Column(Modifier.fillMaxWidth()) {
-                                    SectionLabel(key.label, Modifier.padding(bottom = 4.dp))
+                                    // v68 — the section label clears the pill
+                                    // row above with its own top margin so the
+                                    // open group never reads cramped/offset.
+                                    SectionLabel(key.label, Modifier.padding(top = 6.dp, bottom = 6.dp))
                                     // v44 — the TYPE group is a FLOW row now,
                                     // not a fixed 2-column grid: a long subtype
                                     // takes its own full line and the next chip

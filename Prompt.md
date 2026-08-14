@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — progress dialog colors off on the reveal page (v67)
+## Current request — hero-tinted icons, pill search, tear filter hero, sort icons (v68)
+
+### What was asked
+"the settings and profile icon get rose color but it should be theme aware
+with the hero color and also the cream background its not getting the tint.
+in filters and settings make the search bar match the app look and pill
+shaped like in cabinet. and the filters give it the tear hero style too
+with increasing the text size of header books or category name and also
+give proper margin as the filters type gets off set. and in cabinet the
+sort pill give it the icon of the sorting type and make the pill slimmer
+please."
+
+### What was done
+1. **Settings/Profile icons theme-aware** — hero watermark symbols/back
+   pill dropped the AMOLED HomeRosewood override and ride the hero's
+   readable ink (already theme- + lane-aware); the cream paper under the
+   tear lerps 10% toward the hero fill.
+2. **Search bars pill-shaped** — `CurioSearchField` 16dp box → 50dp pill
+   (Settings hub, Spin filter sheet, Topic History).
+3. **Filter sheet tear-hero header** — category banner with SoftTornBottomShape,
+   torn-edge shadow, watermark glyphs, 26sp category name + Clear-all pill
+   riding it; groups column margins fixed (14dp top, section label
+   6/6 top/bottom).
+4. **Sort pill sort-type icon + slimmer** — `CurioSortOption.glyph`
+   (CalendarToday/FormatText/Tune for Cabinet; AutoAwesome/FormatText/
+   CalendarToday for Topic DB), icon shown before the label, padding
+   trimmed 8/6→6/4, min-width 88→76dp.
+
+### Validation
+Brace balance OK (7 files); `git diff --check` clean. No Gradle locally
+(env rule) — CI on push.
+
+## Prior — progress dialog colors off on the reveal page (v67)
 
 ### What was asked
 "inside topic reveal page progress dialog the color are still very off,

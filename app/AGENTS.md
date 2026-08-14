@@ -351,6 +351,28 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v68 — hero-tinted icons, pill search bars, tear-hero filter sheet,
+  sort-type icons.** (1) **Settings + Profile icons theme-aware**
+  (`SettingsHeroHeader` + `ProfileHero`): the hero watermark symbols /
+  back pill rode the hardcoded `HomeRosewood` in AMOLED — they now ride
+  the hero's READABLE ink (already resolves per-theme + per spin-lane),
+  so a lane-colored hero never wears mismatched rose icons. The cream
+  paper under the tear picks up a 10% lerp of the hero fill (was flat
+  cream); AMOLED keeps the rose twin. (2) **Search bars pill-shaped**
+  (`CurioSearchField`): rounded-16 box → full 50dp pill like the Cabinet
+  hero search — Settings hub, Spin filter sheet and Topic History all
+  share it. (3) **Filter sheet tear-hero header** (`FilterSheet` in
+  SpinScreen): the plain icon+title row is now a category-colored torn
+  banner (`SoftTornBottomShape` + torn-edge hairline + watermark glyphs)
+  with the category name at 26sp and a Clear-all pill riding it; the
+  groups column gained proper margins (14dp under the tear, section
+  label clears the pill row with its own 6/6 top/bottom padding) so the
+  open group never reads cramped or offset. (4) **Sort pill shows its
+  sort-type icon + slimmer** (`CurioSortOption` gains `glyph`;
+  `CurioSortDropdown` renders it 16dp before the label, label-zone
+  padding 8/6 → 6/4, gap 5 → 4dp, min-width 88 → 76dp): Cabinet
+  Date/Title/Category → calendar_today/text_fields/tune; Topic Database
+  Default/Name/Year → auto_awesome/text_fields/calendar_today.
 - **v67 — progress dialog colors fixed (reveal page).** The reveal
   hero's pill passed the RAW category accent into the dialog, which then
   used it for the −/+ stepper glyphs and the Save label ON the theme's

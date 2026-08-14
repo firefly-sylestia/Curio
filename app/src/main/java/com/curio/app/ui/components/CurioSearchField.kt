@@ -44,17 +44,21 @@ fun CurioSearchField(
     // its bigger-type page while the shared default stays unchanged.
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
+    // v68 — full pill (50dp) like the Cabinet hero's search bar, so the
+    // on-page search boxes (Settings hub, Spin filter sheet, Topic History)
+    // read as the same search language as the hero fields.
+    val pillShape = RoundedCornerShape(50)
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = pillShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shadowElevation = 3.dp,
         modifier = modifier
             .fillMaxWidth()
             // v28 — dark mode elevation visibility (glow + hairline).
-            .curioDarkGlow(3.dp, RoundedCornerShape(16.dp))
+            .curioDarkGlow(3.dp, pillShape)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
