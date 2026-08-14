@@ -1,6 +1,39 @@
 # Prompt.md — Request log
 
-## Current request — update toast + once-per-version notification + editable Profile tagline + progress dialog tint (v54)
+## Current request — remove device-screenshot auto-attach (lag on screenshot) (v55)
+
+### What was asked
+"When I take a screenshot the app starts to lag. Remove that auto attach
+feature of screenshot — just keep the option in save your take, but
+remove its permission or logic for the auto attach."
+
+### What was done
+- **Deleted `DeviceScreenshotWatcher`** (the MediaStore ContentObserver
+that watched for new screenshots while a session / pending write
+package was live, then copied each shot into app storage and appended it
+— the lag: the observer fired on EVERY media-library change (even with
+no session active), and each new shot triggered a MediaStore query + a
+full FILE COPY at the exact moment the system was still writing and
+indexing the file).
+- **Removed its wiring:** MainActivity's `DeviceScreenshotWatcher.start()`
+call; the reveal's `requestMediaRead` launcher and the READ_MEDIA_IMAGES
+permission request in `beginExploreSession` (that permission existed
+only for auto-attach).
+- **Kept everything the save page needs:** the manual add-from-gallery
+uses the system Photo Picker (`PickVisualMedia` — NO storage
+permission) + `SessionShots.copyFrom` + `appendPendingScreenshot`, the
+remove-thumbnail option, and session-screenshot backup/restore are all
+touched by nothing. `ExploreSessionStore.addSessionScreenshot` stays as
+an unused data-layer helper (harmless).
+
+### Validation
+No `DeviceScreenshotWatcher` / `requestMediaRead` references remain;
+balance holds (reveal hunks removed −3/−3 and −4/−4, each internally
+balanced; file keeps its pre-existing +1 comment imbalance; MainActivity
+51/51); `git diff --check` clean. No Gradle locally (env rule) — CI on
+push is the gate.
+
+## Prior — update toast + once-per-version notification + editable Profile tagline + progress dialog tint (v54)
 
 ### What was asked
 1. "Add a toast update notifier, and also update notification once the

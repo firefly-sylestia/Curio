@@ -351,6 +351,19 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v55 — device-screenshot AUTO-ATTACH removed (per user: it lagged on screenshot).**
+  `DeviceScreenshotWatcher` (the MediaStore ContentObserver that watched
+  for new screenshots while a session / pending write was live and copied
+  them into the session) is DELETED, along with its wiring: MainActivity's
+  `DeviceScreenshotWatcher.start()` call and the reveal's
+  `requestMediaRead` launcher + the READ_MEDIA_IMAGES permission request
+  in `beginExploreSession`. The SAVE PAGE keeps its manual add-from-gallery
+  (system Photo Picker — no storage permission — `SessionShots.copyFrom` +
+  `appendPendingScreenshot`, untouched) and the remove-thumbnail option;
+  backup/restore of session screenshots also untouched. The watcher's lag:
+  the observer fired on EVERY media-library change (even with no session)
+  plus MediaStore queries + full file copies at the exact moment the system
+  was still writing/indexing the shot.
 - **v54 — update toast + once-per-version notification + editable Profile tagline + progress dialog on the background tint.**
   (1) **Update notifier** (`UpdateChecker.notifyIfUpdateAvailable`, run on
   app start from MainActivity): fetches the latest release, and when it's
