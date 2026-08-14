@@ -16,6 +16,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.TopicProgressStore
+import com.curio.app.data.UpdateChecker
 import kotlinx.coroutines.launch
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioNavHost
@@ -82,6 +83,12 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             runCatching { TopicJsonLoader.loadIndex() }
             runCatching { TopicJsonLoader.preloadAll() }
+        }
+        // v53 — update notifier on app start: a toast whenever a check finds
+        // a newer release, and a notification ONCE per version (never
+        // re-notified for the same tag). Offline/failures are silent.
+        lifecycleScope.launch {
+            runCatching { UpdateChecker.notifyIfUpdateAvailable(this@MainActivity) }
         }
         // v27 — watch for device screenshots while a session (or a handed-off
         // write package) is live, so the user's own shots auto-join the

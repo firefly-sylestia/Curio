@@ -351,6 +351,23 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v54 — update toast + once-per-version notification + editable Profile tagline + progress dialog on the background tint.**
+  (1) **Update notifier** (`UpdateChecker.notifyIfUpdateAvailable`, run on
+  app start from MainActivity): fetches the latest release, and when it's
+  newer — a TOAST announces it on every check that finds one, and a
+  NOTIFICATION fires ONCE per version (AppPreferences persists the last
+  announced tag; same-tag launches skip it). Notification opens the app
+  (launcher intent), `curio_updates` channel, `ic_notification` small
+  icon, runCatching on notify (POST_NOTIFICATIONS gate on 13+).
+  (2) **Editable Profile tagline**: tap the hero tagline ("Keep the spark
+  going today." …) → AlertDialog with an OutlinedTextField; Save persists
+  `custom_streak_tagline` (empty = automatic `taglineForStreak`), "Use
+  automatic tagline" resets it; `taglineRevision` bump re-reads the pref.
+  (3) **Progress editor dialog on the theme background tint**: container
+  `accent` → `curioDialogContainerColor()`; `dialogContentColor` default
+  `ink` → `MaterialTheme.colorScheme.onSurface` (reveal's explicit
+  `cat.onAccent()` override removed — that was the v45 workaround for the
+  accent container); accent still colors the ring/steppers/Save button.
 - **v53 — Apple Music resolves to a real catalog item + saved progress restored + filter chips/icons + chip-bar animations.**
   (1) **Apple Music "Watch in" resolves the topic to an actual catalog
   item** (`resolveAppleMusicItemUrl` in ExploreSearch.kt): the reveal's

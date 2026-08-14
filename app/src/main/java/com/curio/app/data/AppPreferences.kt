@@ -58,6 +58,8 @@ object AppPreferences {
 
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
+    private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
+    private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
     private const val KEY_THEME_MODE = "theme_mode"        // "light", "dark", "system"
     private const val KEY_THEME_STYLE = "theme_style"      // "default", "amoled", "material"
     private const val KEY_PET_CHATTER = "pet_chatter"     // "talkative", "cozy", "quiet"
@@ -181,6 +183,26 @@ object AppPreferences {
 
     fun setDisplayName(context: Context, name: String) =
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
+
+    // ── Custom streak tagline (v53) ──────────────────────────────────
+    // The Profile hero tagline: a user-set line replaces the automatic
+    // streak-based tagline; empty = use the automatic one again.
+    fun getCustomStreakTagline(context: Context): String =
+        prefs(context).getString(KEY_CUSTOM_TAGLINE, "").orEmpty()
+
+    fun setCustomStreakTagline(context: Context, tagline: String) =
+        prefs(context).edit().putString(KEY_CUSTOM_TAGLINE, tagline.trim()).apply()
+
+    // ── Update-notification dedupe (v53) ─────────────────────────────
+    // The version tag of the newest update that has ALREADY been announced
+    // with a notification — the updater only notifies once per new release
+    // ("once the update comes, not always"), while the toast fires on every
+    // check that finds an update.
+    fun getLastNotifiedUpdateVersion(context: Context): String =
+        prefs(context).getString(KEY_LAST_NOTIFIED_UPDATE, "").orEmpty()
+
+    fun setLastNotifiedUpdateVersion(context: Context, version: String) =
+        prefs(context).edit().putString(KEY_LAST_NOTIFIED_UPDATE, version).apply()
 
     /**
      * Reactive theme mode state — updated by [setThemeMode] so [CurioTheme]

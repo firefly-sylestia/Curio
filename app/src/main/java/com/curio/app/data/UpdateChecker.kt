@@ -1,5 +1,15 @@
 package com.curio.app.data
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.curio.app.BuildConfig
+import com.curio.app.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -243,5 +253,76 @@ object UpdateChecker {
         } finally {
             conn.disconnect()
         }
+    }
+
+    private const val UPDATE_CHANNEL_ID = "curio_updates"
+    private const val UPDATE_NOTIFICATION_ID = 7007
+
+    /**
+     * v53 — background update notifier, run on app start. When the latest
+     * release is newer than the installed build:
+     *  - a TOAST announces it on every check that finds an update, and
+     *  - a NOTIFICATION fires ONCE per version ([AppPreferences] remembers
+     *    the last announced tag), so a pending update never re-notifies on
+     *    every launch.
+     * Any failure (offline, API error) is silently ignored — the manual
+     * check in Support & diagnostics remains the authoritative path.
+     */
+    suspend fun notifyIfUpdateAvailable(context: Context) = withContext(Dispatchers.IO) {
+        val appContext = context.applicationContext
+        val release = fetchLatestRelease() ?: return@withContext
+        if (!isNewer(release.tagName, BuildConfig.VERSION_NAME)) return@withContext
+        withContext(Dispatchers.Main) {
+            Toast.makeText(
+                appContext,
+                "Curio ${release.tagName} is available — update in Support & diagnostics",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        // Notification — only once per version ("once the update comes,
+        // not always"). The toast above still fires on every check.
+        val lastNotified = AppPreferences.getLastNotifiedUpdateVersion(appContext)
+        if (lastNotified == release.tagName) return@withContext
+        AppPreferences.setLastNotifiedUpdateVersion(appContext, release.tagName)
+        runCatching { ensureChannel(appContext) }
+        val openApp = appContext.packageManager
+            .getLaunchIntentForPackage(appContext.packageName)
+            ?: Intent(Intent.ACTION_MAIN)
+        val contentIntent = PendingIntent.getActivity(
+            appContext,
+            0,
+            openApp,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(appContext, UPDATE_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle("Curio ${release.tagName} is available")
+            .setContentText("A newer version is ready — open Curio and update from Support & diagnostics.")
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText("A newer version is ready — open Curio and update from Support & diagnostics.")
+            )
+            .setContentIntent(contentIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+        // POST_NOTIFICATIONS is runtime-gated on 13+; without the grant the
+        // notify() throws — the toast already announced the update.
+        runCatching {
+            NotificationManagerCompat.from(appContext).notify(UPDATE_NOTIFICATION_ID, notification)
+        }
+    }
+
+    private fun ensureChannel(context: Context) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(
+            NotificationChannel(
+                UPDATE_CHANNEL_ID,
+                "Curio updates",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "New Curio releases"
+            }
+        )
     }
 }

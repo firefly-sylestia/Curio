@@ -44,6 +44,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicProgressStore
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlin.math.roundToInt
 
 /**
@@ -72,12 +73,13 @@ fun CurioProgressPill(
     modifier: Modifier = Modifier,
     showBar: Boolean = true,
     // v45 — the editor dialog's content color. The pill's [ink] is tuned
-    // for the pill's OWN background, but the dialog sits on the ACCENT
-    // container — a pill ink that matches the accent (e.g. the reveal
-    // hero's deep-accent text on a light frosted pill) would render
-    // invisible against it. Defaults to [ink]; callers whose pill ink is
-    // accent-toned pass their on-accent ink here.
-    dialogContentColor: Color = ink
+    // for the pill's OWN background, but the dialog sits on the theme
+    // dialog container — a pill ink that matches the accent (e.g. the
+    // reveal hero's deep-accent text on a light frosted pill) would render
+    // invisible against it. v53 — defaults to the theme's onSurface (the
+    // dialog now wears the standard background tint), so every caller reads
+    // crisply without passing anything.
+    dialogContentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     val target = topic.progressTarget ?: return
     if (target <= 0) return
@@ -162,10 +164,12 @@ fun CurioProgressEditorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        // v29 — the dialog wears the CATEGORY ACCENT (opaque, not the old
-        // washed-out theme surface): the progress world is the category's
-        // color in every theme, with the readable on-accent content.
-        containerColor = accent,
+        // v53 — the dialog wears the standard page-background tint like
+        // every other dialog (the accent container was too loud); the
+        // category accent still colors the ring, steppers and the Save
+        // button through [accent], and the content uses the theme's
+        // onSurface.
+        containerColor = curioDialogContainerColor(),
         shape = RoundedCornerShape(28.dp),
         title = {
             Text(

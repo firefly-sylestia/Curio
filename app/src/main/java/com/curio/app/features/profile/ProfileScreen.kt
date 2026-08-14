@@ -178,6 +178,15 @@ fun ProfileScreen(navController: NavController) {
     var displayName by remember { mutableStateOf(AppPreferences.getDisplayName(context)) }
     var showNameDialog by remember { mutableStateOf(false) }
     var nameInput by remember(displayName) { mutableStateOf(displayName) }
+    // v53 — the hero tagline is user-editable: tap it to set a custom line
+    // (or restore the automatic streak-based one). The revision bump
+    // re-reads the pref so the hero updates instantly after saving.
+    var showTaglineDialog by remember { mutableStateOf(false) }
+    var taglineInput by remember { mutableStateOf("") }
+    var taglineRevision by remember { mutableIntStateOf(0) }
+    val heroTagline = remember(taglineRevision, displayStreak) {
+        AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
+    }
     var crashCount by remember { mutableIntStateOf(0) }
     var totalSaved by remember { mutableIntStateOf(0) }
     var categoryCounts by remember { mutableStateOf<Map<CategoryId, Int>>(emptyMap()) }
@@ -255,6 +264,20 @@ fun ProfileScreen(navController: NavController) {
             displayName = nameInput.trim().ifBlank { "Curious Explorer" }
             AppPreferences.setDisplayName(context, displayName)
             showNameDialog = false
+        },
+        showTaglineDialog = showTaglineDialog,
+        taglineInput = taglineInput,
+        onTaglineInputChange = { taglineInput = it },
+        onDismissTagline = { showTaglineDialog = false },
+        onSaveTagline = {
+            AppPreferences.setCustomStreakTagline(context, taglineInput)
+            taglineRevision++
+            showTaglineDialog = false
+        },
+        onResetTagline = {
+            AppPreferences.setCustomStreakTagline(context, "")
+            taglineRevision++
+            showTaglineDialog = false
         }
     )
 
@@ -295,6 +318,7 @@ fun ProfileScreen(navController: NavController) {
             item {
                 ProfileHero(
                     name = displayName,
+                    tagline = heroTagline,
                     displayStreak = displayStreak,
                     level = level,
                     saved = displaySaved,
@@ -305,6 +329,10 @@ fun ProfileScreen(navController: NavController) {
                     onEditName = {
                         nameInput = displayName
                         showNameDialog = true
+                    },
+                    onEditTagline = {
+                        taglineInput = AppPreferences.getCustomStreakTagline(context)
+                        showTaglineDialog = true
                     }
                 )
             }
@@ -503,7 +531,15 @@ private fun ProfileDialogs(
     nameInput: String,
     onNameInputChange: (String) -> Unit,
     onDismissName: () -> Unit,
-    onSaveName: () -> Unit
+    onSaveName: () -> Unit,
+    // v53 — the tagline editor: tap the hero tagline, type your own line,
+    // or restore the automatic streak-based one.
+    showTaglineDialog: Boolean,
+    taglineInput: String,
+    onTaglineInputChange: (String) -> Unit,
+    onDismissTagline: () -> Unit,
+    onSaveTagline: () -> Unit,
+    onResetTagline: () -> Unit
 ) {
     if (showNameDialog) {
         AlertDialog(
@@ -531,6 +567,42 @@ private fun ProfileDialogs(
             }
         )
     }
+    if (showTaglineDialog) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = onDismissTagline,
+            title = { Text("Tagline", fontWeight = FontWeight.ExtraBold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "Your own line under your name. Leave it empty to use the automatic streak one.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    OutlinedTextField(
+                        value = taglineInput,
+                        onValueChange = onTaglineInputChange,
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        placeholder = { Text("Keep the spark going today.") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    TextButton(
+                        onClick = onResetTagline,
+                        contentPadding = PaddingValues(horizontal = 0.dp)
+                    ) {
+                        Text("Use automatic tagline", fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onSaveTagline, colors = curioDialogActionButtonColors()) { Text("Save", fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissTagline, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+            }
+        )
+    }
 }
 
 /**
@@ -549,6 +621,7 @@ private fun ProfileDialogs(
 @OptIn(ExperimentalLayoutApi::class)
 private fun ProfileHero(
     name: String,
+    tagline: String,
     displayStreak: Int,
     level: Int,
     saved: Int,
@@ -556,7 +629,9 @@ private fun ProfileHero(
     family: CategoryFamily,
     fill: Color,
     ink: Color,
-    onEditName: () -> Unit
+    onEditName: () -> Unit,
+    // v53 — tap the tagline to set a custom one (or restore automatic).
+    onEditTagline: () -> Unit
 ) {
     val initial = name.firstOrNull()?.uppercase().orEmpty()
     val heroTornShape = remember(PROFILE_TEAR_SEED) { SoftTornBottomShape(PROFILE_TEAR_SEED, bold = true) }
@@ -710,11 +785,13 @@ private fun ProfileHero(
                                 )
                             }
                             Text(
-                                taglineForStreak(displayStreak),
+                                tagline,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = ink.copy(alpha = 0.78f),
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                // v53 — editable: tap to open the tagline editor.
+                                modifier = Modifier.clickable(onClick = onEditTagline)
                             )
                         }
                     }

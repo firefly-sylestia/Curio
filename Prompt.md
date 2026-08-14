@@ -1,6 +1,54 @@
 # Prompt.md — Request log
 
-## Current request — Apple Music item resolution + saved-progress fix + filter chips + chip-bar animation (v53)
+## Current request — update toast + once-per-version notification + editable Profile tagline + progress dialog tint (v54)
+
+### What was asked
+1. "Add a toast update notifier, and also update notification once the
+update comes — not always."
+2. "In profile, let user change the 'keep your spark going' (the streak
+tagline)."
+3. "In topic reveal the progress dialog — fix its background color, it's
+so bad — make it take the background tint."
+
+### What was done
+1. **Update notifier** (`UpdateChecker.notifyIfUpdateAvailable`, called
+from MainActivity's startup coroutine right after the catalog prewarm):
+fetches the latest release (reuses `fetchLatestRelease` + `isNewer`); if
+newer than `BuildConfig.VERSION_NAME` — a TOAST on every check that
+finds one ("Curio {tag} is available — update in Support &
+diagnostics"), and a NOTIFICATION only when the tag wasn't announced
+before (`getLastNotifiedUpdateVersion` / `setLastNotifiedUpdateVersion`
+in AppPreferences — the "once, not always" dedupe). Notification:
+`curio_updates` channel (IMPORTANCE_DEFAULT), `ic_notification` small
+icon, BigText style, launcher-intent PendingIntent (FLAG_IMMUTABLE),
+`runCatching` around notify (POST_NOTIFICATIONS runtime gate on 13+ —
+the toast already announced it). Silent on offline/API failure; the
+manual Support & diagnostics check stays authoritative.
+2. **Editable tagline**: the Profile hero tagline (streak-derived) is now
+tappable → AlertDialog (background-tint container, CurioDialogShape)
+with an OutlinedTextField. Save persists `custom_streak_tagline`;
+empty = automatic (`taglineForStreak`); "Use automatic tagline" button
+in the dialog body resets it; Cancel/back dismisses. `heroTagline`
+`remember(taglineRevision, displayStreak)` re-reads the pref; wired
+through ProfileHero's new `tagline` + `onEditTagline` params and
+ProfileDialogs' new params.
+3. **Progress editor dialog**: `containerColor` `accent` →
+`curioDialogContainerColor()` (the standard page-background tint);
+`dialogContentColor` default `ink` → `MaterialTheme.colorScheme.onSurface`;
+the reveal's explicit `dialogContentColor = cat.onAccent()` override
+removed (it existed for the accent container — with the tinted container,
+accents text would be invisible). Category accent still drives the ring,
+steppers and the Save button fill.
+
+### Validation
+Brace/paren balance on all 6 files vs baselines (UpdateChecker −2 and
+reveal +1 are pre-existing comment imbalances — deltas exact);
+`git diff --check` clean. Imports verified (androidx.core
+NotificationCompat/ManagerCompat, BuildConfig/R, launch-intent pattern,
+clickable/PaddingValues already present in Profile). No Gradle locally
+(env rule) — CI on push is the gate.
+
+## Prior — Apple Music item resolution + saved-progress fix + filter chips + chip-bar animation (v53)
 
 ### What was asked
 1. "The Apple Music link still opens up the browser after opening Apple
