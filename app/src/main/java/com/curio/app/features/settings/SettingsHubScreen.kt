@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -112,6 +113,10 @@ private val SettingsHeroSheetExtent = 24.dp
  *  the hero (the hero overlays the content, letting rows disappear under
  *  the ragged tear as they scroll). */
 val SettingsHeroTotalHeight = SettingsHeroBannerHeight + SettingsHeroSheetExtent
+/** Extra banner height added when the hero carries a second action row
+ *  under the top pills (the Topic Database's Category pill). Public so the
+ *  database can compute its own content offsets. */
+val SettingsHeroExtraRowHeight = 52.dp
 
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
@@ -155,9 +160,18 @@ fun SettingsHeroHeader(
     onSearchQueryChange: (String) -> Unit = {},
     onCloseSearch: () -> Unit = {},
     searchFocus: FocusRequester? = null,
-    searchPlaceholder: String = "Search…"
+    searchPlaceholder: String = "Search…",
+    // v30 — optional second action row directly under the top pills (the
+    // Topic Database's Category pill). When present the banner grows by
+    // [SettingsHeroExtraRowHeight] so the row fits without crowding the
+    // title block; hidden while searching (search swaps the hero content
+    // and surfaces the chips itself).
+    extraRow: (@Composable (ink: Color) -> Unit)? = null
 ) {
-    val bannerHeight = if (compact) 140.dp else SettingsHeroBannerHeight
+    // v30 — a second action row rides under the top pills; the banner
+    // grows by [SettingsHeroExtraRowHeight] to make room.
+    val baseBanner = if (compact) 140.dp else SettingsHeroBannerHeight
+    val bannerHeight = if (extraRow != null) baseBanner + SettingsHeroExtraRowHeight else baseBanner
     val totalHeight = bannerHeight + SettingsHeroSheetExtent
     val heroTornShape = remember(SETTINGS_HERO_TEAR_SEED) { SoftTornBottomShape(SETTINGS_HERO_TEAR_SEED, bold = true) }
     val sheetShape = remember(SETTINGS_HERO_TEAR_SEED) {
@@ -266,6 +280,13 @@ fun SettingsHeroHeader(
                                 trailing(ink)
                             }
                         }
+                    }
+                    // v30 — optional second action row under the top pills
+                    // (the Category pill); hidden while searching — search
+                    // swaps the hero content and surfaces the chips itself.
+                    if (extraRow != null && !searchActive) {
+                        Spacer(Modifier.height(8.dp))
+                        extraRow(ink)
                     }
                     // Flex spacer — pins the title/search block just above the tear.
                     Spacer(Modifier.weight(1f))
@@ -432,7 +453,11 @@ fun SettingsHeroActionPill(
         Row(
             // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero
             // controls read as substantial buttons, not tiny chips.
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            // v30 — uniform 42dp height so label-only pills match glyph
+            // pills and the sort dropdown (which reads the same 42dp).
+            modifier = Modifier
+                .heightIn(min = 42.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

@@ -97,7 +97,9 @@ fun CurioSortDropdown(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.heightIn(min = 44.dp)
+                // v30 — uniform hero-pill height: 42dp like the action pills
+                // (was 44dp — the sort pill read too thick next to them).
+                modifier = Modifier.heightIn(min = 42.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
                 Row(

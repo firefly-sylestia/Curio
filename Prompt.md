@@ -1,6 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — pastel-mode FilterSheet chips: invisible elevation (v29 follow-up)
+## Current request — Cabinet + Topic Browser: sort pill height, uniform pills, Category pill (v30)
+
+### What was asked
+"In cabinet and topic browser the sorting pill is too thick — fix it and
+keep all pills with same height. And below those 3 pills place the category
+choose pill which shows the category chips same as when it shows when i tap
+the search."
+
+### User decisions (ask_user)
+- Topic Browser category chips: HIDE by default, reveal via the new pill
+  (or search) — matching the Cabinet.
+- Category pill placement: INSIDE the hero, directly under the top pill
+  row — the hero banner grows taller to make room.
+
+### What was done
+- **Uniform 42dp hero pills:** `CurioSortDropdown` min 44→42dp;
+  `CabinetHeroActionPill` + `SettingsHeroActionPill` label-only pills gain
+  `heightIn(min = 42.dp)` (they were 40dp vs the 22dp-glyph pills' 42dp) —
+  Select / Sort / Search now read the same height in both heroes.
+- **Category pill:** a second row directly under the top pill row (Tune
+  glyph + active-filter label, `emphasized` when open) toggles the sticky
+  category chip bar — the same chips search shows — in the Cabinet and
+  the Topic Database. Heroes grow +52dp: `CabinetHeroBannerHeight` 180→232
+  (compact 140→192); settings hero adds `SettingsHeroExtraRowHeight = 52.dp`
+  when its new `extraRow` slot is used (only the DB passes it).
+- **DB chips hidden by default:** `DatabaseStickyChipBar` renders only when
+  `categoryFilterOpen || searchActive`; the DB derives all offsets from a
+  new `DatabaseHeroTotalHeight`. Both screens' content top-padding shrinks
+  when the chips are hidden (the 52dp chip-bar reservation only applies
+  while visible).
+- Docs: `app/AGENTS.md` v30 bullet.
+
+### Validation
+No Gradle locally (env rule). Source-audited imports (heightIn added to
+Cabinet/Settings), braces balanced, `git diff --check` clean; CI on push is
+the gate.
+
+## Prior — pastel-mode FilterSheet chips: invisible elevation (v29 follow-up)
 
 ### What was asked
 "In pastel mode the filter chips elevation isn't visible as they have the

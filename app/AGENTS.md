@@ -271,6 +271,24 @@ app/src/main/java/com/curio/app/
   The light-mode lift is now a clear surface step (`0.32` toward white,
   dark keeps `0.04` + glow), so unselected chips visibly stand off the
   tinted sheet in pastel AND plain light mode.
+- **v30 — uniform hero-pill height + Category pill in Cabinet & Topic
+  Browser heroes.** (1) Every hero pill now reads the SAME 42dp height:
+  `CurioSortDropdown` trims from a 44dp minimum to 42dp, and
+  `CabinetHeroActionPill` / `SettingsHeroActionPill` label-only pills get
+  a `heightIn(min = 42.dp)` so they match the 22dp-glyph pills — the sort
+  pill no longer reads thick next to Select/Search. (2) A new **Category**
+  pill rides a SECOND row directly under the hero's top pill row (Tune
+  glyph + active-filter label, `emphasized` while open): tapping it
+  reveals the sticky category chip bar — the same chips that appear while
+  searching — in BOTH the Cabinet and the Topic Database. The heroes grow
+  +52dp to fit it (`CabinetHeroBannerHeight` 180→232, compact 140→192;
+  `SettingsHeroExtraRowHeight = 52.dp` applied to the settings hero when
+  the new `extraRow` slot is used). The Topic Database's category chips
+  are now HIDDEN BY DEFAULT (matching the Cabinet): the chip bar shows
+  only while the Category pill is open or search is active, and the DB
+  derives its own content offsets from `DatabaseHeroTotalHeight`. The
+  chip-bar content-top reservation only applies while the chips are
+  visible, so the collapsed screens start right below the hero.
 - **v29 — capture attach boxes are OPAQUE.** The border-removal pass left
   the translucent `category.tint` (accent @ 20% alpha) attach boxes
   looking broken (v27n rule: translucent fills bleed the elevation
